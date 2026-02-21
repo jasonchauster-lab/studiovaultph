@@ -1,0 +1,621 @@
+import { createClient } from '@/lib/supabase/server'
+import { CheckCircle, Clock, Building2, MessageCircle, BarChart3, Download } from 'lucide-react'
+import VerifyButton from '@/components/admin/VerifyButton'
+import RejectBookingButton from '@/components/admin/RejectBookingButton'
+import { getAdminAnalytics } from './actions'
+import AdminAnalytics from '@/components/admin/AdminAnalytics'
+import ExportCsvButton from '@/components/dashboard/ExportCsvButton'
+import DateRangeFilters from '@/components/dashboard/DateRangeFilters'
+import SupportNotificationBadge from '@/components/admin/SupportNotificationBadge'
+import AdminExportButtons from '@/components/admin/AdminExportButtons'
+import TriggerFundsUnlockButton from '@/components/admin/TriggerFundsUnlockButton'
+
+// Since this is a server component, we fetch data directly
+export default async function AdminDashboard({
+    searchParams
+}: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+    const { range } = await searchParams
+    const supabase = await createClient()
+
+    // --- DATE FILTER LOGIC ---
+    let startDate: string | undefined
+    let endDate: string | undefined = new Date().toISOString()
+    const now = new Date()
+
+    if (range === '7d') {
+        const d = new Date()
+        d.setDate(d.getDate() - 7)
+        startDate = d.toISOString()
+    } else if (range === '30d') {
+        const d = new Date()
+        d.setDate(d.getDate() - 30)
+        startDate = d.toISOString()
+    } else if (range === 'this-month') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    } else if (range === 'this-quarter') {
+        const quarter = Math.floor(now.getMonth() / 3)
+        startDate = new Date(now.getFullYear(), quarter * 3, 1).toISOString()
+    } else if (range === 'this-year') {
+        startDate = new Date(now.getFullYear(), 0, 1).toISOString()
+    }
+    // --- END DATE FILTER LOGIC ---
+
+    // 1. Fetch Verification Queue (Pending Certifications)
+    const { data: pendingCerts } = await supabase
+        .from('certifications')
+        .select('*, profiles(full_name, contact_number)')
+        .eq('verified', false)
+        .order('created_at', { ascending: false })
+
+    // DEBUG: Fetch current user info
+    const { data: { user } } = await supabase.auth.getUser()
+    let userRole = 'unknown'
+    let userId = user?.id
+    if (user) {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+        userRole = profile?.role || 'no-profile'
+    }
+
+    // DEBUG: Check for query errors and raw counts
+    // DEBUG: Check for query errors and raw counts
+    const { count: totalBookingsCount, error: totalBookingsError } = await supabase.from('bookings').select('*', { count: 'exact', head: true })
+    const { data: debugBookings, error: debugBookingsError } = await supabase.from('bookings').select('id, status, payment_proof_url').limit(5)
+
+    // DEBUG: Support Messages
+    const { data: debugSupportData, error: debugSupportError } = await supabase
+        .from('support_messages')
+        .select('*')
+        .eq('is_read', false)
+
+    console.log('--- DEBUG SUPPORT MESSAGES ---');
+    if (debugSupportError) {
+        console.error('Error fetching support messages:', debugSupportError);
+    } else {
+        console.log('Total Unread Messages (Raw):', debugSupportData?.length || 0);
+        console.log('Sample Unread Message:', debugSupportData?.[0] ? JSON.stringify(debugSupportData[0]) : 'None');
+        console.log('Current User ID:', user?.id);
+
+        const myUnread = debugSupportData?.filter((m: any) => m.sender_id !== user?.id);
+        console.log('Unread Messages NOT from me (Count):', myUnread?.length || 0);
+    }
+    console.log('------------------------------');
+
+
+    // 1b. Generate signed URLs for proofs
+    const certsWithUrls = await Promise.all(pendingCerts?.map(async (cert: any) => {
+        let signedUrl = null
+        if (cert.proof_url) {
+            const { data } = await supabase.storage
+                .from('certifications')
+                .createSignedUrl(cert.proof_url, 3600) // 1 hour access
+            signedUrl = data?.signedUrl
+        }
+        return { ...cert, signedUrl }
+    }) || [])
+
+    // 2. Fetch Pending Studios
+    const { data: pendingStudios } = await supabase
+        .from('studios')
+        .select(`
+            *,
+            profiles(full_name)
+        `)
+        .eq('verified', false)
+        .order('created_at', { ascending: false })
+
+    // 3. Fetch Booking Requests (Pending Bookings)
+    const { data: pendingBookings, error: pendingBookingsError } = await supabase
+        .from('bookings')
+        .select(`
+      *,
+      client:profiles!client_id(full_name),
+      slots(
+        start_time,
+        end_time,
+        studios(name, location, address)
+      )
+    `)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+
+    // 4. Fetch Pending Instructor Payouts
+    const { data: rawPayoutRequests, error: payoutError } = await supabase
+        .from('payout_requests')
+        .select('*')
+        .eq('status', 'pending')
+        .not('instructor_id', 'is', null)
+        .order('created_at', { ascending: false })
+
+    // 4b. Enrich with instructor names from profiles
+    let payoutRequests: any[] = []
+    if (rawPayoutRequests && rawPayoutRequests.length > 0) {
+        const instructorIds = rawPayoutRequests.map((p: any) => p.instructor_id)
+        const { data: instructorProfiles } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', instructorIds)
+
+        const profileMap: Record<string, string> = {}
+        instructorProfiles?.forEach((p: any) => { profileMap[p.id] = p.full_name })
+
+        payoutRequests = rawPayoutRequests.map((p: any) => ({
+            ...p,
+            instructor_name: profileMap[p.instructor_id] || null
+        }))
+    }
+
+    // 5. Fetch Pending Studio Payouts
+    const { data: rawStudioPayouts } = await supabase
+        .from('payout_requests')
+        .select('*, studios(name, profiles(full_name))')
+        .eq('status', 'pending')
+        .not('studio_id', 'is', null)
+        .order('created_at', { ascending: false })
+
+    const studioPayouts = rawStudioPayouts ?? []
+
+    // 7. Fetch Customer Payout Requests
+    // Step 1: Get all pending payout_requests that have a user_id (customer payouts use user_id instead of instructor_id/studio_id)
+    const { data: rawUserPayouts } = await supabase
+        .from('payout_requests')
+        .select('*')
+        .eq('status', 'pending')
+        .not('user_id', 'is', null)
+        .is('instructor_id', null)
+        .is('studio_id', null)
+        .order('created_at', { ascending: false })
+
+    // Step 2: For those user_ids, fetch profiles to get name + role
+    let customerPayouts: any[] = []
+    if (rawUserPayouts && rawUserPayouts.length > 0) {
+        const userIds = rawUserPayouts.map((p: any) => p.user_id)
+        const { data: userProfiles } = await supabase
+            .from('profiles')
+            .select('id, full_name, role')
+            .in('id', userIds)
+
+        const profileMap: Record<string, any> = {}
+        userProfiles?.forEach((p: any) => { profileMap[p.id] = p })
+
+        // Merge and filter to only include customers
+        customerPayouts = rawUserPayouts
+            .map((p: any) => ({ ...p, profile: profileMap[p.user_id] || null }))
+            .filter((p: any) => p.profile?.role === 'customer')
+    }
+
+    // 6. Fetch Analytics
+    const analytics = await getAdminAnalytics(startDate, endDate)
+
+    return (
+        <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
+            <div className="max-w-7xl mx-auto">
+                <div className="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 className="text-3xl font-serif text-charcoal-900 mb-2">Admin Dashboard</h1>
+                        <p className="text-charcoal-600">Overview of verification requests and system status.</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <TriggerFundsUnlockButton />
+                        <a href="/admin/support" className="px-4 py-2 bg-charcoal-900 text-cream-50 rounded-lg text-sm font-medium hover:bg-charcoal-800 transition-colors flex items-center gap-2">
+                            <MessageCircle className="w-4 h-4" />
+                            Support Center
+                            <SupportNotificationBadge />
+                        </a>
+                    </div>
+                </div>
+
+                {/* DEBUG SECTION - REMOVE AFTER FIXING */}
+                <div className="bg-gray-900 text-white border border-gray-700 p-4 rounded-lg mb-8 text-xs font-mono break-all">
+                    <p className="text-yellow-400 font-bold mb-2">Debug Info:</p>
+                    <p>User ID: {userId}</p>
+                    <p>User Role (Profile): {userRole}</p>
+                    <p>Pending Bookings Count (Filtered): {pendingBookings?.length ?? 'null'}</p>
+                    <p>Total Bookings in DB (Raw): {totalBookingsCount ?? 'null'}</p>
+                    <p>Pending Payouts Count: {payoutRequests?.length ?? 'null'}</p>
+                    <p>Payout Query Error: {payoutError?.message || 'None'}</p>
+                    <p>Query Error (if any): {totalBookingsError?.message || debugBookingsError?.message || pendingBookingsError?.message || 'None'}</p>
+                    <p>Sample Bookings Statuses: {JSON.stringify(debugBookings)}</p>
+
+                    <div className="mt-4 pt-4 border-t border-gray-700">
+                        <p className="text-blue-400 font-bold mb-1">Support Debug:</p>
+                        <p>Support Query Error: {debugSupportError ? debugSupportError.message : 'None'}</p>
+                        <p>Total Unread Messages (Raw): {debugSupportData?.length ?? 0}</p>
+                        <p>Unread Messages NOT from me: {debugSupportData?.filter((m: any) => m.sender_id !== user?.id)?.length ?? 0}</p>
+                        <p>Sample Support Message: {debugSupportData?.[0] ? JSON.stringify(debugSupportData[0]) : 'None'}</p>
+                    </div>
+                </div>
+                {/* END DEBUG SECTION */}
+
+                {/* Analytics Overview */}
+                <div className="mb-12">
+                    <div className="mb-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-medium text-charcoal-900 flex items-center gap-2">
+                                <BarChart3 className="w-6 h-6 text-charcoal-500" />
+                                Revenue & Performance
+                            </h2>
+                            {!('error' in analytics) && (
+                                <ExportCsvButton data={analytics.transactions} />
+                            )}
+                        </div>
+
+                        <DateRangeFilters />
+
+                        {/* CSV Export Buttons */}
+                        <div className="mt-4">
+                            <AdminExportButtons startDate={startDate} endDate={endDate} />
+                        </div>
+                    </div>
+
+                    {!('error' in analytics) ? (
+                        <AdminAnalytics stats={analytics} />
+                    ) : (
+                        <div className="bg-red-50 text-red-700 p-4 rounded-lg">
+                            Failed to load analytics data.
+                        </div>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                    {/* Instructor Payout Requests */}
+                    <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-charcoal-500" />
+                            Instructor Payout Requests
+                        </h2>
+
+                        {!payoutRequests || payoutRequests.length === 0 ? (
+                            <p className="text-charcoal-500 text-sm">No pending payout requests.</p>
+                        ) : (
+                            <div className="space-y-4">
+                                {payoutRequests.map((request: any) => (
+                                    <div key={request.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p className="font-medium text-charcoal-900">
+                                                    ₱{request.amount.toLocaleString()} — {request.instructor_name || `Instructor ID: ${request.instructor_id}`}
+                                                </p>
+                                                <div className="text-sm text-charcoal-600 mt-1">
+                                                    <span className="capitalize font-medium">{request.payment_method === 'bank' || request.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'GCash'}</span>
+                                                    <span className="mx-2 text-charcoal-300">|</span>
+                                                    <span className="text-xs">
+                                                        {(request.bank_name || request.payment_details?.bankName || request.payment_details?.bank_name) ? (
+                                                            `${request.bank_name || request.payment_details?.bankName || request.payment_details?.bank_name} — `
+                                                        ) : ''}
+                                                        {request.account_number || request.payment_details?.accountNumber || request.payment_details?.account_number}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-charcoal-500 mt-0.5">
+                                                    Account Name: {request.account_name || request.payment_details?.accountName || request.payment_details?.account_name || '—'}
+                                                </p>
+                                                <p className="text-xs text-charcoal-400 mt-1">
+                                                    Requested: {new Date(request.created_at).toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <VerifyButton
+                                                    id={request.id}
+                                                    action="rejectPayout"
+                                                    label="Reject"
+                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                                />
+                                                <VerifyButton
+                                                    id={request.id}
+                                                    action="approvePayout"
+                                                    label="Approve"
+                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+
+                    {/* Verification Queue (Instructors) */}
+                    <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
+                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5 text-charcoal-500" />
+                            Instructor Verification
+                        </h2>
+
+                        {certsWithUrls?.length === 0 ? (
+                            <p className="text-charcoal-500 text-sm">No pending certifications.</p>
+                        ) : (
+                            <div className="space-y-4">
+                                {certsWithUrls?.map((cert: any) => (
+                                    <div key={cert.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p className="font-medium text-charcoal-900">{cert.profiles?.full_name || 'Unknown User'}</p>
+                                                <p className="text-sm text-charcoal-600">{cert.certification_body} - {cert.certification_name}</p>
+                                                {cert.profiles?.contact_number && (
+                                                    <p className="text-xs text-charcoal-500 mt-0.5">Contact: {cert.profiles.contact_number}</p>
+                                                )}
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <VerifyButton
+                                                    id={cert.id}
+                                                    action="rejectCert"
+                                                    label="Reject"
+                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                                />
+                                                <VerifyButton
+                                                    id={cert.id}
+                                                    action="approveCert"
+                                                    label="Approve"
+                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                                />
+                                            </div>
+                                        </div>
+                                        {cert.signedUrl ? (
+                                            <a
+                                                href={cert.signedUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs text-charcoal-600 underline hover:text-charcoal-900 mt-2 block"
+                                            >
+                                                View Certificate Proof
+                                            </a>
+                                        ) : cert.proof_url ? (
+                                            <p className="text-xs text-charcoal-400 mt-2 truncate">Proof path: {cert.proof_url} (No URL generated)</p>
+                                        ) : null}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Studio Verification Queue */}
+                    <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
+                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                            <Building2 className="w-5 h-5 text-charcoal-500" />
+                            Studio Verification
+                        </h2>
+
+                        {pendingStudios?.length === 0 ? (
+                            <p className="text-charcoal-500 text-sm">No pending studio applications.</p>
+                        ) : (
+                            <div className="space-y-4">
+                                {pendingStudios?.map((studio: any) => (
+                                    <div key={studio.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p className="font-medium text-charcoal-900">{studio.name}</p>
+                                                <p className="text-sm text-charcoal-600">{studio.location} • ₱{studio.hourly_rate}/hr</p>
+                                                {studio.contact_number && (
+                                                    <p className="text-xs text-charcoal-500 mt-0.5">Contact: {studio.contact_number}</p>
+                                                )}
+                                                <p className="text-xs text-charcoal-500 mt-1">Owner: {studio.profiles?.full_name}</p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <VerifyButton
+                                                    id={studio.id}
+                                                    action="rejectStudio"
+                                                    label="Reject"
+                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                                />
+                                                <VerifyButton
+                                                    id={studio.id}
+                                                    action="verifyStudio"
+                                                    label="Approve"
+                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Booking Requests */}
+                    <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-charcoal-500" />
+                            Booking Requests
+                        </h2>
+
+                        {pendingBookings?.length === 0 ? (
+                            <p className="text-charcoal-500 text-sm">No pending booking requests.</p>
+                        ) : (
+                            <div className="space-y-4">
+                                {pendingBookings?.map((booking: any) => {
+                                    const studio = booking.slots?.studios;
+                                    const startTime = new Date(booking.slots?.start_time).toLocaleString();
+                                    const hasPaymentProof = !!booking.payment_proof_url;
+
+                                    return (
+                                        <div key={booking.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <p className="font-medium text-charcoal-900">{booking.client?.full_name}</p>
+                                                    <p className="text-sm text-charcoal-600">
+                                                        Requested: <span className="font-medium">{studio?.name}</span> ({studio?.location})
+                                                    </p>
+                                                    {studio?.address && (
+                                                        <p className="text-xs text-charcoal-500">{studio.address}</p>
+                                                    )}
+                                                    <p className="text-xs text-charcoal-500 mt-1">{startTime}</p>
+
+                                                    {/* Payment Status Badge */}
+                                                    <div className="mt-2 flex items-center gap-2">
+                                                        <span className={`text-xs px-2 py-0.5 rounded-full ${booking.payment_status === 'submitted'
+                                                            ? 'bg-green-100 text-green-700'
+                                                            : 'bg-yellow-100 text-yellow-700'
+                                                            }`}>
+                                                            Payment: {booking.payment_status || 'Pending'}
+                                                        </span>
+
+                                                        {hasPaymentProof && (
+                                                            <div className="mt-1">
+                                                                <a
+                                                                    href={booking.payment_proof_url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="block relative hover:opacity-90 transition-opacity"
+                                                                >
+                                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                    <img
+                                                                        src={booking.payment_proof_url}
+                                                                        alt="Payment Proof"
+                                                                        className="h-16 w-auto object-cover rounded border border-gray-300"
+                                                                    />
+                                                                    <span className="text-[10px] text-blue-600 underline mt-1 block">View Full Size</span>
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-cream-100">
+                                                <RejectBookingButton
+                                                    id={booking.id}
+                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                                />
+                                                <VerifyButton
+                                                    id={booking.id}
+                                                    action="confirmBooking"
+                                                    label="Confirm Booking"
+                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                                />
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Studio Payout Requests */}
+                    <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                            <Building2 className="w-5 h-5 text-charcoal-500" />
+                            Studio Payout Requests
+                        </h2>
+
+                        {studioPayouts.length === 0 ? (
+                            <p className="text-charcoal-500 text-sm">No pending studio payout requests.</p>
+                        ) : (
+                            <div className="space-y-4">
+                                {studioPayouts.map((request: any) => (
+                                    <div key={request.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p className="font-medium text-charcoal-900">
+                                                    ₱{request.amount.toLocaleString()} — {request.studios?.name || 'Unknown Studio'}
+                                                </p>
+                                                <p className="text-xs text-charcoal-500 mt-0.5">
+                                                    Owner: {request.studios?.profiles?.full_name || '—'}
+                                                </p>
+                                                <div className="text-sm text-charcoal-600 mt-1">
+                                                    <span className="capitalize font-medium">{request.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'GCash'}</span>
+                                                    <span className="mx-2 text-charcoal-300">|</span>
+                                                    <span className="text-xs text-charcoal-600">
+                                                        {(request.bank_name || request.payment_details?.bankName || request.payment_details?.bank_name) ? (
+                                                            `${request.bank_name || request.payment_details?.bankName || request.payment_details?.bank_name} — `
+                                                        ) : ''}
+                                                        {request.account_number || request.payment_details?.accountNumber || request.payment_details?.account_number}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-charcoal-500 mt-0.5">
+                                                    Account Name: {request.account_name || request.payment_details?.accountName || request.payment_details?.account_name || '—'}
+                                                </p>
+                                                <p className="text-xs text-charcoal-400 mt-1">
+                                                    Requested: {new Date(request.created_at).toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <VerifyButton
+                                                    id={request.id}
+                                                    action="rejectPayout"
+                                                    label="Reject"
+                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                                />
+                                                <VerifyButton
+                                                    id={request.id}
+                                                    action="approvePayout"
+                                                    label="Approve"
+                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    {/* Customer Payout Requests */}
+                    <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5 text-charcoal-500" />
+                            Customer Payout Requests
+                            {customerPayouts.length > 0 && (
+                                <span className="ml-2 bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full font-medium">
+                                    {customerPayouts.length} pending
+                                </span>
+                            )}
+                        </h2>
+
+                        {customerPayouts.length === 0 ? (
+                            <p className="text-charcoal-500 text-sm">No pending customer payout requests.</p>
+                        ) : (
+                            <div className="space-y-4">
+                                {customerPayouts.map((request: any) => (
+                                    <div key={request.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <p className="font-medium text-charcoal-900">
+                                                        ₱{request.amount.toLocaleString()} — {request.profile?.full_name || `User ID: ${request.user_id}`}
+                                                    </p>
+                                                    <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full uppercase tracking-wider font-medium">Customer</span>
+                                                </div>
+                                                <div className="text-sm text-charcoal-600 mt-1">
+                                                    <span className="capitalize font-medium">{request.payment_method === 'bank' || request.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'GCash'}</span>
+                                                    <span className="mx-2 text-charcoal-300">|</span>
+                                                    <span className="text-xs">
+                                                        {(request.bank_name) ? `${request.bank_name} — ` : ''}
+                                                        {request.account_number || '—'}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-charcoal-500 mt-0.5">
+                                                    Account Name: {request.account_name || '—'}
+                                                </p>
+                                                <p className="text-xs text-charcoal-400 mt-1">
+                                                    Requested: {new Date(request.created_at).toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <VerifyButton
+                                                    id={request.id}
+                                                    action="rejectPayout"
+                                                    label="Reject"
+                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                                />
+                                                <VerifyButton
+                                                    id={request.id}
+                                                    action="approvePayout"
+                                                    label="Approve"
+                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    )
+}
