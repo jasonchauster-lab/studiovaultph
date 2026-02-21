@@ -11,10 +11,10 @@ const HEALTH_WAIVER_TEXT = `HEALTH AND FITNESS PARTICIPATION WAIVER AND RELEASE 
 
 Effective Date: Upon Booking
 
-This Health and Fitness Participation Waiver and Release of Liability ("Waiver") is entered into between the participant ("Participant") and Pilates Bridge, its affiliated instructors, studios, and personnel ("Service Providers").
+This Health and Fitness Participation Waiver and Release of Liability ("Waiver") is entered into between the participant ("Participant") and StudioVaultPH, its affiliated instructors, studios, and personnel ("Service Providers").
 
 1. VOLUNTARY PARTICIPATION
-The Participant voluntarily chooses to participate in Pilates, fitness, and wellness sessions facilitated through the Pilates Bridge platform. The Participant acknowledges that these activities involve physical exertion that may be strenuous and could cause physical injury.
+The Participant voluntarily chooses to participate in Pilates, fitness, and wellness sessions facilitated through the StudioVaultPH platform. The Participant acknowledges that these activities involve physical exertion that may be strenuous and could cause physical injury.
 
 2. DECLARATION OF HEALTH
 The Participant represents and warrants that:
@@ -30,7 +30,7 @@ b) The use of Pilates equipment (Reformer, Cadillac, Chair, Barrel, etc.) involv
 c) Such risks exist even when sessions are conducted safely and professionally.
 
 4. RELEASE OF LIABILITY
-In consideration of being permitted to participate, the Participant, on behalf of themselves, their heirs, personal representatives, and assigns, hereby releases, waives, and forever discharges Pilates Bridge, its owners, operators, instructors, studios, employees, and agents from any and all claims, demands, or causes of action arising from or related to participation in any session booked through the platform, including claims arising from:
+In consideration of being permitted to participate, the Participant, on behalf of themselves, their heirs, personal representatives, and assigns, hereby releases, waives, and forever discharges StudioVaultPH, its owners, operators, instructors, studios, employees, and agents from any and all claims, demands, or causes of action arising from or related to participation in any session booked through the platform, including claims arising from:
 a) Negligence (ordinary) of the released parties;
 b) Injury, illness, or death;
 c) Damage to or loss of personal property.
@@ -56,12 +56,12 @@ const TERMS_TEXT = `TERMS AND CONDITIONS — BOOKING & CANCELLATION POLICY
 
 Effective Date: Upon Booking
 
-These Terms and Conditions ("Terms") govern all bookings made through the Pilates Bridge platform between the client ("Client") and the instructor/studio ("Service Provider").
+These Terms and Conditions ("Terms") govern all bookings made through the StudioVaultPH platform between the client ("Client") and the instructor/studio ("Service Provider").
 
 1. BOOKING CONFIRMATION
 a) A booking is considered tentative until confirmed by the instructor and payment is verified.
 b) The Client will receive notification once their booking is confirmed.
-c) Pilates Bridge reserves the right to decline any booking at its discretion.
+c) StudioVaultPH reserves the right to decline any booking at its discretion.
 
 2. PAYMENT
 a) Full payment is required prior to confirmation of any session.
@@ -70,7 +70,7 @@ c) Sessions will not be confirmed until payment verification is complete.
 
 3. CANCELLATION POLICY — STRICTLY NO CANCELLATION WITHOUT INSTRUCTOR APPROVAL
 a) ALL CANCELLATIONS REQUIRE EXPLICIT WRITTEN APPROVAL FROM THE INSTRUCTOR.
-b) The Client may NOT cancel a confirmed booking without first receiving written approval from the assigned instructor through the Pilates Bridge platform.
+b) The Client may NOT cancel a confirmed booking without first receiving written approval from the assigned instructor through the StudioVaultPH platform.
 c) Requests to cancel must be submitted through the platform messaging system at least 24 hours before the scheduled session start time.
 d) Approval of cancellation requests is at the SOLE DISCRETION of the instructor.
 e) Instructors are not obligated to approve cancellation requests for any reason.
@@ -94,14 +94,14 @@ b) No time extensions or refunds will be provided for late arrivals.
 
 7. CONDUCT
 a) Clients are expected to treat instructors and studio staff with respect.
-b) Pilates Bridge reserves the right to suspend or permanently ban accounts for inappropriate behavior.
+b) StudioVaultPH reserves the right to suspend or permanently ban accounts for inappropriate behavior.
 
 8. HEALTH AND SAFETY
 a) Clients are responsible for disclosing health conditions to their instructor before each session.
 b) Service Providers are not responsible for injuries resulting from undisclosed health conditions.
 
 9. LIABILITY LIMITATION
-To the fullest extent permitted by Philippine law, Pilates Bridge's maximum liability to any Client shall not exceed the amount paid for the specific session in question.
+To the fullest extent permitted by Philippine law, StudioVaultPH's maximum liability to any Client shall not exceed the amount paid for the specific session in question.
 
 10. GOVERNING LAW
 These Terms are governed by the laws of the Republic of the Philippines. Any disputes shall be subject to the exclusive jurisdiction of the appropriate courts of the Philippines, in accordance with the Electronic Commerce Act (Republic Act No. 8792), the Civil Code, and the Consumer Act (Republic Act No. 7394).

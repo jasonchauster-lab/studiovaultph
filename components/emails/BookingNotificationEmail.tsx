@@ -37,7 +37,7 @@ export default function BookingNotificationEmail({
     return (
         <Html>
             <Head />
-            <Preview>{bookingType} - Pilates Bridge</Preview>
+            <Preview>{bookingType} - StudioVaultPH</Preview>
             <Body style={main}>
                 <Container style={container}>
                     <Heading style={h1}>{bookingType}</Heading>
@@ -86,7 +86,7 @@ export default function BookingNotificationEmail({
                     </Section>
 
                     <Hr style={hr} />
-                    <Text style={footer}>Pilates Bridge Notification</Text>
+                    <Text style={footer}>StudioVaultPH Notification</Text>
                 </Container>
             </Body>
         </Html>

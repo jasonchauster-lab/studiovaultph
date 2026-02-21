@@ -337,7 +337,7 @@ export default function BookingSection({
                                 ))}
                             </select>
                             <p className="text-xs text-charcoal-500 mt-1">
-                                Don't see your instructor? Tell them to verify their profile on PilatesBridge!
+                                Don't see your instructor? Tell them to verify their profile on StudioVaultPH!
                             </p>
                         </div>
 
