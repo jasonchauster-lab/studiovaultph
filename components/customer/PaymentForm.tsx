@@ -264,7 +264,7 @@ export default function PaymentForm({
     )
 
     // Agreement checkboxes
-    const [waiverAgreed, setWaiverAgreed] = useState(false)
+    const [waiverAgreed, setWaiverAgreed] = useState(userRole === 'instructor')
     const [termsAgreed, setTermsAgreed] = useState(false)
     const [showWaiver, setShowWaiver] = useState(false)
     const [showTerms, setShowTerms] = useState(false)
@@ -525,36 +525,38 @@ export default function PaymentForm({
                             You must read and agree to both documents before you can submit payment.
                         </p>
 
-                        {/* Health Waiver */}
-                        <div className="bg-white rounded-lg border border-amber-200 p-4">
-                            <div className="flex items-start gap-3">
-                                <input
-                                    id="waiver"
-                                    type="checkbox"
-                                    checked={waiverAgreed}
-                                    onChange={(e) => setWaiverAgreed(e.target.checked)}
-                                    className="mt-0.5 w-4 h-4 rounded border-cream-300 accent-charcoal-900 cursor-pointer shrink-0"
-                                />
-                                <label htmlFor="waiver" className="text-sm text-charcoal-700 cursor-pointer">
-                                    I have read and agree to the{' '}
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowWaiver(true)}
-                                        className="text-charcoal-900 underline underline-offset-2 font-medium hover:text-charcoal-600 transition-colors"
-                                    >
-                                        Health & Fitness Participation Waiver
-                                    </button>
-                                    . I confirm I am in good physical health and voluntarily assume the risks associated with Pilates and fitness activities.
-                                </label>
+                        {/* Health Waiver - Only for Customers */}
+                        {userRole !== 'instructor' && (
+                            <div className="bg-white rounded-lg border border-amber-200 p-4">
+                                <div className="flex items-start gap-3">
+                                    <input
+                                        id="waiver"
+                                        type="checkbox"
+                                        checked={waiverAgreed}
+                                        onChange={(e) => setWaiverAgreed(e.target.checked)}
+                                        className="mt-0.5 w-4 h-4 rounded border-cream-300 accent-charcoal-900 cursor-pointer shrink-0"
+                                    />
+                                    <label htmlFor="waiver" className="text-sm text-charcoal-700 cursor-pointer">
+                                        I have read and agree to the{' '}
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowWaiver(true)}
+                                            className="text-charcoal-900 underline underline-offset-2 font-medium hover:text-charcoal-600 transition-colors"
+                                        >
+                                            Health & Fitness Participation Waiver
+                                        </button>
+                                        . I confirm I am in good physical health and voluntarily assume the risks associated with Pilates and fitness activities.
+                                    </label>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowWaiver(true)}
+                                    className="mt-3 ml-7 text-xs text-charcoal-500 hover:text-charcoal-900 flex items-center gap-1 transition-colors"
+                                >
+                                    <FileText className="w-3 h-3" /> View full waiver
+                                </button>
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => setShowWaiver(true)}
-                                className="mt-3 ml-7 text-xs text-charcoal-500 hover:text-charcoal-900 flex items-center gap-1 transition-colors"
-                            >
-                                <FileText className="w-3 h-3" /> View full waiver
-                            </button>
-                        </div>
+                        )}
 
                         {/* Terms & Conditions */}
                         <div className="bg-white rounded-lg border border-amber-200 p-4">

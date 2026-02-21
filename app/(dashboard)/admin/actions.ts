@@ -266,40 +266,63 @@ export async function confirmBooking(bookingId: string) {
     const studioName = studios.name;
     const studioAddress = studios.address;
 
-    // 3a. Notify Client
-    if (clientEmail) {
-        await sendEmail({
-            to: clientEmail,
-            subject: `Booking Confirmed: ${studioName}`,
-            react: BookingNotificationEmail({
-                recipientName: clientName,
-                bookingType: 'Booking Confirmed',
-                studioName,
-                address: studioAddress,
-                instructorName,
-                date,
-                time
-            })
-        });
+    // 4. Send Emails based on Booking Type
+    const isRental = booking.client_id === booking.instructor_id;
+
+    if (isRental) {
+        // --- STUDIO RENTAL FLOW ---
+        // Just one email to the instructor (who is also the client)
+        if (instructorEmail) {
+            await sendEmail({
+                to: instructorEmail,
+                subject: `Studio Rental Approved: ${studioName}`,
+                react: BookingNotificationEmail({
+                    recipientName: instructorName,
+                    bookingType: 'Booking Confirmed',
+                    studioName,
+                    address: studioAddress,
+                    date,
+                    time
+                })
+            });
+        }
+    } else {
+        // --- REGULAR SESSION FLOW ---
+        // 4a. Notify Client
+        if (clientEmail) {
+            await sendEmail({
+                to: clientEmail,
+                subject: `Booking Confirmed: ${studioName}`,
+                react: BookingNotificationEmail({
+                    recipientName: clientName,
+                    bookingType: 'Booking Confirmed',
+                    studioName,
+                    address: studioAddress,
+                    instructorName,
+                    date,
+                    time
+                })
+            });
+        }
+
+        // 4b. Notify Instructor
+        if (instructorEmail) {
+            await sendEmail({
+                to: instructorEmail,
+                subject: `Session Confirmed with ${clientName}`,
+                react: BookingNotificationEmail({
+                    recipientName: instructorName,
+                    bookingType: 'Booking Confirmed',
+                    studioName,
+                    clientName,
+                    date,
+                    time
+                })
+            });
+        }
     }
 
-    // 3b. Notify Instructor
-    if (instructorEmail) {
-        await sendEmail({
-            to: instructorEmail,
-            subject: `Session Confirmed with ${clientName}`,
-            react: BookingNotificationEmail({
-                recipientName: instructorName,
-                bookingType: 'Booking Confirmed',
-                studioName,
-                clientName,
-                date,
-                time
-            })
-        });
-    }
-
-    // 3c. Notify Studio Owner
+    // 4c. Notify Studio Owner (Always)
     const studioOwnerId = studios.owner_id;
     if (studioOwnerId) {
         const { data: owner } = await supabase.from('profiles').select('email').eq('id', studioOwnerId).single();

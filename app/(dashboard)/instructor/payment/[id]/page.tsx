@@ -131,7 +131,7 @@ export default async function InstructorPaymentPage({
                     </div>
 
                     {/* Reusing PaymentForm - it should work because we set client_id = user.id */}
-                    <PaymentForm booking={booking} existingParq={existingParq ?? null} />
+                    <PaymentForm booking={booking} existingParq={existingParq ?? null} userRole="instructor" />
                 </div>
             </div>
         </div>

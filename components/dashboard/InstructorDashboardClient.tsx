@@ -75,7 +75,11 @@ export default function InstructorDashboardClient() {
                                 location
                             )
                         ),
-                        profiles:client_id (
+                        client:profiles!client_id (
+                            full_name,
+                            email
+                        ),
+                        instructor:profiles!instructor_id (
                             full_name,
                             email
                         )
@@ -269,11 +273,21 @@ export default function InstructorDashboardClient() {
                                                 </div>
                                                 <div className="flex gap-3">
                                                     <button
-                                                        onClick={() => setActiveChat({ id: booking.id, name: booking.profiles?.full_name || 'Client', isExpired: isChatExpired(booking) })}
+                                                        onClick={() => {
+                                                            const isRental = booking.client_id === booking.instructor_id;
+                                                            const recipientName = isRental
+                                                                ? booking.slots?.studios?.name
+                                                                : booking.client?.full_name || 'Client';
+                                                            setActiveChat({
+                                                                id: booking.id,
+                                                                name: recipientName || 'Messenger',
+                                                                isExpired: isChatExpired(booking)
+                                                            });
+                                                        }}
                                                         className="px-4 py-2 bg-charcoal-900 text-cream-50 rounded-lg hover:bg-charcoal-800 transition-colors text-sm font-medium flex items-center gap-2 relative"
                                                     >
                                                         <span className="w-2 h-2 rounded-full bg-green-400"></span>
-                                                        Chat with Client
+                                                        {booking.client_id === booking.instructor_id ? 'Chat with Studio' : 'Chat with Client'}
                                                         <MessageCountBadge bookingId={booking.id} currentUserId={userId} isOpen={activeChat?.id === booking.id} />
                                                     </button>
                                                 </div>
@@ -315,7 +329,17 @@ export default function InstructorDashboardClient() {
                                                 </div>
                                                 {booking.status === 'approved' && (
                                                     <button
-                                                        onClick={() => setActiveChat({ id: booking.id, name: booking.profiles?.full_name || 'Client', isExpired: isChatExpired(booking) })}
+                                                        onClick={() => {
+                                                            const isRental = booking.client_id === booking.instructor_id;
+                                                            const recipientName = isRental
+                                                                ? booking.slots?.studios?.name
+                                                                : booking.client?.full_name || 'Client';
+                                                            setActiveChat({
+                                                                id: booking.id,
+                                                                name: recipientName || 'Messenger',
+                                                                isExpired: isChatExpired(booking)
+                                                            });
+                                                        }}
                                                         className="text-xs font-medium text-charcoal-600 hover:text-charcoal-900 underline relative"
                                                     >
                                                         View Chat

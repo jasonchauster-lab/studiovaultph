@@ -3,8 +3,8 @@ import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
 import { redirect } from 'next/navigation'
 import { Calendar } from 'lucide-react'
 import clsx from 'clsx'
+import StudioChatButton from '@/components/dashboard/StudioChatButton'
 import InstructorLeaveReviewButton from '@/components/reviews/InstructorLeaveReviewButton'
-
 
 export default async function InstructorSessionsPage() {
     const supabase = await createClient()
@@ -37,6 +37,11 @@ export default async function InstructorSessionsPage() {
                 id,
                 full_name,
                 avatar_url
+            ),
+            instructor:profiles!instructor_id (
+                id,
+                full_name,
+                avatar_url
             )
         `)
         .eq('instructor_id', user.id)
@@ -45,8 +50,8 @@ export default async function InstructorSessionsPage() {
     const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
     const now = new Date()
 
-    const upcomingBookings = bookings?.filter(b => new Date(getFirst(b.slots)?.start_time) > now) || []
-    const pastBookings = bookings?.filter(b => new Date(getFirst(b.slots)?.start_time) <= now) || []
+    const upcomingBookings = bookings?.filter(b => b.status !== 'rejected' && new Date(getFirst(b.slots)?.start_time) > now) || []
+    const pastBookings = bookings?.filter(b => b.status === 'rejected' || new Date(getFirst(b.slots)?.start_time) <= now) || []
 
     return (
         <div className="min-h-screen bg-cream-50 p-8">
@@ -84,14 +89,17 @@ export default async function InstructorSessionsPage() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <span className={clsx(
-                                            'text-xs px-2 py-1 rounded',
-                                            booking.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                                booking.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                    'bg-charcoal-100 text-charcoal-600'
-                                        )}>
-                                            {booking.status}
-                                        </span>
+                                        <div className="flex items-center gap-3">
+                                            <StudioChatButton booking={booking} currentUserId={user.id} />
+                                            <span className={clsx(
+                                                'text-xs px-2 py-1 rounded',
+                                                booking.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                                    booking.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                        'bg-charcoal-100 text-charcoal-600'
+                                            )}>
+                                                {booking.status}
+                                            </span>
+                                        </div>
                                     </div>
                                 )
                             })}
@@ -130,6 +138,7 @@ export default async function InstructorSessionsPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
+                                            <StudioChatButton booking={booking} currentUserId={user.id} />
                                             {booking.status === 'completed' && (
                                                 <InstructorLeaveReviewButton
                                                     booking={booking}
