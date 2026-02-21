@@ -8,6 +8,8 @@ import clsx from 'clsx'
 export default function InstructorOnboardingForm() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+    const [certificationBody, setCertificationBody] = useState('')
+    const [selectedFileName, setSelectedFileName] = useState<string | null>(null)
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -21,8 +23,13 @@ export default function InstructorOnboardingForm() {
             if (result?.error) {
                 setMessage({ type: 'error', text: result.error })
             } else {
-                // Redirect handled in server action, but if we stay here:
                 setMessage({ type: 'success', text: 'Application submitted successfully!' })
+                // Reset form
+                setCertificationBody('')
+                setSelectedFileName(null)
+                if (event.target instanceof HTMLFormElement) {
+                    event.target.reset()
+                }
             }
         } catch (error) {
             console.error(error)
@@ -99,20 +106,39 @@ export default function InstructorOnboardingForm() {
                             id="certificationBody"
                             name="certificationBody"
                             required
+                            value={certificationBody}
+                            onChange={(e) => setCertificationBody(e.target.value)}
                             className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all appearance-none cursor-pointer text-charcoal-800"
                         >
-                            <option value="" disabled selected>Select your certification...</option>
+                            <option value="" disabled>Select your certification...</option>
                             <option value="STOTT">STOTT Pilates</option>
                             <option value="BASI">BASI Pilates</option>
                             <option value="Balanced Body">Balanced Body</option>
                             <option value="Polestar">Polestar Pilates</option>
-                            <option value="Other">Other</option>
+                            <option value="Other">Other (Type below)</option>
                         </select>
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-charcoal-500">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
                 </div>
+
+                {/* Other Certification Field (Conditional) */}
+                {certificationBody === 'Other' && (
+                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label htmlFor="otherCertification" className="block text-sm font-medium text-charcoal-800">
+                            Certification Name
+                        </label>
+                        <input
+                            type="text"
+                            id="otherCertification"
+                            name="otherCertification"
+                            required
+                            className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400"
+                            placeholder="e.g. Classic Pilates UK"
+                        />
+                    </div>
+                )}
 
                 {/* Certificate Upload */}
                 <div className="space-y-2">
@@ -126,12 +152,25 @@ export default function InstructorOnboardingForm() {
                             name="certificateFile"
                             accept=".pdf,.jpg,.jpeg,.png"
                             required
+                            onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                setSelectedFileName(file ? file.name : null)
+                            }}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
-                        <div className="w-10 h-10 rounded-full bg-cream-200 flex items-center justify-center mb-3 group-hover:bg-cream-300 transition-colors">
-                            <Upload className="w-5 h-5 text-charcoal-700" />
+                        <div className={clsx(
+                            "w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-colors",
+                            selectedFileName ? "bg-green-100" : "bg-cream-200 group-hover:bg-cream-300"
+                        )}>
+                            {selectedFileName ? (
+                                <CheckCircle className="w-5 h-5 text-green-600" />
+                            ) : (
+                                <Upload className="w-5 h-5 text-charcoal-700" />
+                            )}
                         </div>
-                        <p className="text-sm font-medium text-charcoal-700">Click to upload or drag and drop</p>
+                        <p className="text-sm font-medium text-charcoal-700">
+                            {selectedFileName || 'Click to upload or drag and drop'}
+                        </p>
                         <p className="text-xs text-charcoal-500 mt-1">PDF, JPG, or PNG (max 5MB)</p>
                     </div>
                 </div>

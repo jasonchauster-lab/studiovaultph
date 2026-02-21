@@ -1,9 +1,16 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, MapPin, Calendar, DollarSign, User, Sparkles } from 'lucide-react'
+import RoleSelectionModal from '@/components/auth/RoleSelectionModal'
 
 export default function LandingPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
   return (
     <div className="min-h-screen bg-cream-50 font-sans text-charcoal-900">
+      <RoleSelectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* Navigation */}
       <nav className="flex items-center justify-between px-4 sm:px-6 py-4 max-w-7xl mx-auto">
@@ -12,9 +19,12 @@ export default function LandingPage() {
           <Link href="/login" className="text-charcoal-600 hover:text-charcoal-900 font-medium px-4 py-2">
             Log In
           </Link>
-          <Link href="#join" className="bg-charcoal-900 text-cream-50 px-5 py-2 rounded-full font-medium hover:bg-charcoal-800 transition-colors">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-charcoal-900 text-cream-50 px-5 py-2 rounded-full font-medium hover:bg-charcoal-800 transition-colors"
+          >
             Sign Up
-          </Link>
+          </button>
         </div>
       </nav>
 
@@ -28,22 +38,17 @@ export default function LandingPage() {
           The first marketplace connecting freelance Pilates instructors with premium studios — and helping clients discover affordable sessions during off-peak hours.
         </p>
 
-        <div id="join" className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
-          <Link href="/login?role=customer&mode=signup" className="bg-green-700 text-white px-8 py-4 rounded-full text-lg font-medium hover:bg-green-800 transition-all flex items-center justify-center gap-2">
-            <Sparkles className="w-5 h-5" />
-            I'm a Client
-          </Link>
-          <Link href="/login?role=instructor&mode=signup" className="bg-charcoal-900 text-cream-50 px-8 py-4 rounded-full text-lg font-medium hover:bg-charcoal-800 transition-all flex items-center justify-center gap-2 group">
-            <User className="w-5 h-5" />
-            I'm an Instructor
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-          <Link href="/login?role=studio&mode=signup" className="bg-white text-charcoal-900 border border-charcoal-200 px-8 py-4 rounded-full text-lg font-medium hover:bg-cream-50 transition-all flex items-center justify-center gap-2">
-            <DollarSign className="w-5 h-5" />
-            I own a Studio
-          </Link>
+        <div className="flex justify-center">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="group bg-charcoal-900 text-cream-50 px-8 py-4 rounded-full text-lg font-bold hover:bg-charcoal-800 transition-all flex items-center gap-3 shadow-xl hover:shadow-2xl hover:-translate-y-1"
+          >
+            Join StudioVaultPH
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </button>
         </div>
       </header>
+
 
       {/* Value Props */}
       <section className="px-4 sm:px-6 py-16 bg-white border-y border-cream-200">

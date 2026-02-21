@@ -27,11 +27,17 @@ export async function submitInstructorOnboarding(formData: FormData) {
     const fullName = formData.get('fullName') as string
     const instagramHandle = formData.get('instagramHandle') as string
     const contactNumber = formData.get('contactNumber') as string
-    const certificationBody = formData.get('certificationBody') as string
+    let certificationBody = formData.get('certificationBody') as string
+    const otherCertification = formData.get('otherCertification') as string
     const certificateFile = formData.get('certificateFile') as File
 
-    if (!fullName || !instagramHandle || !contactNumber || !certificationBody || !certificateFile) {
-        return { error: 'All fields are required' }
+    // Use specific certification name if 'Other' was selected
+    if (certificationBody === 'Other' && otherCertification) {
+        certificationBody = otherCertification
+    }
+
+    if (!fullName || !instagramHandle || !contactNumber || !certificationBody || !certificateFile || certificateFile.size === 0) {
+        return { error: 'All fields are required, including a valid certificate file' }
     }
 
     // 1. Update Profile

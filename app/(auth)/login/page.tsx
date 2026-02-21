@@ -42,7 +42,8 @@ function LoginContent() {
                         full_name: fullName,
                         email: email,
                         role: initialRole
-                    }
+                    },
+                    emailRedirectTo: `${window.location.origin}/verified`
                 }
             })
 
