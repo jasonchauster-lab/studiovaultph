@@ -45,65 +45,71 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
         fetchUnreadCount()
     }, [userId, supabase])
 
-    // Load active ticket on mount
+    // 1. Fetch/Find active ticket when opening
     useEffect(() => {
-        if (!isOpen) return
+        if (!isOpen || ticket) return
 
-        async function loadChat() {
+        async function findTicket() {
             setIsLoading(true)
-            // Find existing open ticket
             const { data: activeTicket } = await supabase
                 .from('support_tickets')
                 .select('*')
                 .eq('user_id', userId)
                 .eq('status', 'open')
-                .single()
+                .maybeSingle()
 
             if (activeTicket) {
                 setTicket(activeTicket)
-                // Load messages
-                const { data: msgs } = await supabase
-                    .from('support_messages')
-                    .select('*')
-                    .eq('ticket_id', activeTicket.id)
-                    .order('created_at', { ascending: true })
-
-                if (msgs) setMessages(msgs)
-
-                // Mark messages as read when opening the ticket
-                await fetch('/api/support/mark-read', { method: 'POST', body: JSON.stringify({ ticketId: activeTicket.id }) }).catch(() => { })
-                // Alternatively, can reuse the server action directly since this is a client component calling a server action
-                import('@/app/(dashboard)/support/actions').then(m => m.markMessagesAsRead(activeTicket.id))
-
-                setUnreadCount(0)
             }
             setIsLoading(false)
         }
 
-        loadChat()
+        findTicket()
+    }, [isOpen, userId, ticket, supabase])
 
-        // Realtime subscription (Basic)
+    // 2. Sync messages and setup realtime when ticket exists
+    useEffect(() => {
+        if (!ticket?.id) return
+        const ticketId = ticket.id
+
+        async function syncMessages() {
+            // Load messages
+            const { data: msgs } = await supabase
+                .from('support_messages')
+                .select('*')
+                .eq('ticket_id', ticketId)
+                .order('created_at', { ascending: true })
+
+            if (msgs) setMessages(msgs)
+
+            // Mark as read
+            import('@/app/(dashboard)/support/actions').then(m => m.markMessagesAsRead(ticketId))
+            setUnreadCount(0)
+        }
+
+        syncMessages()
+
+        // Realtime subscription
         const channel = supabase
-            .channel('chat_updates')
+            .channel(`ticket-${ticketId}`)
             .on(
                 'postgres_changes',
                 {
-                    event: '*',
+                    event: 'INSERT',
                     schema: 'public',
                     table: 'support_messages',
-                    filter: ticket ? `ticket_id=eq.${ticket.id}` : undefined
+                    filter: `ticket_id=eq.${ticketId}`
                 },
                 (payload) => {
-                    const newMsg = (payload as any).new as SupportMessage
-                    if (payload.eventType === 'INSERT') {
-                        setMessages((prev) => [...prev, newMsg])
-                        if (!isOpen && newMsg.sender_id !== userId) {
-                            setUnreadCount((prev) => prev + 1)
-                        } else if (isOpen && newMsg.sender_id !== userId) {
-                            if (ticket) {
-                                import('@/app/(dashboard)/support/actions').then(m => m.markMessagesAsRead(ticket.id))
-                            }
-                        }
+                    const newMsg = payload.new as SupportMessage
+                    setMessages((prev) => {
+                        // Avoid duplicates if already added optimistically
+                        if (prev.find(m => m.id === newMsg.id)) return prev
+                        return [...prev, newMsg]
+                    })
+
+                    if (newMsg.sender_id !== userId) {
+                        import('@/app/(dashboard)/support/actions').then(m => m.markMessagesAsRead(ticketId))
                     }
                 }
             )
@@ -112,7 +118,7 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [isOpen, userId, ticket?.id, supabase, ticket]) // Re-sub if ticket ID changes
+    }, [ticket?.id, userId, supabase])
 
     const handleSend = async () => {
         if (!inputValue.trim()) return

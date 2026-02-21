@@ -2,8 +2,10 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
+import ApplicationApprovalEmail from '@/components/emails/ApplicationApprovalEmail'
 
 export async function approvePayout(payoutId: string) {
     const supabase = await createClient()
@@ -87,23 +89,33 @@ export async function approveCertification(certificationId: string) {
     // Verify admin role 
     // In a real app, we would check if (await supabase.auth.getUser()).data.user.role === 'admin'
 
-    const { error, count } = await supabase.from('certifications')
+    const { data: cert, error: fetchError } = await supabase.from('certifications')
         .update({ verified: true })
         .eq('id', certificationId)
-        .select('id')
+        .select('*, profiles(full_name, email)')
+        .single()
 
-    if (error) {
-        console.error('Error approving certification:', error)
+    if (fetchError || !cert) {
+        console.error('Error approving certification:', fetchError)
         return { error: 'Failed to approve certification' }
     }
 
-    if (count === 0) {
-        return { error: 'Permission denied or item not found. Are you an admin?' }
-    }
+    // Send notification email
+    if (cert.profiles?.email) {
+        const host = (await headers()).get('host')
+        const protocol = host?.includes('localhost') ? 'http' : 'https'
+        const siteUrl = `${protocol}://${host}`
 
-    if (error) {
-        console.error('Error approving certification:', error)
-        return { error: 'Failed to approve certification' }
+        await sendEmail({
+            to: cert.profiles.email,
+            subject: 'Congratulations! Your certification has been verified',
+            react: ApplicationApprovalEmail({
+                recipientName: (cert.profiles as any).full_name || 'Instructor',
+                applicationType: 'Instructor',
+                itemName: cert.certification_name,
+                dashboardUrl: `${siteUrl}/instructor/profile`
+            })
+        })
     }
 
     revalidatePath('/admin')
@@ -135,18 +147,33 @@ export async function rejectCertification(certificationId: string) {
 export async function verifyStudio(studioId: string) {
     const supabase = await createClient()
 
-    const { error, count } = await supabase.from('studios')
+    const { data: studio, error: fetchError } = await supabase.from('studios')
         .update({ verified: true })
         .eq('id', studioId)
-        .select('id')
+        .select('*, profiles(full_name, email)')
+        .single()
 
-    if (error) {
-        console.error('Error verifying studio:', error)
+    if (fetchError || !studio) {
+        console.error('Error verifying studio:', fetchError)
         return { error: 'Failed to verify studio' }
     }
 
-    if (count === 0) {
-        return { error: 'Permission denied or item not found. Are you an admin?' }
+    // Send notification email
+    if (studio.profiles?.email) {
+        const host = (await headers()).get('host')
+        const protocol = host?.includes('localhost') ? 'http' : 'https'
+        const siteUrl = `${protocol}://${host}`
+
+        await sendEmail({
+            to: studio.profiles.email,
+            subject: 'Exciting news! Your studio has been approved',
+            react: ApplicationApprovalEmail({
+                recipientName: (studio.profiles as any).full_name || 'Studio Owner',
+                applicationType: 'Studio',
+                itemName: studio.name,
+                dashboardUrl: `${siteUrl}/studio`
+            })
+        })
     }
 
     revalidatePath('/admin')
@@ -307,6 +334,8 @@ export async function rejectBooking(bookingId: string, reason: string) {
         .select(`
             id,
             slot_id,
+            instructor_id,
+            client_id,
             booked_slot_ids,
             client:profiles!client_id(full_name, email),
             slots(
@@ -347,6 +376,28 @@ export async function rejectBooking(bookingId: string, reason: string) {
     const client = first(booking.client);
     const slots = first(booking.slots);
     const studios = first(slots?.studios);
+
+    // --- AUTO-REMOVAL OF AVAILABILITY START ---
+    // If an instructor's studio rental is rejected, remove the auto-created availability
+    if (booking.client_id === booking.instructor_id) {
+        try {
+            const startDateTime = new Date(slots?.start_time);
+            const dateStr = startDateTime.toISOString().split('T')[0];
+            const timeStr = startDateTime.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
+
+            await supabase
+                .from('instructor_availability')
+                .delete()
+                .eq('instructor_id', booking.instructor_id)
+                .eq('date', dateStr)
+                .eq('start_time', timeStr);
+
+            revalidatePath('/instructor/schedule');
+        } catch (availError) {
+            console.error('Failed to remove auto-availability on rejection:', availError);
+        }
+    }
+    // --- AUTO-REMOVAL OF AVAILABILITY END ---
 
     if (!client?.email) {
         console.error('Missing client email for rejection:', { client, booking });

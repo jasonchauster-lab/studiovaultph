@@ -382,6 +382,39 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
     }
     // --- EMAIL NOTIFICATION END ---
 
+    // --- AUTO-SLOTTING START ---
+    // Automatically create an availability slot for the instructor at this studio/time
+    try {
+        const bookingDate = start.toISOString().split('T')[0];
+        const dayOfWeek = start.getDay();
+        const startTimeStr = start.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
+        const endTimeStr = end.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
+
+        // Check if availability already exists to avoid duplicates
+        const { data: existingAvail } = await supabase
+            .from('instructor_availability')
+            .select('id')
+            .eq('instructor_id', user.id)
+            .eq('date', bookingDate)
+            .eq('start_time', startTimeStr)
+            .limit(1);
+
+        if (!existingAvail || existingAvail.length === 0) {
+            await supabase.from('instructor_availability').insert({
+                instructor_id: user.id,
+                date: bookingDate,
+                day_of_week: dayOfWeek,
+                start_time: startTimeStr,
+                end_time: endTimeStr,
+                location_area: studios?.location || 'Unknown'
+            });
+        }
+    } catch (slotError) {
+        console.error('Auto-slotting skipped/failed:', slotError);
+    }
+    // --- AUTO-SLOTTING END ---
+
     revalidatePath('/instructor')
+    revalidatePath('/instructor/schedule')
     return { success: true, bookingId: booking.id }
 }

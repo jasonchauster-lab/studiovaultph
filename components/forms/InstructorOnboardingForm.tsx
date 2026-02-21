@@ -10,6 +10,7 @@ export default function InstructorOnboardingForm() {
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
     const [certificationBody, setCertificationBody] = useState('')
     const [selectedFileName, setSelectedFileName] = useState<string | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -27,6 +28,8 @@ export default function InstructorOnboardingForm() {
                 // Reset form
                 setCertificationBody('')
                 setSelectedFileName(null)
+                if (previewUrl) URL.revokeObjectURL(previewUrl)
+                setPreviewUrl(null)
                 if (event.target instanceof HTMLFormElement) {
                     event.target.reset()
                 }
@@ -155,19 +158,38 @@ export default function InstructorOnboardingForm() {
                             onChange={(e) => {
                                 const file = e.target.files?.[0]
                                 setSelectedFileName(file ? file.name : null)
+                                if (file && file.type.startsWith('image/')) {
+                                    const url = URL.createObjectURL(file)
+                                    setPreviewUrl(url)
+                                } else {
+                                    setPreviewUrl(null)
+                                }
                             }}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
-                        <div className={clsx(
-                            "w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-colors",
-                            selectedFileName ? "bg-green-100" : "bg-cream-200 group-hover:bg-cream-300"
-                        )}>
-                            {selectedFileName ? (
-                                <CheckCircle className="w-5 h-5 text-green-600" />
-                            ) : (
-                                <Upload className="w-5 h-5 text-charcoal-700" />
-                            )}
-                        </div>
+                        {previewUrl ? (
+                            <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-3">
+                                <img
+                                    src={previewUrl}
+                                    alt="Certificate Preview"
+                                    className="w-full h-full object-contain bg-cream-100"
+                                />
+                                <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                    <p className="text-white text-xs font-medium bg-black/50 px-2 py-1 rounded">Click to change</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className={clsx(
+                                "w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-colors",
+                                selectedFileName ? "bg-green-100" : "bg-cream-200 group-hover:bg-cream-300"
+                            )}>
+                                {selectedFileName ? (
+                                    <CheckCircle className="w-5 h-5 text-green-600" />
+                                ) : (
+                                    <Upload className="w-5 h-5 text-charcoal-700" />
+                                )}
+                            </div>
+                        )}
                         <p className="text-sm font-medium text-charcoal-700">
                             {selectedFileName || 'Click to upload or drag and drop'}
                         </p>

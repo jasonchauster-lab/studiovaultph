@@ -71,9 +71,18 @@ export default async function InstructorSessionsPage() {
                                 const studio = getFirst(slot?.studios)
                                 return (
                                     <div key={booking.id} className="bg-white p-4 rounded-xl border border-cream-200 flex justify-between items-center">
-                                        <div className="flex items-center gap-4">
-                                            <div className="text-charcoal-500 text-sm">{new Date(slot?.start_time).toLocaleDateString()}</div>
-                                            <div className="font-medium text-charcoal-700">{studio?.name}</div>
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                            <div className="text-charcoal-500 text-sm font-medium">
+                                                {new Date(slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <div className="font-bold text-charcoal-700">{studio?.name}</div>
+                                                <div className="text-xs text-charcoal-500 flex items-center gap-1.5">
+                                                    <span>{new Date(slot?.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(slot?.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                    <span className="w-1 h-1 rounded-full bg-cream-300" />
+                                                    <span className="font-medium text-charcoal-600">{booking.price_breakdown?.equipment || booking.equipment || 'Session'}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                         <span className={clsx(
                                             'text-xs px-2 py-1 rounded',
@@ -101,12 +110,24 @@ export default async function InstructorSessionsPage() {
                                 const client = getFirst(booking.client)
                                 return (
                                     <div key={booking.id} className="bg-white p-4 rounded-xl border border-cream-200 flex justify-between items-center flex-wrap gap-3">
-                                        <div className="flex items-center gap-4">
-                                            <div className="text-charcoal-500 text-sm">{new Date(slot?.start_time).toLocaleDateString()}</div>
-                                            <div className="font-medium text-charcoal-700">{studio?.name}</div>
-                                            {client && client.id !== user.id && (
-                                                <div className="text-xs text-charcoal-400">w/ {client.full_name}</div>
-                                            )}
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                            <div className="text-charcoal-500 text-sm font-medium">
+                                                {new Date(slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <div className="font-bold text-charcoal-700">{studio?.name}</div>
+                                                <div className="text-xs text-charcoal-500 flex items-center gap-1.5">
+                                                    <span>{new Date(slot?.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                    <span className="w-1 h-1 rounded-full bg-cream-300" />
+                                                    <span className="font-medium text-charcoal-600">{booking.price_breakdown?.equipment || booking.equipment || 'Session'}</span>
+                                                    {client && client.id !== user.id && (
+                                                        <>
+                                                            <span className="w-1 h-1 rounded-full bg-cream-300" />
+                                                            <span>w/ {client.full_name}</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             {booking.status === 'completed' && (

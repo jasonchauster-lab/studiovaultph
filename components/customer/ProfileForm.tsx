@@ -9,6 +9,7 @@ import Image from 'next/image'
 export default function ProfileForm({ profile }: { profile: any }) {
     const [isLoading, setIsLoading] = useState(false)
     const [message, setMessage] = useState<string | null>(null)
+    const [selectedEquipment, setSelectedEquipment] = useState<string[]>(profile?.teaching_equipment || [])
 
     const handleSubmit = async (formData: FormData) => {
         const contactNumber = formData.get('contactNumber') as string
@@ -169,7 +170,14 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                     type="checkbox"
                                     name="teaching_equipment"
                                     value={eq}
-                                    defaultChecked={profile?.teaching_equipment?.includes(eq)}
+                                    checked={selectedEquipment.includes(eq)}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setSelectedEquipment([...selectedEquipment, eq])
+                                        } else {
+                                            setSelectedEquipment(selectedEquipment.filter((item) => item !== eq))
+                                        }
+                                    }}
                                     className="w-4 h-4 text-charcoal-900 rounded border-cream-300 focus:ring-charcoal-500"
                                 />
                                 <span className="text-sm text-charcoal-700">{eq}</span>
@@ -185,27 +193,27 @@ export default function ProfileForm({ profile }: { profile: any }) {
                 <div>
                     <label className="block text-sm font-medium text-charcoal-700 mb-2">Teaching Rates (PHP/hr)</label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {['Reformer', 'Cadillac', 'Chair', 'Barrel', 'Mat'].map((eq) => (
-                            <div key={eq} className={!profile?.teaching_equipment?.includes(eq) ? 'opacity-50' : ''}>
-                                <label className="block text-xs font-medium text-charcoal-600 mb-1">{eq}</label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-2 text-charcoal-400 text-sm">₱</span>
-                                    <input
-                                        type="number"
-                                        name={`rate_${eq}`}
-                                        defaultValue={profile?.rates?.[eq] || ''}
-                                        placeholder="0.00"
-                                        min="0"
-                                        step="0.01"
-                                        disabled={!profile?.teaching_equipment?.includes(eq)} // Only enable if they teach it? Or allow setting it regardless? Better to only enable if selected.
-                                        // Actually, form updates happen on submit. If I disable it based on *initial* state, they can't enable it and set price in one go without complex state.
-                                        // Let's NOT disable it, just fade it visually if not checked logic is complex without useState.
-                                        // I'll just leave it enabled for simplicity.
-                                        className="w-full pl-7 pr-3 py-2 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm"
-                                    />
+                        {['Reformer', 'Cadillac', 'Chair', 'Barrel', 'Mat'].map((eq) => {
+                            const isSelected = selectedEquipment.includes(eq);
+                            return (
+                                <div key={eq} className={`transition-all duration-300 ${!isSelected ? 'opacity-40 grayscale' : ''}`}>
+                                    <label className="block text-xs font-medium text-charcoal-600 mb-1">{eq}</label>
+                                    <div className="relative">
+                                        <span className={`absolute left-3 top-2 text-sm transition-colors ${isSelected ? 'text-charcoal-400' : 'text-charcoal-300'}`}>₱</span>
+                                        <input
+                                            type="number"
+                                            name={`rate_${eq}`}
+                                            defaultValue={profile?.rates?.[eq] || ''}
+                                            placeholder="0.00"
+                                            min="0"
+                                            step="0.01"
+                                            disabled={!isSelected}
+                                            className="w-full pl-7 pr-3 py-2 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm disabled:bg-cream-50/50 disabled:cursor-not-allowed transition-all"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             )}

@@ -108,6 +108,34 @@ These Terms are governed by the laws of the Republic of the Philippines. Any dis
 
 BY CHECKING THE BOX BELOW, THE CLIENT CONFIRMS THEY HAVE READ, UNDERSTOOD, AND AGREE TO THESE TERMS AND CONDITIONS, INCLUDING THE STRICT NO-CANCELLATION-WITHOUT-INSTRUCTOR-APPROVAL POLICY.`
 
+// ─── Instructor Specific Terms ───────────────────────────────────────────────
+const INSTRUCTOR_TERMS_TEXT = `TERMS AND CONDITIONS — INSTRUCTOR PROFESSIONAL BOOKING
+
+Effective Date: Upon Booking
+
+These terms govern your use of the StudioVaultPH platform as a Professional Instructor booking studio space for your private training sessions.
+
+1. PROFESSIONAL REPRESENTATION
+By booking a slot, you represent that you are a qualified and certified fitness professional. You are responsible for maintaining your own professional liability insurance as per standard practice in the Philippines.
+
+2. CANCELLATION POLICY — STRICT 24-HOUR NOTICE
+a) As a Professional Instructor, you may cancel your studio booking with a full refund (to your wallet balance) provided you do so at least 24 HOURS before the session start time.
+b) Cancellations made within less than 24 hours are non-refundable. The full studio fee will be charged to cover the studio's loss of income, in accordance with Philippine contract laws regarding service reservations (Art. 1159, Civil Code).
+c) Instructors are responsible for managing their own clients' cancellations. StudioVaultPH is not liable for customer no-shows to your private sessions.
+
+3. STUDIO CARE & CONDUCT
+a) You agree to leave the studio and equipment in the state you found it. 
+b) Any damage to studio property caused by you or your client will be your financial responsibility.
+c) You must adhere to the specific house rules of the studio you have booked.
+
+4. INDEMNITY
+You agree to indemnify and hold harmless StudioVaultPH and the partner studio from any claims, suits, or damages arising from your professional instruction or your client's presence on the premises.
+
+5. GOVERNING LAW
+These terms are governed by the laws of the Republic of the Philippines.
+
+BY CHECKING THE BOX BELOW, YOU ACKNOWLEDGE YOUR PROFESSIONAL STATUS AND AGREE TO THESE BINDING TERMS.`
+
 // ─── PAR-Q Questions ──────────────────────────────────────────────────────────
 const PARQ_QUESTIONS = [
     { key: 'heart_condition', label: 'Has your doctor ever said that you have a heart condition and that you should only exercise under medical supervision?' },
@@ -210,7 +238,15 @@ type ExistingParq = {
 } | null
 
 // ─── Main PaymentForm Component ───────────────────────────────────────────────
-export default function PaymentForm({ booking, existingParq }: { booking: any; existingParq: ExistingParq }) {
+export default function PaymentForm({
+    booking,
+    existingParq,
+    userRole = 'customer'
+}: {
+    booking: any;
+    existingParq: ExistingParq;
+    userRole?: string
+}) {
     const [file, setFile] = useState<File | null>(null)
     const [isUploading, setIsUploading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -236,10 +272,10 @@ export default function PaymentForm({ booking, existingParq }: { booking: any; e
     const router = useRouter()
     const supabase = createClient()
 
-    const parqComplete = parqOnFile && !showParqForm
+    const parqComplete = (userRole === 'instructor') || (parqOnFile && !showParqForm)
         ? true
         : PARQ_QUESTIONS.every(q => parqAnswers[q.key] !== undefined)
-    const hasRiskFlags = Object.values(parqAnswers).some(v => v === true)
+    const hasRiskFlags = userRole === 'instructor' ? false : Object.values(parqAnswers).some(v => v === true)
     // Agreements unlock only when PAR-Q is done AND (no risk OR risk acknowledged)
     const agreementsUnlocked = parqComplete && (!hasRiskFlags || medicalAcknowledged)
     const canSubmit = file && waiverAgreed && termsAgreed && agreementsUnlocked && !isUploading
@@ -363,8 +399,8 @@ export default function PaymentForm({ booking, existingParq }: { booking: any; e
             )}
             {showTerms && (
                 <AgreementModal
-                    title="Terms and Conditions & Cancellation Policy"
-                    content={TERMS_TEXT}
+                    title={userRole === 'instructor' ? "Instructor Professional Terms" : "Terms and Conditions & Cancellation Policy"}
+                    content={userRole === 'instructor' ? INSTRUCTOR_TERMS_TEXT : TERMS_TEXT}
                     onClose={() => setShowTerms(false)}
                 />
             )}
@@ -372,102 +408,106 @@ export default function PaymentForm({ booking, existingParq }: { booking: any; e
             <form onSubmit={handleSubmit} className="border-t border-cream-200 pt-8 space-y-6">
                 <h3 className="font-serif text-lg text-charcoal-900">Complete Your Booking</h3>
 
-                {/* ── PAR-Q Section ── */}
-                {parqOnFile && !showParqForm ? (
-                    // On-file banner
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-5">
-                        <div className="flex items-start justify-between gap-3">
-                            <div className="flex items-center gap-2">
-                                <HeartPulse className="w-5 h-5 text-green-600 shrink-0" />
-                                <span className="font-medium text-green-900 text-sm">PAR-Q On File</span>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={handleRedoParq}
-                                className="flex items-center gap-1 text-xs text-green-600 hover:text-green-800 transition-colors shrink-0"
-                            >
-                                <RefreshCw className="w-3 h-3" />
-                                Update
-                            </button>
-                        </div>
-                        <p className="text-xs text-green-700 mt-2">
-                            Completed on{' '}
-                            <strong>{new Date(existingParq!.agreed_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}</strong>
-                            {' '}· Valid until{' '}
-                            <strong>
-                                {new Date(new Date(existingParq!.agreed_at).setFullYear(
-                                    new Date(existingParq!.agreed_at).getFullYear() + 1
-                                )).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}
-                            </strong>
-                        </p>
-                        {existingParq!.has_risk_flags && (
-                            <p className="text-xs text-amber-700 mt-1">
-                                ⚠️ Your previous submission flagged health conditions. Please ensure you have medical clearance before each session.
-                            </p>
-                        )}
-                    </div>
-                ) : (
-                    // Full PAR-Q questionnaire
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 space-y-4">
-                        <div className="flex items-center gap-2 mb-1">
-                            <HeartPulse className="w-5 h-5 text-blue-600 shrink-0" />
-                            <span className="font-medium text-blue-900 text-sm">Physical Activity Readiness Questionnaire (PAR-Q)</span>
-                        </div>
-                        <p className="text-xs text-blue-700">
-                            Please answer all questions honestly. This helps your instructor keep you safe. Your answers are recorded as part of your booking.
-                        </p>
-
-                        <div className="space-y-3">
-                            {PARQ_QUESTIONS.map((q) => (
-                                <div key={q.key} className="bg-white rounded-lg border border-blue-100 p-4">
-                                    <p className="text-sm text-charcoal-800 mb-3 leading-snug">{q.label}</p>
-                                    <div className="flex gap-6">
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                name={q.key}
-                                                value="yes"
-                                                checked={parqAnswers[q.key] === true}
-                                                onChange={() => handleParqChange(q.key, true)}
-                                                className="accent-red-600 w-4 h-4"
-                                            />
-                                            <span className="text-sm font-medium text-charcoal-700">Yes</span>
-                                        </label>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                name={q.key}
-                                                value="no"
-                                                checked={parqAnswers[q.key] === false}
-                                                onChange={() => handleParqChange(q.key, false)}
-                                                className="accent-charcoal-900 w-4 h-4"
-                                            />
-                                            <span className="text-sm font-medium text-charcoal-700">No</span>
-                                        </label>
+                {/* ── PAR-Q Section (Skip for Instructors) ── */}
+                {userRole !== 'instructor' && (
+                    <>
+                        {parqOnFile && !showParqForm ? (
+                            // On-file banner
+                            <div className="bg-green-50 border border-green-200 rounded-xl p-5">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex items-center gap-2">
+                                        <HeartPulse className="w-5 h-5 text-green-600 shrink-0" />
+                                        <span className="font-medium text-green-900 text-sm">PAR-Q On File</span>
                                     </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleRedoParq}
+                                        className="flex items-center gap-1 text-xs text-green-600 hover:text-green-800 transition-colors shrink-0"
+                                    >
+                                        <RefreshCw className="w-3 h-3" />
+                                        Update
+                                    </button>
                                 </div>
-                            ))}
-                        </div>
+                                <p className="text-xs text-green-700 mt-2">
+                                    Completed on{' '}
+                                    <strong>{new Date(existingParq!.agreed_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}</strong>
+                                    {' '}· Valid until{' '}
+                                    <strong>
+                                        {new Date(new Date(existingParq!.agreed_at).setFullYear(
+                                            new Date(existingParq!.agreed_at).getFullYear() + 1
+                                        )).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                    </strong>
+                                </p>
+                                {existingParq!.has_risk_flags && (
+                                    <p className="text-xs text-amber-700 mt-1">
+                                        ⚠️ Your previous submission flagged health conditions. Please ensure you have medical clearance before each session.
+                                    </p>
+                                )}
+                            </div>
+                        ) : (
+                            // Full PAR-Q questionnaire
+                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 space-y-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <HeartPulse className="w-5 h-5 text-blue-600 shrink-0" />
+                                    <span className="font-medium text-blue-900 text-sm">Physical Activity Readiness Questionnaire (PAR-Q)</span>
+                                </div>
+                                <p className="text-xs text-blue-700">
+                                    Please answer all questions honestly. This helps your instructor keep you safe. Your answers are recorded as part of your booking.
+                                </p>
 
-                        {/* PAR-Q completion status */}
-                        {!parqComplete && (
-                            <p className="text-xs text-blue-600 font-medium">
-                                Please answer all {PARQ_QUESTIONS.length} questions above to continue.
-                            </p>
-                        )}
-                        {parqComplete && hasRiskFlags && medicalAcknowledged && (
-                            <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                                <HeartPulse className="w-3.5 h-3.5 shrink-0" />
-                                Medical clearance notice acknowledged.
+                                <div className="space-y-3">
+                                    {PARQ_QUESTIONS.map((q) => (
+                                        <div key={q.key} className="bg-white rounded-lg border border-blue-100 p-4">
+                                            <p className="text-sm text-charcoal-800 mb-3 leading-snug">{q.label}</p>
+                                            <div className="flex gap-6">
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name={q.key}
+                                                        value="yes"
+                                                        checked={parqAnswers[q.key] === true}
+                                                        onChange={() => handleParqChange(q.key, true)}
+                                                        className="accent-red-600 w-4 h-4"
+                                                    />
+                                                    <span className="text-sm font-medium text-charcoal-700">Yes</span>
+                                                </label>
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name={q.key}
+                                                        value="no"
+                                                        checked={parqAnswers[q.key] === false}
+                                                        onChange={() => handleParqChange(q.key, false)}
+                                                        className="accent-charcoal-900 w-4 h-4"
+                                                    />
+                                                    <span className="text-sm font-medium text-charcoal-700">No</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* PAR-Q completion status */}
+                                {!parqComplete && (
+                                    <p className="text-xs text-blue-600 font-medium">
+                                        Please answer all {PARQ_QUESTIONS.length} questions above to continue.
+                                    </p>
+                                )}
+                                {parqComplete && hasRiskFlags && medicalAcknowledged && (
+                                    <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                                        <HeartPulse className="w-3.5 h-3.5 shrink-0" />
+                                        Medical clearance notice acknowledged.
+                                    </div>
+                                )}
+                                {parqComplete && !hasRiskFlags && (
+                                    <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                                        <CheckCircle className="w-3.5 h-3.5 shrink-0" />
+                                        PAR-Q complete. No risk flags identified.
+                                    </div>
+                                )}
                             </div>
                         )}
-                        {parqComplete && !hasRiskFlags && (
-                            <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                                <CheckCircle className="w-3.5 h-3.5 shrink-0" />
-                                PAR-Q complete. No risk flags identified.
-                            </div>
-                        )}
-                    </div>
+                    </>
                 )}
 
                 {/* ── Agreements Section ── */}
@@ -533,10 +573,14 @@ export default function PaymentForm({ booking, existingParq }: { booking: any; e
                                         onClick={() => setShowTerms(true)}
                                         className="text-charcoal-900 underline underline-offset-2 font-medium hover:text-charcoal-600 transition-colors"
                                     >
-                                        Terms and Conditions & Cancellation Policy
+                                        {userRole === 'instructor' ? "Instructor Professional Terms" : "Terms and Conditions & Cancellation Policy"}
                                     </button>
                                     . I understand that{' '}
-                                    <span className="font-semibold text-red-700">cancellations require explicit instructor approval</span>
+                                    <span className="font-semibold text-red-700">
+                                        {userRole === 'instructor'
+                                            ? "studio cancellations require 24-hour notice"
+                                            : "cancellations require explicit instructor approval"}
+                                    </span>
                                     {' '}and that unapproved cancellations result in forfeiture of payment.
                                 </label>
                             </div>

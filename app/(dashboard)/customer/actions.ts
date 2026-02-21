@@ -606,6 +606,7 @@ export async function cancelBooking(bookingId: string) {
             status, 
             total_price, 
             client_id,
+            instructor_id,
             slot_id,
             price_breakdown,
             slots (start_time)
@@ -637,12 +638,20 @@ export async function cancelBooking(bookingId: string) {
     const now = new Date().getTime()
     const hoursUntilStart = (startTime - now) / (1000 * 60 * 60)
 
-    // 2. Refund logic (if > 24 hours away and not strictly 'rejected')
+    // Check user role for strict cancellation enforcement
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    const isInstructor = profile?.role === 'instructor'
+
+    // 2. Cancellation restriction and Refund logic
+    if (hoursUntilStart < 24) {
+        if (isInstructor) {
+            return { error: 'As an instructor, you cannot cancel a booking less than 24 hours in advance.' }
+        }
+    }
+
     let refundAmount = 0
     if (hoursUntilStart >= 24) {
         // Refund the exact total_price paid by the customer, plus any portion they paid via wallet
-        // Wait, total_price is the *remainder* paid.
-        // We should refund the original price (total_price + wallet_deduction)
         const breakdown = booking.price_breakdown as any;
         const walletDeduction = breakdown?.wallet_deduction || 0;
         refundAmount = Number(booking.total_price) + Number(walletDeduction);
@@ -659,6 +668,28 @@ export async function cancelBooking(bookingId: string) {
     // Mark as cancelled and release the slot
     await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId);
     await supabase.from('slots').update({ is_available: true }).eq('id', booking.slot_id);
+
+    // --- AUTO-REMOVAL OF AVAILABILITY START ---
+    // If an instructor is cancelling their own studio rental, remove the auto-created availability
+    if (booking.client_id === booking.instructor_id) {
+        try {
+            const startDateTime = new Date(slotData.start_time);
+            const dateStr = startDateTime.toISOString().split('T')[0];
+            const timeStr = startDateTime.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
+
+            await supabase
+                .from('instructor_availability')
+                .delete()
+                .eq('instructor_id', user.id)
+                .eq('date', dateStr)
+                .eq('start_time', timeStr);
+
+            revalidatePath('/instructor/schedule');
+        } catch (availError) {
+            console.error('Failed to remove auto-availability:', availError);
+        }
+    }
+    // --- AUTO-REMOVAL OF AVAILABILITY END ---
 
     revalidatePath('/customer')
     revalidatePath('/customer/bookings')
