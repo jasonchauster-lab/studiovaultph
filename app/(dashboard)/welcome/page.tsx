@@ -21,8 +21,8 @@ export default async function WelcomePage() {
         }
     }
     return (
-        <div className="min-h-screen bg-cream-50 flex flex-col items-center justify-center p-4 sm:p-8">
-            <div className="max-w-4xl w-full text-center">
+        <div className="min-h-screen bg-cream-50 flex flex-col items-center justify-center p-4 sm:p-8 py-12">
+            <div className="max-w-4xl w-full text-center mt-auto mb-auto">
                 <h1 className="text-4xl font-serif text-charcoal-900 mb-4">Welcome to StudioVaultPH</h1>
                 <p className="text-charcoal-600 mb-12 text-lg">How will you be using the platform?</p>
 

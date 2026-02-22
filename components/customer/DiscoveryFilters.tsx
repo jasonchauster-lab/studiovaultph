@@ -26,7 +26,7 @@ export default function DiscoveryFilters() {
     }
 
     return (
-        <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-xl border border-cream-200 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 bg-white p-4 rounded-xl border border-cream-200 shadow-sm">
             <div className="flex items-center gap-2 text-charcoal-500 mr-2">
                 <Filter className="w-4 h-4" />
                 <span className="text-sm font-medium">Filter by:</span>
@@ -36,7 +36,7 @@ export default function DiscoveryFilters() {
             <select
                 onChange={(e) => handleFilter('type', e.target.value)}
                 defaultValue={searchParams.get('type') || 'all'}
-                className="px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
+                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
             >
                 <option value="all">All Types</option>
                 <option value="instructor">Instructors</option>
@@ -48,22 +48,40 @@ export default function DiscoveryFilters() {
             <select
                 onChange={(e) => handleFilter('location', e.target.value)}
                 defaultValue={searchParams.get('location') || 'all'}
-                className="px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
+                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
             >
                 <option value="all">All Locations</option>
-                <option value="Makati">Makati</option>
-                <option value="BGC">BGC</option>
                 <option value="Alabang">Alabang</option>
+                <option value="BGC">BGC</option>
                 <option value="Ortigas">Ortigas</option>
-                <option value="Quezon City">Quezon City</option>
-                <option value="Mandaluyong">Mandaluyong</option>
+                <optgroup label="Makati">
+                    <option value="Makati - CBD/Ayala">CBD / Ayala</option>
+                    <option value="Makati - Poblacion/Rockwell">Poblacion / Rockwell</option>
+                    <option value="Makati - San Antonio/Gil Puyat">San Antonio / Gil Puyat</option>
+                    <option value="Makati - Others">Others</option>
+                </optgroup>
+                <optgroup label="Mandaluyong">
+                    <option value="Mandaluyong - Ortigas South">Ortigas South</option>
+                    <option value="Mandaluyong - Greenfield/Shaw">Greenfield / Shaw</option>
+                    <option value="Mandaluyong - Boni/Pioneer">Boni / Pioneer</option>
+                </optgroup>
+                <optgroup label="Quezon City">
+                    <option value="QC - Tomas Morato">Tomas Morato</option>
+                    <option value="QC - Katipunan">Katipunan</option>
+                    <option value="QC - Eastwood">Eastwood</option>
+                    <option value="QC - Cubao">Cubao</option>
+                    <option value="QC - Fairview/Commonwealth">Fairview / Commonwealth</option>
+                    <option value="QC - Novaliches">Novaliches</option>
+                    <option value="QC - Diliman">Diliman</option>
+                    <option value="QC - Maginhawa/UP Village">Maginhawa / UP Village</option>
+                </optgroup>
             </select>
 
             {/* Equipment Filter */}
             <select
                 onChange={(e) => handleFilter('equipment', e.target.value)}
                 defaultValue={searchParams.get('equipment') || 'all'}
-                className="px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
+                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
             >
                 <option value="all">All Equipment</option>
                 <option value="Reformer">Reformer</option>
@@ -77,7 +95,7 @@ export default function DiscoveryFilters() {
             <select
                 onChange={(e) => handleFilter('certification', e.target.value)}
                 defaultValue={searchParams.get('certification') || 'all'}
-                className="px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
+                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
             >
                 <option value="all">All Certifications</option>
                 <option value="STOTT">STOTT Pilates</option>
@@ -94,7 +112,7 @@ export default function DiscoveryFilters() {
                 min={new Date().toISOString().split('T')[0]}
                 onChange={(e) => handleFilter('date', e.target.value)}
                 defaultValue={searchParams.get('date') || ''}
-                className="px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
+                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
             />
 
             {/* Time Filter */}
@@ -107,7 +125,7 @@ export default function DiscoveryFilters() {
                 }
                 onChange={(e) => handleFilter('time', e.target.value)}
                 defaultValue={searchParams.get('time') || ''}
-                className="px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
+                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
             />
         </div>
     )

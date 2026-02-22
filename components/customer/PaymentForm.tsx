@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Upload, CheckCircle, Loader2, AlertCircle, X, FileText, ShieldAlert, HeartPulse, RefreshCw } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Upload, CheckCircle, Loader2, AlertCircle, X, FileText, ShieldAlert, HeartPulse, RefreshCw, Eye } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { submitPaymentProof } from '@/app/(dashboard)/customer/actions'
@@ -248,6 +248,7 @@ export default function PaymentForm({
     userRole?: string
 }) {
     const [file, setFile] = useState<File | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [isUploading, setIsUploading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
@@ -271,6 +272,15 @@ export default function PaymentForm({
 
     const router = useRouter()
     const supabase = createClient()
+
+    // Cleanup preview URL on unmount or file change
+    useEffect(() => {
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl)
+            }
+        }
+    }, [previewUrl])
 
     const parqComplete = (userRole === 'instructor') || (parqOnFile && !showParqForm)
         ? true
@@ -306,8 +316,17 @@ export default function PaymentForm({
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setFile(e.target.files[0])
+            const selectedFile = e.target.files[0]
+            setFile(selectedFile)
             setError(null)
+
+            // Create preview URL for images
+            if (selectedFile.type.startsWith('image/')) {
+                const url = URL.createObjectURL(selectedFile)
+                setPreviewUrl(url)
+            } else {
+                setPreviewUrl(null)
+            }
         }
     }
 
@@ -620,10 +639,25 @@ export default function PaymentForm({
                             disabled={!waiverAgreed || !termsAgreed}
                         />
                         {file ? (
-                            <div className="text-charcoal-900 font-medium flex flex-col items-center">
-                                <CheckCircle className="w-8 h-8 text-green-500 mb-2" />
-                                {file.name}
-                                <span className="text-xs text-charcoal-500 mt-1">Click to change</span>
+                            <div className="space-y-4">
+                                <div className="text-charcoal-900 font-medium flex flex-col items-center">
+                                    <CheckCircle className="w-8 h-8 text-green-500 mb-2" />
+                                    <span className="text-sm truncate max-w-[200px]">{file.name}</span>
+                                    <span className="text-xs text-charcoal-500 mt-1">Click to change</span>
+                                </div>
+
+                                {previewUrl && (
+                                    <div className="relative mx-auto w-48 h-48 rounded-xl overflow-hidden border border-cream-200 bg-white group shadow-sm">
+                                        <img
+                                            src={previewUrl}
+                                            alt="Payment proof preview"
+                                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                        />
+                                        <div className="absolute inset-0 bg-charcoal-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <Eye className="w-6 h-6 text-white" />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <div className="text-charcoal-500 flex flex-col items-center">

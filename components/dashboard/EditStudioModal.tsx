@@ -66,12 +66,30 @@ export default function EditStudioModal({ studio }: { studio: Studio }) {
                             <div>
                                 <label className="block text-sm font-medium text-charcoal-700 mb-1">Location</label>
                                 <select name="location" required defaultValue={studio.location} className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white">
-                                    <option value="Makati">Makati</option>
-                                    <option value="BGC">BGC</option>
                                     <option value="Alabang">Alabang</option>
+                                    <option value="BGC">BGC</option>
                                     <option value="Ortigas">Ortigas</option>
-                                    <option value="Quezon City">Quezon City</option>
-                                    <option value="Mandaluyong">Mandaluyong</option>
+                                    <optgroup label="Makati">
+                                        <option value="Makati - CBD/Ayala">Makati - CBD / Ayala</option>
+                                        <option value="Makati - Poblacion/Rockwell">Makati - Poblacion / Rockwell</option>
+                                        <option value="Makati - San Antonio/Gil Puyat">Makati - San Antonio / Gil Puyat</option>
+                                        <option value="Makati - Others">Makati - Others</option>
+                                    </optgroup>
+                                    <optgroup label="Mandaluyong">
+                                        <option value="Mandaluyong - Ortigas South">Mandaluyong - Ortigas South</option>
+                                        <option value="Mandaluyong - Greenfield/Shaw">Mandaluyong - Greenfield / Shaw</option>
+                                        <option value="Mandaluyong - Boni/Pioneer">Mandaluyong - Boni / Pioneer</option>
+                                    </optgroup>
+                                    <optgroup label="Quezon City">
+                                        <option value="QC - Tomas Morato">QC - Tomas Morato</option>
+                                        <option value="QC - Katipunan">QC - Katipunan</option>
+                                        <option value="QC - Eastwood">QC - Eastwood</option>
+                                        <option value="QC - Cubao">QC - Cubao</option>
+                                        <option value="QC - Fairview/Commonwealth">QC - Fairview / Commonwealth</option>
+                                        <option value="QC - Novaliches">QC - Novaliches</option>
+                                        <option value="QC - Diliman">QC - Diliman</option>
+                                        <option value="QC - Maginhawa/UP Village">QC - Maginhawa / UP Village</option>
+                                    </optgroup>
                                 </select>
                             </div>
 

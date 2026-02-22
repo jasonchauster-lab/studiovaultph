@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { addCertification, deleteCertification } from '@/app/(dashboard)/instructor/profile/actions'
 import { Award, Plus, Trash2, Loader2, FileText, CheckCircle, Clock } from 'lucide-react'
 
@@ -20,7 +20,15 @@ export default function InstructorCertificationsSection({ certifications }: Inst
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [showForm, setShowForm] = useState(false)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    // Cleanup preview URL
+    useEffect(() => {
+        return () => {
+            if (previewUrl) URL.revokeObjectURL(previewUrl)
+        }
+    }, [previewUrl])
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -34,6 +42,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
 
             if (result.success) {
                 setShowForm(false)
+                setPreviewUrl(null)
                 if (fileInputRef.current) fileInputRef.current.value = ''
             } else {
                 setError(result.error || 'Failed to add certification')
@@ -93,17 +102,38 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                 ref={fileInputRef}
                                 required
                                 accept=".pdf,image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file && file.type.startsWith('image/')) {
+                                        const url = URL.createObjectURL(file)
+                                        setPreviewUrl(url)
+                                    } else {
+                                        setPreviewUrl(null)
+                                    }
+                                }}
                                 className="w-full px-4 py-1.5 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm file:mr-4 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-charcoal-100 file:text-charcoal-700 hover:file:bg-charcoal-200 cursor-pointer"
                             />
                         </div>
                     </div>
+
+                    {previewUrl && (
+                        <div className="mt-2">
+                            <p className="text-xs text-charcoal-500 mb-2">Preview:</p>
+                            <div className="w-32 h-32 rounded-lg border border-cream-200 overflow-hidden bg-white">
+                                <img src={previewUrl} alt="Certificate preview" className="w-full h-full object-cover" />
+                            </div>
+                        </div>
+                    )}
 
                     {error && <p className="text-xs text-red-600">{error}</p>}
 
                     <div className="flex justify-end gap-3">
                         <button
                             type="button"
-                            onClick={() => setShowForm(false)}
+                            onClick={() => {
+                                setShowForm(false)
+                                setPreviewUrl(null)
+                            }}
                             className="px-4 py-2 text-sm font-medium text-charcoal-600 hover:text-charcoal-900"
                         >
                             Cancel

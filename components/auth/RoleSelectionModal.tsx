@@ -66,7 +66,7 @@ export default function RoleSelectionModal({ isOpen, onClose }: RoleSelectionMod
             />
 
             {/* Modal Content */}
-            <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+            <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
                 <div className="p-6 sm:p-10">
                     <div className="flex justify-between items-start mb-8">
                         <div>

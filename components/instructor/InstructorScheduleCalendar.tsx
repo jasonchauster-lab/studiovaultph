@@ -300,7 +300,7 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                                         className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none bg-white focus:ring-2 focus:ring-charcoal-500"
                                         name="location"
                                     >
-                                        {['BGC', 'Makati', 'Alabang', 'Quezon City', 'Ortigas', 'Mandaluyong'].map(l => <option key={l} value={l}>{l}</option>)}
+                                        {['Alabang', 'BGC', 'Ortigas', 'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others', 'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer', 'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village'].map(l => <option key={l} value={l}>{l}</option>)}
                                     </select>
                                 </div>
 
@@ -361,7 +361,7 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                                     className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none bg-white"
                                     name="location"
                                 >
-                                    {['BGC', 'Makati', 'Alabang', 'Quezon City', 'Ortigas', 'Mandaluyong'].map(l => <option key={l} value={l}>{l}</option>)}
+                                    {['Alabang', 'BGC', 'Ortigas', 'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others', 'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer', 'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village'].map(l => <option key={l} value={l}>{l}</option>)}
                                 </select>
                             </div>
 
