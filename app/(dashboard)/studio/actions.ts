@@ -149,151 +149,156 @@ export async function updateSlot(slotId: string, formData: FormData) {
 }
 
 export async function createStudio(formData: FormData) {
-    const supabase = await createClient()
+    try {
+        const supabase = await createClient()
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: 'Not authenticated' }
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return { error: 'Not authenticated' }
 
-    // Check for existing studio to prevent duplicates
-    const { data: existingStudio } = await supabase
-        .from('studios')
-        .select('id')
-        .eq('owner_id', user.id)
-        .limit(1)
+        // Check for existing studio to prevent duplicates
+        const { data: existingStudio } = await supabase
+            .from('studios')
+            .select('id')
+            .eq('owner_id', user.id)
+            .limit(1)
 
-    if (existingStudio && existingStudio.length > 0) {
-        return { error: 'You have already registered a studio.' }
-    }
+        if (existingStudio && existingStudio.length > 0) {
+            return { error: 'You have already registered a studio.' }
+        }
 
-    const name = formData.get('name') as string
-    const location = formData.get('location') as string
-    const hourlyRate = formData.get('hourlyRate') as string
-    const contactNumber = formData.get('contactNumber') as string
-    const address = formData.get('address') as string
+        const name = formData.get('name') as string
+        const location = formData.get('location') as string
+        const hourlyRate = formData.get('hourlyRate') as string
+        const contactNumber = formData.get('contactNumber') as string
+        const address = formData.get('address') as string
 
-    const birCertificate = formData.get('birCertificate') as File
-    const govId = formData.get('govId') as File
-    const insurance = formData.get('insurance') as File
-    const spacePhotos = formData.getAll('spacePhotos') as File[]
+        const birCertificate = formData.get('birCertificate') as File
+        const govId = formData.get('govId') as File
+        const insurance = formData.get('insurance') as File
+        const spacePhotos = formData.getAll('spacePhotos') as File[]
 
-    const birExpiry = formData.get('birExpiry') as string
-    const govIdExpiry = formData.get('govIdExpiry') as string
-    const insuranceExpiry = formData.get('insuranceExpiry') as string
-
-
-    if (!name || !location || !contactNumber || !address || !birCertificate || !govId || spacePhotos.length === 0) {
-        return { error: 'All fields and documents are required' }
-    }
+        const birExpiry = formData.get('birExpiry') as string
+        const govIdExpiry = formData.get('govIdExpiry') as string
+        const insuranceExpiry = formData.get('insuranceExpiry') as string
 
 
-    // Parse equipment
-    const equipment: string[] = []
-    if (formData.get('reformer') === 'on') equipment.push('Reformer')
-    if (formData.get('cadillac') === 'on') equipment.push('Cadillac')
-    if (formData.get('tower') === 'on') equipment.push('Tower')
-    if (formData.get('chair') === 'on') equipment.push('Chair')
-    if (formData.get('ladderBarrel') === 'on') equipment.push('Ladder Barrel')
-    if (formData.get('mat') === 'on') equipment.push('Mat')
-
-    const otherEquipment = formData.get('otherEquipment') as string
-    if (otherEquipment) {
-        otherEquipment.split(',').forEach(item => {
-            if (item.trim()) equipment.push(item.trim())
-        })
-    }
-
-    // Upload Documents
-    const timestamp = Date.now()
-    let birPath = null
-    let govIdPath = null
-
-    if (birCertificate && birCertificate.size > 0) {
-        const birExt = birCertificate.name.split('.').pop()
-        birPath = `studios/${user.id}/bir_${timestamp}.${birExt}`
-        const { error: birError } = await supabase.storage.from('certifications').upload(birPath, birCertificate)
-        if (birError) console.error('BIR upload error:', birError)
-    }
-
-    if (govId && govId.size > 0) {
-        const govIdExt = govId.name.split('.').pop()
-        govIdPath = `studios/${user.id}/govid_${timestamp}.${govIdExt}`
-        const { error: govIdError } = await supabase.storage.from('certifications').upload(govIdPath, govId)
-        if (govIdError) console.error('Gov ID upload error:', govIdError)
-    }
-
-    let insurancePath = null
-    if (insurance && insurance.size > 0) {
-        const insExt = insurance.name.split('.').pop()
-        insurancePath = `studios/${user.id}/insurance_${timestamp}.${insExt}`
-        const { error: insError } = await supabase.storage.from('certifications').upload(insurancePath, insurance)
-        if (insError) console.error('Insurance upload error:', insError)
-    }
+        if (!name || !location || !contactNumber || !address || !birCertificate || !govId || spacePhotos.length === 0) {
+            return { error: 'All fields and documents are required' }
+        }
 
 
-    const spacePhotosUrls: string[] = []
-    if (spacePhotos && spacePhotos.length > 0) {
-        for (const [index, photo] of spacePhotos.entries()) {
-            if (photo.size > 0) {
-                const photoExt = photo.name.split('.').pop()
-                const photoPath = `studios/${user.id}/space_${timestamp}_${index}.${photoExt}`
-                const { error: photoError } = await supabase.storage.from('avatars').upload(photoPath, photo)
-                if (photoError) {
-                    console.error('Space photo upload error:', photoError)
-                } else {
-                    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(photoPath)
-                    spacePhotosUrls.push(publicUrl)
+        // Parse equipment
+        const equipment: string[] = []
+        if (formData.get('reformer') === 'on') equipment.push('Reformer')
+        if (formData.get('cadillac') === 'on') equipment.push('Cadillac')
+        if (formData.get('tower') === 'on') equipment.push('Tower')
+        if (formData.get('chair') === 'on') equipment.push('Chair')
+        if (formData.get('ladderBarrel') === 'on') equipment.push('Ladder Barrel')
+        if (formData.get('mat') === 'on') equipment.push('Mat')
+
+        const otherEquipment = formData.get('otherEquipment') as string
+        if (otherEquipment) {
+            otherEquipment.split(',').forEach(item => {
+                if (item.trim()) equipment.push(item.trim())
+            })
+        }
+
+        // Upload Documents
+        const timestamp = Date.now()
+        let birPath = null
+        let govIdPath = null
+
+        if (birCertificate && birCertificate.size > 0) {
+            const birExt = birCertificate.name.split('.').pop()
+            birPath = `studios/${user.id}/bir_${timestamp}.${birExt}`
+            const { error: birError } = await supabase.storage.from('certifications').upload(birPath, birCertificate)
+            if (birError) console.error('BIR upload error:', birError)
+        }
+
+        if (govId && govId.size > 0) {
+            const govIdExt = govId.name.split('.').pop()
+            govIdPath = `studios/${user.id}/govid_${timestamp}.${govIdExt}`
+            const { error: govIdError } = await supabase.storage.from('certifications').upload(govIdPath, govId)
+            if (govIdError) console.error('Gov ID upload error:', govIdError)
+        }
+
+        let insurancePath = null
+        if (insurance && insurance.size > 0) {
+            const insExt = insurance.name.split('.').pop()
+            insurancePath = `studios/${user.id}/insurance_${timestamp}.${insExt}`
+            const { error: insError } = await supabase.storage.from('certifications').upload(insurancePath, insurance)
+            if (insError) console.error('Insurance upload error:', insError)
+        }
+
+
+        const spacePhotosUrls: string[] = []
+        if (spacePhotos && spacePhotos.length > 0) {
+            for (const [index, photo] of spacePhotos.entries()) {
+                if (photo.size > 0) {
+                    const photoExt = photo.name.split('.').pop()
+                    const photoPath = `studios/${user.id}/space_${timestamp}_${index}.${photoExt}`
+                    const { error: photoError } = await supabase.storage.from('avatars').upload(photoPath, photo)
+                    if (photoError) {
+                        console.error('Space photo upload error:', photoError)
+                    } else {
+                        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(photoPath)
+                        spacePhotosUrls.push(publicUrl)
+                    }
                 }
             }
         }
+
+
+        // Ensure profile exists (to satisfy FK constraint)
+        // NOTE: Profiles table requires email and full_name by default.
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+                id: user.id, // Ensure id is set for upsert
+                full_name: user.user_metadata?.full_name || 'Studio Owner',
+                email: user.email, // Required by profiles schema
+                role: 'studio', // Ensure they have the studio role
+                updated_at: new Date().toISOString()
+            })
+            .select()
+
+        if (profileError) {
+            console.error('Error ensuring profile exists:', profileError)
+            return { error: 'Failed to initialize studio profile: ' + profileError.message }
+        }
+
+        const { error } = await supabase
+            .from('studios')
+            .insert({
+                owner_id: user.id,
+                name,
+                location,
+                address,
+                hourly_rate: 0,
+                reformers_count: 5, // Default
+                equipment: equipment,
+                contact_number: contactNumber,
+                bir_certificate_url: birPath,
+                gov_id_url: govIdPath,
+                insurance_url: insurancePath,
+                bir_certificate_expiry: birExpiry || null,
+                gov_id_expiry: govIdExpiry || null,
+                insurance_expiry: insuranceExpiry || null,
+                space_photos_urls: spacePhotosUrls
+            })
+
+
+        if (error) {
+            console.error('Error creating studio:', error)
+            return { error: `Failed to create studio: ${error.message} (Code: ${error.code})` }
+        }
+
+        revalidatePath('/studio')
+        return { success: true }
+    } catch (err: any) {
+        console.error('CRITICAL ERROR inside createStudio:', err)
+        return { error: `Server exception: ${err.message || 'Unknown processing error'}` }
     }
-
-
-    // Ensure profile exists (to satisfy FK constraint)
-    // NOTE: Profiles table requires email and full_name by default.
-    const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-            id: user.id, // Ensure id is set for upsert
-            full_name: user.user_metadata?.full_name || 'Studio Owner',
-            email: user.email, // Required by profiles schema
-            role: 'studio', // Ensure they have the studio role
-            updated_at: new Date().toISOString()
-        })
-        .select()
-
-    if (profileError) {
-        console.error('Error ensuring profile exists:', profileError)
-        return { error: 'Failed to initialize studio profile: ' + profileError.message }
-    }
-
-    const { error } = await supabase
-        .from('studios')
-        .insert({
-            owner_id: user.id,
-            name,
-            location,
-            address,
-            hourly_rate: 0,
-            reformers_count: 5, // Default
-            equipment: equipment,
-            contact_number: contactNumber,
-            bir_certificate_url: birPath,
-            gov_id_url: govIdPath,
-            insurance_url: insurancePath,
-            bir_certificate_expiry: birExpiry || null,
-            gov_id_expiry: govIdExpiry || null,
-            insurance_expiry: insuranceExpiry || null,
-            space_photos_urls: spacePhotosUrls
-        })
-
-
-    if (error) {
-        console.error('Error creating studio:', error)
-        return { error: `Failed to create studio: ${error.message} (Code: ${error.code})` }
-    }
-
-    revalidatePath('/studio')
-    return { success: true }
 }
 
 interface GenerateSlotsParams {

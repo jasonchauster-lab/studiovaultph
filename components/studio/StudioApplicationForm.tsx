@@ -33,6 +33,7 @@ export default function StudioApplicationForm() {
                 setError(result.error)
             }
         } catch (err: any) {
+            console.error('Studio Form Submit Error:', err)
             setError(err.message || 'An unexpected error occurred.')
         } finally {
             setIsLoading(false)
