@@ -138,7 +138,14 @@ export default async function AdminDashboard({
                 .createSignedUrl(studio.gov_id_url, 3600)
             govIdSignedUrl = data?.signedUrl
         }
-        return { ...studio, birSignedUrl, govIdSignedUrl }
+        let insuranceSignedUrl = null
+        if (studio.insurance_url) {
+            const { data } = await supabase.storage
+                .from('certifications')
+                .createSignedUrl(studio.insurance_url, 3600)
+            insuranceSignedUrl = data?.signedUrl
+        }
+        return { ...studio, birSignedUrl, govIdSignedUrl, insuranceSignedUrl }
     }) || [])
 
     // 2.5 Fetch Pending Studio Payout Approvals
@@ -519,46 +526,87 @@ export default async function AdminDashboard({
                                             </div>
                                         </div>
 
-                                        {/* Document Links */}
-                                        <div className="mt-4 pt-3 border-t border-cream-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div>
-                                                <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Legal Documents</p>
-                                                <div className="space-y-1.5 flex flex-col items-start text-xs">
-                                                    {studio.birSignedUrl ? (
+                                        {/* Document Links Always Visible */}
+                                        <div className="mt-4 pt-3 border-t border-cream-100">
+                                            <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Legal Documents</p>
+                                            <div className="space-y-1.5 flex flex-col items-start text-xs max-w-sm">
+                                                {studio.birSignedUrl ? (
+                                                    <div className="flex justify-between w-full border border-cream-100 rounded p-1.5 bg-white">
                                                         <a href={studio.birSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
                                                             BIR Form 2303
                                                         </a>
-                                                    ) : (
-                                                        <p className="text-red-500">Missing BIR Form 2303</p>
-                                                    )}
-
-                                                    {studio.govIdSignedUrl ? (
-                                                        <a href={studio.govIdSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                                                            Gov ID
-                                                        </a>
-                                                    ) : (
-                                                        <p className="text-red-500">Missing Gov ID</p>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Space Photos</p>
-                                                {studio.space_photos_urls && studio.space_photos_urls.length > 0 ? (
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {studio.space_photos_urls.map((photoUrl: string, idx: number) => (
-                                                            <a key={idx} href={photoUrl} target="_blank" rel="noopener noreferrer" className="block relative hover:opacity-90 transition-opacity">
-                                                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                                <img src={photoUrl} alt={`Space Photo ${idx + 1}`} className="h-12 w-12 object-cover rounded border border-cream-200" />
-                                                            </a>
-                                                        ))}
+                                                        <span className="text-charcoal-500 font-medium">Exp: {studio.bir_certificate_expiry ? new Date(studio.bir_certificate_expiry).toLocaleDateString() : 'N/A'}</span>
                                                     </div>
                                                 ) : (
-                                                    <p className="text-xs text-charcoal-400">No photos uploaded</p>
+                                                    <p className="text-red-500">Missing BIR Form 2303</p>
+                                                )}
+
+                                                {studio.govIdSignedUrl ? (
+                                                    <div className="flex justify-between w-full border border-cream-100 rounded p-1.5 bg-white">
+                                                        <a href={studio.govIdSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                            Valid Gov ID
+                                                        </a>
+                                                        <span className="text-charcoal-500 font-medium">Exp: {studio.gov_id_expiry ? new Date(studio.gov_id_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-red-500">Missing Gov ID</p>
+                                                )}
+
+                                                {studio.insuranceSignedUrl && (
+                                                    <div className="flex justify-between w-full border border-cream-100 rounded p-1.5 bg-white">
+                                                        <a href={studio.insuranceSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                            Insurance Policy
+                                                        </a>
+                                                        <span className="text-charcoal-500 font-medium">Exp: {studio.insurance_expiry ? new Date(studio.insurance_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
+
+                                        {/* Expanding section for other app details */}
+                                        <details className="mt-3 group">
+                                            <summary className="text-xs font-medium text-blue-600 cursor-pointer hover:text-blue-800 outline-none list-none flex items-center gap-1">
+                                                <span className="group-open:hidden">▼ Show Full Application</span>
+                                                <span className="hidden group-open:inline">▲ Hide Full Application</span>
+                                            </summary>
+                                            <div className="mt-3 text-sm text-charcoal-700 space-y-3 bg-white border border-cream-100 rounded-lg p-4">
+                                                <div>
+                                                    <span className="font-medium text-charcoal-900 block mb-0.5">Detailed Address</span>
+                                                    <p className="whitespace-pre-wrap">{studio.address}</p>
+                                                </div>
+
+                                                {studio.equipment && studio.equipment.length > 0 && (
+                                                    <div>
+                                                        <span className="font-medium text-charcoal-900 block mb-0.5">Equipment Provided</span>
+                                                        <div className="flex flex-wrap gap-1 mt-1">
+                                                            {studio.equipment.map((eq: string, i: number) => (
+                                                                <span key={i} className="px-2 py-0.5 bg-cream-100 text-charcoal-700 text-xs rounded-full">
+                                                                    {eq}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                <div>
+                                                    <span className="font-medium text-charcoal-900 block mb-2">Space Photos</span>
+                                                    {studio.space_photos_urls && studio.space_photos_urls.length > 0 ? (
+                                                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                                                            {studio.space_photos_urls.map((photoUrl: string, idx: number) => (
+                                                                <a key={idx} href={photoUrl} target="_blank" rel="noopener noreferrer" className="block relative aspect-square hover:opacity-90 transition-opacity">
+                                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                    <img src={photoUrl} alt={`Space Photo ${idx + 1}`} className="w-full h-full object-cover rounded shadow-sm border border-cream-200" />
+                                                                </a>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-xs text-charcoal-400 italic">No photos uploaded</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </details>
                                     </div>
+
                                 ))}
                             </div>
                         )}
