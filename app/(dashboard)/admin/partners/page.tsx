@@ -40,7 +40,7 @@ export default async function AdminPartnersPage() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-cream-200 shadow-sm p-6 overflow-x-auto">
+                <div className="bg-white text-charcoal-900 rounded-2xl border border-cream-200 shadow-sm p-6 overflow-x-auto">
                     <PartnerFeeClient
                         instructors={instructors || []}
                         studios={studios || []}

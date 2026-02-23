@@ -191,11 +191,13 @@ export async function createStudio(formData: FormData) {
 
 
     // Ensure profile exists (to satisfy FK constraint)
+    // NOTE: Profiles table requires email and full_name by default.
     const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
             id: user.id, // Ensure id is set for upsert
-            full_name: 'Studio Owner', // Default name or fetch from metadata if available
+            full_name: user.user_metadata?.full_name || 'Studio Owner',
+            email: user.email, // Required by profiles schema
             role: 'studio', // Ensure they have the studio role
             updated_at: new Date().toISOString()
         })
@@ -203,7 +205,7 @@ export async function createStudio(formData: FormData) {
 
     if (profileError) {
         console.error('Error ensuring profile exists:', profileError)
-        // We'll try to proceed, but it might fail at the next step
+        return { error: 'Failed to initialize studio profile: ' + profileError.message }
     }
 
     const { error } = await supabase

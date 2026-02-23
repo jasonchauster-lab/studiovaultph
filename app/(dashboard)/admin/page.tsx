@@ -261,7 +261,7 @@ export default async function AdminDashboard({
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
                     {/* Instructor Payout Requests */}
-                    <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
                         <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
                             <Clock className="w-5 h-5 text-charcoal-500" />
                             Instructor Payout Requests
@@ -318,7 +318,7 @@ export default async function AdminDashboard({
 
 
                     {/* Verification Queue (Instructors) */}
-                    <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
+                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm">
                         <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
                             <CheckCircle className="w-5 h-5 text-charcoal-500" />
                             Instructor Verification
@@ -372,7 +372,7 @@ export default async function AdminDashboard({
                     </div>
 
                     {/* Studio Verification Queue */}
-                    <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
+                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm">
                         <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
                             <Building2 className="w-5 h-5 text-charcoal-500" />
                             Studio Verification
@@ -415,7 +415,7 @@ export default async function AdminDashboard({
                     </div>
 
                     {/* Booking Requests */}
-                    <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
                         <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
                             <Clock className="w-5 h-5 text-charcoal-500" />
                             Booking Requests
@@ -494,7 +494,7 @@ export default async function AdminDashboard({
                     </div>
 
                     {/* Studio Payout Requests */}
-                    <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
                         <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
                             <Building2 className="w-5 h-5 text-charcoal-500" />
                             Studio Payout Requests
@@ -552,7 +552,7 @@ export default async function AdminDashboard({
                         )}
                     </div>
                     {/* Customer Payout Requests */}
-                    <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
                         <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
                             <CheckCircle className="w-5 h-5 text-charcoal-500" />
                             Customer Payout Requests

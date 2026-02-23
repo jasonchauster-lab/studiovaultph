@@ -122,7 +122,7 @@ export default function GlobalSearch() {
             </div>
 
             {isOpen && query.length >= 2 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-cream-200 rounded-xl shadow-lg max-h-[500px] overflow-y-auto z-50">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white text-charcoal-900 border border-cream-200 rounded-xl shadow-lg max-h-[500px] overflow-y-auto z-50">
                     {results.length === 0 && !isSearching ? (
                         <div className="p-4 text-center text-sm text-charcoal-500">
                             No results found for "{query}"
