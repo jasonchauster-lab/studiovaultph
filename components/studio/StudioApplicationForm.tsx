@@ -104,8 +104,30 @@ export default function StudioApplicationForm() {
                     <input type="file" name="birCertificate" accept="image/*,.pdf" required className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
                 </div>
                 <div>
+                    <label className="block text-sm font-medium text-charcoal-700 mb-1">BIR Expiration Date <span className="text-red-500">*</span></label>
+                    <input type="date" required name="birExpiry" className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
                     <label className="block text-sm font-medium text-charcoal-700 mb-1">Valid Government ID <span className="text-red-500">*</span></label>
                     <input type="file" name="govId" accept="image/*,.pdf" required className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-charcoal-700 mb-1">ID Expiration Date <span className="text-red-500">*</span></label>
+                    <input type="date" required name="govIdExpiry" className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-charcoal-700 mb-1">Insurance Policy</label>
+                    <input type="file" name="insurance" accept="image/*,.pdf" className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-charcoal-700 mb-1">Insurance Expiration Date</label>
+                    <input type="date" name="insuranceExpiry" className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
                 </div>
             </div>
 

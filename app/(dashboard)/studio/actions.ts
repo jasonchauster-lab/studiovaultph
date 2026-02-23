@@ -173,7 +173,12 @@ export async function createStudio(formData: FormData) {
 
     const birCertificate = formData.get('birCertificate') as File
     const govId = formData.get('govId') as File
+    const insurance = formData.get('insurance') as File
     const spacePhotos = formData.getAll('spacePhotos') as File[]
+
+    const birExpiry = formData.get('birExpiry') as string
+    const govIdExpiry = formData.get('govIdExpiry') as string
+    const insuranceExpiry = formData.get('insuranceExpiry') as string
 
 
     if (!name || !location || !contactNumber || !address || !birCertificate || !govId || spacePhotos.length === 0) {
@@ -214,6 +219,14 @@ export async function createStudio(formData: FormData) {
         govIdPath = `studios/${user.id}/govid_${timestamp}.${govIdExt}`
         const { error: govIdError } = await supabase.storage.from('certifications').upload(govIdPath, govId)
         if (govIdError) console.error('Gov ID upload error:', govIdError)
+    }
+
+    let insurancePath = null
+    if (insurance && insurance.size > 0) {
+        const insExt = insurance.name.split('.').pop()
+        insurancePath = `studios/${user.id}/insurance_${timestamp}.${insExt}`
+        const { error: insError } = await supabase.storage.from('certifications').upload(insurancePath, insurance)
+        if (insError) console.error('Insurance upload error:', insError)
     }
 
 
@@ -266,6 +279,10 @@ export async function createStudio(formData: FormData) {
             contact_number: contactNumber,
             bir_certificate_url: birPath,
             gov_id_url: govIdPath,
+            insurance_url: insurancePath,
+            bir_certificate_expiry: birExpiry || null,
+            gov_id_expiry: govIdExpiry || null,
+            insurance_expiry: insuranceExpiry || null,
             space_photos_urls: spacePhotosUrls
         })
 

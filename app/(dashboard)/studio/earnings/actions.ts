@@ -152,13 +152,24 @@ export async function requestPayout(prevState: any, formData: FormData) {
         return { error: 'Invalid amount' }
     }
 
-    // Check approval status
+    // Check approval status and document expiry
     const { data: studio } = await supabase
         .from('studios')
-        .select('payout_approval_status')
+        .select('payout_approval_status, bir_certificate_expiry, mayors_permit_expiry, payout_lock')
         .eq('id', studioId).single()
+
     if (studio?.payout_approval_status !== 'approved') {
         return { error: 'Your payout application is pending or has not been approved yet. Please submit the required documents first.' }
+    }
+
+    if (studio?.payout_lock) {
+        return { error: 'Withdrawals are currently locked for your studio. Please contact support.' }
+    }
+
+    const today = new Date().toISOString().split('T')[0]
+    if ((studio?.bir_certificate_expiry && studio.bir_certificate_expiry < today)
+        || (studio?.mayors_permit_expiry && studio.mayors_permit_expiry < today)) {
+        return { error: 'One or more of your mandatory documents (BIR 2303 or Mayor\'s Permit) have expired. Please update them before requesting a payout.' }
     }
 
 
@@ -215,6 +226,8 @@ export async function submitPayoutApplication(prevState: any, formData: FormData
     const studioId = formData.get('studioId') as string
     const mayorsPermit = formData.get('mayorsPermit') as File
     const secretaryCertificate = formData.get('secretaryCertificate') as File
+    const mayorsPermitExpiry = formData.get('mayorsPermitExpiry') as string
+    const secretaryCertificateExpiry = formData.get('secretaryCertificateExpiry') as string
 
     if (!studioId || !mayorsPermit || !secretaryCertificate) {
         return { error: 'All documents are required.' }
@@ -251,7 +264,9 @@ export async function submitPayoutApplication(prevState: any, formData: FormData
         .update({
             payout_approval_status: 'pending',
             mayors_permit_url: permitPath,
-            secretary_certificate_url: certPath
+            secretary_certificate_url: certPath,
+            mayors_permit_expiry: mayorsPermitExpiry,
+            secretary_certificate_expiry: secretaryCertificateExpiry
         })
         .eq('id', studioId)
 

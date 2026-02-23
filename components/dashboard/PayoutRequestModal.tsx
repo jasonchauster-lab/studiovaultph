@@ -106,7 +106,7 @@ export default function PayoutRequestModal({ studioId, availableBalance, payoutA
                                     <div className="bg-amber-50 text-amber-800 p-3 rounded-lg text-sm border border-amber-200">
                                         Before your first withdrawal, you must submit the following documents for verification. This is a one-time process.
                                     </div>
-                                    <div className="grid grid-cols-1 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Mayor's Permit <span className="text-red-500">*</span></label>
                                             <input
@@ -117,14 +117,32 @@ export default function PayoutRequestModal({ studioId, availableBalance, payoutA
                                                 className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900 text-sm bg-white"
                                             />
                                         </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Permit Expiry Date <span className="text-red-500">*</span></label>
+                                            <input
+                                                name="mayorsPermitExpiry"
+                                                type="date"
+                                                required
+                                                className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900 text-sm bg-white"
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-1 gap-4 mt-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                         <div>
                                             <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Secretary's Certificate <span className="text-red-500">*</span></label>
                                             <input
                                                 name="secretaryCertificate"
                                                 type="file"
                                                 accept="image/*,.pdf"
+                                                required
+                                                className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900 text-sm bg-white"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Certificate Expiry Date <span className="text-red-500">*</span></label>
+                                            <input
+                                                name="secretaryCertificateExpiry"
+                                                type="date"
                                                 required
                                                 className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900 text-sm bg-white"
                                             />

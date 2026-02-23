@@ -145,8 +145,9 @@ export default async function AdminDashboard({
     const { data: pendingStudioPayouts } = await supabase
         .from('studios')
         .select(`
-            id, name, mayors_permit_url, secretary_certificate_url,
-            bir_certificate_url,
+            id, name, mayors_permit_url, secretary_certificate_url, mayors_permit_expiry, secretary_certificate_expiry,
+            bir_certificate_url, bir_certificate_expiry,
+            insurance_url, insurance_expiry,
             created_at,
             profiles(full_name)
         `)
@@ -168,7 +169,14 @@ export default async function AdminDashboard({
                 .createSignedUrl(studio.secretary_certificate_url, 3600)
             certSignedUrl = data?.signedUrl
         }
-        return { ...studio, permitSignedUrl, certSignedUrl }
+        let insuranceSignedUrl = null
+        if (studio.insurance_url) {
+            const { data } = await supabase.storage
+                .from('certifications')
+                .createSignedUrl(studio.insurance_url, 3600)
+            insuranceSignedUrl = data?.signedUrl
+        }
+        return { ...studio, permitSignedUrl, certSignedUrl, insuranceSignedUrl }
     }) || [])
 
     // 3. Fetch Booking Requests (Pending Bookings)
@@ -596,19 +604,39 @@ export default async function AdminDashboard({
                                                 <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Legal Documents</p>
                                                 <div className="space-y-1.5 flex flex-col items-start text-xs">
                                                     {studio.permitSignedUrl ? (
-                                                        <a href={studio.permitSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                                                            Mayor's Permit
-                                                        </a>
+                                                        <div className="flex justify-between w-full">
+                                                            <a href={studio.permitSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                                Mayor's Permit
+                                                            </a>
+                                                            <span className="text-charcoal-500">Exp: {studio.mayors_permit_expiry ? new Date(studio.mayors_permit_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                        </div>
                                                     ) : (
                                                         <p className="text-red-500">Missing Permit</p>
                                                     )}
                                                     {studio.certSignedUrl ? (
-                                                        <a href={studio.certSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                                                            Secretary's Cert
-                                                        </a>
+                                                        <div className="flex justify-between w-full">
+                                                            <a href={studio.certSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                                Secretary's Cert
+                                                            </a>
+                                                            <span className="text-charcoal-500">Exp: {studio.secretary_certificate_expiry ? new Date(studio.secretary_certificate_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                        </div>
                                                     ) : (
                                                         <p className="text-red-500">Missing Cert</p>
                                                     )}
+                                                    {studio.bir_certificate_url ? (
+                                                        <div className="flex justify-between w-full">
+                                                            <span className="text-charcoal-900 font-medium">BIR Form 2303 (See queue)</span>
+                                                            <span className="text-charcoal-500">Exp: {studio.bir_certificate_expiry ? new Date(studio.bir_certificate_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                        </div>
+                                                    ) : null}
+                                                    {studio.insuranceSignedUrl ? (
+                                                        <div className="flex justify-between w-full">
+                                                            <a href={studio.insuranceSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                                Insurance Policy
+                                                            </a>
+                                                            <span className="text-charcoal-500">Exp: {studio.insurance_expiry ? new Date(studio.insurance_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                        </div>
+                                                    ) : null}
                                                 </div>
                                             </div>
                                         </div>
