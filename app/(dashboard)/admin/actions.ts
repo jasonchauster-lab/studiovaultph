@@ -6,6 +6,7 @@ import { headers } from 'next/headers'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import ApplicationApprovalEmail from '@/components/emails/ApplicationApprovalEmail'
+import ApplicationRejectionEmail from '@/components/emails/ApplicationRejectionEmail'
 
 export async function approvePayout(payoutId: string) {
     const supabase = await createClient()
@@ -125,8 +126,14 @@ export async function approveCertification(certificationId: string) {
     return { success: true }
 }
 
-export async function rejectCertification(certificationId: string) {
+export async function rejectCertification(certificationId: string, customReason?: string) {
     const supabase = await createClient()
+
+    // Fetch details before deleting so we can send an email
+    const { data: cert } = await supabase.from('certifications')
+        .select('*, profiles(full_name, email)')
+        .eq('id', certificationId)
+        .single()
 
     // For now, "rejecting" means deleting the certification row so they can re-apply.
     const { error, count } = await supabase.from('certifications')
@@ -141,6 +148,28 @@ export async function rejectCertification(certificationId: string) {
 
     if (count === 0) {
         return { error: 'Permission denied or item not found. Are you an admin?' }
+    }
+
+    // Send rejection email
+    if (cert?.profiles?.email) {
+        const host = (await headers()).get('host')
+        const protocol = host?.includes('localhost') ? 'http' : 'https'
+        const siteUrl = `${protocol}://${host}`
+
+        const emailResult = await sendEmail({
+            to: cert.profiles.email,
+            subject: 'Update regarding your Instructor Certification',
+            react: ApplicationRejectionEmail({
+                recipientName: (cert.profiles as any).full_name || 'Instructor',
+                applicationType: 'Instructor',
+                itemName: cert.certification_name,
+                dashboardUrl: `${siteUrl}/instructor/profile`,
+                reason: customReason || 'Your uploaded documents did not meet our verification criteria. Please ensure your documents are clear, valid, and match your profile details. Feel free to re-upload them.'
+            })
+        })
+        if (!emailResult.success) {
+            console.error('Failed to send certification rejection email to', cert.profiles.email, emailResult.error);
+        }
     }
 
     revalidatePath('/admin')
@@ -186,8 +215,14 @@ export async function verifyStudio(studioId: string) {
     return { success: true }
 }
 
-export async function rejectStudio(studioId: string) {
+export async function rejectStudio(studioId: string, customReason?: string) {
     const supabase = await createClient()
+
+    // Fetch details before deleting so we can send an email
+    const { data: studio } = await supabase.from('studios')
+        .select('*, profiles(full_name, email)')
+        .eq('id', studioId)
+        .single()
 
     // "Rejecting" deletes the studio so they can fix and re-submit (or start over).
     const { error, count } = await supabase.from('studios')
@@ -202,6 +237,28 @@ export async function rejectStudio(studioId: string) {
 
     if (count === 0) {
         return { error: 'Permission denied or item not found. Are you an admin?' }
+    }
+
+    // Send rejection email
+    if (studio?.profiles?.email) {
+        const host = (await headers()).get('host')
+        const protocol = host?.includes('localhost') ? 'http' : 'https'
+        const siteUrl = `${protocol}://${host}`
+
+        const emailResult = await sendEmail({
+            to: studio.profiles.email,
+            subject: 'Update regarding your Studio Application',
+            react: ApplicationRejectionEmail({
+                recipientName: (studio.profiles as any).full_name || 'Studio Owner',
+                applicationType: 'Studio',
+                itemName: studio.name,
+                dashboardUrl: `${siteUrl}/studio`,
+                reason: customReason || 'Your uploaded documents or studio details did not meet our verification criteria. Please ensure all documents are clear, valid, and up-to-date, then re-apply.'
+            })
+        })
+        if (!emailResult.success) {
+            console.error('Failed to send studio rejection email to', studio.profiles.email, emailResult.error);
+        }
     }
 
     revalidatePath('/admin')
@@ -247,8 +304,14 @@ export async function approveStudioPayout(studioId: string) {
     return { success: true }
 }
 
-export async function rejectStudioPayout(studioId: string) {
+export async function rejectStudioPayout(studioId: string, customReason?: string) {
     const supabase = await createClient()
+
+    // Fetch details before updating so we can send an email
+    const { data: studio } = await supabase.from('studios')
+        .select('*, profiles(full_name, email)')
+        .eq('id', studioId)
+        .single()
 
     // Status 'rejected' means they need to re-upload the documents
     const { error } = await supabase.from('studios')
@@ -258,6 +321,28 @@ export async function rejectStudioPayout(studioId: string) {
     if (error) {
         console.error('Error rejecting studio payout:', error)
         return { error: 'Failed to reject studio payout' }
+    }
+
+    // Send rejection email
+    if (studio?.profiles?.email) {
+        const host = (await headers()).get('host')
+        const protocol = host?.includes('localhost') ? 'http' : 'https'
+        const siteUrl = `${protocol}://${host}`
+
+        const emailResult = await sendEmail({
+            to: studio.profiles.email,
+            subject: 'Action Required: Studio Payout Setup',
+            react: ApplicationRejectionEmail({
+                recipientName: (studio.profiles as any).full_name || 'Studio Owner',
+                applicationType: 'Studio Payout Setup',
+                itemName: `${studio.name} Payout Setup`,
+                dashboardUrl: `${siteUrl}/studio/earnings`,
+                reason: customReason || 'The legal documents provided for your payout setup did not meet our requirements. Please check that they are accurate and upload them again in the Earnings tab.'
+            })
+        })
+        if (!emailResult.success) {
+            console.error('Failed to send studio payout rejection email to', studio.profiles.email, emailResult.error);
+        }
     }
 
     revalidatePath('/admin')

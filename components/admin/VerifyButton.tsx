@@ -19,6 +19,14 @@ export default function VerifyButton({ id, action, label, className }: VerifyBut
     const router = useRouter()
 
     const handleAction = async () => {
+        let reason: string | undefined = undefined;
+
+        if (action.includes('reject')) {
+            const userInput = window.prompt("Optional: Enter a specific reason for rejection to send to the user.");
+            if (userInput === null) return; // Cancelled
+            reason = userInput.trim() || undefined;
+        }
+
         setIsLoading(true)
         let result: any
 
@@ -28,13 +36,13 @@ export default function VerifyButton({ id, action, label, className }: VerifyBut
                     result = await verifyStudio(id)
                     break
                 case 'rejectStudio':
-                    result = await rejectStudio(id)
+                    result = await rejectStudio(id, reason)
                     break
                 case 'approveCert':
                     result = await approveCertification(id)
                     break
                 case 'rejectCert':
-                    result = await rejectCertification(id)
+                    result = await rejectCertification(id, reason)
                     break
                 case 'confirmBooking':
                     result = await confirmBooking(id)
@@ -49,7 +57,7 @@ export default function VerifyButton({ id, action, label, className }: VerifyBut
                     result = await approveStudioPayout(id)
                     break
                 case 'rejectStudioPayout':
-                    result = await rejectStudioPayout(id)
+                    result = await rejectStudioPayout(id, reason)
                     break
             }
 

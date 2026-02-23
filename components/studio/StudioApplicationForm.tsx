@@ -123,11 +123,13 @@ export default function StudioApplicationForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-1">Insurance Policy</label>
+                    <label className="block text-sm font-medium text-charcoal-700 mb-0.5">Insurance Policy</label>
+                    <p className="text-[10px] text-charcoal-500 italic mb-1">Optional, but recommended</p>
                     <input type="file" name="insurance" accept="image/*,.pdf" className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-1">Insurance Expiration Date</label>
+                    <label className="block text-sm font-medium text-charcoal-700 mb-0.5">Insurance Expiration Date</label>
+                    <p className="text-[10px] text-charcoal-500 italic mb-1">Optional</p>
                     <input type="date" name="insuranceExpiry" className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
                 </div>
             </div>
