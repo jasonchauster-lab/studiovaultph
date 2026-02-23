@@ -200,8 +200,8 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
 
                 <div>
                     <label className="block text-sm font-medium text-charcoal-700 mb-2">Available Equipment Types</label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        {['Reformer', 'Cadillac', 'Chair', 'Barrel', 'Tower', 'Mat'].map((eq) => (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
                             <label key={eq} className="flex items-center gap-2 p-3 bg-white border border-cream-200 rounded-lg hover:bg-cream-50 cursor-pointer transition-colors">
                                 <input
                                     type="checkbox"
@@ -214,7 +214,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                         ))}
                     </div>
                     <p className="text-xs text-charcoal-500 mt-2">
-                        For &apos;Chair&apos;, &apos;Barrel&apos;, &apos;Mat&apos;, ensure the update script handles them.
+                        For &apos;Chair&apos;, &apos;Ladder Barrel&apos;, &apos;Mat&apos;, ensure the update script handles them.
                     </p>
                 </div>
 
@@ -225,7 +225,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                         Set the hourly rental price for each equipment type.
                     </p>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {['Reformer', 'Cadillac', 'Chair', 'Barrel', 'Tower', 'Mat'].map((eq) => (
+                        {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
                             <div key={eq}>
                                 <label className="block text-xs font-medium text-charcoal-600 mb-1">{eq}</label>
                                 <div className="relative">

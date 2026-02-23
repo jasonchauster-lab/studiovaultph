@@ -15,7 +15,7 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
 
     // 1. Get all approved bookings for total earnings
     // We only count 'approved' (paid) bookings
-    const { data: studio } = await supabase.from('studios').select('owner_id').eq('id', studioId).single()
+    const { data: studio } = await supabase.from('studios').select('owner_id, payout_approval_status').eq('id', studioId).single()
     const ownerId = studio?.owner_id
 
     const { data: profile } = ownerId
@@ -128,7 +128,8 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             totalPaidOut,
             pendingPayouts: totalPending,
             availableBalance: profile?.available_balance || 0,
-            pendingBalance: profile?.pending_balance || 0
+            pendingBalance: profile?.pending_balance || 0,
+            payoutApprovalStatus: studio?.payout_approval_status || 'none'
         }
     }
 }
@@ -149,6 +150,12 @@ export async function requestPayout(prevState: any, formData: FormData) {
 
     if (amount <= 0) {
         return { error: 'Invalid amount' }
+    }
+
+    // Check approval status
+    const { data: studio } = await supabase.from('studios').select('payout_approval_status').eq('id', studioId).single()
+    if (studio?.payout_approval_status !== 'approved') {
+        return { error: 'Your payout application is pending or has not been approved yet. Please submit the required documents first.' }
     }
 
     // Re-verify balance server-side to prevent overdrawing
@@ -194,4 +201,61 @@ export async function requestPayout(prevState: any, formData: FormData) {
 
     revalidatePath('/studio/earnings')
     return { success: true, message: 'Payout request submitted successfully!' }
+}
+
+export async function submitPayoutApplication(prevState: any, formData: FormData) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Not authenticated' }
+
+    const studioId = formData.get('studioId') as string
+    const mayorsPermit = formData.get('mayorsPermit') as File
+    const secretaryCertificate = formData.get('secretaryCertificate') as File
+
+    if (!studioId || !mayorsPermit || !secretaryCertificate) {
+        return { error: 'All documents are required.' }
+    }
+
+    const timestamp = Date.now()
+    let permitPath = null
+    let certPath = null
+
+    // Upload Mayor's Permit
+    if (mayorsPermit && mayorsPermit.size > 0) {
+        const ext = mayorsPermit.name.split('.').pop()
+        permitPath = `studios/${user.id}/mayors_permit_${timestamp}.${ext}`
+        const { error: uploadError } = await supabase.storage.from('certifications').upload(permitPath, mayorsPermit)
+        if (uploadError) {
+            console.error('Mayors permit upload error:', uploadError)
+            return { error: 'Failed to upload Mayor\'s Permit.' }
+        }
+    }
+
+    // Upload Secretary's Certificate
+    if (secretaryCertificate && secretaryCertificate.size > 0) {
+        const ext = secretaryCertificate.name.split('.').pop()
+        certPath = `studios/${user.id}/secretary_cert_${timestamp}.${ext}`
+        const { error: uploadError } = await supabase.storage.from('certifications').upload(certPath, secretaryCertificate)
+        if (uploadError) {
+            console.error('Secretary certificate upload error:', uploadError)
+            return { error: 'Failed to upload Secretary\'s Certificate.' }
+        }
+    }
+
+    const { error: updateError } = await supabase
+        .from('studios')
+        .update({
+            payout_approval_status: 'pending',
+            mayors_permit_url: permitPath,
+            secretary_certificate_url: certPath
+        })
+        .eq('id', studioId)
+
+    if (updateError) {
+        console.error('Failed to update studio status:', updateError)
+        return { error: 'Failed to submit application. Please try again later.' }
+    }
+
+    revalidatePath('/studio/earnings')
+    return { success: true, message: 'Application submitted successfully! It is now pending admin approval.' }
 }

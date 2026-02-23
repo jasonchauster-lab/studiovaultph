@@ -171,12 +171,23 @@ export async function createStudio(formData: FormData) {
     const contactNumber = formData.get('contactNumber') as string
     const address = formData.get('address') as string
 
+    const birCertificate = formData.get('birCertificate') as File
+    const govId = formData.get('govId') as File
+    const spacePhotos = formData.getAll('spacePhotos') as File[]
+
+    if (!name || !location || !contactNumber || !address || !birCertificate || !govId || spacePhotos.length === 0) {
+        return { error: 'All fields and documents are required' }
+    }
+
 
     // Parse equipment
     const equipment: string[] = []
     if (formData.get('reformer') === 'on') equipment.push('Reformer')
     if (formData.get('cadillac') === 'on') equipment.push('Cadillac')
     if (formData.get('tower') === 'on') equipment.push('Tower')
+    if (formData.get('chair') === 'on') equipment.push('Chair')
+    if (formData.get('ladderBarrel') === 'on') equipment.push('Ladder Barrel')
+    if (formData.get('mat') === 'on') equipment.push('Mat')
 
     const otherEquipment = formData.get('otherEquipment') as string
     if (otherEquipment) {
@@ -185,8 +196,40 @@ export async function createStudio(formData: FormData) {
         })
     }
 
-    if (!name || !location || !contactNumber || !address) {
-        return { error: 'All fields are required' }
+    // Upload Documents
+    const timestamp = Date.now()
+    let birPath = null
+    let govIdPath = null
+
+    if (birCertificate && birCertificate.size > 0) {
+        const birExt = birCertificate.name.split('.').pop()
+        birPath = `studios/${user.id}/bir_${timestamp}.${birExt}`
+        const { error: birError } = await supabase.storage.from('certifications').upload(birPath, birCertificate)
+        if (birError) console.error('BIR upload error:', birError)
+    }
+
+    if (govId && govId.size > 0) {
+        const govIdExt = govId.name.split('.').pop()
+        govIdPath = `studios/${user.id}/govid_${timestamp}.${govIdExt}`
+        const { error: govIdError } = await supabase.storage.from('certifications').upload(govIdPath, govId)
+        if (govIdError) console.error('Gov ID upload error:', govIdError)
+    }
+
+    const spacePhotosUrls: string[] = []
+    if (spacePhotos && spacePhotos.length > 0) {
+        for (const [index, photo] of spacePhotos.entries()) {
+            if (photo.size > 0) {
+                const photoExt = photo.name.split('.').pop()
+                const photoPath = `studios/${user.id}/space_${timestamp}_${index}.${photoExt}`
+                const { error: photoError } = await supabase.storage.from('avatars').upload(photoPath, photo)
+                if (photoError) {
+                    console.error('Space photo upload error:', photoError)
+                } else {
+                    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(photoPath)
+                    spacePhotosUrls.push(publicUrl)
+                }
+            }
+        }
     }
 
 
@@ -218,13 +261,16 @@ export async function createStudio(formData: FormData) {
             hourly_rate: 0,
             reformers_count: 5, // Default
             equipment: equipment,
-            contact_number: contactNumber
+            contact_number: contactNumber,
+            bir_certificate_url: birPath,
+            gov_id_url: govIdPath,
+            space_photos_urls: spacePhotosUrls
         })
 
 
     if (error) {
         console.error('Error creating studio:', error)
-        return { error: 'Failed to create studio' }
+        return { error: `Failed to create studio: ${error.message} (Code: ${error.code})` }
     }
 
     revalidatePath('/studio')
@@ -342,6 +388,9 @@ export async function updateStudio(formData: FormData) {
     if (formData.get('reformer') === 'on') equipment.push('Reformer')
     if (formData.get('cadillac') === 'on') equipment.push('Cadillac')
     if (formData.get('tower') === 'on') equipment.push('Tower')
+    if (formData.get('chair') === 'on') equipment.push('Chair')
+    if (formData.get('ladderBarrel') === 'on') equipment.push('Ladder Barrel')
+    if (formData.get('mat') === 'on') equipment.push('Mat')
 
     // Support generic eq_ prefixes (New Standard)
     const allKeys = Array.from(formData.keys())

@@ -16,9 +16,12 @@ export default function StudioApplicationForm() {
         const hasReformer = formData.get('reformer') === 'on'
         const hasCadillac = formData.get('cadillac') === 'on'
         const hasTower = formData.get('tower') === 'on'
+        const hasChair = formData.get('chair') === 'on'
+        const hasLadderBarrel = formData.get('ladderBarrel') === 'on'
+        const hasMat = formData.get('mat') === 'on'
         const otherEq = formData.get('otherEquipment') as string
 
-        if (!hasReformer && !hasCadillac && !hasTower && !otherEq.trim()) {
+        if (!hasReformer && !hasCadillac && !hasTower && !hasChair && !hasLadderBarrel && !hasMat && !otherEq.trim()) {
             setError('Please select at least one piece of equipment or specify other equipment.')
             setIsLoading(false)
             return
@@ -96,19 +99,49 @@ export default function StudioApplicationForm() {
             </div>
 
             <div>
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">BIR Certificate of Registration (Form 2303) <span className="text-red-500">*</span></label>
+                <input type="file" name="birCertificate" accept="image/*,.pdf" required className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">Valid Government ID <span className="text-red-500">*</span></label>
+                <input type="file" name="govId" accept="image/*,.pdf" required className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">Photos of the Space <span className="text-red-500">*</span></label>
+                <input type="file" name="spacePhotos" accept="image/*" multiple required className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
+                <p className="text-[10px] text-charcoal-500 mt-1 italic">
+                    Upload multiple photos showing the studio layout, equipment, and amenities. You can select multiple files at once.
+                </p>
+            </div>
+
+            <div>
                 <label className="block text-sm font-medium text-charcoal-700 mb-2">Available Equipment <span className="text-red-500">*</span></label>
-                <div className="space-y-2 mb-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
                     <label className="flex items-center gap-2">
                         <input type="checkbox" name="reformer" className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                        <span className="text-charcoal-700">Reformer</span>
+                        <span className="text-charcoal-700 text-sm">Reformer</span>
                     </label>
                     <label className="flex items-center gap-2">
                         <input type="checkbox" name="cadillac" className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                        <span className="text-charcoal-700">Cadillac</span>
+                        <span className="text-charcoal-700 text-sm">Cadillac</span>
                     </label>
                     <label className="flex items-center gap-2">
                         <input type="checkbox" name="tower" className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                        <span className="text-charcoal-700">Tower</span>
+                        <span className="text-charcoal-700 text-sm">Tower</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                        <input type="checkbox" name="chair" className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
+                        <span className="text-charcoal-700 text-sm">Chair</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                        <input type="checkbox" name="ladderBarrel" className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
+                        <span className="text-charcoal-700 text-sm">Ladder Barrel</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                        <input type="checkbox" name="mat" className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
+                        <span className="text-charcoal-700 text-sm">Mat</span>
                     </label>
                 </div>
                 <input

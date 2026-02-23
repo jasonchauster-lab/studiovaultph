@@ -9,6 +9,7 @@ interface EarningsOverviewProps {
         pendingPayouts: number
         availableBalance: number
         pendingBalance: number
+        payoutApprovalStatus?: string
     }
 }
 
@@ -56,6 +57,7 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                         <PayoutRequestModal
                             studioId={studioId}
                             availableBalance={summary.availableBalance}
+                            payoutApprovalStatus={summary.payoutApprovalStatus}
                         />
                     </div>
                     <p className="text-sm text-gray-400 mb-1">Available Balance</p>

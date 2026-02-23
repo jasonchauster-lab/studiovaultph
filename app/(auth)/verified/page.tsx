@@ -1,7 +1,45 @@
 import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
 
-export default function VerifiedPage() {
+export default async function VerifiedPage() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    let nextRoute = '/login'
+    let buttonText = 'Log In Now'
+
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+
+        if (profile) {
+            switch (profile.role) {
+                case 'admin':
+                    nextRoute = '/admin'
+                    break
+                case 'instructor':
+                    nextRoute = '/instructor'
+                    break
+                case 'studio':
+                    nextRoute = '/studio'
+                    break
+                case 'customer':
+                    nextRoute = '/customer'
+                    break
+                default:
+                    nextRoute = '/welcome'
+            }
+            buttonText = 'Go to Dashboard'
+        } else {
+            nextRoute = '/welcome'
+            buttonText = 'Complete Profile'
+        }
+    }
+
     return (
         <div className="min-h-screen bg-cream-50 flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-md bg-white p-8 rounded-2xl border border-cream-200 shadow-sm text-center">
@@ -13,14 +51,14 @@ export default function VerifiedPage() {
 
                 <h1 className="text-2xl font-serif text-charcoal-900 mb-2">Email Verified!</h1>
                 <p className="text-charcoal-600 mb-8">
-                    Your account has been successfully verified. You can now log in to StudioVaultPH and start booking.
+                    Your account has been successfully verified. You can now access your account.
                 </p>
 
                 <Link
-                    href="/login"
+                    href={nextRoute}
                     className="block w-full bg-charcoal-900 text-cream-50 py-3 rounded-xl font-medium hover:bg-charcoal-800 transition-colors"
                 >
-                    Log In Now
+                    {buttonText}
                 </Link>
             </div>
         </div>

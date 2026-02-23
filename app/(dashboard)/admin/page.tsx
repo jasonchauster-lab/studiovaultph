@@ -105,6 +105,53 @@ export default async function AdminDashboard({
         .eq('verified', false)
         .order('created_at', { ascending: false })
 
+    // 2b. Generate signed URLs for private studio docs
+    const studiosWithUrls = await Promise.all(pendingStudios?.map(async (studio: any) => {
+        let birSignedUrl = null
+        if (studio.bir_certificate_url) {
+            const { data } = await supabase.storage
+                .from('certifications')
+                .createSignedUrl(studio.bir_certificate_url, 3600)
+            birSignedUrl = data?.signedUrl
+        }
+        let govIdSignedUrl = null
+        if (studio.gov_id_url) {
+            const { data } = await supabase.storage
+                .from('certifications')
+                .createSignedUrl(studio.gov_id_url, 3600)
+            govIdSignedUrl = data?.signedUrl
+        }
+        return { ...studio, birSignedUrl, govIdSignedUrl }
+    }) || [])
+
+    // 2.5 Fetch Pending Studio Payout Approvals
+    const { data: pendingStudioPayouts } = await supabase
+        .from('studios')
+        .select(`
+            id, name, mayors_permit_url, secretary_certificate_url, created_at,
+            profiles(full_name)
+        `)
+        .eq('payout_approval_status', 'pending')
+        .order('created_at', { ascending: false })
+
+    const payoutStudiosWithUrls = await Promise.all(pendingStudioPayouts?.map(async (studio: any) => {
+        let permitSignedUrl = null
+        if (studio.mayors_permit_url) {
+            const { data } = await supabase.storage
+                .from('certifications')
+                .createSignedUrl(studio.mayors_permit_url, 3600)
+            permitSignedUrl = data?.signedUrl
+        }
+        let certSignedUrl = null
+        if (studio.secretary_certificate_url) {
+            const { data } = await supabase.storage
+                .from('certifications')
+                .createSignedUrl(studio.secretary_certificate_url, 3600)
+            certSignedUrl = data?.signedUrl
+        }
+        return { ...studio, permitSignedUrl, certSignedUrl }
+    }) || [])
+
     // 3. Fetch Booking Requests (Pending Bookings)
     const { data: pendingBookings, error: pendingBookingsError } = await supabase
         .from('bookings')
@@ -378,11 +425,11 @@ export default async function AdminDashboard({
                             Studio Verification
                         </h2>
 
-                        {pendingStudios?.length === 0 ? (
+                        {studiosWithUrls?.length === 0 ? (
                             <p className="text-charcoal-500 text-sm">No pending studio applications.</p>
                         ) : (
                             <div className="space-y-4">
-                                {pendingStudios?.map((studio: any) => (
+                                {studiosWithUrls?.map((studio: any) => (
                                     <div key={studio.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
                                         <div className="flex justify-between items-start mb-2">
                                             <div>
@@ -406,6 +453,109 @@ export default async function AdminDashboard({
                                                     label="Approve"
                                                     className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
                                                 />
+                                            </div>
+                                        </div>
+
+                                        {/* Document Links */}
+                                        <div className="mt-4 pt-3 border-t border-cream-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Legal Documents</p>
+                                                <div className="space-y-1.5 flex flex-col items-start text-xs">
+                                                    {studio.birSignedUrl ? (
+                                                        <a href={studio.birSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                            BIR Form 2303
+                                                        </a>
+                                                    ) : (
+                                                        <p className="text-red-500">Missing BIR Form 2303</p>
+                                                    )}
+
+                                                    {studio.govIdSignedUrl ? (
+                                                        <a href={studio.govIdSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                            Gov ID
+                                                        </a>
+                                                    ) : (
+                                                        <p className="text-red-500">Missing Gov ID</p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Space Photos</p>
+                                                {studio.space_photos_urls && studio.space_photos_urls.length > 0 ? (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {studio.space_photos_urls.map((photoUrl: string, idx: number) => (
+                                                            <a key={idx} href={photoUrl} target="_blank" rel="noopener noreferrer" className="block relative hover:opacity-90 transition-opacity">
+                                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                <img src={photoUrl} alt={`Space Photo ${idx + 1}`} className="h-12 w-12 object-cover rounded border border-cream-200" />
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-xs text-charcoal-400">No photos uploaded</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Studio Payout Setup Initial Verification Queue */}
+                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm">
+                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                            <Building2 className="w-5 h-5 text-charcoal-500" />
+                            Studio Payout Setup Approvals
+                        </h2>
+
+                        {payoutStudiosWithUrls?.length === 0 ? (
+                            <p className="text-charcoal-500 text-sm">No pending studio payout setups.</p>
+                        ) : (
+                            <div className="space-y-4">
+                                {payoutStudiosWithUrls?.map((studio: any) => (
+                                    <div key={studio.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p className="font-medium text-charcoal-900">{studio.name}</p>
+                                                <p className="text-xs text-charcoal-500 mt-1">Owner: {studio.profiles?.full_name}</p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <VerifyButton
+                                                    id={studio.id}
+                                                    action="rejectStudioPayout"
+                                                    label="Reject"
+                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                                />
+                                                <VerifyButton
+                                                    id={studio.id}
+                                                    action="approveStudioPayout"
+                                                    label="Approve"
+                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Document Links */}
+                                        <div className="mt-4 pt-3 border-t border-cream-100 grid grid-cols-1 gap-4">
+                                            <div>
+                                                <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Legal Documents</p>
+                                                <div className="space-y-1.5 flex flex-col items-start text-xs">
+                                                    {studio.permitSignedUrl ? (
+                                                        <a href={studio.permitSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                            Mayor's Permit
+                                                        </a>
+                                                    ) : (
+                                                        <p className="text-red-500">Missing Mayor's Permit</p>
+                                                    )}
+
+                                                    {studio.certSignedUrl ? (
+                                                        <a href={studio.certSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                            Secretary's Certificate
+                                                        </a>
+                                                    ) : (
+                                                        <p className="text-red-500">Missing Secretary's Cert</p>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -106,7 +106,7 @@ export async function approveCertification(certificationId: string) {
         const protocol = host?.includes('localhost') ? 'http' : 'https'
         const siteUrl = `${protocol}://${host}`
 
-        await sendEmail({
+        const emailResult = await sendEmail({
             to: cert.profiles.email,
             subject: 'Congratulations! Your certification has been verified',
             react: ApplicationApprovalEmail({
@@ -116,6 +116,9 @@ export async function approveCertification(certificationId: string) {
                 dashboardUrl: `${siteUrl}/instructor/profile`
             })
         })
+        if (!emailResult.success) {
+            console.error('Failed to send certification approval email to', cert.profiles.email, emailResult.error);
+        }
     }
 
     revalidatePath('/admin')
@@ -164,7 +167,7 @@ export async function verifyStudio(studioId: string) {
         const protocol = host?.includes('localhost') ? 'http' : 'https'
         const siteUrl = `${protocol}://${host}`
 
-        await sendEmail({
+        const emailResult = await sendEmail({
             to: studio.profiles.email,
             subject: 'Exciting news! Your studio has been approved',
             react: ApplicationApprovalEmail({
@@ -174,6 +177,9 @@ export async function verifyStudio(studioId: string) {
                 dashboardUrl: `${siteUrl}/studio`
             })
         })
+        if (!emailResult.success) {
+            console.error('Failed to send studio approval email to', studio.profiles.email, emailResult.error);
+        }
     }
 
     revalidatePath('/admin')
@@ -199,6 +205,63 @@ export async function rejectStudio(studioId: string) {
     }
 
     revalidatePath('/admin')
+    return { success: true }
+}
+
+export async function approveStudioPayout(studioId: string) {
+    const supabase = await createClient()
+
+    const { data: studio, error: fetchError } = await supabase.from('studios')
+        .update({ payout_approval_status: 'approved' })
+        .eq('id', studioId)
+        .select('*, profiles(full_name, email)')
+        .single()
+
+    if (fetchError || !studio) {
+        console.error('Error approving studio payout:', fetchError)
+        return { error: 'Failed to approve studio payout' }
+    }
+
+    if (studio.profiles?.email) {
+        const host = (await headers()).get('host')
+        const protocol = host?.includes('localhost') ? 'http' : 'https'
+        const siteUrl = `${protocol}://${host}`
+
+        const emailResult = await sendEmail({
+            to: studio.profiles.email,
+            subject: 'Your Studio Payout Setup is Approved',
+            react: ApplicationApprovalEmail({
+                recipientName: (studio.profiles as any).full_name || 'Studio Owner',
+                applicationType: 'Studio',
+                itemName: `${studio.name} Payout Setup`,
+                dashboardUrl: `${siteUrl}/studio/earnings`
+            })
+        })
+        if (!emailResult.success) {
+            console.error('Failed to send studio payout approval email to', studio.profiles.email, emailResult.error);
+        }
+    }
+
+    revalidatePath('/admin')
+    revalidatePath('/studio/earnings')
+    return { success: true }
+}
+
+export async function rejectStudioPayout(studioId: string) {
+    const supabase = await createClient()
+
+    // Status 'rejected' means they need to re-upload the documents
+    const { error } = await supabase.from('studios')
+        .update({ payout_approval_status: 'rejected' })
+        .eq('id', studioId)
+
+    if (error) {
+        console.error('Error rejecting studio payout:', error)
+        return { error: 'Failed to reject studio payout' }
+    }
+
+    revalidatePath('/admin')
+    revalidatePath('/studio/earnings')
     return { success: true }
 }
 

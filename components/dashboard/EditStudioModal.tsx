@@ -31,7 +31,7 @@ export default function EditStudioModal({ studio }: { studio: Studio }) {
     }
 
     const hasEquipment = (name: string) => studio.equipment?.includes(name)
-    const otherEquipment = studio.equipment?.filter(e => !['Reformer', 'Cadillac', 'Tower'].includes(e)).join(', ')
+    const otherEquipment = studio.equipment?.filter(e => !['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].includes(e)).join(', ')
 
     return (
         <>
@@ -106,18 +106,30 @@ export default function EditStudioModal({ studio }: { studio: Studio }) {
 
                             <div>
                                 <label className="block text-sm font-medium text-charcoal-700 mb-2">Available Equipment</label>
-                                <div className="space-y-2 mb-3">
+                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 mb-3">
                                     <label className="flex items-center gap-2">
                                         <input type="checkbox" name="reformer" defaultChecked={hasEquipment('Reformer')} className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                                        <span className="text-charcoal-700">Reformer</span>
+                                        <span className="text-charcoal-700 text-sm">Reformer</span>
                                     </label>
                                     <label className="flex items-center gap-2">
                                         <input type="checkbox" name="cadillac" defaultChecked={hasEquipment('Cadillac')} className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                                        <span className="text-charcoal-700">Cadillac</span>
+                                        <span className="text-charcoal-700 text-sm">Cadillac</span>
                                     </label>
                                     <label className="flex items-center gap-2">
                                         <input type="checkbox" name="tower" defaultChecked={hasEquipment('Tower')} className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                                        <span className="text-charcoal-700">Tower</span>
+                                        <span className="text-charcoal-700 text-sm">Tower</span>
+                                    </label>
+                                    <label className="flex items-center gap-2">
+                                        <input type="checkbox" name="chair" defaultChecked={hasEquipment('Chair')} className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
+                                        <span className="text-charcoal-700 text-sm">Chair</span>
+                                    </label>
+                                    <label className="flex items-center gap-2">
+                                        <input type="checkbox" name="ladderBarrel" defaultChecked={hasEquipment('Ladder Barrel')} className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
+                                        <span className="text-charcoal-700 text-sm">Ladder Barrel</span>
+                                    </label>
+                                    <label className="flex items-center gap-2">
+                                        <input type="checkbox" name="mat" defaultChecked={hasEquipment('Mat')} className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
+                                        <span className="text-charcoal-700 text-sm">Mat</span>
                                     </label>
                                 </div>
                                 <input

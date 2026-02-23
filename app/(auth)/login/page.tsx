@@ -43,7 +43,7 @@ function LoginContent() {
                         email: email,
                         role: initialRole
                     },
-                    emailRedirectTo: `${window.location.origin}/verified`
+                    emailRedirectTo: `${window.location.origin}/auth/callback?next=/verified`
                 }
             })
 

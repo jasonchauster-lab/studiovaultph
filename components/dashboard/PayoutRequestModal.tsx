@@ -1,15 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { requestPayout } from '@/app/(dashboard)/studio/earnings/actions'
-import { X, Loader2 } from 'lucide-react'
+import { requestPayout, submitPayoutApplication } from '@/app/(dashboard)/studio/earnings/actions'
+import { X, Loader2, Clock } from 'lucide-react'
 
 interface PayoutRequestModalProps {
     studioId: string
     availableBalance: number
+    payoutApprovalStatus?: string
 }
 
-export default function PayoutRequestModal({ studioId, availableBalance }: PayoutRequestModalProps) {
+export default function PayoutRequestModal({ studioId, availableBalance, payoutApprovalStatus = 'none' }: PayoutRequestModalProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
@@ -25,8 +26,12 @@ export default function PayoutRequestModal({ studioId, availableBalance }: Payou
         formData.append('studioId', studioId)
 
         try {
-            // @ts-ignore - simplistic invocation for now
-            const result = await requestPayout(null, formData)
+            let result: any;
+            if (payoutApprovalStatus === 'approved') {
+                result = await requestPayout(null, formData)
+            } else {
+                result = await submitPayoutApplication(null, formData)
+            }
 
             if (result?.error) {
                 setMessage({ type: 'error', text: result.error })
@@ -88,73 +93,110 @@ export default function PayoutRequestModal({ studioId, availableBalance }: Payou
                                 </div>
                             )}
 
-                            <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Amount (₱)</label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">₱</span>
-                                    <input
-                                        name="amount"
-                                        type="number"
-                                        max={availableBalance}
-                                        step="0.01"
-                                        required
-                                        defaultValue={availableBalance}
-                                        className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900"
-                                    />
+                            {payoutApprovalStatus === 'pending' ? (
+                                <div className="py-8 text-center bg-gray-50 rounded-xl border border-gray-100">
+                                    <Clock className="w-12 h-12 text-amber-500 mx-auto mb-3" />
+                                    <h4 className="text-lg font-medium text-charcoal-900 mb-2">Application Under Review</h4>
+                                    <p className="text-sm text-charcoal-600 px-4">
+                                        Your payout setup application is currently pending admin approval. You will be able to withdraw funds once it is approved.
+                                    </p>
                                 </div>
-                                <p className="text-xs text-charcoal-500 mt-1.5 font-medium">
-                                    Available Balance: <span className="text-green-600">₱{availableBalance.toLocaleString()}</span>
-                                </p>
-                            </div>
+                            ) : payoutApprovalStatus !== 'approved' ? (
+                                <>
+                                    <div className="bg-amber-50 text-amber-800 p-3 rounded-lg text-sm border border-amber-200">
+                                        Before your first withdrawal, you must submit the following documents for verification. This is a one-time process.
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Mayor's Permit <span className="text-red-500">*</span></label>
+                                        <input
+                                            name="mayorsPermit"
+                                            type="file"
+                                            accept="image/*,.pdf"
+                                            required
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900 text-sm bg-white"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Secretary's Certificate <span className="text-red-500">*</span></label>
+                                        <input
+                                            name="secretaryCertificate"
+                                            type="file"
+                                            accept="image/*,.pdf"
+                                            required
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900 text-sm bg-white"
+                                        />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Amount (₱)</label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">₱</span>
+                                            <input
+                                                name="amount"
+                                                type="number"
+                                                max={availableBalance}
+                                                step="0.01"
+                                                required
+                                                defaultValue={availableBalance}
+                                                className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-charcoal-500 mt-1.5 font-medium">
+                                            Available Balance: <span className="text-green-600">₱{availableBalance.toLocaleString()}</span>
+                                        </p>
+                                    </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Payment Method</label>
-                                <select
-                                    name="paymentMethod"
-                                    value={paymentMethod}
-                                    onChange={(e) => setPaymentMethod(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none bg-white transition-all text-charcoal-900"
-                                >
-                                    <option value="bank_transfer">Bank Transfer</option>
-                                    <option value="gcash">GCash</option>
-                                </select>
-                            </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Payment Method</label>
+                                        <select
+                                            name="paymentMethod"
+                                            value={paymentMethod}
+                                            onChange={(e) => setPaymentMethod(e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none bg-white transition-all text-charcoal-900"
+                                        >
+                                            <option value="bank_transfer">Bank Transfer</option>
+                                            <option value="gcash">GCash</option>
+                                        </select>
+                                    </div>
 
-                            {paymentMethod === 'bank_transfer' && (
-                                <div className="animate-in slide-in-from-top-2 duration-200">
-                                    <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Bank Name</label>
-                                    <input
-                                        name="bankName"
-                                        type="text"
-                                        required
-                                        placeholder="e.g. BPI, BDO, Unionbank"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900"
-                                    />
-                                </div>
+                                    {paymentMethod === 'bank_transfer' && (
+                                        <div className="animate-in slide-in-from-top-2 duration-200">
+                                            <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Bank Name</label>
+                                            <input
+                                                name="bankName"
+                                                type="text"
+                                                required
+                                                placeholder="e.g. BPI, BDO, Unionbank"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900"
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Account Name</label>
+                                        <input
+                                            name="accountName"
+                                            type="text"
+                                            required
+                                            placeholder="Account Holder Name"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Account Number</label>
+                                        <input
+                                            name="accountNumber"
+                                            type="text"
+                                            required
+                                            placeholder="Account / Mobile Number"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900"
+                                        />
+                                    </div>
+                                </>
                             )}
-
-                            <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Account Name</label>
-                                <input
-                                    name="accountName"
-                                    type="text"
-                                    required
-                                    placeholder="Account Holder Name"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Account Number</label>
-                                <input
-                                    name="accountNumber"
-                                    type="text"
-                                    required
-                                    placeholder="Account / Mobile Number"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900"
-                                />
-                            </div>
-
                             <div className="pt-2">
                                 <button
                                     type="submit"
