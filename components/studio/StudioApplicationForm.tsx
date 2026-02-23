@@ -98,14 +98,15 @@ export default function StudioApplicationForm() {
                 />
             </div>
 
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">BIR Certificate of Registration (Form 2303) <span className="text-red-500">*</span></label>
-                <input type="file" name="birCertificate" accept="image/*,.pdf" required className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Valid Government ID <span className="text-red-500">*</span></label>
-                <input type="file" name="govId" accept="image/*,.pdf" required className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-charcoal-700 mb-1">BIR Certificate (Form 2303) <span className="text-red-500">*</span></label>
+                    <input type="file" name="birCertificate" accept="image/*,.pdf" required className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-charcoal-700 mb-1">Valid Government ID <span className="text-red-500">*</span></label>
+                    <input type="file" name="govId" accept="image/*,.pdf" required className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
+                </div>
             </div>
 
             <div>

@@ -61,6 +61,7 @@ export default async function CustomerDashboard({
             )
         `)
         .eq('role', 'instructor')
+        .eq('is_suspended', false)
 
     if (params.equipment && params.equipment !== 'all') {
         // Instructors must teach this equipment

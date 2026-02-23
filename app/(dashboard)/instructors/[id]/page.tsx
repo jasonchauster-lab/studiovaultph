@@ -31,6 +31,7 @@ export default async function InstructorProfilePage({
         `)
         .eq('id', id)
         .eq('role', 'instructor')
+        .eq('is_suspended', false)
         .single()
 
     if (!instructor) notFound()

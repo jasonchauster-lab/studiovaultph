@@ -14,14 +14,17 @@ export type SearchResult = {
     phone?: string;
     role?: string;
     location?: string;
+    url?: string;
     is_founding_partner?: boolean;
     custom_fee_percentage?: number;
     documents?: {
         bir: string | null;
         govId: string | null;
-        mayorsPermit: string | null;
-        secretaryCert: string | null;
-        spacePhotos: string[];
+        govIdExpiry?: string | null;
+        tin?: string | null;
+        mayorsPermit?: string | null;
+        secretaryCert?: string | null;
+        spacePhotos?: string[];
     };
 };
 
@@ -226,7 +229,7 @@ export default function GlobalSearch() {
                                                 )}
                                                 <div className="mt-3 pt-3 border-t border-cream-200">
                                                     <Link
-                                                        href={result.url}
+                                                        href={result.url || '#'}
                                                         onClick={() => { setIsOpen(false); setExpandedId(null); }}
                                                         className="inline-flex items-center gap-1.5 text-xs font-medium text-charcoal-600 hover:text-charcoal-900 transition-colors border border-cream-200 px-3 py-1.5 rounded-lg hover:bg-cream-50"
                                                     >
@@ -282,6 +285,36 @@ export default function GlobalSearch() {
                                                                 </div>
                                                             </div>
                                                         )}
+                                                    </div>
+                                                )}
+
+                                                {/* Legal Documents Section (for Instructors) */}
+                                                {result.role === 'instructor' && result.documents && (
+                                                    <div className="mt-3 pt-3 border-t border-cream-200">
+                                                        <p className="text-[10px] uppercase tracking-wider text-charcoal-400 mb-2 font-medium">Legal Documents</p>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                            <div className="flex items-center justify-between bg-white border border-cream-100 rounded px-2 py-1 text-xs">
+                                                                <span className="text-charcoal-500">TIN:</span>
+                                                                <span className="font-mono text-charcoal-900">{result.documents.tin || '—'}</span>
+                                                            </div>
+                                                            <div className="flex items-center justify-between bg-white border border-cream-100 rounded px-2 py-1 text-xs">
+                                                                <div className="flex items-center gap-1">
+                                                                    <span className="text-charcoal-500">Gov ID:</span>
+                                                                    {result.documents.govId ? (
+                                                                        <a href={result.documents.govId} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium">View</a>
+                                                                    ) : <span className="text-red-400">Missing</span>}
+                                                                </div>
+                                                                <span className="text-charcoal-600">
+                                                                    {result.documents.govIdExpiry ? `Exp: ${new Date(result.documents.govIdExpiry).toLocaleDateString()}` : 'No date'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center justify-between bg-white border border-cream-100 rounded px-2 py-1 text-xs h-fit">
+                                                                <span className="text-charcoal-500">BIR 2303:</span>
+                                                                {result.documents.bir ? (
+                                                                    <a href={result.documents.bir} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium">View Form</a>
+                                                                ) : <span className="text-charcoal-400 italic">Not provided</span>}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>

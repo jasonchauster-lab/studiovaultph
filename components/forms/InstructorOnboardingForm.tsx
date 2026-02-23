@@ -11,6 +11,10 @@ export default function InstructorOnboardingForm() {
     const [certificationBody, setCertificationBody] = useState('')
     const [selectedFileName, setSelectedFileName] = useState<string | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const [govIdFileName, setGovIdFileName] = useState<string | null>(null)
+    const [govIdPreviewUrl, setGovIdPreviewUrl] = useState<string | null>(null)
+    const [birFileName, setBirFileName] = useState<string | null>(null)
+    const [birPreviewUrl, setBirPreviewUrl] = useState<string | null>(null)
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -30,6 +34,12 @@ export default function InstructorOnboardingForm() {
                 setSelectedFileName(null)
                 if (previewUrl) URL.revokeObjectURL(previewUrl)
                 setPreviewUrl(null)
+                setGovIdFileName(null)
+                if (govIdPreviewUrl) URL.revokeObjectURL(govIdPreviewUrl)
+                setGovIdPreviewUrl(null)
+                setBirFileName(null)
+                if (birPreviewUrl) URL.revokeObjectURL(birPreviewUrl)
+                setBirPreviewUrl(null)
                 if (event.target instanceof HTMLFormElement) {
                     event.target.reset()
                 }
@@ -142,6 +152,116 @@ export default function InstructorOnboardingForm() {
                         />
                     </div>
                 )}
+
+                <div className="pt-4 border-t border-cream-200">
+                    <h3 className="text-sm font-semibold text-charcoal-900 uppercase tracking-wider mb-4">Legal Documents</h3>
+
+                    {/* TIN */}
+                    <div className="space-y-2 mb-6">
+                        <label htmlFor="tin" className="block text-sm font-medium text-charcoal-800">
+                            Tax Identification Number (TIN)
+                        </label>
+                        <input
+                            type="text"
+                            id="tin"
+                            name="tin"
+                            required
+                            className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400"
+                            placeholder="000-000-000-000"
+                        />
+                        <p className="text-[10px] text-charcoal-500 italic">Required for legal payment processing.</p>
+                    </div>
+
+                    {/* Gov ID */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-charcoal-800">
+                                Valid Government ID
+                            </label>
+                            <div className="border-2 border-dashed border-cream-300 rounded-lg p-4 flex flex-col items-center justify-center bg-cream-50/50 hover:bg-cream-100/50 transition-colors relative cursor-pointer group h-[120px]">
+                                <input
+                                    type="file"
+                                    name="govIdFile"
+                                    accept=".jpg,.jpeg,.png,.pdf"
+                                    required
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0]
+                                        setGovIdFileName(file ? file.name : null)
+                                        if (file && file.type.startsWith('image/')) {
+                                            const url = URL.createObjectURL(file)
+                                            setGovIdPreviewUrl(url)
+                                        } else {
+                                            setGovIdPreviewUrl(null)
+                                        }
+                                    }}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                />
+                                {govIdPreviewUrl ? (
+                                    <img src={govIdPreviewUrl} alt="ID Preview" className="h-full w-full object-contain" />
+                                ) : (
+                                    <>
+                                        <Upload className="w-5 h-5 text-charcoal-700 mb-1" />
+                                        <p className="text-[10px] text-center font-medium text-charcoal-700">
+                                            {govIdFileName || 'Upload ID'}
+                                        </p>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="govIdExpiry" className="block text-sm font-medium text-charcoal-800">
+                                ID Expiration Date
+                            </label>
+                            <input
+                                type="date"
+                                id="govIdExpiry"
+                                name="govIdExpiry"
+                                required
+                                className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all"
+                            />
+                            <p className="text-[10px] text-charcoal-500 italic">As listed on your ID.</p>
+                        </div>
+                    </div>
+
+                    {/* BIR Form 2303 */}
+                    <div className="space-y-2 mb-6">
+                        <label className="block text-sm font-medium text-charcoal-800">
+                            BIR Form 2303 (COR) <span className="text-charcoal-400 font-normal">(Optional)</span>
+                        </label>
+                        <div className="border-2 border-dashed border-cream-300 rounded-lg p-4 flex flex-col items-center justify-center bg-cream-50/50 hover:bg-cream-100/50 transition-colors relative cursor-pointer group h-[100px]">
+                            <input
+                                type="file"
+                                name="birFile"
+                                accept=".jpg,.jpeg,.png,.pdf"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    setBirFileName(file ? file.name : null)
+                                    if (file && file.type.startsWith('image/')) {
+                                        const url = URL.createObjectURL(file)
+                                        setBirPreviewUrl(url)
+                                    } else {
+                                        setBirPreviewUrl(null)
+                                    }
+                                }}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            />
+                            {birPreviewUrl ? (
+                                <img src={birPreviewUrl} alt="BIR Preview" className="h-full w-full object-contain" />
+                            ) : (
+                                <>
+                                    <Upload className="w-4 h-4 text-charcoal-700 mb-1" />
+                                    <p className="text-[10px] text-center font-medium text-charcoal-700">
+                                        {birFileName || 'Click to upload'}
+                                    </p>
+                                </>
+                            )}
+                        </div>
+                        <p className="text-[10px] text-charcoal-500 italic">
+                            If provided, tax withholding is 5%. If not, 10% will be withheld.
+                        </p>
+                    </div>
+                </div>
+
 
                 {/* Certificate Upload */}
                 <div className="space-y-2">

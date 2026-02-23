@@ -45,7 +45,7 @@ export default async function AdminDashboard({
     // 1. Fetch Verification Queue (Pending Certifications)
     const { data: pendingCerts } = await supabase
         .from('certifications')
-        .select('*, profiles(full_name, contact_number)')
+        .select('*, profiles(full_name, contact_number, tin, gov_id_url, gov_id_expiry, bir_url)')
         .eq('verified', false)
         .order('created_at', { ascending: false })
 
@@ -92,7 +92,24 @@ export default async function AdminDashboard({
                 .createSignedUrl(cert.proof_url, 3600) // 1 hour access
             signedUrl = data?.signedUrl
         }
-        return { ...cert, signedUrl }
+
+        let govIdSignedUrl = null
+        if (cert.profiles?.gov_id_url) {
+            const { data } = await supabase.storage
+                .from('certifications')
+                .createSignedUrl(cert.profiles.gov_id_url, 3600)
+            govIdSignedUrl = data?.signedUrl
+        }
+
+        let birSignedUrl = null
+        if (cert.profiles?.bir_url) {
+            const { data } = await supabase.storage
+                .from('certifications')
+                .createSignedUrl(cert.profiles.bir_url, 3600)
+            birSignedUrl = data?.signedUrl
+        }
+
+        return { ...cert, signedUrl, govIdSignedUrl, birSignedUrl }
     }) || [])
 
     // 2. Fetch Pending Studios
@@ -128,7 +145,9 @@ export default async function AdminDashboard({
     const { data: pendingStudioPayouts } = await supabase
         .from('studios')
         .select(`
-            id, name, mayors_permit_url, secretary_certificate_url, created_at,
+            id, name, mayors_permit_url, secretary_certificate_url,
+            bir_certificate_url,
+            created_at,
             profiles(full_name)
         `)
         .eq('payout_approval_status', 'pending')
@@ -400,18 +419,54 @@ export default async function AdminDashboard({
                                                 />
                                             </div>
                                         </div>
-                                        {cert.signedUrl ? (
-                                            <a
-                                                href={cert.signedUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-xs text-charcoal-600 underline hover:text-charcoal-900 mt-2 block"
-                                            >
-                                                View Certificate Proof
-                                            </a>
-                                        ) : cert.proof_url ? (
-                                            <p className="text-xs text-charcoal-400 mt-2 truncate">Proof path: {cert.proof_url} (No URL generated)</p>
-                                        ) : null}
+                                        <div className="mt-4 pt-3 border-t border-cream-100 flex flex-col gap-3">
+                                            <div>
+                                                <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Certification</p>
+                                                {cert.signedUrl ? (
+                                                    <a
+                                                        href={cert.signedUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-xs text-blue-600 underline hover:text-blue-800 font-medium"
+                                                    >
+                                                        View Certification Proof
+                                                    </a>
+                                                ) : cert.proof_url ? (
+                                                    <p className="text-xs text-charcoal-400 truncate">Proof path: {cert.proof_url} (No URL generated)</p>
+                                                ) : (
+                                                    <p className="text-xs text-red-500">Missing Proof</p>
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Legal Documents</p>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <div className="space-y-1.5">
+                                                        <div className="flex items-center justify-between bg-white border border-cream-100 rounded-lg px-2 py-1.5">
+                                                            <span className="text-[10px] text-charcoal-500">TIN:</span>
+                                                            <span className="text-[10px] font-mono font-medium text-charcoal-900">{cert.profiles?.tin || '—'}</span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between bg-white border border-cream-100 rounded-lg px-2 py-1.5">
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-[10px] text-charcoal-500">Gov ID:</span>
+                                                                {cert.govIdSignedUrl ? (
+                                                                    <a href={cert.govIdSignedUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-600 underline font-medium">View</a>
+                                                                ) : <span className="text-[10px] text-red-400">Missing</span>}
+                                                            </div>
+                                                            <span className="text-[10px] text-charcoal-700 font-medium">
+                                                                {cert.profiles?.gov_id_expiry ? `Exp: ${new Date(cert.profiles.gov_id_expiry).toLocaleDateString()}` : 'No date'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center justify-between bg-white border border-cream-100 rounded-lg px-2 py-1.5 h-fit">
+                                                        <span className="text-[10px] text-charcoal-500">BIR 2303:</span>
+                                                        {cert.birSignedUrl ? (
+                                                            <a href={cert.birSignedUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-600 underline font-medium">View Form</a>
+                                                        ) : <span className="text-[10px] text-charcoal-400 italic">Not provided</span>}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -536,7 +591,7 @@ export default async function AdminDashboard({
                                         </div>
 
                                         {/* Document Links */}
-                                        <div className="mt-4 pt-3 border-t border-cream-100 grid grid-cols-1 gap-4">
+                                        <div className="mt-4 pt-3 border-t border-cream-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Legal Documents</p>
                                                 <div className="space-y-1.5 flex flex-col items-start text-xs">
@@ -545,15 +600,14 @@ export default async function AdminDashboard({
                                                             Mayor's Permit
                                                         </a>
                                                     ) : (
-                                                        <p className="text-red-500">Missing Mayor's Permit</p>
+                                                        <p className="text-red-500">Missing Permit</p>
                                                     )}
-
                                                     {studio.certSignedUrl ? (
                                                         <a href={studio.certSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                                                            Secretary's Certificate
+                                                            Secretary's Cert
                                                         </a>
                                                     ) : (
-                                                        <p className="text-red-500">Missing Secretary's Cert</p>
+                                                        <p className="text-red-500">Missing Cert</p>
                                                     )}
                                                 </div>
                                             </div>

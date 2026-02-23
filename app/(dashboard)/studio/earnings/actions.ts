@@ -153,10 +153,14 @@ export async function requestPayout(prevState: any, formData: FormData) {
     }
 
     // Check approval status
-    const { data: studio } = await supabase.from('studios').select('payout_approval_status').eq('id', studioId).single()
+    const { data: studio } = await supabase
+        .from('studios')
+        .select('payout_approval_status')
+        .eq('id', studioId).single()
     if (studio?.payout_approval_status !== 'approved') {
         return { error: 'Your payout application is pending or has not been approved yet. Please submit the required documents first.' }
     }
+
 
     // Re-verify balance server-side to prevent overdrawing
     const { summary, error: dataError } = await getEarningsData(studioId)

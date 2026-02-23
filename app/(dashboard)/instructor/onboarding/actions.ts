@@ -30,14 +30,18 @@ export async function submitInstructorOnboarding(formData: FormData) {
     let certificationBody = formData.get('certificationBody') as string
     const otherCertification = formData.get('otherCertification') as string
     const certificateFile = formData.get('certificateFile') as File
+    const tin = formData.get('tin') as string
+    const govIdExpiry = formData.get('govIdExpiry') as string
+    const govIdFile = formData.get('govIdFile') as File
+    const birFile = formData.get('birFile') as File
 
     // Use specific certification name if 'Other' was selected
     if (certificationBody === 'Other' && otherCertification) {
         certificationBody = otherCertification
     }
 
-    if (!fullName || !instagramHandle || !contactNumber || !certificationBody || !certificateFile || certificateFile.size === 0) {
-        return { error: 'All fields are required, including a valid certificate file' }
+    if (!fullName || !instagramHandle || !contactNumber || !certificationBody || !certificateFile || certificateFile.size === 0 || !tin || !govIdExpiry || !govIdFile || govIdFile.size === 0) {
+        return { error: 'All fields are required, including TIN and Gov ID' }
     }
 
     // 1. Update Profile
@@ -48,6 +52,8 @@ export async function submitInstructorOnboarding(formData: FormData) {
             full_name: fullName,
             instagram_handle: instagramHandle,
             contact_number: contactNumber,
+            tin: tin,
+            gov_id_expiry: govIdExpiry,
             role: 'instructor', // Default to instructor
             updated_at: new Date().toISOString()
         })
@@ -58,23 +64,49 @@ export async function submitInstructorOnboarding(formData: FormData) {
         return { error: 'Failed to update profile' }
     }
 
-    // 2. Upload Certificate
-    // Note: 'certifications' bucket must exist. We'll assume it does or user needs to create it.
-    // For this task, we'll try to upload if bucket exists, or just store a placeholder URL if not strictly enforced yet.
-    // Ideally, we should check bucket existence.
+    const certificatePath = `${user.id}/cert_${Date.now()}.${certificateFile.name.split('.').pop()}`
+    const govIdPath = `${user.id}/govid_${Date.now()}.${govIdFile.name.split('.').pop()}`
+    let birPath = null
 
-    const fileExt = certificateFile.name.split('.').pop()
-    const filePath = `${user.id}/${Date.now()}.${fileExt}`
-
-    const { error: uploadError } = await supabase.storage
+    // Upload Cert
+    const { error: certUploadError } = await supabase.storage
         .from('certifications')
-        .upload(filePath, certificateFile)
+        .upload(certificatePath, certificateFile)
 
-    if (uploadError) {
-        console.error('Upload error:', uploadError)
-        // For now, we might return error, or proceed if bucket is missing (as we can't create it via client easily without setup)
-        return { error: 'Failed to upload certificate. Please try again.' }
+    if (certUploadError) {
+        console.error('Cert upload error:', certUploadError)
+        return { error: 'Failed to upload certificate' }
     }
+
+    // Upload Gov ID
+    const { error: govIdUploadError } = await supabase.storage
+        .from('certifications')
+        .upload(govIdPath, govIdFile)
+
+    if (govIdUploadError) {
+        console.error('Gov ID upload error:', govIdUploadError)
+        return { error: 'Failed to upload Government ID' }
+    }
+
+    // Upload BIR (Optional)
+    if (birFile && birFile.size > 0) {
+        birPath = `${user.id}/bir_${Date.now()}.${birFile.name.split('.').pop()}`
+        const { error: birUploadError } = await supabase.storage
+            .from('certifications')
+            .upload(birPath, birFile)
+
+        if (birUploadError) {
+            console.error('BIR upload error:', birUploadError)
+            // We might allow proceeding without BIR if upload fails but maybe better to error
+            return { error: 'Failed to upload BIR document' }
+        }
+    }
+
+    // Update Profile with URLs
+    await supabase.from('profiles').update({
+        gov_id_url: govIdPath,
+        bir_url: birPath
+    }).eq('id', user.id)
 
     // Get public URL (or signed URL depending on bucket privacy)
     // Assuming private bucket for certs, we typically store the path.
@@ -88,7 +120,7 @@ export async function submitInstructorOnboarding(formData: FormData) {
             instructor_id: user.id,
             certification_body: certificationBody,
             certification_name: 'Instructor Certification', // Generic name or derived
-            proof_url: filePath,
+            proof_url: certificatePath,
             verified: false // Defaults to false in DB, but being explicit
         })
 

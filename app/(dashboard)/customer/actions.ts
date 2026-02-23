@@ -408,6 +408,17 @@ export async function bookInstructorSession(
     const endDateTime = new Date(startDateTime)
     endDateTime.setHours(startDateTime.getHours() + 1)
 
+    // 0. Check Instructor Suspension
+    const { data: instructorProfile } = await supabase
+        .from('profiles')
+        .select('is_suspended')
+        .eq('id', instructorId)
+        .single()
+
+    if (instructorProfile?.is_suspended) {
+        return { error: 'This instructor is not currently accepting bookings.' }
+    }
+
     // 1. Validate Instructor Availability
     const dayOfWeek = startDateTime.getDay()
     const { data: instructorAvailability } = await supabase

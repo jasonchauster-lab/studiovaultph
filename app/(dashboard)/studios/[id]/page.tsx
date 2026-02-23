@@ -115,13 +115,28 @@ export default async function StudioDetailsPage({
                         <Clock className="w-5 h-5 text-charcoal-500" />
                         Available Slots
                     </h2>
-                    <BookingSection
-                        studioId={studio.id}
-                        slots={slots || []}
-                        instructors={instructors}
-                        studioHourlyRate={studio.hourly_rate || 0}
-                        studioPricing={studio.pricing as Record<string, number> | undefined}
-                    />
+                    {(() => {
+                        const now = new Date().toISOString().split('T')[0];
+                        const expired = (studio.mayors_permit_expiry && studio.mayors_permit_expiry < now)
+                            || (studio.bir_certificate_expiry && studio.bir_certificate_expiry < now);
+                        if (expired || studio.verified === false) {
+                            return (
+                                <div className="py-8 text-center bg-red-50 border border-red-200 rounded-xl">
+                                    <p className="text-red-700 font-medium text-sm">This studio is temporarily unavailable for bookings.</p>
+                                    <p className="text-red-600 text-xs mt-1">One or more required documents have expired. The studio owner has been notified.</p>
+                                </div>
+                            );
+                        }
+                        return (
+                            <BookingSection
+                                studioId={studio.id}
+                                slots={slots || []}
+                                instructors={instructors}
+                                studioHourlyRate={studio.hourly_rate || 0}
+                                studioPricing={studio.pricing as Record<string, number> | undefined}
+                            />
+                        );
+                    })()}
                 </div>
 
 

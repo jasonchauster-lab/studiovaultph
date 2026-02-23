@@ -837,7 +837,7 @@ export async function searchAllUsers(query: string) {
     const results: any[] = [];
 
     // Search Profiles
-    let profileQuery = supabase.from('profiles').select('id, full_name, role, contact_number, is_founding_partner');
+    let profileQuery = supabase.from('profiles').select('id, full_name, role, contact_number, is_founding_partner, gov_id_url, gov_id_expiry, bir_url, tin');
 
     if (isPhoneQuery) {
         profileQuery = profileQuery.ilike('contact_number', `%${cleanQuery}%`);
@@ -846,10 +846,27 @@ export async function searchAllUsers(query: string) {
     }
 
     const { data: profiles } = await profileQuery.limit(10);
+    const profilePathsToSign: string[] = [];
     if (profiles) {
-        // Attempt to fetch emails from auth if possible? The user might not have `email` in profiles explicitly unless added.
-        // Assuming we rely on name/phone for profiles if email column is absent. If it's present, we could select it.
-        // The previous error about 'email does not exist' might happen if we query it. So I omit email for now.
+        profiles.forEach(p => {
+            if (p.role === 'instructor') {
+                if (p.gov_id_url) profilePathsToSign.push(p.gov_id_url);
+                if (p.bir_url) profilePathsToSign.push(p.bir_url);
+            }
+        });
+    }
+
+    let profileSignedUrlsMap: Record<string, string> = {};
+    if (profilePathsToSign.length > 0) {
+        const { data: signedData } = await supabase.storage.from('certifications').createSignedUrls(profilePathsToSign, 3600);
+        if (signedData) {
+            signedData.forEach(item => {
+                if (item.signedUrl && item.path) profileSignedUrlsMap[item.path] = item.signedUrl;
+            });
+        }
+    }
+
+    if (profiles) {
         profiles.forEach(p => {
             results.push({
                 id: p.id,
@@ -858,7 +875,13 @@ export async function searchAllUsers(query: string) {
                 phone: p.contact_number,
                 role: p.role,
                 url: p.role === 'instructor' ? `/instructors/${p.id}` : '#',
-                is_founding_partner: p.is_founding_partner
+                is_founding_partner: p.is_founding_partner,
+                documents: p.role === 'instructor' ? {
+                    govId: p.gov_id_url ? profileSignedUrlsMap[p.gov_id_url] : null,
+                    govIdExpiry: p.gov_id_expiry,
+                    bir: p.bir_url ? profileSignedUrlsMap[p.bir_url] : null,
+                    tin: p.tin
+                } : null
             });
         });
     }

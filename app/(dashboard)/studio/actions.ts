@@ -175,6 +175,7 @@ export async function createStudio(formData: FormData) {
     const govId = formData.get('govId') as File
     const spacePhotos = formData.getAll('spacePhotos') as File[]
 
+
     if (!name || !location || !contactNumber || !address || !birCertificate || !govId || spacePhotos.length === 0) {
         return { error: 'All fields and documents are required' }
     }
@@ -214,6 +215,7 @@ export async function createStudio(formData: FormData) {
         const { error: govIdError } = await supabase.storage.from('certifications').upload(govIdPath, govId)
         if (govIdError) console.error('Gov ID upload error:', govIdError)
     }
+
 
     const spacePhotosUrls: string[] = []
     if (spacePhotos && spacePhotos.length > 0) {
