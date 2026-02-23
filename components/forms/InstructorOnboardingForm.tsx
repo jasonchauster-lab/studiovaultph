@@ -53,13 +53,13 @@ export default function InstructorOnboardingForm() {
     }
 
     return (
-        <div className="w-full max-w-lg mx-auto bg-card border border-cream-300 rounded-xl shadow-sm overflow-hidden">
-            <div className="p-8 bg-cream-50 border-b border-cream-200">
+        <div className="w-full max-w-lg mx-auto bg-card border border-cream-300 rounded-xl shadow-sm overflow-hidden mb-8">
+            <div className="p-5 sm:p-8 bg-cream-50 border-b border-cream-200">
                 <h2 className="text-2xl font-serif text-charcoal-900 mb-2">Instructor Application</h2>
                 <p className="text-charcoal-600">Join the StudioVaultPH network. Please provide your details and certification.</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-8 space-y-6 bg-white/50 backdrop-blur-sm">
+            <form onSubmit={handleSubmit} className="p-5 sm:p-8 space-y-6 bg-white/50 backdrop-blur-sm">
 
                 {/* Full Name */}
                 <div className="space-y-2">

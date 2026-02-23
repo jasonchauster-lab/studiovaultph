@@ -144,25 +144,33 @@ export default function PartnerFeeClient({
                     <div className="mt-4 pt-3 border-t border-cream-100">
                         <p className="text-[10px] uppercase tracking-wider text-charcoal-400 mb-2 font-medium">Documents</p>
                         <div className="flex flex-wrap gap-2 text-[10px]">
-                            {p.documents.bir && (
+                            {p.documents.bir ? (
                                 <a href={p.documents.bir} target="_blank" rel="noopener noreferrer" className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
                                     BIR 2303
                                 </a>
+                            ) : (
+                                <span className="px-2 py-0.5 bg-red-50 text-red-500 rounded border border-red-100 opacity-50 cursor-not-allowed">Missing BIR</span>
                             )}
-                            {p.documents.govId && (
+                            {p.documents.govId ? (
                                 <a href={p.documents.govId} target="_blank" rel="noopener noreferrer" className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
                                     Gov ID
                                 </a>
+                            ) : (
+                                <span className="px-2 py-0.5 bg-red-50 text-red-500 rounded border border-red-100 opacity-50 cursor-not-allowed">Missing Gov ID</span>
                             )}
-                            {p.documents.mayorsPermit && (
+                            {p.documents.mayorsPermit ? (
                                 <a href={p.documents.mayorsPermit} target="_blank" rel="noopener noreferrer" className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
                                     Permit
                                 </a>
+                            ) : (
+                                <span className="px-2 py-0.5 bg-red-50 text-red-500 rounded border border-red-100 opacity-50 cursor-not-allowed">Missing Permit</span>
                             )}
-                            {p.documents.secretaryCert && (
+                            {p.documents.secretaryCert ? (
                                 <a href={p.documents.secretaryCert} target="_blank" rel="noopener noreferrer" className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
                                     Cert
                                 </a>
+                            ) : (
+                                <span className="px-2 py-0.5 bg-red-50 text-red-500 rounded border border-red-100 opacity-50 cursor-not-allowed">Missing Cert</span>
                             )}
                         </div>
 

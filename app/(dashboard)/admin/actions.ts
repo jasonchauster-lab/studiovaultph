@@ -972,7 +972,7 @@ export async function searchAllUsers(query: string) {
     }
 
     // Search Studios
-    let studioQuery = supabase.from('studios').select('id, name, location, contact_number, is_founding_partner, bir_certificate_url, gov_id_url, mayors_permit_url, secretary_certificate_url, space_photos_urls');
+    let studioQuery = supabase.from('studios').select('id, name, location, contact_number, is_founding_partner, bir_certificate_url, bir_certificate_expiry, gov_id_url, gov_id_expiry, mayors_permit_url, mayors_permit_expiry, secretary_certificate_url, secretary_certificate_expiry, insurance_url, insurance_expiry, space_photos_urls');
 
     if (isPhoneQuery) {
         studioQuery = studioQuery.ilike('contact_number', `%${cleanQuery}%`);
@@ -988,6 +988,7 @@ export async function searchAllUsers(query: string) {
             if (s.gov_id_url) pathsToSign.push(s.gov_id_url);
             if (s.mayors_permit_url) pathsToSign.push(s.mayors_permit_url);
             if (s.secretary_certificate_url) pathsToSign.push(s.secretary_certificate_url);
+            if (s.insurance_url) pathsToSign.push(s.insurance_url);
         });
 
         let signedUrlsMap: Record<string, string> = {};
@@ -1011,9 +1012,15 @@ export async function searchAllUsers(query: string) {
                 is_founding_partner: s.is_founding_partner,
                 documents: {
                     bir: s.bir_certificate_url ? signedUrlsMap[s.bir_certificate_url] : null,
+                    birExpiry: s.bir_certificate_expiry,
                     govId: s.gov_id_url ? signedUrlsMap[s.gov_id_url] : null,
+                    govIdExpiry: s.gov_id_expiry,
                     mayorsPermit: s.mayors_permit_url ? signedUrlsMap[s.mayors_permit_url] : null,
+                    mayorsPermitExpiry: s.mayors_permit_expiry,
                     secretaryCert: s.secretary_certificate_url ? signedUrlsMap[s.secretary_certificate_url] : null,
+                    secretaryCertExpiry: s.secretary_certificate_expiry,
+                    insurance: s.insurance_url ? signedUrlsMap[s.insurance_url] : null,
+                    insuranceExpiry: s.insurance_expiry,
                     spacePhotos: s.space_photos_urls || []
                 }
             });

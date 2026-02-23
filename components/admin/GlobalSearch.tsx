@@ -19,11 +19,16 @@ export type SearchResult = {
     custom_fee_percentage?: number;
     documents?: {
         bir: string | null;
+        birExpiry?: string | null;
         govId: string | null;
         govIdExpiry?: string | null;
         tin?: string | null;
         mayorsPermit?: string | null;
+        mayorsPermitExpiry?: string | null;
         secretaryCert?: string | null;
+        secretaryCertExpiry?: string | null;
+        insurance?: string | null;
+        insuranceExpiry?: string | null;
         spacePhotos?: string[];
     };
 };
@@ -242,35 +247,30 @@ export default function GlobalSearch() {
                                                 {result.type === 'studio' && result.documents && (
                                                     <div className="mt-3 pt-3 border-t border-cream-200">
                                                         <p className="text-[10px] uppercase tracking-wider text-charcoal-400 mb-2 font-medium">Legal Documents</p>
-                                                        <div className="flex flex-wrap gap-2 text-xs">
-                                                            {result.documents.bir ? (
-                                                                <a href={result.documents.bir} target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
-                                                                    BIR Form 2303
-                                                                </a>
-                                                            ) : (
-                                                                <span className="px-2 py-1 bg-red-50 text-red-500 rounded border border-red-100 opacity-50 cursor-not-allowed">Missing BIR</span>
-                                                            )}
-                                                            {result.documents.govId ? (
-                                                                <a href={result.documents.govId} target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
-                                                                    Gov ID
-                                                                </a>
-                                                            ) : (
-                                                                <span className="px-2 py-1 bg-red-50 text-red-500 rounded border border-red-100 opacity-50 cursor-not-allowed">Missing Gov ID</span>
-                                                            )}
-                                                            {result.documents.mayorsPermit ? (
-                                                                <a href={result.documents.mayorsPermit} target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
-                                                                    Mayor's Permit
-                                                                </a>
-                                                            ) : (
-                                                                <span className="px-2 py-1 bg-red-50 text-red-500 rounded border border-red-100 opacity-50 cursor-not-allowed">Missing Permit</span>
-                                                            )}
-                                                            {result.documents.secretaryCert ? (
-                                                                <a href={result.documents.secretaryCert} target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
-                                                                    Secretary's Cert
-                                                                </a>
-                                                            ) : (
-                                                                <span className="px-2 py-1 bg-red-50 text-red-500 rounded border border-red-100 opacity-50 cursor-not-allowed">Missing Cert</span>
-                                                            )}
+                                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                            {[
+                                                                { title: 'BIR Form 2303', url: result.documents.bir, expiry: result.documents.birExpiry },
+                                                                { title: 'Gov ID', url: result.documents.govId, expiry: result.documents.govIdExpiry },
+                                                                { title: "Mayor's Permit", url: result.documents.mayorsPermit, expiry: result.documents.mayorsPermitExpiry },
+                                                                { title: "Secretary's Cert", url: result.documents.secretaryCert, expiry: result.documents.secretaryCertExpiry },
+                                                                { title: 'Insurance', url: result.documents.insurance, expiry: result.documents.insuranceExpiry }
+                                                            ].map((doc, idx) => (
+                                                                <div key={idx} className="flex flex-col justify-between gap-1 p-2 bg-white border border-cream-100 rounded-lg text-xs">
+                                                                    <div className="flex items-center justify-between gap-2">
+                                                                        <span className="text-charcoal-600 font-medium truncate">{doc.title}</span>
+                                                                        {doc.url ? (
+                                                                            <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline text-[10px]">View</a>
+                                                                        ) : (
+                                                                            <span className="text-red-400 text-[10px]">Missing</span>
+                                                                        )}
+                                                                    </div>
+                                                                    {doc.url && (
+                                                                        <div className="text-[10px] text-charcoal-500 mt-0.5">
+                                                                            {doc.expiry ? `Exp: ${new Date(doc.expiry).toLocaleDateString()}` : <span className="italic text-charcoal-400">No expiry provided</span>}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            ))}
                                                         </div>
 
                                                         {result.documents.spacePhotos && result.documents.spacePhotos.length > 0 && (
