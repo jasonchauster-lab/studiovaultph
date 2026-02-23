@@ -25,6 +25,7 @@ export interface Profile {
     full_name: string;
     avatar_url?: string;
     bio?: string;
+    date_of_birth?: string;
     role: 'customer' | 'instructor' | 'admin';
     instagram_handle?: string;
     emergency_contact?: string;

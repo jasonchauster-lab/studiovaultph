@@ -58,6 +58,10 @@ export default function StudioApplicationForm() {
                     We will reach out through this number to confirm your studio's application and booking details.
                 </p>
             </div>
+            <div>
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">Date of Birth of Authorized Representative <span className="text-red-500">*</span></label>
+                <input type="date" name="dateOfBirth" required className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white" />
+            </div>
 
             <div>
                 <label className="block text-sm font-medium text-charcoal-700 mb-1">Location <span className="text-red-500">*</span></label>

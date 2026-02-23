@@ -76,6 +76,20 @@ export default function InstructorOnboardingForm() {
                     />
                 </div>
 
+                {/* Date of Birth */}
+                <div className="space-y-2">
+                    <label htmlFor="dateOfBirth" className="block text-sm font-medium text-charcoal-800">
+                        Date of Birth
+                    </label>
+                    <input
+                        type="date"
+                        id="dateOfBirth"
+                        name="dateOfBirth"
+                        required
+                        className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all"
+                    />
+                </div>
+
                 {/* Instagram Handle */}
                 <div className="space-y-2">
                     <label htmlFor="instagramHandle" className="block text-sm font-medium text-charcoal-800">

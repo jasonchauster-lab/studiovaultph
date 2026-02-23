@@ -170,6 +170,7 @@ export async function createStudio(formData: FormData) {
         const location = formData.get('location') as string
         const hourlyRate = formData.get('hourlyRate') as string
         const contactNumber = formData.get('contactNumber') as string
+        const dateOfBirth = formData.get('dateOfBirth') as string
         const address = formData.get('address') as string
 
         const birCertificate = formData.get('birCertificate') as File
@@ -182,7 +183,7 @@ export async function createStudio(formData: FormData) {
         const insuranceExpiry = formData.get('insuranceExpiry') as string
 
 
-        if (!name || !location || !contactNumber || !address || !birCertificate || !govId || spacePhotos.length === 0) {
+        if (!name || !location || !contactNumber || !dateOfBirth || !address || !birCertificate || !govId || spacePhotos.length === 0) {
             return { error: 'All fields and documents are required' }
         }
 
@@ -281,6 +282,8 @@ export async function createStudio(formData: FormData) {
                 full_name: user.user_metadata?.full_name || 'Studio Owner',
                 email: user.email, // Required by profiles schema
                 role: 'studio', // Ensure they have the studio role
+                contact_number: contactNumber,
+                date_of_birth: dateOfBirth,
                 updated_at: new Date().toISOString()
             })
             .select()

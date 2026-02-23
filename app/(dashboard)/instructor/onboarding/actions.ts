@@ -27,6 +27,7 @@ export async function submitInstructorOnboarding(formData: FormData) {
     const fullName = formData.get('fullName') as string
     const instagramHandle = formData.get('instagramHandle') as string
     const contactNumber = formData.get('contactNumber') as string
+    const dateOfBirth = formData.get('dateOfBirth') as string
     let certificationBody = formData.get('certificationBody') as string
     const otherCertification = formData.get('otherCertification') as string
     const certificateFile = formData.get('certificateFile') as File
@@ -40,7 +41,7 @@ export async function submitInstructorOnboarding(formData: FormData) {
         certificationBody = otherCertification
     }
 
-    if (!fullName || !instagramHandle || !contactNumber || !certificationBody || !certificateFile || certificateFile.size === 0 || !tin || !govIdExpiry || !govIdFile || govIdFile.size === 0) {
+    if (!fullName || !instagramHandle || !contactNumber || !dateOfBirth || !certificationBody || !certificateFile || certificateFile.size === 0 || !tin || !govIdExpiry || !govIdFile || govIdFile.size === 0) {
         return { error: 'All fields are required, including TIN and Gov ID' }
     }
 
@@ -52,6 +53,7 @@ export async function submitInstructorOnboarding(formData: FormData) {
             full_name: fullName,
             instagram_handle: instagramHandle,
             contact_number: contactNumber,
+            date_of_birth: dateOfBirth,
             tin: tin,
             gov_id_expiry: govIdExpiry,
             role: 'instructor', // Default to instructor
