@@ -864,7 +864,7 @@ export async function searchAllUsers(query: string) {
     }
 
     // Search Studios
-    let studioQuery = supabase.from('studios').select('id, name, location, contact_number, is_founding_partner');
+    let studioQuery = supabase.from('studios').select('id, name, location, contact_number, is_founding_partner, bir_certificate_url, gov_id_url, mayors_permit_url, secretary_certificate_url, space_photos_urls');
 
     if (isPhoneQuery) {
         studioQuery = studioQuery.ilike('contact_number', `%${cleanQuery}%`);
@@ -874,6 +874,24 @@ export async function searchAllUsers(query: string) {
 
     const { data: studios } = await studioQuery.limit(10);
     if (studios) {
+        const pathsToSign: string[] = [];
+        studios.forEach(s => {
+            if (s.bir_certificate_url) pathsToSign.push(s.bir_certificate_url);
+            if (s.gov_id_url) pathsToSign.push(s.gov_id_url);
+            if (s.mayors_permit_url) pathsToSign.push(s.mayors_permit_url);
+            if (s.secretary_certificate_url) pathsToSign.push(s.secretary_certificate_url);
+        });
+
+        let signedUrlsMap: Record<string, string> = {};
+        if (pathsToSign.length > 0) {
+            const { data: signedData } = await supabase.storage.from('certifications').createSignedUrls(pathsToSign, 3600);
+            if (signedData) {
+                signedData.forEach(item => {
+                    if (item.signedUrl && item.path) signedUrlsMap[item.path] = item.signedUrl;
+                });
+            }
+        }
+
         studios.forEach(s => {
             results.push({
                 id: s.id,
@@ -882,7 +900,14 @@ export async function searchAllUsers(query: string) {
                 phone: s.contact_number,
                 location: s.location,
                 url: `/studios/${s.id}`,
-                is_founding_partner: s.is_founding_partner
+                is_founding_partner: s.is_founding_partner,
+                documents: {
+                    bir: s.bir_certificate_url ? signedUrlsMap[s.bir_certificate_url] : null,
+                    govId: s.gov_id_url ? signedUrlsMap[s.gov_id_url] : null,
+                    mayorsPermit: s.mayors_permit_url ? signedUrlsMap[s.mayors_permit_url] : null,
+                    secretaryCert: s.secretary_certificate_url ? signedUrlsMap[s.secretary_certificate_url] : null,
+                    spacePhotos: s.space_photos_urls || []
+                }
             });
         });
     }

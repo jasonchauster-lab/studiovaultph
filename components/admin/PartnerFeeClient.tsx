@@ -15,6 +15,13 @@ type PartnerProps = {
     custom_fee_percentage: number
     email?: string
     phone?: string
+    documents?: {
+        bir: string | null;
+        govId: string | null;
+        mayorsPermit: string | null;
+        secretaryCert: string | null;
+        spacePhotos: string[];
+    };
 }
 
 export default function PartnerFeeClient({
@@ -45,7 +52,8 @@ export default function PartnerFeeClient({
                 is_founding_partner: s.is_founding_partner || false,
                 custom_fee_percentage: s.custom_fee_percentage || 20,
                 email: ownerObj?.email,
-                phone: s.contact_number
+                phone: s.contact_number,
+                documents: s.documents
             }
         })
     ]
@@ -130,6 +138,48 @@ export default function PartnerFeeClient({
                         <span className="text-[10px] text-charcoal-400 italic">Enable Founding Partner to edit</span>
                     )}
                 </div>
+
+                {/* Studio Documents section */}
+                {p.type === 'studio' && p.documents && (
+                    <div className="mt-4 pt-3 border-t border-cream-100">
+                        <p className="text-[10px] uppercase tracking-wider text-charcoal-400 mb-2 font-medium">Documents</p>
+                        <div className="flex flex-wrap gap-2 text-[10px]">
+                            {p.documents.bir && (
+                                <a href={p.documents.bir} target="_blank" rel="noopener noreferrer" className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
+                                    BIR 2303
+                                </a>
+                            )}
+                            {p.documents.govId && (
+                                <a href={p.documents.govId} target="_blank" rel="noopener noreferrer" className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
+                                    Gov ID
+                                </a>
+                            )}
+                            {p.documents.mayorsPermit && (
+                                <a href={p.documents.mayorsPermit} target="_blank" rel="noopener noreferrer" className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
+                                    Permit
+                                </a>
+                            )}
+                            {p.documents.secretaryCert && (
+                                <a href={p.documents.secretaryCert} target="_blank" rel="noopener noreferrer" className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
+                                    Cert
+                                </a>
+                            )}
+                        </div>
+
+                        {p.documents.spacePhotos && p.documents.spacePhotos.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                                {p.documents.spacePhotos.slice(0, 4).map((photo, i) => (
+                                    <a key={i} href={photo} target="_blank" rel="noopener noreferrer" className="block w-6 h-6 rounded border border-cream-200 overflow-hidden hover:opacity-80 transition-opacity">
+                                        <img src={photo} alt={`Space ${i + 1}`} className="w-full h-full object-cover" />
+                                    </a>
+                                ))}
+                                {p.documents.spacePhotos.length > 4 && (
+                                    <span className="text-[9px] text-charcoal-400 self-center">+{p.documents.spacePhotos.length - 4} more</span>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         )
     }

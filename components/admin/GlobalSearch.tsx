@@ -14,9 +14,15 @@ export type SearchResult = {
     phone?: string;
     role?: string;
     location?: string;
-    url: string;
     is_founding_partner?: boolean;
     custom_fee_percentage?: number;
+    documents?: {
+        bir: string | null;
+        govId: string | null;
+        mayorsPermit: string | null;
+        secretaryCert: string | null;
+        spacePhotos: string[];
+    };
 };
 
 type ExpandedState = {
@@ -228,6 +234,56 @@ export default function GlobalSearch() {
                                                         View Profile
                                                     </Link>
                                                 </div>
+
+                                                {/* Legal Documents Section (for Studios) */}
+                                                {result.type === 'studio' && result.documents && (
+                                                    <div className="mt-3 pt-3 border-t border-cream-200">
+                                                        <p className="text-[10px] uppercase tracking-wider text-charcoal-400 mb-2 font-medium">Legal Documents</p>
+                                                        <div className="flex flex-wrap gap-2 text-xs">
+                                                            {result.documents.bir ? (
+                                                                <a href={result.documents.bir} target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
+                                                                    BIR Form 2303
+                                                                </a>
+                                                            ) : (
+                                                                <span className="px-2 py-1 bg-red-50 text-red-500 rounded border border-red-100 opacity-50 cursor-not-allowed">Missing BIR</span>
+                                                            )}
+                                                            {result.documents.govId ? (
+                                                                <a href={result.documents.govId} target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
+                                                                    Gov ID
+                                                                </a>
+                                                            ) : (
+                                                                <span className="px-2 py-1 bg-red-50 text-red-500 rounded border border-red-100 opacity-50 cursor-not-allowed">Missing Gov ID</span>
+                                                            )}
+                                                            {result.documents.mayorsPermit ? (
+                                                                <a href={result.documents.mayorsPermit} target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
+                                                                    Mayor's Permit
+                                                                </a>
+                                                            ) : (
+                                                                <span className="px-2 py-1 bg-red-50 text-red-500 rounded border border-red-100 opacity-50 cursor-not-allowed">Missing Permit</span>
+                                                            )}
+                                                            {result.documents.secretaryCert ? (
+                                                                <a href={result.documents.secretaryCert} target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
+                                                                    Secretary's Cert
+                                                                </a>
+                                                            ) : (
+                                                                <span className="px-2 py-1 bg-red-50 text-red-500 rounded border border-red-100 opacity-50 cursor-not-allowed">Missing Cert</span>
+                                                            )}
+                                                        </div>
+
+                                                        {result.documents.spacePhotos && result.documents.spacePhotos.length > 0 && (
+                                                            <div className="mt-3">
+                                                                <p className="text-[10px] uppercase tracking-wider text-charcoal-400 mb-2 font-medium">Space Photos</p>
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {result.documents.spacePhotos.map((photo, i) => (
+                                                                        <a key={i} href={photo} target="_blank" rel="noopener noreferrer" className="block w-10 h-10 rounded border border-cream-200 overflow-hidden hover:opacity-80 transition-opacity">
+                                                                            <img src={photo} alt={`Space ${i + 1}`} className="w-full h-full object-cover" />
+                                                                        </a>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </li>

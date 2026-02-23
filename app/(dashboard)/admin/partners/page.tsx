@@ -20,11 +20,41 @@ export default async function AdminPartnersPage() {
         .order('full_name', { ascending: true });
 
     // Fetch Studios
-    const { data: studios } = await supabase
+    const { data: studiosRaw } = await supabase
         .from('studios')
-        .select('id, name, location, is_founding_partner, custom_fee_percentage, contact_number, owner:profiles!owner_id(email)')
+        .select('id, name, location, is_founding_partner, custom_fee_percentage, contact_number, owner:profiles!owner_id(email), bir_certificate_url, gov_id_url, mayors_permit_url, secretary_certificate_url, space_photos_urls')
         .eq('verified', true)
         .order('name', { ascending: true });
+
+    // Sign Studio Documents
+    const studios = await Promise.all((studiosRaw || []).map(async (s: any) => {
+        const pathsToSign = [];
+        if (s.bir_certificate_url) pathsToSign.push(s.bir_certificate_url);
+        if (s.gov_id_url) pathsToSign.push(s.gov_id_url);
+        if (s.mayors_permit_url) pathsToSign.push(s.mayors_permit_url);
+        if (s.secretary_certificate_url) pathsToSign.push(s.secretary_certificate_url);
+
+        let signedUrlsMap: Record<string, string> = {};
+        if (pathsToSign.length > 0) {
+            const { data: signedData } = await supabase.storage.from('certifications').createSignedUrls(pathsToSign, 3600);
+            if (signedData) {
+                signedData.forEach(item => {
+                    if (item.signedUrl && item.path) signedUrlsMap[item.path] = item.signedUrl;
+                });
+            }
+        }
+
+        return {
+            ...s,
+            documents: {
+                bir: s.bir_certificate_url ? signedUrlsMap[s.bir_certificate_url] : null,
+                govId: s.gov_id_url ? signedUrlsMap[s.gov_id_url] : null,
+                mayorsPermit: s.mayors_permit_url ? signedUrlsMap[s.mayors_permit_url] : null,
+                secretaryCert: s.secretary_certificate_url ? signedUrlsMap[s.secretary_certificate_url] : null,
+                spacePhotos: s.space_photos_urls || []
+            }
+        };
+    }));
 
     return (
         <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
