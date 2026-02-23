@@ -184,18 +184,24 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                 <h2 className="text-xl font-serif text-charcoal-900 border-b border-cream-200 pb-2">Equipment & Inventory</h2>
 
                 <div className="bg-cream-50 p-4 rounded-lg border border-cream-200 mb-4">
-                    <label className="block text-sm font-medium text-charcoal-700 mb-1">Total Reformer Count (Inventory)</label>
-                    <input
-                        type="number"
-                        name="reformersCount"
-                        defaultValue={studio.reformers_count}
-                        required
-                        min="0"
-                        className="w-full md:w-1/3 px-4 py-2 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-                    />
-                    <p className="text-xs text-charcoal-500 mt-1">
+                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Equipment Inventory Quantities</label>
+                    <p className="text-xs text-charcoal-500 mb-3">
                         Use this to track how many physical machines you have. This does not limit booking slots automatically unless confirmed otherwise.
                     </p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
+                            <div key={eq}>
+                                <label className="block text-xs font-medium text-charcoal-600 mb-1">{eq}</label>
+                                <input
+                                    type="number"
+                                    name={`qty_${eq}`}
+                                    defaultValue={studio.inventory?.[eq] || (eq === 'Reformer' ? studio.reformers_count : 0)}
+                                    min="0"
+                                    className="w-full px-3 py-2 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm"
+                                />
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 <div>

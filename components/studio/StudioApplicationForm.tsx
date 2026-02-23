@@ -143,32 +143,33 @@ export default function StudioApplicationForm() {
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-2">Available Equipment <span className="text-red-500">*</span></label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
-                    <label className="flex items-center gap-2">
-                        <input type="checkbox" name="reformer" className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                        <span className="text-charcoal-700 text-sm">Reformer</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                        <input type="checkbox" name="cadillac" className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                        <span className="text-charcoal-700 text-sm">Cadillac</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                        <input type="checkbox" name="tower" className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                        <span className="text-charcoal-700 text-sm">Tower</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                        <input type="checkbox" name="chair" className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                        <span className="text-charcoal-700 text-sm">Chair</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                        <input type="checkbox" name="ladderBarrel" className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                        <span className="text-charcoal-700 text-sm">Ladder Barrel</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                        <input type="checkbox" name="mat" className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                        <span className="text-charcoal-700 text-sm">Mat</span>
-                    </label>
+                <label className="block text-sm font-medium text-charcoal-700 mb-2">Available Equipment & Quantities <span className="text-red-500">*</span></label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                    {[
+                        { id: 'reformer', label: 'Reformer' },
+                        { id: 'cadillac', label: 'Cadillac' },
+                        { id: 'tower', label: 'Tower' },
+                        { id: 'chair', label: 'Chair' },
+                        { id: 'ladderBarrel', label: 'Ladder Barrel' },
+                        { id: 'mat', label: 'Mat' }
+                    ].map((eq) => (
+                        <div key={eq.id} className="flex items-center gap-3 p-3 border border-cream-200 rounded-lg bg-cream-50">
+                            <label className="flex items-center gap-2 flex-1 cursor-pointer">
+                                <input type="checkbox" name={eq.id} className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900 peer" />
+                                <span className="text-charcoal-700 text-sm font-medium">{eq.label}</span>
+                            </label>
+                            <div className="flex items-center gap-2 opacity-50 peer-checked:opacity-100 transition-opacity">
+                                <span className="text-xs text-charcoal-500">Qty:</span>
+                                <input
+                                    type="number"
+                                    name={`qty_${eq.label}`}
+                                    min="1"
+                                    defaultValue="1"
+                                    className="w-16 px-2 py-1 border border-cream-300 rounded text-sm text-center focus:ring-1 focus:ring-charcoal-900 outline-none"
+                                />
+                            </div>
+                        </div>
+                    ))}
                 </div>
                 <input
                     type="text"

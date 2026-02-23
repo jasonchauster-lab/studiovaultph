@@ -17,6 +17,7 @@ export interface Studio {
     logo_url?: string;
     is_founding_partner?: boolean;
     custom_fee_percentage?: number;
+    inventory?: Record<string, number>;
 }
 
 export interface Profile {

@@ -187,14 +187,37 @@ export async function createStudio(formData: FormData) {
         }
 
 
-        // Parse equipment
+        // Parse equipment & inventory
         const equipment: string[] = []
-        if (formData.get('reformer') === 'on') equipment.push('Reformer')
-        if (formData.get('cadillac') === 'on') equipment.push('Cadillac')
-        if (formData.get('tower') === 'on') equipment.push('Tower')
-        if (formData.get('chair') === 'on') equipment.push('Chair')
-        if (formData.get('ladderBarrel') === 'on') equipment.push('Ladder Barrel')
-        if (formData.get('mat') === 'on') equipment.push('Mat')
+        const inventory: Record<string, number> = {}
+        let reformersCount = 0
+
+        const allKeys = Array.from(formData.keys())
+
+        // Support new generic checkbox names from onboarding
+        allKeys.forEach(key => {
+            // Check if it's one of the equipment checkboxes (Reformer, Cadillac, etc)
+            if (['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].includes(key)) {
+                if (formData.get(key) === 'on') {
+                    equipment.push(key)
+
+                    // Get its quantity
+                    const qtyVal = parseInt(formData.get(`qty_${key}`) as string)
+                    if (!isNaN(qtyVal) && qtyVal >= 0) {
+                        inventory[key] = qtyVal
+                        if (key === 'Reformer') {
+                            reformersCount = qtyVal
+                        }
+                    } else {
+                        // Default to 1 if checked but no qty provided
+                        inventory[key] = 1
+                        if (key === 'Reformer') {
+                            reformersCount = 1
+                        }
+                    }
+                }
+            }
+        })
 
         const otherEquipment = formData.get('otherEquipment') as string
         if (otherEquipment) {
@@ -275,7 +298,7 @@ export async function createStudio(formData: FormData) {
                 location,
                 address,
                 hourly_rate: 0,
-                reformers_count: 5, // Default
+                reformers_count: reformersCount,
                 equipment: equipment,
                 contact_number: contactNumber,
                 bir_certificate_url: birPath,
@@ -284,7 +307,8 @@ export async function createStudio(formData: FormData) {
                 bir_certificate_expiry: birExpiry || null,
                 gov_id_expiry: govIdExpiry || null,
                 insurance_expiry: insuranceExpiry || null,
-                space_photos_urls: spacePhotosUrls
+                space_photos_urls: spacePhotosUrls,
+                inventory: inventory
             })
 
 
@@ -446,6 +470,25 @@ export async function updateStudio(formData: FormData) {
         }
     })
 
+    // Parse inventory quantities
+    const inventory: Record<string, number> = {}
+    let reformersCount = 0
+
+    // For generic eq_ prefixed checkboxes
+    allKeys.forEach(key => {
+        if (key.startsWith('qty_')) {
+            const eq = key.replace('qty_', '')
+            const val = parseInt(formData.get(key) as string)
+            if (!isNaN(val) && val >= 0) {
+                inventory[eq] = val
+                // maintain backward compatibility:
+                if (eq === 'Reformer') {
+                    reformersCount = val
+                }
+            }
+        }
+    })
+
     if (!studioId || !name || !location || !contactNumber) {
         return { error: 'All fields are required' }
     }
@@ -458,8 +501,9 @@ export async function updateStudio(formData: FormData) {
         bio: formData.get('bio') as string,
         equipment: equipment,
         contact_number: contactNumber,
-        reformers_count: parseInt(formData.get('reformersCount') as string) || 0,
-        pricing: pricing
+        reformers_count: reformersCount,
+        pricing: pricing,
+        inventory: inventory
     }
 
     // Handle Logo Upload
