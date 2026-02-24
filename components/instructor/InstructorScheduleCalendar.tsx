@@ -119,20 +119,33 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
         <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-xl border border-cream-200 shadow-sm">
-                <div className="flex items-center gap-4">
-                    <h2 className="text-xl font-serif text-charcoal-900">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <h2 className="text-xl font-serif text-charcoal-900 hidden md:block min-w-[140px]">
                         {format(currentDate, 'MMMM yyyy')}
                     </h2>
-                    <div className="flex items-center bg-cream-100 rounded-lg p-1">
-                        <button onClick={handlePrevWeek} className="p-1 hover:bg-white rounded-md transition-all text-charcoal-600">
-                            <ChevronLeft className="w-5 h-5" />
-                        </button>
-                        <button onClick={handleToday} className="px-3 py-1 text-xs font-medium text-charcoal-700 hover:bg-white rounded-md transition-all">
-                            Today
-                        </button>
-                        <button onClick={handleNextWeek} className="p-1 hover:bg-white rounded-md transition-all text-charcoal-600">
-                            <ChevronRight className="w-5 h-5" />
-                        </button>
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="date"
+                            value={format(currentDate, 'yyyy-MM-dd')}
+                            onChange={(e) => {
+                                if (e.target.value) {
+                                    router.push(`?date=${e.target.value}`)
+                                }
+                            }}
+                            className="px-3 py-1 border border-cream-200 rounded-lg text-sm bg-white text-charcoal-700 outline-none focus:ring-2 focus:ring-charcoal-500 cursor-pointer"
+                            title="Select any specific date"
+                        />
+                        <div className="flex items-center bg-cream-100 rounded-lg p-1">
+                            <button onClick={handlePrevWeek} className="p-1 hover:bg-white rounded-md transition-all text-charcoal-600" title="Previous Week">
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+                            <button onClick={handleToday} className="px-3 py-1 text-xs font-medium text-charcoal-700 hover:bg-white rounded-md transition-all" title="Go to Current week">
+                                Today
+                            </button>
+                            <button onClick={handleNextWeek} className="p-1 hover:bg-white rounded-md transition-all text-charcoal-600" title="Next Week">
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
