@@ -136,14 +136,14 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                             title="Select any specific date"
                         />
                         <div className="flex items-center bg-cream-100 rounded-lg p-1">
-                            <button onClick={handlePrevWeek} className="p-1 hover:bg-white rounded-md transition-all text-charcoal-600" title="Previous Week">
-                                <ChevronLeft className="w-5 h-5" />
+                            <button onClick={handlePrevWeek} className="flex items-center gap-1 px-2 py-1 hover:bg-white rounded-md transition-all text-charcoal-600 text-xs font-medium" title="Previous Week">
+                                <ChevronLeft className="w-4 h-4" /> Prev Week
                             </button>
-                            <button onClick={handleToday} className="px-3 py-1 text-xs font-medium text-charcoal-700 hover:bg-white rounded-md transition-all" title="Go to Current week">
+                            <button onClick={handleToday} className="px-3 py-1 text-xs font-medium text-charcoal-700 hover:bg-white rounded-md transition-all border-x border-cream-200/50" title="Go to Current week">
                                 Today
                             </button>
-                            <button onClick={handleNextWeek} className="p-1 hover:bg-white rounded-md transition-all text-charcoal-600" title="Next Week">
-                                <ChevronRight className="w-5 h-5" />
+                            <button onClick={handleNextWeek} className="flex items-center gap-1 px-2 py-1 hover:bg-white rounded-md transition-all text-charcoal-600 text-xs font-medium" title="Next Week">
+                                Next Week <ChevronRight className="w-4 h-4" />
                             </button>
                         </div>
                     </div>

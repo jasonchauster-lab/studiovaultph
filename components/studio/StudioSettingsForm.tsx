@@ -254,7 +254,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
 
             {/* Status Message */}
             {message && (
-                <div className={`p-4 rounded-lg text-sm font-medium flex items-center gap-2 ${message.includes('Success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                <div className={`p-4 rounded-lg text-sm font-medium flex items-center gap-2 ${message.toLowerCase().includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                     {message}
                 </div>
             )}
