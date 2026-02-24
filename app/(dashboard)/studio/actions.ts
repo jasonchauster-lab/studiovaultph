@@ -531,6 +531,35 @@ export async function updateStudio(formData: FormData) {
         }
     }
 
+    // Handle Space Photos Upload
+    const existingPhotosJson = formData.get('existingPhotos') as string
+    let spacePhotosUrls: string[] = existingPhotosJson ? JSON.parse(existingPhotosJson) : []
+    const spacePhotos = formData.getAll('spacePhotos') as File[]
+
+    if (spacePhotos && spacePhotos.length > 0) {
+        for (const [index, photo] of spacePhotos.entries()) {
+            if (photo.size > 0) {
+                const photoExt = photo.name.split('.').pop()
+                if (photoExt) {
+                    const photoPath = `studios/${studioId}/space_${Date.now()}_${index}.${photoExt}`
+                    const { error: photoError } = await supabase.storage.from('avatars').upload(photoPath, photo)
+                    if (photoError) {
+                        console.error('Space photo upload error:', photoError)
+                    } else {
+                        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(photoPath)
+                        spacePhotosUrls.push(publicUrl)
+                    }
+                }
+            }
+        }
+    }
+
+    if (spacePhotosUrls.length > 0) {
+        updateData.space_photos_urls = spacePhotosUrls;
+    } else if (existingPhotosJson === '[]') {
+        updateData.space_photos_urls = [];
+    }
+
     const { error } = await supabase
         .from('studios')
         .update(updateData)

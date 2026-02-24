@@ -18,6 +18,7 @@ export interface Studio {
     is_founding_partner?: boolean;
     custom_fee_percentage?: number;
     inventory?: Record<string, number>;
+    space_photos_urls?: string[];
 }
 
 export interface Profile {

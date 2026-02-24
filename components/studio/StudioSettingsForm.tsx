@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { updateStudio } from '@/app/(dashboard)/studio/actions'
-import { Loader2, Save, Camera, User } from 'lucide-react'
+import { Loader2, Save, Camera, User, X, Upload } from 'lucide-react'
 import { Studio } from '@/types'
 import { isValidPhone } from '@/lib/validation'
 import Image from 'next/image'
@@ -11,6 +11,31 @@ import { useRef } from 'react'
 export default function StudioSettingsForm({ studio }: { studio: Studio }) {
     const [isLoading, setIsLoading] = useState(false)
     const [message, setMessage] = useState<string | null>(null)
+
+    const [existingPhotos, setExistingPhotos] = useState<string[]>(studio.space_photos_urls || [])
+    const [newSpacePhotos, setNewSpacePhotos] = useState<File[]>([])
+    const spacePhotosInputRef = useRef<HTMLInputElement>(null)
+
+    const handleSpacePhotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || [])
+        const validFiles = files.filter(f => f.type.startsWith('image/'))
+        if (validFiles.length > 0) {
+            setNewSpacePhotos(prev => [...prev, ...validFiles])
+        }
+        if (spacePhotosInputRef.current) {
+            spacePhotosInputRef.current.value = ''
+        }
+    }
+
+    const removeExistingPhoto = (e: React.MouseEvent, urlToRemove: string) => {
+        e.preventDefault()
+        setExistingPhotos(existingPhotos.filter(url => url !== urlToRemove))
+    }
+
+    const removeNewPhoto = (e: React.MouseEvent, indexToRemove: number) => {
+        e.preventDefault()
+        setNewSpacePhotos(newSpacePhotos.filter((_, idx) => idx !== indexToRemove))
+    }
 
     const handleSubmit = async (formData: FormData) => {
         const contactNumber = formData.get('contactNumber') as string
@@ -21,6 +46,13 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
 
         setIsLoading(true)
         setMessage(null)
+
+        // Attach space photos state to form data
+        formData.set('existingPhotos', JSON.stringify(existingPhotos))
+        formData.delete('spacePhotos') // ensure we use our controlled state
+        newSpacePhotos.forEach(file => {
+            formData.append('spacePhotos', file)
+        })
 
         const result = await updateStudio(formData)
 
@@ -175,6 +207,65 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                             We will reach out through this number to confirm your studio&apos;s application and booking details.
                         </p>
 
+                    </div>
+                </div>
+            </div>
+
+            {/* Space Photos */}
+            <div className="space-y-4">
+                <h2 className="text-xl font-serif text-charcoal-900 border-b border-cream-200 pb-2">Photos of the Space</h2>
+                <div className="bg-cream-50 p-6 rounded-lg border border-cream-200">
+                    {/* Existing Photos Grid */}
+                    {existingPhotos.length > 0 && (
+                        <div className="mb-6">
+                            <h3 className="text-sm font-medium text-charcoal-700 mb-3">Current Photos</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {existingPhotos.map((url, index) => (
+                                    <div key={'ext_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
+                                        <Image src={url} alt={`Space Photo ${index + 1}`} fill className="object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <button onClick={(e) => removeExistingPhoto(e, url)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors" title="Remove Photo">
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* New Photos Grid */}
+                    {newSpacePhotos.length > 0 && (
+                        <div className="mb-6">
+                            <h3 className="text-sm font-medium text-charcoal-700 mb-3">New Photos (Ready to Upload)</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {newSpacePhotos.map((file, index) => (
+                                    <div key={'new_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
+                                        <img src={URL.createObjectURL(file)} alt={`New Photo ${index + 1}`} className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <button onClick={(e) => removeNewPhoto(e, index)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors" title="Remove Photo">
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Add Photo Button */}
+                    <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-cream-300 rounded-lg hover:bg-cream-100/50 transition-colors cursor-pointer" onClick={() => spacePhotosInputRef.current?.click()}>
+                        <Upload className="w-8 h-8 text-charcoal-400 mb-2" />
+                        <p className="text-sm font-medium text-charcoal-700">Click to add photos</p>
+                        <p className="text-xs text-charcoal-500 mt-1">Images only (JPG, PNG)</p>
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            ref={spacePhotosInputRef}
+                            className="hidden"
+                            onChange={handleSpacePhotosChange}
+                        />
                     </div>
                 </div>
             </div>
