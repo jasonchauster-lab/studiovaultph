@@ -165,6 +165,12 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                                 <option value="QC - Diliman">QC - Diliman</option>
                                 <option value="QC - Maginhawa/UP Village">QC - Maginhawa / UP Village</option>
                             </optgroup>
+                            <optgroup label="Paranaque">
+                                <option value="Paranaque - BF Homes">Paranaque - BF Homes</option>
+                                <option value="Paranaque - Moonwalk / Merville">Paranaque - Moonwalk / Merville</option>
+                                <option value="Paranaque - Bicutan / Sucat">Paranaque - Bicutan / Sucat</option>
+                                <option value="Paranaque - Others">Paranaque - Others</option>
+                            </optgroup>
                         </select>
                     </div>
                 </div>
@@ -222,12 +228,20 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {existingPhotos.map((url, index) => (
                                     <div key={'ext_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
-                                        <Image src={url} alt={`Space Photo ${index + 1}`} fill className="object-cover" />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <button onClick={(e) => removeExistingPhoto(e, url)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors" title="Remove Photo">
-                                                <X className="w-4 h-4" />
-                                            </button>
-                                        </div>
+                                        <Image
+                                            src={url}
+                                            alt={`Space Photo ${index + 1}`}
+                                            fill
+                                            className="object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                            onClick={(e) => { e.preventDefault(); window.open(url, '_blank'); }}
+                                        />
+                                        <button
+                                            onClick={(e) => removeExistingPhoto(e, url)}
+                                            className="absolute top-2 right-2 p-1.5 bg-red-500/90 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm z-10"
+                                            title="Remove Photo"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -239,16 +253,26 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                         <div className="mb-6">
                             <h3 className="text-sm font-medium text-charcoal-700 mb-3">New Photos (Ready to Upload)</h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {newSpacePhotos.map((file, index) => (
-                                    <div key={'new_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
-                                        <img src={URL.createObjectURL(file)} alt={`New Photo ${index + 1}`} className="w-full h-full object-cover" />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <button onClick={(e) => removeNewPhoto(e, index)} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors" title="Remove Photo">
+                                {newSpacePhotos.map((file, index) => {
+                                    const objectUrl = URL.createObjectURL(file);
+                                    return (
+                                        <div key={'new_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
+                                            <img
+                                                src={objectUrl}
+                                                alt={`New Photo ${index + 1}`}
+                                                className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                                onClick={(e) => { e.preventDefault(); window.open(objectUrl, '_blank'); }}
+                                            />
+                                            <button
+                                                onClick={(e) => removeNewPhoto(e, index)}
+                                                className="absolute top-2 right-2 p-1.5 bg-red-500/90 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm z-10"
+                                                title="Remove Photo"
+                                            >
                                                 <X className="w-4 h-4" />
                                             </button>
                                         </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
                         </div>
                     )}

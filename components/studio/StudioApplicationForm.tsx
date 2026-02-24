@@ -145,6 +145,12 @@ export default function StudioApplicationForm() {
                         <option value="QC - Diliman">QC - Diliman</option>
                         <option value="QC - Maginhawa/UP Village">QC - Maginhawa / UP Village</option>
                     </optgroup>
+                    <optgroup label="Paranaque">
+                        <option value="Paranaque - BF Homes">Paranaque - BF Homes</option>
+                        <option value="Paranaque - Moonwalk / Merville">Paranaque - Moonwalk / Merville</option>
+                        <option value="Paranaque - Bicutan / Sucat">Paranaque - Bicutan / Sucat</option>
+                        <option value="Paranaque - Others">Paranaque - Others</option>
+                    </optgroup>
                 </select>
             </div>
             <div>

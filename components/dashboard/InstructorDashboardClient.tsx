@@ -172,7 +172,7 @@ export default function InstructorDashboardClient() {
                                 <span className="text-sm font-medium text-charcoal-700">Filter by Area:</span>
                             </div>
                             <div className="flex gap-2 flex-wrap">
-                                {['All', 'Makati', 'BGC', 'Alabang', 'Ortigas', 'Quezon City', 'Mandaluyong'].map((area) => (
+                                {['All', 'Makati', 'BGC', 'Alabang', 'Ortigas', 'Quezon City', 'Mandaluyong', 'Paranaque'].map((area) => (
                                     <button
                                         key={area}
                                         onClick={() => setFilterArea(area as LocationArea | 'All')}

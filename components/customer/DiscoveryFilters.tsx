@@ -75,6 +75,12 @@ export default function DiscoveryFilters() {
                     <option value="QC - Diliman">Diliman</option>
                     <option value="QC - Maginhawa/UP Village">Maginhawa / UP Village</option>
                 </optgroup>
+                <optgroup label="Paranaque">
+                    <option value="Paranaque - BF Homes">BF Homes</option>
+                    <option value="Paranaque - Moonwalk / Merville">Moonwalk / Merville</option>
+                    <option value="Paranaque - Bicutan / Sucat">Bicutan / Sucat</option>
+                    <option value="Paranaque - Others">Others</option>
+                </optgroup>
             </select>
 
             {/* Equipment Filter */}
