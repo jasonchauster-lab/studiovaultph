@@ -2,11 +2,65 @@
 
 import { useState } from 'react'
 import { createStudio } from '@/app/(dashboard)/studio/actions'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Upload } from 'lucide-react'
+import clsx from 'clsx'
+
+function FileUploadBox({ name, label, required, fileName, previewUrl, accept, setFileState }: any) {
+    return (
+        <div>
+            <label className="block text-sm font-medium text-charcoal-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
+            <div className="border-2 border-dashed border-cream-300 rounded-lg p-2 flex flex-col items-center justify-center bg-cream-50/50 hover:bg-cream-100/50 transition-colors relative cursor-pointer group h-[120px]">
+                <input type="file" name={name} accept={accept} required={required}
+                    onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        const url = file && file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+                        setFileState(file ? file.name : null, url)
+                    }}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+                {previewUrl ? (
+                    <div className="relative w-full h-full z-20 group/preview block">
+                        <img src={previewUrl} alt="Preview" className="h-full w-full object-contain cursor-pointer" onClick={(e) => { e.preventDefault(); window.open(previewUrl, '_blank'); }} />
+                        <div className="absolute top-1 right-1 bg-charcoal-900/70 p-1 rounded-full text-white cursor-pointer opacity-0 group-hover/preview:opacity-100 transition-opacity pointer-events-auto" onClick={(e) => { e.preventDefault(); setFileState(null, null); }}>
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <Upload className="w-5 h-5 text-charcoal-700 mb-1" />
+                        <p className="text-[10px] text-center font-medium text-charcoal-700 px-2">{fileName || 'Click to upload'}</p>
+                    </>
+                )}
+            </div>
+        </div>
+    )
+}
 
 export default function StudioApplicationForm() {
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
+
+    const [birFileName, setBirFileName] = useState<string | null>(null)
+    const [birPreviewUrl, setBirPreviewUrl] = useState<string | null>(null)
+
+    const [govIdFileName, setGovIdFileName] = useState<string | null>(null)
+    const [govIdPreviewUrl, setGovIdPreviewUrl] = useState<string | null>(null)
+
+    const [insuranceFileName, setInsuranceFileName] = useState<string | null>(null)
+    const [insurancePreviewUrl, setInsurancePreviewUrl] = useState<string | null>(null)
+
+    const [spacePhotosUrls, setSpacePhotosUrls] = useState<string[]>([])
+    const [selectedEquipment, setSelectedEquipment] = useState<Record<string, boolean>>({})
+
+    const handleEquipmentChange = (id: string, checked: boolean) => {
+        setSelectedEquipment(prev => ({ ...prev, [id]: checked }))
+    }
+
+    const handleSpacePhotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || [])
+        const urls = files.filter(f => f.type.startsWith('image/')).map(f => URL.createObjectURL(f))
+        setSpacePhotosUrls(urls)
+    }
 
     async function handleSubmit(formData: FormData) {
         setError(null)
@@ -104,10 +158,15 @@ export default function StudioApplicationForm() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-1">BIR Certificate (Form 2303) <span className="text-red-500">*</span></label>
-                    <input type="file" name="birCertificate" accept="image/*,.pdf" required className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
-                </div>
+                <FileUploadBox
+                    name="birCertificate"
+                    label="BIR Certificate (Form 2303)"
+                    required={true}
+                    fileName={birFileName}
+                    previewUrl={birPreviewUrl}
+                    accept="image/*,.pdf"
+                    setFileState={(name: string | null, url: string | null) => { setBirFileName(name); setBirPreviewUrl(url); }}
+                />
                 <div>
                     <label className="block text-sm font-medium text-charcoal-700 mb-1">BIR Expiration Date <span className="text-red-500">*</span></label>
                     <input type="date" required name="birExpiry" className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
@@ -115,10 +174,15 @@ export default function StudioApplicationForm() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-1">Valid Government ID <span className="text-red-500">*</span></label>
-                    <input type="file" name="govId" accept="image/*,.pdf" required className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
-                </div>
+                <FileUploadBox
+                    name="govId"
+                    label="Valid Government ID"
+                    required={true}
+                    fileName={govIdFileName}
+                    previewUrl={govIdPreviewUrl}
+                    accept="image/*,.pdf"
+                    setFileState={(name: string | null, url: string | null) => { setGovIdFileName(name); setGovIdPreviewUrl(url); }}
+                />
                 <div>
                     <label className="block text-sm font-medium text-charcoal-700 mb-1">ID Expiration Date <span className="text-red-500">*</span></label>
                     <input type="date" required name="govIdExpiry" className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
@@ -126,11 +190,15 @@ export default function StudioApplicationForm() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-0.5">Insurance Policy</label>
-                    <p className="text-[10px] text-charcoal-500 italic mb-1">Optional, but recommended</p>
-                    <input type="file" name="insurance" accept="image/*,.pdf" className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
-                </div>
+                <FileUploadBox
+                    name="insurance"
+                    label="Insurance Policy (Optional)"
+                    required={false}
+                    fileName={insuranceFileName}
+                    previewUrl={insurancePreviewUrl}
+                    accept="image/*,.pdf"
+                    setFileState={(name: string | null, url: string | null) => { setInsuranceFileName(name); setInsurancePreviewUrl(url); }}
+                />
                 <div>
                     <label className="block text-sm font-medium text-charcoal-700 mb-0.5">Insurance Expiration Date</label>
                     <p className="text-[10px] text-charcoal-500 italic mb-1">Optional</p>
@@ -140,10 +208,22 @@ export default function StudioApplicationForm() {
 
             <div>
                 <label className="block text-sm font-medium text-charcoal-700 mb-1">Photos of the Space <span className="text-red-500">*</span></label>
-                <input type="file" name="spacePhotos" accept="image/*" multiple required className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
-                <p className="text-[10px] text-charcoal-500 mt-1 italic">
-                    Upload multiple photos showing the studio layout, equipment, and amenities. You can select multiple files at once.
-                </p>
+                <div className="border-2 border-dashed border-cream-300 rounded-lg p-4 bg-cream-50/50 relative cursor-pointer group">
+                    <input type="file" name="spacePhotos" accept="image/*" multiple required onChange={handleSpacePhotosChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                    {spacePhotosUrls.length > 0 ? (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 relative z-20">
+                            {spacePhotosUrls.map((url, i) => (
+                                <img key={i} src={url} className="w-full aspect-square object-cover rounded cursor-pointer" onClick={(e) => { e.preventDefault(); window.open(url, '_blank'); }} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-4">
+                            <Upload className="w-6 h-6 text-charcoal-700 mb-2" />
+                            <p className="text-sm font-medium text-charcoal-700">Upload multiple photos</p>
+                            <p className="text-[10px] text-charcoal-500 mt-1 italic text-center">showing the studio layout, equipment, and amenities.</p>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div>
@@ -156,24 +236,28 @@ export default function StudioApplicationForm() {
                         { id: 'chair', label: 'Chair' },
                         { id: 'ladderBarrel', label: 'Ladder Barrel' },
                         { id: 'mat', label: 'Mat' }
-                    ].map((eq) => (
-                        <div key={eq.id} className="flex items-center gap-3 p-3 border border-cream-200 rounded-lg bg-cream-50">
-                            <label className="flex items-center gap-2 flex-1 cursor-pointer">
-                                <input type="checkbox" name={eq.id} className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900 peer" />
-                                <span className="text-charcoal-700 text-sm font-medium">{eq.label}</span>
-                            </label>
-                            <div className="flex items-center gap-2 opacity-50 peer-checked:opacity-100 transition-opacity">
-                                <span className="text-xs text-charcoal-500">Qty:</span>
-                                <input
-                                    type="number"
-                                    name={`qty_${eq.label}`}
-                                    min="1"
-                                    defaultValue="1"
-                                    className="w-16 px-2 py-1 border border-cream-300 rounded text-sm text-center focus:ring-1 focus:ring-charcoal-900 outline-none"
-                                />
+                    ].map((eq) => {
+                        const isChecked = selectedEquipment[eq.id] || false;
+                        return (
+                            <div key={eq.id} className="flex items-center gap-3 p-3 border border-cream-200 rounded-lg bg-cream-50">
+                                <label className="flex items-center gap-2 flex-1 cursor-pointer">
+                                    <input type="checkbox" name={eq.id} checked={isChecked} onChange={(e) => handleEquipmentChange(eq.id, e.target.checked)} className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
+                                    <span className="text-charcoal-700 text-sm font-medium">{eq.label}</span>
+                                </label>
+                                <div className={clsx("flex items-center gap-2 transition-opacity", !isChecked && "opacity-30 pointer-events-none")}>
+                                    <span className="text-xs text-charcoal-500">Qty:</span>
+                                    <input
+                                        type="number"
+                                        name={`qty_${eq.label}`}
+                                        min="1"
+                                        defaultValue="1"
+                                        disabled={!isChecked}
+                                        className="w-16 px-2 py-1 border border-cream-300 rounded text-sm text-center focus:ring-1 focus:ring-charcoal-900 outline-none disabled:bg-cream-100 disabled:text-charcoal-400"
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
                 <input
                     type="text"
@@ -184,7 +268,12 @@ export default function StudioApplicationForm() {
             </div>
 
             <button type="submit" disabled={isLoading} className="w-full py-2.5 flex items-center justify-center gap-2 bg-charcoal-900 text-cream-50 rounded-lg font-medium hover:bg-charcoal-800 transition-colors disabled:opacity-70">
-                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Application'}
+                {isLoading ? (
+                    <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span className="text-green-400 font-semibold tracking-wide">Application submitted please wait...</span>
+                    </>
+                ) : 'Submit Application'}
             </button>
         </form>
     )

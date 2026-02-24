@@ -192,14 +192,16 @@ export default function InstructorOnboardingForm() {
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
                         {previewUrl ? (
-                            <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-3">
+                            <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-3 z-20 group">
                                 <img
                                     src={previewUrl}
                                     alt="Certificate Preview"
-                                    className="w-full h-full object-contain bg-cream-100"
+                                    className="w-full h-full object-contain bg-cream-100 cursor-pointer"
+                                    onClick={(e) => { e.preventDefault(); window.open(previewUrl, '_blank'); }}
                                 />
-                                <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                    <p className="text-white text-xs font-medium bg-black/50 px-2 py-1 rounded">Click to change</p>
+                                <div className="absolute top-2 right-2 bg-charcoal-900/70 p-1 rounded-full text-white cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={(e) => { e.preventDefault(); setPreviewUrl(null); setSelectedFileName(null); }}>
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                 </div>
                             </div>
                         ) : (
@@ -265,7 +267,18 @@ export default function InstructorOnboardingForm() {
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                 />
                                 {govIdPreviewUrl ? (
-                                    <img src={govIdPreviewUrl} alt="ID Preview" className="h-full w-full object-contain" />
+                                    <div className="relative w-full h-full z-20 group">
+                                        <img
+                                            src={govIdPreviewUrl}
+                                            alt="ID Preview"
+                                            className="h-full w-full object-contain cursor-pointer"
+                                            onClick={(e) => { e.preventDefault(); window.open(govIdPreviewUrl, '_blank'); }}
+                                        />
+                                        <div className="absolute top-1 right-1 bg-charcoal-900/70 p-1 rounded-full text-white cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={(e) => { e.preventDefault(); setGovIdPreviewUrl(null); setGovIdFileName(null); }}>
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </div>
+                                    </div>
                                 ) : (
                                     <>
                                         <Upload className="w-5 h-5 text-charcoal-700 mb-1" />
@@ -314,7 +327,18 @@ export default function InstructorOnboardingForm() {
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
                             {birPreviewUrl ? (
-                                <img src={birPreviewUrl} alt="BIR Preview" className="h-full w-full object-contain" />
+                                <div className="relative w-full h-full z-20 group">
+                                    <img
+                                        src={birPreviewUrl}
+                                        alt="BIR Preview"
+                                        className="h-full w-full object-contain cursor-pointer"
+                                        onClick={(e) => { e.preventDefault(); window.open(birPreviewUrl, '_blank'); }}
+                                    />
+                                    <div className="absolute top-1 right-1 bg-charcoal-900/70 p-1 rounded-full text-white cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={(e) => { e.preventDefault(); setBirPreviewUrl(null); setBirFileName(null); }}>
+                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    </div>
+                                </div>
                             ) : (
                                 <>
                                     <Upload className="w-4 h-4 text-charcoal-700 mb-1" />
@@ -349,7 +373,7 @@ export default function InstructorOnboardingForm() {
                     {isSubmitting ? (
                         <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            Submitting...
+                            <span className="text-green-400 font-semibold tracking-wide">Application submitted please wait...</span>
                         </>
                     ) : (
                         'Submit Application'
