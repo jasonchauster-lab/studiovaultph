@@ -268,7 +268,7 @@ export default function StudioApplicationForm() {
                                         min="1"
                                         defaultValue="1"
                                         disabled={!isChecked}
-                                        className="w-16 px-2 py-1 border border-cream-300 rounded text-sm text-center focus:ring-1 focus:ring-charcoal-900 outline-none disabled:bg-cream-100 disabled:text-charcoal-400"
+                                        className="w-16 px-2 py-1 border border-cream-300 rounded text-sm text-center text-charcoal-900 bg-white focus:ring-1 focus:ring-charcoal-900 outline-none disabled:bg-cream-100 disabled:text-charcoal-400"
                                     />
                                 </div>
                             </div>
