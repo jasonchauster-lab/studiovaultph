@@ -314,18 +314,18 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                 <div className="space-y-3">
                     {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
                         return (
-                            <div key={eq} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border border-cream-200 rounded-lg bg-cream-50">
+                            <div key={eq} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border border-cream-200 rounded-lg bg-cream-50 group">
                                 <label className="flex items-center gap-3 flex-1 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         name={`eq_${eq}`}
-                                        className="w-5 h-5 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900 peer"
+                                        className="w-5 h-5 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
                                         defaultChecked={studio.equipment?.includes(eq)}
                                     />
                                     <span className="text-charcoal-900 font-medium">{eq}</span>
                                 </label>
 
-                                <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap opacity-50 peer-checked:opacity-100 transition-opacity">
+                                <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap opacity-50 group-has-[:checked]:opacity-100 transition-opacity">
                                     <div className="flex items-center gap-2">
                                         <span className="text-xs text-charcoal-500 w-8">Qty:</span>
                                         <input
