@@ -164,7 +164,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                 <div>
                     <label className="block text-sm font-medium text-charcoal-700 mb-2">Teaching Equipment</label>
                     <div className="grid grid-cols-2 gap-2">
-                        {['Reformer', 'Cadillac', 'Chair', 'Barrel', 'Mat'].map((eq) => (
+                        {['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
                             <label key={eq} className="flex items-center gap-2 p-3 border border-cream-200 rounded-lg hover:bg-cream-50 cursor-pointer transition-colors">
                                 <input
                                     type="checkbox"
@@ -193,7 +193,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                 <div>
                     <label className="block text-sm font-medium text-charcoal-700 mb-2">Teaching Rates (PHP/hr)</label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {['Reformer', 'Cadillac', 'Chair', 'Barrel', 'Mat'].map((eq) => {
+                        {['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
                             const isSelected = selectedEquipment.includes(eq);
                             return (
                                 <div key={eq} className={`transition-all duration-300 ${!isSelected ? 'opacity-40 grayscale' : ''}`}>

@@ -581,7 +581,7 @@ export default async function AdminDashboard({
                                                         <div className="flex flex-wrap gap-1 mt-1">
                                                             {studio.equipment.map((eq: string, i: number) => (
                                                                 <span key={i} className="px-2 py-0.5 bg-cream-100 text-charcoal-700 text-xs rounded-full">
-                                                                    {eq}
+                                                                    {studio.inventory?.[eq] || (eq === 'Reformer' ? studio.reformers_count : 1)}x {eq}
                                                                 </span>
                                                             ))}
                                                         </div>

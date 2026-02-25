@@ -172,6 +172,7 @@ export async function createStudio(formData: FormData) {
         const contactNumber = formData.get('contactNumber') as string
         const dateOfBirth = formData.get('dateOfBirth') as string
         const address = formData.get('address') as string
+        const googleMapsUrl = formData.get('googleMapsUrl') as string
 
         const birCertificate = formData.get('birCertificate') as File
         const govId = formData.get('govId') as File
@@ -200,10 +201,9 @@ export async function createStudio(formData: FormData) {
             // Check if it's one of the equipment checkboxes (Reformer, Cadillac, etc)
             if (['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].includes(key)) {
                 if (formData.get(key) === 'on') {
-                    equipment.push(key)
-
                     // Get its quantity
                     const qtyVal = parseInt(formData.get(`qty_${key}`) as string)
+
                     if (!isNaN(qtyVal) && qtyVal >= 0) {
                         inventory[key] = qtyVal
                         if (key === 'Reformer') {
@@ -215,6 +215,11 @@ export async function createStudio(formData: FormData) {
                         if (key === 'Reformer') {
                             reformersCount = 1
                         }
+                    }
+
+                    // ONLY add to equipment array if qty > 0
+                    if (inventory[key] > 0) {
+                        equipment.push(key)
                     }
                 }
             }
@@ -311,7 +316,9 @@ export async function createStudio(formData: FormData) {
                 gov_id_expiry: govIdExpiry || null,
                 insurance_expiry: insuranceExpiry || null,
                 space_photos_urls: spacePhotosUrls,
-                inventory: inventory
+                inventory: inventory,
+                google_maps_url: googleMapsUrl || null,
+                amenities: formData.getAll('amenities') as string[]
             })
 
 
@@ -432,24 +439,46 @@ export async function updateStudio(formData: FormData) {
     const description = formData.get('description') as string
 
     // Parse equipment
+    // Parse inventory quantities first to know the amounts
+    const inventory: Record<string, number> = {}
+    let reformersCount = 0
+
+    // For generic eq_ prefixed checkboxes
+    const allKeys = Array.from(formData.keys())
+    allKeys.forEach(key => {
+        if (key.startsWith('qty_')) {
+            const eq = key.replace('qty_', '')
+            const val = parseInt(formData.get(key) as string)
+            if (!isNaN(val) && val >= 0) {
+                inventory[eq] = val
+                // maintain backward compatibility:
+                if (eq === 'Reformer') {
+                    reformersCount = val
+                }
+            }
+        }
+    })
+
     // Parse equipment
     const equipment: string[] = []
 
     // Support legacy/specific checkbox names from onboarding
-    if (formData.get('reformer') === 'on') equipment.push('Reformer')
-    if (formData.get('cadillac') === 'on') equipment.push('Cadillac')
-    if (formData.get('tower') === 'on') equipment.push('Tower')
-    if (formData.get('chair') === 'on') equipment.push('Chair')
-    if (formData.get('ladderBarrel') === 'on') equipment.push('Ladder Barrel')
-    if (formData.get('mat') === 'on') equipment.push('Mat')
+    if (formData.get('reformer') === 'on' && (inventory['Reformer'] === undefined || inventory['Reformer'] > 0)) equipment.push('Reformer')
+    if (formData.get('cadillac') === 'on' && (inventory['Cadillac'] === undefined || inventory['Cadillac'] > 0)) equipment.push('Cadillac')
+    if (formData.get('tower') === 'on' && (inventory['Tower'] === undefined || inventory['Tower'] > 0)) equipment.push('Tower')
+    if (formData.get('chair') === 'on' && (inventory['Chair'] === undefined || inventory['Chair'] > 0)) equipment.push('Chair')
+    if (formData.get('ladderBarrel') === 'on' && (inventory['Ladder Barrel'] === undefined || inventory['Ladder Barrel'] > 0)) equipment.push('Ladder Barrel')
+    if (formData.get('mat') === 'on' && (inventory['Mat'] === undefined || inventory['Mat'] > 0)) equipment.push('Mat')
 
     // Support generic eq_ prefixes (New Standard)
-    const allKeys = Array.from(formData.keys())
     allKeys.forEach(key => {
         if (key.startsWith('eq_') && formData.get(key) === 'on') {
             const eqName = key.replace('eq_', '')
             if (!equipment.includes(eqName)) { // Prevent duplicates
-                equipment.push(eqName)
+                // Only add if inventory count is greater than 0, or if not specified assume > 0
+                if (inventory[eqName] === undefined || inventory[eqName] > 0) {
+                    equipment.push(eqName)
+                }
             }
         }
     })
@@ -473,24 +502,7 @@ export async function updateStudio(formData: FormData) {
         }
     })
 
-    // Parse inventory quantities
-    const inventory: Record<string, number> = {}
-    let reformersCount = 0
-
-    // For generic eq_ prefixed checkboxes
-    allKeys.forEach(key => {
-        if (key.startsWith('qty_')) {
-            const eq = key.replace('qty_', '')
-            const val = parseInt(formData.get(key) as string)
-            if (!isNaN(val) && val >= 0) {
-                inventory[eq] = val
-                // maintain backward compatibility:
-                if (eq === 'Reformer') {
-                    reformersCount = val
-                }
-            }
-        }
-    })
+    // Pricing was parsed successfully via replaced block
 
     if (!studioId || !name || !location || !contactNumber) {
         return { error: 'All fields are required' }
@@ -506,7 +518,9 @@ export async function updateStudio(formData: FormData) {
         contact_number: contactNumber,
         reformers_count: reformersCount,
         pricing: pricing,
-        inventory: inventory
+        inventory: inventory,
+        google_maps_url: formData.get('googleMapsUrl') as string || null,
+        amenities: formData.getAll('amenities') as string[]
     }
 
     // Handle Logo Upload

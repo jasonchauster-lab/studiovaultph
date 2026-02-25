@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createStudio } from '@/app/(dashboard)/studio/actions'
 import { Loader2, Upload } from 'lucide-react'
 import clsx from 'clsx'
+import { STUDIO_AMENITIES } from '@/types'
 
 function FileUploadBox({ name, label, required, fileName, previewUrl, accept, setFileState }: any) {
     return (
@@ -162,6 +163,15 @@ export default function StudioApplicationForm() {
                     className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 h-20"
                 />
             </div>
+            <div>
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">Google Maps Link (Optional)</label>
+                <input
+                    type="url"
+                    name="googleMapsUrl"
+                    placeholder="e.g. https://maps.app.goo.gl/..."
+                    className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white"
+                />
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FileUploadBox
@@ -271,6 +281,23 @@ export default function StudioApplicationForm() {
                     placeholder="Other equipment (comma separated)"
                     className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm"
                 />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-charcoal-700 mb-2">Amenities</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {STUDIO_AMENITIES.map((amenity) => (
+                        <label key={amenity} className="flex items-center gap-2 p-2.5 border border-cream-200 rounded-lg bg-cream-50 cursor-pointer hover:bg-cream-100 transition-colors">
+                            <input
+                                type="checkbox"
+                                name="amenities"
+                                value={amenity}
+                                className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
+                            />
+                            <span className="text-charcoal-700 text-sm font-medium">{amenity}</span>
+                        </label>
+                    ))}
+                </div>
             </div>
 
             <button type="submit" disabled={isLoading} className="w-full py-2.5 flex items-center justify-center gap-2 bg-charcoal-900 text-cream-50 rounded-lg font-medium hover:bg-charcoal-800 transition-colors disabled:opacity-70">

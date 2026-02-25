@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { MapPin, Clock, Users, Star } from 'lucide-react'
+import { MapPin, Clock, Users, Star, ShowerHead, Droplets, Car, Wifi, Square, Lock, Shirt, CheckCircle2 } from 'lucide-react'
 import BookingSection from '@/components/customer/BookingSection'
 import StarRating from '@/components/reviews/StarRating'
 import ReviewList from '@/components/reviews/ReviewList'
@@ -83,13 +83,27 @@ export default async function StudioDetailsPage({
                                     <MapPin className="w-4 h-4" />
                                     {studio.location}
                                 </span>
-                                <span className="flex items-center gap-1">
-                                    <Users className="w-4 h-4" />
-                                    {studio.reformers_count} Reformers
-                                </span>
                             </div>
+
+                            {studio.equipment && studio.equipment.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {studio.equipment.map((eq: string, i: number) => (
+                                        <span key={i} className="px-2.5 py-1 bg-cream-100/50 text-charcoal-700 text-xs rounded-full border border-cream-200">
+                                            <span className="font-semibold text-charcoal-900">{studio.inventory?.[eq] || (eq === 'Reformer' ? studio.reformers_count : 1)}x</span> {eq}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                             {studio.address && (
-                                <p className="text-sm text-charcoal-500 mb-4">{studio.address}</p>
+                                <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <p className="text-sm text-charcoal-500">{studio.address}</p>
+                                    {studio.google_maps_url && (
+                                        <a href={studio.google_maps_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-600 rounded text-xs font-medium hover:bg-blue-100 transition-colors border border-blue-100 w-fit">
+                                            <MapPin className="w-3.5 h-3.5" />
+                                            Open in Google Maps
+                                        </a>
+                                    )}
+                                </div>
                             )}
                             <a href="#reviews" className="inline-block hover:opacity-80 transition-opacity">
                                 <StarRating rating={averageRating} count={totalCount} size="md" />
@@ -106,6 +120,31 @@ export default async function StudioDetailsPage({
                         <p className={studio.bio ? "mt-4 text-charcoal-600" : "mt-6 text-charcoal-600 border-t border-cream-100 pt-6"}>
                             {studio.description}
                         </p>
+                    )}
+
+                    {studio.amenities && studio.amenities.length > 0 && (
+                        <div className="mt-8 border-t border-cream-100 pt-8">
+                            <h3 className="text-sm font-semibold text-charcoal-900 mb-4 uppercase tracking-wider">Features & Amenities</h3>
+                            <div className="flex flex-wrap gap-3">
+                                {studio.amenities.map((amenity: string, i: number) => {
+                                    let Icon = CheckCircle2;
+                                    if (amenity === 'Shower') Icon = ShowerHead;
+                                    if (amenity === 'Water Dispenser') Icon = Droplets;
+                                    if (amenity === 'Parking') Icon = Car;
+                                    if (amenity === 'Wi-Fi') Icon = Wifi;
+                                    if (amenity === 'Towels') Icon = Square;
+                                    if (amenity === 'Lockers') Icon = Lock;
+                                    if (amenity === 'Changing Room') Icon = Shirt;
+
+                                    return (
+                                        <div key={i} className="flex items-center gap-2 text-sm text-charcoal-700 bg-cream-50 px-3 py-2 rounded-lg border border-cream-200">
+                                            <Icon className="w-4 h-4 text-charcoal-500" />
+                                            <span className="font-medium">{amenity}</span>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
                     )}
                 </div>
 

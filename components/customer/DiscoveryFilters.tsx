@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
 import { Filter } from 'lucide-react'
+import { STUDIO_AMENITIES } from '@/types'
 
 export default function DiscoveryFilters() {
     const router = useRouter()
@@ -93,7 +94,7 @@ export default function DiscoveryFilters() {
                 <option value="Reformer">Reformer</option>
                 <option value="Cadillac">Cadillac</option>
                 <option value="Chair">Chair</option>
-                <option value="Barrel">Barrel</option>
+                <option value="Ladder Barrel">Barrel</option>
                 <option value="Mat">Mat</option>
             </select>
 
@@ -110,6 +111,19 @@ export default function DiscoveryFilters() {
                 <option value="Polestar">Polestar</option>
                 <option value="Polestar">Polestar</option>
                 <option value="Classical">Classical</option>
+                <option value="Classical">Classical</option>
+            </select>
+
+            {/* Amenities Filter */}
+            <select
+                onChange={(e) => handleFilter('amenity', e.target.value)}
+                defaultValue={searchParams.get('amenity') || 'all'}
+                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
+            >
+                <option value="all">All Amenities</option>
+                {STUDIO_AMENITIES.map(amenity => (
+                    <option key={amenity} value={amenity}>{amenity}</option>
+                ))}
             </select>
 
             {/* Date Filter */}

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { updateStudio } from '@/app/(dashboard)/studio/actions'
 import { Loader2, Save, Camera, User, X, Upload } from 'lucide-react'
-import { Studio } from '@/types'
+import { Studio, STUDIO_AMENITIES } from '@/types'
 import { isValidPhone } from '@/lib/validation'
 import Image from 'next/image'
 import { useRef } from 'react'
@@ -78,7 +78,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
     }
 
     return (
-        <form action={handleSubmit} className="space-y-8 bg-white p-8 rounded-2xl border border-cream-200 shadow-sm max-w-3xl">
+        <form action={handleSubmit} className="space-y-8 bg-white p-8 rounded-2xl border border-cream-200 shadow-sm max-w-3xl mx-auto">
 
             <input type="hidden" name="studioId" value={studio.id} />
 
@@ -185,6 +185,16 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                             rows={2}
                             placeholder="e.g. Unit 204, 2nd Floor, The Podium, ADB Ave, Ortigas Center"
                             className="w-full px-4 py-2 bg-cream-50 border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 resize-none"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-charcoal-700 mb-1">Google Maps Link (Optional)</label>
+                        <input
+                            type="url"
+                            name="googleMapsUrl"
+                            defaultValue={studio.google_maps_url || ''}
+                            placeholder="e.g. https://maps.app.goo.gl/..."
+                            className="w-full px-4 py-2 bg-cream-50 border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
                         />
                     </div>
                     <div>
@@ -296,74 +306,74 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
 
             {/* Equipment & Inventory */}
             <div className="space-y-4">
-                <h2 className="text-xl font-serif text-charcoal-900 border-b border-cream-200 pb-2">Equipment & Inventory</h2>
+                <h2 className="text-xl font-serif text-charcoal-900 border-b border-cream-200 pb-2">Equipment, Inventory & Pricing</h2>
+                <p className="text-sm text-charcoal-600 mb-4">
+                    Select the equipment available in your studio, enter the quantity, and set the hourly rental rate (if applicable).
+                </p>
 
-                <div className="bg-cream-50 p-4 rounded-lg border border-cream-200 mb-4">
-                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Equipment Inventory Quantities</label>
-                    <p className="text-xs text-charcoal-500 mb-3">
-                        Use this to track how many physical machines you have. This does not limit booking slots automatically unless confirmed otherwise.
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
-                            <div key={eq}>
-                                <label className="block text-xs font-medium text-charcoal-600 mb-1">{eq}</label>
-                                <input
-                                    type="number"
-                                    name={`qty_${eq}`}
-                                    defaultValue={studio.inventory?.[eq] || (eq === 'Reformer' ? studio.reformers_count : 0)}
-                                    min="0"
-                                    className="w-full px-3 py-2 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm"
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Available Equipment Types</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
-                            <label key={eq} className="flex items-center gap-2 p-3 bg-white border border-cream-200 rounded-lg hover:bg-cream-50 cursor-pointer transition-colors">
-                                <input
-                                    type="checkbox"
-                                    name={`eq_${eq}`}
-                                    className="w-4 h-4 text-charcoal-900 rounded border-cream-300 focus:ring-charcoal-500"
-                                    defaultChecked={studio.equipment?.includes(eq)}
-                                />
-                                <span className="text-sm text-charcoal-700">{eq}</span>
-                            </label>
-                        ))}
-                    </div>
-                    <p className="text-xs text-charcoal-500 mt-2">
-                        For &apos;Chair&apos;, &apos;Ladder Barrel&apos;, &apos;Mat&apos;, ensure the update script handles them.
-                    </p>
-                </div>
-
-                {/* Equipment Pricing */}
-                <div className="bg-cream-50 p-4 rounded-lg border border-cream-200 mt-4">
-                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Equipment Hourly Rates (PHP)</label>
-                    <p className="text-xs text-charcoal-500 mb-3">
-                        Set the hourly rental price for each equipment type.
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
-                            <div key={eq}>
-                                <label className="block text-xs font-medium text-charcoal-600 mb-1">{eq}</label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-2 text-charcoal-400 text-sm">₱</span>
+                <div className="space-y-3">
+                    {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
+                        return (
+                            <div key={eq} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border border-cream-200 rounded-lg bg-cream-50">
+                                <label className="flex items-center gap-3 flex-1 cursor-pointer">
                                     <input
-                                        type="number"
-                                        name={`price_${eq}`}
-                                        defaultValue={studio.pricing?.[eq] || ''}
-                                        placeholder="500"
-                                        min="0"
-                                        step="0.01"
-                                        className="w-full pl-7 pr-3 py-2 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm"
+                                        type="checkbox"
+                                        name={`eq_${eq}`}
+                                        className="w-5 h-5 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900 peer"
+                                        defaultChecked={studio.equipment?.includes(eq)}
                                     />
+                                    <span className="text-charcoal-900 font-medium">{eq}</span>
+                                </label>
+
+                                <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap opacity-50 peer-checked:opacity-100 transition-opacity">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-charcoal-500 w-8">Qty:</span>
+                                        <input
+                                            type="number"
+                                            name={`qty_${eq}`}
+                                            defaultValue={studio.inventory?.[eq] || (eq === 'Reformer' ? studio.reformers_count : 1)}
+                                            min="0"
+                                            className="w-20 px-3 py-1.5 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-charcoal-500 w-8">Rate:</span>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1.5 text-charcoal-400 text-sm">₱</span>
+                                            <input
+                                                type="number"
+                                                name={`price_${eq}`}
+                                                defaultValue={studio.pricing?.[eq] || ''}
+                                                placeholder="0.00"
+                                                min="0"
+                                                step="0.01"
+                                                className="w-28 pl-7 pr-3 py-1.5 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        )
+                    })}
+                </div>
+            </div>
+
+            {/* Amenities Section */}
+            <div className="space-y-4">
+                <h2 className="text-xl font-serif text-charcoal-900 border-b border-cream-200 pb-2">Amenities</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {STUDIO_AMENITIES.map((amenity) => (
+                        <label key={amenity} className="flex items-center gap-2 p-3 border border-cream-200 rounded-lg bg-white cursor-pointer hover:bg-cream-50 transition-colors">
+                            <input
+                                type="checkbox"
+                                name="amenities"
+                                value={amenity}
+                                defaultChecked={studio.amenities?.includes(amenity)}
+                                className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
+                            />
+                            <span className="text-charcoal-700 text-sm font-medium">{amenity}</span>
+                        </label>
+                    ))}
                 </div>
             </div>
 

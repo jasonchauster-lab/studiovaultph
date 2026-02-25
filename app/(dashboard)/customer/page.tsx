@@ -17,6 +17,7 @@ interface SearchParams {
     date?: string;
     time?: string;
     equipment?: string;
+    amenity?: string;
 }
 
 export default async function CustomerDashboard({
@@ -43,6 +44,11 @@ export default async function CustomerDashboard({
     if (params.equipment && params.equipment !== 'all') {
         // Studios must have this equipment
         studioQuery = studioQuery.contains('equipment', [params.equipment])
+    }
+
+    if (params.amenity && params.amenity !== 'all') {
+        // Studios must have this amenity
+        studioQuery = studioQuery.contains('amenities', [params.amenity])
     }
 
     const { data: studios } = await studioQuery

@@ -1,5 +1,17 @@
 export type LocationArea = 'Alabang' | 'BGC' | 'Ortigas' | 'Makati - CBD/Ayala' | 'Makati - Poblacion/Rockwell' | 'Makati - San Antonio/Gil Puyat' | 'Makati - Others' | 'Mandaluyong - Ortigas South' | 'Mandaluyong - Greenfield/Shaw' | 'Mandaluyong - Boni/Pioneer' | 'QC - Tomas Morato' | 'QC - Katipunan' | 'QC - Eastwood' | 'QC - Cubao' | 'QC - Fairview/Commonwealth' | 'QC - Novaliches' | 'QC - Diliman' | 'QC - Maginhawa/UP Village' | 'Paranaque - BF Homes' | 'Paranaque - Moonwalk / Merville' | 'Paranaque - Bicutan / Sucat' | 'Paranaque - Others';
 
+export const STUDIO_AMENITIES = [
+    'Shower',
+    'Water Dispenser',
+    'Parking',
+    'Wi-Fi',
+    'Towels',
+    'Lockers',
+    'Changing Room'
+] as const;
+
+export type StudioAmenity = typeof STUDIO_AMENITIES[number];
+
 export interface Studio {
     id: string;
     name: string;
@@ -19,6 +31,8 @@ export interface Studio {
     custom_fee_percentage?: number;
     inventory?: Record<string, number>;
     space_photos_urls?: string[];
+    google_maps_url?: string;
+    amenities?: string[];
 }
 
 export interface Profile {
