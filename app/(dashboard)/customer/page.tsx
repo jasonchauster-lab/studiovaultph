@@ -231,7 +231,7 @@ export default async function CustomerDashboard({
                                     <div key={inst.id} className="bg-white p-6 rounded-2xl border border-cream-200 shadow-sm hover:shadow-md transition-all">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-full overflow-hidden bg-cream-100 flex items-center justify-center border border-cream-200">
+                                                <Link href={`/instructors/${inst.id}`} className="shrink-0 w-12 h-12 rounded-full overflow-hidden bg-cream-100 flex items-center justify-center border border-cream-200 hover:opacity-80 transition-opacity">
                                                     {inst.avatar_url ? (
                                                         <Image
                                                             src={inst.avatar_url}
@@ -243,7 +243,7 @@ export default async function CustomerDashboard({
                                                     ) : (
                                                         <User className="w-6 h-6 text-charcoal-400" />
                                                     )}
-                                                </div>
+                                                </Link>
                                                 <div>
                                                     <h3 className="font-medium text-charcoal-900">{inst.full_name}</h3>
                                                     {inst.instagram_handle && (
@@ -306,7 +306,7 @@ export default async function CustomerDashboard({
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {studios?.map(studio => (
                                     <div key={studio.id} className="bg-white rounded-2xl border border-cream-200 shadow-sm overflow-hidden hover:shadow-md transition-all group">
-                                        <div className="h-40 bg-charcoal-50 relative items-center justify-center flex overflow-hidden border-b border-cream-100">
+                                        <Link href={`/studios/${studio.id}`} className="block h-40 bg-charcoal-50 relative items-center justify-center overflow-hidden border-b border-cream-100 cursor-pointer">
                                             {studio.logo_url ? (
                                                 <Image
                                                     src={studio.logo_url}
@@ -315,11 +315,11 @@ export default async function CustomerDashboard({
                                                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                                                 />
                                             ) : (
-                                                <span className="text-charcoal-300 font-serif italic text-4xl group-hover:scale-110 transition-transform duration-500">
+                                                <span className="text-charcoal-300 font-serif italic text-4xl group-hover:scale-110 transition-transform duration-500 flex h-full items-center justify-center">
                                                     {studio.name.slice(0, 1)}
                                                 </span>
                                             )}
-                                        </div>
+                                        </Link>
                                         <div className="p-6">
                                             <div className="flex justify-between items-start mb-2">
                                                 <div>

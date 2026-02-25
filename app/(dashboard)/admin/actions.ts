@@ -8,8 +8,19 @@ import BookingNotificationEmail from '@/components/emails/BookingNotificationEma
 import ApplicationApprovalEmail from '@/components/emails/ApplicationApprovalEmail'
 import ApplicationRejectionEmail from '@/components/emails/ApplicationRejectionEmail'
 
+async function verifyAdmin(supabase: any) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return false
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    return profile?.role === 'admin'
+}
+
 export async function approvePayout(payoutId: string) {
     const supabase = await createClient()
+
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
 
     // 1. Update status to 'paid'
     const { data: payout, error: fetchError } = await supabase
@@ -57,6 +68,10 @@ export async function approvePayout(payoutId: string) {
 export async function rejectPayout(payoutId: string) {
     const supabase = await createClient()
 
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
     // 1. Update status to 'rejected'
     // This effectively "refunds" the amount to the Available Balance calculation
     // because available = totalEarned - totalWithdrawn (processed) - pendingPayouts (pending)
@@ -86,6 +101,10 @@ export async function rejectPayout(payoutId: string) {
 
 export async function approveCertification(certificationId: string) {
     const supabase = await createClient()
+
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
 
     // Verify admin role 
     // In a real app, we would check if (await supabase.auth.getUser()).data.user.role === 'admin'
@@ -128,6 +147,10 @@ export async function approveCertification(certificationId: string) {
 
 export async function rejectCertification(certificationId: string, customReason?: string) {
     const supabase = await createClient()
+
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
 
     // Fetch details before deleting so we can send an email
     const { data: cert } = await supabase.from('certifications')
@@ -179,6 +202,10 @@ export async function rejectCertification(certificationId: string, customReason?
 export async function verifyStudio(studioId: string) {
     const supabase = await createClient()
 
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
     const { data: studio, error: fetchError } = await supabase.from('studios')
         .update({ verified: true })
         .eq('id', studioId)
@@ -217,6 +244,10 @@ export async function verifyStudio(studioId: string) {
 
 export async function rejectStudio(studioId: string, customReason?: string) {
     const supabase = await createClient()
+
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
 
     // Fetch details before deleting so we can send an email
     const { data: studio } = await supabase.from('studios')
@@ -268,6 +299,10 @@ export async function rejectStudio(studioId: string, customReason?: string) {
 export async function approveStudioPayout(studioId: string) {
     const supabase = await createClient()
 
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
     const { data: studio, error: fetchError } = await supabase.from('studios')
         .update({ payout_approval_status: 'approved' })
         .eq('id', studioId)
@@ -306,6 +341,10 @@ export async function approveStudioPayout(studioId: string) {
 
 export async function rejectStudioPayout(studioId: string, customReason?: string) {
     const supabase = await createClient()
+
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
 
     // Fetch details before updating so we can send an email
     const { data: studio } = await supabase.from('studios')
@@ -352,6 +391,10 @@ export async function rejectStudioPayout(studioId: string, customReason?: string
 
 export async function confirmBooking(bookingId: string) {
     const supabase = await createClient()
+
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
 
     // Helper to extract first item if array
     const first = (val: any) => Array.isArray(val) ? val[0] : val;
@@ -497,6 +540,10 @@ export async function confirmBooking(bookingId: string) {
 
 export async function rejectBooking(bookingId: string, reason: string) {
     const supabase = await createClient()
+
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
     const first = (val: any) => Array.isArray(val) ? val[0] : val;
 
     // 1. Fetch the booking to get associated slot IDs and client info
@@ -606,6 +653,10 @@ export async function rejectBooking(bookingId: string, reason: string) {
 
 export async function getAdminAnalytics(startDate?: string, endDate?: string) {
     const supabase = await createClient()
+
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
 
     // 1. Fetch all approved bookings with details for detailed transactions
     let bookingsQuery = supabase
@@ -731,6 +782,10 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
 export async function getPayoutsExport() {
     const supabase = await createClient()
 
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
     const { data: payouts, error } = await supabase
         .from('payout_requests')
         .select('id, amount, status, payment_method, account_name, account_number, bank_name, created_at, updated_at, instructor_id, studio_id, user_id')
@@ -782,6 +837,10 @@ export async function getPayoutsExport() {
 
 export async function getRevenueExport(startDate?: string, endDate?: string) {
     const supabase = await createClient()
+
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
 
     let query = supabase
         .from('bookings')
@@ -841,6 +900,10 @@ export async function getRevenueExport(startDate?: string, endDate?: string) {
 export async function getWalletBalancesExport() {
     const supabase = await createClient()
 
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
     // 1. Fetch all profiles
     const { data: profiles, error: profileError } = await supabase
         .from('profiles')
@@ -887,6 +950,11 @@ export async function getWalletBalancesExport() {
 }
 
 export async function completeBooking(bookingId: string) {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
     const { processBookingCompletion } = await import('@/lib/wallet')
     const result = await processBookingCompletion(bookingId)
 
@@ -901,6 +969,11 @@ export async function completeBooking(bookingId: string) {
 }
 
 export async function triggerFundsUnlock() {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
     const { unlockMaturedFunds, autoCompleteBookings } = await import('@/lib/wallet')
     const completed = await autoCompleteBookings()
     const unlocked = await unlockMaturedFunds()
@@ -913,6 +986,10 @@ export async function triggerFundsUnlock() {
 
 export async function searchAllUsers(query: string) {
     const supabase = await createClient();
+
+    if (!(await verifyAdmin(supabase))) {
+        return [];
+    }
     const cleanQuery = query.trim();
     if (cleanQuery.length < 2) return [];
 
@@ -1037,6 +1114,10 @@ export async function updatePartnerFeeSettings(
     customFeePercentage: number
 ) {
     const supabase = await createClient();
+
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
     const table = type === 'profile' ? 'profiles' : 'studios';
 
     const { error } = await supabase

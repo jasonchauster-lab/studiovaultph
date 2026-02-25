@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
-import { Loader2, CheckCircle, Calendar } from 'lucide-react'
+import { Loader2, CheckCircle, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 import clsx from 'clsx'
 import { useRouter } from 'next/navigation'
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays } from 'date-fns'
 
 interface Slot {
     id: string;
@@ -49,15 +50,77 @@ export default function BookingSection({
 
     const availableDates = Object.keys(slotsByDate).sort();
 
-    // 2. State for active date
+    // 2. State for active date & month
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
-    // Auto-select first date on mount
+    // Auto-select first date on mount, and sync month to it
     useEffect(() => {
         if (availableDates.length > 0 && !selectedDate) {
             setSelectedDate(availableDates[0]);
+            setCurrentMonth(new Date(availableDates[0]));
         }
     }, [availableDates, selectedDate]);
+
+    // Calendar logic
+    const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1))
+    const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1))
+
+    const monthStart = startOfMonth(currentMonth)
+    const monthEnd = endOfMonth(monthStart)
+    const startDate = startOfWeek(monthStart)
+    const endDate = endOfWeek(monthEnd)
+
+    const calendarRows = []
+    let days = []
+    let day = startDate
+    let formattedDate = ""
+    const today = startOfDay(new Date())
+
+    while (day <= endDate) {
+        for (let i = 0; i < 7; i++) {
+            formattedDate = format(day, "d")
+            const cloneDay = day
+
+            // Check if this render day has slots
+            const dateStr = format(cloneDay, 'yyyy-MM-dd')
+            const hasSlots = availableDates.includes(dateStr)
+            const isSelected = selectedDate === dateStr
+            const isPast = isBefore(cloneDay, today)
+
+            days.push(
+                <button
+                    key={day.toString()}
+                    type="button"
+                    onClick={() => {
+                        if (hasSlots) {
+                            setSelectedDate(dateStr)
+                            setSelectedSlotTime(null)
+                        }
+                    }}
+                    className={clsx(
+                        "h-12 flex flex-col items-center justify-center rounded-xl text-sm transition-all focus:outline-none",
+                        !isSameMonth(day, monthStart) ? "text-cream-300 pointer-events-none" : "",
+                        isSameMonth(day, monthStart) && !hasSlots && !isPast && !isSelected ? "text-charcoal-400 opacity-50" : "",
+                        isPast ? "text-cream-300 pointer-events-none opacity-50" : "",
+                        hasSlots && !isSelected ? "bg-cream-100 text-charcoal-900 font-medium hover:bg-cream-200 cursor-pointer border border-cream-200" : "",
+                        isSelected ? "bg-charcoal-900 text-cream-50 font-bold shadow-md transform scale-105" : ""
+                    )}
+                    disabled={!hasSlots || isPast}
+                >
+                    <span className="leading-none">{formattedDate}</span>
+                    {hasSlots && !isSelected && <span className="w-1 h-1 bg-charcoal-500 rounded-full mt-1"></span>}
+                </button>
+            )
+            day = addDays(day, 1)
+        }
+        calendarRows.push(
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-1 sm:mb-2" key={day.toString()}>
+                {days}
+            </div>
+        )
+        days = []
+    }
 
     // 3. Group slots for the SELECTED date by time range
     const slotsForDate = selectedDate ? slotsByDate[selectedDate] : [];
@@ -170,38 +233,40 @@ export default function BookingSection({
                 </div>
             )}
 
-            {/* Date Picker Tabs */}
-            <div className="flex overflow-x-auto pb-4 gap-3 -mx-4 px-4 no-scrollbar snap-x snap-mandatory">
-                {availableDates.map(date => {
-                    const d = new Date(date);
-                    const isDateSelected = selectedDate === date;
-                    return (
-                        <button
-                            key={date}
-                            onClick={() => {
-                                setSelectedDate(date);
-                                setSelectedSlotTime(null); // Reset time selection
-                            }}
-                            className={clsx(
-                                "flex flex-col items-center min-w-[72px] py-3 rounded-2xl border transition-all snap-start",
-                                isDateSelected
-                                    ? "bg-charcoal-900 border-charcoal-900 text-cream-50 shadow-md"
-                                    : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
-                            )}
-                        >
-                            <span className="text-[10px] uppercase tracking-widest font-bold opacity-60 mb-0.5">
-                                {d.toLocaleDateString(undefined, { weekday: 'short' })}
-                            </span>
-                            <span className="text-xl font-serif leading-tight">
-                                {d.getDate()}
-                            </span>
-                            <span className="text-[10px] uppercase font-medium">
-                                {d.toLocaleDateString(undefined, { month: 'short' })}
-                            </span>
-                        </button>
-                    )
-                })}
+            {/* Monthly Calendar View */}
+            <div className="bg-white border border-cream-200 rounded-2xl p-4 sm:p-6 shadow-sm max-w-md mx-auto">
+                <div className="flex items-center justify-between mb-4">
+                    <button onClick={prevMonth} className="p-2 hover:bg-cream-50 rounded-full transition-colors text-charcoal-500 hover:text-charcoal-900">
+                        <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <h3 className="font-serif text-lg text-charcoal-900">
+                        {format(currentMonth, 'MMMM yyyy')}
+                    </h3>
+                    <button onClick={nextMonth} className="p-2 hover:bg-cream-50 rounded-full transition-colors text-charcoal-500 hover:text-charcoal-900">
+                        <ChevronRight className="w-5 h-5" />
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
+                    {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
+                        <div key={d} className="text-center text-[10px] sm:text-xs font-semibold text-charcoal-400 uppercase tracking-wider py-1">
+                            {d}
+                        </div>
+                    ))}
+                </div>
+
+                <div>{calendarRows}</div>
             </div>
+
+            {/* Selected Date Header Display (Optional context for slots below) */}
+            {selectedDate && (
+                <div className="text-center mb-4 pb-2 border-b border-cream-200 max-w-2xl mx-auto">
+                    <h3 className="text-xl font-serif text-charcoal-900">
+                        {format(new Date(selectedDate), 'EEEE, MMMM do')}
+                    </h3>
+                    <p className="text-sm text-charcoal-500 mt-1">Select a time slot below to continue</p>
+                </div>
+            )}
 
             {/* Time Slots for Selected Date */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
