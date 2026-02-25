@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { findMatchingStudios } from '@/app/(dashboard)/instructors/actions'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
-import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus } from 'lucide-react'
+import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import clsx from 'clsx'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -17,6 +17,7 @@ export default function InstructorBookingWizard({
     availability: any[]
 }) {
     const [step, setStep] = useState<1 | 2 | 3>(1)
+    const scrollContainerRef = useRef<HTMLDivElement>(null)
     const [selectedDate, setSelectedDate] = useState<string>('') // YYYY-MM-DD
     const [selectedSlot, setSelectedSlot] = useState<any>(null) // Availability Object
     const [matchingStudios, setMatchingStudios] = useState<any[]>([])
@@ -40,6 +41,18 @@ export default function InstructorBookingWizard({
             label: d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
         }
     })
+
+    const scrollLeft = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' })
+        }
+    }
+
+    const scrollRight = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' })
+        }
+    }
 
     const handleSearchCheck = async (slot: any, dateStr: string) => {
         setSelectedSlot(slot)
@@ -137,35 +150,56 @@ export default function InstructorBookingWizard({
                         </div>
                     </div>
 
-                    {/* Horizontal Date Picker */}
-                    <div className="flex overflow-x-auto pb-4 gap-3 -mx-4 px-4 no-scrollbar snap-x snap-mandatory">
-                        {nextDays.map((d) => {
-                            const hasSlots = availability.some(a => {
-                                if (a.date) return a.date === d.date
-                                return !a.date && a.day_of_week === d.dayIndex
-                            });
+                    <div className="relative group">
+                        {/* Left Scroll Button */}
+                        <button
+                            onClick={scrollLeft}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 md:w-10 md:h-10 bg-white border border-cream-200 shadow-md rounded-full flex items-center justify-center text-charcoal-500 hover:text-charcoal-900 transition-all opacity-0 group-hover:opacity-100 -ml-4 md:-ml-5"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
 
-                            if (!hasSlots) return null;
+                        {/* Horizontal Date Picker */}
+                        <div
+                            ref={scrollContainerRef}
+                            className="flex overflow-x-auto pb-4 gap-3 px-1 no-scrollbar snap-x snap-mandatory scroll-smooth"
+                        >
+                            {nextDays.map((d) => {
+                                const hasSlots = availability.some(a => {
+                                    if (a.date) return a.date === d.date
+                                    return !a.date && a.day_of_week === d.dayIndex
+                                });
 
-                            const isSelected = selectedDate === d.date || (!selectedDate && nextDays.find(nd => availability.some(a => a.date === nd.date || (!a.date && a.day_of_week === nd.dayIndex)))?.date === d.date);
+                                if (!hasSlots) return null;
 
-                            return (
-                                <button
-                                    key={d.date}
-                                    onClick={() => setSelectedDate(d.date)}
-                                    className={clsx(
-                                        "flex flex-col items-center min-w-[72px] py-3 rounded-2xl border transition-all snap-start",
-                                        isSelected
-                                            ? "bg-charcoal-900 border-charcoal-900 text-cream-50 shadow-md"
-                                            : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
-                                    )}
-                                >
-                                    <span className="text-[10px] uppercase tracking-widest font-bold opacity-60 mb-0.5">{d.date === new Date().toISOString().split('T')[0] ? 'Today' : d.label.split(' ')[0]}</span>
-                                    <span className="text-xl font-serif leading-tight">{d.label.split(' ').pop()}</span>
-                                    <span className="text-[10px] uppercase font-medium">{d.label.split(' ')[1]}</span>
-                                </button>
-                            );
-                        })}
+                                const isSelected = selectedDate === d.date || (!selectedDate && nextDays.find(nd => availability.some(a => a.date === nd.date || (!a.date && a.day_of_week === nd.dayIndex)))?.date === d.date);
+
+                                return (
+                                    <button
+                                        key={d.date}
+                                        onClick={() => setSelectedDate(d.date)}
+                                        className={clsx(
+                                            "flex flex-col items-center min-w-[72px] py-3 rounded-2xl border transition-all snap-start flex-shrink-0",
+                                            isSelected
+                                                ? "bg-charcoal-900 border-charcoal-900 text-cream-50 shadow-md"
+                                                : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
+                                        )}
+                                    >
+                                        <span className="text-[10px] uppercase tracking-widest font-bold opacity-60 mb-0.5">{d.date === new Date().toISOString().split('T')[0] ? 'Today' : d.label.split(' ')[0]}</span>
+                                        <span className="text-xl font-serif leading-tight">{d.label.split(' ').pop()}</span>
+                                        <span className="text-[10px] uppercase font-medium">{d.label.split(' ')[1]}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Right Scroll Button */}
+                        <button
+                            onClick={scrollRight}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 md:w-10 md:h-10 bg-white border border-cream-200 shadow-md rounded-full flex items-center justify-center text-charcoal-500 hover:text-charcoal-900 transition-all opacity-0 group-hover:opacity-100 -mr-4 md:-mr-5"
+                        >
+                            <ChevronRight className="w-5 h-5" />
+                        </button>
                     </div>
 
                     {/* Slots for Selected Date */}
