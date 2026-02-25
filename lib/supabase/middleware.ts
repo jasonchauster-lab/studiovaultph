@@ -38,6 +38,7 @@ export async function updateSession(request: NextRequest) {
         !request.nextUrl.pathname.startsWith('/login') &&
         !request.nextUrl.pathname.startsWith('/auth') &&
         !request.nextUrl.pathname.startsWith('/register') &&
+        !request.nextUrl.pathname.startsWith('/verified') && // Allow verification success page
         !request.nextUrl.pathname.startsWith('/_next') && // Next.js internals
         !request.nextUrl.pathname.startsWith('/favicon.ico') && // Static asset
         request.nextUrl.pathname !== '/' // Landing page
