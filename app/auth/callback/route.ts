@@ -10,20 +10,27 @@ export async function GET(request: Request) {
     if (code) {
         const supabase = await createClient()
         const { error } = await supabase.auth.exchangeCodeForSession(code)
-        if (!error) {
-            const forwardedHost = request.headers.get('x-forwarded-host') // i.e. demo.vercel.app
-            const isLocalEnv = process.env.NODE_ENV === 'development'
-            if (isLocalEnv) {
-                // we can skip typical extra security checks in local dev
-                return NextResponse.redirect(`${origin}${next}`)
-            } else if (forwardedHost) {
-                return NextResponse.redirect(`https://${forwardedHost}${next}`)
-            } else {
-                return NextResponse.redirect(`${origin}${next}`)
-            }
+
+        // If there's an error (like PKCE verifier missing because they opened the link on their phone),
+        // we still want to redirect them to the /verified page. Their email is already verified in the DB 
+        // by the Supabase /verify endpoint, they just won't be auto-logged in.
+        if (error) {
+            console.error('Auth callback token exchange error:', error.message)
+        }
+
+        const forwardedHost = request.headers.get('x-forwarded-host') // i.e. demo.vercel.app
+        const isLocalEnv = process.env.NODE_ENV === 'development'
+
+        if (isLocalEnv) {
+            // we can skip typical extra security checks in local dev
+            return NextResponse.redirect(`${origin}${next}`)
+        } else if (forwardedHost) {
+            return NextResponse.redirect(`https://${forwardedHost}${next}`)
+        } else {
+            return NextResponse.redirect(`${origin}${next}`)
         }
     }
 
-    // return the user to an error page with instructions
-    return NextResponse.redirect(`${origin}/auth/auth-code-error`)
+    // fallback if no code was found at all
+    return NextResponse.redirect(`${origin}/login`)
 }
