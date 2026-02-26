@@ -42,6 +42,7 @@ function FileUploadBox({ name, label, required, fileName, previewUrl, accept, se
                     <>
                         <Upload className="w-5 h-5 text-charcoal-700 mb-1" />
                         <p className="text-[10px] text-center font-medium text-charcoal-700 px-2">Click to upload</p>
+                        {accept && <p className="text-[8px] text-center text-charcoal-500 mt-0.5 max-w-[90%] break-words">{accept.replace(/,/g, ', ')}</p>}
                     </>
                 )}
             </div>
@@ -297,14 +298,16 @@ export default function StudioApplicationForm() {
                 <label className="block text-sm font-medium text-charcoal-700 mb-2">Amenities</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {STUDIO_AMENITIES.map((amenity) => (
-                        <label key={amenity} className="flex items-center gap-2 p-2.5 border border-cream-200 rounded-lg bg-cream-50 cursor-pointer hover:bg-cream-100 transition-colors">
-                            <input
-                                type="checkbox"
-                                name="amenities"
-                                value={amenity}
-                                className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
-                            />
-                            <span className="text-charcoal-700 text-sm font-medium">{amenity}</span>
+                        <label key={amenity} className="flex items-start gap-2.5 p-3 border border-cream-200 rounded-lg bg-cream-50 cursor-pointer hover:bg-cream-100 transition-colors h-full">
+                            <div className="flex items-center h-5">
+                                <input
+                                    type="checkbox"
+                                    name="amenities"
+                                    value={amenity}
+                                    className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
+                                />
+                            </div>
+                            <span className="text-charcoal-700 text-sm font-medium leading-tight pt-0.5">{amenity}</span>
                         </label>
                     ))}
                 </div>
