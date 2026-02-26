@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createStudio } from '@/app/(dashboard)/studio/actions'
-import { Loader2, Upload } from 'lucide-react'
+import { Loader2, Upload, CheckCircle } from 'lucide-react'
 import clsx from 'clsx'
 import { STUDIO_AMENITIES } from '@/types'
 
@@ -21,15 +21,27 @@ function FileUploadBox({ name, label, required, fileName, previewUrl, accept, se
                 />
                 {previewUrl ? (
                     <div className="relative w-full h-full z-20 group/preview block">
-                        <img src={previewUrl} alt="Preview" className="h-full w-full object-contain cursor-pointer" onClick={(e) => { e.preventDefault(); window.open(previewUrl, '_blank'); }} />
-                        <div className="absolute top-1 right-1 bg-charcoal-900/70 p-1 rounded-full text-white cursor-pointer opacity-0 group-hover/preview:opacity-100 transition-opacity pointer-events-auto" onClick={(e) => { e.preventDefault(); setFileState(null, null); }}>
+                        <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                            <img src={previewUrl} alt="Preview" className="h-full w-full object-contain cursor-pointer" />
+                        </a>
+                        <div className="absolute top-1 right-1 bg-charcoal-900/70 p-1 rounded-full text-white cursor-pointer opacity-0 group-hover/preview:opacity-100 transition-opacity pointer-events-auto z-30" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setFileState(null, null); }}>
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </div>
+                    </div>
+                ) : fileName ? (
+                    <div className="flex flex-col items-center justify-center w-full h-full z-20 relative group/file">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center mb-1 bg-green-100">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                        </div>
+                        <p className="text-[10px] text-center font-medium text-charcoal-700 px-2 line-clamp-2 max-w-[90%] break-all">{fileName}</p>
+                        <div className="absolute top-1 right-1 bg-charcoal-900/70 p-1 rounded-full text-white cursor-pointer opacity-0 group-hover/file:opacity-100 transition-opacity pointer-events-auto" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setFileState(null, null); }}>
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </div>
                     </div>
                 ) : (
                     <>
                         <Upload className="w-5 h-5 text-charcoal-700 mb-1" />
-                        <p className="text-[10px] text-center font-medium text-charcoal-700 px-2">{fileName || 'Click to upload'}</p>
+                        <p className="text-[10px] text-center font-medium text-charcoal-700 px-2">Click to upload</p>
                     </>
                 )}
             </div>
@@ -180,13 +192,9 @@ export default function StudioApplicationForm() {
                     required={true}
                     fileName={birFileName}
                     previewUrl={birPreviewUrl}
-                    accept="image/*,.pdf"
+                    accept=".jpg,.jpeg,.png,.pdf"
                     setFileState={(name: string | null, url: string | null) => { setBirFileName(name); setBirPreviewUrl(url); }}
                 />
-                <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-1">BIR Expiration Date <span className="text-red-500">*</span></label>
-                    <input type="date" required name="birExpiry" className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
-                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -196,7 +204,7 @@ export default function StudioApplicationForm() {
                     required={true}
                     fileName={govIdFileName}
                     previewUrl={govIdPreviewUrl}
-                    accept="image/*,.pdf"
+                    accept=".jpg,.jpeg,.png,.pdf"
                     setFileState={(name: string | null, url: string | null) => { setGovIdFileName(name); setGovIdPreviewUrl(url); }}
                 />
                 <div>
@@ -212,7 +220,7 @@ export default function StudioApplicationForm() {
                     required={false}
                     fileName={insuranceFileName}
                     previewUrl={insurancePreviewUrl}
-                    accept="image/*,.pdf"
+                    accept=".jpg,.jpeg,.png,.pdf"
                     setFileState={(name: string | null, url: string | null) => { setInsuranceFileName(name); setInsurancePreviewUrl(url); }}
                 />
                 <div>
@@ -229,7 +237,9 @@ export default function StudioApplicationForm() {
                     {spacePhotosUrls.length > 0 ? (
                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 relative z-20">
                             {spacePhotosUrls.map((url, i) => (
-                                <img key={i} src={url} className="w-full aspect-square object-cover rounded cursor-pointer" onClick={(e) => { e.preventDefault(); window.open(url, '_blank'); }} />
+                                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block w-full aspect-square relative z-30">
+                                    <img src={url} className="w-full aspect-square object-cover rounded cursor-pointer" alt={`Space Photo ${i + 1}`} />
+                                </a>
                             ))}
                         </div>
                     ) : (

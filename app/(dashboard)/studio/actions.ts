@@ -179,10 +179,9 @@ export async function createStudio(formData: FormData) {
         const insurance = formData.get('insurance') as File
         const spacePhotos = formData.getAll('spacePhotos') as File[]
 
-        const birExpiry = formData.get('birExpiry') as string
+        const birExpiry = null // No longer required
         const govIdExpiry = formData.get('govIdExpiry') as string
         const insuranceExpiry = formData.get('insuranceExpiry') as string
-
 
         if (!name || !location || !contactNumber || !dateOfBirth || !address || !birCertificate || !govId || spacePhotos.length === 0) {
             return { error: 'All fields and documents are required' }

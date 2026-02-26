@@ -238,13 +238,14 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {existingPhotos.map((url, index) => (
                                     <div key={'ext_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
-                                        <Image
-                                            src={url}
-                                            alt={`Space Photo ${index + 1}`}
-                                            fill
-                                            className="object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                            onClick={(e) => { e.preventDefault(); window.open(url, '_blank'); }}
-                                        />
+                                        <a href={url} target="_blank" rel="noopener noreferrer">
+                                            <Image
+                                                src={url}
+                                                alt={`Space Photo ${index + 1}`}
+                                                fill
+                                                className="object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                            />
+                                        </a>
                                         <button
                                             onClick={(e) => removeExistingPhoto(e, url)}
                                             className="absolute top-2 right-2 p-1.5 bg-red-500/90 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm z-10"
@@ -267,12 +268,13 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                                     const objectUrl = URL.createObjectURL(file);
                                     return (
                                         <div key={'new_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
-                                            <img
-                                                src={objectUrl}
-                                                alt={`New Photo ${index + 1}`}
-                                                className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                                onClick={(e) => { e.preventDefault(); window.open(objectUrl, '_blank'); }}
-                                            />
+                                            <a href={objectUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                                                <img
+                                                    src={objectUrl}
+                                                    alt={`New Photo ${index + 1}`}
+                                                    className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                                />
+                                            </a>
                                             <button
                                                 onClick={(e) => removeNewPhoto(e, index)}
                                                 className="absolute top-2 right-2 p-1.5 bg-red-500/90 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm z-10"
