@@ -151,11 +151,11 @@ export default async function StudioDetailsPage({
                         </div>
                     )}
 
-                    {studio.space_photos && studio.space_photos.length > 0 && (
+                    {studio.space_photos_urls && studio.space_photos_urls.length > 0 && (
                         <div className="mt-8 border-t border-cream-100 pt-8">
                             <h3 className="text-sm font-semibold text-charcoal-900 mb-4 uppercase tracking-wider">Studio Photos</h3>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                {studio.space_photos.map((photoUrl: string, index: number) => (
+                                {studio.space_photos_urls.map((photoUrl: string, index: number) => (
                                     <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-cream-100 border border-cream-200 group">
                                         <NextImage
                                             src={photoUrl}

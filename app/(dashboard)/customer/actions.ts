@@ -163,8 +163,8 @@ export async function requestBooking(
         const currentSlotEnd = new Date(slot.end_time);
 
         if (bookingStart && bookingEnd) {
-            const reqStart = new Date(bookingStart);
-            const reqEnd = new Date(bookingEnd);
+            const reqStart = new Date(bookingStart + '+08:00');
+            const reqEnd = new Date(bookingEnd + '+08:00');
 
             // Validate range (already checked logic, assuming valid relative to slot)
             const isPartial = reqStart.getTime() > currentSlotStart.getTime() || reqEnd.getTime() < currentSlotEnd.getTime();
@@ -273,8 +273,8 @@ export async function requestBooking(
     const studioAddress = booking.slots.studios.address;
     const instructorName = booking.profiles?.full_name || 'Instructor';
     const instructorEmail = booking.profiles?.email;
-    const date = new Date(booking.slots.start_time).toLocaleDateString();
-    const time = new Date(booking.slots.start_time).toLocaleTimeString();
+    const date = new Date(booking.slots.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
+    const time = new Date(booking.slots.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' });
 
     // 1. Notify Client
     if (clientEmail) {
@@ -409,7 +409,7 @@ export async function bookInstructorSession(
         return { error: 'Missing booking details. Please select Date, Time, Location and Equipment.' }
     }
 
-    const startDateTime = new Date(`${date}T${time}`)
+    const startDateTime = new Date(`${date}T${time}+08:00`)
     // Assume 1 hour session for now as per "hourly slot" standard
     const endDateTime = new Date(startDateTime)
     endDateTime.setHours(startDateTime.getHours() + 1)
@@ -546,8 +546,8 @@ export async function bookInstructorSession(
         const studioAddress = studios?.address;
 
         if (clientEmail && slots?.start_time) {
-            const dateStr = new Date(slots.start_time).toLocaleDateString();
-            const timeStr = new Date(slots.start_time).toLocaleTimeString();
+            const dateStr = new Date(slots.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
+            const timeStr = new Date(slots.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' });
 
             // Notify Client
             await sendEmail({

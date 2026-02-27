@@ -21,8 +21,8 @@ export async function findMatchingStudios(
     // So we search for slots where:
     // slot.start_time >= (Date + StartTime) AND slot.end_time <= (Date + EndTime)
 
-    const searchStart = new Date(`${dateStr}T${startTimeStr}`)
-    const searchEnd = new Date(`${dateStr}T${endTimeStr}`)
+    const searchStart = new Date(`${dateStr}T${startTimeStr}+08:00`)
+    const searchEnd = new Date(`${dateStr}T${endTimeStr}+08:00`)
 
     // 2. Query Slots in Location
     // We join studios to filter by location

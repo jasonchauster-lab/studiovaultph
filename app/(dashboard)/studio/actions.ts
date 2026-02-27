@@ -34,8 +34,8 @@ export async function createSlot(formData: FormData) {
         return { error: 'Time must be on the hour (e.g. 8:00, 9:00)' }
     }
 
-    const startDateTime = new Date(`${date}T${startTimeStr}:00`)
-    const endDateTime = new Date(`${date}T${endTimeStr}:00`)
+    const startDateTime = new Date(`${date}T${startTimeStr}:00+08:00`)
+    const endDateTime = new Date(`${date}T${endTimeStr}:00+08:00`)
 
     // Loop through hours
     const slotsToInsert = []
@@ -127,8 +127,8 @@ export async function updateSlot(slotId: string, formData: FormData) {
         return { error: 'Time fields are required' }
     }
 
-    const startDateTime = new Date(`${date}T${startTimeStr}:00`)
-    const endDateTime = new Date(`${date}T${endTimeStr}:00`)
+    const startDateTime = new Date(`${date}T${startTimeStr}:00+08:00`)
+    const endDateTime = new Date(`${date}T${endTimeStr}:00+08:00`)
 
     const { error } = await supabase
         .from('slots')
@@ -334,8 +334,8 @@ export async function generateRecurringSlots(params: GenerateSlotsParams) {
 
             // Generate slots for this day
             const dayStr = currentDay.toISOString().split('T')[0];
-            let slotStart = new Date(`${dayStr}T${params.startTime}:00`);
-            const slotEnd = new Date(`${dayStr}T${params.endTime}:00`);
+            let slotStart = new Date(`${dayStr}T${params.startTime}:00+08:00`);
+            const slotEnd = new Date(`${dayStr}T${params.endTime}:00+08:00`);
 
             while (slotStart < slotEnd) {
                 const nextHour = new Date(slotStart);
