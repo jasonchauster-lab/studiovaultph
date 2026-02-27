@@ -13,7 +13,10 @@ export default async function CustomerBookingsPage() {
 
     if (!user) redirect('/login')
 
-    // Fetch Bookings with nested details
+    // Lazily expire any abandoned bookings before fetching (same as dashboard + payment page)
+    const { expireAbandonedBookings } = await import('@/lib/wallet')
+    await expireAbandonedBookings().catch(() => { })
+
     // We need Studio name and Instructor name
     const { data: bookings } = await supabase
         .from('bookings')
