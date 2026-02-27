@@ -253,7 +253,7 @@ export default function LandingPage() {
               </li>
               <li className="flex items-start gap-3 text-charcoal-700">
                 <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                <span><strong className="text-charcoal-900">Automated Payouts:</strong> Seamless system splits funds and deposits directly without chasing invoices.</span>
+                <span><strong className="text-charcoal-900">Direct Rental Payouts:</strong> Receive your full equipment fee automatically without waiting for complex revenue splits.</span>
               </li>
             </ul>
           </div>
