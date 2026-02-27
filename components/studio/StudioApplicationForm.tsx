@@ -76,7 +76,10 @@ export default function StudioApplicationForm() {
         setSpacePhotosUrls(urls)
     }
 
-    async function handleSubmit(formData: FormData) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        const formData = new FormData(event.currentTarget)
+
         setError(null)
         setIsLoading(true)
 
@@ -95,6 +98,25 @@ export default function StudioApplicationForm() {
             return
         }
 
+        // Validate total file sizes
+        let totalSize = 0;
+        let fileCount = 0;
+        for (const value of formData.values()) {
+            if (value instanceof File && value.size > 0) {
+                totalSize += value.size;
+                fileCount++;
+            }
+        }
+
+        console.log(`Submitting ${fileCount} files, total size: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
+
+        // If total size > 4.5MB, warn exactly what's wrong so they avoid Next.js payload limits
+        if (totalSize > 4.5 * 1024 * 1024) {
+            setError(`Your files are too large (${(totalSize / 1024 / 1024).toFixed(1)}MB total). Please compress your images/PDFs so they are under 4MB combined. The server will reject large uploads.`)
+            setIsLoading(false);
+            return;
+        }
+
         try {
             const result = await createStudio(formData)
             if (result?.error) {
@@ -109,7 +131,7 @@ export default function StudioApplicationForm() {
     }
 
     return (
-        <form action={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
                 <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
                     {error}
@@ -298,8 +320,8 @@ export default function StudioApplicationForm() {
                 <label className="block text-sm font-medium text-charcoal-700 mb-2">Amenities</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {STUDIO_AMENITIES.map((amenity) => (
-                        <label key={amenity} className="flex items-start gap-2.5 p-3 border border-cream-200 rounded-lg bg-cream-50 cursor-pointer hover:bg-cream-100 transition-colors h-full">
-                            <div className="flex items-center h-5">
+                        <label key={amenity} className="flex items-start gap-2.5 p-3 border border-cream-200 rounded-lg bg-cream-50 cursor-pointer hover:bg-cream-100 transition-colors h-full min-w-0">
+                            <div className="flex items-center h-5 shrink-0">
                                 <input
                                     type="checkbox"
                                     name="amenities"
@@ -307,7 +329,7 @@ export default function StudioApplicationForm() {
                                     className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
                                 />
                             </div>
-                            <span className="text-charcoal-700 text-sm font-medium leading-tight pt-0.5">{amenity}</span>
+                            <span className="text-charcoal-700 text-sm font-medium leading-tight pt-0.5 flex-1 min-w-0 break-words">{amenity}</span>
                         </label>
                     ))}
                 </div>

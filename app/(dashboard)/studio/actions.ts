@@ -150,6 +150,8 @@ export async function updateSlot(slotId: string, formData: FormData) {
 
 export async function createStudio(formData: FormData) {
     try {
+        console.log('--- createStudio action started ---');
+        console.log('FormData size:', Array.from(formData.keys()).length, 'keys');
         const supabase = await createClient()
 
         const { data: { user } } = await supabase.auth.getUser()

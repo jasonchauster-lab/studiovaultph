@@ -15,13 +15,13 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className="flex items-center justify-between px-4 sm:px-6 py-4 max-w-7xl mx-auto">
         <div className="text-2xl font-serif font-bold text-charcoal-900 tracking-tight">StudioVaultPH</div>
-        <div className="flex gap-4">
-          <Link href="/login" className="text-charcoal-600 hover:text-charcoal-900 font-medium px-4 py-2">
+        <div className="flex gap-4 relative z-30">
+          <Link href="/login" className="text-charcoal-600 hover:text-charcoal-900 font-medium px-4 py-2 bg-cream-50/80 backdrop-blur-sm rounded-full">
             Log In
           </Link>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-charcoal-900 text-cream-50 px-5 py-2 rounded-full font-medium hover:bg-charcoal-800 transition-colors"
+            className="bg-charcoal-900 text-cream-50 px-5 py-2 rounded-full font-medium hover:bg-charcoal-800 transition-colors shadow-sm"
           >
             Sign Up
           </button>
@@ -29,25 +29,34 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <header className="px-4 sm:px-6 py-16 md:py-24 max-w-5xl mx-auto text-center">
-        <h1 className="text-5xl md:text-7xl font-serif text-charcoal-900 mb-6 leading-tight">
-          Find your space.<br />
-          <span className="text-charcoal-600 italic">Build your practice.</span>
-        </h1>
-        <p className="text-xl text-charcoal-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-          The first marketplace connecting freelance Pilates instructors with premium studios — and helping clients discover affordable sessions during off-peak hours.
-        </p>
+      <div className="relative">
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/hero-bg.png')" }}
+        />
+        {/* Gradient Overlay for Text Readability */}
+        <div className="absolute inset-0 z-10 bg-gradient-to-r from-charcoal-900/90 via-charcoal-900/70 to-charcoal-900/40" />
 
-        <div className="flex justify-center">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="group bg-charcoal-900 text-cream-50 px-8 py-4 rounded-full text-lg font-bold hover:bg-charcoal-800 transition-all flex items-center gap-3 shadow-xl hover:shadow-2xl hover:-translate-y-1"
-          >
-            Join StudioVaultPH
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </button>
-        </div>
-      </header>
+        <header className="relative z-20 px-4 sm:px-6 py-24 md:py-32 max-w-7xl mx-auto flex flex-col items-start text-left">
+          <div className="max-w-2xl">
+            <h1 className="text-5xl md:text-7xl font-serif text-cream-50 mb-6 leading-tight">
+              Find your space.<br />
+              <span className="text-cream-200 italic">Build your practice.</span>
+            </h1>
+            <p className="text-xl text-cream-100 mb-10 leading-relaxed max-w-xl">
+              The first marketplace connecting freelance Pilates instructors with premium studios — and helping clients discover affordable sessions during off-peak hours.
+            </p>
+
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="group bg-cream-50 text-charcoal-900 px-8 py-4 rounded-full text-lg font-bold hover:bg-white transition-all flex items-center gap-3 shadow-xl hover:shadow-2xl hover:-translate-y-1"
+            >
+              Join StudioVaultPH
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </header>
+      </div>
 
 
       {/* Value Props */}

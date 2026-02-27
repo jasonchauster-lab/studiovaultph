@@ -365,8 +365,8 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                 <h2 className="text-xl font-serif text-charcoal-900 border-b border-cream-200 pb-2">Amenities</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {STUDIO_AMENITIES.map((amenity) => (
-                        <label key={amenity} className="flex items-start gap-2.5 p-3 border border-cream-200 rounded-lg bg-white cursor-pointer hover:bg-cream-50 transition-colors h-full">
-                            <div className="flex items-center h-5">
+                        <label key={amenity} className="flex items-start gap-2.5 p-3 border border-cream-200 rounded-lg bg-white cursor-pointer hover:bg-cream-50 transition-colors h-full min-w-0">
+                            <div className="flex items-center h-5 shrink-0">
                                 <input
                                     type="checkbox"
                                     name="amenities"
@@ -375,7 +375,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                                     className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
                                 />
                             </div>
-                            <span className="text-charcoal-700 text-sm font-medium leading-tight pt-0.5">{amenity}</span>
+                            <span className="text-charcoal-700 text-sm font-medium leading-tight pt-0.5 flex-1 min-w-0 break-words">{amenity}</span>
                         </label>
                     ))}
                 </div>
