@@ -151,9 +151,9 @@ export default function ReviewModal({ booking, isInstructor, revieweeId: reviewe
                                     key={tag}
                                     type="button"
                                     onClick={() => toggleTag(tag)}
-                                    className={`px-4 py-1.5 rounded-full text-sm border transition-all ${selectedTags.includes(tag)
-                                        ? 'bg-charcoal-900 text-white border-charcoal-900'
-                                        : 'bg-white text-charcoal-700 border-charcoal-300 hover:border-charcoal-600'
+                                    className={`px-4 py-1.5 rounded-full text-sm border font-bold transition-all ${selectedTags.includes(tag)
+                                        ? 'bg-rose-gold text-white border-rose-gold shadow-sm'
+                                        : 'bg-white text-charcoal-700 border-charcoal-300 hover:border-rose-gold/50'
                                         }`}
                                 >
                                     {tag}
@@ -185,7 +185,7 @@ export default function ReviewModal({ booking, isInstructor, revieweeId: reviewe
                     <button
                         onClick={handleSubmit}
                         disabled={isSubmitting || rating === 0}
-                        className="w-full py-3 rounded-xl bg-charcoal-900 text-white font-medium text-sm hover:bg-charcoal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="w-full py-3 rounded-xl bg-rose-gold text-white font-bold text-sm hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md active:scale-[0.99]"
                     >
                         {isSubmitting ? 'Submitting…' : 'Submit Review'}
                     </button>

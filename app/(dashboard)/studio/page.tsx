@@ -50,8 +50,8 @@ export default async function StudioDashboard(props: {
             .from('bookings')
             .select(`
                 *,
-                client:profiles!client_id(full_name),
-                instructor:profiles!instructor_id(full_name),
+                client:profiles!client_id(full_name, avatar_url),
+                instructor:profiles!instructor_id(full_name, avatar_url),
                 slots(*)
             `)
             .order('created_at', { ascending: false })
@@ -89,7 +89,7 @@ export default async function StudioDashboard(props: {
             .from('bookings')
             .select(`
                 *,
-                instructor:profiles!instructor_id(full_name),
+                instructor:profiles!instructor_id(full_name, avatar_url),
                 slots!inner(studio_id)
             `)
             .eq('slots.studio_id', myStudio.id)
@@ -129,7 +129,7 @@ export default async function StudioDashboard(props: {
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl overflow-hidden border border-cream-200 shadow-inner">
                                     <Image
-                                        src={myStudio.space_photos_urls?.[0] || "/logo.png"}
+                                        src={myStudio.logo_url || myStudio.space_photos_urls?.[0] || "/logo.png"}
                                         alt={myStudio.name}
                                         width={40}
                                         height={40}
@@ -251,10 +251,11 @@ export default async function StudioDashboard(props: {
                                                                 <div className="flex items-center gap-3">
                                                                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
                                                                         <Image
-                                                                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${booking.instructor?.full_name}`}
+                                                                            src={booking.instructor?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${booking.instructor?.full_name}`}
                                                                             alt="Instructor"
                                                                             width={40}
                                                                             height={40}
+                                                                            className="object-cover w-full h-full"
                                                                         />
                                                                     </div>
                                                                     <div>
@@ -270,7 +271,15 @@ export default async function StudioDashboard(props: {
 
                                                             <div className="space-y-2 p-3 bg-white/50 rounded-lg border border-cream-100 mb-4">
                                                                 <div className="flex items-center gap-2 text-charcoal-600 text-[11px]">
-                                                                    <User className="w-3 h-3" />
+                                                                    <div className="w-4 h-4 rounded-full overflow-hidden border border-cream-200">
+                                                                        <Image
+                                                                            src={booking.client?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${booking.client?.full_name}`}
+                                                                            alt="Client"
+                                                                            width={16}
+                                                                            height={16}
+                                                                            className="object-cover w-full h-full"
+                                                                        />
+                                                                    </div>
                                                                     <span>Client: {booking.client?.full_name || 'N/A'}</span>
                                                                 </div>
                                                                 <div className="flex items-center gap-2 text-charcoal-900 text-[11px] font-medium">

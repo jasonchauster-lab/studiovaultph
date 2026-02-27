@@ -89,8 +89,8 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
 
     return (
         <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
-            <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
-                <Repeat className="w-5 h-5 text-charcoal-500" />
+            <h2 className="text-xl font-serif font-bold text-charcoal-900 mb-4 flex items-center gap-2">
+                <Repeat className="w-5 h-5 text-rose-gold" />
                 Recurring Schedule Generator
             </h2>
 
@@ -136,9 +136,9 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
                             <button
                                 key={day.id}
                                 onClick={() => toggleDay(day.id)}
-                                className={`w-10 h-10 rounded-full text-sm font-medium transition-colors border ${selectedDays.includes(day.id)
-                                    ? 'bg-charcoal-900 text-cream-50 border-charcoal-900'
-                                    : 'bg-white text-charcoal-600 border-cream-300 hover:border-charcoal-500'
+                                className={`w-10 h-10 rounded-full text-sm font-bold transition-all border ${selectedDays.includes(day.id)
+                                    ? 'bg-rose-gold text-white border-rose-gold shadow-sm'
+                                    : 'bg-white text-charcoal-600 border-cream-300 hover:border-rose-gold/50'
                                     }`}
                             >
                                 {day.label}
@@ -188,8 +188,8 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
                                 <button
                                     key={eq}
                                     onClick={() => toggleEquipment(eq)}
-                                    className={`flex items-center gap-2 p-2 border rounded-lg transition-colors text-left ${selectedEquipment.includes(eq)
-                                        ? 'bg-charcoal-900 text-cream-50 border-charcoal-900'
+                                    className={`flex items-center gap-2 p-2 border rounded-lg transition-all text-left ${selectedEquipment.includes(eq)
+                                        ? 'bg-rose-gold text-white border-rose-gold shadow-sm'
                                         : 'bg-white text-charcoal-700 border-cream-200 hover:bg-cream-50'
                                         }`}
                                 >
@@ -204,7 +204,7 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
                     <button
                         onClick={handleGenerate}
                         disabled={isSubmitting}
-                        className="w-full py-3 bg-charcoal-900 text-cream-50 rounded-lg font-medium hover:bg-charcoal-800 transition-colors flex items-center justify-center gap-2"
+                        className="w-full py-3 bg-rose-gold text-white rounded-lg font-bold hover:brightness-110 transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
                     >
                         {isSubmitting ? (
                             <>

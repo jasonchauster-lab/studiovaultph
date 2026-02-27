@@ -16,9 +16,9 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             value: `₱${stats.revenue.toLocaleString()}`,
             icon: TrendingUp,
             trend: 'Last 30 Days',
-            trendColor: 'text-green-600',
-            bgIcon: 'bg-green-50',
-            iconColor: 'text-green-600'
+            trendColor: 'text-rose-gold',
+            bgIcon: 'bg-rose-gold/10',
+            iconColor: 'text-rose-gold'
         },
         {
             label: 'Active Listings',
@@ -26,7 +26,7 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             icon: Calendar,
             trend: 'This week',
             trendColor: 'text-rose-gold',
-            bgIcon: 'bg-rose-50',
+            bgIcon: 'bg-rose-gold/10',
             iconColor: 'text-rose-gold'
         },
         {
@@ -43,9 +43,9 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             value: stats.topInstructor,
             icon: Star,
             trend: 'Most Bookings',
-            trendColor: 'text-amber-600',
-            bgIcon: 'bg-amber-50',
-            iconColor: 'text-amber-600'
+            trendColor: 'text-rose-gold',
+            bgIcon: 'bg-rose-gold/10',
+            iconColor: 'text-rose-gold'
         }
     ]
 

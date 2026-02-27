@@ -124,9 +124,9 @@ export default function ChatWindow({ bookingId, currentUserId, recipientName, is
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col h-[600px]">
                 {/* Header */}
-                <div className="bg-charcoal-900 text-white p-4 flex justify-between items-center">
+                <div className="bg-charcoal-900 text-white p-4 flex justify-between items-center shrink-0">
                     <div>
-                        <h3 className="font-medium">Chat with {recipientName}</h3>
+                        <h3 className="font-serif font-bold text-lg">Chat with {recipientName}</h3>
                         {isExpired && (
                             <p className="text-xs text-yellow-400 flex items-center gap-1 mt-1">
                                 <Clock className="w-3 h-3" /> Session Expired
@@ -189,7 +189,7 @@ export default function ChatWindow({ bookingId, currentUserId, recipientName, is
                             <button
                                 type="submit"
                                 disabled={!newMessage.trim()}
-                                className="bg-charcoal-900 text-white p-2 rounded-lg hover:bg-charcoal-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="bg-rose-gold text-white p-2 rounded-lg hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95 flex items-center justify-center"
                             >
                                 <Send className="w-5 h-5" />
                             </button>
@@ -197,6 +197,6 @@ export default function ChatWindow({ bookingId, currentUserId, recipientName, is
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     )
 }

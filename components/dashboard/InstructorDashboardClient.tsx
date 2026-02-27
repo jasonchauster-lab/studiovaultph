@@ -51,7 +51,8 @@ export default function InstructorDashboardClient() {
             name,
             location,
             hourly_rate,
-            verified
+            verified,
+            logo_url
           )
         `)
                 .eq('is_available', true)
@@ -72,16 +73,19 @@ export default function InstructorDashboardClient() {
                             end_time,
                             studios (
                                 name,
-                                location
+                                location,
+                                logo_url
                             )
                         ),
                         client:profiles!client_id (
                             full_name,
-                            email
+                            email,
+                            avatar_url
                         ),
                         instructor:profiles!instructor_id (
                             full_name,
-                            email
+                            email,
+                            avatar_url
                         )
                     `)
                     .eq('instructor_id', user.id)
@@ -118,20 +122,20 @@ export default function InstructorDashboardClient() {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-serif text-charcoal-900 mb-1">Instructor Dashboard</h1>
-                        <p className="text-charcoal-600">Find spaces or manage your bookings.</p>
+                        <p className="text-charcoal-600 font-medium">Find spaces or manage your bookings.</p>
                     </div>
 
                     <div className="flex gap-2">
                         <Link
                             href="/instructor/schedule"
-                            className="flex items-center gap-2 px-4 py-2 bg-white text-charcoal-900 border border-cream-200 rounded-lg hover:bg-cream-50 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-white text-charcoal-900 border border-cream-200 rounded-lg hover:bg-cream-50 transition-colors shadow-sm"
                         >
                             <Calendar className="w-4 h-4" />
                             <span className="hidden sm:inline">Manage Schedule</span>
                         </Link>
                         <Link
                             href="/instructor/profile"
-                            className="flex items-center gap-2 px-4 py-2 bg-charcoal-900 text-cream-50 rounded-lg hover:bg-charcoal-800 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-rose-gold text-white rounded-lg hover:brightness-110 transition-all shadow-sm font-bold"
                         >
                             <User className="w-4 h-4" />
                             <span className="hidden sm:inline">My Profile</span>
@@ -177,9 +181,9 @@ export default function InstructorDashboardClient() {
                                         key={area}
                                         onClick={() => setFilterArea(area as LocationArea | 'All')}
                                         className={clsx(
-                                            "px-4 py-1.5 rounded-full text-sm font-medium transition-all",
+                                            "px-4 py-1.5 rounded-full text-sm font-bold transition-all",
                                             filterArea === area
-                                                ? "bg-charcoal-900 text-cream-50 shadow-md"
+                                                ? "bg-rose-gold text-white shadow-md"
                                                 : "bg-cream-100 text-charcoal-600 hover:bg-cream-200"
                                         )}
                                     >
@@ -246,29 +250,47 @@ export default function InstructorDashboardClient() {
 
                             return (
                                 <div className="space-y-4">
-                                    <h2 className="text-xl font-medium text-charcoal-900 flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                    <h2 className="text-xl font-serif font-bold text-charcoal-900 flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-rose-gold animate-pulse" />
                                         Upcoming Confirmed Sessions
                                     </h2>
                                     <div className="grid grid-cols-1 gap-4">
                                         {upcoming.map(booking => (
                                             <div key={booking.id} className="bg-white p-6 rounded-xl border-2 border-green-100 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <h3 className="font-bold text-charcoal-900 text-lg">{booking.slots.studios.name}</h3>
-                                                        <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded-full tracking-wider">Confirmed</span>
+                                                <div className="flex items-center gap-4 flex-1">
+                                                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-cream-50 border border-cream-200 flex-shrink-0">
+                                                        <img
+                                                            src={booking.slots.studios.logo_url || "/logo.png"}
+                                                            alt={booking.slots.studios.name}
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     </div>
-                                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-charcoal-600">
-                                                        <div className="flex items-center gap-1.5">
-                                                            <Calendar className="w-4 h-4 text-charcoal-400" />
-                                                            <span>{new Date(booking.slots.start_time).toLocaleDateString()} at {new Date(booking.slots.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <h3 className="font-bold text-charcoal-900 text-lg">{booking.slots.studios.name}</h3>
+                                                            <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded-full tracking-wider">Confirmed</span>
                                                         </div>
-                                                        <div className="flex items-center gap-1.5 font-medium text-charcoal-900">
-                                                            <span>{booking.price_breakdown?.quantity || 1} x {booking.price_breakdown?.equipment || booking.equipment || 'Session'}</span>
+                                                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-charcoal-600">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <Calendar className="w-4 h-4 text-charcoal-400" />
+                                                                <span>{new Date(booking.slots.start_time).toLocaleDateString()} at {new Date(booking.slots.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 font-medium text-charcoal-900">
+                                                                <span>{booking.price_breakdown?.quantity || 1} x {booking.price_breakdown?.equipment || booking.equipment || 'Session'}</span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div className="text-xs text-charcoal-500 mt-2">
-                                                        Client: <span className="font-medium">{booking.profiles?.full_name || 'Guest'}</span>
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            <div className="w-5 h-5 rounded-full overflow-hidden border border-cream-200">
+                                                                <img
+                                                                    src={booking.client?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${booking.client?.full_name || 'Guest'}`}
+                                                                    alt={booking.client?.full_name}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            </div>
+                                                            <span className="text-xs text-charcoal-500">
+                                                                Client: <span className="font-medium">{booking.client?.full_name || 'Guest'}</span>
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-3">
@@ -284,9 +306,9 @@ export default function InstructorDashboardClient() {
                                                                 isExpired: isChatExpired(booking)
                                                             });
                                                         }}
-                                                        className="px-4 py-2 bg-charcoal-900 text-cream-50 rounded-lg hover:bg-charcoal-800 transition-colors text-sm font-medium flex items-center gap-2 relative"
+                                                        className="px-4 py-2 bg-rose-gold text-white rounded-lg hover:brightness-110 transition-all text-sm font-bold flex items-center gap-2 relative shadow-sm"
                                                     >
-                                                        <span className="w-2 h-2 rounded-full bg-green-400"></span>
+                                                        <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
                                                         {booking.client_id === booking.instructor_id ? 'Chat with Studio' : 'Chat with Client'}
                                                         <MessageCountBadge bookingId={booking.id} currentUserId={userId} isOpen={activeChat?.id === booking.id} />
                                                     </button>
@@ -299,7 +321,7 @@ export default function InstructorDashboardClient() {
                         })()}
 
                         <div className="space-y-4">
-                            <h2 className="text-xl font-medium text-charcoal-900">
+                            <h2 className="text-xl font-serif font-bold text-charcoal-900">
                                 Session History
                             </h2>
                             {bookings.filter(b => b.status === 'approved' && new Date(b.slots.start_time) < new Date()).length === 0 ? (

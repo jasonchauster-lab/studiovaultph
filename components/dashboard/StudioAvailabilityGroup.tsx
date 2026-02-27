@@ -39,14 +39,23 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
             >
                 <div className="flex items-start gap-4">
                     {/* Date Box */}
-                    <div className="flex flex-col items-center justify-center w-16 h-16 bg-cream-100 rounded-lg text-charcoal-900">
+                    <div className="flex flex-col items-center justify-center w-16 h-16 bg-cream-100 rounded-lg text-charcoal-900 flex-shrink-0">
                         <span className="text-xs font-medium uppercase tracking-wider">{date.toLocaleDateString([], { month: 'short' })}</span>
                         <span className="text-2xl font-serif font-bold">{date.getDate()}</span>
                     </div>
 
-                    <div>
-                        <h3 className="text-lg font-serif text-charcoal-900 font-medium">{studio.name}</h3>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-charcoal-600 mt-1">
+                    <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="w-8 h-8 rounded-lg overflow-hidden bg-cream-50 border border-cream-200 flex-shrink-0">
+                                <img
+                                    src={studio.logo_url || "/logo.png"}
+                                    alt={studio.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <h3 className="text-lg font-serif text-charcoal-900 font-medium">{studio.name}</h3>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-charcoal-600">
                             <span className="flex items-center gap-1">
                                 <MapPin className="w-3.5 h-3.5" />
                                 {studio.location}

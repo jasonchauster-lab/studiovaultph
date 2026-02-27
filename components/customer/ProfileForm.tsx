@@ -227,7 +227,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
             <button
                 type="submit"
                 disabled={isLoading}
-                className="bg-charcoal-900 text-cream-50 px-6 py-2 rounded-lg font-medium hover:bg-charcoal-800 transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="bg-rose-gold text-white px-8 py-2 rounded-lg font-bold hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2 shadow-sm"
             >
                 {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                 Save Changes

@@ -21,7 +21,7 @@ export default function Navigation({ role }: NavigationProps) {
     const linkClass = (isActive: boolean) =>
         clsx(
             "text-sm font-medium flex items-center gap-2 transition-colors py-2 md:py-0",
-            isActive ? "text-charcoal-900 font-bold" : "text-charcoal-600 hover:text-charcoal-900"
+            isActive ? "text-rose-gold font-bold" : "text-charcoal-600 hover:text-charcoal-900"
         );
 
     const navLinks = (

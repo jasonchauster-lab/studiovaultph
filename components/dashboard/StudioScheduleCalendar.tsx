@@ -365,7 +365,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                 </div>
 
                                 <div className="flex gap-3 pt-2">
-                                    <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal-900 text-cream-50 py-2.5 rounded-lg font-medium hover:bg-charcoal-800 transition-colors">
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="flex-1 bg-rose-gold text-white py-2.5 rounded-lg font-bold hover:brightness-110 transition-all shadow-md active:scale-95"
+                                    >
                                         {isSubmitting ? 'Creating...' : 'Create Slot'}
                                     </button>
                                     <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 py-2.5 rounded-lg font-medium text-charcoal-500 hover:text-charcoal-900 transition-colors border border-transparent hover:border-cream-300">
@@ -441,7 +445,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                             )}
 
                             <div className="flex gap-3 pt-4 border-t border-cream-100 mt-4">
-                                <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal-900 text-cream-50 py-2.5 rounded-lg font-medium hover:bg-charcoal-800 transition-colors flex items-center justify-center gap-2">
+                                <button type="submit" disabled={isSubmitting} className="flex-1 bg-rose-gold text-white py-2.5 rounded-lg font-bold hover:brightness-110 transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
                                     <Edit2 className="w-4 h-4" /> {isSubmitting ? 'Saving...' : 'Save Changes'}
                                 </button>
                                 <button type="button" onClick={handleDelete} disabled={isSubmitting} className="flex-1 bg-white text-red-600 border border-red-200 py-2.5 rounded-lg font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2">
@@ -514,7 +518,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                     setAddMode('single');
                                     setIsAddModalOpen(true);
                                 }}
-                                className="bg-charcoal-900 text-cream-50 px-4 py-2 rounded-lg text-sm font-medium hover:bg-charcoal-800 transition-colors flex items-center gap-2"
+                                className="bg-rose-gold text-white px-4 py-2 rounded-lg text-sm font-bold hover:brightness-110 transition-all shadow-md active:scale-95 flex items-center gap-2"
                             >
                                 <Plus className="w-4 h-4" /> Add Another Slot Here
                             </button>

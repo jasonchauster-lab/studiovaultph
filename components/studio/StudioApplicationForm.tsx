@@ -419,7 +419,7 @@ export default function StudioApplicationForm() {
                 </div>
             </div>
 
-            <button type="submit" disabled={isLoading} className="w-full py-4 flex items-center justify-center gap-3 bg-charcoal-900 text-white rounded-xl font-bold text-lg hover:bg-charcoal-800 transition-all shadow-lg hover:shadow-xl active:scale-[0.99] disabled:opacity-70 group">
+            <button type="submit" disabled={isLoading} className="w-full py-4 flex items-center justify-center gap-3 bg-rose-gold text-white rounded-xl font-bold text-lg hover:brightness-110 transition-all shadow-lg hover:shadow-xl active:scale-[0.99] disabled:opacity-70 group">
                 {isLoading ? (
                     <>
                         <Loader2 className="w-6 h-6 animate-spin" />

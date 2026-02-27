@@ -158,7 +158,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                     />
                 </div>
                 <div className="text-center">
-                    <h3 className="text-sm font-medium text-charcoal-900">Studio Logo</h3>
+                    <h3 className="text-sm font-serif font-bold text-charcoal-900">Studio Logo</h3>
                     <p className="text-xs text-charcoal-500">Click to upload or change</p>
                 </div>
             </div>
@@ -334,9 +334,9 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                     )}
 
                     {/* Add Photo Button */}
-                    <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-cream-300 rounded-lg hover:bg-cream-100/50 transition-colors cursor-pointer" onClick={() => spacePhotosInputRef.current?.click()}>
-                        <Upload className="w-8 h-8 text-charcoal-400 mb-2" />
-                        <p className="text-sm font-medium text-charcoal-700">Click to add photos</p>
+                    <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-rose-gold/30 rounded-lg hover:bg-rose-gold/5 transition-colors cursor-pointer group" onClick={() => spacePhotosInputRef.current?.click()}>
+                        <Upload className="w-8 h-8 text-rose-gold mb-2 group-hover:scale-110 transition-transform" />
+                        <p className="text-sm font-serif font-bold text-charcoal-900">Add Studio Photos</p>
                         <p className="text-xs text-charcoal-500 mt-1">Images only (JPG, PNG)</p>
                         <input
                             type="file"
@@ -434,7 +434,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="bg-charcoal-900 text-cream-50 px-6 py-3 rounded-lg font-medium hover:bg-charcoal-800 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    className="bg-rose-gold text-white px-8 py-3 rounded-lg font-bold hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2 shadow-md hover:shadow-lg active:scale-95"
                 >
                     {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     Save Settings
