@@ -138,6 +138,54 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Designed by Studio Owners Section */}
+      <section className="px-4 sm:px-6 py-20 bg-white">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl font-serif text-charcoal-900 mb-8">&ldquo;Designed by Studio Owners&rdquo;</h2>
+          <blockquote className="text-xl md:text-2xl text-charcoal-700 font-serif italic leading-relaxed relative">
+            <span className="absolute -top-6 -left-4 text-6xl text-cream-300 pointer-events-none">&ldquo;</span>
+            We built StudioVault because we were tired of seeing our reformers sit idle. We understand the high cost of rent in BGC and the challenge of finding reliable instructors. This isn't just a platform; it’s a tool built by the community to help our local industry thrive.
+            <span className="absolute -bottom-10 -right-4 text-6xl text-cream-300 pointer-events-none">&rdquo;</span>
+          </blockquote>
+        </div>
+      </section>
+
+      {/* Safety & Maintenance Section */}
+      <section className="px-4 sm:px-6 py-16 bg-cream-50 border-y border-cream-200">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white rounded-[2rem] p-8 md:p-12 border border-cream-200 shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-cream-100/50 rounded-bl-full -mr-10 -mt-10" />
+
+            <h2 className="text-3xl font-serif text-charcoal-900 mb-10">Our Commitment to You</h2>
+            <div className="grid md:grid-cols-3 gap-10">
+              <div className="space-y-4">
+                <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+                  <ShieldCheck className="w-6 h-6 text-green-700" />
+                </div>
+                <h3 className="text-lg font-bold text-charcoal-900">Verified Professionalism</h3>
+                <p className="text-charcoal-600 text-sm leading-relaxed">Every instructor must upload a valid Pilates Certification and Government ID before their first booking.</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6 text-amber-700" />
+                </div>
+                <h3 className="text-lg font-bold text-charcoal-900">Equipment Respect</h3>
+                <p className="text-charcoal-600 text-sm leading-relaxed">Our community guidelines hold instructors strictly accountable for the care of your studio&rsquo;s equipment.</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-blue-700" />
+                </div>
+                <h3 className="text-lg font-bold text-charcoal-900">Instant Reporting</h3>
+                <p className="text-charcoal-600 text-sm leading-relaxed">A dedicated channel for studios to report any issues immediately after a session.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       {/* Value Props */}
       <section className="px-4 sm:px-6 py-16 bg-white border-y border-cream-200">
