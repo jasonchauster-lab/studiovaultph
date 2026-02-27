@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
             {/* Right Side: Form */}
             <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-20 bg-white overflow-y-auto">
                 <div className="w-full max-w-lg">
-                    <Link href="/login" className="inline-flex items-center text-sm text-charcoal-500 hover:text-charcoal-900 mb-12 transition-colors group font-medium">
+                    <Link href="/login" className="inline-flex items-center text-sm text-charcoal-600 hover:text-charcoal-900 mb-12 transition-colors group font-bold">
                         <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
                         Back to Sign In
                     </Link>
@@ -59,9 +59,9 @@ export default function ForgotPasswordPage() {
                         </div>
 
                         <div className="text-center">
-                            <h2 className="text-charcoal-400 text-sm font-medium uppercase tracking-[0.2em] mb-2">Welcome to the Vault</h2>
+                            <h2 className="text-charcoal-600 text-sm font-medium uppercase tracking-[0.2em] mb-2">Welcome to the Vault</h2>
                             <h1 className="text-4xl font-serif text-charcoal-900 mb-4">Reset Password</h1>
-                            <p className="text-charcoal-500 text-base max-w-sm mx-auto">
+                            <p className="text-charcoal-600 text-base max-w-sm mx-auto">
                                 Enter your email address and we'll send you a secure link to reset your password.
                             </p>
                         </div>
@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
 
                     <form action={handleSubmit} className="grid grid-cols-1 gap-8">
                         <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-2">Email Address</label>
+                            <label className="block text-sm font-semibold text-charcoal-800 mb-2">Email Address</label>
                             <input
                                 name="email"
                                 type="email"

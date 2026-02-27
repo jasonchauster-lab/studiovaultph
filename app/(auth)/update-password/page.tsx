@@ -112,9 +112,9 @@ export default function UpdatePasswordPage() {
                         </div>
 
                         <div className="text-center">
-                            <h2 className="text-charcoal-400 text-sm font-medium uppercase tracking-[0.2em] mb-2">Welcome to the Vault</h2>
+                            <h2 className="text-charcoal-600 text-sm font-medium uppercase tracking-[0.2em] mb-2">Welcome to the Vault</h2>
                             <h1 className="text-4xl font-serif text-charcoal-900 mb-4">Update Password</h1>
-                            <p className="text-charcoal-500 text-base max-w-sm mx-auto">
+                            <p className="text-charcoal-600 text-base max-w-sm mx-auto">
                                 Please enter your new password below to secure your account.
                             </p>
                         </div>
@@ -122,7 +122,7 @@ export default function UpdatePasswordPage() {
 
                     <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-2">New Password</label>
+                            <label className="block text-sm font-semibold text-charcoal-800 mb-2">New Password</label>
                             <input
                                 type="password"
                                 value={password}
@@ -134,7 +134,7 @@ export default function UpdatePasswordPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-2">Confirm New Password</label>
+                            <label className="block text-sm font-semibold text-charcoal-800 mb-2">Confirm New Password</label>
                             <input
                                 type="password"
                                 value={confirmPassword}

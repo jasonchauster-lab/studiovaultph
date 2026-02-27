@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Loader2, Award } from 'lucide-react'
+import { Loader2, Award, ChevronLeft } from 'lucide-react'
 import { isValidEmail } from '@/lib/validation'
 
 function LoginContent() {
@@ -163,7 +163,16 @@ function LoginContent() {
             </div>
 
             {/* Right Side: Form Content */}
-            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-20 bg-white overflow-y-auto">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-20 bg-white overflow-y-auto relative">
+                {/* Back Button */}
+                <Link
+                    href="/"
+                    className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-2 text-charcoal-400 hover:text-charcoal-900 transition-colors group"
+                >
+                    <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-sm font-medium">Back to Home</span>
+                </Link>
+
                 <div className="w-full max-w-lg">
                     <div className="flex flex-col items-center mb-12">
                         <Link href="/" className="mb-8">
@@ -176,13 +185,13 @@ function LoginContent() {
                         </div>
 
                         <div className="text-center">
-                            <h2 className="text-charcoal-400 text-sm font-medium uppercase tracking-[0.2em] mb-2">Welcome to the Vault</h2>
+                            <h2 className="text-charcoal-600 text-sm font-medium uppercase tracking-[0.2em] mb-2">Welcome to the Vault</h2>
                             <h1 className="text-4xl font-serif text-charcoal-900 mb-4">
                                 {isSignUp
                                     ? (role === 'studio' ? 'List Your Studio' : role === 'instructor' ? 'Join as Instructor' : 'Create an Account')
                                     : 'Welcome Back'}
                             </h1>
-                            <p className="text-charcoal-500 text-base max-w-sm mx-auto">
+                            <p className="text-charcoal-600 text-base max-w-sm mx-auto">
                                 {isSignUp
                                     ? (role === 'studio'
                                         ? 'Start monetizing your empty reformers today.'
@@ -219,7 +228,7 @@ function LoginContent() {
                     <form onSubmit={handleAuth} className="grid grid-cols-1 gap-6">
                         {isSignUp && (
                             <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-2">Full Name</label>
+                                <label className="block text-sm font-semibold text-charcoal-800 mb-2">Full Name</label>
                                 <input
                                     type="text"
                                     value={fullName}
@@ -232,7 +241,7 @@ function LoginContent() {
                         )}
 
                         <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-2">Email Address</label>
+                            <label className="block text-sm font-semibold text-charcoal-800 mb-2">Email Address</label>
                             <input
                                 type="email"
                                 value={email}
@@ -244,9 +253,9 @@ function LoginContent() {
                         </div>
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm font-medium text-charcoal-700">Password</label>
+                                <label className="block text-sm font-semibold text-charcoal-800">Password</label>
                                 {!isSignUp && (
-                                    <Link href="/forgot-password" gap-2 className="text-xs text-charcoal-500 hover:text-charcoal-900 transition-colors font-medium">
+                                    <Link href="/forgot-password" gap-2 className="text-xs text-charcoal-600 hover:text-charcoal-900 transition-colors font-bold">
                                         Forgot password?
                                     </Link>
                                 )}
