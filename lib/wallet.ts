@@ -95,13 +95,15 @@ export async function autoCompleteBookings() {
 /**
  * Finds pending bookings that have passed their expires_at deadline
  * (payment was never submitted) and releases their slots + refunds wallet.
+ * Also handles legacy bookings with NULL expires_at by falling back to created_at + 15 min.
  */
 export async function expireAbandonedBookings() {
     const supabase = await createClient()
     const now = new Date().toISOString()
+    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString()
 
-    // Find expired pending bookings (expires_at is set and in the past, payment not submitted)
-    const { data: expiredBookings, error } = await supabase
+    // Query A: bookings with explicit expires_at set and past due
+    const { data: expiredByTimer } = await supabase
         .from('bookings')
         .select('id, slot_id, client_id, booked_slot_ids, price_breakdown')
         .eq('status', 'pending')
@@ -109,7 +111,18 @@ export async function expireAbandonedBookings() {
         .lte('expires_at', now)
         .is('payment_proof_url', null)
 
-    if (error || !expiredBookings || expiredBookings.length === 0) {
+    // Query B: legacy bookings with NULL expires_at that are older than 15 minutes
+    const { data: expiredLegacy } = await supabase
+        .from('bookings')
+        .select('id, slot_id, client_id, booked_slot_ids, price_breakdown')
+        .eq('status', 'pending')
+        .is('expires_at', null)
+        .lte('created_at', fifteenMinutesAgo)
+        .is('payment_proof_url', null)
+
+    const expiredBookings = [...(expiredByTimer || []), ...(expiredLegacy || [])]
+
+    if (expiredBookings.length === 0) {
         return { count: 0 }
     }
 

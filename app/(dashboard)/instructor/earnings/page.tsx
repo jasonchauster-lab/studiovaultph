@@ -1,5 +1,5 @@
 import { getInstructorEarnings } from '../actions'
-import { Wallet, TrendingUp, Clock, ArrowUpRight, DollarSign } from 'lucide-react'
+import { Wallet, TrendingUp, Clock, ArrowUpRight, DollarSign, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import ExportCsvButton from '@/components/dashboard/ExportCsvButton'
 import DateRangeFilters from '@/components/dashboard/DateRangeFilters'
@@ -57,6 +57,13 @@ export default async function EarningsPage({
         <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
+                    <Link
+                        href="/instructor"
+                        className="inline-flex items-center gap-1.5 text-sm text-charcoal-500 hover:text-charcoal-900 transition-colors mb-3"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Dashboard
+                    </Link>
                     <h1 className="text-3xl font-serif text-charcoal-900 mb-2">Earnings & Payouts</h1>
                     <p className="text-charcoal-600">Track your income and manage withdrawals.</p>
                 </div>

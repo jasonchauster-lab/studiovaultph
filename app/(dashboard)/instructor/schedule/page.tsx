@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import InstructorScheduleCalendar from '@/components/instructor/InstructorScheduleCalendar'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
 
@@ -28,6 +30,13 @@ export default async function InstructorSchedulePage(props: {
         <div className="min-h-screen bg-cream-50 p-8">
             <div className="max-w-7xl mx-auto space-y-8">
                 <div>
+                    <Link
+                        href="/instructor"
+                        className="inline-flex items-center gap-1.5 text-sm text-charcoal-500 hover:text-charcoal-900 transition-colors mb-4"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Dashboard
+                    </Link>
                     <h1 className="text-3xl font-serif text-charcoal-900 mb-2">My Schedule</h1>
                     <p className="text-charcoal-600">Set your weekly availability so customers can book you.</p>
                 </div>
