@@ -82,8 +82,8 @@ export default function LandingPage() {
                 <span className="text-[10px] font-bold text-charcoal-500 uppercase tracking-widest mb-1">Step 1</span>
                 <span className="text-xl font-serif text-charcoal-900 leading-tight">List</span>
               </div>
-              <h3 className="text-xl font-bold text-charcoal-900 mb-3">Open Your Hours</h3>
-              <p className="text-charcoal-600 max-w-xs mx-auto text-sm leading-relaxed">Studios list available reformers during their quietest hours (10 AM - 4 PM).</p>
+              <h3 className="text-xl font-bold text-charcoal-900 mb-3">Set Your Terms</h3>
+              <p className="text-charcoal-600 max-w-xs mx-auto text-sm leading-relaxed">Post your available reformers and set your own hourly rental rate.</p>
             </div>
 
             <div className="relative z-10 flex flex-col items-center">
@@ -91,8 +91,8 @@ export default function LandingPage() {
                 <span className="text-[10px] font-bold text-charcoal-500 uppercase tracking-widest mb-1">Step 2</span>
                 <span className="text-xl font-serif text-charcoal-900 leading-tight">Book</span>
               </div>
-              <h3 className="text-xl font-bold text-charcoal-900 mb-3">Secure Verified Pros</h3>
-              <p className="text-charcoal-600 max-w-xs mx-auto text-sm leading-relaxed">Elite, certified instructors book space directly for their private clients.</p>
+              <h3 className="text-xl font-bold text-charcoal-900 mb-3">Instant Match</h3>
+              <p className="text-charcoal-600 max-w-xs mx-auto text-sm leading-relaxed">Verified instructors browse and book your space at the price you've set.</p>
             </div>
 
             <div className="relative z-10 flex flex-col items-center">
@@ -100,20 +100,20 @@ export default function LandingPage() {
                 <span className="text-[10px] font-bold text-cream-200 uppercase tracking-widest mb-1">Step 3</span>
                 <span className="text-xl font-serif leading-tight">Earn</span>
               </div>
-              <h3 className="text-xl font-bold text-charcoal-900 mb-3">Seamless Payouts</h3>
-              <p className="text-charcoal-600 max-w-xs mx-auto text-sm leading-relaxed">Funds are split automatically (60/40) and deposited directly into your account.</p>
+              <h3 className="text-xl font-bold text-charcoal-900 mb-3">Direct Payouts</h3>
+              <p className="text-charcoal-600 max-w-xs mx-auto text-sm leading-relaxed">Receive your full rental fee automatically. No guesswork, no complex splits.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Trust Blocks Section (Decision Zone) */}
-      <section className="px-4 sm:px-6 py-16 bg-white">
+      <section className="px-4 sm:px-6 py-16 bg-cream-100/50">
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center text-center p-8 bg-cream-50 rounded-3xl border border-cream-200 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-14 h-14 bg-charcoal-900 rounded-2xl flex items-center justify-center mb-6 shadow-lg rotate-3">
-                <TrendingUp className="w-7 h-7 text-cream-200" />
+                <TrendingUp className="w-7 h-7 text-cream-400" />
               </div>
               <h3 className="text-xl font-serif font-bold text-charcoal-900 mb-3 italic">Stop Idle Loss</h3>
               <p className="text-charcoal-600 text-sm leading-relaxed">Every hour a reformer sits empty is lost revenue. Turn your "dead air" into guaranteed house income.</p>
@@ -121,7 +121,7 @@ export default function LandingPage() {
 
             <div className="flex flex-col items-center text-center p-8 bg-cream-50 rounded-3xl border border-cream-200 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-14 h-14 bg-charcoal-900 rounded-2xl flex items-center justify-center mb-6 shadow-lg -rotate-3">
-                <ShieldCheck className="w-7 h-7 text-cream-200" />
+                <ShieldCheck className="w-7 h-7 text-cream-400" />
               </div>
               <h3 className="text-xl font-serif font-bold text-charcoal-900 mb-3 italic">Vetted & Insured</h3>
               <p className="text-charcoal-600 text-sm leading-relaxed">Every professional in the Vault is identity-verified, certified, and fully insured.</p>
@@ -129,7 +129,7 @@ export default function LandingPage() {
 
             <div className="flex flex-col items-center text-center p-8 bg-cream-50 rounded-3xl border border-cream-200 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-14 h-14 bg-charcoal-900 rounded-2xl flex items-center justify-center mb-6 shadow-lg rotate-3">
-                <Award className="w-7 h-7 text-cream-200" />
+                <Award className="w-7 h-7 text-cream-400" />
               </div>
               <h3 className="text-xl font-serif font-bold text-charcoal-900 mb-3 italic">Founding Partner Program</h3>
               <p className="text-charcoal-600 text-sm leading-relaxed">We are currently only accepting 5 premium studios for our exclusive launch.</p>
