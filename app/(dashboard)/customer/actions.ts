@@ -57,20 +57,46 @@ export async function requestBooking(
 
     // --- AVAILABILITY VALIDATION START ---
     const slotStart = new Date(slot.start_time);
-    const dayOfWeek = slotStart.getDay();
-    const timeStr = slotStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' });
-    const dateStr = slotStart.toISOString().split('T')[0];
 
-    // Check if instructor has availability for this time & location
-    const { data: avail } = await supabase
+    // ✅ Derive date & day using Manila timezone (not UTC) to avoid midnight-crossing bugs
+    const manilaDateStr = slotStart.toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }); // YYYY-MM-DD
+    const manilaDayOfWeek = Number(
+        slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Sun' ? 0
+            : slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Mon' ? 1
+                : slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Tue' ? 2
+                    : slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Wed' ? 3
+                        : slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Thu' ? 4
+                            : slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Fri' ? 5 : 6
+    );
+    const timeStr = slotStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' });
+
+    // ✅ Run TWO separate queries instead of .or() to avoid PostgREST NULL ambiguity:
+    // Query A: date-specific availability (instructor set a specific date)
+    const { data: availByDate } = await supabase
         .from('instructor_availability')
         .select('id, group_id')
         .eq('instructor_id', instructorId)
-        .eq('location_area', studio.location) // Match studio location
-        .or(`date.eq.${dateStr},day_of_week.eq.${dayOfWeek}`) // Specific date OR weekly
+        .eq('location_area', studio.location)
+        .eq('date', manilaDateStr)
         .lte('start_time', timeStr)
-        .gt('end_time', timeStr) // Simple check: requested start must be within instructor's block
+        .gt('end_time', timeStr)
+        .limit(1)
         .maybeSingle();
+
+    // Query B: weekly recurring availability (instructor set a day_of_week)
+    const { data: availByDay } = await supabase
+        .from('instructor_availability')
+        .select('id, group_id')
+        .eq('instructor_id', instructorId)
+        .eq('location_area', studio.location)
+        .eq('day_of_week', manilaDayOfWeek)
+        .is('date', null) // Only weekly-recurring entries (not date-specific)
+        .lte('start_time', timeStr)
+        .gt('end_time', timeStr)
+        .limit(1)
+        .maybeSingle();
+
+    const avail = availByDate || availByDay;
 
     if (!avail) {
         return { error: `${instructor?.full_name || 'The instructor'} is not available at ${studio.location} during this time.` }
