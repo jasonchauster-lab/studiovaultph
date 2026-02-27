@@ -175,8 +175,8 @@ function LoginContent() {
 
                 <div className="w-full max-w-lg">
                     <div className="flex flex-col items-center mb-12">
-                        <Link href="/" className="mb-10">
-                            <Image src="/logo.png" alt="StudioVault Logo" width={192} height={192} className="w-48 h-48 object-contain" />
+                        <Link href="/" className="mb-12">
+                            <Image src="/logo.png" alt="StudioVault Logo" width={320} height={320} className="w-80 h-80 object-contain" />
                         </Link>
 
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-100 rounded-full mb-6">
@@ -197,7 +197,7 @@ function LoginContent() {
                                         ? 'Start monetizing your empty reformers today.'
                                         : role === 'instructor'
                                             ? 'Access premium studio spaces and grow your practice.'
-                                            : 'Join our exclusive community of elite Pilates professionals.')
+                                            : 'Premium Pilates. Affordable Rates.')
                                     : 'Please enter your credentials to access your secure dashboard.'}
                             </p>
                         </div>
