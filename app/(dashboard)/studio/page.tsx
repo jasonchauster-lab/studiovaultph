@@ -33,10 +33,20 @@ export default async function StudioDashboard(props: {
 
     const myStudio = studios?.[0] // Assuming single studio for MVP
 
-    // 3. Fetch Upcoming Bookings for this Studio (including Pending)
+    // 3. Fetch Variables for Stats
     let upcomingBookings: any[] = []
+    let weeklySlots: any[] = []
+    let monthlyRevenue = 0
+    let occupancyRate = 0
+    let topInstructorName = 'N/A'
+
+    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' })
+    const dateParam = typeof searchParams.date === 'string' ? searchParams.date : todayStr
+    const currentDate = new Date(dateParam + "T00:00:00+08:00")
+
     if (myStudio) {
-        const { data: allBookings, error } = await supabase
+        // Fetch Upcoming Bookings
+        const { data: allBookings } = await supabase
             .from('bookings')
             .select(`
                 *,
@@ -54,28 +64,58 @@ export default async function StudioDashboard(props: {
                 return sId === myStudio.id && ['approved', 'confirmed', 'pending', 'paid'].includes(status);
             }).slice(0, 10);
         }
-    }
 
-    // 4. Fetch Slots for Calendar View
-    let weeklySlots: any[] = []
-    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' })
-    const dateParam = typeof searchParams.date === 'string' ? searchParams.date : todayStr
-    const currentDate = new Date(dateParam + "T00:00:00+08:00")
-
-    if (myStudio) {
+        // Fetch Weekly Slots
         const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
         const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 })
         weekEnd.setHours(23, 59, 59, 999)
 
-        const { data: slots, error: slotsError } = await supabase
+        const { data: slots } = await supabase
             .from('slots')
             .select('*')
             .eq('studio_id', myStudio.id)
             .gte('start_time', weekStart.toISOString())
             .lte('start_time', weekEnd.toISOString())
 
-        if (!slotsError && slots) {
+        if (slots) {
             weeklySlots = slots
+        }
+
+        // 4. Calculate Stats (Last 30 Days)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const { data: statsBookings } = await supabase
+            .from('bookings')
+            .select(`
+                *,
+                instructor:profiles!instructor_id(full_name),
+                slots!inner(studio_id)
+            `)
+            .eq('slots.studio_id', myStudio.id)
+            .gte('created_at', thirtyDaysAgo.toISOString())
+            .in('status', ['approved', 'confirmed', 'paid']);
+
+        if (statsBookings && statsBookings.length > 0) {
+            // Calc Revenue
+            monthlyRevenue = statsBookings.reduce((sum, b) => {
+                const fee = b.price_breakdown?.studio_fee || (b.total_price ? Math.max(0, b.total_price - 100) : 0);
+                return sum + fee;
+            }, 0);
+
+            // Calc Top Instructor
+            const instructorCounts: Record<string, number> = {};
+            statsBookings.forEach(b => {
+                const name = b.instructor?.full_name || 'Unknown';
+                instructorCounts[name] = (instructorCounts[name] || 0) + 1;
+            });
+            topInstructorName = Object.entries(instructorCounts).sort((a, b) => b[1] - a[1])[0][0];
+        }
+
+        // Calc Occupancy for currently viewed week
+        if (weeklySlots.length > 0) {
+            const bookedSlotsCount = weeklySlots.filter(s => !s.is_available).length;
+            occupancyRate = Math.round((bookedSlotsCount / weeklySlots.length) * 100);
         }
     }
 
@@ -128,9 +168,9 @@ export default async function StudioDashboard(props: {
                         <div className="flex-1 overflow-y-auto bg-white p-8 md:p-12 lg:p-20">
                             <div className="max-w-xl mx-auto">
                                 <div className="mb-12">
-                                    <Link href="/" className="flex items-center gap-0 group">
-                                        <Image src="/logo.png" alt="StudioVault Logo" width={144} height={144} className="w-36 h-36 object-contain" />
-                                        <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight -ml-4 whitespace-nowrap">StudioVaultPH</span>
+                                    <Link href="/" className="flex items-center justify-center gap-0 group">
+                                        <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-20 h-20 object-contain" />
+                                        <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight -ml-5 whitespace-nowrap">StudioVaultPH</span>
                                     </Link>
                                     <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Get Started</h2>
                                     <h1 className="text-4xl font-serif text-charcoal-900 mb-4">Setup Your Studio</h1>
@@ -160,10 +200,10 @@ export default async function StudioDashboard(props: {
                     <>
                         <StudioStatCards
                             stats={{
-                                revenue: 45000,
+                                revenue: monthlyRevenue,
                                 activeListings: weeklySlots.length,
-                                occupancy: 78,
-                                topInstructor: upcomingBookings[0]?.instructor?.full_name || 'N/A'
+                                occupancy: occupancyRate,
+                                topInstructor: topInstructorName
                             }}
                         />
 

@@ -17,8 +17,8 @@ export default function LandingPage() {
       <div className="sticky top-0 z-50 w-full bg-cream-50/95 backdrop-blur-md border-b border-cream-200/50 shadow-sm transition-all duration-300">
         <nav className="flex items-center justify-between px-4 sm:px-6 py-4 max-w-7xl mx-auto">
           <Link href="/" className="flex items-center gap-0 z-30 group">
-            <Image src="/logo.png" alt="StudioVault Logo" width={144} height={144} className="w-36 h-36 object-contain" />
-            <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight hidden sm:block -ml-10">StudioVaultPH</span>
+            <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-20 h-20 object-contain" />
+            <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight hidden sm:block -ml-5">StudioVaultPH</span>
           </Link>
           <div className="flex gap-4 relative z-30">
             <Link href="/login" className="text-charcoal-600 hover:text-charcoal-900 font-medium px-4 py-2 bg-cream-50/80 backdrop-blur-sm rounded-full">

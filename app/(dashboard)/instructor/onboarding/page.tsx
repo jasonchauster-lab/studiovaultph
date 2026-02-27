@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import InstructorOnboardingForm from '@/components/forms/InstructorOnboardingForm'
 import { Clock, CheckCircle2 } from 'lucide-react'
 import Image from 'next/image'
@@ -81,6 +82,10 @@ export default async function InstructorOnboardingPage() {
             <div className="flex-1 overflow-y-auto bg-white p-8 md:p-12 lg:p-20">
                 <div className="max-w-xl mx-auto">
                     <div className="mb-12">
+                        <Link href="/" className="flex items-center justify-center gap-0 group mb-8">
+                            <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-20 h-20 object-contain" />
+                            <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight -ml-5 whitespace-nowrap">StudioVaultPH</span>
+                        </Link>
                         <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Join the Vault</h2>
                         <h1 className="text-4xl font-serif text-charcoal-900 mb-4 tracking-tight">Instructor Application</h1>
                         <p className="text-charcoal-600">The premium marketplace for Pilates professionals.</p>

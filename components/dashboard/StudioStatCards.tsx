@@ -15,7 +15,7 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             label: 'Monthly Revenue',
             value: `₱${stats.revenue.toLocaleString()}`,
             icon: TrendingUp,
-            trend: '+12%',
+            trend: 'Last 30 Days',
             trendColor: 'text-green-600',
             bgIcon: 'bg-green-50',
             iconColor: 'text-green-600'
@@ -33,7 +33,7 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             label: 'Average Occupancy',
             value: `${stats.occupancy}%`,
             icon: Zap,
-            trend: 'Optimized',
+            trend: 'Current Week',
             trendColor: 'text-blue-600',
             bgIcon: 'bg-blue-50',
             iconColor: 'text-blue-600'
