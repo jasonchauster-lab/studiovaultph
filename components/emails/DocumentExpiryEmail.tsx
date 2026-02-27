@@ -1,5 +1,5 @@
 import {
-    Html, Head, Body, Container, Section, Text, Button, Hr
+    Html, Head, Body, Container, Section, Text, Button, Hr, Img
 } from '@react-email/components';
 
 interface DocumentExpiryEmailProps {
@@ -29,7 +29,7 @@ export default function DocumentExpiryEmail({
             : `📋 Reminder: Documents expiring in 30 days`;
 
     const description = isSuspended
-        ? `Your ${entityLabel} "${entityName}" has been temporarily suspended because the following mandatory documents have expired. Bookings and payouts are disabled until updated documents are submitted.`
+        ? `Your ${entityLabel} "${entityName}" has been temporarily suspended because the following mandatory documents have expired.Bookings and payouts are disabled until updated documents are submitted.`
         : `This is a ${isUrgent ? 'final' : 'friendly'} reminder that the following documents for "${entityName}" will expire ${isUrgent ? 'within 7 days' : 'within 30 days'}. Please upload updated versions to avoid suspension.`;
 
     return (
@@ -37,6 +37,10 @@ export default function DocumentExpiryEmail({
             <Head />
             <Body style={{ fontFamily: 'system-ui, sans-serif', backgroundColor: '#f9f7f4', padding: '20px' }}>
                 <Container style={{ maxWidth: '520px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '12px', padding: '32px', border: '1px solid #e8e4df' }}>
+                    <Section style={header}>
+                        <Img src="https://studiovaultph.com/logo.png" width="48" height="48" alt="StudioVaultPH Logo" style={logoImage} />
+                        <Text style={logoText}>StudioVaultPH</Text>
+                    </Section>
                     <Text style={{ fontSize: '20px', fontWeight: 'bold', color: isSuspended ? '#b91c1c' : '#1a1a1a', marginBottom: '8px' }}>
                         {heading}
                     </Text>
@@ -44,7 +48,7 @@ export default function DocumentExpiryEmail({
                         {description}
                     </Text>
 
-                    <Section style={{ backgroundColor: isSuspended ? '#fef2f2' : '#fffbeb', border: `1px solid ${isSuspended ? '#fecaca' : '#fde68a'}`, borderRadius: '8px', padding: '16px', marginBottom: '20px' }}>
+                    <Section style={{ backgroundColor: isSuspended ? '#fef2f2' : '#fffbeb', border: `1px solid ${isSuspended ? '#fecaca' : '#fde68a'} `, borderRadius: '8px', padding: '16px', marginBottom: '20px' }}>
                         <Text style={{ fontSize: '12px', fontWeight: 'bold', color: '#444', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: '8px' }}>
                             Affected Documents
                         </Text>
@@ -71,3 +75,20 @@ export default function DocumentExpiryEmail({
         </Html>
     );
 }
+
+const header = {
+    padding: '24px 0',
+};
+
+const logoText = {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    fontFamily: 'serif',
+    color: '#1a1f2c',
+    textAlign: 'center' as const,
+};
+
+const logoImage = {
+    margin: '0 auto',
+    marginBottom: '16px',
+};

@@ -9,6 +9,7 @@ import {
     Section,
     Text,
     Button,
+    Img,
 } from '@react-email/components';
 import * as React from 'react';
 
@@ -34,6 +35,7 @@ export const ApplicationRejectionEmail = ({
             <Body style={main}>
                 <Container style={container}>
                     <Section style={header}>
+                        <Img src="https://studiovaultph.com/logo.png" width="48" height="48" alt="StudioVaultPH Logo" style={logoImage} />
                         <Text style={logoText}>StudioVaultPH</Text>
                     </Section>
                     <Heading style={heading}>Application Update</Heading>
@@ -98,6 +100,11 @@ const logoText = {
     fontFamily: 'serif',
     color: '#1a1f2c',
     textAlign: 'center' as const,
+};
+
+const logoImage = {
+    margin: '0 auto',
+    marginBottom: '16px',
 };
 
 const heading = {

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { createStudio } from '@/app/(dashboard)/studio/actions'
-import { Loader2, Upload, CheckCircle } from 'lucide-react'
+import { Loader2, Upload, CheckCircle, X } from 'lucide-react'
 import clsx from 'clsx'
+import { createClient } from '@/lib/supabase/client'
 import { STUDIO_AMENITIES } from '@/types'
 
 function FileUploadBox({ name, label, required, fileName, previewUrl, accept, setFileState }: any) {
@@ -63,7 +64,8 @@ export default function StudioApplicationForm() {
     const [insuranceFileName, setInsuranceFileName] = useState<string | null>(null)
     const [insurancePreviewUrl, setInsurancePreviewUrl] = useState<string | null>(null)
 
-    const [spacePhotosUrls, setSpacePhotosUrls] = useState<string[]>([])
+    const [spacePhotos, setSpacePhotos] = useState<File[]>([])
+    const spacePhotosInputRef = useRef<HTMLInputElement>(null)
     const [selectedEquipment, setSelectedEquipment] = useState<Record<string, boolean>>({})
 
     const handleEquipmentChange = (id: string, checked: boolean) => {
@@ -72,8 +74,18 @@ export default function StudioApplicationForm() {
 
     const handleSpacePhotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || [])
-        const urls = files.filter(f => f.type.startsWith('image/')).map(f => URL.createObjectURL(f))
-        setSpacePhotosUrls(urls)
+        const imageFiles = files.filter(f => f.type.startsWith('image/'))
+        if (imageFiles.length > 0) {
+            setSpacePhotos(prev => [...prev, ...imageFiles])
+        }
+        if (spacePhotosInputRef.current) {
+            spacePhotosInputRef.current.value = ''
+        }
+    }
+
+    const removeSpacePhoto = (e: React.MouseEvent, indexToRemove: number) => {
+        e.preventDefault()
+        setSpacePhotos(prev => prev.filter((_, idx) => idx !== indexToRemove))
     }
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -82,6 +94,12 @@ export default function StudioApplicationForm() {
 
         setError(null)
         setIsLoading(true)
+
+        if (spacePhotos.length === 0) {
+            setError('Please upload at least one photo of the space.')
+            setIsLoading(false)
+            return
+        }
 
         // Custom validation: At least one equipment must be provided
         const hasReformer = formData.get('reformer') === 'on'
@@ -98,26 +116,68 @@ export default function StudioApplicationForm() {
             return
         }
 
-        // Validate total file sizes
-        let totalSize = 0;
-        let fileCount = 0;
-        for (const value of formData.values()) {
-            if (value instanceof File && value.size > 0) {
-                totalSize += value.size;
-                fileCount++;
-            }
-        }
-
-        console.log(`Submitting ${fileCount} files, total size: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
-
-        // If total size > 4.5MB, warn exactly what's wrong so they avoid Next.js payload limits
-        if (totalSize > 4.5 * 1024 * 1024) {
-            setError(`Your files are too large (${(totalSize / 1024 / 1024).toFixed(1)}MB total). Please compress your images/PDFs so they are under 4MB combined. The server will reject large uploads.`)
-            setIsLoading(false);
-            return;
-        }
-
         try {
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+
+            if (!user) {
+                throw new Error('You must be logged in to apply.')
+            }
+
+            const timestamp = Date.now()
+
+            // Upload BIR
+            const birFile = formData.get('birCertificate') as File
+            if (birFile && birFile.size > 0) {
+                const ext = birFile.name.split('.').pop()
+                const path = `studios/${user.id}/bir_${timestamp}.${ext}`
+                const { error: birErr } = await supabase.storage.from('certifications').upload(path, birFile)
+                if (birErr) throw new Error('Failed to upload BIR Certificate: ' + birErr.message)
+
+                const { data: { publicUrl } } = supabase.storage.from('certifications').getPublicUrl(path)
+                formData.set('birCertificateUrl', publicUrl)
+            }
+            formData.delete('birCertificate')
+
+            // Upload Gov ID
+            const govIdFile = formData.get('govId') as File
+            if (govIdFile && govIdFile.size > 0) {
+                const ext = govIdFile.name.split('.').pop()
+                const path = `studios/${user.id}/govid_${timestamp}.${ext}`
+                const { error: govErr } = await supabase.storage.from('certifications').upload(path, govIdFile)
+                if (govErr) throw new Error('Failed to upload Government ID: ' + govErr.message)
+
+                const { data: { publicUrl } } = supabase.storage.from('certifications').getPublicUrl(path)
+                formData.set('govIdUrl', publicUrl)
+            }
+            formData.delete('govId')
+
+            // Upload Insurance
+            const insuranceFile = formData.get('insurance') as File
+            if (insuranceFile && insuranceFile.size > 0) {
+                const ext = insuranceFile.name.split('.').pop()
+                const path = `studios/${user.id}/insurance_${timestamp}.${ext}`
+                const { error: insErr } = await supabase.storage.from('certifications').upload(path, insuranceFile)
+                if (insErr) throw new Error('Failed to upload Insurance/Permit: ' + insErr.message)
+
+                const { data: { publicUrl } } = supabase.storage.from('certifications').getPublicUrl(path)
+                formData.set('insuranceUrl', publicUrl)
+            }
+            formData.delete('insurance')
+
+            // Upload Space Photos directly (bypassing append to formData previously)
+            for (let i = 0; i < spacePhotos.length; i++) {
+                const file = spacePhotos[i]
+                if (file.size > 0) {
+                    const ext = file.name.split('.').pop()
+                    const path = `studios/${user.id}/space_${timestamp}_${i}.${ext}`
+                    const { error: photoErr } = await supabase.storage.from('avatars').upload(path, file)
+                    if (photoErr) throw new Error('Failed to upload space photo: ' + photoErr.message)
+
+                    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+                    formData.append('spacePhotosUrls', publicUrl)
+                }
+            }
             const result = await createStudio(formData)
             if (result?.error) {
                 setError(result.error)
@@ -255,23 +315,37 @@ export default function StudioApplicationForm() {
 
             <div>
                 <label className="block text-sm font-medium text-charcoal-700 mb-1">Photos of the Space <span className="text-red-500">*</span></label>
-                <div className="border-2 border-dashed border-cream-300 rounded-lg p-4 bg-cream-50/50 relative cursor-pointer group">
-                    <input type="file" name="spacePhotos" accept="image/*" multiple required onChange={handleSpacePhotosChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                    {spacePhotosUrls.length > 0 ? (
-                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 relative z-20">
-                            {spacePhotosUrls.map((url, i) => (
-                                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block w-full aspect-square relative z-30">
-                                    <img src={url} className="w-full aspect-square object-cover rounded cursor-pointer" alt={`Space Photo ${i + 1}`} />
-                                </a>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center py-4">
-                            <Upload className="w-6 h-6 text-charcoal-700 mb-2" />
-                            <p className="text-sm font-medium text-charcoal-700">Upload multiple photos</p>
-                            <p className="text-[10px] text-charcoal-500 mt-1 italic text-center">showing the studio layout, equipment, and amenities.</p>
+                <div className="bg-cream-50 p-6 rounded-lg border border-cream-200">
+                    {spacePhotos.length > 0 && (
+                        <div className="mb-6">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                {spacePhotos.map((file, i) => {
+                                    const url = URL.createObjectURL(file)
+                                    return (
+                                        <div key={i} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm z-30">
+                                            <a href={url} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                                                <img src={url} className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity" alt={`Space Photo ${i + 1}`} />
+                                            </a>
+                                            <button
+                                                onClick={(e) => removeSpacePhoto(e, i)}
+                                                className="absolute top-2 right-2 p-1.5 bg-red-500/90 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm z-40 opacity-0 group-hover:opacity-100"
+                                                title="Remove Photo"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         </div>
                     )}
+
+                    <div className="flex flex-col items-center justify-center py-6 border-2 border-dashed border-cream-300 rounded-lg hover:bg-cream-100/50 transition-colors cursor-pointer" onClick={() => spacePhotosInputRef.current?.click()}>
+                        <Upload className="w-6 h-6 text-charcoal-400 mb-2" />
+                        <p className="text-sm font-medium text-charcoal-700">Click to add photos</p>
+                        <p className="text-[10px] text-charcoal-500 mt-1 italic text-center">Images only. Show the studio layout, equipment, and amenities.</p>
+                        <input type="file" accept="image/*" multiple onChange={handleSpacePhotosChange} ref={spacePhotosInputRef} className="hidden" />
+                    </div>
                 </div>
             </div>
 
@@ -288,13 +362,13 @@ export default function StudioApplicationForm() {
                     ].map((eq) => {
                         const isChecked = selectedEquipment[eq.id] || false;
                         return (
-                            <div key={eq.id} className="flex items-center gap-3 p-3 border border-cream-200 rounded-lg bg-cream-50">
-                                <label className="flex items-center gap-2 flex-1 cursor-pointer">
-                                    <input type="checkbox" name={eq.id} checked={isChecked} onChange={(e) => handleEquipmentChange(eq.id, e.target.checked)} className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
+                            <div key={eq.id} className="flex items-center justify-between gap-3 p-3 border border-cream-200 rounded-lg bg-cream-50">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name={eq.id} checked={isChecked} onChange={(e) => handleEquipmentChange(eq.id, e.target.checked)} className="w-4 h-4 shrink-0 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
                                     <span className="text-charcoal-700 text-sm font-medium">{eq.label}</span>
                                 </label>
-                                <div className={clsx("flex items-center gap-2 transition-opacity", !isChecked && "opacity-30 pointer-events-none")}>
-                                    <span className="text-xs text-charcoal-500">Qty:</span>
+                                <div className={clsx("flex items-center gap-2 transition-opacity shrink-0", !isChecked && "opacity-30 pointer-events-none")}>
+                                    <span className="text-xs text-charcoal-500 font-medium">Qty:</span>
                                     <input
                                         type="number"
                                         name={`qty_${eq.label}`}
@@ -320,16 +394,14 @@ export default function StudioApplicationForm() {
                 <label className="block text-sm font-medium text-charcoal-700 mb-2">Amenities</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {STUDIO_AMENITIES.map((amenity) => (
-                        <label key={amenity} className="flex items-start gap-2.5 p-3 border border-cream-200 rounded-lg bg-cream-50 cursor-pointer hover:bg-cream-100 transition-colors h-full min-w-0">
-                            <div className="flex items-center h-5 shrink-0">
-                                <input
-                                    type="checkbox"
-                                    name="amenities"
-                                    value={amenity}
-                                    className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
-                                />
-                            </div>
-                            <span className="text-charcoal-700 text-sm font-medium leading-tight pt-0.5 flex-1 min-w-0 break-words">{amenity}</span>
+                        <label key={amenity} className="flex items-center gap-2.5 p-3 border border-cream-200 rounded-lg bg-cream-50 cursor-pointer hover:bg-cream-100 transition-colors h-full">
+                            <input
+                                type="checkbox"
+                                name="amenities"
+                                value={amenity}
+                                className="w-4 h-4 shrink-0 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
+                            />
+                            <span className="text-charcoal-700 text-sm font-medium leading-tight">{amenity}</span>
                         </label>
                     ))}
                 </div>

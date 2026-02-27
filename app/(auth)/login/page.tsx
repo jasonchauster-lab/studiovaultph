@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Loader2 } from 'lucide-react'
 import { isValidEmail } from '@/lib/validation'
 
@@ -126,6 +127,9 @@ function LoginContent() {
     return (
         <div className="min-h-screen bg-cream-50 flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-md bg-white p-8 rounded-xl border border-cream-200 shadow-sm">
+                <div className="flex justify-center mb-6">
+                    <Image src="/logo.png" alt="StudioVault Logo" width={56} height={56} className="w-14 h-14 object-contain" />
+                </div>
                 <h1 className="text-2xl font-serif text-charcoal-900 mb-2 text-center">
                     {isSignUp ? 'Create an Account' : 'Login to StudioVaultPH'}
                 </h1>

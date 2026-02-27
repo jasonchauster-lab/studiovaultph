@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { updateStudio } from '@/app/(dashboard)/studio/actions'
 import { Loader2, Save, Camera, User, X, Upload } from 'lucide-react'
+import clsx from 'clsx'
 import { Studio, STUDIO_AMENITIES } from '@/types'
+import { createClient } from '@/lib/supabase/client'
 import { isValidPhone } from '@/lib/validation'
 import Image from 'next/image'
 import { useRef } from 'react'
@@ -47,22 +49,64 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
         setIsLoading(true)
         setMessage(null)
 
-        // Attach space photos state to form data
-        formData.set('existingPhotos', JSON.stringify(existingPhotos))
-        formData.delete('spacePhotos') // ensure we use our controlled state
-        newSpacePhotos.forEach(file => {
-            formData.append('spacePhotos', file)
-        })
+        try {
+            const supabase = createClient()
+            const timestamp = Date.now()
 
-        const result = await updateStudio(formData)
+            // 1. Upload Logo if changed
+            const logoFile = formData.get('logo') as File
+            if (logoFile && logoFile.size > 0) {
+                const ext = logoFile.name.split('.').pop()
+                const path = `studios/${studio.id}/logo_${timestamp}.${ext}`
+                const { error: uploadError } = await supabase.storage.from('avatars').upload(path, logoFile)
 
-        if (result.success) {
-            setMessage('Settings updated successfully!')
-        } else {
-            setMessage(result.error || 'Failed to update settings.')
+                if (uploadError) {
+                    throw new Error('Failed to upload logo: ' + uploadError.message)
+                }
+
+                const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+                formData.set('logoUrl', publicUrl)
+            }
+            formData.delete('logo') // Remove file object from payload
+
+            // 2. Upload New Space Photos
+            const additionalUrls: string[] = []
+            for (let i = 0; i < newSpacePhotos.length; i++) {
+                const file = newSpacePhotos[i]
+                if (file.size > 0) {
+                    const ext = file.name.split('.').pop()
+                    const path = `studios/${studio.id}/space_${timestamp}_${i}.${ext}`
+                    const { error: photoErr } = await supabase.storage.from('avatars').upload(path, file)
+
+                    if (photoErr) {
+                        throw new Error('Failed to upload new space photo: ' + photoErr.message)
+                    }
+
+                    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+                    additionalUrls.push(publicUrl)
+                }
+            }
+
+            // Combine old retained photos with newly uploaded ones
+            const finalPhotosUrls = [...existingPhotos, ...additionalUrls]
+            formData.set('spacePhotosUrls', JSON.stringify(finalPhotosUrls))
+            formData.delete('spacePhotos') // Not used anymore, but ensure clear
+
+            const result = await updateStudio(formData)
+
+            if (result.success) {
+                setMessage('Settings updated successfully!')
+                // Reset file inputs explicitly on success
+                setNewSpacePhotos([])
+            } else {
+                setMessage(result.error || 'Failed to update settings.')
+            }
+        } catch (err: any) {
+            console.error('Settings update error:', err)
+            setMessage(err.message || 'An unexpected error occurred.')
+        } finally {
+            setIsLoading(false)
         }
-
-        setIsLoading(false)
     }
 
     // State for logo preview
@@ -316,20 +360,20 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                 <div className="space-y-3">
                     {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
                         return (
-                            <div key={eq} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border border-cream-200 rounded-lg bg-cream-50 group">
-                                <label className="flex items-center gap-3 flex-1 cursor-pointer">
+                            <div key={eq} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-cream-200 rounded-lg bg-cream-50 group">
+                                <label className="flex items-center gap-3 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         name={`eq_${eq}`}
-                                        className="w-5 h-5 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
+                                        className="w-5 h-5 shrink-0 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
                                         defaultChecked={studio.equipment?.includes(eq)}
                                     />
                                     <span className="text-charcoal-900 font-medium">{eq}</span>
                                 </label>
 
-                                <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap opacity-50 group-has-[:checked]:opacity-100 transition-opacity">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs text-charcoal-500 w-8">Qty:</span>
+                                <div className="flex items-center justify-end gap-4 flex-wrap sm:flex-nowrap opacity-50 group-has-[:checked]:opacity-100 transition-opacity">
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <span className="text-xs text-charcoal-500 font-medium">Qty:</span>
                                         <input
                                             type="number"
                                             name={`qty_${eq}`}
@@ -338,8 +382,8 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                                             className="w-20 px-3 py-1.5 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm"
                                         />
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs text-charcoal-500 w-8">Rate:</span>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <span className="text-xs text-charcoal-500 font-medium">Rate:</span>
                                         <div className="relative">
                                             <span className="absolute left-3 top-1.5 text-charcoal-400 text-sm">₱</span>
                                             <input
@@ -365,17 +409,15 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                 <h2 className="text-xl font-serif text-charcoal-900 border-b border-cream-200 pb-2">Amenities</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {STUDIO_AMENITIES.map((amenity) => (
-                        <label key={amenity} className="flex items-start gap-2.5 p-3 border border-cream-200 rounded-lg bg-white cursor-pointer hover:bg-cream-50 transition-colors h-full min-w-0">
-                            <div className="flex items-center h-5 shrink-0">
-                                <input
-                                    type="checkbox"
-                                    name="amenities"
-                                    value={amenity}
-                                    defaultChecked={studio.amenities?.includes(amenity)}
-                                    className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
-                                />
-                            </div>
-                            <span className="text-charcoal-700 text-sm font-medium leading-tight pt-0.5 flex-1 min-w-0 break-words">{amenity}</span>
+                        <label key={amenity} className="flex items-center gap-2.5 p-3 border border-cream-200 rounded-lg bg-white cursor-pointer hover:bg-cream-50 transition-colors h-full">
+                            <input
+                                type="checkbox"
+                                name="amenities"
+                                value={amenity}
+                                defaultChecked={studio.amenities?.includes(amenity)}
+                                className="w-4 h-4 shrink-0 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
+                            />
+                            <span className="text-charcoal-700 text-sm font-medium leading-tight">{amenity}</span>
                         </label>
                     ))}
                 </div>

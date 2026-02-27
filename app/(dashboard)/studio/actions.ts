@@ -176,16 +176,16 @@ export async function createStudio(formData: FormData) {
         const address = formData.get('address') as string
         const googleMapsUrl = formData.get('googleMapsUrl') as string
 
-        const birCertificate = formData.get('birCertificate') as File
-        const govId = formData.get('govId') as File
-        const insurance = formData.get('insurance') as File
-        const spacePhotos = formData.getAll('spacePhotos') as File[]
+        const birPath = formData.get('birCertificateUrl') as string
+        const govIdPath = formData.get('govIdUrl') as string
+        const insurancePath = formData.get('insuranceUrl') as string
+        const spacePhotosUrls = formData.getAll('spacePhotosUrls') as string[]
 
         const birExpiry = null // No longer required
         const govIdExpiry = formData.get('govIdExpiry') as string
         const insuranceExpiry = formData.get('insuranceExpiry') as string
 
-        if (!name || !location || !contactNumber || !dateOfBirth || !address || !birCertificate || !govId || spacePhotos.length === 0) {
+        if (!name || !location || !contactNumber || !dateOfBirth || !address || !birPath || !govIdPath || spacePhotosUrls.length === 0) {
             return { error: 'All fields and documents are required' }
         }
 
@@ -231,51 +231,6 @@ export async function createStudio(formData: FormData) {
             otherEquipment.split(',').forEach(item => {
                 if (item.trim()) equipment.push(item.trim())
             })
-        }
-
-        // Upload Documents
-        const timestamp = Date.now()
-        let birPath = null
-        let govIdPath = null
-
-        if (birCertificate && birCertificate.size > 0) {
-            const birExt = birCertificate.name.split('.').pop()
-            birPath = `studios/${user.id}/bir_${timestamp}.${birExt}`
-            const { error: birError } = await supabase.storage.from('certifications').upload(birPath, birCertificate)
-            if (birError) console.error('BIR upload error:', birError)
-        }
-
-        if (govId && govId.size > 0) {
-            const govIdExt = govId.name.split('.').pop()
-            govIdPath = `studios/${user.id}/govid_${timestamp}.${govIdExt}`
-            const { error: govIdError } = await supabase.storage.from('certifications').upload(govIdPath, govId)
-            if (govIdError) console.error('Gov ID upload error:', govIdError)
-        }
-
-        let insurancePath = null
-        if (insurance && insurance.size > 0) {
-            const insExt = insurance.name.split('.').pop()
-            insurancePath = `studios/${user.id}/insurance_${timestamp}.${insExt}`
-            const { error: insError } = await supabase.storage.from('certifications').upload(insurancePath, insurance)
-            if (insError) console.error('Insurance upload error:', insError)
-        }
-
-
-        const spacePhotosUrls: string[] = []
-        if (spacePhotos && spacePhotos.length > 0) {
-            for (const [index, photo] of spacePhotos.entries()) {
-                if (photo.size > 0) {
-                    const photoExt = photo.name.split('.').pop()
-                    const photoPath = `studios/${user.id}/space_${timestamp}_${index}.${photoExt}`
-                    const { error: photoError } = await supabase.storage.from('avatars').upload(photoPath, photo)
-                    if (photoError) {
-                        console.error('Space photo upload error:', photoError)
-                    } else {
-                        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(photoPath)
-                        spacePhotosUrls.push(publicUrl)
-                    }
-                }
-            }
         }
 
 
@@ -524,55 +479,14 @@ export async function updateStudio(formData: FormData) {
         amenities: formData.getAll('amenities') as string[]
     }
 
-    // Handle Logo Upload
-    const logoFile = formData.get('logo') as File
-    if (logoFile && logoFile.size > 0) {
-        const fileExt = logoFile.name.split('.').pop()
-        const filePath = `studios/${studioId}/logo_${Date.now()}.${fileExt}`
-
-        const { error: uploadError } = await supabase.storage
-            .from('avatars') // Using existing 'avatars' bucket or should I check for 'studios'? 
-            // The instructions for customer profile used 'avatars'. I'll stick to it or a new one.
-            // Let's use 'avatars' for now as it exists for instructors.
-            .upload(filePath, logoFile)
-
-        if (uploadError) {
-            console.error('Logo upload error:', uploadError)
-        } else {
-            const { data: { publicUrl } } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(filePath)
-            updateData.logo_url = publicUrl
-        }
+    const logoUrl = formData.get('logoUrl') as string
+    if (logoUrl) {
+        updateData.logo_url = logoUrl
     }
 
-    // Handle Space Photos Upload
-    const existingPhotosJson = formData.get('existingPhotos') as string
-    let spacePhotosUrls: string[] = existingPhotosJson ? JSON.parse(existingPhotosJson) : []
-    const spacePhotos = formData.getAll('spacePhotos') as File[]
-
-    if (spacePhotos && spacePhotos.length > 0) {
-        for (const [index, photo] of spacePhotos.entries()) {
-            if (photo.size > 0) {
-                const photoExt = photo.name.split('.').pop()
-                if (photoExt) {
-                    const photoPath = `studios/${studioId}/space_${Date.now()}_${index}.${photoExt}`
-                    const { error: photoError } = await supabase.storage.from('avatars').upload(photoPath, photo)
-                    if (photoError) {
-                        console.error('Space photo upload error:', photoError)
-                    } else {
-                        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(photoPath)
-                        spacePhotosUrls.push(publicUrl)
-                    }
-                }
-            }
-        }
-    }
-
-    if (spacePhotosUrls.length > 0) {
-        updateData.space_photos_urls = spacePhotosUrls;
-    } else if (existingPhotosJson === '[]') {
-        updateData.space_photos_urls = [];
+    const spacePhotosJson = formData.get('spacePhotosUrls') as string
+    if (spacePhotosJson) {
+        updateData.space_photos_urls = JSON.parse(spacePhotosJson)
     }
 
     const { error } = await supabase

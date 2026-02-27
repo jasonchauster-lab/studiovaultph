@@ -2,6 +2,7 @@
 
 import { X, Sparkles, User, DollarSign, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect } from 'react'
 
 interface RoleSelectionModalProps {
@@ -70,7 +71,10 @@ export default function RoleSelectionModal({ isOpen, onClose }: RoleSelectionMod
                 <div className="p-6 sm:p-10">
                     <div className="flex justify-between items-start mb-8">
                         <div>
-                            <h2 className="text-3xl font-serif text-charcoal-900 mb-2">Join StudioVaultPH</h2>
+                            <div className="flex items-center gap-3 mb-2">
+                                <Image src="/logo.png" alt="StudioVault Logo" width={40} height={40} className="w-10 h-10 object-contain" />
+                                <h2 className="text-3xl font-serif text-charcoal-900">Join StudioVaultPH</h2>
+                            </div>
                             <p className="text-charcoal-500">Choose how you'd like to use the platform.</p>
                         </div>
                         <button

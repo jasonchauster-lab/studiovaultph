@@ -9,6 +9,7 @@ import {
     Preview,
     Section,
     Text,
+    Img,
 } from '@react-email/components';
 
 interface BookingNotificationEmailProps {
@@ -40,6 +41,10 @@ export default function BookingNotificationEmail({
             <Preview>{bookingType} - StudioVaultPH</Preview>
             <Body style={main}>
                 <Container style={container}>
+                    <Section style={header}>
+                        <Img src="https://studiovaultph.com/logo.png" width="48" height="48" alt="StudioVaultPH Logo" style={logoImage} />
+                        <Text style={logoText}>StudioVaultPH</Text>
+                    </Section>
                     <Heading style={h1}>{bookingType}</Heading>
                     <Text style={text}>Hi {recipientName},</Text>
                     <Text style={text}>
@@ -103,6 +108,23 @@ const container = {
     margin: '0 auto',
     padding: '20px 0 48px',
     marginBottom: '64px',
+};
+
+const header = {
+    padding: '24px 0',
+};
+
+const logoText = {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    fontFamily: 'serif',
+    color: '#1a1f2c',
+    textAlign: 'center' as const,
+};
+
+const logoImage = {
+    margin: '0 auto',
+    marginBottom: '16px',
 };
 
 const h1 = {
