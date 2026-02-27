@@ -107,14 +107,14 @@ export default function UpdatePasswordPage() {
             <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-20 bg-white overflow-y-auto">
                 <div className="w-full max-w-lg">
                     <div className="flex flex-col items-center mb-12">
-                        <div className="mb-8">
-                            <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-20 h-20 object-contain" />
+                        <div className="mb-10">
+                            <Image src="/logo.png" alt="StudioVault Logo" width={128} height={128} className="w-32 h-32 object-contain" />
                         </div>
 
                         <div className="text-center">
-                            <h2 className="text-charcoal-600 text-sm font-medium uppercase tracking-[0.2em] mb-2">Welcome to the Vault</h2>
+                            <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Welcome to the Vault</h2>
                             <h1 className="text-4xl font-serif text-charcoal-900 mb-4">Update Password</h1>
-                            <p className="text-charcoal-600 text-base max-w-sm mx-auto">
+                            <p className="text-charcoal-800 text-base max-w-sm mx-auto font-medium">
                                 Please enter your new password below to secure your account.
                             </p>
                         </div>

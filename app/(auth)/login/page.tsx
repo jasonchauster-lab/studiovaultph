@@ -167,16 +167,16 @@ function LoginContent() {
                 {/* Back Button */}
                 <Link
                     href="/"
-                    className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-2 text-charcoal-400 hover:text-charcoal-900 transition-colors group"
+                    className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-2 text-charcoal-600 hover:text-charcoal-900 transition-colors group"
                 >
-                    <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-sm font-medium">Back to Home</span>
+                    <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform border border-cream-200 rounded-lg p-1" />
+                    <span className="text-sm font-bold">Back to Home</span>
                 </Link>
 
                 <div className="w-full max-w-lg">
                     <div className="flex flex-col items-center mb-12">
-                        <Link href="/" className="mb-8">
-                            <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-20 h-20 object-contain" />
+                        <Link href="/" className="mb-10">
+                            <Image src="/logo.png" alt="StudioVault Logo" width={128} height={128} className="w-32 h-32 object-contain" />
                         </Link>
 
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-100 rounded-full mb-6">
@@ -185,7 +185,7 @@ function LoginContent() {
                         </div>
 
                         <div className="text-center">
-                            <h2 className="text-charcoal-600 text-sm font-medium uppercase tracking-[0.2em] mb-2">Welcome to the Vault</h2>
+                            <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Welcome to the Vault</h2>
                             <h1 className="text-4xl font-serif text-charcoal-900 mb-4">
                                 {isSignUp
                                     ? (role === 'studio' ? 'List Your Studio' : role === 'instructor' ? 'Join as Instructor' : 'Create an Account')
@@ -216,7 +216,7 @@ function LoginContent() {
                                     onClick={() => setRole(opt.id)}
                                     className={`flex-1 py-3 px-2 rounded-xl text-sm font-bold transition-all duration-200 ${role === opt.id
                                         ? 'bg-white text-charcoal-900 shadow-sm border border-cream-200'
-                                        : 'text-charcoal-400 hover:text-charcoal-600'
+                                        : 'text-charcoal-800 hover:text-charcoal-900'
                                         }`}
                                 >
                                     {opt.label}
