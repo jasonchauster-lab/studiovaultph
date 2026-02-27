@@ -16,6 +16,7 @@ function LoginContent() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [fullName, setFullName] = useState('')
+    const [role, setRole] = useState(initialRole)
     const [isSignUp, setIsSignUp] = useState(initialMode)
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null)
@@ -34,6 +35,21 @@ function LoginContent() {
         setMessage(null)
 
         if (isSignUp) {
+            // Handle Sign-Up Duplicate Check
+            // Supabase signUp returns success even if email exists (for security/enumeration protection)
+            // We check our public profiles table to provide a better UX
+            const { data: existingProfile } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('email', email.toLowerCase())
+                .maybeSingle()
+
+            if (existingProfile) {
+                setMessage({ type: 'error', text: 'An account with this email already exists. Please sign in instead.' })
+                setLoading(false)
+                return
+            }
+
             // HANDLE SIGN UP
             const { error } = await supabase.auth.signUp({
                 email,
@@ -42,7 +58,7 @@ function LoginContent() {
                     data: {
                         full_name: fullName,
                         email: email,
-                        role: initialRole
+                        role: role
                     },
                     emailRedirectTo: `${window.location.origin}/auth/callback?next=/verified`
                 }
@@ -162,15 +178,43 @@ function LoginContent() {
                         <div className="text-center">
                             <h2 className="text-charcoal-400 text-sm font-medium uppercase tracking-[0.2em] mb-2">Welcome to the Vault</h2>
                             <h1 className="text-4xl font-serif text-charcoal-900 mb-4">
-                                {isSignUp ? 'Create an Account' : 'Welcome Back'}
+                                {isSignUp
+                                    ? (role === 'studio' ? 'List Your Studio' : role === 'instructor' ? 'Join as Instructor' : 'Create an Account')
+                                    : 'Welcome Back'}
                             </h1>
                             <p className="text-charcoal-500 text-base max-w-sm mx-auto">
                                 {isSignUp
-                                    ? 'Join our exclusive community of elite Pilates professionals and premium studios.'
+                                    ? (role === 'studio'
+                                        ? 'Start monetizing your empty reformers today.'
+                                        : role === 'instructor'
+                                            ? 'Access premium studio spaces and grow your practice.'
+                                            : 'Join our exclusive community of elite Pilates professionals.')
                                     : 'Please enter your credentials to access your secure dashboard.'}
                             </p>
                         </div>
                     </div>
+
+                    {isSignUp && (
+                        <div className="mb-10 p-1 bg-cream-50 rounded-2xl flex gap-1 border border-cream-100/50">
+                            {[
+                                { id: 'customer', label: 'Client' },
+                                { id: 'instructor', label: 'Instructor' },
+                                { id: 'studio', label: 'Studio' }
+                            ].map((opt) => (
+                                <button
+                                    key={opt.id}
+                                    type="button"
+                                    onClick={() => setRole(opt.id)}
+                                    className={`flex-1 py-3 px-2 rounded-xl text-sm font-bold transition-all duration-200 ${role === opt.id
+                                        ? 'bg-white text-charcoal-900 shadow-sm border border-cream-200'
+                                        : 'text-charcoal-400 hover:text-charcoal-600'
+                                        }`}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
                     <form onSubmit={handleAuth} className="grid grid-cols-1 gap-6">
                         {isSignUp && (
