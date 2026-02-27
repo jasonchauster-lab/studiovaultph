@@ -41,8 +41,11 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
                     {/* Studio Thumbnail */}
                     <div className="hidden sm:block w-32 h-32 rounded-xl overflow-hidden bg-cream-100 border border-cream-200 flex-shrink-0 shadow-inner">
                         <img
-                            src={(studio.space_photos_urls && studio.space_photos_urls[0]) || studio.logo_url || "/hero-bg.png"}
+                            src={(studio.space_photos_urls && studio.space_photos_urls.length > 0) ? studio.space_photos_urls[0] : (studio.logo_url || "/hero-bg.png")}
                             alt={studio.name}
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).src = "/hero-bg.png";
+                            }}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                     </div>
@@ -55,6 +58,9 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
                                     <img
                                         src={studio.logo_url || "/logo.png"}
                                         alt={studio.name}
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = "/logo.png";
+                                        }}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
