@@ -6,7 +6,7 @@ import { Loader2, Save, Camera, User, X, Upload } from 'lucide-react'
 import clsx from 'clsx'
 import { Studio, STUDIO_AMENITIES } from '@/types'
 import { createClient } from '@/lib/supabase/client'
-import { isValidPhone } from '@/lib/validation'
+import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
 import { useRef } from 'react'
 
@@ -42,7 +42,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
     const handleSubmit = async (formData: FormData) => {
         const contactNumber = formData.get('contactNumber') as string
         if (contactNumber && !isValidPhone(contactNumber)) {
-            setMessage('Please enter a valid contact number (at least 7 digits).')
+            setMessage(phoneErrorMessage)
             return
         }
 
@@ -165,7 +165,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
 
             {/* Basic Info */}
             <div className="space-y-4">
-                <h2 className="text-xl font-serif text-charcoal-900 border-b border-cream-200 pb-2">Basic Details</h2>
+                <h2 className="text-xl font-serif font-bold text-charcoal-900 border-b border-cream-200 pb-2">Basic Details</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -247,9 +247,10 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                             name="bio"
                             defaultValue={studio.bio || studio.description || ''}
                             rows={3}
-                            placeholder="Tell customers about your studio, vibe, and amenities."
-                            className="w-full px-4 py-2 bg-cream-50 border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 resize-none"
+                            placeholder="Describe your vibe and nearby BGC/Makati landmarks — e.g. 'Bright reformer studio steps from Waltermart Makati. Street parking available on Chino Roces.'"
+                            className="w-full px-4 py-2 bg-cream-50 border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/50 resize-none"
                         />
+                        <p className="text-[10px] text-charcoal-400 mt-1 italic">Help clients find you — mention landmarks, parking, and what makes your studio unique.</p>
                     </div>
                 </div>
 
@@ -257,23 +258,22 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-charcoal-700 mb-1">Reception / Contact Number</label>
                         <input
-                            type="text"
+                            type="tel"
                             name="contactNumber"
                             defaultValue={studio.contact_number || ''}
                             required
+                            maxLength={13}
+                            placeholder="e.g. 09171234567"
                             className="w-full px-4 py-2 bg-cream-50 border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
                         />
-                        <p className="text-[10px] text-charcoal-500 mt-1 italic leading-relaxed">
-                            We will reach out through this number to confirm your studio&apos;s application and booking details.
-                        </p>
-
+                        <p className="text-[11px] text-charcoal-400 mt-1">Format: 09XXXXXXXXX or +639XXXXXXXXX (11 digits)</p>
                     </div>
                 </div>
             </div>
 
             {/* Space Photos */}
             <div className="space-y-4">
-                <h2 className="text-xl font-serif text-charcoal-900 border-b border-cream-200 pb-2">Photos of the Space</h2>
+                <h2 className="text-xl font-serif font-bold text-charcoal-900 border-b border-cream-200 pb-2">Photos of the Space</h2>
                 <div className="bg-cream-50 p-6 rounded-lg border border-cream-200">
                     {/* Existing Photos Grid */}
                     {existingPhotos.length > 0 && (
@@ -352,7 +352,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
 
             {/* Equipment & Inventory */}
             <div className="space-y-4">
-                <h2 className="text-xl font-serif text-charcoal-900 border-b border-cream-200 pb-2">Equipment, Inventory & Pricing</h2>
+                <h2 className="text-xl font-serif font-bold text-charcoal-900 border-b border-cream-200 pb-2">Equipment, Inventory &amp; Pricing</h2>
                 <p className="text-sm text-charcoal-600 mb-4">
                     Select the equipment available in your studio, enter the quantity, and set the hourly rental rate (if applicable).
                 </p>
@@ -365,7 +365,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                                     <input
                                         type="checkbox"
                                         name={`eq_${eq}`}
-                                        className="w-5 h-5 shrink-0 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
+                                        className="w-5 h-5 shrink-0 accent-rose-gold border-cream-300 rounded focus:ring-rose-gold"
                                         defaultChecked={studio.equipment?.includes(eq)}
                                     />
                                     <span className="text-charcoal-900 font-medium">{eq}</span>
@@ -379,7 +379,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                                             name={`qty_${eq}`}
                                             defaultValue={studio.inventory?.[eq] || (eq === 'Reformer' ? studio.reformers_count : 1)}
                                             min="0"
-                                            className="w-20 px-3 py-1.5 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm"
+                                            className="w-20 px-3 py-1.5 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/50 text-sm"
                                         />
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
@@ -390,10 +390,12 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                                                 type="number"
                                                 name={`price_${eq}`}
                                                 defaultValue={studio.pricing?.[eq] || ''}
-                                                placeholder="0.00"
+                                                placeholder="0"
                                                 min="0"
-                                                step="0.01"
-                                                className="w-28 pl-7 pr-3 py-1.5 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm"
+                                                step="1"
+                                                inputMode="numeric"
+                                                onKeyDown={(e) => { if (['.', 'e', '-', '+'].includes(e.key)) e.preventDefault() }}
+                                                className="w-28 pl-7 pr-3 py-1.5 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/50 text-sm"
                                             />
                                         </div>
                                     </div>
@@ -406,18 +408,18 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
 
             {/* Amenities Section */}
             <div className="space-y-4">
-                <h2 className="text-xl font-serif text-charcoal-900 border-b border-cream-200 pb-2">Amenities</h2>
+                <h2 className="text-xl font-serif font-bold text-charcoal-900 border-b border-cream-200 pb-2">Amenities</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {STUDIO_AMENITIES.map((amenity) => (
-                        <label key={amenity} className="flex items-start gap-2.5 p-3 border border-cream-200 rounded-lg bg-white cursor-pointer hover:bg-cream-50 transition-colors min-h-[52px]">
+                        <label key={amenity} className="flex items-start gap-2.5 p-3 border border-cream-200 rounded-lg bg-white cursor-pointer hover:bg-rose-gold/5 hover:border-rose-gold/30 transition-colors min-h-[52px] group">
                             <input
                                 type="checkbox"
                                 name="amenities"
                                 value={amenity}
                                 defaultChecked={studio.amenities?.includes(amenity)}
-                                className="w-4 h-4 mt-0.5 shrink-0 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
+                                className="w-4 h-4 mt-0.5 shrink-0 accent-rose-gold border-cream-300 rounded focus:ring-rose-gold"
                             />
-                            <span className="text-charcoal-700 text-sm font-medium leading-tight">{amenity}</span>
+                            <span className="text-charcoal-700 text-sm font-medium leading-tight group-hover:text-charcoal-900 transition-colors">{amenity}</span>
                         </label>
                     ))}
                 </div>

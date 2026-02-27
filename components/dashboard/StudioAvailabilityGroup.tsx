@@ -89,16 +89,7 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
                                 </div>
                             </div>
 
-                            {/* Price Badge - Top Right */}
-                            <div className="text-right">
-                                <div className="text-xl font-bold text-charcoal-900 leading-none">
-                                    {minPrice !== null ? `From ₱${minPrice}` : `Price on Request`}
-                                    {minPrice !== null && <span className="text-xs text-charcoal-500 font-normal ml-0.5 sm:block md:inline">/hr</span>}
-                                </div>
-                                <div className="text-[10px] font-medium text-charcoal-400 mt-1 uppercase tracking-tighter hidden sm:block">
-                                    Equipment-Based
-                                </div>
-                            </div>
+
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2">

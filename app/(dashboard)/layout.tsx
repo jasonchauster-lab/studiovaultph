@@ -61,7 +61,7 @@ export default async function DashboardLayout({
 
                         <div className="flex items-center gap-3 pl-4 border-l border-cream-100">
                             <div className="hidden sm:block text-right">
-                                <p className="text-xs font-bold text-charcoal-900 leading-none mb-1">{profile?.full_name || 'Partner'}</p>
+                                <p className="text-xs font-bold text-charcoal-900 leading-none mb-1">{profile?.role === 'studio' ? (studioData?.name || profile?.full_name || 'Studio') : (profile?.full_name || 'Partner')}</p>
                                 <p className="text-[10px] text-charcoal-500 uppercase font-bold tracking-tighter text-rose-gold">{profile?.role || 'User'}</p>
                             </div>
                             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-cream-100 shadow-sm transition-transform hover:scale-105">

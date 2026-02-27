@@ -4,15 +4,10 @@ export const isValidEmail = (email: string): boolean => {
 };
 
 export const isValidPhone = (phone: string): boolean => {
-    // Supports PH Mobile: 09XXXXXXXXX, +639XXXXXXXXX
-    // Supports PH Landline: 02-8XXX-XXXX, etc.
-    // Generally: allows +, -, spaces, and 7-13 digits.
-
-    // Clean the number for counting digits
-    const digits = phone.replace(/\D/g, '');
-
-    // Basic format check (allowing common symbols)
-    const flexRe = /^[\d\+\-\s\(\)]{7,20}$/;
-
-    return flexRe.test(phone.trim()) && digits.length >= 7;
+    // PH Mobile: 09XXXXXXXXX (11 digits) OR +639XXXXXXXXX (12 digits after +)
+    const trimmed = phone.trim().replace(/[\s\-\(\)]/g, '');
+    // Accepts 09XXXXXXXXX or +639XXXXXXXXX
+    return /^(09\d{9}|\+639\d{9})$/.test(trimmed);
 };
+
+export const phoneErrorMessage = 'Please enter a valid PH mobile number (e.g. 09171234567 or +63917 123 4567).';

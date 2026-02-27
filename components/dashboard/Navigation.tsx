@@ -113,14 +113,17 @@ export default function Navigation({ role }: NavigationProps) {
                             <Link href="/studio/earnings" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/studio/earnings'))}>
                                 <DollarSign className="w-4 h-4" />
                                 Earnings
+                                {pathname.startsWith('/studio/earnings') && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
                             <Link href="/studio/history" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/studio/history'))}>
                                 <History className="w-4 h-4" />
                                 Rental History
+                                {pathname.startsWith('/studio/history') && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
                             <Link href="/studio/settings" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/studio/settings'))}>
                                 <Box className="w-4 h-4" />
                                 Settings & Equipment
+                                {pathname.startsWith('/studio/settings') && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
                         </>
                     )}

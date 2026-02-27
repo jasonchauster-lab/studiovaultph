@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
 import { redirect } from 'next/navigation'
-import { Calendar } from 'lucide-react'
+import { Calendar, ArrowLeft } from 'lucide-react'
 import clsx from 'clsx'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
 import InstructorLeaveReviewButton from '@/components/reviews/InstructorLeaveReviewButton'
+import Link from 'next/link'
 
 export default async function InstructorSessionsPage() {
     const supabase = await createClient()
@@ -57,6 +58,13 @@ export default async function InstructorSessionsPage() {
         <div className="min-h-screen bg-cream-50 p-8">
             <div className="max-w-4xl mx-auto space-y-12">
                 <div>
+                    <Link
+                        href="/instructor"
+                        className="inline-flex items-center gap-1.5 text-sm text-charcoal-500 hover:text-charcoal-900 transition-colors mb-4"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Dashboard
+                    </Link>
                     <h1 className="text-3xl font-serif text-charcoal-900 mb-2">My Sessions</h1>
                     <p className="text-charcoal-600">Track studio slots you've booked and leave reviews after sessions.</p>
                 </div>

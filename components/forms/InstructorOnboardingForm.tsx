@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { submitInstructorOnboarding } from '@/app/(dashboard)/instructor/onboarding/actions'
 import { Upload, CheckCircle, AlertCircle, Loader2, ShieldCheck, ArrowRight } from 'lucide-react'
 import clsx from 'clsx'
+import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
 
 export default function InstructorOnboardingForm() {
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -22,6 +23,13 @@ export default function InstructorOnboardingForm() {
         setMessage(null)
 
         const formData = new FormData(event.currentTarget)
+
+        const contactNumber = formData.get('contactNumber') as string
+        if (contactNumber && !isValidPhone(contactNumber)) {
+            setMessage({ type: 'error', text: phoneErrorMessage })
+            setIsSubmitting(false)
+            return
+        }
 
         try {
             const result = await submitInstructorOnboarding(formData)
@@ -118,9 +126,11 @@ export default function InstructorOnboardingForm() {
                         id="contactNumber"
                         name="contactNumber"
                         required
+                        maxLength={13}
                         className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400"
-                        placeholder="e.g. +63 917 123 4567"
+                        placeholder="e.g. 09171234567"
                     />
+                    <p className="text-[11px] text-charcoal-400 mt-1">Format: 09XXXXXXXXX or +639XXXXXXXXX (11 digits)</p>
                 </div>
 
                 {/* Certification Body */}

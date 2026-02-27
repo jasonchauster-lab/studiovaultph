@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { updateProfile } from '@/app/(dashboard)/customer/profile/actions'
 import { Loader2, Camera, User } from 'lucide-react'
-import { isValidPhone, isValidEmail } from '@/lib/validation'
+import { isValidPhone, isValidEmail, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
 
 export default function ProfileForm({ profile }: { profile: any }) {
@@ -16,7 +16,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
         const emergencyContact = formData.get('emergencyContact') as string
 
         if (contactNumber && !isValidPhone(contactNumber)) {
-            setMessage('Please enter a valid contact number (at least 7 digits).')
+            setMessage(phoneErrorMessage)
             return
         }
 
@@ -125,12 +125,14 @@ export default function ProfileForm({ profile }: { profile: any }) {
                     <div>
                         <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Contact Number</label>
                         <input
-                            type="text"
+                            type="tel"
                             name="contactNumber"
                             defaultValue={profile?.contact_number || ''}
                             placeholder="e.g. 09171234567"
+                            maxLength={13}
                             className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
                         />
+                        <p className="text-[11px] text-charcoal-400 mt-1">Format: 09XXXXXXXXX or +639XXXXXXXXX (11 digits)</p>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Emergency Contact</label>

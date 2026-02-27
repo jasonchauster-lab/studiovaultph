@@ -203,9 +203,9 @@ export default function StudioApplicationForm() {
             </div>
             <div>
                 <label className="block text-sm font-medium text-charcoal-700 mb-1">Contact Number <span className="text-rose-gold font-bold">*</span></label>
-                <input name="contactNumber" required placeholder="e.g. +63 917 123 4567" className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 transition-all font-mono" />
+                <input type="tel" name="contactNumber" required maxLength={13} placeholder="e.g. 09171234567" className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 transition-all font-mono" />
                 <p className="text-[10px] text-charcoal-500 mt-1 italic">
-                    We will reach out through this number to confirm your studio's application and booking details.
+                    Format: 09XXXXXXXXX or +639XXXXXXXXX (11 digits). We&apos;ll reach out here to confirm your application.
                 </p>
             </div>
             <div>
