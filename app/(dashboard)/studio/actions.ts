@@ -253,6 +253,18 @@ export async function createStudio(formData: FormData) {
             return { error: 'Failed to initialize studio profile: ' + profileError.message }
         }
 
+        // Parse pricing
+        const pricing: Record<string, number> = {}
+        allKeys.forEach(key => {
+            if (key.startsWith('price_')) {
+                const eq = key.replace('price_', '')
+                const val = parseFloat(formData.get(key) as string)
+                if (!isNaN(val) && val > 0) {
+                    pricing[eq] = val
+                }
+            }
+        })
+
         const { error } = await supabase
             .from('studios')
             .insert({
@@ -272,6 +284,7 @@ export async function createStudio(formData: FormData) {
                 insurance_expiry: insuranceExpiry || null,
                 space_photos_urls: spacePhotosUrls,
                 inventory: inventory,
+                pricing: pricing,
                 google_maps_url: googleMapsUrl || null,
                 amenities: formData.getAll('amenities') as string[]
             })

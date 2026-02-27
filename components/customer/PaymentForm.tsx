@@ -190,9 +190,9 @@ function MedicalClearanceModal({ onAcknowledge }: { onAcknowledge: () => void })
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-900/70 backdrop-blur-sm">
             <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
-                <div className="p-6 border-b border-red-100 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center shrink-0">
-                        <HeartPulse className="w-5 h-5 text-red-600" />
+                <div className="p-6 border-b border-rose-gold/10 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-rose-gold/10 rounded-full flex items-center justify-center shrink-0">
+                        <HeartPulse className="w-5 h-5 text-rose-gold" />
                     </div>
                     <h3 className="font-serif text-lg text-charcoal-900">Medical Clearance Required</h3>
                 </div>
@@ -202,26 +202,26 @@ function MedicalClearanceModal({ onAcknowledge }: { onAcknowledge: () => void })
                     </p>
                     <ul className="space-y-2 text-sm text-charcoal-700">
                         <li className="flex items-start gap-2">
-                            <span className="text-red-500 mt-0.5 shrink-0">•</span>
+                            <span className="text-rose-gold mt-0.5 shrink-0">•</span>
                             <span>Please ensure you have <strong>written medical clearance from a licensed physician</strong> before attending your first session.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <span className="text-red-500 mt-0.5 shrink-0">•</span>
+                            <span className="text-rose-gold mt-0.5 shrink-0">•</span>
                             <span>Inform your instructor of your condition before the session begins so they can modify exercises accordingly.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <span className="text-red-500 mt-0.5 shrink-0">•</span>
+                            <span className="text-rose-gold mt-0.5 shrink-0">•</span>
                             <span>The assigned instructor bears responsibility for safe exercise selection and ongoing supervision during your session.</span>
                         </li>
                     </ul>
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-700">
+                    <div className="bg-rose-gold/5 border border-rose-gold/20 rounded-lg p-3 text-xs text-rose-gold-700">
                         By clicking "I Acknowledge", you confirm that you have read this notice and will obtain appropriate medical clearance before your session.
                     </div>
                 </div>
                 <div className="px-6 pb-6">
                     <button
                         onClick={onAcknowledge}
-                        className="w-full bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition-colors"
+                        className="w-full bg-rose-gold text-white py-3 rounded-lg font-medium hover:bg-rose-gold/90 transition-colors"
                     >
                         I Acknowledge — Continue to Booking
                     </button>
@@ -490,20 +490,20 @@ export default function PaymentForm({
                 {/* Countdown Timer Banner */}
                 {timeLeft !== null && timeLeft > 0 && (
                     <div className={`flex items-center justify-between p-4 rounded-xl border ${timeLeft <= 120
-                            ? 'bg-red-50 border-red-200'
-                            : timeLeft <= 300
-                                ? 'bg-amber-50 border-amber-200'
-                                : 'bg-blue-50 border-blue-200'
+                        ? 'bg-rose-gold/10 border-rose-gold/30'
+                        : timeLeft <= 300
+                            ? 'bg-amber-50 border-amber-200'
+                            : 'bg-charcoal-50 border-charcoal-200'
                         }`}>
                         <div className="flex items-center gap-2">
-                            <Clock className={`w-5 h-5 ${timeLeft <= 120 ? 'text-red-600 animate-pulse' : timeLeft <= 300 ? 'text-amber-600' : 'text-blue-600'
+                            <Clock className={`w-5 h-5 ${timeLeft <= 120 ? 'text-rose-gold animate-pulse' : timeLeft <= 300 ? 'text-amber-600' : 'text-charcoal-600'
                                 }`} />
-                            <span className={`text-sm font-medium ${timeLeft <= 120 ? 'text-red-800' : timeLeft <= 300 ? 'text-amber-800' : 'text-blue-800'
+                            <span className={`text-sm font-medium ${timeLeft <= 120 ? 'text-rose-gold' : timeLeft <= 300 ? 'text-amber-800' : 'text-charcoal-800'
                                 }`}>
                                 Complete payment before your hold expires
                             </span>
                         </div>
-                        <span className={`font-mono text-lg font-bold ${timeLeft <= 120 ? 'text-red-700' : timeLeft <= 300 ? 'text-amber-700' : 'text-blue-700'
+                        <span className={`font-mono text-lg font-bold ${timeLeft <= 120 ? 'text-rose-gold' : timeLeft <= 300 ? 'text-amber-700' : 'text-charcoal-700'
                             }`}>
                             {formatTime(timeLeft)}
                         </span>
@@ -571,7 +571,7 @@ export default function PaymentForm({
                                                         value="yes"
                                                         checked={parqAnswers[q.key] === true}
                                                         onChange={() => handleParqChange(q.key, true)}
-                                                        className="accent-red-600 w-4 h-4"
+                                                        className="accent-rose-gold w-4 h-4"
                                                     />
                                                     <span className="text-sm font-medium text-charcoal-700">Yes</span>
                                                 </label>
@@ -620,12 +620,12 @@ export default function PaymentForm({
                         Complete the PAR-Q questionnaire above to unlock the agreement section.
                     </div>
                 ) : (
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 space-y-4">
+                    <div className="bg-rose-gold/5 border border-rose-gold/50 rounded-xl p-5 space-y-4">
                         <div className="flex items-center gap-2 mb-1">
-                            <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0" />
-                            <span className="font-medium text-amber-900 text-sm">Required Agreements</span>
+                            <ShieldAlert className="w-5 h-5 text-rose-gold shrink-0" />
+                            <span className="font-medium text-charcoal-900 text-sm">Required Agreements</span>
                         </div>
-                        <p className="text-xs text-amber-700">
+                        <p className="text-xs text-charcoal-600">
                             You must read and agree to both documents before you can submit payment.
                         </p>
 
@@ -655,7 +655,7 @@ export default function PaymentForm({
                                 <button
                                     type="button"
                                     onClick={() => setShowWaiver(true)}
-                                    className="mt-3 ml-7 text-xs text-charcoal-500 hover:text-charcoal-900 flex items-center gap-1 transition-colors"
+                                    className="mt-3 ml-7 text-xs text-rose-gold hover:text-rose-gold/80 flex items-center gap-1 transition-colors"
                                 >
                                     <FileText className="w-3 h-3" /> View full waiver
                                 </button>
@@ -663,7 +663,7 @@ export default function PaymentForm({
                         )}
 
                         {/* Terms & Conditions */}
-                        <div className="bg-white rounded-lg border border-amber-200 p-4">
+                        <div className="bg-white rounded-lg border border-rose-gold/20 p-4">
                             <div className="flex items-start gap-3">
                                 <input
                                     id="terms"
@@ -682,7 +682,7 @@ export default function PaymentForm({
                                         {userRole === 'instructor' ? "Instructor Professional Terms" : "Terms and Conditions & Cancellation Policy"}
                                     </button>
                                     . I understand that{' '}
-                                    <span className="font-semibold text-red-700">
+                                    <span className="font-bold text-charcoal-900">
                                         {userRole === 'instructor'
                                             ? "studio cancellations require 24-hour notice"
                                             : "cancellations require explicit instructor approval"}
@@ -693,7 +693,7 @@ export default function PaymentForm({
                             <button
                                 type="button"
                                 onClick={() => setShowTerms(true)}
-                                className="mt-3 ml-7 text-xs text-charcoal-500 hover:text-charcoal-900 flex items-center gap-1 transition-colors"
+                                className="mt-3 ml-7 text-xs text-rose-gold hover:text-rose-gold/80 flex items-center gap-1 transition-colors"
                             >
                                 <FileText className="w-3 h-3" /> View full terms
                             </button>
@@ -761,7 +761,10 @@ export default function PaymentForm({
                 <button
                     type="submit"
                     disabled={!canSubmit}
-                    className="w-full bg-charcoal-900 text-cream-50 py-3 rounded-lg font-medium hover:bg-charcoal-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                    className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${file
+                        ? 'bg-rose-gold text-white hover:bg-rose-gold/90 shadow-md'
+                        : 'bg-charcoal-900 text-cream-50 hover:bg-charcoal-800 disabled:opacity-40 disabled:cursor-not-allowed'
+                        }`}
                 >
                     {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Payment'}
                 </button>

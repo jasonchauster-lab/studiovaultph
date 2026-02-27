@@ -196,10 +196,16 @@ export default function BookingSection({
         const instructor = instructors.find(i => i.id === selectedInstructor);
         const iRate = instructor?.rates?.[selectedEquipment] || 0;
 
-        // Service Fee
-        const fee = 100;
+        // Platform Service Fee: 20% of (studio + instructor) or ₱100 minimum, per slot
+        const subtotalPerSlot = sRate + iRate;
+        const serviceFee = Math.max(100, subtotalPerSlot * 0.20);
 
-        return (sRate + iRate + fee) * quantity;
+        return {
+            studioRate: sRate,
+            instructorRate: iRate,
+            serviceFee,
+            total: (subtotalPerSlot + serviceFee) * quantity,
+        };
     }
 
     const totalPrice = calculateTotal();
@@ -437,16 +443,28 @@ export default function BookingSection({
 
                         {/* Price Display */}
                         {totalPrice !== null && (
-                            <div className="bg-white p-4 rounded-lg border border-cream-200 flex justify-between items-center">
-                                <div>
-                                    <p className="text-charcoal-600 font-medium">Grand Total</p>
-                                    {quantity > 1 && (
-                                        <p className="text-xs text-charcoal-400">
-                                            For {quantity} {selectedEquipment}{quantity > 1 ? 's' : ''}
-                                        </p>
-                                    )}
+                            <div className="bg-white p-4 rounded-lg border border-cream-200 space-y-2 text-sm">
+                                <div className="flex justify-between text-charcoal-600">
+                                    <span>Studio Rate ({selectedEquipment})</span>
+                                    <span>₱{totalPrice.studioRate.toLocaleString()}</span>
                                 </div>
-                                <span className="text-xl font-serif text-charcoal-900">₱{totalPrice.toLocaleString()}</span>
+                                <div className="flex justify-between text-charcoal-600">
+                                    <span>Instructor Rate ({selectedEquipment})</span>
+                                    <span>₱{totalPrice.instructorRate.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between text-charcoal-500 text-xs">
+                                    <span>Platform Service Fee <span className="italic">(20% min. ₱100)</span></span>
+                                    <span>₱{totalPrice.serviceFee.toLocaleString()}</span>
+                                </div>
+                                {quantity > 1 && (
+                                    <div className="flex justify-between text-charcoal-400 text-xs">
+                                        <span>× {quantity} {selectedEquipment}s</span>
+                                    </div>
+                                )}
+                                <div className="border-t border-cream-200 pt-2 flex justify-between items-center">
+                                    <p className="font-bold text-charcoal-900">Grand Total</p>
+                                    <span className="text-xl font-serif text-charcoal-900">₱{totalPrice.total.toLocaleString()}</span>
+                                </div>
                             </div>
                         )}
 

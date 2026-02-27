@@ -158,7 +158,7 @@ export default async function PaymentPage({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div className="text-center">
                             <p className="font-medium text-charcoal-900 mb-2">GCash</p>
-                            <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-sm inline-block">
+                            <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-md hover:shadow-lg transition-shadow inline-block">
                                 <ExpandableImage
                                     src="/gcash-qr.jpg"
                                     alt="GCash QR Code"
@@ -169,7 +169,7 @@ export default async function PaymentPage({
                         </div>
                         <div className="text-center mt-4 md:mt-0">
                             <p className="font-medium text-charcoal-900 mb-2">BPI</p>
-                            <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-sm inline-block">
+                            <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-md hover:shadow-lg transition-shadow inline-block">
                                 <ExpandableImage
                                     src="/bpi-qr.jpg"
                                     alt="BPI QR Code"
