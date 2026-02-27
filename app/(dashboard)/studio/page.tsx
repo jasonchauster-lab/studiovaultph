@@ -66,8 +66,9 @@ export default async function StudioDashboard(props: {
 
     // 4. Fetch Slots for Calendar View
     let weeklySlots: any[] = []
-    const dateParam = typeof searchParams.date === 'string' ? searchParams.date : new Date().toISOString().split('T')[0]
-    const currentDate = new Date(dateParam)
+    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' })
+    const dateParam = typeof searchParams.date === 'string' ? searchParams.date : todayStr
+    const currentDate = new Date(dateParam + "T00:00:00+08:00")
 
     if (myStudio) {
         const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })

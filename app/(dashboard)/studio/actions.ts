@@ -314,10 +314,9 @@ export async function generateRecurringSlots(params: GenerateSlotsParams) {
         return { error: 'Please select at least one piece of equipment.' };
     }
 
-    const start = new Date(params.startDate);
-    const end = new Date(params.endDate);
+    const start = new Date(params.startDate + "T00:00:00+08:00");
+    const end = new Date(params.endDate + "T23:59:59+08:00");
     const endOfDayEnd = new Date(end);
-    endOfDayEnd.setHours(23, 59, 59, 999);
     const quantity = params.quantity || 1;
 
     if (start > end) {

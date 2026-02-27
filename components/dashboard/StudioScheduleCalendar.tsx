@@ -54,7 +54,8 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
     }
 
     const handleToday = () => {
-        router.push('?date=' + new Date().toISOString().split('T')[0])
+        const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' })
+        router.push('?date=' + todayStr)
     }
 
     // Modal State for Single Slot

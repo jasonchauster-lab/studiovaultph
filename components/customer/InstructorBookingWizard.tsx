@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { findMatchingStudios } from '@/app/(dashboard)/instructors/actions'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
-import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import clsx from 'clsx'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -30,6 +30,8 @@ export default function InstructorBookingWizard({
     const [success, setSuccess] = useState(false)
     const [bookingId, setBookingId] = useState<string | null>(null)
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const filterLocation = searchParams.get('location')
 
     // Helper: Generate next 14 days
     const nextDays = Array.from({ length: 14 }).map((_, i) => {
@@ -166,8 +168,9 @@ export default function InstructorBookingWizard({
                         >
                             {nextDays.map((d) => {
                                 const hasSlots = availability.some(a => {
-                                    if (a.date) return a.date === d.date
-                                    return !a.date && a.day_of_week === d.dayIndex
+                                    const dateMatch = a.date ? a.date === d.date : a.day_of_week === d.dayIndex;
+                                    const locationMatch = filterLocation ? a.location_area === filterLocation : true;
+                                    return dateMatch && locationMatch;
                                 });
 
                                 if (!hasSlots) return null;
@@ -210,11 +213,27 @@ export default function InstructorBookingWizard({
 
                             const d = nextDays.find(nd => nd.date === activeDate);
                             const slots = availability.filter(a => {
-                                if (a.date) return a.date === activeDate
-                                return !a.date && a.day_of_week === d?.dayIndex
+                                const dateMatch = a.date ? a.date === activeDate : a.day_of_week === d?.dayIndex;
+                                const locationMatch = filterLocation ? a.location_area === filterLocation : true;
+                                return dateMatch && locationMatch;
                             });
 
-                            if (slots.length === 0) return <p className="text-charcoal-500 text-center italic">No sessions available on this day.</p>;
+                            if (slots.length === 0) {
+                                return (
+                                    <div className="text-center py-6">
+                                        <Info className="w-8 h-8 text-charcoal-300 mx-auto mb-2" />
+                                        <p className="text-charcoal-500 italic">No sessions available {filterLocation ? `in ${filterLocation}` : ''} on this day.</p>
+                                        {filterLocation && (
+                                            <button
+                                                onClick={() => router.push(window.location.pathname)}
+                                                className="mt-2 text-xs text-charcoal-900 font-medium hover:underline"
+                                            >
+                                                Clear filters to see all availability
+                                            </button>
+                                        )}
+                                    </div>
+                                );
+                            }
 
                             return (
                                 <div className="space-y-3">

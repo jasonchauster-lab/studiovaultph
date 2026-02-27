@@ -88,9 +88,8 @@ export default async function CustomerDashboard({
         }
 
         if (params.date) {
-            // JavaScript getDay(): 0 = Sunday, 1 = Monday...
-            // Use local date to avoid timezone offset issues if possible, but params.date is typically YYYY-MM-DD
-            const dayOfWeek = new Date(params.date).getDay()
+            // Use local PHT date to avoid day-shift issues
+            const dayOfWeek = new Date(params.date + "T00:00:00+08:00").getDay()
             availQuery = availQuery.eq('day_of_week', dayOfWeek)
 
             // Optional: If the table supports specific dates ('date' column), we could also check:
@@ -149,9 +148,8 @@ export default async function CustomerDashboard({
 
             if (params.date) {
                 // Filter by date range (start of day to end of day)
-                const startOfDay = new Date(params.date)
-                const endOfDay = new Date(params.date)
-                endOfDay.setHours(23, 59, 59, 999)
+                const startOfDay = new Date(params.date + "T00:00:00+08:00")
+                const endOfDay = new Date(params.date + "T23:59:59+08:00")
                 slotQuery = slotQuery.gte('start_time', startOfDay.toISOString()).lte('start_time', endOfDay.toISOString())
             }
 
@@ -165,10 +163,11 @@ export default async function CustomerDashboard({
                 // Let's rely on date + time combination for precise lookups, or just Client side filter if needed.
                 // For MVP: if Date AND Time provided, combine them.
                 if (params.date) {
-                    const specificStart = new Date(`${params.date}T${params.time}`)
+                    const specificStart = new Date(`${params.date}T${params.time}+08:00`)
                     slotQuery = slotQuery.gte('start_time', specificStart.toISOString())
                 }
             }
+
 
             const { data } = await slotQuery
             if (data) slots = data as unknown as Slot[]

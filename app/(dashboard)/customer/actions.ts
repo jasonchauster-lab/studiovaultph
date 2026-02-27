@@ -692,7 +692,7 @@ export async function cancelBooking(bookingId: string) {
         try {
             const startDateTime = new Date(slotData.start_time);
             const dateStr = startDateTime.toISOString().split('T')[0];
-            const timeStr = startDateTime.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
+            const timeStr = startDateTime.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour12: false, hour: '2-digit', minute: '2-digit' });
 
             await supabase
                 .from('instructor_availability')

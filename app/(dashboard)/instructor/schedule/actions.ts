@@ -87,7 +87,7 @@ export async function updateAvailability(id: string, formData: FormData) {
     if (date) {
         updateData.date = date
         // Update day_of_week to match the new date
-        updateData.day_of_week = new Date(date).getDay()
+        updateData.day_of_week = new Date(date + "T00:00:00+08:00").getDay()
     }
 
     const { error } = await supabase
@@ -132,10 +132,12 @@ export async function generateRecurringAvailability(params: GenerateAvailability
     let currentDay = new Date(start);
 
     while (currentDay <= endOfDayEnd) {
-        if (params.days.includes(currentDay.getDay())) {
+        // Use local PHT day of week
+        const dayOfWeek = new Date(currentDay.toISOString().split('T')[0] + "T00:00:00+08:00").getDay();
+        if (params.days.includes(dayOfWeek)) {
             availabilitiesToInsert.push({
                 instructor_id: user.id,
-                day_of_week: currentDay.getDay(),
+                day_of_week: dayOfWeek,
                 date: currentDay.toISOString().split('T')[0], // Specific date
                 start_time: params.startTime, // Assuming TIME type handles 'HH:MM'
                 end_time: params.endTime,

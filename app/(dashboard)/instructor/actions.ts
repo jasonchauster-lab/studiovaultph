@@ -387,8 +387,8 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
     try {
         const bookingDate = start.toISOString().split('T')[0];
         const dayOfWeek = start.getDay();
-        const startTimeStr = start.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
-        const endTimeStr = end.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
+        const startTimeStr = start.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour12: false, hour: '2-digit', minute: '2-digit' });
+        const endTimeStr = end.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour12: false, hour: '2-digit', minute: '2-digit' });
 
         // Check if availability already exists to avoid duplicates
         const { data: existingAvail } = await supabase
