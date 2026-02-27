@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, CheckCircle2, MapPin, Calendar, DollarSign, User, Sparkles } from 'lucide-react'
+import { ArrowRight, CheckCircle2, MapPin, Calendar, DollarSign, User, Sparkles, TrendingUp, ShieldCheck, Award } from 'lucide-react'
 import RoleSelectionModal from '@/components/auth/RoleSelectionModal'
 
 export default function LandingPage() {
@@ -106,6 +106,38 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Trust Blocks Section (Decision Zone) */}
+      <section className="px-4 sm:px-6 py-16 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center text-center p-8 bg-cream-50 rounded-3xl border border-cream-200 shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-14 h-14 bg-charcoal-900 rounded-2xl flex items-center justify-center mb-6 shadow-lg rotate-3">
+                <TrendingUp className="w-7 h-7 text-cream-200" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-charcoal-900 mb-3 italic">Stop Idle Loss</h3>
+              <p className="text-charcoal-600 text-sm leading-relaxed">Every hour a reformer sits empty is lost revenue. Turn your "dead air" into guaranteed house income.</p>
+            </div>
+
+            <div className="flex flex-col items-center text-center p-8 bg-cream-50 rounded-3xl border border-cream-200 shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-14 h-14 bg-charcoal-900 rounded-2xl flex items-center justify-center mb-6 shadow-lg -rotate-3">
+                <ShieldCheck className="w-7 h-7 text-cream-200" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-charcoal-900 mb-3 italic">Vetted & Insured</h3>
+              <p className="text-charcoal-600 text-sm leading-relaxed">Every professional in the Vault is identity-verified, certified, and fully insured.</p>
+            </div>
+
+            <div className="flex flex-col items-center text-center p-8 bg-cream-50 rounded-3xl border border-cream-200 shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-14 h-14 bg-charcoal-900 rounded-2xl flex items-center justify-center mb-6 shadow-lg rotate-3">
+                <Award className="w-7 h-7 text-cream-200" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-charcoal-900 mb-3 italic">Founding Partner Program</h3>
+              <p className="text-charcoal-600 text-sm leading-relaxed">We are currently only accepting 5 premium studios for our exclusive launch.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       {/* Value Props */}
       <section className="px-4 sm:px-6 py-16 bg-white border-y border-cream-200">
