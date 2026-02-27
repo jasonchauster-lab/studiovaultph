@@ -24,7 +24,7 @@ export default async function StudioSettingsPage() {
 
     return (
         <div className="space-y-6 max-w-3xl mx-auto">
-            <div>
+            <div className="text-center">
                 <h1 className="text-3xl font-serif text-charcoal-900 mb-2">Studio Settings</h1>
                 <p className="text-charcoal-600">Manage your studio details, equipment, and inventory.</p>
             </div>
