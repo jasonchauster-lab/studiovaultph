@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Slot, Studio } from '@/types';
-import { ChevronDown, ChevronUp, MapPin, Clock, CreditCard } from 'lucide-react';
+import { ChevronDown, ChevronUp, MapPin, Clock, CreditCard, ShieldCheck } from 'lucide-react';
 import { bookSlot } from '@/app/(dashboard)/instructor/actions'; // Type only import if needed, actual usage in subcomponent
 import BookSlotGroup from './BookSlotGroup';
 import clsx from 'clsx';
@@ -35,47 +35,77 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
             {/* Header / Summary View */}
             <div
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="p-4 sm:p-6 cursor-pointer flex justify-between items-center bg-white hover:bg-cream-50/50 transition-colors"
+                className="p-4 sm:p-5 cursor-pointer flex justify-between items-start bg-white hover:bg-cream-50/50 transition-colors relative"
             >
-                <div className="flex items-start gap-4">
-                    {/* Date Box */}
-                    <div className="flex flex-col items-center justify-center w-16 h-16 bg-cream-100 rounded-lg text-charcoal-900 flex-shrink-0">
-                        <span className="text-xs font-medium uppercase tracking-wider">{date.toLocaleDateString([], { month: 'short' })}</span>
-                        <span className="text-2xl font-serif font-bold">{date.getDate()}</span>
+                <div className="flex items-start gap-5 w-full">
+                    {/* Studio Thumbnail */}
+                    <div className="hidden sm:block w-32 h-32 rounded-xl overflow-hidden bg-cream-100 border border-cream-200 flex-shrink-0 shadow-inner">
+                        <img
+                            src={(studio.space_photos_urls && studio.space_photos_urls[0]) || studio.logo_url || "/hero-bg.png"}
+                            alt={studio.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
                     </div>
 
-                    <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-1">
-                            <div className="w-8 h-8 rounded-lg overflow-hidden bg-cream-50 border border-cream-200 flex-shrink-0">
-                                <img
-                                    src={studio.logo_url || "/logo.png"}
-                                    alt={studio.name}
-                                    className="w-full h-full object-cover"
-                                />
+                    {/* Mobile Logo / Date Section */}
+                    <div className="flex flex-col gap-3 flex-1 min-w-0">
+                        <div className="flex justify-between items-start w-full">
+                            <div className="flex items-center gap-2">
+                                <div className="sm:hidden w-10 h-10 rounded-lg overflow-hidden bg-cream-50 border border-cream-200 flex-shrink-0">
+                                    <img
+                                        src={studio.logo_url || "/logo.png"}
+                                        alt={studio.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                        <h3 className="text-xl font-serif text-charcoal-900 font-bold leading-tight">{studio.name}</h3>
+                                        {studio.verified && (
+                                            <div className="flex items-center gap-0.5 bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                                                <ShieldCheck className="w-3 h-3" />
+                                                Verified
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-1 text-sm text-charcoal-500 mt-0.5">
+                                        <MapPin className="w-3.5 h-3.5" />
+                                        <span className="truncate">{studio.location}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <h3 className="text-lg font-serif text-charcoal-900 font-medium">{studio.name}</h3>
+
+                            {/* Price Badge - Top Right */}
+                            <div className="text-right">
+                                <div className="text-xl font-bold text-charcoal-900 leading-none">
+                                    ₱{studio.hourly_rate}
+                                    <span className="text-xs text-charcoal-500 font-normal ml-0.5 sm:block md:inline">/hr</span>
+                                </div>
+                                <div className="text-[10px] font-medium text-charcoal-400 mt-1 uppercase tracking-tighter hidden sm:block">
+                                    Price Autonomy
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-charcoal-600">
-                            <span className="flex items-center gap-1">
-                                <MapPin className="w-3.5 h-3.5" />
-                                {studio.location}
-                            </span>
-                            <span className="flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5" />
-                                {timeRangeString}
-                            </span>
-                            <span className="flex items-center gap-1">
-                                <CreditCard className="w-3.5 h-3.5 shrink-0" />
-                                ₱{studio.hourly_rate}/hr
-                            </span>
-                        </div>
-                        <div className="mt-2 text-xs text-charcoal-500 font-medium bg-cream-50 px-2 py-1 rounded inline-block">
-                            {slots.length} available slots
+
+                        <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex items-center gap-1.5 text-sm bg-cream-100/50 px-2.5 py-1 rounded-lg text-charcoal-700 font-medium border border-cream-200">
+                                <span className="text-charcoal-400">{date.toLocaleDateString([], { month: 'short', day: 'numeric', weekday: 'short' })}</span>
+                                <span className="w-1 h-1 rounded-full bg-cream-300" />
+                                <span className="flex items-center gap-1">
+                                    <Clock className="w-3.5 h-3.5" />
+                                    {timeRangeString}
+                                </span>
+                            </div>
+
+                            <div className="text-xs text-white font-bold bg-rose-gold px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                {slots.length} Slots Available
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="text-charcoal-400">
+                <div className="text-charcoal-300 ml-4 mt-2">
                     {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                 </div>
             </div>

@@ -52,7 +52,8 @@ export default function InstructorDashboardClient() {
             location,
             hourly_rate,
             verified,
-            logo_url
+            logo_url,
+            space_photos_urls
           )
         `)
                 .eq('is_available', true)

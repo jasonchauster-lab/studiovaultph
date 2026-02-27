@@ -20,16 +20,26 @@ interface Instructor {
     rates?: Record<string, number>;
 }
 
+interface AvailabilityBlock {
+    instructor_id: string;
+    day_of_week: number;
+    date: string | null;
+    start_time: string;
+    end_time: string;
+}
+
 export default function BookingSection({
     studioId,
     slots,
     instructors,
+    availabilityBlocks,
     studioPricing,
     studioHourlyRate
 }: {
     studioId: string
     slots: Slot[]
     instructors: Instructor[]
+    availabilityBlocks: AvailabilityBlock[]
     studioPricing?: Record<string, number>
     studioHourlyRate: number
 }) {
@@ -39,6 +49,23 @@ export default function BookingSection({
     const [quantity, setQuantity] = useState<number>(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [successMessage, setSuccessMessage] = useState<string | null>(null)
+
+    // Determine available instructors for the selected time
+    const availableInstructors = instructors.filter(inst => {
+        if (!selectedSlotTime || !selectedDate) return true;
+        const [startFullStr] = selectedSlotTime.split('-');
+        const start = new Date(startFullStr);
+        const dayOfWeek = start.getDay();
+        const dateStr = format(start, 'yyyy-MM-dd');
+        const timeStr = format(start, 'HH:mm');
+
+        return availabilityBlocks.some(block =>
+            block.instructor_id === inst.id &&
+            (block.date === dateStr || (block.date === null && block.day_of_week === dayOfWeek)) &&
+            block.start_time <= timeStr &&
+            block.end_time > timeStr
+        );
+    });
 
     // 1. Group by Date
     const slotsByDate = slots.reduce((acc, slot) => {
@@ -395,14 +422,18 @@ export default function BookingSection({
                                 className="w-full px-4 py-2 bg-white border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
                             >
                                 <option value="">-- Choose an Instructor --</option>
-                                {instructors.map(inst => (
-                                    <option key={inst.id} value={inst.id}>
-                                        {inst.full_name}
-                                    </option>
-                                ))}
+                                {availableInstructors.length > 0 ? (
+                                    availableInstructors.map(inst => (
+                                        <option key={inst.id} value={inst.id}>
+                                            {inst.full_name}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option value="" disabled>No instructors available at this time</option>
+                                )}
                             </select>
                             <p className="text-xs text-charcoal-500 mt-1">
-                                Don't see your instructor? Tell them to verify their profile on StudioVaultPH!
+                                {availableInstructors.length === 0 ? "None of our verified instructors are available for this specific time slot." : "Don't see your instructor? Tell them to verify their profile on StudioVaultPH!"}
                             </p>
                         </div>
 

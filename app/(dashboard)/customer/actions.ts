@@ -34,7 +34,7 @@ export async function requestBooking(
     // 2. Fetch Studio Details
     const { data: studio, error: studioError } = await supabase
         .from('studios')
-        .select('pricing, hourly_rate, id, is_founding_partner, custom_fee_percentage') // Select needed fields
+        .select('pricing, hourly_rate, id, is_founding_partner, custom_fee_percentage, location') // Select needed fields
         .eq('id', slot.studio_id)
         .single()
 
@@ -51,9 +51,31 @@ export async function requestBooking(
     // Fetch Instructor Rates
     const { data: instructor } = await supabase
         .from('profiles')
-        .select('rates, is_founding_partner, custom_fee_percentage')
+        .select('full_name, rates, is_founding_partner, custom_fee_percentage')
         .eq('id', instructorId)
         .single()
+
+    // --- AVAILABILITY VALIDATION START ---
+    const slotStart = new Date(slot.start_time);
+    const dayOfWeek = slotStart.getDay();
+    const timeStr = slotStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' });
+    const dateStr = slotStart.toISOString().split('T')[0];
+
+    // Check if instructor has availability for this time & location
+    const { data: avail } = await supabase
+        .from('instructor_availability')
+        .select('*')
+        .eq('instructor_id', instructorId)
+        .eq('location_area', studio.location) // Match studio location
+        .or(`date.eq.${dateStr},day_of_week.eq.${dayOfWeek}`) // Specific date OR weekly
+        .lte('start_time', timeStr)
+        .gt('end_time', timeStr) // Simple check: requested start must be within instructor's block
+        .maybeSingle();
+
+    if (!avail) {
+        return { error: `${instructor?.full_name || 'The instructor'} is not available at ${studio.location} during this time.` }
+    }
+    // --- AVAILABILITY VALIDATION END ---
 
     // --- PRICE CALCULATION START ---
     // 1. Determine Equipment (Default to first or Reformer)
