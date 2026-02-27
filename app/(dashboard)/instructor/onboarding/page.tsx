@@ -62,8 +62,8 @@ export default async function InstructorOnboardingPage() {
             {/* Left Side: Image */}
             <div className="hidden md:flex md:w-1/2 relative flex-col justify-end">
                 <Image
-                    src="/auth-bg.png"
-                    alt="Pilates Studio"
+                    src="/instructor-application-bg.png"
+                    alt="Instructor Application"
                     fill
                     className="object-cover"
                     priority

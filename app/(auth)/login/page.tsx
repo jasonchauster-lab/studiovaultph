@@ -175,8 +175,9 @@ function LoginContent() {
 
                 <div className="w-full max-w-lg">
                     <div className="flex flex-col items-center mb-12">
-                        <Link href="/" className="mb-2">
-                            <Image src="/logo.png" alt="StudioVault Logo" width={320} height={320} className="w-80 h-80 object-contain" />
+                        <Link href="/" className="flex items-center gap-0 group">
+                            <Image src="/logo.png" alt="StudioVault Logo" width={144} height={144} className="w-36 h-36 object-contain" />
+                            <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight -ml-4 whitespace-nowrap">StudioVaultPH</span>
                         </Link>
 
                         <div className="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 border border-amber-100 rounded-full mb-6">

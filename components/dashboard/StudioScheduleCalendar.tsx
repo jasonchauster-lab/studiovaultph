@@ -160,7 +160,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                 <div className="flex gap-2">
                     <button
                         onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
-                        className="bg-charcoal-900 text-cream-50 px-4 py-2 rounded-lg text-sm font-medium hover:bg-charcoal-800 transition-colors flex items-center gap-2"
+                        className="bg-rose-gold text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-rose-gold/90 transition-all shadow-md hover:shadow-lg active:scale-95 flex items-center gap-2"
                     >
                         <Plus className="w-4 h-4" /> Add Slot
                     </button>
@@ -181,8 +181,8 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                             <div className="p-4 text-xs font-medium text-black border-r border-cream-200 sticky left-0 bg-cream-50 z-20">TIME</div>
                             {days.map(day => (
                                 <div key={day.toString()} className={clsx("p-3 text-center border-r border-cream-200 last:border-r-0 min-w-[100px]", isSameDay(day, new Date()) ? "bg-blue-50/50" : "")}>
-                                    <div className="text-xs text-charcoal-500 uppercase mb-1">{format(day, 'EEE')}</div>
-                                    <div className={clsx("text-lg font-serif", isSameDay(day, new Date()) ? "text-blue-600 font-bold" : "text-black")}>{format(day, 'd')}</div>
+                                    <div className="text-xs text-charcoal-500 uppercase mb-1 font-bold tracking-tighter">{format(day, 'EEE')}</div>
+                                    <div className={clsx("text-lg font-serif", isSameDay(day, new Date()) ? "text-rose-gold font-black" : "text-black")}>{format(day, 'd')}</div>
                                 </div>
                             ))}
                         </div>

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createStudio } from './actions'
-import { Calendar, DollarSign, Clock, User, Users } from 'lucide-react'
+import { Calendar, DollarSign, Clock, User, Users, MapPin, TrendingUp, Sparkles } from 'lucide-react'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import StudioScheduleCalendar from '@/components/dashboard/StudioScheduleCalendar'
 import { startOfWeek, endOfWeek } from 'date-fns'
@@ -8,6 +9,7 @@ import StudioChatButton from '@/components/dashboard/StudioChatButton'
 import StudioApplicationForm from '@/components/studio/StudioApplicationForm'
 import clsx from 'clsx'
 import Image from 'next/image'
+import StudioStatCards from '@/components/dashboard/StudioStatCards'
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
 
@@ -34,7 +36,6 @@ export default async function StudioDashboard(props: {
     // 3. Fetch Upcoming Bookings for this Studio (including Pending)
     let upcomingBookings: any[] = []
     if (myStudio) {
-        console.log('DEBUG: Fetching ALL bookings to filter in JS for Studio ID:', myStudio.id);
         const { data: allBookings, error } = await supabase
             .from('bookings')
             .select(`
@@ -46,21 +47,11 @@ export default async function StudioDashboard(props: {
             .order('created_at', { ascending: false })
             .limit(50);
 
-        if (error) {
-            console.error('DEBUG ERROR:', error);
-        }
-
         if (allBookings) {
-            console.log('DEBUG: Total potential bookings fetched:', allBookings.length);
             upcomingBookings = allBookings.filter(b => {
                 const sId = b.slots?.studio_id;
                 const status = b.status?.toLowerCase();
-                const isMatch = sId === myStudio.id && ['approved', 'confirmed', 'pending', 'paid'].includes(status);
-
-                if (sId === myStudio.id) {
-                    console.log(`DEBUG Check: Booking ${b.id}, Status=${b.status}, Match=${isMatch}`);
-                }
-                return isMatch;
+                return sId === myStudio.id && ['approved', 'confirmed', 'pending', 'paid'].includes(status);
             }).slice(0, 10);
         }
     }
@@ -73,9 +64,7 @@ export default async function StudioDashboard(props: {
 
     if (myStudio) {
         const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
-        const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 }) // end of week
-
-        // Adjust weekEnd to include the whole day
+        const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 })
         weekEnd.setHours(23, 59, 59, 999)
 
         const { data: slots, error: slotsError } = await supabase
@@ -83,7 +72,7 @@ export default async function StudioDashboard(props: {
             .select('*')
             .eq('studio_id', myStudio.id)
             .gte('start_time', weekStart.toISOString())
-            .lte('start_time', weekEnd.toISOString()) // Filter by start time within range
+            .lte('start_time', weekEnd.toISOString())
 
         if (!slotsError && slots) {
             weeklySlots = slots
@@ -93,21 +82,40 @@ export default async function StudioDashboard(props: {
     return (
         <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
             <div className="max-w-7xl mx-auto">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-serif text-charcoal-900">Studio Partner Dashboard</h1>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <div>
+                        <h1 className="text-4xl font-serif text-charcoal-900 mb-2">Studio Partner Dashboard</h1>
+                        {myStudio && (
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl overflow-hidden border border-cream-200 shadow-inner">
+                                    <Image
+                                        src={myStudio.space_photos_urls?.[0] || "/logo.png"}
+                                        alt={myStudio.name}
+                                        width={40}
+                                        height={40}
+                                        className="object-cover w-full h-full"
+                                    />
+                                </div>
+                                <div className="text-sm">
+                                    <p className="font-semibold text-charcoal-900">{myStudio.name}</p>
+                                    <p className="text-charcoal-500 flex items-center gap-1 font-medium">
+                                        <MapPin className="w-3 h-3 text-rose-gold" />
+                                        {myStudio.location}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="hidden lg:flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-cream-200 shadow-sm">
+                        <Sparkles className="w-4 h-4 text-rose-gold animate-pulse" />
+                        <span className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider">Premium Partner Access</span>
+                    </div>
                 </div>
 
                 {!myStudio ? (
                     <div className="fixed inset-0 bg-white flex flex-col md:flex-row z-[60]">
-                        {/* Left Side: Image */}
                         <div className="hidden md:flex md:w-1/2 relative flex-col justify-end">
-                            <Image
-                                src="/auth-bg.png"
-                                alt="Pilates Studio"
-                                fill
-                                className="object-cover"
-                                priority
-                            />
+                            <Image src="/studio-application-bg.png" alt="Studio Application" fill className="object-cover" priority />
                             <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 via-transparent to-transparent" />
                             <div className="relative p-16 text-white z-10">
                                 <h2 className="text-4xl lg:text-5xl font-serif mb-6 leading-tight">Elevate Your Studio Management</h2>
@@ -117,10 +125,13 @@ export default async function StudioDashboard(props: {
                             </div>
                         </div>
 
-                        {/* Right Side: Form */}
                         <div className="flex-1 overflow-y-auto bg-white p-8 md:p-12 lg:p-20">
                             <div className="max-w-xl mx-auto">
                                 <div className="mb-12">
+                                    <Link href="/" className="flex items-center gap-0 group">
+                                        <Image src="/logo.png" alt="StudioVault Logo" width={144} height={144} className="w-36 h-36 object-contain" />
+                                        <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight -ml-4 whitespace-nowrap">StudioVaultPH</span>
+                                    </Link>
                                     <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Get Started</h2>
                                     <h1 className="text-4xl font-serif text-charcoal-900 mb-4">Setup Your Studio</h1>
                                     <p className="text-charcoal-600 text-base">
@@ -147,13 +158,16 @@ export default async function StudioDashboard(props: {
                     </div>
                 ) : (
                     <>
-                        <p className="text-charcoal-600 mb-8">
-                            Managing: <span className="font-semibold">{myStudio.name}</span> ({myStudio.location})
-                            {myStudio.address && <span className="block text-sm text-charcoal-500 mt-1">{myStudio.address}</span>}
-                        </p>
+                        <StudioStatCards
+                            stats={{
+                                revenue: 45000,
+                                activeListings: weeklySlots.length,
+                                occupancy: 78,
+                                topInstructor: upcomingBookings[0]?.instructor?.full_name || 'N/A'
+                            }}
+                        />
 
                         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                            {/* Main Schedule Area */}
                             <div className="xl:col-span-2">
                                 <StudioScheduleCalendar
                                     studioId={myStudio.id}
@@ -163,77 +177,89 @@ export default async function StudioDashboard(props: {
                                 />
                             </div>
 
-                            {/* Sidebar: Recent Activity / Financials */}
                             <div className="space-y-6">
-                                <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
-                                    <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
-                                        <Calendar className="w-5 h-5 text-charcoal-500" />
-                                        Upcoming Bookings
-                                    </h2>
+                                <div className="bg-white border border-cream-200 rounded-2xl shadow-sm overflow-hidden">
+                                    <div className="bg-charcoal-900 p-4 flex items-center justify-between">
+                                        <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                                            <Calendar className="w-4 h-4 text-rose-gold" />
+                                            Upcoming Bookings
+                                        </h2>
+                                        <span className="text-[10px] font-bold text-white/40 border border-white/10 px-2 py-0.5 rounded-full uppercase">Next 7 Days</span>
+                                    </div>
+                                    <div className="p-6">
+                                        {upcomingBookings.length === 0 ? (
+                                            <div className="text-center py-12 px-4">
+                                                <div className="w-16 h-16 bg-cream-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-cream-200">
+                                                    <Sparkles className="w-8 h-8 text-rose-gold opacity-30" />
+                                                </div>
+                                                <p className="text-charcoal-900 font-serif text-lg mb-2">Your vault is ready.</p>
+                                                <p className="text-charcoal-500 text-sm leading-relaxed max-w-[200px] mx-auto">
+                                                    Add a slot to start monetizing your idle reformers.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                {upcomingBookings.map((booking: any) => {
+                                                    const start = new Date(booking.slots.start_time)
+                                                    const payout = booking.price_breakdown?.studio_fee || (booking.total_price ? Math.max(0, booking.total_price - 100) : 0);
+                                                    const equipment = booking.price_breakdown?.equipment || booking.equipment || 'Session';
+                                                    const qty = booking.price_breakdown?.quantity || 1;
 
-                                    {upcomingBookings.length === 0 ? (
-                                        <p className="text-charcoal-500 text-sm">No upcoming bookings.</p>
-                                    ) : (
-                                        <div className="space-y-4">
-                                            {upcomingBookings.map((booking: any) => {
-                                                const start = new Date(booking.slots.start_time)
-                                                const payout = booking.price_breakdown?.studio_fee || (booking.total_price ? Math.max(0, booking.total_price - 100) : 0);
-                                                const equipment = booking.price_breakdown?.equipment || booking.equipment || 'Session';
-                                                const qty = booking.price_breakdown?.quantity || 1;
-
-                                                return (
-                                                    <div key={booking.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
-                                                        <div className="flex justify-between items-start mb-3">
-                                                            <div className="space-y-1">
-                                                                <div className="flex items-center gap-2">
-                                                                    <User className="w-4 h-4 text-charcoal-400" />
-                                                                    <p className="text-sm font-semibold text-charcoal-900">
-                                                                        <span className="text-charcoal-500 font-normal">Client:</span> {booking.client?.full_name || 'N/A'}
-                                                                    </p>
+                                                    return (
+                                                        <div key={booking.id} className="border border-cream-100 rounded-xl p-4 bg-cream-50/30 hover:bg-cream-50 transition-colors shadow-sm mb-4 last:mb-0">
+                                                            <div className="flex justify-between items-start mb-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                                                                        <Image
+                                                                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${booking.instructor?.full_name}`}
+                                                                            alt="Instructor"
+                                                                            width={40}
+                                                                            height={40}
+                                                                        />
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-sm font-bold text-charcoal-900 leading-none mb-1">{booking.instructor?.full_name || 'N/A'}</p>
+                                                                        <p className="text-[10px] text-charcoal-500 uppercase font-bold tracking-tighter">Instructor</p>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="flex items-center gap-2">
-                                                                    <Users className="w-4 h-4 text-charcoal-400" />
-                                                                    <p className="text-sm font-semibold text-charcoal-900">
-                                                                        <span className="text-charcoal-500 font-normal">Instructor:</span> {booking.instructor?.full_name || 'N/A'}
-                                                                    </p>
+                                                                <div className="text-right">
+                                                                    <p className="text-lg font-bold text-charcoal-900 leading-none">₱{payout.toLocaleString()}</p>
+                                                                    <p className="text-[8px] text-charcoal-400 uppercase font-bold tracking-widest mt-1">Earnings</p>
                                                                 </div>
                                                             </div>
-                                                            <div className="flex flex-col items-end gap-2">
-                                                                <div className="text-right">
-                                                                    <p className="text-lg font-bold text-charcoal-900">₱{payout.toLocaleString()}</p>
-                                                                    <p className="text-[10px] text-charcoal-500 uppercase tracking-wider">Studio Fee</p>
+
+                                                            <div className="space-y-2 p-3 bg-white/50 rounded-lg border border-cream-100 mb-4">
+                                                                <div className="flex items-center gap-2 text-charcoal-600 text-[11px]">
+                                                                    <User className="w-3 h-3" />
+                                                                    <span>Client: {booking.client?.full_name || 'N/A'}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2 text-charcoal-900 text-[11px] font-medium">
+                                                                    <Calendar className="w-3 h-3 text-rose-gold" />
+                                                                    <span>{start.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })} at {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2 text-charcoal-900 text-[11px] font-medium">
+                                                                    <Clock className="w-3 h-3 text-rose-gold" />
+                                                                    <span>{qty} x {equipment}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex items-center justify-between">
+                                                                <div className={clsx(
+                                                                    "text-[9px] font-black uppercase tracking-[0.15em] px-2.5 py-1 rounded-md border",
+                                                                    booking.status?.toLowerCase() === 'approved' || booking.status?.toLowerCase() === 'confirmed'
+                                                                        ? "bg-green-50 text-green-700 border-green-200"
+                                                                        : "bg-amber-50 text-amber-700 border-amber-200"
+                                                                )}>
+                                                                    {booking.status?.toLowerCase() === 'approved' || booking.status?.toLowerCase() === 'confirmed' ? 'Confirmed' : 'Pending'}
                                                                 </div>
                                                                 <StudioChatButton booking={booking} currentUserId={user.id} />
                                                             </div>
                                                         </div>
-
-                                                        <div className="flex flex-col gap-1 text-xs text-charcoal-600 mb-3">
-                                                            <div className="flex items-center gap-1.5">
-                                                                <Calendar className="w-3 h-3" />
-                                                                <span>{start.toLocaleDateString()} at {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-1.5">
-                                                                <Clock className="w-3 h-3" />
-                                                                <span>{qty} x {equipment}</span>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Status Tag */}
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={clsx(
-                                                                "text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border",
-                                                                booking.status?.toLowerCase() === 'approved' || booking.status?.toLowerCase() === 'confirmed'
-                                                                    ? "bg-green-50 text-green-700 border-green-200"
-                                                                    : "bg-yellow-50 text-yellow-700 border-yellow-200"
-                                                            )}>
-                                                                {booking.status?.toLowerCase() === 'approved' || booking.status?.toLowerCase() === 'confirmed' ? 'Confirmed' : 'Pending Approval'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    )}
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -47,9 +47,9 @@ export default async function DashboardLayout({
             {/* Shared Header */}
             <header className="bg-white border-b border-cream-200 px-4 py-3 sm:px-6 sm:py-4 sticky top-0 z-10 relative">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <Link href="/welcome" className="text-xl font-serif font-bold text-charcoal-900 flex items-center gap-2">
-                        <Image src="/logo.png" alt="StudioVault Logo" width={32} height={32} className="w-8 h-8 object-contain" />
-                        <span className="hidden sm:inline">StudioVaultPH</span>
+                    <Link href="/welcome" className="flex items-center gap-0 group">
+                        <Image src="/logo.png" alt="StudioVault Logo" width={144} height={144} className="w-36 h-36 object-contain" />
+                        <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight hidden sm:block -ml-4 whitespace-nowrap">StudioVaultPH</span>
                     </Link>
 
                     <div className="flex items-center gap-4">
