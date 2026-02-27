@@ -13,10 +13,9 @@ interface BookSlotGroupProps {
         equipment?: string[];
     }[];
     studioPricing?: Record<string, number>;
-    studioHourlyRate: number;
 }
 
-export default function BookSlotGroup({ startTime, endTime, slots, studioPricing, studioHourlyRate }: BookSlotGroupProps) {
+export default function BookSlotGroup({ startTime, endTime, slots, studioPricing }: BookSlotGroupProps) {
     const [loading, setLoading] = useState(false)
     const [status, setStatus] = useState<'idle' | 'selecting' | 'success' | 'error'>('idle')
     const [errorMessage, setErrorMessage] = useState('')
@@ -87,6 +86,7 @@ export default function BookSlotGroup({ startTime, endTime, slots, studioPricing
     }
 
     const maxQuantity = selectedEquipment ? equipmentCounts[selectedEquipment] : 1;
+    const currentPrice = selectedEquipment ? (studioPricing?.[selectedEquipment] || 0) : 0;
 
     // --- Render ---
 
@@ -125,7 +125,7 @@ export default function BookSlotGroup({ startTime, endTime, slots, studioPricing
                         >
                             {equipmentTypes.map(eq => (
                                 <option key={eq} value={eq}>
-                                    {eq}: ₱{studioPricing?.[eq] || studioHourlyRate} ({equipmentCounts[eq]} avail)
+                                    {eq}: ₱{studioPricing?.[eq] || 0} ({equipmentCounts[eq]} avail)
                                 </option>
                             ))}
                         </select>
@@ -159,7 +159,7 @@ export default function BookSlotGroup({ startTime, endTime, slots, studioPricing
                         <div className="flex justify-between items-center text-xs">
                             <span className="text-charcoal-500">Total Price</span>
                             <span className="font-bold text-charcoal-900 text-sm">
-                                ₱{(studioPricing?.[selectedEquipment] || studioHourlyRate) * quantity}
+                                ₱{currentPrice * quantity}
                             </span>
                         </div>
                     </div>

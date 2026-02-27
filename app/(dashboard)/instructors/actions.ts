@@ -34,7 +34,8 @@ export async function findMatchingStudios(
                 id,
                 name,
                 location,
-                hourly_rate
+                hourly_rate,
+                pricing
             )
         `)
         .eq('is_available', true)

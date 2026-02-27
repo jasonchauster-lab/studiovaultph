@@ -83,8 +83,7 @@ export async function requestBooking(
 
     // 2. Studio Price
     const studioPricing = studio.pricing as Record<string, number> | null;
-    const studioBaseRate = studio.hourly_rate || 0;
-    const studioFee = studioPricing?.[equipment] || studioBaseRate;
+    const studioFee = studioPricing?.[equipment] || 0;
 
     // 3. Instructor Price
     const instructorRates = instructor?.rates as Record<string, number> | null;

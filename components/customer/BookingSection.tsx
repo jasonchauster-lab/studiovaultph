@@ -33,15 +33,13 @@ export default function BookingSection({
     slots,
     instructors,
     availabilityBlocks,
-    studioPricing,
-    studioHourlyRate
+    studioPricing
 }: {
     studioId: string
     slots: Slot[]
     instructors: Instructor[]
     availabilityBlocks: AvailabilityBlock[]
     studioPricing?: Record<string, number>
-    studioHourlyRate: number
 }) {
     const [selectedSlotTime, setSelectedSlotTime] = useState<string | null>(null) // Key: start-end
     const [selectedInstructor, setSelectedInstructor] = useState<string>('')
@@ -192,7 +190,7 @@ export default function BookingSection({
         if (maxQuantity === 0) return null;
 
         // Studio Rate
-        const sRate = studioPricing?.[selectedEquipment] || studioHourlyRate;
+        const sRate = studioPricing?.[selectedEquipment] || 0;
 
         // Instructor Rate
         const instructor = instructors.find(i => i.id === selectedInstructor);

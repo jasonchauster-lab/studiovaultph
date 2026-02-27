@@ -374,21 +374,38 @@ export default function StudioApplicationForm() {
                     ].map((eq) => {
                         const isChecked = selectedEquipment[eq.id] || false;
                         return (
-                            <div key={eq.id} className="flex items-center justify-between gap-3 p-3 border border-cream-200 rounded-lg bg-cream-50">
+                            <div key={eq.id} className="flex flex-col gap-3 p-4 border border-cream-200 rounded-lg bg-cream-50 transition-all">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" name={eq.id} checked={isChecked} onChange={(e) => handleEquipmentChange(eq.id, e.target.checked)} className="w-4 h-4 shrink-0 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                                    <span className="text-charcoal-700 text-sm font-medium">{eq.label}</span>
+                                    <span className="text-charcoal-700 text-sm font-bold">{eq.label}</span>
                                 </label>
-                                <div className={clsx("flex items-center gap-2 transition-opacity shrink-0", !isChecked && "opacity-30 pointer-events-none")}>
-                                    <span className="text-xs text-charcoal-500 font-medium">Qty:</span>
-                                    <input
-                                        type="number"
-                                        name={`qty_${eq.label}`}
-                                        min="1"
-                                        defaultValue="1"
-                                        disabled={!isChecked}
-                                        className="w-16 px-2 py-1 border border-cream-300 rounded text-sm text-center text-charcoal-900 bg-white focus:ring-1 focus:ring-charcoal-900 outline-none disabled:bg-cream-100 disabled:text-charcoal-400"
-                                    />
+                                <div className={clsx("flex items-center gap-4 transition-all", !isChecked && "opacity-30 pointer-events-none")}>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <span className="text-[10px] text-charcoal-500 font-bold uppercase tracking-tight">Qty:</span>
+                                        <input
+                                            type="number"
+                                            name={`qty_${eq.label}`}
+                                            min="1"
+                                            defaultValue="1"
+                                            disabled={!isChecked}
+                                            className="w-16 px-2 py-1.5 border border-cream-200 rounded-lg text-sm text-center text-charcoal-900 bg-white focus:ring-2 focus:ring-charcoal-900 outline-none"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2 grow">
+                                        <span className="text-[10px] text-charcoal-500 font-bold uppercase tracking-tight">Rate:</span>
+                                        <div className="relative grow">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-400 text-xs">₱</span>
+                                            <input
+                                                type="number"
+                                                name={`price_${eq.label}`}
+                                                min="0"
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                disabled={!isChecked}
+                                                className="w-full pl-7 pr-3 py-1.5 border border-cream-200 rounded-lg text-sm text-charcoal-900 bg-white focus:ring-2 focus:ring-charcoal-900 outline-none"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )

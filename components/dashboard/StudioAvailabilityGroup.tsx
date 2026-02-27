@@ -31,9 +31,9 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
     const dateString = date.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
 
     // Calculate minimum price from equipment pricing
-    const minPrice = studio.pricing
-        ? Math.min(...Object.values(studio.pricing).filter(v => typeof v === 'number'))
-        : studio.hourly_rate;
+    const minPrice = studio.pricing && Object.values(studio.pricing).some(v => typeof v === 'number' && v > 0)
+        ? Math.min(...Object.values(studio.pricing).filter(v => typeof v === 'number' && v > 0))
+        : null;
 
     // Get unique equipment types across all slots for the summary
     const allEquipment = Array.from(new Set(slots.flatMap(s => s.equipment || [])));
@@ -92,11 +92,11 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
                             {/* Price Badge - Top Right */}
                             <div className="text-right">
                                 <div className="text-xl font-bold text-charcoal-900 leading-none">
-                                    {studio.pricing ? `From ₱${minPrice}` : `₱${studio.hourly_rate}`}
-                                    <span className="text-xs text-charcoal-500 font-normal ml-0.5 sm:block md:inline">/hr</span>
+                                    {minPrice !== null ? `From ₱${minPrice}` : `Price on Request`}
+                                    {minPrice !== null && <span className="text-xs text-charcoal-500 font-normal ml-0.5 sm:block md:inline">/hr</span>}
                                 </div>
                                 <div className="text-[10px] font-medium text-charcoal-400 mt-1 uppercase tracking-tighter hidden sm:block">
-                                    Price Autonomy
+                                    Equipment-Based
                                 </div>
                             </div>
                         </div>
@@ -121,7 +121,7 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
                         <div className="flex flex-wrap gap-1.5">
                             {allEquipment.slice(0, 4).map(eq => (
                                 <span key={eq} className="text-[10px] bg-cream-50 text-charcoal-600 px-2 py-0.5 rounded border border-cream-200">
-                                    {eq}: <span className="font-bold text-charcoal-900">₱{studio.pricing?.[eq] || studio.hourly_rate}</span>
+                                    {eq}: <span className="font-bold text-charcoal-900">{studio.pricing?.[eq] ? `₱${studio.pricing[eq]}` : 'TBA'}</span>
                                 </span>
                             ))}
                             {allEquipment.length > 4 && (
@@ -139,29 +139,30 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
             </div>
 
             {/* Expanded View: Individual Slots grouped by time */}
-            {isExpanded && (
-                <div className="p-4 sm:p-6 pt-0 border-t border-cream-100 bg-cream-50/30">
-                    <h4 className="text-sm font-medium text-charcoal-700 mb-3 mt-4">Select a time block to book:</h4>
-                    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {Object.entries(groupedSlots).map(([key, group]) => {
-                            const slotStart = new Date(group.slots[0].start_time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-                            const slotEnd = new Date(group.slots[0].end_time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            {
+                isExpanded && (
+                    <div className="p-4 sm:p-6 pt-0 border-t border-cream-100 bg-cream-50/30">
+                        <h4 className="text-sm font-medium text-charcoal-700 mb-3 mt-4">Select a time block to book:</h4>
+                        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                            {Object.entries(groupedSlots).map(([key, group]) => {
+                                const slotStart = new Date(group.slots[0].start_time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                                const slotEnd = new Date(group.slots[0].end_time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
-                            return (
-                                <BookSlotGroup
-                                    key={key}
-                                    startTime={slotStart}
-                                    endTime={slotEnd}
-                                    slots={group.slots}
-                                    studioPricing={studio.pricing}
-                                    studioHourlyRate={studio.hourly_rate}
-                                />
-                            )
-                        })}
+                                return (
+                                    <BookSlotGroup
+                                        key={key}
+                                        startTime={slotStart}
+                                        endTime={slotEnd}
+                                        slots={group.slots}
+                                        studioPricing={studio.pricing}
+                                    />
+                                )
+                            })}
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }
 

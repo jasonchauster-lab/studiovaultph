@@ -97,7 +97,6 @@ export default async function StudioDetailsPage({
                                 slots={slots || []}
                                 instructors={instructors}
                                 availabilityBlocks={locationAvailability || []}
-                                studioHourlyRate={studio.hourly_rate || 0}
                                 studioPricing={studio.pricing as Record<string, number> | undefined}
                             />
                         );

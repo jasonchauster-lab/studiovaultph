@@ -51,7 +51,14 @@ export default function SlotCard({ slot }: SlotCardProps) {
                     </div>
                     <div className="flex items-center gap-2">
                         <CreditCard className="w-4 h-4 text-charcoal-400" />
-                        <span className="font-medium text-charcoal-900">₱{studio.hourly_rate?.toLocaleString()} / hr</span>
+                        <span className="font-medium text-charcoal-900">
+                            {(() => {
+                                const minPrice = studio.pricing && Object.values(studio.pricing).some(v => typeof v === 'number' && v > 0)
+                                    ? Math.min(...Object.values(studio.pricing).filter(v => typeof v === 'number' && v > 0))
+                                    : null;
+                                return minPrice !== null ? `From ₱${minPrice.toLocaleString()}` : 'Price on Request';
+                            })()}
+                        </span>
                     </div>
                 </div>
             </div>

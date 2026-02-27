@@ -303,7 +303,17 @@ export default function InstructorBookingWizard({
                                             <h4 className="font-serif text-lg text-charcoal-900">{result.studio.name}</h4>
                                             <p className="text-sm text-charcoal-500">{result.studio.location}</p>
                                         </div>
-                                        <p className="font-medium text-charcoal-900">₱{result.studio.hourly_rate}/hr</p>
+                                        <div className="text-right">
+                                            <p className="font-bold text-charcoal-900">
+                                                {(() => {
+                                                    const minPrice = result.studio.pricing && Object.values(result.studio.pricing).some((v: any) => typeof v === 'number' && v > 0)
+                                                        ? Math.min(...Object.values(result.studio.pricing).filter((v: any) => typeof v === 'number' && v > 0) as number[])
+                                                        : null;
+                                                    return minPrice !== null ? `From ₱${minPrice.toLocaleString()}` : 'Price on Request';
+                                                })()}
+                                            </p>
+                                            {result.studio.pricing && <p className="text-[10px] text-charcoal-400 uppercase font-bold tracking-tighter">Equipment-Based</p>}
+                                        </div>
                                     </div>
 
                                     <p className="text-xs font-medium text-charcoal-400 mb-2 uppercase tracking-wider">Available Time Slots</p>

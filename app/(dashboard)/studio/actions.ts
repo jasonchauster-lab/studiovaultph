@@ -170,7 +170,6 @@ export async function createStudio(formData: FormData) {
 
         const name = formData.get('name') as string
         const location = formData.get('location') as string
-        const hourlyRate = formData.get('hourlyRate') as string
         const contactNumber = formData.get('contactNumber') as string
         const dateOfBirth = formData.get('dateOfBirth') as string
         const address = formData.get('address') as string
