@@ -46,7 +46,16 @@ export default function ForgotPasswordPage() {
             </div>
 
             {/* Right Side: Form */}
-            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-20 bg-white overflow-y-auto">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-20 bg-white overflow-y-auto relative">
+                {/* Back to Home Button */}
+                <Link
+                    href="/"
+                    className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-2 text-charcoal-600 hover:text-charcoal-900 transition-colors group"
+                >
+                    <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform border border-cream-200 rounded-lg p-1" />
+                    <span className="text-sm font-bold">Back to Home</span>
+                </Link>
+
                 <div className="w-full max-w-lg">
                     <Link href="/login" className="inline-flex items-center text-sm text-charcoal-600 hover:text-charcoal-900 mb-12 transition-colors group font-bold">
                         <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />

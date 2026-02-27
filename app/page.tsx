@@ -16,7 +16,7 @@ export default function LandingPage() {
       {/* Navigation */}
       <div className="sticky top-0 z-50 w-full bg-cream-50/95 backdrop-blur-md border-b border-cream-200/50 shadow-sm transition-all duration-300">
         <nav className="flex items-center justify-between px-4 sm:px-6 py-4 max-w-7xl mx-auto">
-          <Link href="/" className="flex items-center gap-2 z-30">
+          <Link href="/" className="flex items-center gap-0 z-30">
             <Image src="/logo.png" alt="StudioVault Logo" width={96} height={96} className="w-24 h-24 object-contain" />
             <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight hidden sm:block">StudioVaultPH</span>
           </Link>
@@ -197,19 +197,20 @@ export default function LandingPage() {
               <Sparkles className="w-6 h-6 text-charcoal-900" />
             </div>
             <h2 className="text-3xl font-serif text-charcoal-900">For Clients</h2>
-            <p className="text-lg text-charcoal-600">Enjoy premium Pilates at a fraction of the cost. Book sessions with top freelance instructors or reserve studio space during off-peak hours — same quality, smarter price.</p>
-            <ul className="space-y-3">
-              {[
-                'Discounted rates during off-peak hours',
-                'Access certified, vetted instructors',
-                'Book studios or private sessions with ease',
-                'Flexible scheduling that fits your lifestyle'
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3 text-charcoal-700">
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  {item}
-                </li>
-              ))}
+            <p className="text-lg font-bold text-charcoal-800">Premium Pilates. Affordable Rates.</p>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3 text-charcoal-700">
+                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                <span><strong className="text-charcoal-900">Discounted Rates:</strong> Enjoy high-quality sessions during off-peak hours at a fraction of the cost.</span>
+              </li>
+              <li className="flex items-start gap-3 text-charcoal-700">
+                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                <span><strong className="text-charcoal-900">Verified Pros:</strong> Book with confidence knowing every instructor is background-checked and certified.</span>
+              </li>
+              <li className="flex items-start gap-3 text-charcoal-700">
+                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                <span><strong className="text-charcoal-900">Easy Booking:</strong> Reserve your spot in seconds through our seamless, mobile-first marketplace.</span>
+              </li>
             </ul>
           </div>
 
@@ -219,19 +220,20 @@ export default function LandingPage() {
               <User className="w-6 h-6 text-charcoal-900" />
             </div>
             <h2 className="text-3xl font-serif text-charcoal-900">For Instructors</h2>
-            <p className="text-lg text-charcoal-600">Stop being tied to one location. Find premium studios near your clients and book specialized equipment by the hour.</p>
-            <ul className="space-y-3">
-              {[
-                'Access premium reformers in BGC & Makati',
-                'Pay only for the hours you book',
-                'Manage all your bookings in one regular place',
-                'No monthly membership fees'
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3 text-charcoal-700">
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  {item}
-                </li>
-              ))}
+            <p className="text-lg font-bold text-charcoal-800">Your Business. Your Terms.</p>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3 text-charcoal-700">
+                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                <span><strong className="text-charcoal-900">Premium Access:</strong> Find studio spaces in prime locations like BGC and Makati for your private clients.</span>
+              </li>
+              <li className="flex items-start gap-3 text-charcoal-700">
+                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                <span><strong className="text-charcoal-900">Pay-As-You-Go:</strong> No monthly overhead—only pay for the studio time you actually use.</span>
+              </li>
+              <li className="flex items-start gap-3 text-charcoal-700">
+                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                <span><strong className="text-charcoal-900">Unified Dashboard:</strong> Manage availability, bookings, and payments all in one professional place.</span>
+              </li>
             </ul>
           </div>
 

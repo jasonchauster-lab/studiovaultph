@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { updatePassword } from '@/app/auth/actions'
-import { Loader2, CheckCircle } from 'lucide-react'
+import { Loader2, CheckCircle, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -104,7 +104,16 @@ export default function UpdatePasswordPage() {
             </div>
 
             {/* Right Side: Form */}
-            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-20 bg-white overflow-y-auto">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-20 bg-white overflow-y-auto relative">
+                {/* Back to Home Button */}
+                <Link
+                    href="/"
+                    className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-2 text-charcoal-600 hover:text-charcoal-900 transition-colors group"
+                >
+                    <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform border border-cream-200 rounded-lg p-1" />
+                    <span className="text-sm font-bold">Back to Home</span>
+                </Link>
+
                 <div className="w-full max-w-lg">
                     <div className="flex flex-col items-center mb-12">
                         <div className="mb-10">

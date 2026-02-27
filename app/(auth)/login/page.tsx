@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Loader2, Award, ChevronLeft } from 'lucide-react'
+import { Loader2, Award, ArrowLeft } from 'lucide-react'
 import { isValidEmail } from '@/lib/validation'
 
 function LoginContent() {
@@ -169,7 +169,7 @@ function LoginContent() {
                     href="/"
                     className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-2 text-charcoal-600 hover:text-charcoal-900 transition-colors group"
                 >
-                    <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform border border-cream-200 rounded-lg p-1" />
+                    <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform border border-cream-200 rounded-lg p-1" />
                     <span className="text-sm font-bold">Back to Home</span>
                 </Link>
 
