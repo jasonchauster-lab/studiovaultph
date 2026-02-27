@@ -179,7 +179,7 @@ function LoginContent() {
                             <Image src="/logo.png" alt="StudioVault Logo" width={320} height={320} className="w-80 h-80 object-contain" />
                         </Link>
 
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-100 rounded-full mb-6">
+                        <div className="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 border border-amber-100 rounded-full mb-6">
                             <Award className="w-4 h-4 text-amber-600" />
                             <span className="text-[10px] font-bold text-amber-700 uppercase tracking-widest">Founding Partner Access</span>
                         </div>
