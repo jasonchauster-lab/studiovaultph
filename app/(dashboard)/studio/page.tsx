@@ -4,7 +4,6 @@ import { Calendar, DollarSign, Clock, User, Users } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import StudioScheduleCalendar from '@/components/dashboard/StudioScheduleCalendar'
 import { startOfWeek, endOfWeek } from 'date-fns'
-import EditStudioModal from '@/components/dashboard/EditStudioModal'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
 import StudioApplicationForm from '@/components/studio/StudioApplicationForm'
 import clsx from 'clsx'
@@ -94,9 +93,6 @@ export default async function StudioDashboard(props: {
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-serif text-charcoal-900">Studio Partner Dashboard</h1>
-                    {myStudio && myStudio.verified && (
-                        <EditStudioModal studio={myStudio} />
-                    )}
                 </div>
 
                 {!myStudio ? (

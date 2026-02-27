@@ -15,6 +15,10 @@ export default async function StudioDetailsPage({
     const { id } = await params
     const supabase = await createClient()
 
+    // Lazily expire any abandoned bookings to release their slots
+    const { expireAbandonedBookings } = await import('@/lib/wallet')
+    await expireAbandonedBookings().catch(() => { }) // Non-blocking
+
     // 1. Fetch Studio Details
     const { data: studio } = await supabase
         .from('studios')

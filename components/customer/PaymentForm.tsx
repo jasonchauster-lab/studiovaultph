@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Upload, CheckCircle, Loader2, AlertCircle, X, FileText, ShieldAlert, HeartPulse, RefreshCw, Eye } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Upload, CheckCircle, Loader2, AlertCircle, X, FileText, ShieldAlert, HeartPulse, RefreshCw, Eye, Clock } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { submitPaymentProof } from '@/app/(dashboard)/customer/actions'
@@ -241,11 +241,13 @@ type ExistingParq = {
 export default function PaymentForm({
     booking,
     existingParq,
-    userRole = 'customer'
+    userRole = 'customer',
+    expiresAt = null
 }: {
     booking: any;
     existingParq: ExistingParq;
-    userRole?: string
+    userRole?: string;
+    expiresAt?: string | null;
 }) {
     const [file, setFile] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -273,6 +275,38 @@ export default function PaymentForm({
     const router = useRouter()
     const supabase = createClient()
 
+    // ── Countdown Timer ──
+    const [timeLeft, setTimeLeft] = useState<number | null>(null)
+    const [isExpired, setIsExpired] = useState(false)
+
+    const calculateTimeLeft = useCallback(() => {
+        if (!expiresAt) return null
+        const diff = new Date(expiresAt).getTime() - Date.now()
+        return Math.max(0, Math.floor(diff / 1000))
+    }, [expiresAt])
+
+    useEffect(() => {
+        if (!expiresAt) return
+
+        const initial = calculateTimeLeft()
+        setTimeLeft(initial)
+        if (initial === 0) {
+            setIsExpired(true)
+            return
+        }
+
+        const interval = setInterval(() => {
+            const remaining = calculateTimeLeft()
+            setTimeLeft(remaining)
+            if (remaining !== null && remaining <= 0) {
+                setIsExpired(true)
+                clearInterval(interval)
+            }
+        }, 1000)
+
+        return () => clearInterval(interval)
+    }, [expiresAt, calculateTimeLeft])
+
     // Cleanup preview URL on unmount or file change
     useEffect(() => {
         return () => {
@@ -288,7 +322,7 @@ export default function PaymentForm({
     const hasRiskFlags = userRole === 'instructor' ? false : Object.values(parqAnswers).some(v => v === true)
     // Agreements unlock only when PAR-Q is done AND (no risk OR risk acknowledged)
     const agreementsUnlocked = parqComplete && (!hasRiskFlags || medicalAcknowledged)
-    const canSubmit = file && waiverAgreed && termsAgreed && agreementsUnlocked && !isUploading
+    const canSubmit = file && waiverAgreed && termsAgreed && agreementsUnlocked && !isUploading && !isExpired
 
     const handleParqChange = (key: ParqKey, value: boolean) => {
         const updated = { ...parqAnswers, [key]: value }
@@ -403,6 +437,34 @@ export default function PaymentForm({
         )
     }
 
+    // Format time as MM:SS
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60)
+        const s = seconds % 60
+        return `${m}:${s.toString().padStart(2, '0')}`
+    }
+
+    // Expired state — show message and redirect
+    if (isExpired) {
+        return (
+            <div className="border-t border-cream-200 pt-8">
+                <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                    <Clock className="w-10 h-10 text-red-500 mx-auto mb-3" />
+                    <h3 className="text-lg font-medium text-red-900 mb-2">Time Expired</h3>
+                    <p className="text-sm text-red-700 mb-4">
+                        Your 15-minute payment window has expired. The slot has been released and any wallet deduction has been refunded.
+                    </p>
+                    <a
+                        href="/customer"
+                        className="inline-block bg-charcoal-900 text-cream-50 px-6 py-3 rounded-xl font-medium hover:bg-charcoal-800 transition-colors"
+                    >
+                        Browse Studios
+                    </a>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <>
             {/* Modals */}
@@ -425,6 +487,29 @@ export default function PaymentForm({
             )}
 
             <form onSubmit={handleSubmit} className="border-t border-cream-200 pt-8 space-y-6">
+                {/* Countdown Timer Banner */}
+                {timeLeft !== null && timeLeft > 0 && (
+                    <div className={`flex items-center justify-between p-4 rounded-xl border ${timeLeft <= 120
+                            ? 'bg-red-50 border-red-200'
+                            : timeLeft <= 300
+                                ? 'bg-amber-50 border-amber-200'
+                                : 'bg-blue-50 border-blue-200'
+                        }`}>
+                        <div className="flex items-center gap-2">
+                            <Clock className={`w-5 h-5 ${timeLeft <= 120 ? 'text-red-600 animate-pulse' : timeLeft <= 300 ? 'text-amber-600' : 'text-blue-600'
+                                }`} />
+                            <span className={`text-sm font-medium ${timeLeft <= 120 ? 'text-red-800' : timeLeft <= 300 ? 'text-amber-800' : 'text-blue-800'
+                                }`}>
+                                Complete payment before your hold expires
+                            </span>
+                        </div>
+                        <span className={`font-mono text-lg font-bold ${timeLeft <= 120 ? 'text-red-700' : timeLeft <= 300 ? 'text-amber-700' : 'text-blue-700'
+                            }`}>
+                            {formatTime(timeLeft)}
+                        </span>
+                    </div>
+                )}
+
                 <h3 className="font-serif text-lg text-charcoal-900">Complete Your Booking</h3>
 
                 {/* ── PAR-Q Section (Skip for Instructors) ── */}

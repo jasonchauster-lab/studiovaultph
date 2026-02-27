@@ -15,6 +15,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Studio Vault PH | Pilates Marketplace",
   description: "Connect with premium Pilates studios and certified instructors in the Philippines.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

@@ -91,3 +91,59 @@ export async function autoCompleteBookings() {
 
     return { count: completedCount }
 }
+
+/**
+ * Finds pending bookings that have passed their expires_at deadline
+ * (payment was never submitted) and releases their slots + refunds wallet.
+ */
+export async function expireAbandonedBookings() {
+    const supabase = await createClient()
+    const now = new Date().toISOString()
+
+    // Find expired pending bookings (expires_at is set and in the past, payment not submitted)
+    const { data: expiredBookings, error } = await supabase
+        .from('bookings')
+        .select('id, slot_id, client_id, booked_slot_ids, price_breakdown')
+        .eq('status', 'pending')
+        .not('expires_at', 'is', null)
+        .lte('expires_at', now)
+        .is('payment_proof_url', null)
+
+    if (error || !expiredBookings || expiredBookings.length === 0) {
+        return { count: 0 }
+    }
+
+    let expiredCount = 0
+    for (const booking of expiredBookings) {
+        try {
+            // 1. Mark booking as expired
+            await supabase.from('bookings')
+                .update({ status: 'expired' })
+                .eq('id', booking.id)
+
+            // 2. Release all associated slots
+            const allSlotIds = [booking.slot_id, ...(booking.booked_slot_ids || [])].filter(Boolean)
+            if (allSlotIds.length > 0) {
+                await supabase.from('slots')
+                    .update({ is_available: true })
+                    .in('id', allSlotIds)
+            }
+
+            // 3. Refund wallet deduction if any
+            const breakdown = booking.price_breakdown as any
+            const walletDeduction = Number(breakdown?.wallet_deduction || 0)
+            if (walletDeduction > 0 && booking.client_id) {
+                await supabase.rpc('increment_available_balance', {
+                    user_id: booking.client_id,
+                    amount: walletDeduction
+                })
+            }
+
+            expiredCount++
+        } catch (err) {
+            console.error(`Failed to expire booking ${booking.id}:`, err)
+        }
+    }
+
+    return { count: expiredCount }
+}

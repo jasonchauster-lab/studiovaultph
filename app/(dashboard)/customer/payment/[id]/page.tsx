@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import PaymentForm from '@/components/customer/PaymentForm'
 import ExpandableImage from '@/components/ui/ExpandableImage'
-import { ArrowLeft, CreditCard } from 'lucide-react'
+import { ArrowLeft, CreditCard, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function PaymentPage({
@@ -15,6 +15,10 @@ export default async function PaymentPage({
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) redirect('/login')
+
+    // Lazily expire any abandoned bookings
+    const { expireAbandonedBookings } = await import('@/lib/wallet')
+    await expireAbandonedBookings().catch(() => { })
 
     // Check for a valid PAR-Q on file (within the last 365 days)
     const oneYearAgo = new Date()
@@ -72,6 +76,30 @@ export default async function PaymentPage({
                 <div className="text-center text-charcoal-600">
                     <h1 className="text-2xl font-bold mb-2">Booking Not Found</h1>
                     <p>Could not find booking with ID: {id}</p>
+                </div>
+            </div>
+        )
+    }
+
+    // Check if booking has expired
+    if (booking.status === 'expired') {
+        return (
+            <div className="min-h-screen bg-cream-50 p-8 flex items-center justify-center">
+                <div className="max-w-md text-center bg-white rounded-2xl border border-cream-200 shadow-sm p-8">
+                    <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <AlertTriangle className="w-8 h-8 text-amber-600" />
+                    </div>
+                    <h1 className="text-2xl font-serif text-charcoal-900 mb-2">Booking Expired</h1>
+                    <p className="text-charcoal-600 mb-6">
+                        This booking has expired because payment was not submitted within 15 minutes.
+                        The slot has been released and any wallet deduction has been refunded.
+                    </p>
+                    <Link
+                        href="/customer"
+                        className="inline-block bg-charcoal-900 text-cream-50 px-6 py-3 rounded-xl font-medium hover:bg-charcoal-800 transition-colors"
+                    >
+                        Browse Studios
+                    </Link>
                 </div>
             </div>
         )
@@ -156,6 +184,7 @@ export default async function PaymentPage({
                         booking={booking}
                         existingParq={existingParq ?? null}
                         userRole={profile?.role || 'customer'}
+                        expiresAt={booking.expires_at || null}
                     />
                 </div>
             </div>

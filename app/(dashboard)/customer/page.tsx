@@ -31,6 +31,10 @@ export default async function CustomerDashboard({
 
     if (!user) redirect('/login')
 
+    // Lazily expire any abandoned bookings to release their slots
+    const { expireAbandonedBookings } = await import('@/lib/wallet')
+    await expireAbandonedBookings().catch(() => { }) // Non-blocking
+
     // 1. Fetch Studios
     let studioQuery = supabase
         .from('studios')

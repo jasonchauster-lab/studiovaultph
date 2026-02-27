@@ -110,7 +110,7 @@ export default async function InstructorPaymentPage({
                             <p className="font-medium text-charcoal-900 mb-2">GCash</p>
                             <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-sm inline-block">
                                 <ExpandableImage
-                                    src="/publicgcash-qr.jpg"
+                                    src="/gcash-qr.jpg"
                                     alt="GCash QR Code"
                                     className="w-48 h-48"
                                 />
@@ -121,7 +121,7 @@ export default async function InstructorPaymentPage({
                             <p className="font-medium text-charcoal-900 mb-2">BPI</p>
                             <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-sm inline-block">
                                 <ExpandableImage
-                                    src="/publicbpi-qr.jpg"
+                                    src="/bpi-qr.jpg"
                                     alt="BPI QR Code"
                                     className="w-48 h-48"
                                 />

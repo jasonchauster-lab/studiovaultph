@@ -225,6 +225,10 @@ export async function requestBooking(
     finalSlotId = bookedSlotIdsForRecord[0];
 
     // 4. Create Booking linked to finalSlotId
+    // Set expiry 15 minutes from now for unpaid bookings
+    const expiresAt = new Date()
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15)
+
     const { data: booking, error: bookingError } = await supabase
         .from('bookings')
         .insert({
@@ -235,7 +239,8 @@ export async function requestBooking(
             total_price: finalPrice,
             price_breakdown: breakdown,
             quantity: quantity,
-            booked_slot_ids: bookedSlotIdsForRecord
+            booked_slot_ids: bookedSlotIdsForRecord,
+            expires_at: expiresAt.toISOString()
         })
         .select(`
             *,
@@ -352,7 +357,8 @@ export async function submitPaymentProof(
             payment_status: 'submitted',
             payment_submitted_at: new Date().toISOString(),
             waiver_agreed: waiverAgreed,
-            terms_agreed: termsAgreed
+            terms_agreed: termsAgreed,
+            expires_at: null // Clear expiry — payment submitted, slot is now permanently held
         })
         .eq('id', bookingId)
         .eq('client_id', user.id) // Ensure ownership
