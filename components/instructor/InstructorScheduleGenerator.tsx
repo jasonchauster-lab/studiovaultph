@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { addAvailability, deleteAvailability, generateRecurringAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
 import { Loader2, Plus, Trash2, Clock, MapPin, Repeat, CheckCircle, AlertCircle, Calendar } from 'lucide-react'
+import { clsx } from 'clsx'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const LOCATIONS = ['Alabang', 'BGC', 'Ortigas', 'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others', 'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer', 'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village', 'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others']
@@ -23,11 +24,19 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
     const [selectedDays, setSelectedDays] = useState<number[]>([]);
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('17:00');
-    const [location, setLocation] = useState('BGC');
+    const [locations, setLocations] = useState<string[]>(['BGC']);
+
+    const toggleLocation = (loc: string) => {
+        setLocations(prev =>
+            prev.includes(loc)
+                ? prev.filter(l => l !== loc)
+                : [...prev, loc]
+        );
+    }
 
     const handleGenerate = async () => {
-        if (!startDate || !endDate || selectedDays.length === 0) {
-            setMessage({ type: 'error', text: 'Please fill in all fields (Start/End Date and Days).' });
+        if (!startDate || !endDate || selectedDays.length === 0 || locations.length === 0) {
+            setMessage({ type: 'error', text: 'Please fill in all fields (Start/End Date, Days, and at least one Location).' });
             return;
         }
 
@@ -41,7 +50,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                 days: selectedDays,
                 startTime,
                 endTime,
-                location
+                locations: locations
             });
 
             if (result.success) {
@@ -143,53 +152,71 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                         </div>
                     </div>
 
-                    {/* Time & Location */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-1">Start Time</label>
-                            <select
-                                value={startTime}
-                                onChange={(e) => setStartTime(e.target.value)}
-                                className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none bg-white"
-                            >
-                                {Array.from({ length: 24 }, (_, i) => i).map(hour => (
-                                    <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
-                                        {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 ${hour === 12 ? 'PM' : 'AM'}`}
-                                    </option>
-                                ))}
-                            </select>
+                    {/* Time & Locations */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-charcoal-700 mb-2">Start Time</label>
+                                <select
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
+                                    className="w-full px-4 py-2 border border-cream-300 rounded-xl text-charcoal-900 outline-none bg-white focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                                >
+                                    {Array.from({ length: 24 }, (_, i) => i).map(hour => (
+                                        <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
+                                            {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 ${hour === 12 ? 'PM' : 'AM'}`}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-charcoal-700 mb-2">End Time</label>
+                                <select
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.target.value)}
+                                    className="w-full px-4 py-2 border border-cream-300 rounded-xl text-charcoal-900 outline-none bg-white focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                                >
+                                    {Array.from({ length: 24 }, (_, i) => i).map(hour => (
+                                        <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
+                                            {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 ${hour === 12 ? 'PM' : 'AM'}`}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-1">End Time</label>
-                            <select
-                                value={endTime}
-                                onChange={(e) => setEndTime(e.target.value)}
-                                className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none bg-white"
-                            >
-                                {Array.from({ length: 24 }, (_, i) => i).map(hour => (
-                                    <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
-                                        {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 ${hour === 12 ? 'PM' : 'AM'}`}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-1">Location / Area</label>
-                            <select
-                                value={location}
-                                onChange={(e) => setLocation(e.target.value)}
-                                className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none bg-white"
-                            >
-                                {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
-                            </select>
+                            <label className="block text-sm font-medium text-charcoal-700 mb-3">Locations (Multi-Select)</label>
+                            <div className="flex flex-wrap gap-2">
+                                {LOCATIONS.map(l => {
+                                    const isSelected = locations.includes(l);
+                                    return (
+                                        <button
+                                            key={l}
+                                            type="button"
+                                            onClick={() => toggleLocation(l)}
+                                            className={clsx(
+                                                "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                                                isSelected
+                                                    ? "bg-rose-gold text-white border-rose-gold shadow-sm"
+                                                    : "bg-white text-charcoal-600 border-cream-200 hover:border-rose-gold"
+                                            )}
+                                        >
+                                            {l}
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                            <p className="text-[11px] text-charcoal-500 mt-4 italic">
+                                Note: Availability will be removed across all selected locations once a booking is confirmed.
+                            </p>
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-cream-100">
+                    <div className="pt-6 border-t border-cream-100">
                         <button
                             onClick={handleGenerate}
                             disabled={isSubmitting}
-                            className="w-full py-3 bg-charcoal-900 text-cream-50 rounded-lg font-medium hover:bg-charcoal-800 transition-colors flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-rose-gold text-white rounded-xl font-bold hover:brightness-110 transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                         >
                             {isSubmitting ? (
                                 <>

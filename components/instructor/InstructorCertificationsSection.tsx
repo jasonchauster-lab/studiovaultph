@@ -167,7 +167,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                             <FileText className="w-3 h-3" />
                                             Proof submitted
                                         </div>
-                                        <div className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${cert.verified ? 'bg-green-50 text-green-700 border-green-100' : 'bg-yellow-50 text-yellow-700 border-yellow-100'}`}>
+                                        <div className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${cert.verified ? 'bg-rose-gold text-white border-rose-gold' : 'bg-yellow-50 text-yellow-700 border-yellow-100'}`}>
                                             {cert.verified ? (
                                                 <><CheckCircle className="w-2.5 h-2.5" /> Verified</>
                                             ) : (

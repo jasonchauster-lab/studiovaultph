@@ -53,7 +53,7 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
                 <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="flex items-center gap-2 bg-charcoal-900 text-cream-50 px-4 py-2 rounded-lg text-sm font-medium hover:bg-charcoal-800 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 bg-white border border-cream-300 text-charcoal-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-cream-50 transition-colors disabled:opacity-50"
                 >
                     {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                     Add Photo

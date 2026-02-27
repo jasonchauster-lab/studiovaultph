@@ -45,8 +45,8 @@ export default async function DashboardLayout({
                 <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
                     <div className="flex items-center gap-8">
                         <Link href="/welcome" className="flex items-center gap-0 group">
-                            <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-20 h-20 object-contain" />
-                            <span className="text-2xl font-serif font-bold text-charcoal-900 tracking-tight -ml-5 whitespace-nowrap hidden lg:block">StudioVaultPH</span>
+                            <Image src="/logo.png" alt="StudioVault Logo" width={144} height={144} className="w-36 h-36 object-contain" />
+                            <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight -ml-3 whitespace-nowrap hidden lg:block">StudioVaultPH</span>
                         </Link>
 
                         <nav className="hidden md:block">

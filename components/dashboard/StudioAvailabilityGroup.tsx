@@ -30,6 +30,14 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
     const timeRangeString = `${startTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
     const dateString = date.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
 
+    // Calculate minimum price from equipment pricing
+    const minPrice = studio.pricing
+        ? Math.min(...Object.values(studio.pricing).filter(v => typeof v === 'number'))
+        : studio.hourly_rate;
+
+    // Get unique equipment types across all slots for the summary
+    const allEquipment = Array.from(new Set(slots.flatMap(s => s.equipment || [])));
+
     return (
         <div className="bg-white border border-cream-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
             {/* Header / Summary View */}
@@ -84,7 +92,7 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
                             {/* Price Badge - Top Right */}
                             <div className="text-right">
                                 <div className="text-xl font-bold text-charcoal-900 leading-none">
-                                    ₱{studio.hourly_rate}
+                                    {studio.pricing ? `From ₱${minPrice}` : `₱${studio.hourly_rate}`}
                                     <span className="text-xs text-charcoal-500 font-normal ml-0.5 sm:block md:inline">/hr</span>
                                 </div>
                                 <div className="text-[10px] font-medium text-charcoal-400 mt-1 uppercase tracking-tighter hidden sm:block">
@@ -93,7 +101,7 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-2">
                             <div className="flex items-center gap-1.5 text-sm bg-cream-100/50 px-2.5 py-1 rounded-lg text-charcoal-700 font-medium border border-cream-200">
                                 <span className="text-charcoal-400">{date.toLocaleDateString([], { month: 'short', day: 'numeric', weekday: 'short' })}</span>
                                 <span className="w-1 h-1 rounded-full bg-cream-300" />
@@ -107,6 +115,20 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
                                 <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                                 {slots.length} Slots Available
                             </div>
+                        </div>
+
+                        {/* Equipment Quick View with Prices */}
+                        <div className="flex flex-wrap gap-1.5">
+                            {allEquipment.slice(0, 4).map(eq => (
+                                <span key={eq} className="text-[10px] bg-cream-50 text-charcoal-600 px-2 py-0.5 rounded border border-cream-200">
+                                    {eq}: <span className="font-bold text-charcoal-900">₱{studio.pricing?.[eq] || studio.hourly_rate}</span>
+                                </span>
+                            ))}
+                            {allEquipment.length > 4 && (
+                                <span className="text-[10px] bg-cream-50 text-charcoal-400 px-2 py-0.5 rounded border border-cream-100 italic">
+                                    +{allEquipment.length - 4} more type{allEquipment.length - 4 !== 1 && 's'}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -131,6 +153,8 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
                                     startTime={slotStart}
                                     endTime={slotEnd}
                                     slots={group.slots}
+                                    studioPricing={studio.pricing}
+                                    studioHourlyRate={studio.hourly_rate}
                                 />
                             )
                         })}

@@ -110,7 +110,7 @@ interface GenerateAvailabilityParams {
     days: number[];
     startTime: string;
     endTime: string;
-    location: string;
+    locations: string[];
 }
 
 export async function generateRecurringAvailability(params: GenerateAvailabilityParams) {
@@ -131,18 +131,26 @@ export async function generateRecurringAvailability(params: GenerateAvailability
     const availabilitiesToInsert = [];
     let currentDay = new Date(start);
 
+    // Crypto for group_id
+    const { randomUUID } = await import('crypto');
+
     while (currentDay <= endOfDayEnd) {
         // Use local PHT day of week
         const dayOfWeek = new Date(currentDay.toISOString().split('T')[0] + "T00:00:00+08:00").getDay();
         if (params.days.includes(dayOfWeek)) {
-            availabilitiesToInsert.push({
-                instructor_id: user.id,
-                day_of_week: dayOfWeek,
-                date: currentDay.toISOString().split('T')[0], // Specific date
-                start_time: params.startTime, // Assuming TIME type handles 'HH:MM'
-                end_time: params.endTime,
-                location_area: params.location
-            });
+            const groupId = randomUUID(); // Shared ID for this specific time slot across different locations
+
+            for (const loc of params.locations) {
+                availabilitiesToInsert.push({
+                    instructor_id: user.id,
+                    day_of_week: dayOfWeek,
+                    date: currentDay.toISOString().split('T')[0], // Specific date
+                    start_time: params.startTime,
+                    end_time: params.endTime,
+                    location_area: loc,
+                    group_id: groupId
+                });
+            }
         }
         currentDay.setDate(currentDay.getDate() + 1);
     }

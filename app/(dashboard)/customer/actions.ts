@@ -64,7 +64,7 @@ export async function requestBooking(
     // Check if instructor has availability for this time & location
     const { data: avail } = await supabase
         .from('instructor_availability')
-        .select('*')
+        .select('id, group_id')
         .eq('instructor_id', instructorId)
         .eq('location_area', studio.location) // Match studio location
         .or(`date.eq.${dateStr},day_of_week.eq.${dayOfWeek}`) // Specific date OR weekly
@@ -286,6 +286,21 @@ export async function requestBooking(
     if (bookingError || !booking) {
         console.error('Booking error:', bookingError)
         return { error: `Failed to request booking. DB Error: ${bookingError?.message} (Code: ${bookingError?.code})` }
+    }
+
+    // --- First Come, First Served logic ---
+    if (avail) {
+        if (avail.group_id) {
+            await supabase
+                .from('instructor_availability')
+                .delete()
+                .eq('group_id', avail.group_id);
+        } else {
+            await supabase
+                .from('instructor_availability')
+                .delete()
+                .eq('id', avail.id);
+        }
     }
 
     // --- EMAIL NOTIFICATION START ---

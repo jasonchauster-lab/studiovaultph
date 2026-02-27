@@ -12,9 +12,11 @@ interface BookSlotGroupProps {
         id: string;
         equipment?: string[];
     }[];
+    studioPricing?: Record<string, number>;
+    studioHourlyRate: number;
 }
 
-export default function BookSlotGroup({ startTime, endTime, slots }: BookSlotGroupProps) {
+export default function BookSlotGroup({ startTime, endTime, slots, studioPricing, studioHourlyRate }: BookSlotGroupProps) {
     const [loading, setLoading] = useState(false)
     const [status, setStatus] = useState<'idle' | 'selecting' | 'success' | 'error'>('idle')
     const [errorMessage, setErrorMessage] = useState('')
@@ -123,7 +125,7 @@ export default function BookSlotGroup({ startTime, endTime, slots }: BookSlotGro
                         >
                             {equipmentTypes.map(eq => (
                                 <option key={eq} value={eq}>
-                                    {eq} ({equipmentCounts[eq]} avail)
+                                    {eq}: ₱{studioPricing?.[eq] || studioHourlyRate} ({equipmentCounts[eq]} avail)
                                 </option>
                             ))}
                         </select>
@@ -150,6 +152,16 @@ export default function BookSlotGroup({ startTime, endTime, slots }: BookSlotGro
                             }}
                             className="w-full text-sm p-2 rounded border border-cream-300 bg-white text-charcoal-900 outline-none focus:border-charcoal-500"
                         />
+                    </div>
+
+                    {/* Price Preview */}
+                    <div className="bg-cream-50 rounded p-2 border border-cream-100">
+                        <div className="flex justify-between items-center text-xs">
+                            <span className="text-charcoal-500">Total Price</span>
+                            <span className="font-bold text-charcoal-900 text-sm">
+                                ₱{(studioPricing?.[selectedEquipment] || studioHourlyRate) * quantity}
+                            </span>
+                        </div>
                     </div>
                 </div>
 

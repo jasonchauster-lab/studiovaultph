@@ -103,7 +103,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                             name="fullName"
                             defaultValue={profile?.full_name || ''}
                             required
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 transition-all"
+                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
                         />
                     </div>
                     <div>
@@ -114,7 +114,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 type="text"
                                 name="instagram"
                                 defaultValue={profile?.instagram_handle || ''}
-                                className="w-full pl-10 pr-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 transition-all"
+                                className="w-full pl-10 pr-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
                                 placeholder="username"
                             />
                         </div>
@@ -129,7 +129,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                             name="contactNumber"
                             defaultValue={profile?.contact_number || ''}
                             placeholder="e.g. 09171234567"
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 transition-all"
+                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
                         />
                     </div>
                     <div>
@@ -139,7 +139,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                             name="emergencyContact"
                             defaultValue={profile?.emergency_contact || ''}
                             placeholder="Name and Phone Number"
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 transition-all"
+                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
                         />
                     </div>
                     <p className="text-xs text-charcoal-400 mt-2 italic">
@@ -154,7 +154,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                         defaultValue={profile?.bio || ''}
                         rows={5}
                         placeholder="Tell others about yourself, your fitness journey, or your teaching style..."
-                        className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 resize-none transition-all"
+                        className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold resize-none transition-all"
                     />
                 </div>
             </div>
@@ -178,7 +178,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                             setSelectedEquipment(selectedEquipment.filter((item) => item !== eq))
                                         }
                                     }}
-                                    className="w-4 h-4 text-charcoal-900 rounded border-cream-300 focus:ring-charcoal-500"
+                                    className="w-4 h-4 text-rose-gold rounded border-cream-300 focus:ring-rose-gold/50"
                                 />
                                 <span className="text-sm text-charcoal-700">{eq}</span>
                             </label>
@@ -195,7 +195,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
                             const isSelected = selectedEquipment.includes(eq);
-                            return (
+                            return isSelected ? (
                                 <div key={eq} className={`transition-all duration-300 ${!isSelected ? 'opacity-40 grayscale' : ''}`}>
                                     <label className="block text-xs font-medium text-charcoal-600 mb-1">{eq}</label>
                                     <div className="relative">
@@ -208,11 +208,11 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                             min="0"
                                             step="0.01"
                                             disabled={!isSelected}
-                                            className="w-full pl-7 pr-3 py-2 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm disabled:bg-cream-50/50 disabled:cursor-not-allowed transition-all"
+                                            className="w-full pl-7 pr-3 py-2 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold text-sm disabled:bg-cream-50/50 disabled:cursor-not-allowed transition-all"
                                         />
                                     </div>
                                 </div>
-                            );
+                            ) : null;
                         })}
                     </div>
                 </div>

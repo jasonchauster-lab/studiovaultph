@@ -46,11 +46,12 @@ export default function InstructorDashboardClient() {
                 .from('slots')
                 .select(`
           *,
-          studios!inner (
+            studios!inner (
             id,
             name,
             location,
             hourly_rate,
+            pricing,
             verified,
             logo_url,
             space_photos_urls

@@ -20,8 +20,8 @@ export default function Navigation({ role }: NavigationProps) {
 
     const linkClass = (isActive: boolean) =>
         clsx(
-            "text-sm font-medium flex items-center gap-2 transition-colors py-2 md:py-0",
-            isActive ? "text-rose-gold font-bold" : "text-charcoal-600 hover:text-charcoal-900"
+            "text-sm font-medium flex items-center gap-2 transition-all py-2 md:py-0 relative group",
+            isActive ? "text-rose-gold font-bold" : "text-charcoal-600 hover:text-rose-gold"
         );
 
     const navLinks = (
@@ -31,22 +31,27 @@ export default function Navigation({ role }: NavigationProps) {
                     <Link href="/customer" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/customer')}>
                         <Search className="w-4 h-4" />
                         Find a Class
+                        {pathname === '/customer' && <span className="absolute bottom--2 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                     </Link>
                     <Link href="/customer/bookings" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/customer/bookings')}>
                         <Calendar className="w-4 h-4" />
                         My Sessions
+                        {pathname === '/customer/bookings' && <span className="absolute bottom--2 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                     </Link>
                     <Link href="/customer/profile" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/customer/profile')}>
                         <User className="w-4 h-4" />
                         Profile
+                        {pathname === '/customer/profile' && <span className="absolute bottom--2 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                     </Link>
                     <Link href="/customer/wallet" onClick={() => setMobileOpen(false)} className={linkClass(pathname?.startsWith('/customer/wallet'))}>
                         <Wallet className="w-4 h-4" />
                         My Wallet
+                        {pathname?.startsWith('/customer/wallet') && <span className="absolute bottom--2 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                     </Link>
                     <Link href="/customer/payout" onClick={() => setMobileOpen(false)} className={linkClass(pathname?.startsWith('/customer/payout'))}>
                         <ArrowUpRight className="w-4 h-4" />
                         Withdraw
+                        {pathname?.startsWith('/customer/payout') && <span className="absolute bottom--2 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                     </Link>
 
                     {role && role !== 'customer' && (
@@ -78,18 +83,22 @@ export default function Navigation({ role }: NavigationProps) {
                             <Link href="/instructor/earnings" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/instructor/earnings'))}>
                                 <DollarSign className="w-4 h-4" />
                                 Earnings
+                                {pathname.startsWith('/instructor/earnings') && <span className="absolute bottom--2 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
                             <Link href="/instructor/sessions" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/instructor/sessions'))}>
                                 <Calendar className="w-4 h-4" />
                                 My Sessions
+                                {pathname.startsWith('/instructor/sessions') && <span className="absolute bottom--2 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
                             <Link href="/instructor/schedule" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/instructor/schedule'))}>
                                 <Calendar className="w-4 h-4" />
                                 My Schedule
+                                {pathname.startsWith('/instructor/schedule') && <span className="absolute bottom--2 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
                             <Link href="/instructor/profile" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/instructor/profile'))}>
                                 <User className="w-4 h-4" />
                                 Profile
+                                {pathname.startsWith('/instructor/profile') && <span className="absolute bottom--2 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
                         </>
                     )}
@@ -99,6 +108,7 @@ export default function Navigation({ role }: NavigationProps) {
                             <Link href="/studio" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/studio')}>
                                 <LayoutDashboard className="w-4 h-4" />
                                 Dashboard
+                                {pathname === '/studio' && <span className="absolute bottom--2 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
                             <Link href="/studio/earnings" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/studio/earnings'))}>
                                 <DollarSign className="w-4 h-4" />

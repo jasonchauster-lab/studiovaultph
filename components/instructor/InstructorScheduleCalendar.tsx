@@ -16,6 +16,7 @@ interface Availability {
     start_time: string
     end_time: string
     location_area: string
+    group_id?: string
 }
 
 interface InstructorScheduleCalendarProps {
@@ -33,7 +34,15 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
     const [singleDate, setSingleDate] = useState(format(new Date(), 'yyyy-MM-dd'))
     const [singleTime, setSingleTime] = useState('09:00')
     const [singleEndTime, setSingleEndTime] = useState('10:00')
-    const [location, setLocation] = useState('BGC')
+    const [locations, setLocations] = useState<string[]>(['BGC'])
+
+    const toggleLocation = (loc: string) => {
+        setLocations(prev =>
+            prev.includes(loc)
+                ? prev.filter(l => l !== loc)
+                : [...prev, loc]
+        )
+    }
 
     // Calendar Calculations
     const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 }) // Monday start
@@ -64,7 +73,13 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
         router.refresh()
     }
 
-    const handleCreateSingle = async (formData: FormData) => {
+    const handleCreateSingle = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        if (locations.length === 0) {
+            alert('Please select at least one location');
+            return;
+        }
+
         setIsSubmitting(true)
         const { generateRecurringAvailability } = await import('@/app/(dashboard)/instructor/schedule/actions');
 
@@ -74,7 +89,7 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
             days: [new Date(singleDate).getDay()],
             startTime: singleTime,
             endTime: singleEndTime,
-            location: location
+            locations: locations // Pass array
         })
 
         setIsSubmitting(false)
@@ -111,9 +126,11 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
         setSingleDate(slot.date || format(new Date(), 'yyyy-MM-dd'))
         setSingleTime(slot.start_time)
         setSingleEndTime(slot.end_time)
-        setLocation(slot.location_area)
+        setLocations([slot.location_area])
         setIsEditModalOpen(true)
     }
+
+    const AREAS = ['Alabang', 'BGC', 'Ortigas', 'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others', 'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer', 'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village', 'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others'];
 
     return (
         <div className="space-y-6">
@@ -152,7 +169,7 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                 <div className="flex gap-2">
                     <button
                         onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
-                        className="bg-charcoal-900 text-cream-50 px-4 py-2 rounded-lg text-sm font-medium hover:bg-charcoal-800 transition-colors flex items-center gap-2"
+                        className="bg-rose-gold text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
                     >
                         <Plus className="w-4 h-4" /> Add Slot
                     </button>
@@ -171,9 +188,9 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                     <div className="grid grid-cols-8 border-b border-cream-200 bg-cream-50">
                         <div className="p-4 text-xs font-medium text-charcoal-600 border-r border-cream-200 sticky left-0 bg-cream-50 z-20 w-20 text-center uppercase">TIME</div>
                         {days.map(day => (
-                            <div key={day.toString()} className={clsx("p-3 text-center border-r border-cream-200 last:border-r-0 min-w-[100px]", isSameDay(day, new Date()) ? "bg-blue-50/50" : "")}>
+                            <div key={day.toString()} className={clsx("p-3 text-center border-r border-cream-200 last:border-r-0 min-w-[100px]", isSameDay(day, new Date()) ? "bg-rose-gold/5" : "")}>
                                 <div className="text-xs text-charcoal-500 uppercase mb-1">{format(day, 'EEE')}</div>
-                                <div className={clsx("text-lg font-serif", isSameDay(day, new Date()) ? "text-blue-600 font-bold" : "text-charcoal-900")}>{format(day, 'd')}</div>
+                                <div className={clsx("text-lg font-serif", isSameDay(day, new Date()) ? "text-rose-gold font-bold underline decoration-rose-gold/30 underline-offset-4" : "text-charcoal-900")}>{format(day, 'd')}</div>
                             </div>
                         ))}
                     </div>
@@ -231,7 +248,7 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                                                         key={slot.id}
                                                         className={clsx(
                                                             "absolute left-1 right-1 rounded-md text-xs hover:shadow-lg transition-all cursor-pointer overflow-hidden border z-10 p-2",
-                                                            slot.date ? "bg-blue-100 border-blue-200 text-blue-800" : "bg-teal-100 border-teal-200 text-teal-800"
+                                                            slot.date ? "bg-rose-gold border-rose-gold/20 text-charcoal-900" : "bg-teal-100 border-teal-200 text-teal-800"
                                                         )}
                                                         style={{
                                                             top: `${topOffset}px`,
@@ -290,38 +307,57 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                         {addMode === 'bulk' ? (
                             <InstructorScheduleGenerator initialAvailability={[]} />
                         ) : (
-                            <form action={handleCreateSingle} className="space-y-4">
+                            <form onSubmit={handleCreateSingle} className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-charcoal-700 mb-1">Date</label>
-                                    <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-3 py-2 border border-cream-300 rounded-lg bg-white text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-500" />
+                                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Date</label>
+                                    <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-4 py-2 border border-cream-300 rounded-xl bg-white text-charcoal-900 outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all" />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-charcoal-700 mb-1">Start Time</label>
-                                        <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-3 py-2 border border-cream-300 rounded-lg bg-white text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-500" />
+                                        <label className="block text-sm font-medium text-charcoal-700 mb-2">Start Time</label>
+                                        <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-4 py-2 border border-cream-300 rounded-xl bg-white text-charcoal-900 outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all" />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-charcoal-700 mb-1">End Time</label>
-                                        <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-3 py-2 border border-cream-300 rounded-lg bg-white text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-500" />
+                                        <label className="block text-sm font-medium text-charcoal-700 mb-2">End Time</label>
+                                        <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-4 py-2 border border-cream-300 rounded-xl bg-white text-charcoal-900 outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all" />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-charcoal-700 mb-1">Location</label>
-                                    <select
-                                        value={location}
-                                        onChange={(e) => setLocation(e.target.value)}
-                                        className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none bg-white focus:ring-2 focus:ring-charcoal-500"
-                                        name="location"
-                                    >
-                                        {['Alabang', 'BGC', 'Ortigas', 'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others', 'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer', 'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village', 'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others'].map(l => <option key={l} value={l}>{l}</option>)}
-                                    </select>
+                                    <label className="block text-sm font-medium text-charcoal-700 mb-3">Locations (Multi-Select)</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {AREAS.map(area => {
+                                            const isSelected = locations.includes(area);
+                                            return (
+                                                <button
+                                                    key={area}
+                                                    type="button"
+                                                    onClick={() => toggleLocation(area)}
+                                                    className={clsx(
+                                                        "px-4 py-1.5 rounded-full text-xs font-medium transition-all border",
+                                                        isSelected
+                                                            ? "bg-rose-gold text-white border-rose-gold shadow-sm"
+                                                            : "bg-white text-charcoal-600 border-cream-200 hover:border-rose-gold"
+                                                    )}
+                                                >
+                                                    {area}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                    <p className="text-[11px] text-charcoal-500 mt-4 italic">
+                                        Note: Availability will be removed across all selected locations once a booking is confirmed.
+                                    </p>
                                 </div>
 
-                                <div className="flex gap-3 pt-2">
-                                    <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal-900 text-cream-50 py-2.5 rounded-lg font-medium hover:bg-charcoal-800 transition-colors">
+                                <div className="flex gap-4 pt-4">
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="flex-1 bg-rose-gold text-white py-3 rounded-xl font-bold hover:brightness-110 transition-all shadow-md active:scale-[0.98] disabled:opacity-50"
+                                    >
                                         {isSubmitting ? 'Creating...' : 'Create Slot'}
                                     </button>
-                                    <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 py-2.5 rounded-lg font-medium text-charcoal-500 hover:text-charcoal-900 transition-colors border border-transparent hover:border-cream-300">
+                                    <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 py-3 rounded-xl font-medium text-charcoal-500 hover:text-charcoal-900 transition-colors border border-transparent hover:bg-cream-50">
                                         Cancel
                                     </button>
                                 </div>
@@ -367,19 +403,19 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-1">Location</label>
+                                <label className="block text-sm font-medium text-charcoal-700 mb-2">Location</label>
                                 <select
-                                    value={location}
-                                    onChange={(e) => setLocation(e.target.value)}
-                                    className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none bg-white"
+                                    value={locations[0] || 'BGC'}
+                                    onChange={(e) => setLocations([e.target.value])}
+                                    className="w-full px-4 py-2 border border-cream-300 rounded-xl text-charcoal-900 outline-none bg-white focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
                                     name="location"
                                 >
-                                    {['Alabang', 'BGC', 'Ortigas', 'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others', 'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer', 'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village', 'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others'].map(l => <option key={l} value={l}>{l}</option>)}
+                                    {AREAS.map(l => <option key={l} value={l}>{l}</option>)}
                                 </select>
                             </div>
 
-                            <div className="flex gap-3 pt-4 border-t border-cream-100 mt-4">
-                                <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal-900 text-cream-50 py-2.5 rounded-lg font-medium hover:bg-charcoal-800 transition-colors">
+                            <div className="flex gap-4 pt-6 border-t border-cream-100 mt-6">
+                                <button type="submit" disabled={isSubmitting} className="flex-1 bg-rose-gold text-white py-3 rounded-xl font-bold hover:brightness-110 transition-all shadow-md active:scale-[0.98] disabled:opacity-50">
                                     {isSubmitting ? 'Saving...' : 'Save Changes'}
                                 </button>
                                 <button
@@ -389,7 +425,7 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                                         handleDelete(editingSlot.id)
                                     }}
                                     disabled={isSubmitting}
-                                    className="flex-1 bg-white text-red-600 border border-red-200 py-2.5 rounded-lg font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
+                                    className="flex-1 bg-white text-charcoal-600 border border-cream-200 py-2.5 rounded-lg font-medium hover:bg-cream-50 transition-colors flex items-center justify-center gap-2"
                                 >
                                     <Trash2 className="w-4 h-4" /> Delete Availability
                                 </button>
