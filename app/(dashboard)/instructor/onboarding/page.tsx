@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import InstructorOnboardingForm from '@/components/forms/InstructorOnboardingForm'
 import { Clock, CheckCircle2 } from 'lucide-react'
+import Image from 'next/image'
 
 export default async function InstructorOnboardingPage() {
     const supabase = await createClient()
@@ -57,18 +58,40 @@ export default async function InstructorOnboardingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-cream-50 flex flex-col items-center justify-center p-4 sm:p-8">
-            <div className="w-full max-w-4xl mb-8 text-center">
-                <h1 className="text-4xl font-serif text-charcoal-900 mb-2 tracking-tight">
-                    StudioVaultPH
-                </h1>
-                <p className="text-charcoal-600">The premium marketplace for Pilates professionals.</p>
+        <div className="fixed inset-0 bg-white flex flex-col md:flex-row z-[60]">
+            {/* Left Side: Image */}
+            <div className="hidden md:flex md:w-1/2 relative flex-col justify-end">
+                <Image
+                    src="/auth-bg.png"
+                    alt="Pilates Studio"
+                    fill
+                    className="object-cover"
+                    priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 via-transparent to-transparent" />
+                <div className="relative p-16 text-white z-10">
+                    <h2 className="text-4xl lg:text-5xl font-serif mb-6 leading-tight">Grow Your Practice</h2>
+                    <p className="text-lg text-white/90 font-light max-w-sm leading-relaxed">
+                        Access premium studio spaces and manage your freelance business with StudioVault's elite platform.
+                    </p>
+                </div>
             </div>
 
-            <InstructorOnboardingForm />
+            {/* Right Side: Form */}
+            <div className="flex-1 overflow-y-auto bg-white p-8 md:p-12 lg:p-20">
+                <div className="max-w-xl mx-auto">
+                    <div className="mb-12">
+                        <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Join the Vault</h2>
+                        <h1 className="text-4xl font-serif text-charcoal-900 mb-4 tracking-tight">Instructor Application</h1>
+                        <p className="text-charcoal-600">The premium marketplace for Pilates professionals.</p>
+                    </div>
 
-            <div className="mt-8 text-center text-xs text-charcoal-400">
-                &copy; {new Date().getFullYear()} StudioVaultPH. All rights reserved.
+                    <InstructorOnboardingForm />
+
+                    <div className="mt-12 pt-8 border-t border-cream-100 text-center text-xs text-charcoal-400">
+                        &copy; {new Date().getFullYear()} StudioVaultPH. All rights reserved.
+                    </div>
+                </div>
             </div>
         </div>
     )

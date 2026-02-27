@@ -7,6 +7,7 @@ import { startOfWeek, endOfWeek } from 'date-fns'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
 import StudioApplicationForm from '@/components/studio/StudioApplicationForm'
 import clsx from 'clsx'
+import Image from 'next/image'
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
 
@@ -97,11 +98,38 @@ export default async function StudioDashboard(props: {
                 </div>
 
                 {!myStudio ? (
-                    <div className="max-w-md mx-auto bg-white border border-cream-200 rounded-xl p-8 shadow-sm">
-                        <h2 className="text-xl font-serif text-charcoal-900 mb-4 text-center">Setup Your Studio</h2>
-                        <p className="text-charcoal-600 mb-6 text-center text-sm">Create your studio profile to start accepting bookings.</p>
+                    <div className="fixed inset-0 bg-white flex flex-col md:flex-row z-[60]">
+                        {/* Left Side: Image */}
+                        <div className="hidden md:flex md:w-1/2 relative flex-col justify-end">
+                            <Image
+                                src="/auth-bg.png"
+                                alt="Pilates Studio"
+                                fill
+                                className="object-cover"
+                                priority
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 via-transparent to-transparent" />
+                            <div className="relative p-16 text-white z-10">
+                                <h2 className="text-4xl lg:text-5xl font-serif mb-6 leading-tight">Elevate Your Studio Management</h2>
+                                <p className="text-lg text-white/90 font-light max-w-sm leading-relaxed">
+                                    Experience the art of seamless booking and client care with StudioVault's premium platform.
+                                </p>
+                            </div>
+                        </div>
 
-                        <StudioApplicationForm />
+                        {/* Right Side: Form */}
+                        <div className="flex-1 overflow-y-auto bg-white p-8 md:p-12 lg:p-20">
+                            <div className="max-w-xl mx-auto">
+                                <div className="mb-12">
+                                    <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Get Started</h2>
+                                    <h1 className="text-4xl font-serif text-charcoal-900 mb-4">Setup Your Studio</h1>
+                                    <p className="text-charcoal-600 text-base">
+                                        Create your studio profile to start accepting bookings and monetizing your reformers.
+                                    </p>
+                                </div>
+                                <StudioApplicationForm />
+                            </div>
+                        </div>
                     </div>
                 ) : !myStudio.verified ? (
                     <div className="max-w-md mx-auto bg-white border border-cream-200 rounded-xl p-8 shadow-sm text-center">

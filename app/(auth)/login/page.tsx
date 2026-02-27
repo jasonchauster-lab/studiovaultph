@@ -175,7 +175,7 @@ function LoginContent() {
 
                 <div className="w-full max-w-lg">
                     <div className="flex flex-col items-center mb-12">
-                        <Link href="/" className="mb-12">
+                        <Link href="/" className="mb-2">
                             <Image src="/logo.png" alt="StudioVault Logo" width={320} height={320} className="w-80 h-80 object-contain" />
                         </Link>
 

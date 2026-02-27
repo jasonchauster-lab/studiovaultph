@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { createStudio } from '@/app/(dashboard)/studio/actions'
-import { Loader2, Upload, CheckCircle, X } from 'lucide-react'
+import { Loader2, Upload, CheckCircle, X, ShieldCheck, ArrowRight } from 'lucide-react'
 import clsx from 'clsx'
 import { createClient } from '@/lib/supabase/client'
 import { STUDIO_AMENITIES } from '@/types'
@@ -10,7 +10,7 @@ import { STUDIO_AMENITIES } from '@/types'
 function FileUploadBox({ name, label, required, fileName, previewUrl, accept, setFileState }: any) {
     return (
         <div>
-            <label className="block text-sm font-medium text-charcoal-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
+            <label className="block text-sm font-medium text-charcoal-700 mb-1">{label} {required && <span className="text-rose-gold font-bold">*</span>}</label>
             <div className="border-2 border-dashed border-cream-300 rounded-lg p-2 flex flex-col items-center justify-center bg-cream-50/50 hover:bg-cream-100/50 transition-colors relative cursor-pointer group h-[120px]">
                 <input type="file" name={name} accept={accept} required={required}
                     onChange={(e) => {
@@ -41,7 +41,7 @@ function FileUploadBox({ name, label, required, fileName, previewUrl, accept, se
                     </div>
                 ) : (
                     <>
-                        <Upload className="w-5 h-5 text-charcoal-700 mb-1" />
+                        <Upload className="w-5 h-5 text-rose-gold mb-1" />
                         <p className="text-[10px] text-center font-medium text-charcoal-700 px-2">Click to upload</p>
                         {accept && <p className="text-[8px] text-center text-charcoal-500 mt-0.5 max-w-[90%] break-words">{accept.replace(/,/g, ', ')}</p>}
                     </>
@@ -198,24 +198,24 @@ export default function StudioApplicationForm() {
                 </div>
             )}
             <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Studio Name <span className="text-red-500">*</span></label>
-                <input name="name" required placeholder="e.g. Pilates Logic" className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900" />
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">Studio Name <span className="text-rose-gold font-bold">*</span></label>
+                <input name="name" required placeholder="e.g. Pilates Logic" className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 transition-all" />
             </div>
             <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Contact Number <span className="text-red-500">*</span></label>
-                <input name="contactNumber" required placeholder="e.g. +63 917 123 4567" className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900" />
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">Contact Number <span className="text-rose-gold font-bold">*</span></label>
+                <input name="contactNumber" required placeholder="e.g. +63 917 123 4567" className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 transition-all font-mono" />
                 <p className="text-[10px] text-charcoal-500 mt-1 italic">
                     We will reach out through this number to confirm your studio's application and booking details.
                 </p>
             </div>
             <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Date of Birth of Authorized Representative <span className="text-red-500">*</span></label>
-                <input type="date" name="dateOfBirth" required className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white" />
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">Date of Birth of Authorized Representative <span className="text-rose-gold font-bold">*</span></label>
+                <input type="date" name="dateOfBirth" required className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white transition-all" />
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Location <span className="text-red-500">*</span></label>
-                <select name="location" required className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white">
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">Location <span className="text-rose-gold font-bold">*</span></label>
+                <select name="location" required className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white transition-all">
                     <option value="">Select a location</option>
                     <option value="Alabang">Alabang</option>
                     <option value="BGC">BGC</option>
@@ -250,12 +250,12 @@ export default function StudioApplicationForm() {
                 </select>
             </div>
             <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Detailed Address <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">Detailed Address <span className="text-rose-gold font-bold">*</span></label>
                 <textarea
                     name="address"
                     required
                     placeholder="e.g. Unit 302, One Building, Ayala Ave"
-                    className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 h-20"
+                    className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 h-24 transition-all"
                 />
             </div>
             <div>
@@ -264,35 +264,47 @@ export default function StudioApplicationForm() {
                     type="url"
                     name="googleMapsUrl"
                     placeholder="e.g. https://maps.app.goo.gl/..."
-                    className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white"
+                    className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white transition-all"
                 />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FileUploadBox
-                    name="birCertificate"
-                    label="BIR Certificate (Form 2303)"
-                    required={true}
-                    fileName={birFileName}
-                    previewUrl={birPreviewUrl}
-                    accept=".jpg,.jpeg,.png,.pdf"
-                    setFileState={(name: string | null, url: string | null) => { setBirFileName(name); setBirPreviewUrl(url); }}
-                />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FileUploadBox
-                    name="govId"
-                    label="Valid Government ID"
-                    required={true}
-                    fileName={govIdFileName}
-                    previewUrl={govIdPreviewUrl}
-                    accept=".jpg,.jpeg,.png,.pdf"
-                    setFileState={(name: string | null, url: string | null) => { setGovIdFileName(name); setGovIdPreviewUrl(url); }}
-                />
                 <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-1">ID Expiration Date <span className="text-red-500">*</span></label>
-                    <input type="date" required name="govIdExpiry" className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
+                    <FileUploadBox
+                        name="birCertificate"
+                        label="BIR Certificate (Form 2303)"
+                        required={true}
+                        fileName={birFileName}
+                        previewUrl={birPreviewUrl}
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        setFileState={(name: string | null, url: string | null) => { setBirFileName(name); setBirPreviewUrl(url); }}
+                    />
+                    <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-rose-gold" />
+                        Used only for secure identity verification and automated payouts.
+                    </p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <FileUploadBox
+                        name="govId"
+                        label="Valid Government ID"
+                        required={true}
+                        fileName={govIdFileName}
+                        previewUrl={govIdPreviewUrl}
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        setFileState={(name: string | null, url: string | null) => { setGovIdFileName(name); setGovIdPreviewUrl(url); }}
+                    />
+                    <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-rose-gold" />
+                        Used only for secure identity verification and automated payouts.
+                    </p>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-charcoal-700 mb-1">ID Expiration Date <span className="text-rose-gold font-bold">*</span></label>
+                    <input type="date" required name="govIdExpiry" className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm transition-all" />
                 </div>
             </div>
 
@@ -314,7 +326,7 @@ export default function StudioApplicationForm() {
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Photos of the Space <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">Photos of the Space <span className="text-rose-gold font-bold">*</span></label>
                 <div className="bg-cream-50 p-6 rounded-lg border border-cream-200">
                     {spacePhotos.length > 0 && (
                         <div className="mb-6">
@@ -350,7 +362,7 @@ export default function StudioApplicationForm() {
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-2">Available Equipment & Quantities <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-charcoal-700 mb-2">Available Equipment & Quantities <span className="text-rose-gold font-bold">*</span></label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                     {[
                         { id: 'reformer', label: 'Reformer' },
@@ -407,13 +419,18 @@ export default function StudioApplicationForm() {
                 </div>
             </div>
 
-            <button type="submit" disabled={isLoading} className="w-full py-2.5 flex items-center justify-center gap-2 bg-charcoal-900 text-cream-50 rounded-lg font-medium hover:bg-charcoal-800 transition-colors disabled:opacity-70">
+            <button type="submit" disabled={isLoading} className="w-full py-4 flex items-center justify-center gap-3 bg-charcoal-900 text-white rounded-xl font-bold text-lg hover:bg-charcoal-800 transition-all shadow-lg hover:shadow-xl active:scale-[0.99] disabled:opacity-70 group">
                 {isLoading ? (
                     <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        <span className="text-green-400 font-semibold tracking-wide">Application submitted please wait...</span>
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                        <span className="text-white/80 font-medium tracking-wide">Processing application...</span>
                     </>
-                ) : 'Submit Application'}
+                ) : (
+                    <>
+                        <span>Submit Application</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                )}
             </button>
         </form>
     )

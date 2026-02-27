@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { submitInstructorOnboarding } from '@/app/(dashboard)/instructor/onboarding/actions'
-import { Upload, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Upload, CheckCircle, AlertCircle, Loader2, ShieldCheck, ArrowRight } from 'lucide-react'
 import clsx from 'clsx'
 
 export default function InstructorOnboardingForm() {
@@ -64,7 +64,7 @@ export default function InstructorOnboardingForm() {
                 {/* Full Name */}
                 <div className="space-y-2">
                     <label htmlFor="fullName" className="block text-sm font-medium text-charcoal-800">
-                        Full Name
+                        Full Name <span className="text-rose-gold font-bold">*</span>
                     </label>
                     <input
                         type="text"
@@ -79,7 +79,7 @@ export default function InstructorOnboardingForm() {
                 {/* Date of Birth */}
                 <div className="space-y-2">
                     <label htmlFor="dateOfBirth" className="block text-sm font-medium text-charcoal-800">
-                        Date of Birth
+                        Date of Birth <span className="text-rose-gold font-bold">*</span>
                     </label>
                     <input
                         type="date"
@@ -93,7 +93,7 @@ export default function InstructorOnboardingForm() {
                 {/* Instagram Handle */}
                 <div className="space-y-2">
                     <label htmlFor="instagramHandle" className="block text-sm font-medium text-charcoal-800">
-                        Instagram Handle
+                        Instagram Handle <span className="text-rose-gold font-bold">*</span>
                     </label>
                     <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-500">@</span>
@@ -111,7 +111,7 @@ export default function InstructorOnboardingForm() {
                 {/* Contact Number */}
                 <div className="space-y-2">
                     <label htmlFor="contactNumber" className="block text-sm font-medium text-charcoal-800">
-                        Contact Number
+                        Contact Number <span className="text-rose-gold font-bold">*</span>
                     </label>
                     <input
                         type="tel"
@@ -126,7 +126,7 @@ export default function InstructorOnboardingForm() {
                 {/* Certification Body */}
                 <div className="space-y-2">
                     <label htmlFor="certificationBody" className="block text-sm font-medium text-charcoal-800">
-                        Certification Body
+                        Certification Body <span className="text-rose-gold font-bold">*</span>
                     </label>
                     <div className="relative">
                         <select
@@ -170,7 +170,7 @@ export default function InstructorOnboardingForm() {
                 {/* Certificate Upload */}
                 <div className="space-y-2">
                     <label htmlFor="certificateFile" className="block text-sm font-medium text-charcoal-800">
-                        Upload Certificate
+                        Upload Certificate <span className="text-rose-gold font-bold">*</span>
                     </label>
                     <div className="border-2 border-dashed border-cream-300 rounded-lg p-6 flex flex-col items-center justify-center bg-cream-50/50 hover:bg-cream-100/50 transition-colors relative cursor-pointer group">
                         <input
@@ -212,7 +212,7 @@ export default function InstructorOnboardingForm() {
                                 {selectedFileName ? (
                                     <CheckCircle className="w-5 h-5 text-green-600" />
                                 ) : (
-                                    <Upload className="w-5 h-5 text-charcoal-700" />
+                                    <Upload className="w-5 h-5 text-rose-gold" />
                                 )}
                             </div>
                         )}
@@ -229,24 +229,27 @@ export default function InstructorOnboardingForm() {
                     {/* TIN */}
                     <div className="space-y-2 mb-6">
                         <label htmlFor="tin" className="block text-sm font-medium text-charcoal-800">
-                            Tax Identification Number (TIN)
+                            Tax Identification Number (TIN) <span className="text-rose-gold font-bold">*</span>
                         </label>
                         <input
                             type="text"
                             id="tin"
                             name="tin"
                             required
-                            className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400"
+                            className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400 font-mono"
                             placeholder="000-000-000-000"
                         />
-                        <p className="text-[10px] text-charcoal-500 italic">Required for legal payment processing.</p>
+                        <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
+                            <ShieldCheck className="w-3 h-3 text-rose-gold" />
+                            Used only for secure identity verification and automated payouts.
+                        </p>
                     </div>
 
                     {/* Gov ID */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div className="space-y-2">
                             <label className="block text-sm font-medium text-charcoal-800">
-                                Valid Government ID
+                                Valid Government ID <span className="text-rose-gold font-bold">*</span>
                             </label>
                             <div className="border-2 border-dashed border-cream-300 rounded-lg p-4 flex flex-col items-center justify-center bg-cream-50/50 hover:bg-cream-100/50 transition-colors relative cursor-pointer group h-[120px]">
                                 <input
@@ -281,17 +284,21 @@ export default function InstructorOnboardingForm() {
                                     </div>
                                 ) : (
                                     <>
-                                        <Upload className="w-5 h-5 text-charcoal-700 mb-1" />
+                                        <Upload className="w-5 h-5 text-rose-gold mb-1" />
                                         <p className="text-[10px] text-center font-medium text-charcoal-700">
                                             {govIdFileName || 'Upload ID'}
                                         </p>
                                     </>
                                 )}
                             </div>
+                            <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
+                                <ShieldCheck className="w-3 h-3 text-rose-gold" />
+                                Used only for secure identity verification and automated payouts.
+                            </p>
                         </div>
                         <div className="space-y-2">
                             <label htmlFor="govIdExpiry" className="block text-sm font-medium text-charcoal-800">
-                                ID Expiration Date
+                                ID Expiration Date <span className="text-rose-gold font-bold">*</span>
                             </label>
                             <input
                                 type="date"
@@ -341,13 +348,17 @@ export default function InstructorOnboardingForm() {
                                 </div>
                             ) : (
                                 <>
-                                    <Upload className="w-4 h-4 text-charcoal-700 mb-1" />
+                                    <Upload className="w-4 h-4 text-rose-gold mb-1" />
                                     <p className="text-[10px] text-center font-medium text-charcoal-700">
                                         {birFileName || 'Click to upload'}
                                     </p>
                                 </>
                             )}
                         </div>
+                        <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
+                            <ShieldCheck className="w-3 h-3 text-rose-gold" />
+                            Used only for secure identity verification and automated payouts.
+                        </p>
                         <p className="text-[10px] text-charcoal-500 italic">
                             If provided, tax withholding is 5%. If not, 10% will be withheld.
                         </p>
@@ -368,15 +379,18 @@ export default function InstructorOnboardingForm() {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-2.5 px-4 bg-charcoal-900 text-cream-50 rounded-lg font-medium hover:bg-charcoal-800 focus:ring-4 focus:ring-charcoal-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                    className="w-full py-4 px-6 bg-charcoal-900 text-white rounded-xl font-bold text-lg hover:bg-charcoal-800 active:scale-[0.99] transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:opacity-70 group"
                 >
                     {isSubmitting ? (
                         <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span className="text-green-400 font-semibold tracking-wide">Application submitted please wait...</span>
+                            <Loader2 className="w-6 h-6 animate-spin" />
+                            <span className="text-white/80 font-medium tracking-wide">Processing application...</span>
                         </>
                     ) : (
-                        'Submit Application'
+                        <>
+                            <span>Submit Application</span>
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </>
                     )}
                 </button>
             </form>
