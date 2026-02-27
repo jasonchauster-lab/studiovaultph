@@ -17,7 +17,7 @@ export default function LandingPage() {
       <div className="sticky top-0 z-50 w-full bg-cream-50/95 backdrop-blur-md border-b border-cream-200/50 shadow-sm transition-all duration-300">
         <nav className="flex items-center justify-between px-4 sm:px-6 py-4 max-w-7xl mx-auto">
           <Link href="/" className="flex items-center gap-4 z-30">
-            <Image src="/logo.png" alt="StudioVault Logo" width={48} height={48} className="w-12 h-12 object-contain" />
+            <Image src="/logo.png" alt="StudioVault Logo" width={64} height={64} className="w-16 h-16 object-contain" />
             <span className="text-2xl font-serif font-bold text-charcoal-900 tracking-tight hidden sm:block">StudioVaultPH</span>
           </Link>
           <div className="flex gap-4 relative z-30">
@@ -253,7 +253,7 @@ export default function LandingPage() {
               </li>
               <li className="flex items-start gap-3 text-charcoal-700">
                 <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                <span><strong className="text-charcoal-900">Direct Rental Payouts:</strong> Receive your full equipment fee automatically without waiting for complex revenue splits.</span>
+                <span><strong className="text-charcoal-900">Direct Rental Payouts:</strong> Receive your full rental fee directly without chasing complex splits.</span>
               </li>
             </ul>
           </div>

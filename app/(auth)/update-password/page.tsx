@@ -5,6 +5,7 @@ import { updatePassword } from '@/app/auth/actions'
 import { Loader2, CheckCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export default function UpdatePasswordPage() {
     const [password, setPassword] = useState('')
@@ -48,7 +49,7 @@ export default function UpdatePasswordPage() {
         return (
             <div className="min-h-screen bg-white flex flex-col md:flex-row">
                 {/* Left Side: Image */}
-                <div className="hidden md:block md:w-1/2 relative">
+                <div className="hidden md:flex md:w-1/2 relative flex-col justify-end">
                     <Image
                         src="/auth-bg.png"
                         alt="Pilates Studio"
@@ -56,24 +57,25 @@ export default function UpdatePasswordPage() {
                         className="object-cover"
                         priority
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/40 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 via-transparent to-transparent" />
                 </div>
 
                 {/* Right Side: Success Content */}
-                <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-16 bg-white overflow-y-auto">
-                    <div className="w-full max-w-md text-center">
-                        <div className="flex justify-center mb-6">
-                            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center">
-                                <CheckCircle className="w-10 h-10 text-green-500" />
+                <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-20 bg-white overflow-y-auto">
+                    <div className="w-full max-w-lg text-center">
+                        <div className="flex justify-center mb-8">
+                            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center shadow-inner">
+                                <CheckCircle className="w-12 h-12 text-green-500" />
                             </div>
                         </div>
-                        <h1 className="text-3xl font-serif text-charcoal-900 mb-4">Password Updated</h1>
-                        <p className="text-charcoal-500 mb-8 leading-relaxed">
-                            Your password has been successfully reset. You can now use your new password to sign in.
+                        <h1 className="text-4xl font-serif text-charcoal-900 mb-6">Password Updated</h1>
+                        <p className="text-charcoal-500 text-lg mb-10 leading-relaxed max-w-md mx-auto">
+                            Your password has been successfully reset. You can now use your new credentials to sign in to the Vault.
                         </p>
-                        <p className="text-sm text-charcoal-400">
-                            Redirecting you to sign in...
-                        </p>
+                        <div className="flex items-center justify-center gap-2 text-charcoal-400 font-medium animate-pulse">
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span>Redirecting to sign in...</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -83,7 +85,7 @@ export default function UpdatePasswordPage() {
     return (
         <div className="min-h-screen bg-white flex flex-col md:flex-row">
             {/* Left Side: Image */}
-            <div className="hidden md:block md:w-1/2 relative">
+            <div className="hidden md:flex md:w-1/2 relative flex-col justify-end">
                 <Image
                     src="/auth-bg.png"
                     alt="Pilates Studio"
@@ -91,29 +93,36 @@ export default function UpdatePasswordPage() {
                     className="object-cover"
                     priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/40 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 via-transparent to-transparent" />
 
-                <div className="absolute bottom-12 left-12 text-white max-w-lg z-10">
-                    <h2 className="text-4xl font-serif mb-4">Secure Your Session</h2>
-                    <p className="text-lg text-white/90 font-light max-w-md leading-relaxed">
+                <div className="relative p-16 text-white z-10">
+                    <h2 className="text-4xl lg:text-5xl font-serif mb-6 leading-tight">Secure Your Session</h2>
+                    <p className="text-lg text-white/90 font-light max-w-sm leading-relaxed">
                         Setting a strong password is the first step towards protecting your personal practice data.
                     </p>
                 </div>
             </div>
 
             {/* Right Side: Form */}
-            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-16 bg-white overflow-y-auto">
-                <div className="w-full max-w-md">
-                    <div className="mb-10">
-                        <h1 className="text-3xl font-serif text-charcoal-900 mb-3">Update Password</h1>
-                        <p className="text-charcoal-500 text-sm">
-                            Please enter your new password below to secure your account.
-                        </p>
+            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-20 bg-white overflow-y-auto">
+                <div className="w-full max-w-lg">
+                    <div className="flex flex-col items-center mb-12">
+                        <div className="mb-8">
+                            <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-20 h-20 object-contain" />
+                        </div>
+
+                        <div className="text-center">
+                            <h2 className="text-charcoal-400 text-sm font-medium uppercase tracking-[0.2em] mb-2">Welcome to the Vault</h2>
+                            <h1 className="text-4xl font-serif text-charcoal-900 mb-4">Update Password</h1>
+                            <p className="text-charcoal-500 text-base max-w-sm mx-auto">
+                                Please enter your new password below to secure your account.
+                            </p>
+                        </div>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-1.5">New Password</label>
+                            <label className="block text-sm font-medium text-charcoal-700 mb-2">New Password</label>
                             <input
                                 type="password"
                                 value={password}
@@ -121,11 +130,11 @@ export default function UpdatePasswordPage() {
                                 required
                                 minLength={6}
                                 placeholder="••••••••"
-                                className="w-full px-4 py-3 border border-cream-200 bg-cream-50/30 rounded-xl text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all"
+                                className="w-full px-5 py-3.5 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-300"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Confirm New Password</label>
+                            <label className="block text-sm font-medium text-charcoal-700 mb-2">Confirm New Password</label>
                             <input
                                 type="password"
                                 value={confirmPassword}
@@ -133,12 +142,12 @@ export default function UpdatePasswordPage() {
                                 required
                                 minLength={6}
                                 placeholder="••••••••"
-                                className="w-full px-4 py-3 border border-cream-200 bg-cream-50/30 rounded-xl text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all"
+                                className="w-full px-5 py-3.5 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-300"
                             />
                         </div>
 
                         {error && (
-                            <div className="text-sm p-4 rounded-xl bg-red-50 text-red-700 border border-red-100 flex items-start gap-3">
+                            <div className="text-sm p-4 rounded-xl bg-red-50 text-red-700 border border-red-100 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
                                 {error}
                             </div>
                         )}
@@ -146,11 +155,15 @@ export default function UpdatePasswordPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-charcoal-900 text-white py-3.5 rounded-xl font-medium hover:bg-charcoal-800 active:scale-[0.98] transition-all flex justify-center shadow-sm"
+                            className="w-full bg-charcoal-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-charcoal-800 active:scale-[0.99] transition-all flex justify-center shadow-lg hover:shadow-xl disabled:opacity-70"
                         >
-                            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Update Password'}
+                            {loading ? <Loader2 className="animate-spin w-6 h-6" /> : 'Update Password'}
                         </button>
                     </form>
+
+                    <div className="mt-16 pt-12 border-t border-cream-100 text-center text-xs text-charcoal-400">
+                        Need help? Contact our <Link href="/support" className="underline hover:text-charcoal-900">Support Team</Link>
+                    </div>
                 </div>
             </div>
         </div>
