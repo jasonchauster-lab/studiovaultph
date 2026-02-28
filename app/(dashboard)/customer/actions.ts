@@ -11,6 +11,7 @@ export async function requestBooking(
     slotId: string,
     instructorId: string,
     quantity: number = 1,
+    equipment?: string,
     bookingStart?: string, // optional custom range
     bookingEnd?: string
 ) {
@@ -108,7 +109,7 @@ export async function requestBooking(
         .from('bookings')
         .select('id, slots!inner(start_time)')
         .eq('instructor_id', instructorId)
-        .in('status', ['pending', 'approved', 'submitted'])
+        .in('status', ['pending', 'approved'])
         .eq('slots.start_time', slot.start_time);
 
     if (overlappingBookings && overlappingBookings.length > 0) {
@@ -118,16 +119,16 @@ export async function requestBooking(
     // --- AVAILABILITY VALIDATION END ---
 
     // --- PRICE CALCULATION START ---
-    // 1. Determine Equipment (Default to first or Reformer)
-    const equipment = slot.equipment?.[0] || 'Reformer';
+    // 1. Determine Equipment (Use passed argument or default to first in slot)
+    const selectedEquipment = equipment || slot.equipment?.[0] || 'Reformer';
 
     // 2. Studio Price
     const studioPricing = studio.pricing as Record<string, number> | null;
-    const studioFee = studioPricing?.[equipment] || 0;
+    const studioFee = studioPricing?.[selectedEquipment] || 0;
 
     // 3. Instructor Price
     const instructorRates = instructor?.rates as Record<string, number> | null;
-    const instructorFee = instructorRates?.[equipment] || 0;
+    const instructorFee = instructorRates?.[selectedEquipment] || 0;
 
     // 4. Calculate Service Fee
     const baseFee = studioFee + instructorFee;
@@ -174,7 +175,7 @@ export async function requestBooking(
         studio_fee: studioFee * quantity,
         instructor_fee: instructorFee * quantity,
         service_fee: serviceFee * quantity,
-        equipment: equipment,
+        equipment: selectedEquipment,
         quantity: quantity,
         wallet_deduction: deduction > 0 ? deduction : undefined,
         original_price: deduction > 0 ? totalPrice : undefined
@@ -197,7 +198,7 @@ export async function requestBooking(
             .eq('start_time', slot.start_time) // Must match start
             .eq('is_available', true)
             .neq('id', slotId) // Exclude current
-            .contains('equipment', [equipment]) // Ensure equipment matches
+            .contains('equipment', [selectedEquipment]) // Ensure equipment matches
             .limit(needed);
 
         if (!additionalSlots || additionalSlots.length < needed) {
@@ -532,7 +533,7 @@ export async function bookInstructorSession(
         .from('bookings')
         .select('id, slots!inner(start_time)')
         .eq('instructor_id', instructorId)
-        .in('status', ['pending', 'approved', 'submitted'])
+        .in('status', ['pending', 'approved'])
         .eq('slots.start_time', startDateTime.toISOString());
 
     if (overlappingBookings && overlappingBookings.length > 0) {

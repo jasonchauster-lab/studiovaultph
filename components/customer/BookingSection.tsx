@@ -228,6 +228,7 @@ export default function BookingSection({
                 primarySlot.id,
                 selectedInstructor,
                 quantity, // Pass quantity
+                selectedEquipment,
                 start || undefined,
                 end || undefined
             );

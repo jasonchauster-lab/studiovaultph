@@ -1,3 +1,4 @@
+'use server';
 'use client'
 
 import React, { useState, useRef } from 'react'
@@ -13,11 +14,13 @@ const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 
 export default function InstructorBookingWizard({
     instructorId,
     availability,
-    activeBookings = []
+    activeBookings = [],
+    instructorRates = {}
 }: {
     instructorId: string
     availability: any[]
     activeBookings?: any[]
+    instructorRates?: Record<string, number>
 }) {
     const [step, setStep] = useState<1 | 2 | 3>(1)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -109,41 +112,62 @@ export default function InstructorBookingWizard({
         }
     }
 
-    // When a studio slot is selected, pre-populate equipment options
-    const handleSelectStudioSlot = (slotId: string, equipmentList: string[]) => {
-        setSelectedStudioSlot(slotId)
-        // Default to first available equipment
-        const firstEq = equipmentList?.[0] || ''
+    const handleSelectStudioTime = (studioId: string, startTime: string) => {
+        const studio = matchingStudios.find(s => s.studio.id === studioId)
+        if (!studio) return
+
+        const slotsAtTime = studio.matchingSlots.filter((s: any) => s.start_time === startTime)
+        if (slotsAtTime.length === 0) return
+
+        // Pick first slot as primary
+        const primarySlot = slotsAtTime[0]
+        setSelectedStudioSlot(primarySlot.id)
+
+        // Aggregate unique equipment at this time
+        const allEq = Array.from(new Set(slotsAtTime.flatMap((s: any) => s.equipment || []))) as string[]
+        const firstEq = allEq[0] || 'Reformer'
         setSelectedEquipment(firstEq)
-        // Calculate max quantity: count all slots with this equipment in the matching studio
-        const allMatchingSlots = matchingStudios.flatMap(s => s.matchingSlots)
-        const sameTimeSlots = allMatchingSlots.filter(
-            s => s.start_time === allMatchingSlots.find((ms: any) => ms.id === slotId)?.start_time &&
-                (s.equipment as string[] | undefined)?.includes(firstEq)
-        )
-        setMaxQuantity(Math.max(1, sameTimeSlots.length))
+
+        // Max quantity for this specific equipment at this time
+        const slotsWithEq = slotsAtTime.filter((s: any) => (s.equipment as string[] | undefined)?.includes(firstEq))
+        setMaxQuantity(Math.max(1, slotsWithEq.length))
         setQuantity(1)
     }
 
     const handleEquipmentChange = (eq: string) => {
         setSelectedEquipment(eq)
-        // Recalculate max quantity for this equipment
         if (!selectedStudioSlot) return
-        const allMatchingSlots = matchingStudios.flatMap(s => s.matchingSlots)
-        const primarySlot = allMatchingSlots.find((s: any) => s.id === selectedStudioSlot)
-        const sameTimeSlots = allMatchingSlots.filter(
-            (s: any) => s.start_time === primarySlot?.start_time && (s.equipment as string[] | undefined)?.includes(eq)
-        )
-        setMaxQuantity(Math.max(1, sameTimeSlots.length))
+
+        const studio = matchingStudios.find(s => s.matchingSlots.some((ms: any) => ms.id === selectedStudioSlot))
+        if (!studio) return
+
+        const primarySlot = studio.matchingSlots.find((s: any) => s.id === selectedStudioSlot)
+        const slotsAtTime = studio.matchingSlots.filter((s: any) => s.start_time === primarySlot?.start_time)
+
+        // Update selectedStudioSlot to one that actually has this equipment if possible
+        const bestSlot = slotsAtTime.find((s: any) => (s.equipment as string[] | undefined)?.includes(eq))
+        if (bestSlot) {
+            setSelectedStudioSlot(bestSlot.id)
+        }
+
+        const slotsWithEq = slotsAtTime.filter((s: any) => (s.equipment as string[] | undefined)?.includes(eq))
+        setMaxQuantity(Math.max(1, slotsWithEq.length))
         setQuantity(1)
     }
 
-    const handleConfirmBooking = async () => {
-        if (!selectedStudioSlot) return
+    const handleBooking = async () => {
+        if (!selectedStudioSlot || !selectedSlot) return
         setIsBooking(true)
 
         try {
-            const result = await requestBooking(selectedStudioSlot, instructorId, quantity, undefined, undefined)
+            const result = await requestBooking(
+                selectedStudioSlot,
+                instructorId,
+                quantity,
+                selectedEquipment,
+                selectedDate + 'T' + selectedSlot.start_time,
+                selectedDate + 'T' + selectedSlot.end_time
+            )
             if (result.success && result.bookingId) {
                 setSuccess(true)
                 setBookingId(result.bookingId)
@@ -156,6 +180,7 @@ export default function InstructorBookingWizard({
             }
         } catch (error) {
             console.error(error)
+            alert('Something went wrong')
         } finally {
             setIsBooking(false)
         }
@@ -187,7 +212,6 @@ export default function InstructorBookingWizard({
                     </div>
 
                     <div className="relative group">
-                        {/* Left Scroll Button */}
                         <button
                             onClick={scrollLeft}
                             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 md:w-10 md:h-10 bg-white border border-cream-200 shadow-md rounded-full flex items-center justify-center text-charcoal-500 hover:text-charcoal-900 transition-all opacity-0 group-hover:opacity-100 -ml-4 md:-ml-5"
@@ -195,7 +219,6 @@ export default function InstructorBookingWizard({
                             <ChevronLeft className="w-5 h-5" />
                         </button>
 
-                        {/* Horizontal Date Picker */}
                         <div
                             ref={scrollContainerRef}
                             className="flex overflow-x-auto pb-4 gap-3 px-1 no-scrollbar snap-x snap-mandatory scroll-smooth"
@@ -216,7 +239,7 @@ export default function InstructorBookingWizard({
 
                                 if (!hasSlots) return null;
 
-                                const isSelected = selectedDate === d.date || (!selectedDate && nextDays.find(nd => availability.some(a => a.date === nd.date || (!a.date && a.day_of_week === nd.dayIndex)))?.date === d.date);
+                                const isSelected = selectedDate === d.date;
 
                                 return (
                                     <button
@@ -229,7 +252,7 @@ export default function InstructorBookingWizard({
                                                 : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
                                         )}
                                     >
-                                        <span className="text-[10px] uppercase tracking-widest font-bold opacity-60 mb-0.5">{d.date === new Date().toISOString().split('T')[0] ? 'Today' : d.label.split(' ')[0]}</span>
+                                        <span className="text-[10px] uppercase tracking-widest font-bold opacity-60 mb-0.5">{isTodayPill ? 'Today' : d.label.split(' ')[0]}</span>
                                         <span className="text-xl font-serif leading-tight">{d.label.split(' ').pop()}</span>
                                         <span className="text-[10px] uppercase font-medium">{d.label.split(' ')[1]}</span>
                                     </button>
@@ -237,7 +260,6 @@ export default function InstructorBookingWizard({
                             })}
                         </div>
 
-                        {/* Right Scroll Button */}
                         <button
                             onClick={scrollRight}
                             className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 md:w-10 md:h-10 bg-white border border-cream-200 shadow-md rounded-full flex items-center justify-center text-charcoal-500 hover:text-charcoal-900 transition-all opacity-0 group-hover:opacity-100 -mr-4 md:-mr-5"
@@ -246,25 +268,19 @@ export default function InstructorBookingWizard({
                         </button>
                     </div>
 
-                    {/* Slots for Selected Date */}
                     <div className="bg-cream-50 rounded-2xl p-6 border border-cream-200">
                         {(() => {
-                            const activeDate = selectedDate || nextDays[0].date;
+                            const activeDate = selectedDate || nextDays.find(d => availability.some(a => a.date === d.date || (!a.date && a.day_of_week === d.dayIndex)))?.date;
                             if (!activeDate) return <p className="text-charcoal-500 text-center italic">No availability found.</p>;
 
                             const d = nextDays.find(nd => nd.date === activeDate);
-
                             const nowInstance = toManilaDate(new Date());
-                            const nowManilaTime = nowInstance.getUTCHours().toString().padStart(2, '0') + ':' +
-                                nowInstance.getUTCMinutes().toString().padStart(2, '0');
-
-                            const todayManila = getManilaTodayStr();
-                            const isToday = activeDate === todayManila;
+                            const nowManilaTime = nowInstance.getUTCHours().toString().padStart(2, '0') + ':' + nowInstance.getUTCMinutes().toString().padStart(2, '0');
+                            const isToday = activeDate === getManilaTodayStr();
 
                             const slots = availability.filter(a => {
                                 const dateMatch = a.date ? a.date === activeDate : a.day_of_week === d?.dayIndex;
                                 const locationMatch = filterLocation ? a.location_area === filterLocation : true;
-                                // Hide slots that have already ended when browsing today's date
                                 const notExpired = isToday ? a.end_time.slice(0, 5) > nowManilaTime : true;
                                 const notBooked = !bookedSlotsSet.has(`${activeDate}-${a.start_time.slice(0, 5)}`);
                                 return dateMatch && locationMatch && notExpired && notBooked;
@@ -274,15 +290,7 @@ export default function InstructorBookingWizard({
                                 return (
                                     <div className="text-center py-6">
                                         <Info className="w-8 h-8 text-charcoal-300 mx-auto mb-2" />
-                                        <p className="text-charcoal-500 italic">No sessions available {filterLocation ? `in ${filterLocation}` : ''} on this day.</p>
-                                        {filterLocation && (
-                                            <button
-                                                onClick={() => router.push(window.location.pathname)}
-                                                className="mt-2 text-xs text-charcoal-900 font-medium hover:underline"
-                                            >
-                                                Clear filters to see all availability
-                                            </button>
-                                        )}
+                                        <p className="text-charcoal-500 italic">No sessions available on this day.</p>
                                     </div>
                                 );
                             }
@@ -314,10 +322,6 @@ export default function InstructorBookingWizard({
                             );
                         })()}
                     </div>
-
-                    {availability.length === 0 && (
-                        <p className="text-charcoal-500 text-center italic py-12">This instructor has not added availability yet.</p>
-                    )}
                 </div>
             )}
 
@@ -332,7 +336,7 @@ export default function InstructorBookingWizard({
                     </div>
 
                     <div className="bg-charcoal-900 text-cream-50 p-4 rounded-xl text-sm">
-                        Searching studios in <strong>{selectedSlot?.location_area}</strong> on <strong>{selectedDate}</strong> between <strong>{selectedSlot?.start_time.slice(0, 5)}</strong> and <strong>{selectedSlot?.end_time.slice(0, 5)}</strong>
+                        Searching studios in <strong>{selectedSlot?.location_area}</strong> on <strong>{selectedDate}</strong> at <strong>{selectedSlot?.start_time.slice(0, 5)}</strong>
                     </div>
 
                     {isSearching ? (
@@ -343,137 +347,127 @@ export default function InstructorBookingWizard({
                     ) : matchingStudios.length === 0 ? (
                         <div className="text-center py-12 bg-cream-50 rounded-xl">
                             <p className="text-charcoal-600 mb-2">No matching studios found.</p>
-                            <p className="text-xs text-charcoal-500">Try a different time or date.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {/* Studio Selection */}
                             {matchingStudios.map(result => (
-                                <div key={result.studio.id} className="bg-white p-4 rounded-xl border border-cream-200 shadow-sm">
-                                    <div className="flex justify-between items-start mb-3">
+                                <div key={result.studio.id} className="bg-white p-6 rounded-2xl border border-cream-200 shadow-sm space-y-4">
+                                    <div className="flex justify-between items-start">
                                         <div>
-                                            <h4 className="font-serif text-lg text-charcoal-900">{result.studio.name}</h4>
+                                            <h4 className="font-serif text-xl text-charcoal-900">{result.studio.name}</h4>
                                             <p className="text-sm text-charcoal-500">{result.studio.location}</p>
                                         </div>
-                                        <div className="text-right flex flex-wrap justify-end gap-1 max-w-[160px]">
-                                            {result.studio.pricing && Object.entries(result.studio.pricing).filter(([, v]: any) => typeof v === 'number' && v > 0).length > 0
-                                                ? Object.entries(result.studio.pricing)
-                                                    .filter(([, v]: any) => typeof v === 'number' && v > 0)
-                                                    .map(([eq, price]: any) => (
-                                                        <span key={eq} className="inline-flex items-center gap-1 text-[11px] font-medium bg-cream-100 text-charcoal-700 border border-cream-200 px-2 py-0.5 rounded-full">
-                                                            {eq}: <strong>₱{price.toLocaleString()}</strong>
-                                                        </span>
-                                                    ))
-                                                : <span className="text-xs text-charcoal-400 italic">Price on Request</span>
-                                            }
-                                        </div>
                                     </div>
 
-                                    <p className="text-xs font-medium text-charcoal-400 mb-2 uppercase tracking-wider">Available Time Slots</p>
-                                    <div className="flex flex-wrap gap-2 mb-4">
-                                        {result.matchingSlots.map((slot: any) => (
-                                            <button
-                                                key={slot.id}
-                                                onClick={() => handleSelectStudioSlot(slot.id, slot.equipment || [])}
-                                                className={clsx(
-                                                    "px-3 py-2 rounded-lg text-sm border transition-all",
-                                                    selectedStudioSlot === slot.id
-                                                        ? "bg-charcoal-900 text-cream-50 border-charcoal-900"
-                                                        : "bg-cream-50 text-charcoal-700 border-cream-200 hover:border-charcoal-300"
-                                                )}
-                                            >
-                                                {new Date(slot.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                            </button>
-                                        ))}
+                                    <p className="text-xs font-bold text-charcoal-400 uppercase tracking-widest">Available Time Slots</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {(() => {
+                                            const uniqueTimes = Array.from(new Set(result.matchingSlots.map((s: any) => s.start_time))).sort();
+                                            return (uniqueTimes as string[]).map(startTime => {
+                                                const isSelected = result.matchingSlots.some((s: any) => s.id === selectedStudioSlot && s.start_time === startTime);
+                                                return (
+                                                    <button
+                                                        key={startTime}
+                                                        onClick={() => handleSelectStudioTime(result.studio.id, startTime)}
+                                                        className={clsx(
+                                                            "px-4 py-2 rounded-xl text-sm border font-medium transition-all",
+                                                            isSelected
+                                                                ? "bg-charcoal-900 text-cream-50 border-charcoal-900 shadow-sm"
+                                                                : "bg-cream-50 text-charcoal-700 border-cream-200 hover:border-charcoal-400"
+                                                        )}
+                                                    >
+                                                        {new Date(startTime).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                    </button>
+                                                );
+                                            });
+                                        })()}
                                     </div>
 
-                                    {/* Equipment & Quantity — shown after slot selected */}
+                                    {/* Booking Details — only for selected studio */}
                                     {selectedStudioSlot && result.matchingSlots.some((s: any) => s.id === selectedStudioSlot) && (() => {
-                                        const slot = result.matchingSlots.find((s: any) => s.id === selectedStudioSlot)
-                                        const equipmentList: string[] = slot?.equipment || []
+                                        const slotsAtTime = result.matchingSlots.filter((s: any) =>
+                                            s.start_time === result.matchingSlots.find((ms: any) => ms.id === selectedStudioSlot)?.start_time
+                                        );
+                                        const allEq = Array.from(new Set(slotsAtTime.flatMap((s: any) => s.equipment || [])));
+
                                         return (
-                                            <div className="border-t border-cream-100 pt-4 space-y-4">
-                                                {/* Equipment Selector */}
-                                                {equipmentList.length > 0 && (
+                                            <div className="border-t border-cream-100 pt-4 space-y-5 animate-in fade-in slide-in-from-top-2">
+                                                {/* Equipment & Quantity */}
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                     <div>
-                                                        <label className="text-sm font-medium text-charcoal-700 block mb-2">
-                                                            Equipment Type
-                                                        </label>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {equipmentList.map(eq => (
-                                                                <button
-                                                                    key={eq}
-                                                                    type="button"
-                                                                    onClick={() => handleEquipmentChange(eq)}
-                                                                    className={clsx(
-                                                                        "px-3 py-1.5 rounded-lg text-sm border font-medium transition-all",
-                                                                        selectedEquipment === eq
-                                                                            ? "bg-charcoal-900 text-cream-50 border-charcoal-900"
-                                                                            : "bg-cream-50 text-charcoal-600 border-cream-200 hover:border-charcoal-400"
-                                                                    )}
-                                                                >
-                                                                    {eq}
-                                                                </button>
-                                                            ))}
+                                                        <label className="text-xs font-bold text-charcoal-400 uppercase tracking-widest block mb-1.5">Equipment</label>
+                                                        <select
+                                                            value={selectedEquipment}
+                                                            onChange={(e) => handleEquipmentChange(e.target.value)}
+                                                            className="w-full px-3 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/10"
+                                                        >
+                                                            {allEq.map(eq => {
+                                                                const count = slotsAtTime.filter((s: any) => (s.equipment as string[] | undefined)?.includes(eq as string)).length;
+                                                                return <option key={eq as string} value={eq as string}>{eq as string} ({count} available)</option>;
+                                                            })}
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs font-bold text-charcoal-400 uppercase tracking-widest block mb-1.5">People</label>
+                                                        <div className="flex items-center gap-3">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                                                className="w-10 h-10 rounded-xl border border-cream-200 flex items-center justify-center hover:bg-cream-100 text-charcoal-700 transition-colors"
+                                                            >
+                                                                <Minus className="w-4 h-4" />
+                                                            </button>
+                                                            <span className="w-8 text-center text-lg font-serif">{quantity}</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}
+                                                                className="w-10 h-10 rounded-xl border border-cream-200 flex items-center justify-center hover:bg-cream-100 text-charcoal-700 transition-colors"
+                                                            >
+                                                                <Plus className="w-4 h-4" />
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                )}
-
-                                                {/* Quantity Selector */}
-                                                <div>
-                                                    <label className="text-sm font-medium text-charcoal-700 block mb-2">
-                                                        Number of People
-                                                        <span className="text-xs font-normal text-charcoal-400 ml-2">(max {maxQuantity} available)</span>
-                                                    </label>
-                                                    <div className="flex items-center gap-3">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                                            className="w-8 h-8 rounded-full border border-cream-300 flex items-center justify-center hover:bg-cream-100 transition-colors text-charcoal-700"
-                                                        >
-                                                            <Minus className="w-3.5 h-3.5" />
-                                                        </button>
-                                                        <span className="w-8 text-center font-medium text-charcoal-900 text-lg">{quantity}</span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}
-                                                            className="w-8 h-8 rounded-full border border-cream-300 flex items-center justify-center hover:bg-cream-100 transition-colors text-charcoal-700"
-                                                        >
-                                                            <Plus className="w-3.5 h-3.5" />
-                                                        </button>
-                                                        <span className="text-xs text-charcoal-500">
-                                                            {quantity === 1 ? 'person' : 'people'}
-                                                        </span>
-                                                    </div>
                                                 </div>
 
-                                                {/* Booking Summary */}
-                                                <div className="bg-cream-50 rounded-lg p-3 text-sm text-charcoal-600 border border-cream-200">
-                                                    <p className="font-medium text-charcoal-900 mb-1">Booking Summary</p>
-                                                    <p>{selectedDate} · {selectedSlot?.start_time.slice(0, 5)}–{selectedSlot?.end_time.slice(0, 5)}</p>
-                                                    {selectedEquipment && <p>Equipment: <strong>{selectedEquipment}</strong></p>}
-                                                    <p>People: <strong>{quantity}</strong></p>
-                                                    <p>Studio: <strong>{result.studio.name}</strong></p>
-                                                </div>
+                                                {/* Pricing */}
+                                                {(() => {
+                                                    const studioRate = result.studio.pricing?.[selectedEquipment] || 0;
+                                                    const instructorRate = instructorRates[selectedEquipment] || 0;
+                                                    const subtotal = (studioRate + instructorRate) * quantity;
+                                                    const serviceFee = Math.max(100, subtotal * 0.2);
+                                                    const total = subtotal + serviceFee;
+
+                                                    return (
+                                                        <div className="bg-cream-50 p-4 rounded-2xl border border-cream-100 space-y-2">
+                                                            <div className="flex justify-between text-xs text-charcoal-500">
+                                                                <span>Session ({quantity}x)</span>
+                                                                <span>₱{subtotal.toLocaleString()}</span>
+                                                            </div>
+                                                            <div className="flex justify-between text-xs text-charcoal-500">
+                                                                <span>Service Fee (20%)</span>
+                                                                <span>₱{serviceFee.toLocaleString()}</span>
+                                                            </div>
+                                                            <div className="flex justify-between text-base font-bold text-charcoal-900 pt-2 border-t border-cream-200/50">
+                                                                <span>Total</span>
+                                                                <span className="font-serif text-lg">₱{total.toLocaleString()}</span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })()}
+
+                                                <button
+                                                    onClick={handleBooking}
+                                                    disabled={isBooking}
+                                                    className="w-full bg-charcoal-900 text-cream-50 py-3.5 rounded-xl font-bold hover:bg-charcoal-800 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                                                >
+                                                    {isBooking && <Loader2 className="w-4 h-4 animate-spin" />}
+                                                    Request Booking
+                                                </button>
                                             </div>
-                                        )
+                                        );
                                     })()}
                                 </div>
                             ))}
-
-                            {/* Confirm Button */}
-                            <div className="pt-4 border-t border-cream-200">
-                                <button
-                                    onClick={handleConfirmBooking}
-                                    disabled={!selectedStudioSlot || isBooking}
-                                    className="w-full bg-charcoal-900 text-cream-50 py-3 rounded-lg font-medium hover:bg-charcoal-800 disabled:opacity-50 flex justify-center items-center gap-2 transition-colors"
-                                >
-                                    {isBooking ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm Booking Request'}
-                                </button>
-                                {!selectedStudioSlot && (
-                                    <p className="text-xs text-charcoal-400 text-center mt-2">Select a time slot above to continue</p>
-                                )}
-                            </div>
                         </div>
                     )}
                 </div>

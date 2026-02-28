@@ -48,7 +48,7 @@ export default async function InstructorProfilePage({
         .from('bookings')
         .select('id, slots(start_time)')
         .eq('instructor_id', id)
-        .in('status', ['pending', 'approved', 'submitted'])
+        .in('status', ['pending', 'approved'])
 
     // 3. Fetch public reviews for this instructor
     const { reviews, averageRating, totalCount } = await getPublicReviews(id)
@@ -145,6 +145,7 @@ export default async function InstructorProfilePage({
                             instructorId={instructor.id}
                             availability={availability || []}
                             activeBookings={activeBookings || []}
+                            instructorRates={instructor?.rates || {}}
                         />
                     </div>
 
