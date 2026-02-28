@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, Loader2, User, Building, Phone, Mail, Star, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { Search, Loader2, User, Building, Phone, Mail, Star, ChevronDown, ChevronUp, ExternalLink, Calendar } from 'lucide-react';
 import { searchAllUsers, updatePartnerFeeSettings } from '@/app/(dashboard)/admin/actions';
+import PartnerBookingsDrawer from './PartnerBookingsDrawer';
 import Link from 'next/link';
 import clsx from 'clsx';
 
@@ -46,6 +47,12 @@ export default function GlobalSearch() {
     const [isOpen, setIsOpen] = useState(false);
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [editState, setEditState] = useState<Record<string, ExpandedState>>({});
+    const [drawerState, setDrawerState] = useState<{ isOpen: boolean; partnerId: string; partnerName: string; partnerType: 'profile' | 'studio' }>({
+        isOpen: false,
+        partnerId: '',
+        partnerName: '',
+        partnerType: 'profile'
+    });
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -241,6 +248,18 @@ export default function GlobalSearch() {
                                                         <ExternalLink className="w-3 h-3" />
                                                         View Profile
                                                     </Link>
+                                                    <button
+                                                        onClick={() => setDrawerState({
+                                                            isOpen: true,
+                                                            partnerId: result.id,
+                                                            partnerName: result.name,
+                                                            partnerType: result.type
+                                                        })}
+                                                        className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-gold hover:brightness-110 transition-colors border border-rose-gold/20 px-3 py-1.5 rounded-lg hover:bg-rose-gold/5"
+                                                    >
+                                                        <Calendar className="w-3 h-3" />
+                                                        View Bookings
+                                                    </button>
                                                 </div>
 
                                                 {/* Legal Documents Section (for Studios) */}
@@ -326,6 +345,14 @@ export default function GlobalSearch() {
                     )}
                 </div>
             )}
+
+            <PartnerBookingsDrawer
+                isOpen={drawerState.isOpen}
+                partnerId={drawerState.partnerId}
+                partnerName={drawerState.partnerName}
+                partnerType={drawerState.partnerType}
+                onClose={() => setDrawerState(prev => ({ ...prev, isOpen: false }))}
+            />
         </div>
-    );
+    )
 }

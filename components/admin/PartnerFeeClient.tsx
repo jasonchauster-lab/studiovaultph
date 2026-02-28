@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { updatePartnerFeeSettings } from '@/app/(dashboard)/admin/actions'
-import { Star, Mail, Phone } from 'lucide-react'
+import { Star, Mail, Phone, Calendar } from 'lucide-react'
+import PartnerBookingsDrawer from './PartnerBookingsDrawer'
 import clsx from 'clsx'
 
 type PartnerProps = {
@@ -59,6 +60,12 @@ export default function PartnerFeeClient({
     ]
 
     const [partners, setPartners] = useState<PartnerProps[]>(defaultData)
+    const [drawerState, setDrawerState] = useState<{ isOpen: boolean; partnerId: string; partnerName: string; partnerType: 'profile' | 'studio' }>({
+        isOpen: false,
+        partnerId: '',
+        partnerName: '',
+        partnerType: 'profile'
+    })
 
     const handleToggle = async (index: number) => {
         const p = partners[index]
@@ -108,12 +115,27 @@ export default function PartnerFeeClient({
                 </div>
 
                 {/* Contact Info */}
-                {(p.email || p.phone) && (
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 mb-3 text-xs text-charcoal-500">
-                        {p.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{p.email}</span>}
-                        {p.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{p.phone}</span>}
-                    </div>
-                )}
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 mb-3">
+                    {(p.email || p.phone) && (
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-charcoal-500">
+                            {p.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{p.email}</span>}
+                            {p.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{p.phone}</span>}
+                        </div>
+                    )}
+
+                    <button
+                        onClick={() => setDrawerState({
+                            isOpen: true,
+                            partnerId: p.id,
+                            partnerName: p.name,
+                            partnerType: p.type
+                        })}
+                        className="flex items-center gap-1.5 text-xs font-bold text-rose-gold hover:brightness-110 transition-all group"
+                    >
+                        <Calendar className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                        View Bookings
+                    </button>
+                </div>
 
                 {/* Fee Selector */}
                 <div className="flex items-center gap-2 mt-1">
@@ -209,6 +231,14 @@ export default function PartnerFeeClient({
         <div className="space-y-8">
             <Section title="Studios" list={sList} />
             <Section title="Instructors" list={iList} />
+
+            <PartnerBookingsDrawer
+                isOpen={drawerState.isOpen}
+                partnerId={drawerState.partnerId}
+                partnerName={drawerState.partnerName}
+                partnerType={drawerState.partnerType}
+                onClose={() => setDrawerState(prev => ({ ...prev, isOpen: false }))}
+            />
         </div>
     )
 }

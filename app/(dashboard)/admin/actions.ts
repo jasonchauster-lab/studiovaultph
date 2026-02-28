@@ -995,16 +995,36 @@ export async function searchAllUsers(query: string) {
 
     const isPhoneQuery = /^\+?[0-9\s\-]+$/.test(cleanQuery);
     const isEmailQuery = cleanQuery.includes('@');
+    const isStatusQuery = ['pending', 'approved', 'admin_approved', 'confirmed', 'paid', 'cancelled', 'expired', 'completed', 'rejected'].includes(cleanQuery.toLowerCase());
 
     const results: any[] = [];
+
+    // If searching by status, finding matching profiles/studios requires a join or a list of IDs.
+    // For simplicity and to satisfy the "showing partners with active bookings" requirement:
+    let statusMatchUserIds: string[] = [];
+    let statusMatchStudioIds: string[] = [];
+
+    if (isStatusQuery) {
+        const { data: statusBookings } = await supabase
+            .from('bookings')
+            .select('instructor_id, slots(studio_id)')
+            .eq('status', cleanQuery.toLowerCase());
+
+        if (statusBookings) {
+            statusMatchUserIds = [...new Set(statusBookings.map((b: any) => b.instructor_id).filter(Boolean))];
+            statusMatchStudioIds = [...new Set(statusBookings.map((b: any) => b.slots?.studio_id).filter(Boolean))];
+        }
+    }
 
     // Search Profiles
     let profileQuery = supabase.from('profiles').select('id, full_name, role, contact_number, is_founding_partner, gov_id_url, gov_id_expiry, bir_url, tin');
 
-    if (isPhoneQuery) {
-        profileQuery = profileQuery.ilike('contact_number', `% ${cleanQuery} % `);
+    if (isStatusQuery) {
+        profileQuery = profileQuery.in('id', statusMatchUserIds.length > 0 ? statusMatchUserIds : ['00000000-0000-0000-0000-000000000000']);
+    } else if (isPhoneQuery) {
+        profileQuery = profileQuery.ilike('contact_number', `%${cleanQuery}%`);
     } else if (!isEmailQuery) {
-        profileQuery = profileQuery.ilike('full_name', `% ${cleanQuery} % `);
+        profileQuery = profileQuery.ilike('full_name', `%${cleanQuery}%`);
     }
 
     const { data: profiles } = await profileQuery.limit(10);
@@ -1051,10 +1071,12 @@ export async function searchAllUsers(query: string) {
     // Search Studios
     let studioQuery = supabase.from('studios').select('id, name, location, contact_number, is_founding_partner, bir_certificate_url, bir_certificate_expiry, gov_id_url, gov_id_expiry, mayors_permit_url, mayors_permit_expiry, secretary_certificate_url, secretary_certificate_expiry, insurance_url, insurance_expiry, space_photos_urls');
 
-    if (isPhoneQuery) {
-        studioQuery = studioQuery.ilike('contact_number', `% ${cleanQuery} % `);
+    if (isStatusQuery) {
+        studioQuery = studioQuery.in('id', statusMatchStudioIds.length > 0 ? statusMatchStudioIds : ['00000000-0000-0000-0000-000000000000']);
+    } else if (isPhoneQuery) {
+        studioQuery = studioQuery.ilike('contact_number', `%${cleanQuery}%`);
     } else if (!isEmailQuery) {
-        studioQuery = studioQuery.ilike('name', `% ${cleanQuery} % `);
+        studioQuery = studioQuery.ilike('name', `%${cleanQuery}%`);
     }
 
     const { data: studios } = await studioQuery.limit(10);
@@ -1136,4 +1158,60 @@ export async function updatePartnerFeeSettings(
     revalidatePath('/admin');
     revalidatePath('/admin/partners');
     return { success: true };
+}
+
+export async function getPartnerBookings(id: string, type: 'profile' | 'studio') {
+    const supabase = await createClient();
+
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
+    let query = supabase
+        .from('bookings')
+        .select(`
+            *,
+            instructor:profiles!instructor_id(full_name, avatar_url),
+            slots(
+                start_time,
+                end_time,
+                equipment,
+                studios(name)
+            )
+        `)
+        .order('created_at', { ascending: false });
+
+    if (type === 'profile') {
+        query = query.eq('instructor_id', id);
+    } else {
+        // For studios, we need to filter by slots that belong to this studio
+        const { data: studioSlots } = await supabase
+            .from('slots')
+            .select('id')
+            .eq('studio_id', id);
+
+        const slotIds = studioSlots?.map(s => s.id) ?? [];
+        if (slotIds.length === 0) return { active: [], past: [] };
+        query = query.in('slot_id', slotIds);
+    }
+
+    const { data: bookings, error } = await query;
+
+    if (error) {
+        console.error('Error fetching partner bookings:', error);
+        return { error: 'Failed to fetch bookings.' };
+    }
+
+    const now = new Date();
+    const active = bookings.filter((b: any) => {
+        const endTime = new Date(b.slots?.end_time);
+        return endTime > now && ['approved', 'confirmed', 'admin_approved'].includes(b.status);
+    });
+
+    const past = bookings.filter((b: any) => {
+        const endTime = new Date(b.slots?.end_time);
+        return endTime <= now || ['completed', 'cancelled', 'expired', 'rejected'].includes(b.status);
+    });
+
+    return { active, past };
 }
