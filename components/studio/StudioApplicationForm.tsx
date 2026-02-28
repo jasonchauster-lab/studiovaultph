@@ -217,9 +217,24 @@ export default function StudioApplicationForm() {
                 <label className="block text-sm font-medium text-charcoal-700 mb-1">Location <span className="text-rose-gold font-bold">*</span></label>
                 <select name="location" required className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white transition-all">
                     <option value="">Select a location</option>
-                    <option value="Alabang">Alabang</option>
-                    <option value="BGC">BGC</option>
-                    <option value="Ortigas">Ortigas</option>
+                    <optgroup label="Alabang">
+                        <option value="Alabang - Madrigal/Ayala Alabang">Alabang - Madrigal / Ayala Alabang</option>
+                        <option value="Alabang - Filinvest City">Alabang - Filinvest City</option>
+                        <option value="Alabang - Alabang Town Center Area">Alabang - Alabang Town Center Area</option>
+                        <option value="Alabang - Others">Alabang - Others</option>
+                    </optgroup>
+                    <optgroup label="BGC">
+                        <option value="BGC - High Street">BGC - High Street</option>
+                        <option value="BGC - Central Square/Uptown">BGC - Central Square / Uptown</option>
+                        <option value="BGC - Forbes Town">BGC - Forbes Town</option>
+                        <option value="BGC - Others">BGC - Others</option>
+                    </optgroup>
+                    <optgroup label="Ortigas">
+                        <option value="Ortigas - Ortigas Center">Ortigas - Ortigas Center</option>
+                        <option value="Ortigas - Greenhills">Ortigas - Greenhills</option>
+                        <option value="Ortigas - San Juan">Ortigas - San Juan</option>
+                        <option value="Ortigas - Others">Ortigas - Others</option>
+                    </optgroup>
                     <optgroup label="Makati">
                         <option value="Makati - CBD/Ayala">Makati - CBD / Ayala</option>
                         <option value="Makati - Poblacion/Rockwell">Makati - Poblacion / Rockwell</option>

@@ -1,4 +1,18 @@
-export type LocationArea = 'Alabang' | 'BGC' | 'Ortigas' | 'Makati - CBD/Ayala' | 'Makati - Poblacion/Rockwell' | 'Makati - San Antonio/Gil Puyat' | 'Makati - Others' | 'Mandaluyong - Ortigas South' | 'Mandaluyong - Greenfield/Shaw' | 'Mandaluyong - Boni/Pioneer' | 'QC - Tomas Morato' | 'QC - Katipunan' | 'QC - Eastwood' | 'QC - Cubao' | 'QC - Fairview/Commonwealth' | 'QC - Novaliches' | 'QC - Diliman' | 'QC - Maginhawa/UP Village' | 'Paranaque - BF Homes' | 'Paranaque - Moonwalk / Merville' | 'Paranaque - Bicutan / Sucat' | 'Paranaque - Others';
+export type LocationArea =
+    // Alabang
+    'Alabang - Madrigal/Ayala Alabang' | 'Alabang - Filinvest City' | 'Alabang - Alabang Town Center Area' | 'Alabang - Others' |
+    // BGC
+    'BGC - High Street' | 'BGC - Central Square/Uptown' | 'BGC - Forbes Town' | 'BGC - Others' |
+    // Ortigas
+    'Ortigas - Ortigas Center' | 'Ortigas - Greenhills' | 'Ortigas - San Juan' | 'Ortigas - Others' |
+    // Makati
+    'Makati - CBD/Ayala' | 'Makati - Poblacion/Rockwell' | 'Makati - San Antonio/Gil Puyat' | 'Makati - Others' |
+    // Mandaluyong
+    'Mandaluyong - Ortigas South' | 'Mandaluyong - Greenfield/Shaw' | 'Mandaluyong - Boni/Pioneer' |
+    // Quezon City
+    'QC - Tomas Morato' | 'QC - Katipunan' | 'QC - Eastwood' | 'QC - Cubao' | 'QC - Fairview/Commonwealth' | 'QC - Novaliches' | 'QC - Diliman' | 'QC - Maginhawa/UP Village' |
+    // Paranaque
+    'Paranaque - BF Homes' | 'Paranaque - Moonwalk / Merville' | 'Paranaque - Bicutan / Sucat' | 'Paranaque - Others';
 
 export const STUDIO_AMENITIES = [
     'Shower',

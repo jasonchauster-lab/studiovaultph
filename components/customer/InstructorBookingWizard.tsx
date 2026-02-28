@@ -167,10 +167,17 @@ export default function InstructorBookingWizard({
                             className="flex overflow-x-auto pb-4 gap-3 px-1 no-scrollbar snap-x snap-mandatory scroll-smooth"
                         >
                             {nextDays.map((d) => {
+                                const todayManilaForPill = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
+                                const isTodayPill = d.date === todayManilaForPill;
+                                const nowManilaPill = new Date().toLocaleTimeString('en-US', {
+                                    hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila'
+                                });
+
                                 const hasSlots = availability.some(a => {
                                     const dateMatch = a.date ? a.date === d.date : a.day_of_week === d.dayIndex;
                                     const locationMatch = filterLocation ? a.location_area === filterLocation : true;
-                                    return dateMatch && locationMatch;
+                                    const notExpired = isTodayPill ? a.end_time.slice(0, 5) > nowManilaPill : true;
+                                    return dateMatch && locationMatch && notExpired;
                                 });
 
                                 if (!hasSlots) return null;
@@ -212,10 +219,18 @@ export default function InstructorBookingWizard({
                             if (!activeDate) return <p className="text-charcoal-500 text-center italic">No availability found.</p>;
 
                             const d = nextDays.find(nd => nd.date === activeDate);
+                            const nowManilaTime = new Date().toLocaleTimeString('en-US', {
+                                hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila'
+                            }); // e.g. "10:40"
+                            const todayManila = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }); // YYYY-MM-DD
+                            const isToday = activeDate === todayManila;
+
                             const slots = availability.filter(a => {
                                 const dateMatch = a.date ? a.date === activeDate : a.day_of_week === d?.dayIndex;
                                 const locationMatch = filterLocation ? a.location_area === filterLocation : true;
-                                return dateMatch && locationMatch;
+                                // Hide slots that have already ended when browsing today's date
+                                const notExpired = isToday ? a.end_time.slice(0, 5) > nowManilaTime : true;
+                                return dateMatch && locationMatch && notExpired;
                             });
 
                             if (slots.length === 0) {
@@ -303,16 +318,17 @@ export default function InstructorBookingWizard({
                                             <h4 className="font-serif text-lg text-charcoal-900">{result.studio.name}</h4>
                                             <p className="text-sm text-charcoal-500">{result.studio.location}</p>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="font-bold text-charcoal-900">
-                                                {(() => {
-                                                    const minPrice = result.studio.pricing && Object.values(result.studio.pricing).some((v: any) => typeof v === 'number' && v > 0)
-                                                        ? Math.min(...Object.values(result.studio.pricing).filter((v: any) => typeof v === 'number' && v > 0) as number[])
-                                                        : null;
-                                                    return minPrice !== null ? `From ₱${minPrice.toLocaleString()}` : 'Price on Request';
-                                                })()}
-                                            </p>
-                                            {result.studio.pricing && <p className="text-[10px] text-charcoal-400 uppercase font-bold tracking-tighter">Equipment-Based</p>}
+                                        <div className="text-right flex flex-wrap justify-end gap-1 max-w-[160px]">
+                                            {result.studio.pricing && Object.entries(result.studio.pricing).filter(([, v]: any) => typeof v === 'number' && v > 0).length > 0
+                                                ? Object.entries(result.studio.pricing)
+                                                    .filter(([, v]: any) => typeof v === 'number' && v > 0)
+                                                    .map(([eq, price]: any) => (
+                                                        <span key={eq} className="inline-flex items-center gap-1 text-[11px] font-medium bg-cream-100 text-charcoal-700 border border-cream-200 px-2 py-0.5 rounded-full">
+                                                            {eq}: <strong>₱{price.toLocaleString()}</strong>
+                                                        </span>
+                                                    ))
+                                                : <span className="text-xs text-charcoal-400 italic">Price on Request</span>
+                                            }
                                         </div>
                                     </div>
 

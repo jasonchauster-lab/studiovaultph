@@ -34,7 +34,7 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
     const [singleDate, setSingleDate] = useState(format(new Date(), 'yyyy-MM-dd'))
     const [singleTime, setSingleTime] = useState('09:00')
     const [singleEndTime, setSingleEndTime] = useState('10:00')
-    const [locations, setLocations] = useState<string[]>(['BGC'])
+    const [locations, setLocations] = useState<string[]>(['BGC - High Street'])
 
     const toggleLocation = (loc: string) => {
         setLocations(prev =>
@@ -130,7 +130,15 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
         setIsEditModalOpen(true)
     }
 
-    const AREAS = ['Alabang', 'BGC', 'Ortigas', 'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others', 'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer', 'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village', 'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others'];
+    const AREAS = [
+        'Alabang - Madrigal/Ayala Alabang', 'Alabang - Filinvest City', 'Alabang - Alabang Town Center Area', 'Alabang - Others',
+        'BGC - High Street', 'BGC - Central Square/Uptown', 'BGC - Forbes Town', 'BGC - Others',
+        'Ortigas - Ortigas Center', 'Ortigas - Greenhills', 'Ortigas - San Juan', 'Ortigas - Others',
+        'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others',
+        'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer',
+        'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village',
+        'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others'
+    ];
 
     return (
         <div className="space-y-6">

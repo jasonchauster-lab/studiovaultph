@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
+import { autoCompleteBookings, unlockMaturedFunds, expireAbandonedBookings } from '@/lib/wallet'
 import { redirect } from 'next/navigation'
 import { Calendar, ArrowLeft } from 'lucide-react'
 import clsx from 'clsx'
@@ -16,7 +16,8 @@ export default async function InstructorSessionsPage() {
     // Run financial jobs lazily when page is loaded
     await Promise.allSettled([
         autoCompleteBookings(),
-        unlockMaturedFunds()
+        unlockMaturedFunds(),
+        expireAbandonedBookings(),
     ])
 
     // Fetch instructor's bookings (where they booked a studio slot for themselves)
@@ -51,8 +52,9 @@ export default async function InstructorSessionsPage() {
     const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
     const now = new Date()
 
-    const upcomingBookings = bookings?.filter(b => b.status !== 'rejected' && new Date(getFirst(b.slots)?.start_time) > now) || []
-    const pastBookings = bookings?.filter(b => b.status === 'rejected' || new Date(getFirst(b.slots)?.start_time) <= now) || []
+    const ACTIVE_STATUSES = ['approved', 'confirmed', 'paid']
+    const upcomingBookings = bookings?.filter(b => ACTIVE_STATUSES.includes(b.status) && new Date(getFirst(b.slots)?.start_time) > now) || []
+    const pastBookings = bookings?.filter(b => !ACTIVE_STATUSES.includes(b.status) || new Date(getFirst(b.slots)?.start_time) <= now) || []
 
     return (
         <div className="min-h-screen bg-cream-50 p-8">

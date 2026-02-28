@@ -68,7 +68,7 @@ export async function requestBooking(
                         : slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Thu' ? 4
                             : slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Fri' ? 5 : 6
     );
-    const timeStr = slotStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' });
+    const timeStr = slotStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00';
 
     // ✅ Run TWO separate queries instead of .or() to avoid PostgREST NULL ambiguity:
     // Query A: date-specific availability (instructor set a specific date)

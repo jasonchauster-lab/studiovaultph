@@ -35,7 +35,7 @@ export default async function CustomerDashboard({
     const { expireAbandonedBookings } = await import('@/lib/wallet')
     await expireAbandonedBookings().catch(() => { }) // Non-blocking
 
-    // 1. Fetch Studios
+    // 1. Fetch Studios + all distinct verified locations (for smart filter)
     let studioQuery = supabase
         .from('studios')
         .select('*')
@@ -54,6 +54,16 @@ export default async function CustomerDashboard({
         // Studios must have this amenity
         studioQuery = studioQuery.contains('amenities', [params.amenity])
     }
+
+    // Fetch all verified studio locations for the smart location filter (no other filters applied)
+    const { data: allStudiosForLocations } = await supabase
+        .from('studios')
+        .select('location')
+        .eq('verified', true)
+
+    const availableLocations: string[] = [
+        ...new Set((allStudiosForLocations || []).map((s: any) => s.location).filter(Boolean))
+    ]
 
     const { data: studios } = await studioQuery
 
@@ -213,7 +223,7 @@ export default async function CustomerDashboard({
                     <h1 className="text-4xl font-serif text-charcoal-900 mb-4">Find your flow.</h1>
                     <p className="text-charcoal-600 mb-8 text-lg">Discover top studios and verified instructors in Metro Manila.</p>
 
-                    <DiscoveryFilters />
+                    <DiscoveryFilters availableLocations={availableLocations} />
                 </div>
 
                 {/* Vertical Sections */}

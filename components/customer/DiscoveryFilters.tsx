@@ -4,15 +4,21 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
 import { Filter } from 'lucide-react'
 import { STUDIO_AMENITIES } from '@/types'
+import LocationFilterDropdown from '@/components/shared/LocationFilterDropdown'
 
-export default function DiscoveryFilters() {
+interface DiscoveryFiltersProps {
+    /** Sub-location strings of verified studios that currently exist in the DB */
+    availableLocations?: string[]
+}
+
+export default function DiscoveryFilters({ availableLocations }: DiscoveryFiltersProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
     const createQueryString = useCallback(
         (name: string, value: string) => {
             const params = new URLSearchParams(searchParams.toString())
-            if (value === 'all') {
+            if (value === 'all' || value === '') {
                 params.delete(name)
             } else {
                 params.set(name, value)
@@ -27,8 +33,8 @@ export default function DiscoveryFilters() {
     }
 
     return (
-        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 bg-white p-4 rounded-xl border border-cream-200 shadow-sm">
-            <div className="flex items-center gap-2 text-charcoal-500 mr-2">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 bg-white p-4 rounded-xl border border-cream-200 shadow-sm">
+            <div className="flex items-center gap-2 text-charcoal-500 mr-1">
                 <Filter className="w-4 h-4" />
                 <span className="text-sm font-medium">Filter by:</span>
             </div>
@@ -36,7 +42,7 @@ export default function DiscoveryFilters() {
             {/* Type Filter */}
             <select
                 onChange={(e) => handleFilter('type', e.target.value)}
-                defaultValue={searchParams.get('type') || 'all'}
+                value={searchParams.get('type') || 'all'}
                 className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
             >
                 <option value="all">All Types</option>
@@ -45,49 +51,17 @@ export default function DiscoveryFilters() {
                 <option value="slot">Browse Slots</option>
             </select>
 
-            {/* Location Filter */}
-            <select
-                onChange={(e) => handleFilter('location', e.target.value)}
-                defaultValue={searchParams.get('location') || 'all'}
-                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-            >
-                <option value="all">All Locations</option>
-                <option value="Alabang">Alabang</option>
-                <option value="BGC">BGC</option>
-                <option value="Ortigas">Ortigas</option>
-                <optgroup label="Makati">
-                    <option value="Makati - CBD/Ayala">CBD / Ayala</option>
-                    <option value="Makati - Poblacion/Rockwell">Poblacion / Rockwell</option>
-                    <option value="Makati - San Antonio/Gil Puyat">San Antonio / Gil Puyat</option>
-                    <option value="Makati - Others">Others</option>
-                </optgroup>
-                <optgroup label="Mandaluyong">
-                    <option value="Mandaluyong - Ortigas South">Ortigas South</option>
-                    <option value="Mandaluyong - Greenfield/Shaw">Greenfield / Shaw</option>
-                    <option value="Mandaluyong - Boni/Pioneer">Boni / Pioneer</option>
-                </optgroup>
-                <optgroup label="Quezon City">
-                    <option value="QC - Tomas Morato">Tomas Morato</option>
-                    <option value="QC - Katipunan">Katipunan</option>
-                    <option value="QC - Eastwood">Eastwood</option>
-                    <option value="QC - Cubao">Cubao</option>
-                    <option value="QC - Fairview/Commonwealth">Fairview / Commonwealth</option>
-                    <option value="QC - Novaliches">Novaliches</option>
-                    <option value="QC - Diliman">Diliman</option>
-                    <option value="QC - Maginhawa/UP Village">Maginhawa / UP Village</option>
-                </optgroup>
-                <optgroup label="Paranaque">
-                    <option value="Paranaque - BF Homes">BF Homes</option>
-                    <option value="Paranaque - Moonwalk / Merville">Moonwalk / Merville</option>
-                    <option value="Paranaque - Bicutan / Sucat">Bicutan / Sucat</option>
-                    <option value="Paranaque - Others">Others</option>
-                </optgroup>
-            </select>
+            {/* Location Filter — smart, searchable, grouped */}
+            <LocationFilterDropdown
+                value={searchParams.get('location') || 'all'}
+                onChange={(val) => handleFilter('location', val)}
+                availableLocations={availableLocations}
+            />
 
             {/* Equipment Filter */}
             <select
                 onChange={(e) => handleFilter('equipment', e.target.value)}
-                defaultValue={searchParams.get('equipment') || 'all'}
+                value={searchParams.get('equipment') || 'all'}
                 className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
             >
                 <option value="all">All Equipment</option>
@@ -101,7 +75,7 @@ export default function DiscoveryFilters() {
             {/* Certification Filter */}
             <select
                 onChange={(e) => handleFilter('certification', e.target.value)}
-                defaultValue={searchParams.get('certification') || 'all'}
+                value={searchParams.get('certification') || 'all'}
                 className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
             >
                 <option value="all">All Certifications</option>
@@ -109,15 +83,13 @@ export default function DiscoveryFilters() {
                 <option value="BASI">BASI</option>
                 <option value="Balanced Body">Balanced Body</option>
                 <option value="Polestar">Polestar</option>
-                <option value="Polestar">Polestar</option>
-                <option value="Classical">Classical</option>
                 <option value="Classical">Classical</option>
             </select>
 
             {/* Amenities Filter */}
             <select
                 onChange={(e) => handleFilter('amenity', e.target.value)}
-                defaultValue={searchParams.get('amenity') || 'all'}
+                value={searchParams.get('amenity') || 'all'}
                 className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
             >
                 <option value="all">All Amenities</option>
@@ -131,7 +103,7 @@ export default function DiscoveryFilters() {
                 type="date"
                 min={new Date().toISOString().split('T')[0]}
                 onChange={(e) => handleFilter('date', e.target.value)}
-                defaultValue={searchParams.get('date') || ''}
+                value={searchParams.get('date') || ''}
                 className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
             />
 
@@ -144,7 +116,7 @@ export default function DiscoveryFilters() {
                         : undefined
                 }
                 onChange={(e) => handleFilter('time', e.target.value)}
-                defaultValue={searchParams.get('time') || ''}
+                value={searchParams.get('time') || ''}
                 className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
             />
         </div>

@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Slot, LocationArea } from '@/types';
+import { Slot } from '@/types';
 import StudioAvailabilityGroup from '@/components/dashboard/StudioAvailabilityGroup';
 import { Filter, Search, Loader2, User, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import clsx from 'clsx';
 import ChatWindow from '@/components/dashboard/ChatWindow';
 import MessageCountBadge from '@/components/dashboard/MessageCountBadge';
+import LocationFilterDropdown from '@/components/shared/LocationFilterDropdown';
 
 import { useSearchParams } from 'next/navigation';
 
@@ -19,7 +20,7 @@ export default function InstructorDashboardClient() {
     const [slots, setSlots] = useState<Slot[]>([]);
     const [bookings, setBookings] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [filterArea, setFilterArea] = useState<LocationArea | 'All'>('All');
+    const [filterArea, setFilterArea] = useState<string>('All');
     const [activeTab, setActiveTab] = useState<'browse' | 'bookings'>(initialTab);
     const [activeChat, setActiveChat] = useState<{ id: string, name: string, isExpired: boolean } | null>(null);
     const supabase = createClient();
@@ -102,9 +103,16 @@ export default function InstructorDashboardClient() {
         fetchData();
     }, []);
 
-    const filteredSlots = slots.filter(slot =>
-        filterArea === 'All' || slot.studios?.location === filterArea
-    );
+    const filteredSlots = slots.filter(slot => {
+        if (filterArea === 'All') return true
+        const loc = slot.studios?.location || ''
+        return loc === filterArea
+    });
+
+    // Derive available locations from loaded slots for smart filtering
+    const availableLocations = [...new Set(
+        slots.map(s => s.studios?.location).filter(Boolean) as string[]
+    )];
 
     // Chat Expiration Logic
     const isChatExpired = (booking: any) => {
@@ -172,27 +180,16 @@ export default function InstructorDashboardClient() {
                 {activeTab === 'browse' ? (
                     <>
                         {/* Filters */}
-                        <div className="flex flex-col sm:flex-row gap-4 bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-cream-200 shadow-sm">
-                            <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row gap-4 bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-cream-200 shadow-sm items-center">
+                            <div className="flex items-center gap-2 shrink-0">
                                 <Filter className="w-4 h-4 text-charcoal-500" />
-                                <span className="text-sm font-medium text-charcoal-700">Filter by Area:</span>
+                                <span className="text-sm font-medium text-charcoal-700">Filter by Location:</span>
                             </div>
-                            <div className="flex gap-2 flex-wrap">
-                                {['All', 'Makati', 'BGC', 'Alabang', 'Ortigas', 'Quezon City', 'Mandaluyong', 'Paranaque'].map((area) => (
-                                    <button
-                                        key={area}
-                                        onClick={() => setFilterArea(area as LocationArea | 'All')}
-                                        className={clsx(
-                                            "px-4 py-1.5 rounded-full text-sm font-bold transition-all",
-                                            filterArea === area
-                                                ? "bg-rose-gold text-white shadow-md"
-                                                : "bg-cream-100 text-charcoal-600 hover:bg-cream-200"
-                                        )}
-                                    >
-                                        {area}
-                                    </button>
-                                ))}
-                            </div>
+                            <LocationFilterDropdown
+                                value={filterArea === 'All' ? 'all' : filterArea}
+                                onChange={(val) => setFilterArea(val === 'all' ? 'All' : val)}
+                                availableLocations={availableLocations}
+                            />
                         </div>
 
                         {/* Grid */}
