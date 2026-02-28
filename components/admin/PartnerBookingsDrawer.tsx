@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { getPartnerBookings } from '@/app/(dashboard)/admin/actions'
 import { X, Clock, CalendarX2, Loader2 } from 'lucide-react'
-import Image from 'next/image'
 import clsx from 'clsx'
 
 const STATUS_STYLES: Record<string, string> = {
@@ -59,17 +58,20 @@ export default function PartnerBookingsDrawer({
                 "fixed inset-0 z-[9999] transition-opacity duration-300 ease-in-out",
                 isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
             )}
+            style={{ transform: 'translateZ(0)' }}
         >
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-charcoal-900/60 backdrop-blur-md transition-opacity"
+                className="absolute inset-0 bg-charcoal-900/60 backdrop-blur-md transition-opacity z-0"
                 onClick={onClose}
             />
 
             <div className={clsx(
                 "absolute inset-y-0 right-0 w-full max-w-xl bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out z-10",
                 isOpen ? "translate-x-0" : "translate-x-full"
-            )}>
+            )}
+                style={{ willChange: 'transform' }}
+            >
                 {/* Header */}
                 <div className="px-6 py-5 bg-white border-b border-cream-200 flex items-center justify-between shrink-0">
                     <div className="min-w-0">
@@ -154,17 +156,18 @@ function BookingSection({ title, bookings }: { title: string, bookings: Booking[
                                         {/* Studio / Instructor */}
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-2">
-                                                {booking.instructor?.avatar_url && (
-                                                    <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 border border-cream-200">
-                                                        <Image
-                                                            src={booking.instructor.avatar_url}
-                                                            alt={booking.instructor.full_name}
-                                                            width={24}
-                                                            height={24}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    </div>
-                                                )}
+                                                <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 border border-cream-200 bg-cream-100">
+                                                    <img
+                                                        src={booking.instructor?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.instructor?.full_name || 'instructor')}`}
+                                                        alt={booking.instructor?.full_name || 'Instructor'}
+                                                        width={24}
+                                                        height={24}
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.instructor?.full_name || 'instructor')}`;
+                                                        }}
+                                                    />
+                                                </div>
                                                 <div className="min-w-0">
                                                     <p className="font-medium text-charcoal-900 truncate">
                                                         {booking.slots?.studios?.name || 'Unknown Studio'}

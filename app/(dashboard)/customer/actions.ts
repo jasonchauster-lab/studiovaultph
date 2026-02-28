@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
+import { formatManilaDate, formatManilaTime } from '@/lib/timezone'
 
 export async function requestBooking(
     slotId: string,
@@ -335,8 +336,8 @@ export async function requestBooking(
     const studioAddress = booking.slots.studios.address;
     const instructorName = booking.profiles?.full_name || 'Instructor';
     const instructorEmail = booking.profiles?.email;
-    const date = new Date(booking.slots.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
-    const time = new Date(booking.slots.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' });
+    const date = formatManilaDate(booking.slots.start_time);
+    const time = formatManilaTime(booking.slots.start_time);
 
     // 1. Notify Client
     if (clientEmail) {
@@ -642,8 +643,8 @@ export async function bookInstructorSession(
         const studioAddress = studios?.address;
 
         if (clientEmail && slots?.start_time) {
-            const dateStr = new Date(slots.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
-            const timeStr = new Date(slots.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' });
+            const dateStr = formatManilaDate(slots.start_time);
+            const timeStr = formatManilaTime(slots.start_time);
 
             // Notify Client
             await sendEmail({

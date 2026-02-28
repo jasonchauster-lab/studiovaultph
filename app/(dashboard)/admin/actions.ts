@@ -7,6 +7,7 @@ import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import ApplicationApprovalEmail from '@/components/emails/ApplicationApprovalEmail'
 import ApplicationRejectionEmail from '@/components/emails/ApplicationRejectionEmail'
+import { formatManilaDate, formatManilaTime } from '@/lib/timezone'
 
 async function verifyAdmin(supabase: any) {
     const { data: { user } } = await supabase.auth.getUser()
@@ -447,8 +448,8 @@ export async function confirmBooking(bookingId: string) {
         return { error: 'Booking approved, but failed to send confirmation emails due to missing participant data.' };
     }
 
-    const date = new Date(slots.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
-    const time = new Date(slots.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' });
+    const date = formatManilaDate(slots.start_time);
+    const time = formatManilaTime(slots.start_time);
 
     const clientEmail = client.email;
     const clientName = client.full_name || 'Valued Client';
@@ -622,8 +623,8 @@ export async function rejectBooking(bookingId: string, reason: string) {
         return { error: `Booking rejected, but failed to send email: Client email not found. (ID: ${bookingId})` };
     }
 
-    const date = new Date(slots?.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
-    const time = new Date(slots?.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' });
+    const date = formatManilaDate(slots?.start_time);
+    const time = formatManilaTime(slots?.start_time);
     const studioName = studios?.name || 'Pilates Studio';
 
     const emailResult = await sendEmail({

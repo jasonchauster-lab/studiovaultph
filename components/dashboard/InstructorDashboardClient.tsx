@@ -86,7 +86,8 @@ export default function InstructorDashboardClient() {
                         client:profiles!client_id (
                             full_name,
                             email,
-                            avatar_url
+                            avatar_url,
+                            medical_conditions
                         ),
                         instructor:profiles!instructor_id (
                             full_name,
@@ -178,7 +179,14 @@ export default function InstructorDashboardClient() {
                             className="flex items-center gap-2 px-4 py-2 bg-rose-gold text-white rounded-lg hover:brightness-110 transition-all shadow-sm font-bold"
                         >
                             <User className="w-4 h-4" />
-                            <span className="hidden sm:inline">My Profile</span>
+                            <span className="hidden sm:inline">My Instructor Profile</span>
+                        </Link>
+                        <Link
+                            href="/customer/profile"
+                            className="flex items-center gap-2 px-4 py-2 bg-white text-charcoal-900 border border-cream-200 rounded-lg hover:bg-cream-50 transition-colors shadow-sm"
+                        >
+                            <User className="w-4 h-4" />
+                            <span className="hidden sm:inline">My Customer Profile</span>
                         </Link>
                     </div>
                 </div>
@@ -365,6 +373,9 @@ export default function InstructorDashboardClient() {
                                                             src={booking.slots.studios.logo_url || "/logo.png"}
                                                             alt={booking.slots.studios.name}
                                                             className="w-full h-full object-cover"
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).src = "/logo.png";
+                                                            }}
                                                         />
                                                     </div>
                                                     <div>
@@ -375,7 +386,7 @@ export default function InstructorDashboardClient() {
                                                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-charcoal-600">
                                                             <div className="flex items-center gap-1.5">
                                                                 <Calendar className="w-4 h-4 text-charcoal-400" />
-                                                                <span>{new Date(booking.slots.start_time).toLocaleDateString()} at {new Date(booking.slots.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                                <span>{new Date(booking.slots.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' })} at {new Date(booking.slots.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' })}</span>
                                                             </div>
                                                             <div className="flex items-center gap-1.5 font-medium text-charcoal-900">
                                                                 <span>{booking.price_breakdown?.quantity || 1} x {booking.price_breakdown?.equipment || booking.equipment || 'Session'}</span>
@@ -384,15 +395,31 @@ export default function InstructorDashboardClient() {
                                                         <div className="flex items-center gap-2 mt-2">
                                                             <div className="w-5 h-5 rounded-full overflow-hidden border border-cream-200">
                                                                 <img
-                                                                    src={booking.client?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${booking.client?.full_name || 'Guest'}`}
+                                                                    src={booking.client?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.client?.full_name || 'Guest')}`}
                                                                     alt={booking.client?.full_name}
                                                                     className="w-full h-full object-cover"
+                                                                    onError={(e) => {
+                                                                        (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.client?.full_name || 'Guest')}`;
+                                                                    }}
                                                                 />
                                                             </div>
                                                             <span className="text-xs text-charcoal-500">
                                                                 Client: <span className="font-medium">{booking.client?.full_name || 'Guest'}</span>
                                                             </span>
                                                         </div>
+                                                        {/* Medical Condition Tags */}
+                                                        {booking.client?.medical_conditions && booking.client.medical_conditions.length > 0 && (
+                                                            <div className="flex flex-wrap gap-1.5 mt-2">
+                                                                {booking.client.medical_conditions.map((condition: string) => (
+                                                                    <span
+                                                                        key={condition}
+                                                                        className="inline-flex items-center px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-semibold rounded-full"
+                                                                    >
+                                                                        {condition}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-3">
@@ -450,7 +477,7 @@ export default function InstructorDashboardClient() {
                                                         </span>
                                                     </div>
                                                     <p className="text-xs text-charcoal-500 mt-0.5">
-                                                        {new Date(booking.slots.start_time).toLocaleDateString()} — {booking.price_breakdown?.quantity || 1} x {booking.price_breakdown?.equipment || booking.equipment || 'Session'}
+                                                        {new Date(booking.slots.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' })} — {booking.price_breakdown?.quantity || 1} x {booking.price_breakdown?.equipment || booking.equipment || 'Session'}
                                                     </p>
                                                 </div>
                                                 {booking.status === 'approved' && (

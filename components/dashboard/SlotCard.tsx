@@ -9,9 +9,9 @@ interface SlotCardProps {
 export default function SlotCard({ slot }: SlotCardProps) {
     const studio = slot.studios!;
     const startDate = new Date(slot.start_time);
-    const startTime = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-    const endTime = new Date(slot.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-    const dateString = startDate.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+    const startTime = startDate.toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true });
+    const endTime = new Date(slot.end_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true });
+    const dateString = startDate.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', weekday: 'short', month: 'short', day: 'numeric' });
 
     return (
         <div className="bg-white border border-cream-300 rounded-xl p-5 hover:shadow-md transition-shadow flex flex-col justify-between h-full group">

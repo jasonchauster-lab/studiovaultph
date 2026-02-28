@@ -373,7 +373,7 @@ export default async function AdminDashboard({
                                                     Account Name: {request.account_name || request.payment_details?.accountName || request.payment_details?.account_name || '—'}
                                                 </p>
                                                 <p className="text-xs text-charcoal-400 mt-1">
-                                                    Requested: {new Date(request.created_at).toLocaleString()}
+                                                    Requested: {new Date(request.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
                                                 </p>
                                             </div>
                                             <div className="flex gap-2">
@@ -469,7 +469,7 @@ export default async function AdminDashboard({
                                                                 ) : <span className="text-[10px] text-red-400">Missing</span>}
                                                             </div>
                                                             <span className="text-[10px] text-charcoal-700 font-medium">
-                                                                {cert.profiles?.gov_id_expiry ? `Exp: ${new Date(cert.profiles.gov_id_expiry).toLocaleDateString()}` : 'No date'}
+                                                                {cert.profiles?.gov_id_expiry ? `Exp: ${new Date(cert.profiles.gov_id_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' })}` : 'No date'}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -535,7 +535,7 @@ export default async function AdminDashboard({
                                                         <a href={studio.birSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
                                                             BIR Form 2303
                                                         </a>
-                                                        <span className="text-charcoal-500 font-medium">Exp: {studio.bir_certificate_expiry ? new Date(studio.bir_certificate_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                        <span className="text-charcoal-500 font-medium">Exp: {studio.bir_certificate_expiry ? new Date(studio.bir_certificate_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
                                                     </div>
                                                 ) : (
                                                     <p className="text-red-500">Missing BIR Form 2303</p>
@@ -546,7 +546,7 @@ export default async function AdminDashboard({
                                                         <a href={studio.govIdSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
                                                             Valid Gov ID
                                                         </a>
-                                                        <span className="text-charcoal-500 font-medium">Exp: {studio.gov_id_expiry ? new Date(studio.gov_id_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                        <span className="text-charcoal-500 font-medium">Exp: {studio.gov_id_expiry ? new Date(studio.gov_id_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
                                                     </div>
                                                 ) : (
                                                     <p className="text-red-500">Missing Gov ID</p>
@@ -557,7 +557,7 @@ export default async function AdminDashboard({
                                                         <a href={studio.insuranceSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
                                                             Insurance Policy
                                                         </a>
-                                                        <span className="text-charcoal-500 font-medium">Exp: {studio.insurance_expiry ? new Date(studio.insurance_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                        <span className="text-charcoal-500 font-medium">Exp: {studio.insurance_expiry ? new Date(studio.insurance_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -656,7 +656,7 @@ export default async function AdminDashboard({
                                                             <a href={studio.permitSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
                                                                 Mayor's Permit
                                                             </a>
-                                                            <span className="text-charcoal-500">Exp: {studio.mayors_permit_expiry ? new Date(studio.mayors_permit_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                            <span className="text-charcoal-500">Exp: {studio.mayors_permit_expiry ? new Date(studio.mayors_permit_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
                                                         </div>
                                                     ) : (
                                                         <p className="text-red-500">Missing Permit</p>
@@ -666,7 +666,7 @@ export default async function AdminDashboard({
                                                             <a href={studio.certSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
                                                                 Secretary's Cert
                                                             </a>
-                                                            <span className="text-charcoal-500">Exp: {studio.secretary_certificate_expiry ? new Date(studio.secretary_certificate_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                            <span className="text-charcoal-500">Exp: {studio.secretary_certificate_expiry ? new Date(studio.secretary_certificate_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
                                                         </div>
                                                     ) : (
                                                         <p className="text-red-500">Missing Cert</p>
@@ -674,7 +674,7 @@ export default async function AdminDashboard({
                                                     {studio.bir_certificate_url ? (
                                                         <div className="flex justify-between w-full">
                                                             <span className="text-charcoal-900 font-medium">BIR Form 2303 (See queue)</span>
-                                                            <span className="text-charcoal-500">Exp: {studio.bir_certificate_expiry ? new Date(studio.bir_certificate_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                            <span className="text-charcoal-500">Exp: {studio.bir_certificate_expiry ? new Date(studio.bir_certificate_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
                                                         </div>
                                                     ) : null}
                                                     {studio.insuranceSignedUrl ? (
@@ -682,7 +682,7 @@ export default async function AdminDashboard({
                                                             <a href={studio.insuranceSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
                                                                 Insurance Policy
                                                             </a>
-                                                            <span className="text-charcoal-500">Exp: {studio.insurance_expiry ? new Date(studio.insurance_expiry).toLocaleDateString() : 'N/A'}</span>
+                                                            <span className="text-charcoal-500">Exp: {studio.insurance_expiry ? new Date(studio.insurance_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
                                                         </div>
                                                     ) : null}
                                                 </div>
@@ -707,7 +707,7 @@ export default async function AdminDashboard({
                             <div className="space-y-4">
                                 {pendingBookings?.map((booking: any) => {
                                     const studio = booking.slots?.studios;
-                                    const startTime = new Date(booking.slots?.start_time).toLocaleString();
+                                    const startTime = new Date(booking.slots?.start_time).toLocaleString('en-PH', { timeZone: 'Asia/Manila' });
                                     const hasPaymentProof = !!booking.payment_proof_url;
 
                                     return (
@@ -808,7 +808,7 @@ export default async function AdminDashboard({
                                                     Account Name: {request.account_name || request.payment_details?.accountName || request.payment_details?.account_name || '—'}
                                                 </p>
                                                 <p className="text-xs text-charcoal-400 mt-1">
-                                                    Requested: {new Date(request.created_at).toLocaleString()}
+                                                    Requested: {new Date(request.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
                                                 </p>
                                             </div>
                                             <div className="flex gap-2">
@@ -869,7 +869,7 @@ export default async function AdminDashboard({
                                                     Account Name: {request.account_name || '—'}
                                                 </p>
                                                 <p className="text-xs text-charcoal-400 mt-1">
-                                                    Requested: {new Date(request.created_at).toLocaleString()}
+                                                    Requested: {new Date(request.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
                                                 </p>
                                             </div>
                                             <div className="flex gap-2">

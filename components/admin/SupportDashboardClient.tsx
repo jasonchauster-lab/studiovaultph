@@ -254,7 +254,7 @@ export default function SupportDashboardClient() {
                                         )}
                                     </div>
                                     <span className="text-[10px] text-charcoal-400">
-                                        {new Date(ticket.updated_at).toLocaleDateString()}
+                                        {new Date(ticket.updated_at).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' })}
                                     </span>
                                 </div>
                                 <div className="text-xs text-charcoal-500 uppercase tracking-wider">

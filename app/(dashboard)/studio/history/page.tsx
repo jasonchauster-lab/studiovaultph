@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Clock, CalendarX2, PlusCircle } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 
 const STATUS_STYLES: Record<string, string> = {
@@ -137,20 +136,17 @@ export default async function StudioHistoryPage() {
                                                 {/* Instructor */}
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2.5">
-                                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-cream-100 border border-cream-200 shrink-0 flex items-center justify-center">
-                                                            {instructor?.avatar_url ? (
-                                                                <Image
-                                                                    src={instructor.avatar_url}
-                                                                    alt={instructor.full_name || 'Instructor'}
-                                                                    width={32}
-                                                                    height={32}
-                                                                    className="w-full h-full object-cover"
-                                                                />
-                                                            ) : (
-                                                                <span className="text-xs font-bold text-charcoal-400">
-                                                                    {(instructor?.full_name || '?')[0].toUpperCase()}
-                                                                </span>
-                                                            )}
+                                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-cream-100 border border-cream-200 shrink-0">
+                                                            <img
+                                                                src={instructor?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(instructor?.full_name || 'instructor')}`}
+                                                                alt={instructor?.full_name || 'Instructor'}
+                                                                width={32}
+                                                                height={32}
+                                                                className="w-full h-full object-cover"
+                                                                onError={(e) => {
+                                                                    (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(instructor?.full_name || 'instructor')}`;
+                                                                }}
+                                                            />
                                                         </div>
                                                         <span className="text-charcoal-900 font-medium">
                                                             {instructor?.full_name || 'Unknown'}

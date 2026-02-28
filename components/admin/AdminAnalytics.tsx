@@ -189,7 +189,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                     {/* X-Axis Labels */}
                     <div className="flex gap-4 text-[10px] text-charcoal-600 overflow-hidden">
                         {stats.dailyData.filter((_, i) => i % Math.max(1, Math.floor(stats.dailyData.length / 5)) === 0).map((d, i) => (
-                            <span key={i}>{new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                            <span key={i}>{new Date(d.date).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' })}</span>
                         ))}
                     </div>
                 </div>

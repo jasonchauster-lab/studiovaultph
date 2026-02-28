@@ -18,6 +18,8 @@ export async function updateProfile(formData: FormData) {
 
     // Extract all values for teaching_equipment (checkboxes)
     const teachingEquipment = formData.getAll('teaching_equipment') as string[]
+    // Extract all values for medical_conditions (checkboxes)
+    const medicalConditions = formData.getAll('medical_conditions') as string[]
 
     const updates: any = {
         full_name: fullName,
@@ -26,6 +28,7 @@ export async function updateProfile(formData: FormData) {
         emergency_contact: emergencyContact,
         bio: bio,
         teaching_equipment: teachingEquipment, // Save array
+        medical_conditions: medicalConditions, // Save medical conditions
         rates: {} // Initialize
     }
 

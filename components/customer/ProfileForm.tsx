@@ -10,6 +10,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
     const [isLoading, setIsLoading] = useState(false)
     const [message, setMessage] = useState<string | null>(null)
     const [selectedEquipment, setSelectedEquipment] = useState<string[]>(profile?.teaching_equipment || [])
+    const [selectedMedicalConditions, setSelectedMedicalConditions] = useState<string[]>(profile?.medical_conditions || [])
 
     const handleSubmit = async (formData: FormData) => {
         const contactNumber = formData.get('contactNumber') as string
@@ -159,6 +160,33 @@ export default function ProfileForm({ profile }: { profile: any }) {
                         className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold resize-none transition-all"
                     />
                 </div>
+            </div>
+
+            {/* Medical Conditions */}
+            <div>
+                <label className="block text-sm font-medium text-charcoal-700 mb-2">Medical Conditions / Disabilities</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {['Scoliosis', 'Obesity', 'Herniated Disc', 'Post-partum', 'Chronic Back Pain', 'Hypertension', 'Diabetes', 'Asthma', 'Osteoporosis', 'Others'].map((condition) => (
+                        <label key={condition} className="flex items-center gap-2 p-3 border border-cream-200 rounded-lg hover:bg-cream-50 cursor-pointer transition-colors">
+                            <input
+                                type="checkbox"
+                                name="medical_conditions"
+                                value={condition}
+                                checked={selectedMedicalConditions.includes(condition)}
+                                onChange={(e) => {
+                                    if (e.target.checked) {
+                                        setSelectedMedicalConditions([...selectedMedicalConditions, condition])
+                                    } else {
+                                        setSelectedMedicalConditions(selectedMedicalConditions.filter((item) => item !== condition))
+                                    }
+                                }}
+                                className="w-4 h-4 text-rose-gold rounded border-cream-300 focus:ring-rose-gold/50"
+                            />
+                            <span className="text-sm text-charcoal-700">{condition}</span>
+                        </label>
+                    ))}
+                </div>
+                <p className="text-xs text-charcoal-500 mt-2 italic">Select any conditions you have. This helps your instructor tailor sessions to your needs.</p>
             </div>
 
             {/* Teaching Equipment (Instructors Only) */}

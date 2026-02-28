@@ -258,12 +258,15 @@ export default async function StudioDashboard(props: {
                                                             <div className="flex justify-between items-start mb-4">
                                                                 <div className="flex items-center gap-3">
                                                                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                                                                        <Image
-                                                                            src={booking.instructor?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${booking.instructor?.full_name}`}
+                                                                        <img
+                                                                            src={booking.instructor?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.instructor?.full_name || 'instructor')}`}
                                                                             alt="Instructor"
                                                                             width={40}
                                                                             height={40}
                                                                             className="object-cover w-full h-full"
+                                                                            onError={(e) => {
+                                                                                (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.instructor?.full_name || 'instructor')}`;
+                                                                            }}
                                                                         />
                                                                     </div>
                                                                     <div>
@@ -280,19 +283,22 @@ export default async function StudioDashboard(props: {
                                                             <div className="space-y-2 p-3 bg-white/50 rounded-lg border border-cream-100 mb-4">
                                                                 <div className="flex items-center gap-2 text-charcoal-600 text-[11px]">
                                                                     <div className="w-4 h-4 rounded-full overflow-hidden border border-cream-200">
-                                                                        <Image
-                                                                            src={booking.client?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${booking.client?.full_name}`}
+                                                                        <img
+                                                                            src={booking.client?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.client?.full_name || 'client')}`}
                                                                             alt="Client"
                                                                             width={16}
                                                                             height={16}
                                                                             className="object-cover w-full h-full"
+                                                                            onError={(e) => {
+                                                                                (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.client?.full_name || 'client')}`;
+                                                                            }}
                                                                         />
                                                                     </div>
                                                                     <span>Client: {booking.client?.full_name || 'N/A'}</span>
                                                                 </div>
                                                                 <div className="flex items-center gap-2 text-charcoal-900 text-[11px] font-medium">
                                                                     <Calendar className="w-3 h-3 text-rose-gold" />
-                                                                    <span>{start.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })} at {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                                    <span>{start.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' })} at {start.toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' })}</span>
                                                                 </div>
                                                                 <div className="flex items-center gap-2 text-charcoal-900 text-[11px] font-medium">
                                                                     <Clock className="w-3 h-3 text-rose-gold" />

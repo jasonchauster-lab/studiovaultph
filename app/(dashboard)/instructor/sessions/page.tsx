@@ -93,7 +93,7 @@ export default async function InstructorSessionsPage() {
                                             <div className="flex flex-col">
                                                 <div className="font-bold text-charcoal-700">{studio?.name}</div>
                                                 <div className="text-xs text-charcoal-500 flex items-center gap-1.5">
-                                                    <span>{new Date(slot?.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(slot?.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                    <span>{new Date(slot?.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' })} - {new Date(slot?.end_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' })}</span>
                                                     <span className="w-1 h-1 rounded-full bg-cream-300" />
                                                     <span className="font-medium text-charcoal-600">{booking.price_breakdown?.equipment || booking.equipment || 'Session'}</span>
                                                 </div>
@@ -135,7 +135,7 @@ export default async function InstructorSessionsPage() {
                                             <div className="flex flex-col">
                                                 <div className="font-bold text-charcoal-700">{studio?.name}</div>
                                                 <div className="text-xs text-charcoal-500 flex items-center gap-1.5">
-                                                    <span>{new Date(slot?.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                    <span>{new Date(slot?.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' })}</span>
                                                     <span className="w-1 h-1 rounded-full bg-cream-300" />
                                                     <span className="font-medium text-charcoal-600">{booking.price_breakdown?.equipment || booking.equipment || 'Session'}</span>
                                                     {client && client.id !== user.id && (

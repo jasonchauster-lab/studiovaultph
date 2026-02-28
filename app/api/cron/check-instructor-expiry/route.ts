@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email';
 import DocumentExpiryEmail from '@/components/emails/DocumentExpiryEmail';
+import { getManilaTodayStr } from '@/lib/timezone';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,22 +17,13 @@ export async function GET(request: Request) {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Today in Manila (UTC+8)
-    const now = new Date();
-    const manilaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
-    const todayDateStr = manilaTime.toISOString().split('T')[0];
-    const today = new Date(todayDateStr); // Construction from YYYY-MM-DD is safe for relative comparisons
-    today.setHours(0, 0, 0, 0);
+    // Today in Manila (UTC+8) — robust, works on all server runtimes
+    const todayStr = getManilaTodayStr();
+    const today = new Date(todayStr);
+    today.setUTCHours(0, 0, 0, 0);
 
-    const in30Days = new Date(today);
-    in30Days.setDate(today.getDate() + 30);
-    const in30DaysStr = in30Days.toISOString().split('T')[0];
-
-    const in7Days = new Date(today);
-    in7Days.setDate(today.getDate() + 7);
-    const in7DaysStr = in7Days.toISOString().split('T')[0];
-
-    const todayStr = today.toISOString().split('T')[0];
+    const in30DaysStr = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const in7DaysStr = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     try {
         const { data: instructors, error } = await supabase
