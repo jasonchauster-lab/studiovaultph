@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { updatePartnerFeeSettings } from '@/app/(dashboard)/admin/actions'
 import { Star, Mail, Phone, Calendar } from 'lucide-react'
-import PartnerBookingsDrawer from './PartnerBookingsDrawer'
 import clsx from 'clsx'
 
 type PartnerProps = {
@@ -27,10 +26,12 @@ type PartnerProps = {
 
 export default function PartnerFeeClient({
     instructors,
-    studios
+    studios,
+    onOpenBookings
 }: {
     instructors: any[]
     studios: any[]
+    onOpenBookings: (id: string, name: string, type: 'profile' | 'studio') => void
 }) {
     const defaultData: PartnerProps[] = [
         ...instructors.map(i => ({
@@ -60,12 +61,6 @@ export default function PartnerFeeClient({
     ]
 
     const [partners, setPartners] = useState<PartnerProps[]>(defaultData)
-    const [drawerState, setDrawerState] = useState<{ isOpen: boolean; partnerId: string; partnerName: string; partnerType: 'profile' | 'studio' }>({
-        isOpen: false,
-        partnerId: '',
-        partnerName: '',
-        partnerType: 'profile'
-    })
 
     const handleToggle = async (index: number) => {
         const p = partners[index]
@@ -124,12 +119,7 @@ export default function PartnerFeeClient({
                     )}
 
                     <button
-                        onClick={() => setDrawerState({
-                            isOpen: true,
-                            partnerId: p.id,
-                            partnerName: p.name,
-                            partnerType: p.type
-                        })}
+                        onClick={() => onOpenBookings(p.id, p.name, p.type)}
                         className="flex items-center gap-1.5 text-xs font-bold text-rose-gold hover:brightness-110 transition-all group"
                     >
                         <Calendar className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
@@ -231,14 +221,6 @@ export default function PartnerFeeClient({
         <div className="space-y-8">
             <Section title="Studios" list={sList} />
             <Section title="Instructors" list={iList} />
-
-            <PartnerBookingsDrawer
-                isOpen={drawerState.isOpen}
-                partnerId={drawerState.partnerId}
-                partnerName={drawerState.partnerName}
-                partnerType={drawerState.partnerType}
-                onClose={() => setDrawerState(prev => ({ ...prev, isOpen: false }))}
-            />
         </div>
     )
 }

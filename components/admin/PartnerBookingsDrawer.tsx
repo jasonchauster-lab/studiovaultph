@@ -51,17 +51,23 @@ export default function PartnerBookingsDrawer({
         }
     }, [isOpen, partnerId, partnerType])
 
-    if (!isOpen) return null
+    if (!partnerId) return null
 
     return (
-        <div className="fixed inset-0 z-[100] overflow-hidden">
+        <div className={clsx(
+            "fixed inset-0 z-[100] transition-all duration-300 ease-in-out",
+            isOpen ? "visible opacity-100" : "invisible opacity-0"
+        )}>
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-charcoal-900/40 backdrop-blur-sm transition-opacity"
+                className="fixed inset-0 bg-charcoal-900/40 backdrop-blur-sm"
                 onClick={onClose}
             />
 
-            <div className="absolute inset-y-0 right-0 w-full max-w-2xl bg-cream-50 shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out translate-x-0">
+            <div className={clsx(
+                "fixed inset-y-0 right-0 w-full max-w-2xl bg-cream-50 shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out",
+                isOpen ? "translate-x-0" : "translate-x-full"
+            )}>
                 {/* Header */}
                 <div className="px-6 py-4 bg-white border-b border-cream-200 flex items-center justify-between">
                     <div>

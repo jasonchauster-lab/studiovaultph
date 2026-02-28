@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import GlobalSearch from '@/components/admin/GlobalSearch';
-import PartnerFeeClient from '@/components/admin/PartnerFeeClient';
+import PartnersManagementContent from './PartnersManagementContent';
 
 export default async function AdminPartnersPage() {
     const supabase = await createClient();
@@ -59,23 +58,10 @@ export default async function AdminPartnersPage() {
     return (
         <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
             <div className="max-w-6xl mx-auto">
-
-                <div className="flex flex-col gap-4">
-                    <div>
-                        <h1 className="text-3xl font-serif text-charcoal-900 mb-1">Partner Management</h1>
-                        <p className="text-charcoal-600 text-sm">Manage instructor and studio commission fees.</p>
-                    </div>
-                    <div className="w-full max-w-lg">
-                        <GlobalSearch />
-                    </div>
-                </div>
-
-                <div className="bg-white text-charcoal-900 rounded-2xl border border-cream-200 shadow-sm p-6 overflow-x-auto">
-                    <PartnerFeeClient
-                        instructors={instructors || []}
-                        studios={studios || []}
-                    />
-                </div>
+                <PartnersManagementContent
+                    instructors={instructors || []}
+                    studios={studios || []}
+                />
             </div>
         </div>
     );
