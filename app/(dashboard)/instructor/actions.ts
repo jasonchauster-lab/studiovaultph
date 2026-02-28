@@ -23,7 +23,7 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
             slots(studios(name))
         `)
         .eq('instructor_id', user.id)
-        .eq('status', 'approved')
+        .in('status', ['approved', 'admin_approved'])
 
     if (startDate) bookingsQuery = bookingsQuery.gte('created_at', startDate)
     if (endDate) bookingsQuery = bookingsQuery.lte('created_at', endDate)
@@ -44,7 +44,7 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
         const breakdown = booking.price_breakdown as any;
         const instructorFee = breakdown?.instructor_fee || 0;
         // Only count approved bookings towards actual earnings
-        if (booking.status === 'approved') {
+        if (booking.status === 'approved' || booking.status === 'admin_approved') {
             totalEarned += instructorFee;
         }
 
@@ -343,8 +343,8 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
     const instructorName = instructor?.full_name || 'Instructor';
     const studioName = studios?.name;
     const studioAddress = studios?.address;
-    const date = new Date(slots?.start_time).toLocaleDateString();
-    const time = new Date(slots?.start_time).toLocaleTimeString();
+    const date = new Date(slots?.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
+    const time = new Date(slots?.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' });
 
     if (instructorEmail && slots?.start_time) {
         await sendEmail({

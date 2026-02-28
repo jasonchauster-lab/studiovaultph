@@ -335,9 +335,9 @@ export default function BookingSection({
                             )}
                         >
                             <div className="font-serif text-xl mb-2">
-                                {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                 <span className="text-sm opacity-50 mx-2">to</span>
-                                {end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                {end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                             </div>
                             <div className="flex flex-wrap gap-1.5">
                                 <span className={clsx(

@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, Plus, Users, User, Calendar as CalendarIcon,
 import clsx from 'clsx'
 import { createSlot, deleteSlot, updateSlot } from '@/app/(dashboard)/studio/actions' // For single slot
 import ScheduleManager from './ScheduleManager' // Bulk generator
+import Image from 'next/image'
 
 interface Slot {
     id: string
@@ -14,6 +15,12 @@ interface Slot {
     end_time: string
     is_available: boolean
     equipment?: string[]
+    bookings?: Array<{
+        id: string;
+        status: string;
+        client?: { full_name: string; avatar_url: string };
+        instructor?: { full_name: string; avatar_url: string };
+    }>
 }
 
 interface StudioScheduleCalendarProps {
@@ -405,6 +412,53 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                             </button>
                         </div>
 
+                        {(() => {
+                            const activeBooking = editingSlot.bookings?.find(b => ['approved', 'confirmed', 'pending', 'paid'].includes(b.status?.toLowerCase() || ''));
+                            if (!activeBooking) return null;
+                            return (
+                                <div className="mb-6 p-4 bg-teal-50 border border-teal-200 rounded-xl space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-xs font-bold text-teal-800 uppercase tracking-widest">Active Booking</h4>
+                                        <span className="text-[10px] font-black uppercase px-2 py-0.5 bg-teal-100 text-teal-700 rounded-md border border-teal-200">
+                                            {activeBooking.status}
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {activeBooking.instructor && (
+                                            <div className="space-y-1">
+                                                <p className="text-[10px] text-teal-600 font-bold uppercase">Instructor</p>
+                                                <div className="flex items-center gap-2">
+                                                    {activeBooking.instructor.avatar_url ? (
+                                                        <Image src={activeBooking.instructor.avatar_url} alt="Instructor" width={24} height={24} className="rounded-full w-6 h-6 object-cover border border-white shadow-sm" />
+                                                    ) : (
+                                                        <div className="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center border border-teal-200">
+                                                            <User className="w-3.5 h-3.5 text-teal-600" />
+                                                        </div>
+                                                    )}
+                                                    <span className="text-sm font-medium text-charcoal-900">{activeBooking.instructor.full_name}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {activeBooking.client && (
+                                            <div className="space-y-1">
+                                                <p className="text-[10px] text-teal-600 font-bold uppercase">Client</p>
+                                                <div className="flex items-center gap-2">
+                                                    {activeBooking.client.avatar_url ? (
+                                                        <Image src={activeBooking.client.avatar_url} alt="Client" width={24} height={24} className="rounded-full w-6 h-6 object-cover border border-white shadow-sm" />
+                                                    ) : (
+                                                        <div className="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center border border-teal-200">
+                                                            <Users className="w-3.5 h-3.5 text-teal-600" />
+                                                        </div>
+                                                    )}
+                                                    <span className="text-sm font-medium text-charcoal-900">{activeBooking.client.full_name}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
                         <form action={handleUpdate} className="space-y-4">
                             {/* ... (Existing Form Content) ... */}
                             {/* To avoid huge diffs, I will trust the pre-existing content is fine and just append the new modal below it 
@@ -486,13 +540,43 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                         <div className="bg-white p-2 rounded-md border border-cream-200">
                                             <Clock className="w-4 h-4 text-charcoal-500" />
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-charcoal-900">
-                                                {format(parseISO(slot.start_time), 'h:mm')} - {format(parseISO(slot.end_time), 'h:mm a')}
-                                            </p>
-                                            <p className="text-xs text-charcoal-500">
-                                                {slot.equipment?.join(', ') || 'Open Space'}
-                                            </p>
+                                        <div className="space-y-1.5">
+                                            <div>
+                                                <p className="text-sm font-medium text-charcoal-900 leading-none mb-1">
+                                                    {format(parseISO(slot.start_time), 'h:mm')} - {format(parseISO(slot.end_time), 'h:mm a')}
+                                                </p>
+                                                <p className="text-xs text-charcoal-500 leading-none">
+                                                    {slot.equipment?.join(', ') || 'Open Space'}
+                                                </p>
+                                            </div>
+                                            {(() => {
+                                                const activeBooking = slot.bookings?.find(b => ['approved', 'confirmed', 'pending', 'paid'].includes(b.status?.toLowerCase() || ''));
+                                                if (!activeBooking) return null;
+                                                return (
+                                                    <div className="flex items-center gap-2 pt-1 border-t border-cream-200/50">
+                                                        {activeBooking.instructor && (
+                                                            <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded-md border border-cream-200 shadow-sm" title="Instructor">
+                                                                {activeBooking.instructor.avatar_url ? (
+                                                                    <Image src={activeBooking.instructor.avatar_url} alt="Instructor" width={16} height={16} className="rounded-full w-4 h-4 object-cover" />
+                                                                ) : (
+                                                                    <User className="w-3.5 h-3.5 text-charcoal-400" />
+                                                                )}
+                                                                <span className="text-[11px] font-medium text-charcoal-700">{activeBooking.instructor.full_name || 'N/A'}</span>
+                                                            </div>
+                                                        )}
+                                                        {activeBooking.client && (
+                                                            <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded-md border border-cream-200 shadow-sm" title="Client">
+                                                                {activeBooking.client.avatar_url ? (
+                                                                    <Image src={activeBooking.client.avatar_url} alt="Client" width={16} height={16} className="rounded-full w-4 h-4 object-cover" />
+                                                                ) : (
+                                                                    <Users className="w-3.5 h-3.5 text-charcoal-400" />
+                                                                )}
+                                                                <span className="text-[11px] font-medium text-charcoal-700">{activeBooking.client.full_name || 'N/A'}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                     <button

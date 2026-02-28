@@ -16,7 +16,11 @@ export async function GET(request: Request) {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    const today = new Date();
+    // Today in Manila (UTC+8)
+    const now = new Date();
+    const manilaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+    const todayDateStr = manilaTime.toISOString().split('T')[0];
+    const today = new Date(todayDateStr); // Construction from YYYY-MM-DD is safe for relative comparisons
     today.setHours(0, 0, 0, 0);
 
     const in30Days = new Date(today);

@@ -27,7 +27,7 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
     const startTime = new Date(sortedSlots[0].start_time);
     const endTime = new Date(sortedSlots[sortedSlots.length - 1].end_time);
 
-    const timeRangeString = `${startTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+    const timeRangeString = `${startTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })} - ${endTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}`;
     const dateString = date.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
 
     // Calculate minimum price from equipment pricing
@@ -136,8 +136,8 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
                         <h4 className="text-sm font-medium text-charcoal-700 mb-3 mt-4">Select a time block to book:</h4>
                         <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                             {Object.entries(groupedSlots).map(([key, group]) => {
-                                const slotStart = new Date(group.slots[0].start_time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-                                const slotEnd = new Date(group.slots[0].end_time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                                const slotStart = new Date(group.slots[0].start_time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+                                const slotEnd = new Date(group.slots[0].end_time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
 
                                 return (
                                     <BookSlotGroup

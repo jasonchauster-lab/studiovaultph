@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import SupportChatWidget from '@/components/support/SupportChatWidget'
 import Navigation from '@/components/dashboard/Navigation'
+import UserPresenceTracker from '@/components/shared/UserPresenceTracker'
 
 export default async function DashboardLayout({
     children,
@@ -74,7 +75,7 @@ export default async function DashboardLayout({
                                 />
                             </div>
                             <form action={signOut} className="hidden sm:block">
-                                <button className="p-2 text-charcoal-400 hover:text-red-600 transition-colors" title="Log Out">
+                                <button className="p-2 text-rose-gold hover:text-red-600 transition-colors" title="Log Out">
                                     <LogOut className="w-5 h-5" />
                                 </button>
                             </form>
@@ -89,6 +90,7 @@ export default async function DashboardLayout({
             </main>
 
             {user && <SupportChatWidget userId={user.id} />}
+            {user && <UserPresenceTracker />}
         </div>
     )
 }

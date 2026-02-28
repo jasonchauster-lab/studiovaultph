@@ -61,7 +61,7 @@ export default async function StudioDashboard(props: {
             upcomingBookings = allBookings.filter(b => {
                 const sId = b.slots?.studio_id;
                 const status = b.status?.toLowerCase();
-                return sId === myStudio.id && ['approved', 'confirmed', 'pending', 'paid'].includes(status);
+                return sId === myStudio.id && ['approved', 'admin_approved', 'confirmed', 'pending', 'paid'].includes(status);
             }).slice(0, 10);
         }
 
@@ -72,7 +72,15 @@ export default async function StudioDashboard(props: {
 
         const { data: slots } = await supabase
             .from('slots')
-            .select('*')
+            .select(`
+                *,
+                bookings (
+                    id,
+                    status,
+                    client:profiles!client_id(full_name, avatar_url),
+                    instructor:profiles!instructor_id(full_name, avatar_url)
+                )
+            `)
             .eq('studio_id', myStudio.id)
             .gte('start_time', weekStart.toISOString())
             .lte('start_time', weekEnd.toISOString())
@@ -94,7 +102,7 @@ export default async function StudioDashboard(props: {
             `)
             .eq('slots.studio_id', myStudio.id)
             .gte('created_at', thirtyDaysAgo.toISOString())
-            .in('status', ['approved', 'confirmed', 'paid']);
+            .in('status', ['approved', 'admin_approved', 'confirmed', 'paid']);
 
         if (statsBookings && statsBookings.length > 0) {
             // Calc Revenue
@@ -295,11 +303,11 @@ export default async function StudioDashboard(props: {
                                                             <div className="flex items-center justify-between">
                                                                 <div className={clsx(
                                                                     "text-[9px] font-black uppercase tracking-[0.15em] px-2.5 py-1 rounded-md border",
-                                                                    booking.status?.toLowerCase() === 'approved' || booking.status?.toLowerCase() === 'confirmed'
+                                                                    booking.status?.toLowerCase() === 'approved' || booking.status?.toLowerCase() === 'admin_approved' || booking.status?.toLowerCase() === 'confirmed'
                                                                         ? "bg-green-50 text-green-700 border-green-200"
                                                                         : "bg-amber-50 text-amber-700 border-amber-200"
                                                                 )}>
-                                                                    {booking.status?.toLowerCase() === 'approved' || booking.status?.toLowerCase() === 'confirmed' ? 'Confirmed' : 'Pending'}
+                                                                    {booking.status?.toLowerCase() === 'approved' || booking.status?.toLowerCase() === 'admin_approved' || booking.status?.toLowerCase() === 'confirmed' ? 'Confirmed' : 'Pending'}
                                                                 </div>
                                                                 <StudioChatButton booking={booking} currentUserId={user.id} />
                                                             </div>

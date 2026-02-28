@@ -76,7 +76,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm text-charcoal-500">
                                         <span className="flex items-center gap-1">
                                             <Clock className="w-4 h-4" />
-                                            {new Date(booking.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                            {new Date(booking.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                         </span>
                                         <span className="flex items-center gap-1">
                                             <MapPin className="w-4 h-4" />
@@ -106,14 +106,14 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                 )}
                                 <span className={clsx(
                                     "px-3 py-1 text-xs font-medium rounded-full uppercase tracking-wider",
-                                    booking.status === 'approved' ? "bg-green-100 text-green-700" :
+                                    (booking.status === 'approved' || booking.status === 'admin_approved') ? "bg-green-100 text-green-700" :
                                         booking.status === 'rejected' || booking.status === 'cancelled' ? "bg-red-100 text-red-700" :
                                             "bg-yellow-100 text-yellow-700"
                                 )}>
                                     {booking.status}
                                 </span>
 
-                                {booking.status === 'approved' && new Date(booking.slots.start_time) > new Date() && (
+                                {(booking.status === 'approved' || booking.status === 'admin_approved') && new Date(booking.slots.start_time) > new Date() && (
                                     <button
                                         onClick={() => handleCancel(booking)}
                                         disabled={cancellingId === booking.id}
@@ -135,6 +135,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                 <ChatWindow
                     bookingId={selectedBooking}
                     currentUserId={userId}
+                    recipientId={activeBooking.instructor_id}
                     recipientName={recipientName}
                     isOpen={!!selectedBooking}
                     onClose={() => setSelectedBooking(null)}

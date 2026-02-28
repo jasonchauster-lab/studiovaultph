@@ -447,8 +447,8 @@ export async function confirmBooking(bookingId: string) {
         return { error: 'Booking approved, but failed to send confirmation emails due to missing participant data.' };
     }
 
-    const date = new Date(slots.start_time).toLocaleDateString();
-    const time = new Date(slots.start_time).toLocaleTimeString();
+    const date = new Date(slots.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
+    const time = new Date(slots.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' });
 
     const clientEmail = client.email;
     const clientName = client.full_name || 'Valued Client';
@@ -622,8 +622,8 @@ export async function rejectBooking(bookingId: string, reason: string) {
         return { error: `Booking rejected, but failed to send email: Client email not found. (ID: ${bookingId})` };
     }
 
-    const date = new Date(slots?.start_time).toLocaleDateString();
-    const time = new Date(slots?.start_time).toLocaleTimeString();
+    const date = new Date(slots?.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
+    const time = new Date(slots?.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' });
     const studioName = studios?.name || 'Pilates Studio';
 
     const emailResult = await sendEmail({
@@ -673,7 +673,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
             ),
             instructor:profiles!instructor_id(full_name)
         `)
-        .eq('status', 'approved')
+        .in('status', ['approved', 'admin_approved'])
         .order('created_at', { ascending: true })
 
     if (startDate) bookingsQuery = bookingsQuery.gte('created_at', startDate)
@@ -853,7 +853,7 @@ export async function getRevenueExport(startDate?: string, endDate?: string) {
             instructor:profiles!instructor_id(full_name),
             slots(start_time, studios(name))
         `)
-        .eq('status', 'approved')
+        .in('status', ['approved', 'admin_approved'])
         .order('created_at', { ascending: false })
 
     if (startDate) query = query.gte('created_at', startDate)

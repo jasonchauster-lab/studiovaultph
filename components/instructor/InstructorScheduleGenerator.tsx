@@ -17,6 +17,13 @@ const LOCATIONS = [
     'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others'
 ]
 
+const GROUPED_LOCATIONS = LOCATIONS.reduce((acc, loc) => {
+    const city = loc.split(' - ')[0];
+    if (!acc[city]) acc[city] = [];
+    acc[city].push(loc);
+    return acc;
+}, {} as Record<string, string[]>);
+
 interface ScheduleManagerProps {
     initialAvailability: any[];
 }
@@ -40,6 +47,18 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                 ? prev.filter(l => l !== loc)
                 : [...prev, loc]
         );
+    }
+
+    const toggleCityGroup = (cityLocations: string[]) => {
+        const allSelected = cityLocations.every(loc => locations.includes(loc));
+        if (allSelected) {
+            setLocations(prev => prev.filter(l => !cityLocations.includes(l)));
+        } else {
+            setLocations(prev => {
+                const newSelections = cityLocations.filter(loc => !prev.includes(loc));
+                return [...prev, ...newSelections];
+            });
+        }
     }
 
     const handleGenerate = async () => {
@@ -194,23 +213,49 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-charcoal-700 mb-3">Locations (Multi-Select)</label>
-                            <div className="flex flex-wrap gap-2">
-                                {LOCATIONS.map(l => {
-                                    const isSelected = locations.includes(l);
+                            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                {Object.entries(GROUPED_LOCATIONS).map(([city, cityLocations]) => {
+                                    const allSelected = cityLocations.every(loc => locations.includes(loc));
                                     return (
-                                        <button
-                                            key={l}
-                                            type="button"
-                                            onClick={() => toggleLocation(l)}
-                                            className={clsx(
-                                                "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
-                                                isSelected
-                                                    ? "bg-rose-gold text-white border-rose-gold shadow-sm"
-                                                    : "bg-white text-charcoal-600 border-cream-200 hover:border-rose-gold"
-                                            )}
-                                        >
-                                            {l}
-                                        </button>
+                                        <div key={city} className="space-y-2 border border-cream-200 p-3 rounded-xl bg-cream-50/50">
+                                            <div className="flex items-center justify-between">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleCityGroup(cityLocations)}
+                                                    className="font-bold text-sm text-charcoal-900 hover:text-rose-gold transition-colors text-left flex items-center gap-2"
+                                                >
+                                                    {city}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleCityGroup(cityLocations)}
+                                                    className="text-[10px] font-medium text-charcoal-500 hover:text-rose-gold transition-colors bg-white px-2 py-1 rounded-full border border-cream-200 shadow-sm"
+                                                >
+                                                    {allSelected ? 'Deselect All' : 'Select All'}
+                                                </button>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {cityLocations.map(l => {
+                                                    const isSelected = locations.includes(l);
+                                                    const displayName = l.split(' - ')[1] || l;
+                                                    return (
+                                                        <button
+                                                            key={l}
+                                                            type="button"
+                                                            onClick={() => toggleLocation(l)}
+                                                            className={clsx(
+                                                                "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                                                                isSelected
+                                                                    ? "bg-rose-gold text-white border-rose-gold shadow-sm"
+                                                                    : "bg-white text-charcoal-600 border-cream-200 hover:border-rose-gold"
+                                                            )}
+                                                        >
+                                                            {displayName}
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
                                     )
                                 })}
                             </div>

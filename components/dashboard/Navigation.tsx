@@ -147,7 +147,7 @@ export default function Navigation({ role }: NavigationProps) {
             {/* Log out — shown in mobile drawer only */}
             <div className="md:hidden pt-2 border-t border-cream-100 mt-2">
                 <form action={signOut}>
-                    <button className="flex items-center gap-2 text-sm font-medium text-charcoal-600 hover:text-red-600 transition-colors py-2">
+                    <button className="flex items-center gap-2 text-sm font-medium text-rose-gold hover:text-red-600 transition-colors py-2">
                         <LogOut className="w-4 h-4" />
                         Log Out
                     </button>

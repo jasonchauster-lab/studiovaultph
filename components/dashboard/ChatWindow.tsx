@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Send, X, Clock } from 'lucide-react'
+import UserPresenceIndicator from '@/components/shared/UserPresenceIndicator'
 
 interface Message {
     id: string
@@ -15,13 +16,14 @@ interface Message {
 interface ChatWindowProps {
     bookingId: string
     currentUserId: string
+    recipientId: string
     recipientName: string
     isOpen: boolean
     onClose: () => void
     isExpired: boolean
 }
 
-export default function ChatWindow({ bookingId, currentUserId, recipientName, isOpen, onClose, isExpired }: ChatWindowProps) {
+export default function ChatWindow({ bookingId, currentUserId, recipientId, recipientName, isOpen, onClose, isExpired }: ChatWindowProps) {
     const supabase = createClient()
     const [messages, setMessages] = useState<Message[]>([])
     const [newMessage, setNewMessage] = useState('')
@@ -127,6 +129,7 @@ export default function ChatWindow({ bookingId, currentUserId, recipientName, is
                 <div className="bg-charcoal-900 text-white p-4 flex justify-between items-center shrink-0">
                     <div>
                         <h3 className="font-serif font-bold text-lg">Chat with {recipientName}</h3>
+                        {!isExpired && <UserPresenceIndicator userId={recipientId} className="mt-1" />}
                         {isExpired && (
                             <p className="text-xs text-yellow-400 flex items-center gap-1 mt-1">
                                 <Clock className="w-3 h-3" /> Session Expired

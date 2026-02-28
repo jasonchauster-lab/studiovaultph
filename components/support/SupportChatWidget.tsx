@@ -260,7 +260,7 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
             {/* Floating Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-14 h-14 bg-charcoal-900 text-cream-50 rounded-full shadow-lg hover:bg-charcoal-800 transition-transform hover:scale-105 active:scale-95 flex items-center justify-center pointer-events-auto relative"
+                className="w-14 h-14 bg-rose-gold text-white rounded-full shadow-lg hover:brightness-110 transition-all hover:scale-105 active:scale-95 flex items-center justify-center pointer-events-auto relative"
             >
                 {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
                 {!isOpen && unreadCount > 0 && (

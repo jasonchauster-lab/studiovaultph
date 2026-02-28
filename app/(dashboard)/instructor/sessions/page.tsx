@@ -52,7 +52,7 @@ export default async function InstructorSessionsPage() {
     const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
     const now = new Date()
 
-    const ACTIVE_STATUSES = ['approved', 'confirmed', 'paid']
+    const ACTIVE_STATUSES = ['approved', 'admin_approved', 'confirmed', 'paid']
     const upcomingBookings = bookings?.filter(b => ACTIVE_STATUSES.includes(b.status) && new Date(getFirst(b.slots)?.start_time) > now) || []
     const pastBookings = bookings?.filter(b => !ACTIVE_STATUSES.includes(b.status) || new Date(getFirst(b.slots)?.start_time) <= now) || []
 
@@ -103,7 +103,7 @@ export default async function InstructorSessionsPage() {
                                             <StudioChatButton booking={booking} currentUserId={user.id} />
                                             <span className={clsx(
                                                 'text-xs px-2 py-1 rounded',
-                                                booking.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                                (booking.status === 'approved' || booking.status === 'admin_approved') ? 'bg-green-100 text-green-700' :
                                                     booking.status === 'rejected' ? 'bg-red-100 text-red-700' :
                                                         'bg-charcoal-100 text-charcoal-600'
                                             )}>
@@ -164,13 +164,13 @@ export default async function InstructorSessionsPage() {
                                                 'text-xs px-2 py-1 rounded font-medium',
                                                 booking.status === 'completed'
                                                     ? (booking.funds_unlocked ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700') :
-                                                    booking.status === 'approved' ? 'bg-blue-100 text-blue-700' :
+                                                    (booking.status === 'approved' || booking.status === 'admin_approved') ? 'bg-blue-100 text-blue-700' :
                                                         booking.status === 'rejected' ? 'bg-red-100 text-red-700' :
                                                             'bg-charcoal-100 text-charcoal-600'
                                             )}>
                                                 {booking.status === 'completed'
                                                     ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)') :
-                                                    booking.status === 'approved' ? 'Awaiting Completion' :
+                                                    (booking.status === 'approved' || booking.status === 'admin_approved') ? 'Awaiting Completion' :
                                                         booking.status === 'pending' ? 'Pending' :
                                                             booking.status}
                                             </span>

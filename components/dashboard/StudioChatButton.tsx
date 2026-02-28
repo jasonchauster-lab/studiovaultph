@@ -17,28 +17,28 @@ export default function StudioChatButton({ booking, currentUserId }: { booking: 
 
         // Case 1: I am the Studio Owner -> Chatting with Instructor
         if (studio?.owner_id === currentUserId) {
-            return { name: instructor?.full_name || 'Instructor', title: 'Chat with Instructor' }
+            return { id: instructor?.id || booking.instructor_id, name: instructor?.full_name || 'Instructor', title: 'Chat with Instructor' }
         }
 
         // Case 2: I am the Instructor renting the studio (client_id == instructor_id) -> Chatting with Studio
         if (booking.instructor_id === currentUserId && booking.client_id === currentUserId) {
-            return { name: studio?.name || 'Studio', title: 'Chat with Studio' }
+            return { id: studio?.owner_id, name: studio?.name || 'Studio', title: 'Chat with Studio' }
         }
 
         // Case 3: I am the Instructor teaching a client (client_id != instructor_id) -> Chatting with Client
         if (booking.instructor_id === currentUserId && booking.client_id !== currentUserId) {
-            return { name: client?.full_name || 'Client', title: 'Chat with Client' }
+            return { id: client?.id || booking.client_id, name: client?.full_name || 'Client', title: 'Chat with Client' }
         }
 
         // Case 4: I am the Customer -> Chatting with Instructor
         if (booking.client_id === currentUserId) {
-            return { name: instructor?.full_name || 'Instructor', title: 'Chat with Instructor' }
+            return { id: instructor?.id || booking.instructor_id, name: instructor?.full_name || 'Instructor', title: 'Chat with Instructor' }
         }
 
-        return { name: 'Chat', title: 'Open Chat' }
+        return { id: '', name: 'Chat', title: 'Open Chat' }
     }
 
-    const { name: recipientName, title } = getRecipientInfo()
+    const { id: recipientId, name: recipientName, title } = getRecipientInfo()
 
     return (
         <>
@@ -55,6 +55,7 @@ export default function StudioChatButton({ booking, currentUserId }: { booking: 
                 <ChatWindow
                     bookingId={booking.id}
                     currentUserId={currentUserId}
+                    recipientId={recipientId}
                     recipientName={recipientName}
                     isOpen={isOpen}
                     onClose={() => setIsOpen(false)}

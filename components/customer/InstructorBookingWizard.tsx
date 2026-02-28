@@ -345,7 +345,7 @@ export default function InstructorBookingWizard({
                                                         : "bg-cream-50 text-charcoal-700 border-cream-200 hover:border-charcoal-300"
                                                 )}
                                             >
-                                                {new Date(slot.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                                {new Date(slot.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                             </button>
                                         ))}
                                     </div>

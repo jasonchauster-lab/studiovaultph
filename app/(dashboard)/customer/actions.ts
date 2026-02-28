@@ -488,17 +488,38 @@ export async function bookInstructorSession(
     }
 
     // 1. Validate Instructor Availability
-    const dayOfWeek = startDateTime.getDay()
-    const { data: instructorAvailability } = await supabase
-        .from('instructor_availability')
-        .select('*')
-        .eq('instructor_id', instructorId)
-        .eq('day_of_week', dayOfWeek)
-        .lte('start_time', time)
-        .gt('end_time', time)
-        .eq('location_area', location)
+    const manilaDateStr = date;
+    const manilaDayOfWeek = startDateTime.getDay();
+    const timeStr = time.length === 5 ? time + ':00' : time;
 
-    if (!instructorAvailability || instructorAvailability.length === 0) {
+    // Query A: date-specific availability
+    const { data: availByDate } = await supabase
+        .from('instructor_availability')
+        .select('id, group_id')
+        .eq('instructor_id', instructorId)
+        .eq('location_area', location)
+        .eq('date', manilaDateStr)
+        .lte('start_time', timeStr)
+        .gt('end_time', timeStr)
+        .limit(1)
+        .maybeSingle();
+
+    // Query B: weekly recurring availability
+    const { data: availByDay } = await supabase
+        .from('instructor_availability')
+        .select('id, group_id')
+        .eq('instructor_id', instructorId)
+        .eq('location_area', location)
+        .eq('day_of_week', manilaDayOfWeek)
+        .is('date', null)
+        .lte('start_time', timeStr)
+        .gt('end_time', timeStr)
+        .limit(1)
+        .maybeSingle();
+
+    const avail = availByDate || availByDay;
+
+    if (!avail) {
         return { error: 'Instructor is not available at this time and location.' }
     }
 
@@ -570,6 +591,19 @@ export async function bookInstructorSession(
         .from('slots')
         .update({ is_available: false })
         .eq('id', selectedSlot.id)
+
+    // 5.5. Remove Instructor Availability for this booked slot
+    if (avail.group_id) {
+        await supabase
+            .from('instructor_availability')
+            .delete()
+            .eq('group_id', avail.group_id);
+    } else {
+        await supabase
+            .from('instructor_availability')
+            .delete()
+            .eq('id', avail.id);
+    }
 
     // 6. Notifications
     // Helper to extract first item if array

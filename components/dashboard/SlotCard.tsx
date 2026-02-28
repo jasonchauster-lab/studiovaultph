@@ -9,8 +9,8 @@ interface SlotCardProps {
 export default function SlotCard({ slot }: SlotCardProps) {
     const studio = slot.studios!;
     const startDate = new Date(slot.start_time);
-    const startTime = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const endTime = new Date(slot.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const startTime = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    const endTime = new Date(slot.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     const dateString = startDate.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
 
     return (

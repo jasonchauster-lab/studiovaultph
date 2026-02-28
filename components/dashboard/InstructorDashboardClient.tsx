@@ -25,7 +25,7 @@ export default function InstructorDashboardClient() {
     const [showLocDropdown, setShowLocDropdown] = useState(false);
     const locSearchRef = useRef<HTMLDivElement>(null);
     const [activeTab, setActiveTab] = useState<'browse' | 'bookings'>(initialTab);
-    const [activeChat, setActiveChat] = useState<{ id: string, name: string, isExpired: boolean } | null>(null);
+    const [activeChat, setActiveChat] = useState<{ id: string, recipientId: string, name: string, isExpired: boolean } | null>(null);
     const supabase = createClient();
     const [userId, setUserId] = useState<string>('');
 
@@ -345,7 +345,7 @@ export default function InstructorDashboardClient() {
                         {/* Upcoming Confirmed Bookings Section */}
                         {(() => {
                             const upcoming = bookings.filter(b =>
-                                ['approved', 'confirmed'].includes(b.status) && new Date(b.slots.start_time) >= new Date()
+                                ['approved', 'admin_approved', 'confirmed'].includes(b.status) && new Date(b.slots.start_time) >= new Date()
                             ).sort((a, b) => new Date(a.slots.start_time).getTime() - new Date(b.slots.start_time).getTime());
 
                             if (upcoming.length === 0) return null;
@@ -402,8 +402,10 @@ export default function InstructorDashboardClient() {
                                                             const recipientName = isRental
                                                                 ? booking.slots?.studios?.name
                                                                 : booking.client?.full_name || 'Client';
+                                                            const rId = isRental ? booking.slots?.studios?.owner_id : booking.client_id;
                                                             setActiveChat({
                                                                 id: booking.id,
+                                                                recipientId: rId,
                                                                 name: recipientName || 'Messenger',
                                                                 isExpired: isChatExpired(booking)
                                                             });
@@ -426,14 +428,14 @@ export default function InstructorDashboardClient() {
                             <h2 className="text-xl font-serif font-bold text-charcoal-900">
                                 Session History
                             </h2>
-                            {bookings.filter(b => b.status === 'approved' && new Date(b.slots.start_time) < new Date()).length === 0 ? (
+                            {bookings.filter(b => (b.status === 'approved' || b.status === 'admin_approved') && new Date(b.slots.start_time) < new Date()).length === 0 ? (
                                 <div className="text-center py-12 bg-cream-100/50 rounded-xl border border-dashed border-cream-300">
                                     <p className="text-charcoal-500">No session history found.</p>
                                 </div>
                             ) : (
                                 <div className="space-y-3">
                                     {bookings
-                                        .filter(b => b.status === 'approved' && new Date(b.slots.start_time) < new Date())
+                                        .filter(b => (b.status === 'approved' || b.status === 'admin_approved') && new Date(b.slots.start_time) < new Date())
                                         .map(booking => (
                                             <div key={booking.id} className="bg-white/60 p-4 rounded-lg border border-cream-200 flex flex-col sm:flex-row justify-between items-center gap-3">
                                                 <div>
@@ -441,25 +443,27 @@ export default function InstructorDashboardClient() {
                                                         <h4 className="font-medium text-charcoal-900">{booking.slots.studios.name}</h4>
                                                         <span className={clsx(
                                                             "text-[10px] uppercase font-bold px-1.5 py-0.5 rounded",
-                                                            booking.status === 'approved' ? "bg-gray-100 text-gray-600" :
+                                                            (booking.status === 'approved' || booking.status === 'admin_approved') ? "bg-gray-100 text-gray-600" :
                                                                 booking.status === 'rejected' ? "bg-red-50 text-red-600" : "bg-yellow-50 text-yellow-600"
                                                         )}>
-                                                            {new Date(booking.slots.start_time) < new Date() && booking.status === 'approved' ? 'Completed' : booking.status}
+                                                            {new Date(booking.slots.start_time) < new Date() && (booking.status === 'approved' || booking.status === 'admin_approved') ? 'Completed' : booking.status}
                                                         </span>
                                                     </div>
                                                     <p className="text-xs text-charcoal-500 mt-0.5">
                                                         {new Date(booking.slots.start_time).toLocaleDateString()} — {booking.price_breakdown?.quantity || 1} x {booking.price_breakdown?.equipment || booking.equipment || 'Session'}
                                                     </p>
                                                 </div>
-                                                {booking.status === 'approved' && (
+                                                {(booking.status === 'approved' || booking.status === 'admin_approved') && (
                                                     <button
                                                         onClick={() => {
                                                             const isRental = booking.client_id === booking.instructor_id;
                                                             const recipientName = isRental
                                                                 ? booking.slots?.studios?.name
                                                                 : booking.client?.full_name || 'Client';
+                                                            const rId = isRental ? booking.slots?.studios?.owner_id : booking.client_id;
                                                             setActiveChat({
                                                                 id: booking.id,
+                                                                recipientId: rId,
                                                                 name: recipientName || 'Messenger',
                                                                 isExpired: isChatExpired(booking)
                                                             });
@@ -483,6 +487,7 @@ export default function InstructorDashboardClient() {
                 <ChatWindow
                     bookingId={activeChat.id}
                     currentUserId={userId}
+                    recipientId={activeChat.recipientId}
                     recipientName={activeChat.name}
                     isOpen={!!activeChat}
                     onClose={() => setActiveChat(null)}

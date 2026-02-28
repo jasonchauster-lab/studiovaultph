@@ -110,7 +110,7 @@ export default async function CustomerWalletPage() {
                                         </td>
                                         <td className="px-6 py-4 border-b border-cream-50">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                ${tx.status === 'completed' || tx.status === 'approved' || tx.status === 'processed'
+                                                ${tx.status === 'completed' || tx.status === 'approved' || tx.status === 'admin_approved' || tx.status === 'processed'
                                                     ? 'bg-green-100 text-green-800'
                                                     : tx.status === 'pending'
                                                         ? 'bg-yellow-100 text-yellow-800'
