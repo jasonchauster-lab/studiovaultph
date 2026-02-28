@@ -53,9 +53,19 @@ export default function InstructorBookingWizard({
             if (!slotsData?.start_time) return [];
 
             const startDate = new Date(slotsData.start_time);
-            const dateStr = startDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }); // YYYY-MM-DD
-            const timeStr = startDate.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }); // HH:MM
-            return [`${dateStr}-${timeStr.slice(0, 5)}`];
+            // Apply Manila offset manually to guarantee correctness independent of runtime ICU/locale
+            const manilaDate = new Date(startDate.getTime() + 8 * 60 * 60 * 1000);
+
+            const year = manilaDate.getUTCFullYear();
+            const month = (manilaDate.getUTCMonth() + 1).toString().padStart(2, '0');
+            const day = manilaDate.getUTCDate().toString().padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+
+            const hours = manilaDate.getUTCHours().toString().padStart(2, '0');
+            const minutes = manilaDate.getUTCMinutes().toString().padStart(2, '0');
+            const timeStr = `${hours}:${minutes}`;
+
+            return [`${dateStr}-${timeStr}`];
         })
     );
 

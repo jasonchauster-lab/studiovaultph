@@ -539,7 +539,7 @@ export async function confirmBooking(bookingId: string) {
     return { success: true }
 }
 
-export async function rejectBooking(bookingId: string, reason: string) {
+export async function rejectBooking(bookingId: string, reason: string, withRefund: boolean = false) {
     const supabase = await createClient()
 
     if (!(await verifyAdmin(supabase))) {
@@ -556,6 +556,7 @@ export async function rejectBooking(bookingId: string, reason: string) {
             instructor_id,
             client_id,
             booked_slot_ids,
+            total_price,
             client:profiles!client_id(full_name, email),
             slots(
                 start_time,
@@ -589,6 +590,21 @@ export async function rejectBooking(bookingId: string, reason: string) {
         await supabase.from('slots')
             .update({ is_available: true })
             .in('id', allSlotIds)
+    }
+
+    // 3.5 Process Refund if requested
+    if (withRefund && booking.client_id && booking.total_price != null) {
+        const refundAmount = Number(booking.total_price);
+        if (refundAmount > 0) {
+            const { error: refundError } = await supabase.rpc('increment_available_balance', {
+                user_id: booking.client_id,
+                amount: refundAmount
+            })
+            if (refundError) {
+                console.error('Error processing refund during rejection:', refundError)
+                // Continue with rejection even if refund fails, but you might want to log this securely
+            }
+        }
     }
 
     // 4. Send Rejection Email to Client

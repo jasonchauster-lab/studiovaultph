@@ -396,6 +396,7 @@ export async function requestBooking(
     // --- EMAIL NOTIFICATION END ---
 
     revalidatePath('/customer')
+    revalidatePath(`/instructors/${instructorId}`)
     return { success: true, bookingId: booking.id }
 }
 
@@ -708,6 +709,7 @@ export async function bookInstructorSession(
     }
 
     revalidatePath('/customer')
+    revalidatePath(`/instructors/${instructorId}`)
     return { success: true, studioName: selectedSlot.studios.name, bookingId: booking.id }
 }
 
@@ -768,20 +770,31 @@ export async function cancelBooking(bookingId: string) {
         }
     }
 
-    let refundAmount = 0
+    let refundAmount = 0;
+    const breakdown = booking.price_breakdown as any;
+    const walletDeduction = Number(breakdown?.wallet_deduction || 0);
+
     if (hoursUntilStart >= 24) {
-        // Refund the exact total_price paid by the customer, plus any portion they paid via wallet
-        const breakdown = booking.price_breakdown as any;
-        const walletDeduction = breakdown?.wallet_deduction || 0;
-        refundAmount = Number(booking.total_price) + Number(walletDeduction);
+        // Only refund the exact total_price IF the booking cash payment was approved.
+        // If it's pending or submitted, they haven't verified their cash payment yet, 
+        // so we only return the amount actually deducted from their wallet.
+        if (booking.status === 'approved') {
+            refundAmount = Number(booking.total_price) + walletDeduction;
+        } else {
+            refundAmount = walletDeduction;
+        }
     }
 
     // 3. Update the database within a simulated transaction
     if (refundAmount > 0) {
-        await supabase.rpc('increment_available_balance', {
+        const { error: refundError } = await supabase.rpc('increment_available_balance', {
             user_id: user.id,
             amount: refundAmount
         })
+        if (refundError) {
+            console.error('Wallet increment error:', refundError)
+            return { error: 'Failed to process refund to wallet.' }
+        }
     }
 
     // Preserve existing breakdown and add refunded_amount
