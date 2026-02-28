@@ -54,25 +54,27 @@ export default function PartnerBookingsDrawer({
     if (!partnerId) return null
 
     return (
-        <div className={clsx(
-            "fixed inset-0 z-[100] transition-all duration-300 ease-in-out",
-            isOpen ? "visible opacity-100" : "invisible opacity-0"
-        )}>
+        <div
+            className={clsx(
+                "fixed inset-0 z-[9999] transition-opacity duration-300 ease-in-out",
+                isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            )}
+        >
             {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-charcoal-900/40 backdrop-blur-sm"
+                className="absolute inset-0 bg-charcoal-900/60 backdrop-blur-md transition-opacity"
                 onClick={onClose}
             />
 
             <div className={clsx(
-                "fixed inset-y-0 right-0 w-full max-w-2xl bg-cream-50 shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out",
+                "absolute inset-y-0 right-0 w-full max-w-xl bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out z-10",
                 isOpen ? "translate-x-0" : "translate-x-full"
             )}>
                 {/* Header */}
-                <div className="px-6 py-4 bg-white border-b border-cream-200 flex items-center justify-between">
-                    <div>
-                        <h2 className="text-xl font-serif font-bold text-charcoal-900">Bookings Summary</h2>
-                        <p className="text-sm text-charcoal-500 font-medium">
+                <div className="px-6 py-5 bg-white border-b border-cream-200 flex items-center justify-between shrink-0">
+                    <div className="min-w-0">
+                        <h2 className="text-xl font-serif font-bold text-charcoal-900 truncate">Bookings Summary</h2>
+                        <p className="text-sm text-charcoal-500 font-medium truncate mt-0.5">
                             {partnerName} • <span className="capitalize">{partnerType === 'profile' ? 'Instructor' : 'Studio'}</span>
                         </p>
                     </div>
