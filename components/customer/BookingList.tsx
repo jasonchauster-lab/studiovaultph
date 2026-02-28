@@ -106,14 +106,14 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                 )}
                                 <span className={clsx(
                                     "px-3 py-1 text-xs font-medium rounded-full uppercase tracking-wider",
-                                    (booking.status === 'approved' || booking.status === 'admin_approved') ? "bg-green-100 text-green-700" :
+                                    booking.status === 'approved' ? "bg-green-100 text-green-700" :
                                         booking.status === 'rejected' || booking.status === 'cancelled' ? "bg-red-100 text-red-700" :
                                             "bg-yellow-100 text-yellow-700"
                                 )}>
                                     {booking.status}
                                 </span>
 
-                                {(booking.status === 'approved' || booking.status === 'admin_approved') && new Date(booking.slots.start_time) > new Date() && (
+                                {booking.status === 'approved' && new Date(booking.slots.start_time) > new Date() && (
                                     <button
                                         onClick={() => handleCancel(booking)}
                                         disabled={cancellingId === booking.id}

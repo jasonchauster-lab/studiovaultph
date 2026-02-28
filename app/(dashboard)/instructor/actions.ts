@@ -23,7 +23,7 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
             slots(studios(name))
         `)
         .eq('instructor_id', user.id)
-        .in('status', ['approved', 'admin_approved'])
+        .eq('status', 'approved')
 
     if (startDate) bookingsQuery = bookingsQuery.gte('created_at', startDate)
     if (endDate) bookingsQuery = bookingsQuery.lte('created_at', endDate)
@@ -44,7 +44,7 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
         const breakdown = booking.price_breakdown as any;
         const instructorFee = breakdown?.instructor_fee || 0;
         // Only count approved bookings towards actual earnings
-        if (booking.status === 'approved' || booking.status === 'admin_approved') {
+        if (booking.status === 'approved') {
             totalEarned += instructorFee;
         }
 

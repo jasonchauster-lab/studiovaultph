@@ -50,7 +50,7 @@ export async function submitReview({
     if (bookingError || !booking) return { error: 'Booking not found.' }
 
     const isPast = booking.slots ? new Date((booking.slots as any).end_time) < new Date() : false
-    const canReview = booking.status === 'completed' || ((booking.status === 'approved' || booking.status === 'admin_approved') && isPast)
+    const canReview = booking.status === 'completed' || (booking.status === 'approved' && isPast)
 
     if (!canReview) {
         return { error: 'You can only review a session that has finished.' }
@@ -148,7 +148,7 @@ export async function getPendingReviews() {
                 avatar_url
             )
         `)
-        .in('status', ['completed', 'approved', 'admin_approved'])
+        .in('status', ['completed', 'approved'])
 
     if (isInstructor) {
         query = query
@@ -171,7 +171,7 @@ export async function getPendingReviews() {
     const now = new Date()
     const finalBookings = (bookings || []).filter(b => {
         if (b.status === 'completed') return true
-        if (b.status === 'approved' || b.status === 'admin_approved') {
+        if (b.status === 'approved') {
             const endTime = new Date((b.slots as any)?.end_time)
             return endTime < now
         }

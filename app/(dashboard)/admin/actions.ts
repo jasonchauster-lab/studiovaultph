@@ -673,7 +673,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
             ),
             instructor:profiles!instructor_id(full_name)
         `)
-        .in('status', ['approved', 'admin_approved'])
+        .eq('status', 'approved')
         .order('created_at', { ascending: true })
 
     if (startDate) bookingsQuery = bookingsQuery.gte('created_at', startDate)
@@ -849,11 +849,11 @@ export async function getRevenueExport(startDate?: string, endDate?: string) {
             created_at,
             total_price,
             price_breakdown,
-            client:profiles!client_id(full_name),
-            instructor:profiles!instructor_id(full_name),
+            client: profiles!client_id(full_name),
+            instructor: profiles!instructor_id(full_name),
             slots(start_time, studios(name))
-        `)
-        .in('status', ['approved', 'admin_approved'])
+                `)
+        .eq('status', 'approved')
         .order('created_at', { ascending: false })
 
     if (startDate) query = query.gte('created_at', startDate)
@@ -1002,9 +1002,9 @@ export async function searchAllUsers(query: string) {
     let profileQuery = supabase.from('profiles').select('id, full_name, role, contact_number, is_founding_partner, gov_id_url, gov_id_expiry, bir_url, tin');
 
     if (isPhoneQuery) {
-        profileQuery = profileQuery.ilike('contact_number', `%${cleanQuery}%`);
+        profileQuery = profileQuery.ilike('contact_number', `% ${cleanQuery} % `);
     } else if (!isEmailQuery) {
-        profileQuery = profileQuery.ilike('full_name', `%${cleanQuery}%`);
+        profileQuery = profileQuery.ilike('full_name', `% ${cleanQuery} % `);
     }
 
     const { data: profiles } = await profileQuery.limit(10);
@@ -1036,7 +1036,7 @@ export async function searchAllUsers(query: string) {
                 name: p.full_name || 'Unknown User',
                 phone: p.contact_number,
                 role: p.role,
-                url: p.role === 'instructor' ? `/instructors/${p.id}` : '#',
+                url: p.role === 'instructor' ? `/ instructors / ${p.id}` : '#',
                 is_founding_partner: p.is_founding_partner,
                 documents: p.role === 'instructor' ? {
                     govId: p.gov_id_url ? profileSignedUrlsMap[p.gov_id_url] : null,
@@ -1052,9 +1052,9 @@ export async function searchAllUsers(query: string) {
     let studioQuery = supabase.from('studios').select('id, name, location, contact_number, is_founding_partner, bir_certificate_url, bir_certificate_expiry, gov_id_url, gov_id_expiry, mayors_permit_url, mayors_permit_expiry, secretary_certificate_url, secretary_certificate_expiry, insurance_url, insurance_expiry, space_photos_urls');
 
     if (isPhoneQuery) {
-        studioQuery = studioQuery.ilike('contact_number', `%${cleanQuery}%`);
+        studioQuery = studioQuery.ilike('contact_number', `% ${cleanQuery} % `);
     } else if (!isEmailQuery) {
-        studioQuery = studioQuery.ilike('name', `%${cleanQuery}%`);
+        studioQuery = studioQuery.ilike('name', `% ${cleanQuery} % `);
     }
 
     const { data: studios } = await studioQuery.limit(10);
@@ -1085,7 +1085,7 @@ export async function searchAllUsers(query: string) {
                 name: s.name,
                 phone: s.contact_number,
                 location: s.location,
-                url: `/studios/${s.id}`,
+                url: `/ studios / ${s.id}`,
                 is_founding_partner: s.is_founding_partner,
                 documents: {
                     bir: s.bir_certificate_url ? signedUrlsMap[s.bir_certificate_url] : null,
@@ -1129,7 +1129,7 @@ export async function updatePartnerFeeSettings(
         .eq('id', id);
 
     if (error) {
-        console.error(`Error updating partner fee settings for ${type} ${id}:`, error);
+        console.error(`Error updating partner fee settings for ${type} ${id}: `, error);
         return { error: 'Failed to update partner fee settings.' };
     }
 

@@ -71,7 +71,7 @@ export default async function CustomerBookingsPage() {
                 </div>
 
                 {/* Digital Entry Pass (For the next confirmed session) */}
-                {upcomingBookings.some(b => b.status === 'approved' || b.status === 'admin_approved') && (
+                {upcomingBookings.some(b => b.status === 'approved') && (
                     <div className="bg-charcoal-900 rounded-2xl p-8 text-cream-50 flex flex-col md:flex-row items-center justify-between shadow-xl">
                         <div>
                             <div className="flex items-center gap-2 mb-2 text-charcoal-300 text-sm uppercase tracking-widest font-medium">
@@ -79,17 +79,17 @@ export default async function CustomerBookingsPage() {
                                 Digital Entry Pass
                             </div>
                             <h2 className="text-3xl font-serif mb-1">
-                                {upcomingBookings.find(b => b.status === 'approved' || b.status === 'admin_approved')?.slots.studios.name}
+                                {upcomingBookings.find(b => b.status === 'approved')?.slots.studios.name}
                             </h2>
-                            {upcomingBookings.find(b => b.status === 'approved' || b.status === 'admin_approved')?.slots.studios.address && (
+                            {upcomingBookings.find(b => b.status === 'approved')?.slots.studios.address && (
                                 <p className="text-charcoal-400 text-sm mb-1">
-                                    {upcomingBookings.find(b => b.status === 'approved' || b.status === 'admin_approved')?.slots.studios.address}
+                                    {upcomingBookings.find(b => b.status === 'approved')?.slots.studios.address}
                                 </p>
                             )}
                             <p className="text-charcoal-300 mb-6">
-                                {new Date(upcomingBookings.find(b => b.status === 'approved' || b.status === 'admin_approved')?.slots.start_time).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+                                {new Date(upcomingBookings.find(b => b.status === 'approved')?.slots.start_time).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
                                 {' • '}
-                                {new Date(upcomingBookings.find(b => b.status === 'approved' || b.status === 'admin_approved')?.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                {new Date(upcomingBookings.find(b => b.status === 'approved')?.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
                             </p>
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-charcoal-800 rounded-full flex items-center justify-center text-lg font-bold">
@@ -139,7 +139,7 @@ export default async function CustomerBookingsPage() {
                                         {/* Show Leave Review button only for completed sessions or passed approved sessions */}
                                         {(() => {
                                             const isPast = new Date(booking.slots?.end_time) < new Date()
-                                            const canReview = booking.status === 'completed' || (booking.status === 'approved' || booking.status === 'admin_approved' && isPast)
+                                            const canReview = booking.status === 'completed' || (booking.status === 'approved' && isPast)
 
                                             if (!canReview) return null
 
@@ -157,12 +157,12 @@ export default async function CustomerBookingsPage() {
                                         <span className={clsx(
                                             "text-xs px-2 py-1 rounded",
                                             booking.status === 'completed' ? "bg-green-100 text-green-700" :
-                                                (booking.status === 'approved' || booking.status === 'admin_approved') ? "bg-green-100 text-green-700" :
+                                                booking.status === 'approved' ? "bg-green-100 text-green-700" :
                                                     booking.status === 'rejected' ? "bg-red-100 text-red-700" :
                                                         "bg-charcoal-100 text-charcoal-600"
                                         )}>
                                             {booking.status === 'completed' ? 'Completed' :
-                                                (booking.status === 'approved' || booking.status === 'admin_approved') ? 'Completed' :
+                                                booking.status === 'approved' ? 'Completed' :
                                                     booking.status === 'pending' ? 'Expired' :
                                                         booking.status}
                                         </span>
