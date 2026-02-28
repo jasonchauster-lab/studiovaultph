@@ -45,24 +45,22 @@ export default async function StudioDashboard(props: {
     const currentDate = new Date(dateParam + "T00:00:00+08:00")
 
     if (myStudio) {
-        // Fetch Upcoming Bookings
-        const { data: allBookings } = await supabase
+        // Fetch Upcoming Bookings for THIS studio directly
+        const { data: studioBookings } = await supabase
             .from('bookings')
             .select(`
                 *,
                 client:profiles!client_id(full_name, avatar_url),
                 instructor:profiles!instructor_id(full_name, avatar_url),
-                slots(*)
+                slots!inner(*)
             `)
+            .eq('slots.studio_id', myStudio.id)
+            .in('status', ['approved', 'pending'])
             .order('created_at', { ascending: false })
-            .limit(50);
+            .limit(10);
 
-        if (allBookings) {
-            upcomingBookings = allBookings.filter(b => {
-                const sId = b.slots?.studio_id;
-                const status = b.status?.toLowerCase();
-                return sId === myStudio.id && ['approved', 'pending'].includes(status);
-            }).slice(0, 10);
+        if (studioBookings) {
+            upcomingBookings = studioBookings;
         }
 
         // Fetch Weekly Slots

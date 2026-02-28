@@ -392,38 +392,64 @@ export default function InstructorBookingWizard({
                                         return (
                                             <div className="border-t border-cream-100 pt-4 space-y-5 animate-in fade-in slide-in-from-top-2">
                                                 {/* Equipment & Quantity */}
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label className="text-xs font-bold text-charcoal-400 uppercase tracking-widest block mb-1.5">Equipment</label>
-                                                        <select
-                                                            value={selectedEquipment}
-                                                            onChange={(e) => handleEquipmentChange(e.target.value)}
-                                                            className="w-full px-3 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/10"
-                                                        >
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                                    <div className="sm:col-span-2">
+                                                        <label className="text-xs font-bold text-charcoal-400 uppercase tracking-widest block mb-3">Select Equipment</label>
+                                                        <div className="flex flex-wrap gap-2">
                                                             {allEq.map(eq => {
                                                                 const count = slotsAtTime.filter((s: any) => (s.equipment as string[] | undefined)?.includes(eq as string)).length;
-                                                                return <option key={eq as string} value={eq as string}>{eq as string} ({count} available)</option>;
+                                                                const isSelected = selectedEquipment === eq;
+                                                                return (
+                                                                    <button
+                                                                        key={eq as string}
+                                                                        type="button"
+                                                                        onClick={() => handleEquipmentChange(eq as string)}
+                                                                        className={clsx(
+                                                                            "px-4 py-2.5 rounded-xl border text-sm font-medium transition-all flex items-center gap-2",
+                                                                            isSelected
+                                                                                ? "bg-charcoal-900 border-charcoal-900 text-cream-50 shadow-md ring-2 ring-charcoal-900/10"
+                                                                                : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
+                                                                        )}
+                                                                    >
+                                                                        <span>{eq as string}</span>
+                                                                        <span className={clsx(
+                                                                            "text-[10px] px-1.5 py-0.5 rounded-full",
+                                                                            isSelected ? "bg-charcoal-800 text-cream-200" : "bg-cream-100 text-charcoal-500"
+                                                                        )}>
+                                                                            {count} {count === 1 ? 'slot' : 'slots'}
+                                                                        </span>
+                                                                    </button>
+                                                                );
                                                             })}
-                                                        </select>
+                                                        </div>
                                                     </div>
+
                                                     <div>
-                                                        <label className="text-xs font-bold text-charcoal-400 uppercase tracking-widest block mb-1.5">People</label>
-                                                        <div className="flex items-center gap-3">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                                                className="w-10 h-10 rounded-xl border border-cream-200 flex items-center justify-center hover:bg-cream-100 text-charcoal-700 transition-colors"
-                                                            >
-                                                                <Minus className="w-4 h-4" />
-                                                            </button>
-                                                            <span className="w-8 text-center text-lg font-serif">{quantity}</span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}
-                                                                className="w-10 h-10 rounded-xl border border-cream-200 flex items-center justify-center hover:bg-cream-100 text-charcoal-700 transition-colors"
-                                                            >
-                                                                <Plus className="w-4 h-4" />
-                                                            </button>
+                                                        <label className="text-xs font-bold text-charcoal-400 uppercase tracking-widest block mb-3">Number of People</label>
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="flex items-center gap-1">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                                                    className="w-11 h-11 rounded-xl border border-cream-200 flex items-center justify-center hover:bg-cream-50 text-charcoal-700 transition-all active:scale-95"
+                                                                >
+                                                                    <Minus className="w-5 h-5" />
+                                                                </button>
+                                                                <div className="w-12 text-center">
+                                                                    <span className="text-xl font-serif text-charcoal-900">{quantity}</span>
+                                                                </div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}
+                                                                    className="w-11 h-11 rounded-xl border border-cream-200 flex items-center justify-center hover:bg-cream-50 text-charcoal-700 transition-all active:scale-95"
+                                                                >
+                                                                    <Plus className="w-5 h-5" />
+                                                                </button>
+                                                            </div>
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-tighter">Available</span>
+                                                                <span className="text-sm font-serif text-charcoal-900">{maxQuantity} max</span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -437,18 +463,18 @@ export default function InstructorBookingWizard({
                                                     const total = subtotal + serviceFee;
 
                                                     return (
-                                                        <div className="bg-cream-50 p-4 rounded-2xl border border-cream-100 space-y-2">
+                                                        <div className="bg-cream-50 p-5 rounded-2xl border border-cream-100 space-y-2.5">
                                                             <div className="flex justify-between text-xs text-charcoal-500">
-                                                                <span>Session ({quantity}x)</span>
+                                                                <span>Session Fee ({quantity}x)</span>
                                                                 <span>₱{subtotal.toLocaleString()}</span>
                                                             </div>
                                                             <div className="flex justify-between text-xs text-charcoal-500">
                                                                 <span>Service Fee (20%)</span>
                                                                 <span>₱{serviceFee.toLocaleString()}</span>
                                                             </div>
-                                                            <div className="flex justify-between text-base font-bold text-charcoal-900 pt-2 border-t border-cream-200/50">
+                                                            <div className="flex justify-between text-base font-bold text-charcoal-900 pt-2.5 border-t border-cream-200/50">
                                                                 <span>Total</span>
-                                                                <span className="font-serif text-lg">₱{total.toLocaleString()}</span>
+                                                                <span className="font-serif text-xl">₱{total.toLocaleString()}</span>
                                                             </div>
                                                         </div>
                                                     );
@@ -457,9 +483,9 @@ export default function InstructorBookingWizard({
                                                 <button
                                                     onClick={handleBooking}
                                                     disabled={isBooking}
-                                                    className="w-full bg-charcoal-900 text-cream-50 py-3.5 rounded-xl font-bold hover:bg-charcoal-800 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                                                    className="w-full bg-charcoal-900 text-cream-50 py-4 rounded-xl font-bold hover:bg-charcoal-800 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
                                                 >
-                                                    {isBooking && <Loader2 className="w-4 h-4 animate-spin" />}
+                                                    {isBooking && <Loader2 className="w-5 h-5 animate-spin" />}
                                                     Request Booking
                                                 </button>
                                             </div>

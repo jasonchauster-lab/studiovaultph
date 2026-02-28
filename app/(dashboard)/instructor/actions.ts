@@ -298,16 +298,82 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
         original_price: deduction > 0 ? totalPrice : undefined
     };
 
-    const { data: booking, error } = await supabase
+    // 2. Logic for Quantity & Partial Booking
+    // Find X available slots that match the criteria
+    let allocatedSlotIds: string[] = [slotId];
+
+    if (quantity > 1) {
+        const needed = quantity - 1;
+        const { data: additionalSlots } = await supabase
+            .from('slots')
+            .select('id')
+            .eq('studio_id', slot.studio_id)
+            .eq('start_time', slot.start_time)
+            .eq('is_available', true)
+            .neq('id', slotId)
+            .contains('equipment', [equipment])
+            .limit(needed);
+
+        if (!additionalSlots || additionalSlots.length < needed) {
+            return { error: `Not enough slots available. Requested: ${quantity}` }
+        }
+        allocatedSlotIds = [...allocatedSlotIds, ...additionalSlots.map(s => s.id)];
+    }
+
+    const bookedSlotIdsForRecord: string[] = [];
+
+    for (const currentId of allocatedSlotIds) {
+        let actualBookedId = currentId;
+
+        // Fetch current slot details for extraction
+        const { data: currentSlotData } = await supabase.from('slots').select('*').eq('id', currentId).single();
+        if (!currentSlotData) continue;
+
+        const allEquipment = (currentSlotData.equipment as string[]) || [];
+
+        // --- EQUIPMENT EXTRACTION START ---
+        if (allEquipment.length > 1 && allEquipment.includes(equipment)) {
+            const remainingEquipment = allEquipment.filter(e => e !== equipment);
+            await supabase.from('slots').update({ equipment: remainingEquipment }).eq('id', currentId);
+
+            const { data: extractedSlot, error: extractionError } = await supabase
+                .from('slots')
+                .insert({
+                    studio_id: currentSlotData.studio_id,
+                    start_time: currentSlotData.start_time,
+                    end_time: currentSlotData.end_time,
+                    is_available: false, // Lock it immediately
+                    equipment: [equipment]
+                })
+                .select()
+                .single();
+
+            if (extractionError || !extractedSlot) {
+                console.error('Extraction error:', extractionError);
+                return { error: 'Failed to extract equipment.' };
+            }
+            actualBookedId = extractedSlot.id;
+        } else {
+            // Full Booking of the record
+            await supabase.from('slots').update({ is_available: false }).eq('id', currentId);
+        }
+        // --- EQUIPMENT EXTRACTION END ---
+
+        bookedSlotIdsForRecord.push(actualBookedId);
+    }
+
+    const { data: booking, error: bookingError } = await supabase
         .from('bookings')
         .insert({
-            slot_id: slotId,
+            slot_id: bookedSlotIdsForRecord[0],
             instructor_id: user.id,
             client_id: user.id, // Set client_id to instructor so they can pay/manage it as a "client" of the studio
             status: 'pending',
             equipment: equipment,
             total_price: finalPrice,
-            price_breakdown: breakdown
+            price_breakdown: breakdown,
+            booked_slot_ids: bookedSlotIdsForRecord,
+            quantity: quantity
         })
         .select(`
             *,
@@ -328,17 +394,10 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
         `)
         .single()
 
-    if (error) {
-        console.error('Booking error:', error)
+    if (bookingError || !booking) {
+        console.error('Booking error:', bookingError)
         return { error: 'Failed to request booking. You might have already requested this slot.' }
     }
-
-    // --- SLOT LOCKING START ---
-    // Mark the primary slot as unavailable
-    await supabase.from('slots').update({ is_available: false }).eq('id', slotId);
-    // --- SLOT LOCKING END ---
-
-    // --- EMAIL NOTIFICATION START ---
     // Helper to extract first item if array
     const first = (val: any) => Array.isArray(val) ? val[0] : val;
 
