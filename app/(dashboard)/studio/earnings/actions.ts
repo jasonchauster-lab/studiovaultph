@@ -32,7 +32,7 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             slots!inner(start_time, end_time, studios(name))
         `)
         .eq('slots.studio_id', studioId)
-        .eq('status', 'approved')
+        .in('status', ['approved', 'confirmed', 'admin_approved', 'paid'])
         .order('created_at', { ascending: false })
 
     if (startDate) bookingsQuery = bookingsQuery.gte('created_at', startDate)

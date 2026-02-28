@@ -65,7 +65,7 @@ export default async function DashboardLayout({
                                 <p className="text-xs font-bold text-charcoal-900 leading-none mb-1">{profile?.role === 'studio' ? (studioData?.name || profile?.full_name || 'Studio') : (profile?.full_name || 'Partner')}</p>
                                 <p className="text-[10px] text-charcoal-500 uppercase font-bold tracking-tighter text-rose-gold">
                                     {profile?.role === 'instructor' ? 'Instructor / Customer' :
-                                        profile?.role === 'studio' ? 'Studio / Customer' :
+                                        profile?.role === 'studio' ? 'Studio' :
                                             profile?.role || 'User'}
                                 </p>
                             </div>

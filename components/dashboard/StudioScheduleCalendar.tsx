@@ -413,7 +413,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                         </div>
 
                         {(() => {
-                            const activeBooking = editingSlot.bookings?.find(b => ['approved', 'confirmed', 'pending', 'paid'].includes(b.status?.toLowerCase() || ''));
+                            const activeBooking = editingSlot.bookings?.find(b => ['approved', 'confirmed', 'pending', 'paid', 'admin_approved'].includes(b.status?.toLowerCase() || ''));
                             if (!activeBooking) return null;
                             return (
                                 <div className="mb-6 p-4 bg-teal-50 border border-teal-200 rounded-xl space-y-3">
@@ -550,7 +550,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                                 </p>
                                             </div>
                                             {(() => {
-                                                const activeBooking = slot.bookings?.find(b => ['approved', 'confirmed', 'pending', 'paid'].includes(b.status?.toLowerCase() || ''));
+                                                const activeBooking = slot.bookings?.find(b => ['approved', 'confirmed', 'pending', 'paid', 'admin_approved'].includes(b.status?.toLowerCase() || ''));
                                                 if (!activeBooking) return null;
                                                 return (
                                                     <div className="flex items-center gap-2 pt-1 border-t border-cream-200/50">

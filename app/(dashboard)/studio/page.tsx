@@ -55,7 +55,7 @@ export default async function StudioDashboard(props: {
                 slots!inner(*)
             `)
             .eq('slots.studio_id', myStudio.id)
-            .in('status', ['approved', 'pending'])
+            .in('status', ['approved', 'pending', 'confirmed', 'admin_approved', 'paid'])
             .order('created_at', { ascending: false })
             .limit(10);
 
@@ -100,7 +100,7 @@ export default async function StudioDashboard(props: {
             `)
             .eq('slots.studio_id', myStudio.id)
             .gte('created_at', thirtyDaysAgo.toISOString())
-            .eq('status', 'approved');
+            .in('status', ['approved', 'confirmed', 'admin_approved', 'paid']);
 
         if (statsBookings && statsBookings.length > 0) {
             // Calc Revenue
@@ -307,11 +307,11 @@ export default async function StudioDashboard(props: {
                                                             <div className="flex items-center justify-between">
                                                                 <div className={clsx(
                                                                     "text-[9px] font-black uppercase tracking-[0.15em] px-2.5 py-1 rounded-md border",
-                                                                    booking.status?.toLowerCase() === 'approved'
+                                                                    ['approved', 'confirmed', 'admin_approved', 'paid'].includes(booking.status?.toLowerCase())
                                                                         ? "bg-green-50 text-green-700 border-green-200"
                                                                         : "bg-amber-50 text-amber-700 border-amber-200"
                                                                 )}>
-                                                                    {booking.status?.toLowerCase() === 'approved' ? 'Confirmed' : 'Pending'}
+                                                                    {['approved', 'confirmed', 'admin_approved', 'paid'].includes(booking.status?.toLowerCase()) ? 'Confirmed' : 'Pending'}
                                                                 </div>
                                                                 <StudioChatButton booking={booking} currentUserId={user.id} />
                                                             </div>
