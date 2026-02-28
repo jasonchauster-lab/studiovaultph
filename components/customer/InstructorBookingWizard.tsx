@@ -69,6 +69,11 @@ export default function InstructorBookingWizard({
         })
     );
 
+    console.log('InstructorBookingWizard Debug:');
+    console.log('activeBookings:', activeBookings);
+    console.log('bookedSlotsSet:', Array.from(bookedSlotsSet));
+    console.log('availability:', availability);
+
     const scrollLeft = () => {
         if (scrollContainerRef.current) {
             scrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' })

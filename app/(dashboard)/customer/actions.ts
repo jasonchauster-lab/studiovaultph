@@ -108,7 +108,7 @@ export async function requestBooking(
         .from('bookings')
         .select('id, slots!inner(start_time)')
         .eq('instructor_id', instructorId)
-        .in('status', ['pending', 'confirmed', 'paid', 'submitted'])
+        .in('status', ['pending', 'approved', 'submitted'])
         .eq('slots.start_time', slot.start_time);
 
     if (overlappingBookings && overlappingBookings.length > 0) {
@@ -532,7 +532,7 @@ export async function bookInstructorSession(
         .from('bookings')
         .select('id, slots!inner(start_time)')
         .eq('instructor_id', instructorId)
-        .in('status', ['pending', 'confirmed', 'paid', 'submitted'])
+        .in('status', ['pending', 'approved', 'submitted'])
         .eq('slots.start_time', startDateTime.toISOString());
 
     if (overlappingBookings && overlappingBookings.length > 0) {

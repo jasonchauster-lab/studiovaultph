@@ -50,6 +50,19 @@ export function displayLabel(value: string): string {
     return value
 }
 
+/** Wrap matching text in <strong> tags */
+export function highlightMatch(text: string, query: string) {
+    if (!query) return text
+    const parts = text.split(new RegExp(`(${query})`, 'gi'))
+    return (
+        <>
+            {parts.map((part, i) =>
+                part.toLowerCase() === query.toLowerCase() ? <strong key={i} className="font-bold">{part}</strong> : part
+            )}
+        </>
+    )
+}
+
 interface LocationFilterDropdownProps {
     value: string
     onChange: (value: string) => void
@@ -78,12 +91,18 @@ export default function LocationFilterDropdown({ value, onChange, availableLocat
     const visibleGroups = LOCATION_GROUPS
         .filter(g => activePrefix === 'all' || g.prefix === activePrefix) // scope to selected city
         .map(g => {
-            const subs = g.locations.filter(loc => {
+            let subs = g.locations.filter(loc => {
                 if (lowerSearch) return loc.toLowerCase().includes(lowerSearch) || g.city.toLowerCase().includes(lowerSearch)
                 // No search: apply smart filter
                 if (availableLocations?.length && !availableLocations.includes(loc)) return false
                 return true
             })
+
+            // If no search query, only suggest top 3 sub-locations for this hub
+            if (!lowerSearch) {
+                subs = subs.slice(0, 3)
+            }
+
             return { ...g, locations: subs }
         })
         .filter(g => g.locations.length > 0)
@@ -159,7 +178,7 @@ export default function LocationFilterDropdown({ value, onChange, availableLocat
                     {/* Sub-location list */}
                     <div className="max-h-64 overflow-y-auto py-2">
                         {visibleGroups.length === 0 && (
-                            <p className="px-4 py-6 text-sm text-charcoal-400 text-center">No sub-locations found</p>
+                            <p className="px-4 py-6 text-sm text-charcoal-500 text-center font-medium">We haven't unlocked that area yet.</p>
                         )}
                         {visibleGroups.map(group => (
                             <div key={group.city}>
@@ -178,10 +197,10 @@ export default function LocationFilterDropdown({ value, onChange, availableLocat
                                                     'px-2.5 py-1 rounded-full text-xs font-medium border transition-all',
                                                     isSel
                                                         ? 'bg-rose-gold text-white border-rose-gold shadow-sm'
-                                                        : 'bg-white text-charcoal-700 border-cream-200 hover:border-rose-gold hover:text-rose-gold'
+                                                        : 'bg-white text-charcoal-700 border-cream-200 hover:bg-rose-gold/10 hover:border-rose-gold hover:text-rose-gold'
                                                 )}
                                             >
-                                                {shortLabel(loc)}
+                                                {highlightMatch(shortLabel(loc), search)}
                                             </button>
                                         )
                                     })}
