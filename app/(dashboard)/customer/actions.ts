@@ -102,6 +102,19 @@ export async function requestBooking(
     if (!avail) {
         return { error: `${instructor?.full_name || 'The instructor'} is not available at ${studio.location} during this time.` }
     }
+
+    // --- DOUBLE BOOKING VALIDATION START ---
+    const { data: overlappingBookings } = await supabase
+        .from('bookings')
+        .select('id, slots!inner(start_time)')
+        .eq('instructor_id', instructorId)
+        .in('status', ['pending', 'confirmed', 'paid', 'submitted'])
+        .eq('slots.start_time', slot.start_time);
+
+    if (overlappingBookings && overlappingBookings.length > 0) {
+        return { error: 'The instructor is already booked for this time slot.' }
+    }
+    // --- DOUBLE BOOKING VALIDATION END ---
     // --- AVAILABILITY VALIDATION END ---
 
     // --- PRICE CALCULATION START ---
@@ -315,19 +328,8 @@ export async function requestBooking(
     }
 
     // --- First Come, First Served logic ---
-    if (avail) {
-        if (avail.group_id) {
-            await supabase
-                .from('instructor_availability')
-                .delete()
-                .eq('group_id', avail.group_id);
-        } else {
-            await supabase
-                .from('instructor_availability')
-                .delete()
-                .eq('id', avail.id);
-        }
-    }
+    // Removed old deletion logic that wiped the instructor's recurring availability.
+    // The overlap validation above + UI filtering prevents double bookings.
 
     // --- EMAIL NOTIFICATION START ---
     const clientEmail = user.email; // Auth email
@@ -524,6 +526,19 @@ export async function bookInstructorSession(
         return { error: 'Instructor is not available at this time and location.' }
     }
 
+    // --- DOUBLE BOOKING VALIDATION START ---
+    const { data: overlappingBookings } = await supabase
+        .from('bookings')
+        .select('id, slots!inner(start_time)')
+        .eq('instructor_id', instructorId)
+        .in('status', ['pending', 'confirmed', 'paid', 'submitted'])
+        .eq('slots.start_time', startDateTime.toISOString());
+
+    if (overlappingBookings && overlappingBookings.length > 0) {
+        return { error: 'The instructor is already booked for this time slot.' }
+    }
+    // --- DOUBLE BOOKING VALIDATION END ---
+
     // 2. Find Available Studio Slot
     // Criteria: Verified Studio, Location Match, Equipment Match, Time Match, IS AVAILABLE
     const { data: availableSlots, error: slotError } = await supabase
@@ -594,17 +609,7 @@ export async function bookInstructorSession(
         .eq('id', selectedSlot.id)
 
     // 5.5. Remove Instructor Availability for this booked slot
-    if (avail.group_id) {
-        await supabase
-            .from('instructor_availability')
-            .delete()
-            .eq('group_id', avail.group_id);
-    } else {
-        await supabase
-            .from('instructor_availability')
-            .delete()
-            .eq('id', avail.id);
-    }
+    // Instructor availability record is kept. Active bookings now act as the filter.
 
     // 6. Notifications
     // Helper to extract first item if array
@@ -779,8 +784,19 @@ export async function cancelBooking(bookingId: string) {
         })
     }
 
+    // Preserve existing breakdown and add refunded_amount
+    const currentBreakdown = typeof booking.price_breakdown === 'object' && booking.price_breakdown !== null
+        ? booking.price_breakdown
+        : {};
+
     // Mark as cancelled and release the slot
-    await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId);
+    await supabase.from('bookings').update({
+        status: 'cancelled',
+        price_breakdown: {
+            ...currentBreakdown,
+            refunded_amount: refundAmount
+        }
+    }).eq('id', bookingId);
     await supabase.from('slots').update({ is_available: true }).eq('id', booking.slot_id);
 
     // --- AUTO-REMOVAL OF AVAILABILITY START ---
@@ -862,7 +878,7 @@ export async function getCustomerWalletDetails() {
     // Fetch history (cancelled bookings and payouts)
     const { data: cancelledBookings } = await supabase
         .from('bookings')
-        .select('id, created_at, total_price, price_breakdown, status, slots(studios(name))')
+        .select('id, created_at, total_price, price_breakdown, status, slots(start_time, studios(name))')
         .eq('client_id', user.id)
         .eq('status', 'cancelled')
         .order('created_at', { ascending: false });
@@ -880,18 +896,27 @@ export async function getCustomerWalletDetails() {
 
     cancelledBookings?.forEach(b => {
         const breakdown = b.price_breakdown as any;
-        const refundAmount = Number(b.total_price) + Number(breakdown?.wallet_deduction || 0);
-
         const slotData = getFirst(b.slots);
         const studioData = getFirst(slotData?.studios);
 
-        // We assume all cancelled bookings resulted in a refund if they show here for now, 
-        // to be perfectly accurate we would need a 'transactions' table.
-        // For MVP, we'll mark them as refunded credits.
+        // If refunded_amount was saved during cancellation, use it.
+        // Otherwise, fallback to assuming it was a full refund (legacy bookings).
+        let refundAmount = 0;
+        let isRefunded = false;
+
+        if (breakdown && typeof breakdown.refunded_amount !== 'undefined') {
+            refundAmount = Number(breakdown.refunded_amount);
+            isRefunded = refundAmount > 0;
+        } else {
+            // Legacy assumption for older cancellations
+            refundAmount = Number(b.total_price) + Number(breakdown?.wallet_deduction || 0);
+            isRefunded = refundAmount > 0;
+        }
+
         transactions.push({
             id: b.id,
             date: b.created_at, // Ideally when it was cancelled, but created_at is fallback
-            type: 'Refund (Cancellation)',
+            type: isRefunded ? 'Refund (Cancellation)' : 'Cancellation (No Refund)',
             amount: refundAmount,
             status: 'completed',
             details: `Booking at ${studioData?.name || 'Studio'}`

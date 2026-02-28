@@ -43,6 +43,13 @@ export default async function InstructorProfilePage({
         .eq('instructor_id', id)
         .order('day_of_week', { ascending: true })
 
+    // 2.5 Fetch Active Bookings to filter out taken slots
+    const { data: activeBookings } = await supabase
+        .from('bookings')
+        .select('id, slots(start_time)')
+        .eq('instructor_id', id)
+        .in('status', ['pending', 'confirmed', 'paid', 'submitted'])
+
     // 3. Fetch public reviews for this instructor
     const { reviews, averageRating, totalCount } = await getPublicReviews(id)
 
@@ -137,6 +144,7 @@ export default async function InstructorProfilePage({
                         <InstructorBookingWizard
                             instructorId={instructor.id}
                             availability={availability || []}
+                            activeBookings={activeBookings || []}
                         />
                     </div>
 

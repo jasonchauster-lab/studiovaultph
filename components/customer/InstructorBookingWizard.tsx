@@ -11,10 +11,12 @@ const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 
 
 export default function InstructorBookingWizard({
     instructorId,
-    availability
+    availability,
+    activeBookings = []
 }: {
     instructorId: string
     availability: any[]
+    activeBookings?: any[]
 }) {
     const [step, setStep] = useState<1 | 2 | 3>(1)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -43,6 +45,19 @@ export default function InstructorBookingWizard({
             label: d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
         }
     })
+
+    // Pre-process active bookings into a set of 'YYYY-MM-DD-HH:MM' strings in Manila time
+    const bookedSlotsSet = new Set(
+        activeBookings.flatMap(b => {
+            const slotsData = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+            if (!slotsData?.start_time) return [];
+
+            const startDate = new Date(slotsData.start_time);
+            const dateStr = startDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }); // YYYY-MM-DD
+            const timeStr = startDate.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }); // HH:MM
+            return [`${dateStr}-${timeStr.slice(0, 5)}`];
+        })
+    );
 
     const scrollLeft = () => {
         if (scrollContainerRef.current) {
@@ -177,7 +192,8 @@ export default function InstructorBookingWizard({
                                     const dateMatch = a.date ? a.date === d.date : a.day_of_week === d.dayIndex;
                                     const locationMatch = filterLocation ? a.location_area === filterLocation : true;
                                     const notExpired = isTodayPill ? a.end_time.slice(0, 5) > nowManilaPill : true;
-                                    return dateMatch && locationMatch && notExpired;
+                                    const notBooked = !bookedSlotsSet.has(`${d.date}-${a.start_time.slice(0, 5)}`);
+                                    return dateMatch && locationMatch && notExpired && notBooked;
                                 });
 
                                 if (!hasSlots) return null;
@@ -230,7 +246,8 @@ export default function InstructorBookingWizard({
                                 const locationMatch = filterLocation ? a.location_area === filterLocation : true;
                                 // Hide slots that have already ended when browsing today's date
                                 const notExpired = isToday ? a.end_time.slice(0, 5) > nowManilaTime : true;
-                                return dateMatch && locationMatch && notExpired;
+                                const notBooked = !bookedSlotsSet.has(`${activeDate}-${a.start_time.slice(0, 5)}`);
+                                return dateMatch && locationMatch && notExpired && notBooked;
                             });
 
                             if (slots.length === 0) {
