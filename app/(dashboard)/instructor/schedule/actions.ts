@@ -119,32 +119,36 @@ export async function generateRecurringAvailability(params: GenerateAvailability
 
     if (!user) return { error: 'Unauthorized' };
 
-    const start = new Date(params.startDate);
-    const end = new Date(params.endDate);
-    const endOfDayEnd = new Date(end);
-    endOfDayEnd.setHours(23, 59, 59, 999);
+    // Parse dates purely as date strings (no timezone shift) by using noon UTC
+    // to avoid any day boundary issues when calling .getDay()
+    const parseDateStr = (str: string) => new Date(str + 'T12:00:00Z');
+
+    const start = parseDateStr(params.startDate);
+    const end = parseDateStr(params.endDate);
 
     if (start > end) {
         return { error: 'Start date must be before end date' };
     }
 
     const availabilitiesToInsert = [];
-    let currentDay = new Date(start);
 
     // Crypto for group_id
     const { randomUUID } = await import('crypto');
 
-    while (currentDay <= endOfDayEnd) {
-        // Use local PHT day of week
-        const dayOfWeek = new Date(currentDay.toISOString().split('T')[0] + "T00:00:00+08:00").getDay();
+    // Iterate day-by-day using date strings to avoid timezone drift
+    let currentDateStr = params.startDate;
+    while (currentDateStr <= params.endDate) {
+        // Use noon UTC to get a stable .getDay() that matches the calendar date
+        const dayOfWeek = parseDateStr(currentDateStr).getDay();
+
         if (params.days.includes(dayOfWeek)) {
-            const groupId = randomUUID(); // Shared ID for this specific time slot across different locations
+            const groupId = randomUUID(); // Shared ID for this time slot across locations
 
             for (const loc of params.locations) {
                 availabilitiesToInsert.push({
                     instructor_id: user.id,
                     day_of_week: dayOfWeek,
-                    date: currentDay.toISOString().split('T')[0], // Specific date
+                    date: currentDateStr, // Specific date
                     start_time: params.startTime,
                     end_time: params.endTime,
                     location_area: loc,
@@ -152,7 +156,11 @@ export async function generateRecurringAvailability(params: GenerateAvailability
                 });
             }
         }
-        currentDay.setDate(currentDay.getDate() + 1);
+
+        // Advance to next day by incrementing the date string
+        const nextDay = parseDateStr(currentDateStr);
+        nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+        currentDateStr = nextDay.toISOString().split('T')[0];
     }
 
     if (availabilitiesToInsert.length === 0) {

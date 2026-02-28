@@ -42,7 +42,13 @@ export default async function CustomerDashboard({
         .eq('verified', true)
 
     if (params.location && params.location !== 'all') {
-        studioQuery = studioQuery.eq('location', params.location)
+        if (params.location.includes(' - ')) {
+            studioQuery = studioQuery.eq('location', params.location)
+        } else {
+            // Broad city prefix: match 'BGC - *' etc.
+            // 'QC' is the DB prefix for Quezon City
+            studioQuery = studioQuery.like('location', params.location + ' - %')
+        }
     }
 
     if (params.equipment && params.equipment !== 'all') {
@@ -94,7 +100,11 @@ export default async function CustomerDashboard({
 
         // Filter by Location if set
         if (params.location && params.location !== 'all') {
-            availQuery = availQuery.eq('location_area', params.location)
+            if (params.location.includes(' - ')) {
+                availQuery = availQuery.eq('location_area', params.location)
+            } else {
+                availQuery = availQuery.like('location_area', params.location + ' - %')
+            }
         }
 
         if (params.date) {
@@ -147,7 +157,11 @@ export default async function CustomerDashboard({
                 .order('start_time', { ascending: true })
 
             if (params.location && params.location !== 'all') {
-                slotQuery = slotQuery.eq('studios.location', params.location)
+                if (params.location.includes(' - ')) {
+                    slotQuery = slotQuery.eq('studios.location', params.location)
+                } else {
+                    slotQuery = slotQuery.like('studios.location', params.location + ' - %')
+                }
             }
 
             if (params.equipment && params.equipment !== 'all') {

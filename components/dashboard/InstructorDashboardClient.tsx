@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Slot } from '@/types';
 import StudioAvailabilityGroup from '@/components/dashboard/StudioAvailabilityGroup';
-import { Filter, Search, Loader2, User, Calendar } from 'lucide-react';
+import { Filter, Search, Loader2, User, Calendar, X } from 'lucide-react';
 import Link from 'next/link';
 import clsx from 'clsx';
 import ChatWindow from '@/components/dashboard/ChatWindow';
 import MessageCountBadge from '@/components/dashboard/MessageCountBadge';
-import LocationFilterDropdown from '@/components/shared/LocationFilterDropdown';
+import LocationFilterDropdown, { FILTER_CITIES, LOCATION_GROUPS, shortLabel, activeCityPrefix } from '@/components/shared/LocationFilterDropdown';
 
 import { useSearchParams } from 'next/navigation';
 
@@ -20,7 +20,10 @@ export default function InstructorDashboardClient() {
     const [slots, setSlots] = useState<Slot[]>([]);
     const [bookings, setBookings] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [filterArea, setFilterArea] = useState<string>('All');
+    const [filterArea, setFilterArea] = useState<string>('all');
+    const [locSearch, setLocSearch] = useState('');
+    const [showLocDropdown, setShowLocDropdown] = useState(false);
+    const locSearchRef = useRef<HTMLDivElement>(null);
     const [activeTab, setActiveTab] = useState<'browse' | 'bookings'>(initialTab);
     const [activeChat, setActiveChat] = useState<{ id: string, name: string, isExpired: boolean } | null>(null);
     const supabase = createClient();
@@ -104,15 +107,42 @@ export default function InstructorDashboardClient() {
     }, []);
 
     const filteredSlots = slots.filter(slot => {
-        if (filterArea === 'All') return true
+        if (filterArea === 'all' || filterArea === 'All') return true
         const loc = slot.studios?.location || ''
-        return loc === filterArea
+        // Specific sub-location: exact match
+        if (filterArea.includes(' - ')) return loc === filterArea
+        // Broad city prefix: startsWith match
+        return loc === filterArea || loc.startsWith(filterArea + ' - ')
     });
 
     // Derive available locations from loaded slots for smart filtering
     const availableLocations = [...new Set(
         slots.map(s => s.studios?.location).filter(Boolean) as string[]
     )];
+
+    // Sub-locations to show in the search dropdown
+    const lowerLocSearch = locSearch.toLowerCase()
+    const activePrefix = activeCityPrefix(filterArea)
+    const locSearchResults = locSearch
+        ? LOCATION_GROUPS
+            .filter(g => activePrefix === 'all' || g.prefix === activePrefix)
+            .flatMap(g => g.locations.map(loc => ({ city: g.city, loc })))
+            .filter(({ city, loc }) =>
+                loc.toLowerCase().includes(lowerLocSearch) ||
+                city.toLowerCase().includes(lowerLocSearch)
+            )
+        : []
+
+    // Close search dropdown on outside click
+    useEffect(() => {
+        function handler(e: MouseEvent) {
+            if (locSearchRef.current && !locSearchRef.current.contains(e.target as Node)) {
+                setShowLocDropdown(false)
+            }
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
 
     // Chat Expiration Logic
     const isChatExpired = (booking: any) => {
@@ -180,16 +210,89 @@ export default function InstructorDashboardClient() {
                 {activeTab === 'browse' ? (
                     <>
                         {/* Filters */}
-                        <div className="flex flex-col sm:flex-row gap-4 bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-cream-200 shadow-sm items-center">
-                            <div className="flex items-center gap-2 shrink-0">
+                        <div className="bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-cream-200 shadow-sm space-y-3">
+                            <div className="flex items-center gap-2">
                                 <Filter className="w-4 h-4 text-charcoal-500" />
-                                <span className="text-sm font-medium text-charcoal-700">Filter by Location:</span>
+                                <span className="text-sm font-medium text-charcoal-700">Filter by Location</span>
+                                {filterArea !== 'all' && filterArea !== 'All' && (
+                                    <button onClick={() => { setFilterArea('all'); setLocSearch('') }} className="ml-auto flex items-center gap-1 text-xs text-charcoal-500 hover:text-charcoal-900">
+                                        <X className="w-3 h-3" /> Clear
+                                    </button>
+                                )}
                             </div>
-                            <LocationFilterDropdown
-                                value={filterArea === 'All' ? 'all' : filterArea}
-                                onChange={(val) => setFilterArea(val === 'all' ? 'All' : val)}
-                                availableLocations={availableLocations}
-                            />
+
+                            {/* City pills */}
+                            <div className="flex gap-2 flex-wrap">
+                                {FILTER_CITIES.map(({ label, prefix }) => {
+                                    const isActive = activeCityPrefix(filterArea) === prefix
+                                    return (
+                                        <button
+                                            key={prefix}
+                                            onClick={() => { setFilterArea(prefix); setLocSearch(''); setShowLocDropdown(false) }}
+                                            className={clsx(
+                                                'px-4 py-1.5 rounded-full text-sm font-bold transition-all border',
+                                                isActive
+                                                    ? 'bg-rose-gold text-white border-rose-gold shadow-md'
+                                                    : 'bg-cream-100 text-charcoal-600 border-transparent hover:bg-cream-200'
+                                            )}
+                                        >
+                                            {label}
+                                        </button>
+                                    )
+                                })}
+                            </div>
+
+                            {/* Search bar with sub-location dropdown */}
+                            <div ref={locSearchRef} className="relative">
+                                <div className="flex items-center gap-2 border border-charcoal-300/50 hover:border-charcoal-500 focus-within:border-charcoal-700 rounded-lg px-3 py-2 bg-white transition-colors">
+                                    <Search className="w-4 h-4 text-charcoal-400 shrink-0" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search sub-location… e.g. Fairview, High Street, Uptown"
+                                        value={locSearch}
+                                        onChange={e => { setLocSearch(e.target.value); setShowLocDropdown(true) }}
+                                        onFocus={() => setShowLocDropdown(true)}
+                                        className="flex-1 bg-transparent text-sm text-charcoal-900 placeholder-charcoal-400 outline-none"
+                                    />
+                                    {locSearch && (
+                                        <button onClick={() => { setLocSearch(''); setShowLocDropdown(false) }} className="text-charcoal-400 hover:text-charcoal-700">
+                                            <X className="w-3.5 h-3.5" />
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Search results dropdown */}
+                                {showLocDropdown && locSearchResults.length > 0 && (
+                                    <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-white rounded-xl border border-cream-200 shadow-xl max-h-60 overflow-y-auto py-2">
+                                        {locSearchResults.map(({ city, loc }) => (
+                                            <button
+                                                key={loc}
+                                                onClick={() => { setFilterArea(loc); setLocSearch(''); setShowLocDropdown(false) }}
+                                                className="w-full text-left px-4 py-2 text-sm hover:bg-cream-50 flex items-center gap-3 transition-colors"
+                                            >
+                                                <span className="text-[10px] font-bold uppercase tracking-wider text-charcoal-400 w-20 shrink-0">{city}</span>
+                                                <span className="text-charcoal-700">{shortLabel(loc)}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                                {showLocDropdown && locSearch && locSearchResults.length === 0 && (
+                                    <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-white rounded-xl border border-cream-200 shadow-xl py-4">
+                                        <p className="text-center text-sm text-charcoal-400">No sub-locations found</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Active sub-location badge */}
+                            {filterArea !== 'all' && filterArea !== 'All' && filterArea.includes(' - ') && (
+                                <div className="flex items-center gap-2 pt-1">
+                                    <span className="text-xs text-charcoal-500">Showing:</span>
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-rose-gold text-white text-xs font-semibold rounded-full">
+                                        {filterArea}
+                                        <X className="w-3 h-3 cursor-pointer opacity-80 hover:opacity-100" onClick={() => setFilterArea('all')} />
+                                    </span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Grid */}
