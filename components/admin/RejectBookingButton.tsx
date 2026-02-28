@@ -8,9 +8,10 @@ import { useRouter } from 'next/navigation'
 interface RejectBookingButtonProps {
     id: string
     className?: string
+    variant?: 'default' | 'refund' | 'no-refund'
 }
 
-export default function RejectBookingButton({ id, className }: RejectBookingButtonProps) {
+export default function RejectBookingButton({ id, className, variant = 'default' }: RejectBookingButtonProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [reason, setReason] = useState('')
@@ -38,13 +39,19 @@ export default function RejectBookingButton({ id, className }: RejectBookingButt
         }
     }
 
+    const buttonLabel = variant === 'refund'
+        ? 'Decline with Refund'
+        : variant === 'no-refund'
+            ? 'Decline (No Refund)'
+            : 'Decline'
+
     return (
         <>
             <button
                 onClick={() => setIsOpen(true)}
                 className={`flex items-center justify-center gap-2 ${className}`}
             >
-                Decline
+                {buttonLabel}
             </button>
 
             {isOpen && (
@@ -53,7 +60,7 @@ export default function RejectBookingButton({ id, className }: RejectBookingButt
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="text-lg font-serif text-charcoal-900 flex items-center gap-2">
                                 <AlertCircle className="w-5 h-5 text-red-500" />
-                                Decline Booking
+                                {buttonLabel}
                             </h3>
                             <button
                                 onClick={() => setIsOpen(false)}
@@ -79,24 +86,28 @@ export default function RejectBookingButton({ id, className }: RejectBookingButt
                             </div>
 
                             <div className="flex flex-col gap-2 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={() => handleReject(true)}
-                                    disabled={isLoading || !reason.trim()}
-                                    className="w-full px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isLoading && <Loader2 className="w-3 h-3 animate-spin" />}
-                                    Decline & Refund to Wallet
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => handleReject(false)}
-                                    disabled={isLoading || !reason.trim()}
-                                    className="w-full px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isLoading && <Loader2 className="w-3 h-3 animate-spin" />}
-                                    Decline Without Refund
-                                </button>
+                                {(variant === 'default' || variant === 'refund') && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleReject(true)}
+                                        disabled={isLoading || !reason.trim()}
+                                        className="w-full px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isLoading && <Loader2 className="w-3 h-3 animate-spin" />}
+                                        Confirm & Refund to Wallet
+                                    </button>
+                                )}
+                                {(variant === 'default' || variant === 'no-refund') && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleReject(false)}
+                                        disabled={isLoading || !reason.trim()}
+                                        className="w-full px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isLoading && <Loader2 className="w-3 h-3 animate-spin" />}
+                                        Confirm Without Refund
+                                    </button>
+                                )}
                                 <button
                                     type="button"
                                     onClick={() => setIsOpen(false)}

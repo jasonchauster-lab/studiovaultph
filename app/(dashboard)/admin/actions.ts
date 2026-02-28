@@ -557,6 +557,7 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
             client_id,
             booked_slot_ids,
             total_price,
+            price_breakdown,
             client:profiles!client_id(full_name, email),
             slots(
                 start_time,
@@ -593,8 +594,12 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
     }
 
     // 3.5 Process Refund if requested
-    if (withRefund && booking.client_id && booking.total_price != null) {
-        const refundAmount = Number(booking.total_price);
+    if (withRefund && booking.client_id) {
+        const breakdown = booking.price_breakdown as any;
+        const walletDeduction = Number(breakdown?.wallet_deduction || 0);
+        const totalPrice = Number(booking.total_price || 0);
+        const refundAmount = totalPrice + walletDeduction;
+
         if (refundAmount > 0) {
             const { error: refundError } = await supabase.rpc('increment_available_balance', {
                 user_id: booking.client_id,
@@ -602,7 +607,7 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
             })
             if (refundError) {
                 console.error('Error processing refund during rejection:', refundError)
-                // Continue with rejection even if refund fails, but you might want to log this securely
+                return { error: `Booking rejected, but refund failed: ${refundError.message}` }
             }
         }
     }

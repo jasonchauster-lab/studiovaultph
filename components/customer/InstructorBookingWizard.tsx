@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { findMatchingStudios } from '@/app/(dashboard)/instructors/actions'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
+import { getManilaTodayStr, toManilaDate } from '@/lib/timezone'
 import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -35,13 +36,21 @@ export default function InstructorBookingWizard({
     const searchParams = useSearchParams()
     const filterLocation = searchParams.get('location')
 
-    // Helper: Generate next 14 days
+    // Helper: Generate next 14 days based on Manila Time
     const nextDays = Array.from({ length: 14 }).map((_, i) => {
-        const d = new Date()
-        d.setDate(d.getDate() + i)
+        const todayAtNoon = new Date();
+        todayAtNoon.setHours(12, 0, 0, 0); // Noon to avoid boundary issues
+        const d = toManilaDate(todayAtNoon);
+        d.setUTCDate(d.getUTCDate() + i);
+
+        const year = d.getUTCFullYear();
+        const month = (d.getUTCMonth() + 1).toString().padStart(2, '0');
+        const day = d.getUTCDate().toString().padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+
         return {
-            date: d.toISOString().split('T')[0],
-            dayIndex: d.getDay(),
+            date: dateStr,
+            dayIndex: d.getUTCDay(),
             label: d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
         }
     })
@@ -68,11 +77,6 @@ export default function InstructorBookingWizard({
             return [`${dateStr}-${timeStr}`];
         })
     );
-
-    console.log('InstructorBookingWizard Debug:');
-    console.log('activeBookings:', activeBookings);
-    console.log('bookedSlotsSet:', Array.from(bookedSlotsSet));
-    console.log('availability:', availability);
 
     const scrollLeft = () => {
         if (scrollContainerRef.current) {
@@ -197,11 +201,10 @@ export default function InstructorBookingWizard({
                             className="flex overflow-x-auto pb-4 gap-3 px-1 no-scrollbar snap-x snap-mandatory scroll-smooth"
                         >
                             {nextDays.map((d) => {
-                                const todayManilaForPill = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
-                                const isTodayPill = d.date === todayManilaForPill;
-                                const nowManilaPill = new Date().toLocaleTimeString('en-US', {
-                                    hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila'
-                                });
+                                const todayManilaStr = getManilaTodayStr();
+                                const isTodayPill = d.date === todayManilaStr;
+                                const nowManilaPill = toManilaDate(new Date()).getUTCHours().toString().padStart(2, '0') + ':' +
+                                    toManilaDate(new Date()).getUTCMinutes().toString().padStart(2, '0');
 
                                 const hasSlots = availability.some(a => {
                                     const dateMatch = a.date ? a.date === d.date : a.day_of_week === d.dayIndex;
@@ -246,14 +249,16 @@ export default function InstructorBookingWizard({
                     {/* Slots for Selected Date */}
                     <div className="bg-cream-50 rounded-2xl p-6 border border-cream-200">
                         {(() => {
-                            const activeDate = selectedDate || nextDays.find(nd => availability.some(a => a.date === nd.date || (!a.date && a.day_of_week === nd.dayIndex)))?.date;
+                            const activeDate = selectedDate || nextDays[0].date;
                             if (!activeDate) return <p className="text-charcoal-500 text-center italic">No availability found.</p>;
 
                             const d = nextDays.find(nd => nd.date === activeDate);
-                            const nowManilaTime = new Date().toLocaleTimeString('en-US', {
-                                hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila'
-                            }); // e.g. "10:40"
-                            const todayManila = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }); // YYYY-MM-DD
+
+                            const nowInstance = toManilaDate(new Date());
+                            const nowManilaTime = nowInstance.getUTCHours().toString().padStart(2, '0') + ':' +
+                                nowInstance.getUTCMinutes().toString().padStart(2, '0');
+
+                            const todayManila = getManilaTodayStr();
                             const isToday = activeDate === todayManila;
 
                             const slots = availability.filter(a => {

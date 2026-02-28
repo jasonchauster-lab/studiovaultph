@@ -593,7 +593,7 @@ export async function bookInstructorSession(
             slot_id: selectedSlot.id,
             instructor_id: instructorId,
             client_id: user.id,
-            status: 'confirmed'
+            status: 'approved'
         })
         .select()
         .single()
@@ -773,13 +773,13 @@ export async function cancelBooking(bookingId: string) {
     let refundAmount = 0;
     const breakdown = booking.price_breakdown as any;
     const walletDeduction = Number(breakdown?.wallet_deduction || 0);
+    const totalPrice = Number(booking.total_price || 0);
 
     if (hoursUntilStart >= 24) {
-        // Only refund the exact total_price IF the booking cash payment was approved.
-        // If it's pending or submitted, they haven't verified their cash payment yet, 
-        // so we only return the amount actually deducted from their wallet.
+        // Only if the booking was approved (cash portion confirmed) do we refund total_price + wallet_deduction.
+        // If it's pending/submitted/confirmed, we only return the amount actually deducted from their wallet.
         if (booking.status === 'approved') {
-            refundAmount = Number(booking.total_price) + walletDeduction;
+            refundAmount = totalPrice + walletDeduction;
         } else {
             refundAmount = walletDeduction;
         }
@@ -793,7 +793,7 @@ export async function cancelBooking(bookingId: string) {
         })
         if (refundError) {
             console.error('Wallet increment error:', refundError)
-            return { error: 'Failed to process refund to wallet.' }
+            return { error: `Failed to process refund to wallet: ${refundError.message} (Code: ${refundError.code})` }
         }
     }
 

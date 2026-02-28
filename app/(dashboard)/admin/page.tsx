@@ -755,10 +755,25 @@ export default async function AdminDashboard({
                                             </div>
 
                                             <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-cream-100">
-                                                <RejectBookingButton
-                                                    id={booking.id}
-                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
-                                                />
+                                                {booking.payment_status === 'submitted' ? (
+                                                    <>
+                                                        <RejectBookingButton
+                                                            id={booking.id}
+                                                            variant="no-refund"
+                                                            className="px-3 py-1 border border-red-200 text-red-600 text-xs rounded-md hover:bg-red-50 transition-colors"
+                                                        />
+                                                        <RejectBookingButton
+                                                            id={booking.id}
+                                                            variant="refund"
+                                                            className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                                        />
+                                                    </>
+                                                ) : (
+                                                    <RejectBookingButton
+                                                        id={booking.id}
+                                                        className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                                    />
+                                                )}
                                                 <VerifyButton
                                                     id={booking.id}
                                                     action="confirmBooking"
