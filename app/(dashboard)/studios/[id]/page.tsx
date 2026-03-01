@@ -22,7 +22,7 @@ export default async function StudioDetailsPage({
     // 1. Fetch Studio Details
     const { data: studio } = await supabase
         .from('studios')
-        .select('*')
+        .select('*, profiles!owner_id(available_balance, is_suspended)')
         .eq('id', id)
         .single()
 
@@ -81,13 +81,16 @@ export default async function StudioDetailsPage({
                     </h2>
                     {(() => {
                         const now = new Date().toISOString().split('T')[0];
+                        const owner = Array.isArray(studio.profiles) ? studio.profiles[0] : studio.profiles;
+                        const isSuspended = owner?.is_suspended || (owner?.available_balance || 0) < 0;
                         const expired = (studio.mayors_permit_expiry && studio.mayors_permit_expiry < now)
                             || (studio.bir_certificate_expiry && studio.bir_certificate_expiry < now);
-                        if (expired || studio.verified === false) {
+
+                        if (expired || studio.verified === false || isSuspended) {
                             return (
                                 <div className="py-8 text-center bg-red-50 border border-red-200 rounded-xl">
                                     <p className="text-red-700 font-medium text-sm">This studio is temporarily unavailable for bookings.</p>
-                                    <p className="text-red-600 text-xs mt-1">One or more required documents have expired. The studio owner has been notified.</p>
+                                    <p className="text-red-600 text-xs mt-1">One or more required documents have expired or the studio is under administrative review.</p>
                                 </div>
                             );
                         }

@@ -70,7 +70,7 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             }
         }
 
-        // 3. Get all active bookings
+        // 3. Get all relevant bookings (active + late cancelled with potential charges)
         console.log(`[getEarningsData] Fetching bookings for ${slotIds.length} slots...`)
         let bookingsQuery = supabase
             .from('bookings')
@@ -81,7 +81,7 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
                 slots!inner(start_time, end_time, studios(name))
             `)
             .in('slot_id', slotIds)
-            .in('status', ['approved', 'completed', 'cancelled_charged'])
+            .in('status', ['approved', 'completed', 'cancelled_charged', 'cancelled_refunded'])
             .order('created_at', { ascending: false })
 
         if (startDate) bookingsQuery = bookingsQuery.gte('slots.start_time', startDate)
@@ -113,10 +113,32 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
         }
 
         // 5. Calculate Totals
-        const totalEarnings = bookings?.reduce((sum, b) => {
-            const studioFee = b.price_breakdown?.studio_fee || (b.total_price ? Math.max(0, b.total_price - 100) : 0);
-            return sum + studioFee;
-        }, 0) || 0
+        let grossEarnings = 0
+        let totalCompensation = 0 // Received from Instructor Penalties
+        let totalPenalty = 0 // Paid as Displacement Fees
+
+        bookings?.forEach(b => {
+            const breakdown = b.price_breakdown as any
+            const studioFee = Number(breakdown?.studio_fee || 0)
+            const penaltyProcessed = breakdown?.penalty_processed === true
+            const penaltyAmount = Number(breakdown?.penalty_amount || 0)
+            const initiator = breakdown?.refund_initiator
+
+            // Scenario A: Successful Booking
+            if (['approved', 'completed', 'cancelled_charged'].includes(b.status)) {
+                grossEarnings += studioFee
+            }
+
+            // Scenario B: Compensation (Instructor cancelled late)
+            if (penaltyProcessed && initiator === 'instructor') {
+                totalCompensation += penaltyAmount
+            }
+
+            // Scenario C: Penalty (Studio cancelled late)
+            if (penaltyProcessed && initiator === 'studio') {
+                totalPenalty += penaltyAmount
+            }
+        })
 
         const totalPaidOut = payouts
             ?.filter(p => p.status === 'paid')
@@ -126,29 +148,63 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             ?.filter(p => p.status === 'pending' || p.status === 'approved')
             .reduce((sum, p) => sum + Number(p.amount), 0) || 0
 
-        // Available = Total Earnings - (Paid + Pending)
-        const availableBalance = totalEarnings - (totalPaidOut + totalPending)
+        // Net Earnings logic
+        const netEarnings = grossEarnings + totalCompensation - totalPenalty
 
         // 6. Unified Transactions for CSV
         const transactions: any[] = []
         const wrap = (val: any) => Array.isArray(val) ? val[0] : val
 
         bookings?.forEach(b => {
-            const studioFee = b.price_breakdown?.studio_fee || (b.total_price ? Math.max(0, b.total_price - 100) : 0);
+            const breakdown = b.price_breakdown as any
+            const studioFee = Number(breakdown?.studio_fee || 0)
             const slot = wrap(b.slots)
             const studioName = slot?.studios?.name
             const clientName = wrap(b.client)?.full_name
             const instructorName = wrap(b.instructor)?.full_name
 
-            transactions.push({
-                date: slot?.start_time || b.created_at,
-                type: 'Booking',
-                client: clientName,
-                instructor: instructorName,
-                studio: studioName,
-                total_amount: studioFee,
-                details: `${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}`
-            })
+            const penaltyProcessed = breakdown?.penalty_processed === true
+            const penaltyAmount = Number(breakdown?.penalty_amount || 0)
+            const initiator = breakdown?.refund_initiator
+
+            // Add the booking transaction itself if valid
+            if (['approved', 'completed', 'cancelled_charged'].includes(b.status)) {
+                transactions.push({
+                    date: slot?.start_time || b.created_at,
+                    type: 'Booking',
+                    client: clientName,
+                    instructor: instructorName,
+                    studio: studioName,
+                    total_amount: studioFee,
+                    details: `${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}`
+                })
+            }
+
+            // Add Compensation entry
+            if (penaltyProcessed && initiator === 'instructor') {
+                transactions.push({
+                    date: b.updated_at || b.created_at,
+                    type: 'Cancellation Compensation',
+                    client: clientName,
+                    instructor: instructorName,
+                    studio: studioName,
+                    total_amount: penaltyAmount,
+                    details: 'Late cancellation by instructor'
+                })
+            }
+
+            // Add Penalty entry
+            if (penaltyProcessed && initiator === 'studio') {
+                transactions.push({
+                    date: b.updated_at || b.created_at,
+                    type: 'Cancellation Penalty',
+                    client: clientName,
+                    instructor: instructorName,
+                    studio: studioName,
+                    total_amount: -penaltyAmount,
+                    details: 'Late cancellation displacement fee'
+                })
+            }
         })
 
         payouts?.forEach(p => {
@@ -161,6 +217,24 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             })
         })
 
+        // 4.5. Get Wallet Top-ups & Admin Adjustments
+        const { data: walletActions } = ownerId ? await supabase
+            .from('wallet_top_ups')
+            .select('*')
+            .eq('user_id', ownerId)
+            .eq('status', 'approved')
+            : { data: null };
+
+        walletActions?.forEach(wa => {
+            const isAdjustment = wa.type === 'admin_adjustment';
+            transactions.push({
+                date: wa.processed_at || wa.updated_at || wa.created_at,
+                type: isAdjustment ? 'Direct Adjustment' : 'Wallet Top-Up',
+                total_amount: wa.amount, // Signed amount
+                details: wa.admin_notes || (isAdjustment ? 'Manual balance adjustment' : 'Gcash/Bank Top-up')
+            });
+        });
+
         transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
         console.log('[getEarningsData] Success.')
@@ -169,7 +243,10 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             payouts,
             transactions,
             summary: {
-                totalEarnings,
+                totalEarnings: grossEarnings,
+                totalCompensation,
+                totalPenalty,
+                netEarnings,
                 totalPaidOut,
                 pendingPayouts: totalPending,
                 availableBalance: profile?.available_balance || 0,

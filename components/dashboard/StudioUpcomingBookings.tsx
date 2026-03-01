@@ -123,6 +123,22 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                 onConfirm={handleCancelConfirm}
                 title="Cancel Session"
                 description="Are you sure you want to cancel this session? A 100% refund will be issued to the client immediately. The instructor will also be notified."
+                penaltyNotice={
+                    (() => {
+                        if (!cancellingBooking) return null
+                        const slotData = Array.isArray(cancellingBooking.slots) ? cancellingBooking.slots[0] : cancellingBooking.slots
+                        const startTime = new Date(slotData.start_time)
+                        const now = new Date()
+                        const diffInHours = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60)
+                        const isLate = diffInHours < 24
+
+                        if (isLate) {
+                            const studioFee = cancellingBooking.price_breakdown?.studio_fee || 0
+                            return `Late Cancellation Displacement Fee: ₱${studioFee.toLocaleString()} will be deducted from your wallet and credited to the instructor.`
+                        }
+                        return null
+                    })() || undefined
+                }
             />
         </div>
     )

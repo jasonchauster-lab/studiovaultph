@@ -8,6 +8,8 @@ import BookingNotificationEmail from '@/components/emails/BookingNotificationEma
 import ApplicationApprovalEmail from '@/components/emails/ApplicationApprovalEmail'
 import ApplicationRejectionEmail from '@/components/emails/ApplicationRejectionEmail'
 import { formatManilaDate, formatManilaTime } from '@/lib/timezone'
+import WalletNotificationEmail from '@/components/emails/WalletNotificationEmail'
+import AccountReactivatedEmail from '@/components/emails/AccountReactivatedEmail'
 
 async function verifyAdmin(supabase: any) {
     const { data: { user } } = await supabase.auth.getUser()
@@ -425,9 +427,12 @@ export async function confirmBooking(bookingId: string) {
         return { error: `Failed to find booking details: ${fetchError?.message || 'Unknown'}` }
     }
 
-    // 2. Update status
+    // 2. Update status and set approval timestamp
     const { error: updateError } = await supabase.from('bookings')
-        .update({ status: 'approved' })
+        .update({
+            status: 'approved',
+            approved_at: new Date().toISOString()
+        })
         .eq('id', bookingId)
 
     if (updateError) {
@@ -1238,4 +1243,291 @@ export async function getPartnerBookings(id: string, type: 'profile' | 'studio')
     });
 
     return { active, past };
+}
+
+export async function reinstateStudio(profileId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // 1. Verify Admin
+    if (!user) return { error: 'Unauthorized' }
+    const { data: adminProfile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if (adminProfile?.role !== 'admin') return { error: 'Unauthorized' }
+
+    // 2. Clear strikes and suspension
+    // Get the studio first to clear its strikes
+    const { data: studio } = await supabase
+        .from('studios')
+        .select('id, name')
+        .eq('owner_id', profileId)
+        .single()
+
+    if (!studio) return { error: 'Studio not found.' }
+
+    // Delete strikes
+    const { error: deleteError } = await supabase
+        .from('studio_strikes')
+        .delete()
+        .eq('studio_id', studio.id)
+
+    if (deleteError) {
+        console.error('Error clearing strikes:', deleteError)
+        return { error: 'Failed to clear strikes.' }
+    }
+
+    // Reset suspension
+    const { error: resetError } = await supabase
+        .from('profiles')
+        .update({ is_suspended: false })
+        .eq('id', profileId)
+
+    if (resetError) {
+        console.error('Error resetting suspension:', resetError)
+        return { error: 'Failed to reset suspension.' }
+    }
+
+    // 3. Send Reactivation Email
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', profileId)
+        .single()
+
+    if (profile?.email) {
+        const host = (await headers()).get('host')
+        const protocol = host?.includes('localhost') ? 'http' : 'https'
+        const siteUrl = `${protocol}://${host}`
+
+        await sendEmail({
+            to: profile.email,
+            subject: 'Your Studio Vault PH Listing is Now Active',
+            react: AccountReactivatedEmail({
+                studioName: studio.name,
+                dashboardUrl: `${siteUrl}/studio`
+            })
+        })
+    }
+
+    revalidatePath('/admin')
+    return { success: true }
+}
+
+export async function approveTopUp(id: string) {
+    const supabase = await createClient()
+    const { data: { user: adminUser } } = await supabase.auth.getUser()
+
+    if (!adminUser) return { error: 'Unauthorized' }
+
+    // 1. Get Top-Up Request
+    const { data: topUp, error: fetchError } = await supabase
+        .from('wallet_top_ups')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+    if (fetchError || !topUp) return { error: 'Top-up request not found.' }
+    if (topUp.status !== 'pending') return { error: 'Top-up request already processed.' }
+
+    // 2. Update status and credit user wallet in a transaction (via RPC or sequential updates)
+    // For simplicity here, we do sequential updates. In production, an RPC or transaction is better.
+    const { error: updateError } = await supabase
+        .from('wallet_top_ups')
+        .update({ status: 'approved', processed_at: new Date().toISOString() })
+        .eq('id', id)
+
+    if (updateError) return { error: 'Failed to approve top-up.' }
+
+    // 3. Increment Wallet Balance
+    const { error: balanceError } = await supabase.rpc('increment_available_balance', {
+        user_id_param: topUp.user_id,
+        amount_param: topUp.amount
+    })
+
+    if (balanceError) {
+        console.error('Balance Credit Error:', balanceError)
+        // Note: In an ideal system, we'd rollback the top_up status if this fails.
+        return { error: 'Top-up approved but failed to credit balance.' }
+    }
+
+    // 4. Send Approval Email
+    const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', topUp.user_id).single()
+    if (profile?.email) {
+        await sendEmail({
+            to: profile.email,
+            subject: 'Wallet Top-up Approved!',
+            react: WalletNotificationEmail({
+                recipientName: profile.full_name,
+                type: 'top_up_approved',
+                amount: topUp.amount,
+                date: formatManilaDate(new Date().toISOString())
+            }) as any
+        })
+    }
+
+    revalidatePath('/admin')
+    revalidatePath('/customer/wallet')
+    return { success: true }
+}
+
+export async function rejectTopUp(id: string, reason?: string) {
+    const supabase = await createClient()
+    const { data: { user: adminUser } } = await supabase.auth.getUser()
+
+    if (!adminUser) return { error: 'Unauthorized' }
+
+    const { data: topUp } = await supabase.from('wallet_top_ups').select('*').eq('id', id).single()
+    if (!topUp) return { error: 'Top-up request not found.' }
+
+    const { error: updateError } = await supabase
+        .from('wallet_top_ups')
+        .update({
+            status: 'rejected',
+            rejection_reason: reason || 'Receipt unreadable or incorrect amount.',
+            processed_at: new Date().toISOString()
+        })
+        .eq('id', id)
+
+    if (updateError) return { error: 'Failed to reject top-up.' }
+
+    // Send Rejection Email
+    const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', topUp.user_id).single()
+    if (profile?.email) {
+        await sendEmail({
+            to: profile.email,
+            subject: 'Wallet Top-up Rejected',
+            react: WalletNotificationEmail({
+                recipientName: profile.full_name,
+                type: 'top_up_rejected',
+                amount: topUp.amount,
+                date: formatManilaDate(new Date().toISOString()),
+                rejectionReason: reason
+            }) as any
+        })
+    }
+
+    revalidatePath('/admin')
+    return { success: true }
+}
+
+export async function adjustUserBalance(userId: string, amount: number, reason: string) {
+    const supabase = await createClient()
+    const { data: { user: adminUser } } = await supabase.auth.getUser()
+
+    if (!adminUser) return { error: 'Unauthorized' }
+
+    // 1. Verify Admin (Redundant but safe)
+    const { data: adminProfile } = await supabase.from('profiles').select('role').eq('id', adminUser.id).single()
+    if (adminProfile?.role !== 'admin') return { error: 'Unauthorized' }
+
+    // 2. Create Adjustment Record
+    const { error: recordError } = await supabase
+        .from('wallet_top_ups')
+        .insert({
+            user_id: userId,
+            amount: amount, // Signed amount (positive or negative)
+            type: 'admin_adjustment',
+            status: 'approved',
+            admin_notes: reason,
+            processed_at: new Date().toISOString(),
+            payment_proof_url: 'ADMIN_OVERRIDE'
+        })
+
+    if (recordError) return { error: 'Failed to record adjustment.' }
+
+    // 3. Update Balance
+    const { error: balanceError } = await supabase.rpc('increment_available_balance', {
+        user_id_param: userId,
+        amount_param: amount
+    })
+
+    if (balanceError) return { error: 'Failed to update user balance.' }
+
+    // 4. Send Notification Email
+    const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', userId).single()
+    if (profile?.email) {
+        await sendEmail({
+            to: profile.email,
+            subject: 'Refined Wallet Balance Update',
+            react: WalletNotificationEmail({
+                recipientName: profile.full_name,
+                type: amount > 0 ? 'adjustment_credit' : 'adjustment_debit',
+                amount: Math.abs(amount),
+                date: formatManilaDate(new Date().toISOString()),
+                rejectionReason: reason // Overloading this field for the reason
+            }) as any
+        })
+    }
+
+    revalidatePath('/admin')
+    revalidatePath('/customer/wallet')
+    return { success: true }
+}
+
+export async function settleInstructorDebt(profileId: string) {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
+    // 1. Fetch current balance
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('available_balance, full_name, email')
+        .eq('id', profileId)
+        .single()
+
+    if (!profile) return { error: 'Profile not found.' }
+
+    const currentBalance = profile.available_balance || 0
+    if (currentBalance >= 0) return { error: 'Instructor does not have a negative balance.' }
+
+    // 2. Settle the debt (increment by the absolute value of the negative balance)
+    const settlementAmount = Math.abs(currentBalance)
+
+    // Create Adjustment Record for Audit Trail
+    const { error: recordError } = await supabase
+        .from('wallet_top_ups')
+        .insert({
+            user_id: profileId,
+            amount: settlementAmount,
+            type: 'admin_adjustment',
+            status: 'approved',
+            admin_notes: `Manual debt settlement by Admin. Original balance: ₱${currentBalance.toLocaleString()}`,
+            processed_at: new Date().toISOString(),
+            payment_proof_url: 'DEBT_SETTLEMENT'
+        })
+
+    if (recordError) return { error: 'Failed to record settlement.' }
+
+    // 3. Update Balance to 0
+    const { error: balanceError } = await supabase.rpc('increment_available_balance', {
+        user_id_param: profileId,
+        amount_param: settlementAmount
+    })
+
+    if (balanceError) return { error: 'Failed to settle balance.' }
+
+    // 4. Send Confirmation Email
+    if (profile.email) {
+        await sendEmail({
+            to: profile.email,
+            subject: 'Account Reinstated: Negative Balance Settled',
+            react: WalletNotificationEmail({
+                recipientName: profile.full_name,
+                type: 'adjustment_credit',
+                amount: settlementAmount,
+                date: formatManilaDate(new Date().toISOString()),
+                rejectionReason: 'Your negative balance has been settled by the Admin. Your account is now fully functional.'
+            }) as any
+        })
+    }
+
+    revalidatePath('/admin')
+    revalidatePath('/instructor/earnings')
+    return { success: true }
 }

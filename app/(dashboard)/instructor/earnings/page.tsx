@@ -1,38 +1,73 @@
+'use client'
+
 import { getInstructorEarnings } from '../actions'
-import { Wallet, TrendingUp, Clock, ArrowUpRight, DollarSign, ArrowLeft } from 'lucide-react'
+import { Wallet, TrendingUp, Clock, ArrowUpRight, DollarSign, ArrowLeft, Info, X, ShieldCheck, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { topUpWallet } from '@/app/(dashboard)/customer/actions'
 import ExportCsvButton from '@/components/dashboard/ExportCsvButton'
 import DateRangeFilters from '@/components/dashboard/DateRangeFilters'
 
-export default async function EarningsPage({
+export default function EarningsPage({
     searchParams
 }: {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+    searchParams: any
 }) {
-    const { range } = await searchParams
+    const [range, setRange] = useState<string | undefined>(undefined)
+    const [data, setData] = useState<any>(null)
+    const [showInfoModal, setShowInfoModal] = useState(false)
+    const [showTopUpModal, setShowTopUpModal] = useState(false)
+    const [topUpAmount, setTopUpAmount] = useState('')
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const router = useRouter()
 
-    // --- DATE FILTER LOGIC ---
-    let startDate: string | undefined
-    let endDate: string | undefined = new Date().toISOString()
-    const now = new Date()
+    const handleTopUp = async () => {
+        const amount = parseFloat(topUpAmount)
+        if (isNaN(amount) || amount <= 0) return alert('Please enter a valid amount.')
 
-    if (range === '7d') {
-        const d = new Date()
-        d.setDate(d.getDate() - 7)
-        startDate = d.toISOString()
-    } else if (range === '30d') {
-        const d = new Date()
-        d.setDate(d.getDate() - 30)
-        startDate = d.toISOString()
-    } else if (range === 'this-month') {
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-    } else if (range === 'this-quarter') {
-        const quarter = Math.floor(now.getMonth() / 3)
-        startDate = new Date(now.getFullYear(), quarter * 3, 1).toISOString()
-    } else if (range === 'this-year') {
-        startDate = new Date(now.getFullYear(), 0, 1).toISOString()
+        setIsSubmitting(true)
+        const result = await topUpWallet(amount)
+        setIsSubmitting(false)
+
+        if (result.error) {
+            alert(result.error)
+        } else {
+            router.push(`/customer/payment/top-up/${result.topUpId}`)
+        }
     }
-    // --- END DATE FILTER LOGIC ---
+
+    useEffect(() => {
+        searchParams.then((params: any) => setRange(params.range))
+    }, [searchParams])
+
+    useEffect(() => {
+        // --- DATE FILTER LOGIC ---
+        let startDate: string | undefined
+        let endDate: string | undefined = new Date().toISOString()
+        const now = new Date()
+
+        if (range === '7d') {
+            const d = new Date()
+            d.setDate(d.getDate() - 7)
+            startDate = d.toISOString()
+        } else if (range === '30d') {
+            const d = new Date()
+            d.setDate(d.getDate() - 30)
+            startDate = d.toISOString()
+        } else if (range === 'this-month') {
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+        } else if (range === 'this-quarter') {
+            const quarter = Math.floor(now.getMonth() / 3)
+            startDate = new Date(now.getFullYear(), quarter * 3, 1).toISOString()
+        } else if (range === 'this-year') {
+            startDate = new Date(now.getFullYear(), 0, 1).toISOString()
+        }
+
+        getInstructorEarnings(startDate, endDate).then(setData)
+    }, [range])
+
+    if (!data) return <div className="p-8">Loading earnings...</div>
 
     const {
         totalEarned,
@@ -42,7 +77,7 @@ export default async function EarningsPage({
         pendingBalance,
         recentTransactions,
         error
-    } = await getInstructorEarnings(startDate, endDate)
+    } = data
 
     if (error) {
         return (
@@ -55,6 +90,47 @@ export default async function EarningsPage({
 
     return (
         <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
+            {/* Info Modal */}
+            {showInfoModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-sm" onClick={() => setShowInfoModal(false)}>
+                    <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
+                        <div className="px-6 py-4 border-b border-cream-200 flex justify-between items-center bg-cream-50">
+                            <h3 className="font-serif text-lg text-charcoal-900">Wallet & Recovery Rules</h3>
+                            <button onClick={() => setShowInfoModal(false)} className="text-charcoal-400 hover:text-charcoal-900 transition-colors">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-rose-gold font-bold text-sm uppercase tracking-wider">
+                                    <AlertCircle className="w-4 h-4" />
+                                    Negative Balances
+                                </div>
+                                <p className="text-sm text-charcoal-600 leading-relaxed">
+                                    If penalty deductions cause your wallet to drop below ₱0.00, your account will carry a negative balance. While negative, your "Request Payout" feature is disabled and new bookings are restricted.
+                                </p>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-charcoal-900 font-bold text-sm uppercase tracking-wider">
+                                    <ShieldCheck className="w-4 h-4" />
+                                    Auto-Recovery
+                                </div>
+                                <p className="text-sm text-charcoal-600 leading-relaxed">
+                                    Any future earnings or refunds will be automatically applied to the negative balance until the debt is cleared. You can also contact Admin to settle manually via GCash/Bank Transfer.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="px-6 py-4 bg-cream-50 border-t border-cream-200">
+                            <button
+                                onClick={() => setShowInfoModal(false)}
+                                className="w-full py-2 bg-charcoal-900 text-white rounded-lg font-bold hover:bg-charcoal-800 transition-colors"
+                            >
+                                Got it
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <Link
@@ -69,13 +145,31 @@ export default async function EarningsPage({
                 </div>
                 <div className="flex gap-2">
                     {recentTransactions && <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />}
-                    <Link
-                        href="/instructor/payout"
-                        className="bg-rose-gold text-white px-6 py-3 rounded-lg font-bold hover:brightness-110 shadow-md transition-all flex items-center gap-2"
+                    <button
+                        onClick={() => setShowTopUpModal(true)}
+                        className="bg-white text-charcoal-900 border border-cream-200 px-6 py-3 rounded-lg font-bold hover:bg-cream-50 shadow-sm transition-all flex items-center gap-2"
                     >
-                        <Wallet className="w-4 h-4" />
-                        Request Payout
-                    </Link>
+                        <ArrowUpRight className="w-4 h-4" />
+                        Top-Up Wallet
+                    </button>
+                    {availableBalance < 0 ? (
+                        <button
+                            disabled
+                            className="bg-charcoal-400 text-cream-100 px-6 py-3 rounded-lg font-bold shadow-md transition-all flex items-center gap-2 cursor-not-allowed"
+                            title="Payouts are restricted while your balance is negative."
+                        >
+                            <Wallet className="w-4 h-4" />
+                            Request Payout
+                        </button>
+                    ) : (
+                        <Link
+                            href="/instructor/payout"
+                            className="bg-rose-gold text-white px-6 py-3 rounded-lg font-bold hover:brightness-110 shadow-md transition-all flex items-center gap-2"
+                        >
+                            <Wallet className="w-4 h-4" />
+                            Request Payout
+                        </Link>
+                    )}
                 </div>
             </div>
 
@@ -83,54 +177,98 @@ export default async function EarningsPage({
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Available Balance */}
-                <div className="bg-charcoal-900 text-cream-50 p-6 rounded-xl shadow-lg border border-rose-gold/20">
-                    <div className="flex items-center gap-3 mb-2">
-                        <Wallet className="w-5 h-5 text-rose-gold" />
-                        <span className="text-sm font-medium opacity-80">Available Balance</span>
-                    </div>
-                    <p className="text-3xl font-bold">₱{(availableBalance || 0).toLocaleString()}</p>
-                    <p className="text-xs mt-2 opacity-60">Ready to withdraw</p>
-                </div>
-
-                {/* Total Earnings */}
+                {/* Gross Earnings */}
                 <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <TrendingUp className="w-5 h-5 text-rose-gold" />
-                        <span className="text-sm font-medium text-charcoal-500">Total Earnings</span>
+                        <span className="text-sm font-medium text-charcoal-500 uppercase tracking-wider">Gross Earnings</span>
                     </div>
-                    <p className="text-3xl font-bold text-charcoal-900">₱{(totalEarned || 0).toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-charcoal-900">₱{(data.totalEarned || 0).toLocaleString()}</p>
                     <p className="text-xs mt-2 text-charcoal-400">Lifetime gross income</p>
                 </div>
 
-                {/* Pending Payouts (processing requests) */}
+                {/* Compensation (Studio late cancellation) */}
                 <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <Clock className="w-5 h-5 text-rose-gold" />
-                        <span className="text-sm font-medium text-charcoal-500">Pending Payouts</span>
+                        <TrendingUp className="w-5 h-5 text-green-600" />
+                        <span className="text-sm font-medium text-charcoal-500 uppercase tracking-wider">Compensation</span>
                     </div>
-                    <p className="text-3xl font-bold text-charcoal-900">₱{(pendingPayouts || 0).toLocaleString()}</p>
-                    <p className="text-xs mt-2 text-charcoal-400">Processing requests</p>
+                    <p className="text-3xl font-bold text-green-600">₱{(data.totalCompensation || 0).toLocaleString()}</p>
+                    <p className="text-xs mt-2 text-charcoal-400">From studio late cancels</p>
                 </div>
 
-                {/* Security Hold (Hold for 24h) */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm border-l-4 border-l-rose-gold">
+                {/* Penalty (Instructor late cancellation) */}
+                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <Clock className="w-5 h-5 text-rose-gold" />
-                        <span className="text-sm font-medium text-rose-gold font-bold">Security Hold (24h)</span>
+                        <TrendingUp className="w-5 h-5 text-red-600" transform="rotate(180)" />
+                        <span className="text-sm font-medium text-charcoal-500 uppercase tracking-wider">Penalties</span>
                     </div>
-                    <p className="text-3xl font-bold text-charcoal-900">₱{(pendingBalance || 0).toLocaleString()}</p>
-                    <p className="text-xs mt-2 text-charcoal-400">Unlocking within 24 hours</p>
+                    <p className="text-3xl font-bold text-red-600">- ₱{(data.totalPenalty || 0).toLocaleString()}</p>
+                    <p className="text-xs mt-2 text-charcoal-400">From your late cancels</p>
+                </div>
+
+                {/* Net Earnings */}
+                <div className="bg-charcoal-900 text-cream-50 p-6 rounded-xl shadow-lg border border-rose-gold/20">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                            <TrendingUp className="w-5 h-5 text-rose-gold" />
+                            <span className="text-sm font-medium opacity-80 uppercase tracking-wider">Net Earnings</span>
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-tighter text-rose-gold px-2 py-1 rounded bg-rose-gold/10">
+                            Calculation: Gross + Comp - Penalty
+                        </span>
+                    </div>
+                    <p className="text-3xl font-bold text-white">₱{(data.netEarnings || 0).toLocaleString()}</p>
+                    <p className="text-xs mt-2 opacity-60">Your take-home income</p>
+                </div>
+
+                {/* Available Balance */}
+                <div className="p-6 rounded-xl shadow-sm text-white" style={{ background: '#BC926E' }}>
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                            <Wallet className="w-5 h-5 text-white" />
+                            <span className="text-sm font-medium opacity-90 uppercase tracking-wider">Available Balance</span>
+                        </div>
+                        <button
+                            onClick={() => setShowInfoModal(true)}
+                            className="text-white/80 hover:text-white transition-colors p-1"
+                            title="Wallet Rules"
+                        >
+                            <Info className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <p className="text-3xl font-bold">₱{(availableBalance || 0).toLocaleString()}</p>
+                    <p className="text-xs mt-2 opacity-80">Ready to withdraw</p>
                 </div>
 
                 {/* Total Withdrawn */}
                 <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <ArrowUpRight className="w-5 h-5 text-rose-gold" />
-                        <span className="text-sm font-medium text-charcoal-500">Total Withdrawn</span>
+                        <span className="text-sm font-medium text-charcoal-500 uppercase tracking-wider">Total Withdrawn</span>
                     </div>
                     <p className="text-3xl font-bold text-charcoal-900">₱{(totalWithdrawn || 0).toLocaleString()}</p>
                     <p className="text-xs mt-2 text-charcoal-400">Successfully transferred</p>
+                </div>
+
+                {/* Pending Payouts */}
+                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
+                    <div className="flex items-center gap-3 mb-2">
+                        <Clock className="w-5 h-5 text-rose-gold" />
+                        <span className="text-sm font-medium text-charcoal-500 uppercase tracking-wider">Pending Payouts</span>
+                    </div>
+                    <p className="text-3xl font-bold text-charcoal-900">₱{(pendingPayouts || 0).toLocaleString()}</p>
+                    <p className="text-xs mt-2 text-charcoal-400">In extraction queue</p>
+                </div>
+
+                {/* Security Hold */}
+                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm border-l-4 border-l-rose-gold">
+                    <div className="flex items-center gap-3 mb-2">
+                        <Clock className="w-5 h-5 text-rose-gold" />
+                        <span className="text-sm font-bold text-rose-gold uppercase tracking-wider">Security Hold</span>
+                    </div>
+                    <p className="text-3xl font-bold text-charcoal-900">₱{(pendingBalance || 0).toLocaleString()}</p>
+                    <p className="text-xs mt-2 text-charcoal-400">Unlocking within 24 hours</p>
                 </div>
             </div>
 
@@ -152,7 +290,7 @@ export default async function EarningsPage({
                         </thead>
                         <tbody className="divide-y divide-cream-100">
                             {recentTransactions && recentTransactions.length > 0 ? (
-                                recentTransactions.map((tx, i) => (
+                                recentTransactions.map((tx: any, i: number) => (
                                     <tr key={i} className="hover:bg-cream-50/50 transition-colors">
                                         <td className="px-6 py-4 text-sm text-charcoal-600">
                                             {new Date(tx.date).toLocaleDateString()}

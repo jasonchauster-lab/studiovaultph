@@ -264,8 +264,15 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="px-4 sm:px-6 py-12 text-center text-charcoal-500 text-sm">
-        <p>&copy; {new Date().getFullYear()} StudioVaultPH. All rights reserved.</p>
+      <footer className="px-4 sm:px-6 py-12 bg-white border-t border-cream-200">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-charcoal-500 text-sm">&copy; {new Date().getFullYear()} StudioVaultPH. All rights reserved.</p>
+          <div className="flex gap-8 text-sm text-charcoal-500">
+            <Link href="/terms-of-service" className="hover:text-rose-gold transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-rose-gold transition-colors">Privacy Policy</Link>
+            <Link href="/support" className="hover:text-rose-gold transition-colors">Support</Link>
+          </div>
+        </div>
       </footer>
 
     </div>

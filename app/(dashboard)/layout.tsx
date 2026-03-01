@@ -93,6 +93,17 @@ export default async function DashboardLayout({
                 {children}
             </main>
 
+            <footer className="bg-white border-t border-cream-200 py-6 px-4">
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-charcoal-500">
+                    <p>© 2026 Studio Vault PH. All rights reserved.</p>
+                    <div className="flex gap-6">
+                        <Link href="/terms-of-service" className="hover:text-rose-gold transition-colors">Terms of Service</Link>
+                        <Link href="/privacy" className="hover:text-rose-gold transition-colors">Privacy Policy</Link>
+                        <Link href="/support" className="hover:text-rose-gold transition-colors">Support</Link>
+                    </div>
+                </div>
+            </footer>
+
             {user && <SupportChatWidget userId={user.id} />}
             {user && <UserPresenceTracker />}
         </div>

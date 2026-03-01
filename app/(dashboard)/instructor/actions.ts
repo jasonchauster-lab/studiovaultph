@@ -26,11 +26,12 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
             price_breakdown, 
             status, 
             created_at,
+            updated_at,
             client:profiles!client_id(full_name),
             slots!inner(start_time, studios(name))
         `)
         .eq('instructor_id', user.id)
-        .in('status', ['approved', 'completed', 'cancelled_charged'])
+        .in('status', ['approved', 'completed', 'cancelled_charged', 'cancelled_refunded'])
 
     if (startDate) bookingsQuery = bookingsQuery.gte('slots.start_time', startDate)
     if (endDate) bookingsQuery = bookingsQuery.lte('slots.start_time', endDate)
@@ -44,29 +45,57 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
 
     const first = (val: any) => Array.isArray(val) ? val[0] : val
 
-    let totalEarned = 0;
+    let grossEarned = 0;
+    let totalCompensation = 0; // Received from Studio Displacement Fees
+    let totalPenalty = 0; // Paid as late cancellation penalties
     const recentTransactions: any[] = [];
 
     bookings?.forEach(booking => {
         const breakdown = booking.price_breakdown as any;
-        const instructorFee = breakdown?.instructor_fee || 0;
+        const instructorFee = Number(breakdown?.instructor_fee || 0);
+        const penaltyProcessed = breakdown?.penalty_processed === true;
+        const penaltyAmount = Number(breakdown?.penalty_amount || 0);
+        const initiator = breakdown?.refund_initiator;
 
-        // Count approved, completed, and cancelled_charged towards actual earnings
+        // 1. Gross Earnings (Approved/Completed/Charged sessions)
         if (['approved', 'completed', 'cancelled_charged'].includes(booking.status)) {
-            totalEarned += instructorFee;
+            grossEarned += instructorFee;
+
+            const studioName = first(booking.slots)?.studios?.name
+            recentTransactions.push({
+                date: first(booking.slots)?.start_time || booking.created_at,
+                type: 'Booking',
+                status: booking.status,
+                client: (booking.client as any)?.full_name,
+                studio: studioName,
+                total_amount: instructorFee,
+                details: `${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}`
+            });
         }
 
-        const studioName = first(booking.slots)?.studios?.name
+        // 2. Compensation (Studio cancelled late)
+        if (penaltyProcessed && initiator === 'studio') {
+            totalCompensation += penaltyAmount;
+            recentTransactions.push({
+                date: booking.updated_at || booking.created_at,
+                type: 'Cancellation Compensation',
+                status: 'processed',
+                details: 'Displacement fee from studio',
+                total_amount: penaltyAmount
+            });
+        }
 
-        recentTransactions.push({
-            date: first(booking.slots)?.start_time || booking.created_at,
-            type: 'Booking',
-            status: booking.status,
-            client: (booking.client as any)?.full_name,
-            studio: studioName,
-            total_amount: instructorFee,
-            details: `${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}`
-        });
+        // 3. Penalty (Instructor cancelled late)
+        if (penaltyProcessed && initiator === 'instructor') {
+            totalPenalty += penaltyAmount;
+            recentTransactions.push({
+                date: booking.updated_at || booking.created_at,
+                type: 'Cancellation Penalty',
+                status: 'processed',
+                details: 'Late cancellation penalty',
+                total_amount: -penaltyAmount
+            });
+        }
     });
 
     // 2. Calculate Total Withdrawn & Pending Payouts
@@ -110,17 +139,43 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
         }
     });
 
+    const netEarnings = grossEarned + totalCompensation - totalPenalty;
+
+    // 4. Get Wallet Top-ups & Admin Adjustments
+    const { data: walletActions } = await supabase
+        .from('wallet_top_ups')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+
+    walletActions?.forEach(wa => {
+        const isAdjustment = wa.type === 'admin_adjustment';
+        recentTransactions.push({
+            date: wa.processed_at || wa.updated_at || wa.created_at,
+            type: isAdjustment ? 'Direct Adjustment' : 'Wallet Top-Up',
+            status: 'completed',
+            total_amount: wa.amount, // Signed amount
+            details: wa.admin_notes || (isAdjustment ? 'Manual balance adjustment' : 'Gcash/Bank Top-up')
+        });
+    });
+
+    recentTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
     const availableBalance = profile?.available_balance || 0;
     const pendingBalance = profile?.pending_balance || 0;
 
     return {
-        totalEarned,
+        totalEarned: grossEarned,
+        totalCompensation,
+        totalPenalty,
+        netEarnings,
         totalWithdrawn,
         pendingPayouts,
         availableBalance,
         pendingBalance,
         recentTransactions,
-        bookingsCount: bookings?.length || 0
+        bookingsCount: bookings?.filter(b => ['approved', 'completed', 'cancelled_charged'].includes(b.status))?.length || 0
     };
 }
 
@@ -135,6 +190,10 @@ export async function requestPayout(amount: number, method: string, details: any
 
     if (balanceError || availableBalance === undefined) {
         return { error: 'Failed to verify balance.' }
+    }
+
+    if (availableBalance < 0) {
+        return { error: 'Your account carries a negative balance. Payouts are restricted until the debt is settled.' }
     }
 
     if (amount <= 0) {
@@ -219,6 +278,17 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
         return { error: 'Your account is still under review. You cannot book dates yet.' }
     }
 
+    // Check Balance
+    const { data: instructorProfile } = await supabase
+        .from('profiles')
+        .select('available_balance')
+        .eq('id', user.id)
+        .single();
+
+    if (instructorProfile && (instructorProfile.available_balance || 0) < 0) {
+        return { error: 'Your account carries a negative balance. New studio rentals are restricted until the debt is settled.' }
+    }
+
     // 1. Fetch Studio Details for Pricing
     const { data: slot } = await supabase
         .from('slots')
@@ -230,13 +300,24 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
                 hourly_rate,
                 pricing,
                 is_founding_partner,
-                custom_fee_percentage
+                custom_fee_percentage,
+                profiles!owner_id(available_balance, is_suspended, full_name)
             )
         `)
         .eq('id', slotId)
         .single();
 
     if (!slot) return { error: 'Slot not found.' }
+
+    // 1.1 Check Studio Owner's Status
+    const studio = slot.studios as any;
+    const studioOwner = Array.isArray(studio.profiles) ? studio.profiles[0] : studio.profiles;
+    if (studioOwner?.is_suspended) {
+        return { error: `The studio "${slot.studios?.name || 'Partner Studio'}" is currently not accepting new bookings.` }
+    }
+    if (studioOwner && (studioOwner.available_balance || 0) < 0) {
+        return { error: `The studio "${slot.studios?.name || 'Partner Studio'}" is currently not accepting new bookings due to a pending balance settlement.` }
+    }
 
     // Calculate Duration
     const start = new Date(slot.start_time);
@@ -521,13 +602,21 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
         return { error: 'Booking is already cancelled or rejected.' }
     }
 
+    const startTimeStr = (booking.slots as any)?.start_time
+    const approvedAtStr = booking.approved_at
+    const sessionStart = new Date(startTimeStr)
+    const now = new Date()
+
+    const diffInHours = (sessionStart.getTime() - now.getTime()) / (1000 * 60 * 60)
+    const isLateCancellation = diffInHours < 24
+
+    // Phase 7: 15-minute grace period check (Strictly from approved_at)
+    // If approvedAt is null, the grace period is inherently active (unlocked booking)
+    const approvedAt = approvedAtStr ? new Date(approvedAtStr) : null
+    const isWithinGracePeriod = !approvedAt || (now.getTime() - approvedAt.getTime() <= 15 * 60 * 1000)
+
     const isStudioRental = booking.client_id === booking.instructor_id
     const studio = (booking.slots as any)?.studios
-    const startTimeStr = (booking.slots as any)?.start_time
-    const startTime = new Date(startTimeStr)
-    const now = new Date()
-    const diffInHours = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60)
-    const isLateCancellation = diffInHours < 24
 
     // 2. Process 100% Refund to Client (in Studio Rental case, client IS the instructor)
     const breakdown = booking.price_breakdown as any;
@@ -546,15 +635,15 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
         }
     }
 
-    // 3. Penalty Logic (ONLY for Studio Rentals < 24h)
+    // 3. Penalty Logic (Apply to ALL cancellations < 24h, EXCEPT during grace period)
     let penaltyProcessed = false
     let penaltyAmount = 0
-    if (isStudioRental && isLateCancellation) {
+    if (isLateCancellation && !isWithinGracePeriod) {
         penaltyAmount = Number(breakdown?.studio_fee || 0)
         if (penaltyAmount > 0 && studio?.owner_id) {
-            const { error: penaltyError } = await supabase.rpc('transfer_penalty_instructor_to_studio', {
-                p_instructor_id: user.id,
-                p_studio_owner_id: studio.owner_id,
+            const { error: penaltyError } = await supabase.rpc('transfer_balance', {
+                p_from_id: user.id,
+                p_to_id: studio.owner_id,
                 p_amount: penaltyAmount
             })
             if (penaltyError) {

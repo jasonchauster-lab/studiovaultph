@@ -106,7 +106,13 @@ To the fullest extent permitted by Philippine law, StudioVaultPH's maximum liabi
 10. GOVERNING LAW
 These Terms are governed by the laws of the Republic of the Philippines. Any disputes shall be subject to the exclusive jurisdiction of the appropriate courts of the Philippines, in accordance with the Electronic Commerce Act (Republic Act No. 8792), the Civil Code, and the Consumer Act (Republic Act No. 7394).
 
-BY CHECKING THE BOX BELOW, THE CLIENT CONFIRMS THEY HAVE READ, UNDERSTOOD, AND AGREE TO THESE TERMS AND CONDITIONS, INCLUDING THE STRICT NO-CANCELLATION-WITHOUT-INSTRUCTOR-APPROVAL POLICY.`
+11. 24-HOUR CANCELLATION & WALLET POLICY
+a) Studio Vault PH enforces a strict 24-hour cancellation policy.
+b) Any session cancelled less than 24 hours before the scheduled start time is a "Late Cancellation" subject to automated penalties.
+c) Instructor/Studio-initiated late cancellations result in 100% client refunds and penalty deductions from the initiator's wallet.
+d) Negative wallet balances disable "Request Payout" and new bookings until settled.
+
+BY CHECKING THE BOX BELOW, THE CLIENT CONFIRMS THEY HAVE READ, UNDERSTOOD, AND AGREE TO THESE TERMS AND CONDITIONS, INCLUDING THE STRICT 24-HOUR CANCELLATION & WALLET POLICY.`
 
 // ─── Instructor Specific Terms ───────────────────────────────────────────────
 const INSTRUCTOR_TERMS_TEXT = `TERMS AND CONDITIONS — INSTRUCTOR PROFESSIONAL BOOKING
@@ -133,6 +139,12 @@ You agree to indemnify and hold harmless StudioVaultPH and the partner studio fr
 
 5. GOVERNING LAW
 These terms are governed by the laws of the Republic of the Philippines.
+
+6. 24-HOUR CANCELLATION & WALLET POLICY
+a) Studio Vault PH enforces a strict 24-hour cancellation policy.
+b) Any session cancelled less than 24 hours before the scheduled start time is a "Late Cancellation" subject to automated penalties.
+c) Instructor/Studio-initiated late cancellations result in 100% client refunds and penalty deductions from the initiator's wallet.
+d) Negative wallet balances disable "Request Payout" and new bookings until settled.
 
 BY CHECKING THE BOX BELOW, YOU ACKNOWLEDGE YOUR PROFESSIONAL STATUS AND AGREE TO THESE BINDING TERMS.`
 
@@ -272,6 +284,7 @@ export default function PaymentForm({
     const [lateBookingAgreed, setLateBookingAgreed] = useState(false)
     const [showWaiver, setShowWaiver] = useState(false)
     const [showTerms, setShowTerms] = useState(false)
+    const [showPolicyTLDR, setShowPolicyTLDR] = useState(false)
 
     const router = useRouter()
     const supabase = createClient()
@@ -488,6 +501,17 @@ export default function PaymentForm({
                     title={userRole === 'instructor' ? "Instructor Professional Terms" : "Terms and Conditions & Cancellation Policy"}
                     content={userRole === 'instructor' ? INSTRUCTOR_TERMS_TEXT : TERMS_TEXT}
                     onClose={() => setShowTerms(false)}
+                />
+            )}
+            {showPolicyTLDR && (
+                <AgreementModal
+                    title="24-Hour Cancellation & Wallet Policy (TL;DR)"
+                    content={`1. 24-Hour Rule: Strict 24-hour cancellation policy applies to all bookings.
+2. Late Cancellations: Any cancellation <24h is a "Late Cancellation" with penalties.
+3. Instructor Late Cancel: 100% Client refund; Instructor wallet deducted Studio Rental Fee.
+4. Studio Late Cancel: 100% Client refund; Studio wallet deducted Displacement Fee (credited to Instructor).
+5. Negative Balances: If wallet drops below ₱0, autopayouts and new bookings are disabled until the debt is cleared via future earnings or manual settlement.`}
+                    onClose={() => setShowPolicyTLDR(false)}
                 />
             )}
 
@@ -790,18 +814,31 @@ export default function PaymentForm({
                     </div>
                 )}
 
-                <button
-                    type="submit"
-                    disabled={!canSubmit}
-                    className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${file && canSubmit
-                        ? 'bg-rose-gold text-white hover:bg-rose-gold/90 shadow-md'
-                        : 'bg-charcoal-900 text-cream-50 hover:bg-charcoal-800 disabled:opacity-40 disabled:cursor-not-allowed'
-                        }`}
-                >
-                    {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm Booking'}
-                </button>
+                {/* Policy Agreement Reminder */}
+                <div className="text-center space-y-4">
+                    <p className="text-xs text-charcoal-500">
+                        By booking, you agree to our{' '}
+                        <button
+                            type="button"
+                            onClick={() => setShowPolicyTLDR(true)}
+                            className="text-rose-gold font-bold hover:underline"
+                        >
+                            24-Hour Cancellation Policy
+                        </button>.
+                    </p>
+                    <button
+                        type="submit"
+                        disabled={!canSubmit}
+                        className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${file && canSubmit
+                            ? 'bg-rose-gold text-white hover:bg-rose-gold/90 shadow-md'
+                            : 'bg-charcoal-900 text-cream-50 hover:bg-charcoal-800 disabled:opacity-40 disabled:cursor-not-allowed'
+                            }`}
+                    >
+                        {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm Booking'}
+                    </button>
+                </div>
                 {!canSubmit && !isUploading && (
-                    <p className="text-xs text-center text-charcoal-400">
+                    <p className="text-xs text-center text-charcoal-400 mt-4">
                         {!parqComplete
                             ? 'Complete the PAR-Q questionnaire to continue.'
                             : hasRiskFlags && !medicalAcknowledged

@@ -4,10 +4,28 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
+import AccountFrozenEmail from '@/components/emails/AccountFrozenEmail'
 import { formatManilaDate, formatManilaTime } from '@/lib/timezone'
 
 export async function createSlot(formData: FormData) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    // 0. Check Studio Owner's balance and suspension
+    const { data: ownerProfile } = await supabase
+        .from('profiles')
+        .select('available_balance, is_suspended')
+        .eq('id', user.id)
+        .single()
+
+    if (ownerProfile?.is_suspended) {
+        return { error: 'Your account is currently suspended. You cannot create new slots.' }
+    }
+
+    if (ownerProfile && (ownerProfile.available_balance || 0) < 0) {
+        return { error: 'You have a negative balance. Please settle your outstanding balance before creating new slots.' }
+    }
 
     const studioId = formData.get('studioId') as string
     const date = formData.get('date') as string
@@ -319,6 +337,23 @@ interface GenerateSlotsParams {
 
 export async function generateRecurringSlots(params: GenerateSlotsParams) {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    // 0. Check Studio Owner's balance and suspension
+    const { data: ownerProfile } = await supabase
+        .from('profiles')
+        .select('available_balance, is_suspended')
+        .eq('id', user.id)
+        .single()
+
+    if (ownerProfile?.is_suspended) {
+        return { error: 'Your account is currently suspended. You cannot generate recurring slots.' }
+    }
+
+    if (ownerProfile && (ownerProfile.available_balance || 0) < 0) {
+        return { error: 'You have a negative balance. Please settle your outstanding balance before generating recurring slots.' }
+    }
 
     // Basic validation
     if (!params.studioId || !params.startDate || !params.endDate || !params.startTime || !params.endTime) {
@@ -523,6 +558,21 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Unauthorized' }
 
+    // 0. Check Studio Owner's balance and suspension
+    const { data: ownerProfile } = await supabase
+        .from('profiles')
+        .select('available_balance, is_suspended')
+        .eq('id', user.id)
+        .single()
+
+    if (ownerProfile?.is_suspended) {
+        return { error: 'Your account is currently suspended. You cannot cancel bookings.' }
+    }
+
+    if (ownerProfile && (ownerProfile.available_balance || 0) < 0) {
+        return { error: 'You have a negative balance. Please settle your outstanding balance before cancelling bookings.' }
+    }
+
     if (!reason?.trim()) return { error: 'Cancellation reason is required.' }
 
     // 1. Fetch booking and verify studio ownership
@@ -572,7 +622,81 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
         }
     }
 
-    // 3. Update status and release slots
+    const startTimeStr = (booking.slots as any)?.start_time
+    const approvedAtStr = booking.approved_at
+    const sessionStart = new Date(startTimeStr)
+    const now = new Date()
+
+    const diffInHours = (sessionStart.getTime() - now.getTime()) / (1000 * 60 * 60)
+    const isLateCancellation = diffInHours < 24
+
+    // Phase 7: 15-minute grace period check (Strictly from approved_at)
+    // If approvedAt is null, the grace period is inherently active (unlocked booking)
+    const approvedAt = approvedAtStr ? new Date(approvedAtStr) : null
+    const isWithinGracePeriod = !approvedAt || (now.getTime() - approvedAt.getTime() <= 15 * 60 * 1000)
+
+    // 3. Displacement Fee & Strike logic (Studio Owner -> Instructor)
+    let penaltyProcessed = false
+    let penaltyAmount = 0
+    let strikeLogged = false
+
+    if (isLateCancellation && !isWithinGracePeriod) {
+        penaltyAmount = Number(breakdown?.studio_fee || 0)
+        if (penaltyAmount > 0 && booking.instructor_id) {
+            const { error: penaltyError } = await supabase.rpc('transfer_balance', {
+                p_from_id: user.id, // Studio Owner
+                p_to_id: booking.instructor_id,
+                p_amount: penaltyAmount
+            })
+            if (penaltyError) {
+                console.error('Displacement fee transfer error:', penaltyError)
+                return { error: 'Refund processed, but displacement fee transfer failed.' }
+            }
+            penaltyProcessed = true
+        }
+
+        // --- STRIKE SYSTEM START ---
+        // 1. Log the strike
+        const { error: strikeError } = await supabase.from('studio_strikes').insert({
+            studio_id: studio.id,
+            booking_id: bookingId
+        })
+
+        if (strikeError) {
+            console.error('Error logging studio strike:', strikeError)
+        } else {
+            strikeLogged = true
+
+            // 2. Check for cumulative strikes (last 30 days)
+            const thirtyDaysAgo = new Date()
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+            const { count: strikeCount } = await supabase
+                .from('studio_strikes')
+                .select('*', { count: 'exact', head: true })
+                .eq('studio_id', studio.id)
+                .gte('created_at', thirtyDaysAgo.toISOString())
+
+            if (strikeCount && strikeCount >= 3) {
+                // 3. Auto-suspend
+                await supabase.from('profiles').update({ is_suspended: true }).eq('id', user.id)
+
+                // 4. Send "Account Frozen" email
+                if (user.email) {
+                    await sendEmail({
+                        to: user.email,
+                        subject: 'Action Required: Your Studio Vault PH Listing has been Suspended',
+                        react: AccountFrozenEmail({
+                            studioName: studio.name,
+                        })
+                    })
+                }
+            }
+        }
+        // --- STRIKE SYSTEM END ---
+    }
+
+    // 4. Update status and release slots
     const { error: updateError } = await supabase.from('bookings').update({
         status: 'cancelled_refunded',
         cancel_reason: reason,
@@ -580,6 +704,9 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
         price_breakdown: {
             ...breakdown,
             refunded_amount: refundAmount,
+            penalty_amount: penaltyAmount,
+            penalty_processed: penaltyProcessed,
+            strike_logged: strikeLogged,
             refund_initiator: 'studio'
         }
     }).eq('id', bookingId)

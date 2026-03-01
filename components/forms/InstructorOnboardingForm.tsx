@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { submitInstructorOnboarding } from '@/app/(dashboard)/instructor/onboarding/actions'
+import Link from 'next/link'
 import { Upload, CheckCircle, AlertCircle, Loader2, ShieldCheck, ArrowRight } from 'lucide-react'
 import clsx from 'clsx'
 import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
@@ -374,6 +375,41 @@ export default function InstructorOnboardingForm() {
                         </p>
                     </div>
                 </div>
+                {/* Cancellation & Wallet Policy */}
+                <div className="pt-6 border-t border-cream-200">
+                    <h3 className="text-sm font-semibold text-charcoal-900 uppercase tracking-wider mb-4">Cancellation & Wallet Policy</h3>
+                    <div className="bg-cream-50 rounded-xl border border-cream-200 p-4 mb-4">
+                        <div className="h-48 overflow-y-auto pr-2 text-xs text-charcoal-600 space-y-4 scrollbar-thin scrollbar-thumb-cream-300">
+                            <p className="font-bold text-charcoal-900">1. The 24-Hour Strict Cancellation Rule</p>
+                            <p>Studio Vault PH enforces a strict 24-hour cancellation policy. Any session cancelled less than 24 hours before the scheduled start time is considered a "Late Cancellation" and is subject to automated penalties.</p>
+
+                            <p className="font-bold text-charcoal-900">2. Instructor-Initiated Late Cancellations</p>
+                            <p>If an Instructor cancels within the 24-hour window: The Client receives a 100% refund. The Instructor’s Wallet will be immediately deducted the cost of the Studio Rental Fee, which is credited to the Studio.</p>
+
+                            <p className="font-bold text-charcoal-900">3. Studio-Initiated Late Cancellations</p>
+                            <p>If a Studio cancels within the 24-hour window: The Client receives a 100% refund. The Studio’s Wallet is deducted a Displacement Fee (equal to the Studio Rental Rate), which is credited to the Instructor’s Wallet.</p>
+
+                            <p className="font-bold text-charcoal-900">4. Negative Wallet Balances</p>
+                            <p>If penalties cause a balance to drop below ₱0.00, the account carries a negative balance. Future earnings are automatically applied to the debt. "Request Payout" and new bookings are disabled until settled.</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                        <div className="flex items-center h-5">
+                            <input
+                                id="policyAgree"
+                                name="policyAgree"
+                                type="checkbox"
+                                required
+                                className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900 cursor-pointer"
+                            />
+                        </div>
+                        <label htmlFor="policyAgree" className="text-sm text-charcoal-700 cursor-pointer">
+                            I have read and agree to the <Link href="/terms-of-service" target="_blank" className="text-rose-gold font-bold hover:underline">Studio Vault Cancellation & Wallet Policy</Link>. <span className="text-rose-gold font-bold">*</span>
+                        </label>
+                    </div>
+                </div>
+
                 {/* Notifications */}
                 {message && (
                     <div className={clsx(

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { CheckCircle, Clock, Building2, MessageCircle, BarChart3, Download } from 'lucide-react'
+import { CheckCircle, Clock, Building2, MessageCircle, BarChart3, Download, Wallet, ArrowUpRight, ShieldAlert, AlertTriangle } from 'lucide-react'
 import VerifyButton from '@/components/admin/VerifyButton'
 import RejectBookingButton from '@/components/admin/RejectBookingButton'
 import { getAdminAnalytics } from './actions'
@@ -9,6 +9,7 @@ import DateRangeFilters from '@/components/dashboard/DateRangeFilters'
 import SupportNotificationBadge from '@/components/admin/SupportNotificationBadge'
 import AdminExportButtons from '@/components/admin/AdminExportButtons'
 import TriggerFundsUnlockButton from '@/components/admin/TriggerFundsUnlockButton'
+import BalanceAdjustmentTool from '@/components/admin/BalanceAdjustmentTool'
 
 // Since this is a server component, we fetch data directly
 export default async function AdminDashboard({
@@ -266,8 +267,35 @@ export default async function AdminDashboard({
             .filter((p: any) => p.profile?.role === 'customer')
     }
 
+    // 8. Fetch Pending Wallet Top-Ups
+    const { data: pendingTopUps } = await supabase
+        .from('wallet_top_ups')
+        .select(`
+            *,
+            profiles:user_id(full_name, email, role)
+        `)
+        .eq('status', 'pending')
+        .not('payment_proof_url', 'is', null)
+        .order('created_at', { ascending: false })
+
+    // 9. Fetch Suspended Studios
+    const { data: suspendedStudiosData } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, is_suspended, studios(id, name)')
+        .eq('is_suspended', true)
+
+    const suspendedStudios = suspendedStudiosData ?? []
+
     // 6. Fetch Analytics
     const analytics = await getAdminAnalytics(startDate, endDate)
+
+    // 10. Fetch Negative Balance Instructors
+    const { data: negativeBalanceInstructors } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, available_balance')
+        .eq('role', 'instructor')
+        .lt('available_balance', 0)
+        .order('available_balance', { ascending: true })
 
     return (
         <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
@@ -339,578 +367,725 @@ export default async function AdminDashboard({
                     )}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Negative Balance Instructors */}
+                <div className="bg-white text-charcoal-900 border border-orange-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                    <h2 className="text-xl font-medium text-orange-600 mb-4 flex items-center gap-2">
+                        <ShieldAlert className="w-5 h-5" />
+                        Negative Balance Instructors
+                        {negativeBalanceInstructors && negativeBalanceInstructors.length > 0 && (
+                            <span className="ml-2 bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full font-medium">
+                                {negativeBalanceInstructors.length} restricted
+                            </span>
+                        )}
+                    </h2>
 
-                    {/* Instructor Payout Requests */}
-                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
-                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-charcoal-500" />
-                            Instructor Payout Requests
-                        </h2>
+                    {!negativeBalanceInstructors || negativeBalanceInstructors.length === 0 ? (
+                        <p className="text-charcoal-500 text-sm">No instructors currently have a negative balance.</p>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {negativeBalanceInstructors.map((instructor: any) => (
+                                <div key={instructor.id} className="border border-orange-100 rounded-lg p-4 bg-orange-50/30 flex justify-between items-center">
+                                    <div>
+                                        <p className="font-bold text-charcoal-900">{instructor.full_name}</p>
+                                        <p className="text-xs text-charcoal-600">{instructor.email}</p>
+                                        <p className="text-sm text-red-600 font-bold mt-1">
+                                            Balance: ₱{(instructor.available_balance || 0).toLocaleString()}
+                                        </p>
+                                    </div>
+                                    <VerifyButton
+                                        id={instructor.id}
+                                        action="settleInstructorDebt"
+                                        label="Settle & Reinstate"
+                                        className="px-4 py-2 bg-charcoal-900 text-cream-50 text-xs rounded-lg hover:bg-charcoal-800 transition-colors shadow-sm font-bold"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
-                        {!payoutRequests || payoutRequests.length === 0 ? (
-                            <p className="text-charcoal-500 text-sm">No pending payout requests.</p>
-                        ) : (
-                            <div className="space-y-4">
-                                {payoutRequests.map((request: any) => (
-                                    <div key={request.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
-                                                <p className="font-medium text-charcoal-900">
-                                                    ₱{request.amount.toLocaleString()} — {request.instructor_name || `Instructor ID: ${request.instructor_id}`}
-                                                </p>
-                                                <div className="text-sm text-charcoal-600 mt-1">
-                                                    <span className="capitalize font-medium">{request.payment_method === 'bank' || request.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'GCash'}</span>
-                                                    <span className="mx-2 text-charcoal-300">|</span>
-                                                    <span className="text-xs">
-                                                        {(request.bank_name || request.payment_details?.bankName || request.payment_details?.bank_name) ? (
-                                                            `${request.bank_name || request.payment_details?.bankName || request.payment_details?.bank_name} — `
-                                                        ) : ''}
-                                                        {request.account_number || request.payment_details?.accountNumber || request.payment_details?.account_number}
-                                                    </span>
-                                                </div>
-                                                <p className="text-xs text-charcoal-500 mt-0.5">
-                                                    Account Name: {request.account_name || request.payment_details?.accountName || request.payment_details?.account_name || '—'}
-                                                </p>
-                                                <p className="text-xs text-charcoal-400 mt-1">
-                                                    Requested: {new Date(request.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
-                                                </p>
+                {/* Instructor Payout Requests */}
+                <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                    <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-charcoal-500" />
+                        Instructor Payout Requests
+                    </h2>
+
+                    {!payoutRequests || payoutRequests.length === 0 ? (
+                        <p className="text-charcoal-500 text-sm">No pending payout requests.</p>
+                    ) : (
+                        <div className="space-y-4">
+                            {payoutRequests.map((request: any) => (
+                                <div key={request.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <p className="font-medium text-charcoal-900">
+                                                ₱{request.amount.toLocaleString()} — {request.instructor_name || `Instructor ID: ${request.instructor_id}`}
+                                            </p>
+                                            <div className="text-sm text-charcoal-600 mt-1">
+                                                <span className="capitalize font-medium">{request.payment_method === 'bank' || request.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'GCash'}</span>
+                                                <span className="mx-2 text-charcoal-300">|</span>
+                                                <span className="text-xs">
+                                                    {(request.bank_name || request.payment_details?.bankName || request.payment_details?.bank_name) ? (
+                                                        `${request.bank_name || request.payment_details?.bankName || request.payment_details?.bank_name} — `
+                                                    ) : ''}
+                                                    {request.account_number || request.payment_details?.accountNumber || request.payment_details?.account_number}
+                                                </span>
                                             </div>
-                                            <div className="flex gap-2">
-                                                <VerifyButton
-                                                    id={request.id}
-                                                    action="rejectPayout"
-                                                    label="Reject"
-                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
-                                                />
-                                                <VerifyButton
-                                                    id={request.id}
-                                                    action="approvePayout"
-                                                    label="Approve"
-                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
-                                                />
-                                            </div>
+                                            <p className="text-xs text-charcoal-500 mt-0.5">
+                                                Account Name: {request.account_name || request.payment_details?.accountName || request.payment_details?.account_name || '—'}
+                                            </p>
+                                            <p className="text-xs text-charcoal-400 mt-1">
+                                                Requested: {new Date(request.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <VerifyButton
+                                                id={request.id}
+                                                action="rejectPayout"
+                                                label="Reject"
+                                                className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                            />
+                                            <VerifyButton
+                                                id={request.id}
+                                                action="approvePayout"
+                                                label="Approve"
+                                                className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                            />
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
 
-                    {/* Verification Queue (Instructors) */}
-                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm">
-                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
-                            <CheckCircle className="w-5 h-5 text-charcoal-500" />
-                            Instructor Verification
-                        </h2>
+                {/* Verification Queue (Instructors) */}
+                <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm">
+                    <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5 text-charcoal-500" />
+                        Instructor Verification
+                    </h2>
 
-                        {certsWithUrls?.length === 0 ? (
-                            <p className="text-charcoal-500 text-sm">No pending certifications.</p>
-                        ) : (
-                            <div className="space-y-4">
-                                {certsWithUrls?.map((cert: any) => (
-                                    <div key={cert.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
-                                                <p className="font-medium text-charcoal-900">{cert.profiles?.full_name || 'Unknown User'}</p>
-                                                <p className="text-sm text-charcoal-600">{cert.certification_body} - {cert.certification_name}</p>
-                                                {cert.profiles?.contact_number && (
-                                                    <p className="text-xs text-charcoal-500 mt-0.5">Contact: {cert.profiles.contact_number}</p>
-                                                )}
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <VerifyButton
-                                                    id={cert.id}
-                                                    action="rejectCert"
-                                                    label="Reject"
-                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
-                                                />
-                                                <VerifyButton
-                                                    id={cert.id}
-                                                    action="approveCert"
-                                                    label="Approve"
-                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
-                                                />
-                                            </div>
+                    {certsWithUrls?.length === 0 ? (
+                        <p className="text-charcoal-500 text-sm">No pending certifications.</p>
+                    ) : (
+                        <div className="space-y-4">
+                            {certsWithUrls?.map((cert: any) => (
+                                <div key={cert.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <p className="font-medium text-charcoal-900">{cert.profiles?.full_name || 'Unknown User'}</p>
+                                            <p className="text-sm text-charcoal-600">{cert.certification_body} - {cert.certification_name}</p>
+                                            {cert.profiles?.contact_number && (
+                                                <p className="text-xs text-charcoal-500 mt-0.5">Contact: {cert.profiles.contact_number}</p>
+                                            )}
                                         </div>
-                                        <div className="mt-4 pt-3 border-t border-cream-100 flex flex-col gap-3">
-                                            <div>
-                                                <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Certification</p>
-                                                {cert.signedUrl ? (
-                                                    <a
-                                                        href={cert.signedUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-xs text-blue-600 underline hover:text-blue-800 font-medium"
-                                                    >
-                                                        View Certification Proof
-                                                    </a>
-                                                ) : cert.proof_url ? (
-                                                    <p className="text-xs text-charcoal-400 truncate">Proof path: {cert.proof_url} (No URL generated)</p>
-                                                ) : (
-                                                    <p className="text-xs text-red-500">Missing Proof</p>
-                                                )}
-                                            </div>
-
-                                            <div>
-                                                <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Legal Documents</p>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                    <div className="space-y-1.5">
-                                                        <div className="flex items-center justify-between bg-white border border-cream-100 rounded-lg px-2 py-1.5">
-                                                            <span className="text-[10px] text-charcoal-500">TIN:</span>
-                                                            <span className="text-[10px] font-mono font-medium text-charcoal-900">{cert.profiles?.tin || '—'}</span>
-                                                        </div>
-                                                        <div className="flex items-center justify-between bg-white border border-cream-100 rounded-lg px-2 py-1.5">
-                                                            <div className="flex items-center gap-1">
-                                                                <span className="text-[10px] text-charcoal-500">Gov ID:</span>
-                                                                {cert.govIdSignedUrl ? (
-                                                                    <a href={cert.govIdSignedUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-600 underline font-medium">View</a>
-                                                                ) : <span className="text-[10px] text-red-400">Missing</span>}
-                                                            </div>
-                                                            <span className="text-[10px] text-charcoal-700 font-medium">
-                                                                {cert.profiles?.gov_id_expiry ? `Exp: ${new Date(cert.profiles.gov_id_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' })}` : 'No date'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center justify-between bg-white border border-cream-100 rounded-lg px-2 py-1.5 h-fit">
-                                                        <span className="text-[10px] text-charcoal-500">BIR 2303:</span>
-                                                        {cert.birSignedUrl ? (
-                                                            <a href={cert.birSignedUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-600 underline font-medium">View Form</a>
-                                                        ) : <span className="text-[10px] text-charcoal-400 italic">Not provided</span>}
-                                                    </div>
-                                                </div>
-                                            </div>
+                                        <div className="flex gap-2">
+                                            <VerifyButton
+                                                id={cert.id}
+                                                action="rejectCert"
+                                                label="Reject"
+                                                className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                            />
+                                            <VerifyButton
+                                                id={cert.id}
+                                                action="approveCert"
+                                                label="Approve"
+                                                className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                            />
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Studio Verification Queue */}
-                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm">
-                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
-                            <Building2 className="w-5 h-5 text-charcoal-500" />
-                            Studio Verification
-                        </h2>
-
-                        {studiosWithUrls?.length === 0 ? (
-                            <p className="text-charcoal-500 text-sm">No pending studio applications.</p>
-                        ) : (
-                            <div className="space-y-4">
-                                {studiosWithUrls?.map((studio: any) => (
-                                    <div key={studio.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
-                                                <p className="font-medium text-charcoal-900">{studio.name}</p>
-                                                <p className="text-sm text-charcoal-600">{studio.location} • ₱{studio.hourly_rate}/hr</p>
-                                                {studio.contact_number && (
-                                                    <p className="text-xs text-charcoal-500 mt-0.5">Contact: {studio.contact_number}</p>
-                                                )}
-                                                <p className="text-xs text-charcoal-500 mt-1">Owner: {studio.profiles?.full_name}</p>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <VerifyButton
-                                                    id={studio.id}
-                                                    action="rejectStudio"
-                                                    label="Reject"
-                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
-                                                />
-                                                <VerifyButton
-                                                    id={studio.id}
-                                                    action="verifyStudio"
-                                                    label="Approve"
-                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
-                                                />
-                                            </div>
+                                    <div className="mt-4 pt-3 border-t border-cream-100 flex flex-col gap-3">
+                                        <div>
+                                            <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Certification</p>
+                                            {cert.signedUrl ? (
+                                                <a
+                                                    href={cert.signedUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-xs text-blue-600 underline hover:text-blue-800 font-medium"
+                                                >
+                                                    View Certification Proof
+                                                </a>
+                                            ) : cert.proof_url ? (
+                                                <p className="text-xs text-charcoal-400 truncate">Proof path: {cert.proof_url} (No URL generated)</p>
+                                            ) : (
+                                                <p className="text-xs text-red-500">Missing Proof</p>
+                                            )}
                                         </div>
 
-                                        {/* Document Links Always Visible */}
-                                        <div className="mt-4 pt-3 border-t border-cream-100">
+                                        <div>
                                             <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Legal Documents</p>
-                                            <div className="space-y-1.5 flex flex-col items-start text-xs max-w-sm">
-                                                {studio.birSignedUrl ? (
-                                                    <div className="flex justify-between w-full border border-cream-100 rounded p-1.5 bg-white">
-                                                        <a href={studio.birSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                                                            BIR Form 2303
-                                                        </a>
-                                                        <span className="text-charcoal-500 font-medium">Exp: {studio.bir_certificate_expiry ? new Date(studio.bir_certificate_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <div className="space-y-1.5">
+                                                    <div className="flex items-center justify-between bg-white border border-cream-100 rounded-lg px-2 py-1.5">
+                                                        <span className="text-[10px] text-charcoal-500">TIN:</span>
+                                                        <span className="text-[10px] font-mono font-medium text-charcoal-900">{cert.profiles?.tin || '—'}</span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between bg-white border border-cream-100 rounded-lg px-2 py-1.5">
+                                                        <div className="flex items-center gap-1">
+                                                            <span className="text-[10px] text-charcoal-500">Gov ID:</span>
+                                                            {cert.govIdSignedUrl ? (
+                                                                <a href={cert.govIdSignedUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-600 underline font-medium">View</a>
+                                                            ) : <span className="text-[10px] text-red-400">Missing</span>}
+                                                        </div>
+                                                        <span className="text-[10px] text-charcoal-700 font-medium">
+                                                            {cert.profiles?.gov_id_expiry ? `Exp: ${new Date(cert.profiles.gov_id_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' })}` : 'No date'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center justify-between bg-white border border-cream-100 rounded-lg px-2 py-1.5 h-fit">
+                                                    <span className="text-[10px] text-charcoal-500">BIR 2303:</span>
+                                                    {cert.birSignedUrl ? (
+                                                        <a href={cert.birSignedUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-600 underline font-medium">View Form</a>
+                                                    ) : <span className="text-[10px] text-charcoal-400 italic">Not provided</span>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Studio Verification Queue */}
+                <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm">
+                    <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                        <Building2 className="w-5 h-5 text-charcoal-500" />
+                        Studio Verification
+                    </h2>
+
+                    {studiosWithUrls?.length === 0 ? (
+                        <p className="text-charcoal-500 text-sm">No pending studio applications.</p>
+                    ) : (
+                        <div className="space-y-4">
+                            {studiosWithUrls?.map((studio: any) => (
+                                <div key={studio.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <p className="font-medium text-charcoal-900">{studio.name}</p>
+                                            <p className="text-sm text-charcoal-600">{studio.location} • ₱{studio.hourly_rate}/hr</p>
+                                            {studio.contact_number && (
+                                                <p className="text-xs text-charcoal-500 mt-0.5">Contact: {studio.contact_number}</p>
+                                            )}
+                                            <p className="text-xs text-charcoal-500 mt-1">Owner: {studio.profiles?.full_name}</p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <VerifyButton
+                                                id={studio.id}
+                                                action="rejectStudio"
+                                                label="Reject"
+                                                className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                            />
+                                            <VerifyButton
+                                                id={studio.id}
+                                                action="verifyStudio"
+                                                label="Approve"
+                                                className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Document Links Always Visible */}
+                                    <div className="mt-4 pt-3 border-t border-cream-100">
+                                        <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Legal Documents</p>
+                                        <div className="space-y-1.5 flex flex-col items-start text-xs max-w-sm">
+                                            {studio.birSignedUrl ? (
+                                                <div className="flex justify-between w-full border border-cream-100 rounded p-1.5 bg-white">
+                                                    <a href={studio.birSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                        BIR Form 2303
+                                                    </a>
+                                                    <span className="text-charcoal-500 font-medium">Exp: {studio.bir_certificate_expiry ? new Date(studio.bir_certificate_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
+                                                </div>
+                                            ) : (
+                                                <p className="text-red-500">Missing BIR Form 2303</p>
+                                            )}
+
+                                            {studio.govIdSignedUrl ? (
+                                                <div className="flex justify-between w-full border border-cream-100 rounded p-1.5 bg-white">
+                                                    <a href={studio.govIdSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                        Valid Gov ID
+                                                    </a>
+                                                    <span className="text-charcoal-500 font-medium">Exp: {studio.gov_id_expiry ? new Date(studio.gov_id_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
+                                                </div>
+                                            ) : (
+                                                <p className="text-red-500">Missing Gov ID</p>
+                                            )}
+
+                                            {studio.insuranceSignedUrl && (
+                                                <div className="flex justify-between w-full border border-cream-100 rounded p-1.5 bg-white">
+                                                    <a href={studio.insuranceSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                        Insurance Policy
+                                                    </a>
+                                                    <span className="text-charcoal-500 font-medium">Exp: {studio.insurance_expiry ? new Date(studio.insurance_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Expanding section for other app details */}
+                                    <details className="mt-3 group">
+                                        <summary className="text-xs font-medium text-blue-600 cursor-pointer hover:text-blue-800 outline-none list-none flex items-center gap-1">
+                                            <span className="group-open:hidden">▼ Show Full Application</span>
+                                            <span className="hidden group-open:inline">▲ Hide Full Application</span>
+                                        </summary>
+                                        <div className="mt-3 text-sm text-charcoal-700 space-y-3 bg-white border border-cream-100 rounded-lg p-4">
+                                            <div>
+                                                <span className="font-medium text-charcoal-900 block mb-0.5">Detailed Address</span>
+                                                <p className="whitespace-pre-wrap">{studio.address}</p>
+                                            </div>
+
+                                            {studio.equipment && studio.equipment.length > 0 && (
+                                                <div>
+                                                    <span className="font-medium text-charcoal-900 block mb-0.5">Equipment Provided</span>
+                                                    <div className="flex flex-wrap gap-1 mt-1">
+                                                        {studio.equipment.map((eq: string, i: number) => (
+                                                            <span key={i} className="px-2 py-0.5 bg-cream-100 text-charcoal-700 text-xs rounded-full">
+                                                                {studio.inventory?.[eq] || (eq === 'Reformer' ? studio.reformers_count : 1)}x {eq}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div>
+                                                <span className="font-medium text-charcoal-900 block mb-2">Space Photos</span>
+                                                {studio.space_photos_urls && studio.space_photos_urls.length > 0 ? (
+                                                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                                                        {studio.space_photos_urls.map((photoUrl: string, idx: number) => (
+                                                            <a key={idx} href={photoUrl} target="_blank" rel="noopener noreferrer" className="block relative aspect-square hover:opacity-90 transition-opacity">
+                                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                <img src={photoUrl} alt={`Space Photo ${idx + 1}`} className="w-full h-full object-cover rounded shadow-sm border border-cream-200" />
+                                                            </a>
+                                                        ))}
                                                     </div>
                                                 ) : (
-                                                    <p className="text-red-500">Missing BIR Form 2303</p>
+                                                    <p className="text-xs text-charcoal-400 italic">No photos uploaded</p>
                                                 )}
+                                            </div>
+                                        </div>
+                                    </details>
+                                </div>
 
-                                                {studio.govIdSignedUrl ? (
-                                                    <div className="flex justify-between w-full border border-cream-100 rounded p-1.5 bg-white">
-                                                        <a href={studio.govIdSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                                                            Valid Gov ID
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Studio Payout Setup Initial Verification Queue */}
+                <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm">
+                    <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                        <Building2 className="w-5 h-5 text-charcoal-500" />
+                        Studio Payout Setup Approvals
+                    </h2>
+
+                    {payoutStudiosWithUrls?.length === 0 ? (
+                        <p className="text-charcoal-500 text-sm">No pending studio payout setups.</p>
+                    ) : (
+                        <div className="space-y-4">
+                            {payoutStudiosWithUrls?.map((studio: any) => (
+                                <div key={studio.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <p className="font-medium text-charcoal-900">{studio.name}</p>
+                                            <p className="text-xs text-charcoal-500 mt-1">Owner: {studio.profiles?.full_name}</p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <VerifyButton
+                                                id={studio.id}
+                                                action="rejectStudioPayout"
+                                                label="Reject"
+                                                className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                            />
+                                            <VerifyButton
+                                                id={studio.id}
+                                                action="approveStudioPayout"
+                                                label="Approve"
+                                                className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Document Links */}
+                                    <div className="mt-4 pt-3 border-t border-cream-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Legal Documents</p>
+                                            <div className="space-y-1.5 flex flex-col items-start text-xs">
+                                                {studio.permitSignedUrl ? (
+                                                    <div className="flex justify-between w-full">
+                                                        <a href={studio.permitSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                            Mayor's Permit
                                                         </a>
-                                                        <span className="text-charcoal-500 font-medium">Exp: {studio.gov_id_expiry ? new Date(studio.gov_id_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
+                                                        <span className="text-charcoal-500">Exp: {studio.mayors_permit_expiry ? new Date(studio.mayors_permit_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
                                                     </div>
                                                 ) : (
-                                                    <p className="text-red-500">Missing Gov ID</p>
+                                                    <p className="text-red-500">Missing Permit</p>
                                                 )}
-
-                                                {studio.insuranceSignedUrl && (
-                                                    <div className="flex justify-between w-full border border-cream-100 rounded p-1.5 bg-white">
+                                                {studio.certSignedUrl ? (
+                                                    <div className="flex justify-between w-full">
+                                                        <a href={studio.certSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                                                            Secretary's Cert
+                                                        </a>
+                                                        <span className="text-charcoal-500">Exp: {studio.secretary_certificate_expiry ? new Date(studio.secretary_certificate_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-red-500">Missing Cert</p>
+                                                )}
+                                                {studio.bir_certificate_url ? (
+                                                    <div className="flex justify-between w-full">
+                                                        <span className="text-charcoal-900 font-medium">BIR Form 2303 (See queue)</span>
+                                                        <span className="text-charcoal-500">Exp: {studio.bir_certificate_expiry ? new Date(studio.bir_certificate_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
+                                                    </div>
+                                                ) : null}
+                                                {studio.insuranceSignedUrl ? (
+                                                    <div className="flex justify-between w-full">
                                                         <a href={studio.insuranceSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
                                                             Insurance Policy
                                                         </a>
-                                                        <span className="text-charcoal-500 font-medium">Exp: {studio.insurance_expiry ? new Date(studio.insurance_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
+                                                        <span className="text-charcoal-500">Exp: {studio.insurance_expiry ? new Date(studio.insurance_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
                                                     </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Expanding section for other app details */}
-                                        <details className="mt-3 group">
-                                            <summary className="text-xs font-medium text-blue-600 cursor-pointer hover:text-blue-800 outline-none list-none flex items-center gap-1">
-                                                <span className="group-open:hidden">▼ Show Full Application</span>
-                                                <span className="hidden group-open:inline">▲ Hide Full Application</span>
-                                            </summary>
-                                            <div className="mt-3 text-sm text-charcoal-700 space-y-3 bg-white border border-cream-100 rounded-lg p-4">
-                                                <div>
-                                                    <span className="font-medium text-charcoal-900 block mb-0.5">Detailed Address</span>
-                                                    <p className="whitespace-pre-wrap">{studio.address}</p>
-                                                </div>
-
-                                                {studio.equipment && studio.equipment.length > 0 && (
-                                                    <div>
-                                                        <span className="font-medium text-charcoal-900 block mb-0.5">Equipment Provided</span>
-                                                        <div className="flex flex-wrap gap-1 mt-1">
-                                                            {studio.equipment.map((eq: string, i: number) => (
-                                                                <span key={i} className="px-2 py-0.5 bg-cream-100 text-charcoal-700 text-xs rounded-full">
-                                                                    {studio.inventory?.[eq] || (eq === 'Reformer' ? studio.reformers_count : 1)}x {eq}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                <div>
-                                                    <span className="font-medium text-charcoal-900 block mb-2">Space Photos</span>
-                                                    {studio.space_photos_urls && studio.space_photos_urls.length > 0 ? (
-                                                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                                                            {studio.space_photos_urls.map((photoUrl: string, idx: number) => (
-                                                                <a key={idx} href={photoUrl} target="_blank" rel="noopener noreferrer" className="block relative aspect-square hover:opacity-90 transition-opacity">
-                                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                                    <img src={photoUrl} alt={`Space Photo ${idx + 1}`} className="w-full h-full object-cover rounded shadow-sm border border-cream-200" />
-                                                                </a>
-                                                            ))}
-                                                        </div>
-                                                    ) : (
-                                                        <p className="text-xs text-charcoal-400 italic">No photos uploaded</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </details>
-                                    </div>
-
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Studio Payout Setup Initial Verification Queue */}
-                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm">
-                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
-                            <Building2 className="w-5 h-5 text-charcoal-500" />
-                            Studio Payout Setup Approvals
-                        </h2>
-
-                        {payoutStudiosWithUrls?.length === 0 ? (
-                            <p className="text-charcoal-500 text-sm">No pending studio payout setups.</p>
-                        ) : (
-                            <div className="space-y-4">
-                                {payoutStudiosWithUrls?.map((studio: any) => (
-                                    <div key={studio.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
-                                                <p className="font-medium text-charcoal-900">{studio.name}</p>
-                                                <p className="text-xs text-charcoal-500 mt-1">Owner: {studio.profiles?.full_name}</p>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <VerifyButton
-                                                    id={studio.id}
-                                                    action="rejectStudioPayout"
-                                                    label="Reject"
-                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
-                                                />
-                                                <VerifyButton
-                                                    id={studio.id}
-                                                    action="approveStudioPayout"
-                                                    label="Approve"
-                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Document Links */}
-                                        <div className="mt-4 pt-3 border-t border-cream-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div>
-                                                <p className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">Legal Documents</p>
-                                                <div className="space-y-1.5 flex flex-col items-start text-xs">
-                                                    {studio.permitSignedUrl ? (
-                                                        <div className="flex justify-between w-full">
-                                                            <a href={studio.permitSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                                                                Mayor's Permit
-                                                            </a>
-                                                            <span className="text-charcoal-500">Exp: {studio.mayors_permit_expiry ? new Date(studio.mayors_permit_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
-                                                        </div>
-                                                    ) : (
-                                                        <p className="text-red-500">Missing Permit</p>
-                                                    )}
-                                                    {studio.certSignedUrl ? (
-                                                        <div className="flex justify-between w-full">
-                                                            <a href={studio.certSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                                                                Secretary's Cert
-                                                            </a>
-                                                            <span className="text-charcoal-500">Exp: {studio.secretary_certificate_expiry ? new Date(studio.secretary_certificate_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
-                                                        </div>
-                                                    ) : (
-                                                        <p className="text-red-500">Missing Cert</p>
-                                                    )}
-                                                    {studio.bir_certificate_url ? (
-                                                        <div className="flex justify-between w-full">
-                                                            <span className="text-charcoal-900 font-medium">BIR Form 2303 (See queue)</span>
-                                                            <span className="text-charcoal-500">Exp: {studio.bir_certificate_expiry ? new Date(studio.bir_certificate_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
-                                                        </div>
-                                                    ) : null}
-                                                    {studio.insuranceSignedUrl ? (
-                                                        <div className="flex justify-between w-full">
-                                                            <a href={studio.insuranceSignedUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-                                                                Insurance Policy
-                                                            </a>
-                                                            <span className="text-charcoal-500">Exp: {studio.insurance_expiry ? new Date(studio.insurance_expiry).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : 'N/A'}</span>
-                                                        </div>
-                                                    ) : null}
-                                                </div>
+                                                ) : null}
                                             </div>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
-                    {/* Booking Requests */}
-                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
-                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-charcoal-500" />
-                            Booking Requests
-                        </h2>
+                {/* Booking Requests */}
+                <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                    <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-charcoal-500" />
+                        Booking Requests
+                    </h2>
 
-                        {pendingBookings?.length === 0 ? (
-                            <p className="text-charcoal-500 text-sm">No pending booking requests.</p>
-                        ) : (
-                            <div className="space-y-4">
-                                {pendingBookings?.map((booking: any) => {
-                                    const studio = booking.slots?.studios;
-                                    const startTime = new Date(booking.slots?.start_time).toLocaleString('en-PH', { timeZone: 'Asia/Manila' });
-                                    const hasPaymentProof = !!booking.payment_proof_url;
+                    {pendingBookings?.length === 0 ? (
+                        <p className="text-charcoal-500 text-sm">No pending booking requests.</p>
+                    ) : (
+                        <div className="space-y-4">
+                            {pendingBookings?.map((booking: any) => {
+                                const studio = booking.slots?.studios;
+                                const startTime = new Date(booking.slots?.start_time).toLocaleString('en-PH', { timeZone: 'Asia/Manila' });
+                                const hasPaymentProof = !!booking.payment_proof_url;
 
-                                    return (
-                                        <div key={booking.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
-                                            <div className="flex justify-between items-start mb-3">
-                                                <div>
-                                                    <p className="font-medium text-charcoal-900">{booking.client?.full_name}</p>
-                                                    <p className="text-sm text-charcoal-600">
-                                                        Requested: <span className="font-medium">{studio?.name}</span> ({studio?.location})
-                                                    </p>
-                                                    {studio?.address && (
-                                                        <p className="text-xs text-charcoal-500">{studio.address}</p>
+                                return (
+                                    <div key={booking.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div>
+                                                <p className="font-medium text-charcoal-900">{booking.client?.full_name}</p>
+                                                <p className="text-sm text-charcoal-600">
+                                                    Requested: <span className="font-medium">{studio?.name}</span> ({studio?.location})
+                                                </p>
+                                                {studio?.address && (
+                                                    <p className="text-xs text-charcoal-500">{studio.address}</p>
+                                                )}
+                                                <p className="text-xs text-charcoal-500 mt-1">{startTime}</p>
+
+                                                {/* Payment Status Badge */}
+                                                <div className="mt-2 flex items-center gap-2">
+                                                    <span className={`text-xs px-2 py-0.5 rounded-full ${booking.payment_status === 'submitted'
+                                                        ? 'bg-green-100 text-green-700'
+                                                        : 'bg-yellow-100 text-yellow-700'
+                                                        }`}>
+                                                        Payment: {booking.payment_status || 'Pending'}
+                                                    </span>
+
+                                                    {hasPaymentProof && (
+                                                        <div className="mt-1">
+                                                            <a
+                                                                href={booking.payment_proof_url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="block relative hover:opacity-90 transition-opacity"
+                                                            >
+                                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                <img
+                                                                    src={booking.payment_proof_url}
+                                                                    alt="Payment Proof"
+                                                                    className="h-16 w-auto object-cover rounded border border-gray-300"
+                                                                />
+                                                                <span className="text-[10px] text-blue-600 underline mt-1 block">View Full Size</span>
+                                                            </a>
+                                                        </div>
                                                     )}
-                                                    <p className="text-xs text-charcoal-500 mt-1">{startTime}</p>
-
-                                                    {/* Payment Status Badge */}
-                                                    <div className="mt-2 flex items-center gap-2">
-                                                        <span className={`text-xs px-2 py-0.5 rounded-full ${booking.payment_status === 'submitted'
-                                                            ? 'bg-green-100 text-green-700'
-                                                            : 'bg-yellow-100 text-yellow-700'
-                                                            }`}>
-                                                            Payment: {booking.payment_status || 'Pending'}
-                                                        </span>
-
-                                                        {hasPaymentProof && (
-                                                            <div className="mt-1">
-                                                                <a
-                                                                    href={booking.payment_proof_url}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="block relative hover:opacity-90 transition-opacity"
-                                                                >
-                                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                                    <img
-                                                                        src={booking.payment_proof_url}
-                                                                        alt="Payment Proof"
-                                                                        className="h-16 w-auto object-cover rounded border border-gray-300"
-                                                                    />
-                                                                    <span className="text-[10px] text-blue-600 underline mt-1 block">View Full Size</span>
-                                                                </a>
-                                                            </div>
-                                                        )}
-                                                    </div>
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-cream-100">
-                                                {booking.payment_status === 'submitted' ? (
-                                                    <>
-                                                        <RejectBookingButton
-                                                            id={booking.id}
-                                                            variant="no-refund"
-                                                            className="px-3 py-1 border border-red-200 text-red-600 text-xs rounded-md hover:bg-red-50 transition-colors"
-                                                        />
-                                                        <RejectBookingButton
-                                                            id={booking.id}
-                                                            variant="refund"
-                                                            className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
-                                                        />
-                                                    </>
-                                                ) : (
+                                        <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-cream-100">
+                                            {booking.payment_status === 'submitted' ? (
+                                                <>
                                                     <RejectBookingButton
                                                         id={booking.id}
+                                                        variant="no-refund"
+                                                        className="px-3 py-1 border border-red-200 text-red-600 text-xs rounded-md hover:bg-red-50 transition-colors"
+                                                    />
+                                                    <RejectBookingButton
+                                                        id={booking.id}
+                                                        variant="refund"
                                                         className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
                                                     />
-                                                )}
-                                                <VerifyButton
+                                                </>
+                                            ) : (
+                                                <RejectBookingButton
                                                     id={booking.id}
-                                                    action="confirmBooking"
-                                                    label="Confirm Booking"
-                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
                                                 />
-                                            </div>
+                                            )}
+                                            <VerifyButton
+                                                id={booking.id}
+                                                action="confirmBooking"
+                                                label="Confirm Booking"
+                                                className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                            />
                                         </div>
-                                    )
-                                })}
-                            </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* Studio Payout Requests */}
+                <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                    <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                        <Building2 className="w-5 h-5 text-charcoal-500" />
+                        Studio Payout Requests
+                    </h2>
+
+                    {studioPayouts.length === 0 ? (
+                        <p className="text-charcoal-500 text-sm">No pending studio payout requests.</p>
+                    ) : (
+                        <div className="space-y-4">
+                            {studioPayouts.map((request: any) => (
+                                <div key={request.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <p className="font-medium text-charcoal-900">
+                                                ₱{request.amount.toLocaleString()} — {request.studios?.name || 'Unknown Studio'}
+                                            </p>
+                                            <p className="text-xs text-charcoal-500 mt-0.5">
+                                                Owner: {request.studios?.profiles?.full_name || '—'}
+                                            </p>
+                                            <div className="text-sm text-charcoal-600 mt-1">
+                                                <span className="capitalize font-medium">{request.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'GCash'}</span>
+                                                <span className="mx-2 text-charcoal-300">|</span>
+                                                <span className="text-xs text-charcoal-600">
+                                                    {(request.bank_name || request.payment_details?.bankName || request.payment_details?.bank_name) ? (
+                                                        `${request.bank_name || request.payment_details?.bankName || request.payment_details?.bank_name} — `
+                                                    ) : ''}
+                                                    {request.account_number || request.payment_details?.accountNumber || request.payment_details?.account_number}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-charcoal-500 mt-0.5">
+                                                Account Name: {request.account_name || request.payment_details?.accountName || request.payment_details?.account_name || '—'}
+                                            </p>
+                                            <p className="text-xs text-charcoal-400 mt-1">
+                                                Requested: {new Date(request.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <VerifyButton
+                                                id={request.id}
+                                                action="rejectPayout"
+                                                label="Reject"
+                                                className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                            />
+                                            <VerifyButton
+                                                id={request.id}
+                                                action="approvePayout"
+                                                label="Approve"
+                                                className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                {/* Customer Payout Requests */}
+                <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                    <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5 text-charcoal-500" />
+                        Customer Payout Requests
+                        {customerPayouts.length > 0 && (
+                            <span className="ml-2 bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full font-medium">
+                                {customerPayouts.length} pending
+                            </span>
                         )}
-                    </div>
+                    </h2>
 
-                    {/* Studio Payout Requests */}
-                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
-                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
-                            <Building2 className="w-5 h-5 text-charcoal-500" />
-                            Studio Payout Requests
-                        </h2>
-
-                        {studioPayouts.length === 0 ? (
-                            <p className="text-charcoal-500 text-sm">No pending studio payout requests.</p>
-                        ) : (
-                            <div className="space-y-4">
-                                {studioPayouts.map((request: any) => (
-                                    <div key={request.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
+                    {customerPayouts.length === 0 ? (
+                        <p className="text-charcoal-500 text-sm">No pending customer payout requests.</p>
+                    ) : (
+                        <div className="space-y-4">
+                            {customerPayouts.map((request: any) => (
+                                <div key={request.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-1">
                                                 <p className="font-medium text-charcoal-900">
-                                                    ₱{request.amount.toLocaleString()} — {request.studios?.name || 'Unknown Studio'}
+                                                    ₱{request.amount.toLocaleString()} — {request.profile?.full_name || `User ID: ${request.user_id}`}
                                                 </p>
-                                                <p className="text-xs text-charcoal-500 mt-0.5">
-                                                    Owner: {request.studios?.profiles?.full_name || '—'}
-                                                </p>
-                                                <div className="text-sm text-charcoal-600 mt-1">
-                                                    <span className="capitalize font-medium">{request.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'GCash'}</span>
-                                                    <span className="mx-2 text-charcoal-300">|</span>
-                                                    <span className="text-xs text-charcoal-600">
-                                                        {(request.bank_name || request.payment_details?.bankName || request.payment_details?.bank_name) ? (
-                                                            `${request.bank_name || request.payment_details?.bankName || request.payment_details?.bank_name} — `
-                                                        ) : ''}
-                                                        {request.account_number || request.payment_details?.accountNumber || request.payment_details?.account_number}
-                                                    </span>
-                                                </div>
-                                                <p className="text-xs text-charcoal-500 mt-0.5">
-                                                    Account Name: {request.account_name || request.payment_details?.accountName || request.payment_details?.account_name || '—'}
-                                                </p>
-                                                <p className="text-xs text-charcoal-400 mt-1">
-                                                    Requested: {new Date(request.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
-                                                </p>
+                                                <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full uppercase tracking-wider font-medium">Customer</span>
                                             </div>
-                                            <div className="flex gap-2">
-                                                <VerifyButton
-                                                    id={request.id}
-                                                    action="rejectPayout"
-                                                    label="Reject"
-                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
-                                                />
-                                                <VerifyButton
-                                                    id={request.id}
-                                                    action="approvePayout"
-                                                    label="Approve"
-                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
-                                                />
+                                            <div className="text-sm text-charcoal-600 mt-1">
+                                                <span className="capitalize font-medium">{request.payment_method === 'bank' || request.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'GCash'}</span>
+                                                <span className="mx-2 text-charcoal-300">|</span>
+                                                <span className="text-xs">
+                                                    {(request.bank_name) ? `${request.bank_name} — ` : ''}
+                                                    {request.account_number || '—'}
+                                                </span>
                                             </div>
+                                            <p className="text-xs text-charcoal-500 mt-0.5">
+                                                Account Name: {request.account_name || '—'}
+                                            </p>
+                                            <p className="text-xs text-charcoal-400 mt-1">
+                                                Requested: {new Date(request.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <VerifyButton
+                                                id={request.id}
+                                                action="rejectPayout"
+                                                label="Reject"
+                                                className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
+                                            />
+                                            <VerifyButton
+                                                id={request.id}
+                                                action="approvePayout"
+                                                label="Approve"
+                                                className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
+                                            />
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                    {/* Customer Payout Requests */}
-                    <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
-                        <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
-                            <CheckCircle className="w-5 h-5 text-charcoal-500" />
-                            Customer Payout Requests
-                            {customerPayouts.length > 0 && (
-                                <span className="ml-2 bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full font-medium">
-                                    {customerPayouts.length} pending
-                                </span>
-                            )}
-                        </h2>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
-                        {customerPayouts.length === 0 ? (
-                            <p className="text-charcoal-500 text-sm">No pending customer payout requests.</p>
-                        ) : (
-                            <div className="space-y-4">
-                                {customerPayouts.map((request: any) => (
-                                    <div key={request.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <p className="font-medium text-charcoal-900">
-                                                        ₱{request.amount.toLocaleString()} — {request.profile?.full_name || `User ID: ${request.user_id}`}
-                                                    </p>
-                                                    <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full uppercase tracking-wider font-medium">Customer</span>
-                                                </div>
-                                                <div className="text-sm text-charcoal-600 mt-1">
-                                                    <span className="capitalize font-medium">{request.payment_method === 'bank' || request.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'GCash'}</span>
-                                                    <span className="mx-2 text-charcoal-300">|</span>
-                                                    <span className="text-xs">
-                                                        {(request.bank_name) ? `${request.bank_name} — ` : ''}
-                                                        {request.account_number || '—'}
-                                                    </span>
-                                                </div>
-                                                <p className="text-xs text-charcoal-500 mt-0.5">
-                                                    Account Name: {request.account_name || '—'}
-                                                </p>
-                                                <p className="text-xs text-charcoal-400 mt-1">
-                                                    Requested: {new Date(request.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
-                                                </p>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <VerifyButton
-                                                    id={request.id}
-                                                    action="rejectPayout"
-                                                    label="Reject"
-                                                    className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors"
-                                                />
-                                                <VerifyButton
-                                                    id={request.id}
-                                                    action="approvePayout"
-                                                    label="Approve"
-                                                    className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md hover:bg-charcoal-800 transition-colors"
-                                                />
-                                            </div>
+                {/* Wallet Top-Up Queue */}
+                <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                    <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                        <Wallet className="w-5 h-5 text-charcoal-500" />
+                        Pending Wallet Top-Ups
+                    </h2>
+
+                    {!pendingTopUps || pendingTopUps.length === 0 ? (
+                        <p className="text-charcoal-500 text-sm">No pending top-up requests.</p>
+                    ) : (
+                        <div className="space-y-4">
+                            {pendingTopUps.map((topUp: any) => (
+                                <div key={topUp.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <p className="font-bold text-lg text-charcoal-900">
+                                                ₱{topUp.amount.toLocaleString()} — {topUp.profiles?.full_name}
+                                            </p>
+                                            <p className="text-sm text-charcoal-600">
+                                                {topUp.profiles?.email} ({topUp.profiles?.role})
+                                            </p>
+                                            <p className="text-xs text-charcoal-400 mt-1">
+                                                Requested: {new Date(topUp.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <VerifyButton
+                                                id={topUp.id}
+                                                action="rejectTopUp"
+                                                label="Reject"
+                                                className="px-4 py-2 bg-red-100 text-red-700 text-xs font-bold rounded-lg hover:bg-red-200 transition-colors"
+                                            />
+                                            <VerifyButton
+                                                id={topUp.id}
+                                                action="approveTopUp"
+                                                label="Approve & Credit"
+                                                className="px-4 py-2 bg-charcoal-900 text-cream-50 text-xs font-bold rounded-lg hover:bg-charcoal-800 transition-colors"
+                                            />
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        )}
+
+                                    {topUp.payment_proof_url && (
+                                        <div className="mt-2">
+                                            <p className="text-[10px] font-bold text-charcoal-400 uppercase tracking-widest mb-2">Payment Receipt</p>
+                                            <a
+                                                href={topUp.payment_proof_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-block group relative"
+                                            >
+                                                <img
+                                                    src={topUp.payment_proof_url}
+                                                    alt="Payment Receipt"
+                                                    className="h-32 w-auto object-cover rounded-xl border border-cream-200 shadow-sm group-hover:shadow-md transition-all"
+                                                />
+                                                <div className="absolute inset-0 bg-charcoal-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl text-white text-[10px] font-bold">
+                                                    View Full Size
+                                                </div>
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Admin Balance Override Tool */}
+                <div className="bg-charcoal-900 text-white border border-charcoal-800 rounded-xl p-6 shadow-xl col-span-1 lg:col-span-2">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-rose-gold/20 rounded-lg">
+                            <ShieldAlert className="w-6 h-6 text-rose-gold" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-medium">Manual Balance Adjustment</h2>
+                            <p className="text-white/50 text-xs">Directly credit or debit a user's wallet balance.</p>
+                        </div>
                     </div>
 
+                    <BalanceAdjustmentTool />
+                </div>
+
+                {/* Suspended Studios (Late Cancellations) */}
+                <div className="bg-white text-charcoal-900 border border-red-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2">
+                    <h2 className="text-xl font-medium text-red-600 mb-4 flex items-center gap-2">
+                        <AlertTriangle className="w-5 h-5" />
+                        Suspended Studios (3+ Strikes)
+                    </h2>
+
+                    {suspendedStudios.length === 0 ? (
+                        <p className="text-charcoal-500 text-sm">No studios currently suspended.</p>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {suspendedStudios.map((profile: any) => (
+                                <div key={profile.id} className="border border-red-100 rounded-lg p-4 bg-red-50/30 flex justify-between items-center">
+                                    <div>
+                                        <p className="font-bold text-charcoal-900">{profile.studios?.[0]?.name || profile.full_name}</p>
+                                        <p className="text-xs text-charcoal-600">{profile.email}</p>
+                                        <p className="text-[10px] text-red-500 font-bold uppercase mt-1">Status: Auto-Suspended</p>
+                                    </div>
+                                    <VerifyButton
+                                        id={profile.id}
+                                        action="reinstateStudio"
+                                        label="Reactivate"
+                                        className="px-4 py-2 bg-charcoal-900 text-cream-50 text-xs rounded-lg hover:bg-charcoal-800 transition-colors shadow-sm font-bold"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
             </div>
+
         </div>
+        </div >
     )
 }

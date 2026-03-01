@@ -555,13 +555,12 @@ export default function InstructorDashboardClient() {
                 penaltyNotice={
                     (() => {
                         if (!cancellingBooking) return null
-                        const isRental = cancellingBooking.client_id === cancellingBooking.instructor_id
                         const startTime = new Date(cancellingBooking.slots.start_time)
                         const now = new Date()
                         const diffInHours = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60)
                         const isLate = diffInHours < 24
 
-                        if (isRental && isLate) {
+                        if (isLate) {
                             const studioFee = cancellingBooking.price_breakdown?.studio_fee || 0
                             return `Late Cancellation Penalty: ₱${studioFee.toLocaleString()} (Studio Rental fee) will be deducted from your wallet to compensate the studio.`
                         }

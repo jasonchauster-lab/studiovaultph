@@ -36,7 +36,10 @@ export async function requestBooking(
     // 2. Fetch Studio Details
     const { data: studio, error: studioError } = await supabase
         .from('studios')
-        .select('pricing, hourly_rate, id, is_founding_partner, custom_fee_percentage, location') // Select needed fields
+        .select(`
+            pricing, hourly_rate, id, is_founding_partner, custom_fee_percentage, location,
+            profiles!owner_id(available_balance, is_suspended, full_name, email)
+        `)
         .eq('id', slot.studio_id)
         .single()
 
@@ -50,12 +53,25 @@ export async function requestBooking(
         return { error: `Studio details not found. The studio might be deleted or permission is denied. (Studio ID: ${slot.studio_id})` }
     }
 
-    // Fetch Instructor Rates
+    // 2.1 Check Studio Owner's Status
+    const studioOwnerProfile = Array.isArray(studio.profiles) ? studio.profiles[0] : studio.profiles;
+    if (studioOwnerProfile?.is_suspended) {
+        return { error: `The studio "${studioOwnerProfile.full_name || 'Partner Studio'}" is currently not accepting new bookings.` }
+    }
+    if (studioOwnerProfile && (studioOwnerProfile.available_balance || 0) < 0) {
+        return { error: `The studio "${studioOwnerProfile.full_name || 'Partner Studio'}" is currently not accepting new bookings due to a pending balance settlement.` }
+    }
+
+    // Fetch Instructor Rates and Balance
     const { data: instructor } = await supabase
         .from('profiles')
-        .select('full_name, rates, is_founding_partner, custom_fee_percentage')
+        .select('full_name, rates, is_founding_partner, custom_fee_percentage, available_balance')
         .eq('id', instructorId)
         .single()
+
+    if (instructor && (instructor.available_balance || 0) < 0) {
+        return { error: `${instructor.full_name || 'The instructor'} is currently not accepting new bookings due to a pending balance settlement.` }
+    }
 
     // --- AVAILABILITY VALIDATION START ---
     const slotStart = new Date(slot.start_time);
@@ -415,7 +431,7 @@ export async function requestBooking(
     // 3. Notify Studio (Optional? "send an email confirmation to an instructor and a studio")
     // If Customer books Instructor, Studio should probably know too.
     const studioOwnerId = booking.slots.studios.owner_id;
-    const { data: studioOwner } = await supabase.from('profiles').select('email').eq('id', studioOwnerId).single();
+    const studioOwner = studioOwnerProfile; // Use the profile we fetched earlier
 
     if (studioOwner?.email) {
         await sendEmail({
@@ -497,6 +513,34 @@ export async function submitPaymentProof(
     return { success: true }
 }
 
+export async function submitTopUpPaymentProof(
+    topUpId: string,
+    proofUrl: string
+) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'Unauthorized' }
+
+    const { error } = await supabase
+        .from('wallet_top_ups')
+        .update({
+            payment_proof_url: proofUrl,
+            status: 'pending',
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', topUpId)
+        .eq('user_id', user.id)
+
+    if (error) {
+        console.error('Top-up payment proof submission error:', error)
+        return { error: `DB Error: ${error.message}` }
+    }
+
+    revalidatePath('/customer/wallet')
+    return { success: true }
+}
+
 export async function bookInstructorSession(
     instructorId: string,
     date: string,
@@ -518,15 +562,19 @@ export async function bookInstructorSession(
     const endDateTime = new Date(startDateTime)
     endDateTime.setHours(startDateTime.getHours() + 1)
 
-    // 0. Check Instructor Suspension
+    // 0. Check Instructor Suspension & Balance
     const { data: instructorProfile } = await supabase
         .from('profiles')
-        .select('is_suspended')
+        .select('is_suspended, available_balance, full_name')
         .eq('id', instructorId)
         .single()
 
     if (instructorProfile?.is_suspended) {
         return { error: 'This instructor is not currently accepting bookings.' }
+    }
+
+    if (instructorProfile && (instructorProfile.available_balance || 0) < 0) {
+        return { error: `${instructorProfile.full_name || 'The instructor'} is currently not accepting new bookings due to a pending balance settlement.` }
     }
 
     // 1. Validate Instructor Availability
@@ -584,7 +632,7 @@ export async function bookInstructorSession(
         .from('slots')
         .select(`
             *,
-            studios!inner(*)
+            studios!inner(*, profiles!owner_id(available_balance, is_suspended, full_name))
         `)
         .eq('is_available', true)
         .eq('start_time', startDateTime.toISOString()) // Exact match for slot start
@@ -602,12 +650,22 @@ export async function bookInstructorSession(
         return { error: 'No studio slots available with this equipment.' }
     }
 
+    // 2.1 Filter by Studio Owner's Status
+    const filteredSlots = availableSlots.filter((s: any) => {
+        const owner = Array.isArray(s.studios.profiles) ? s.studios.profiles[0] : s.studios.profiles;
+        return !owner?.is_suspended && (owner?.available_balance || 0) >= 0;
+    });
+
+    if (filteredSlots.length === 0) {
+        return { error: 'The available studios are currently not accepting new bookings.' }
+    }
+
     // 3. Double-Booking Check & Selection
     // Even if is_available is true, double check `bookings` just in case (optional but requested)
     // We iterate to find the first truly free one.
     let selectedSlot = null;
 
-    for (const slot of availableSlots) {
+    for (const slot of filteredSlots) {
         const { count } = await supabase
             .from('bookings')
             .select('*', { count: 'exact', head: true })
@@ -919,17 +977,25 @@ export async function topUpWallet(amount: number) {
 
     if (amount <= 0) return { error: 'Invalid amount' }
 
-    const { error } = await supabase.rpc('increment_available_balance', {
-        user_id: user.id,
-        amount
-    })
+    // Create a pending top-up record
+    const { data, error } = await supabase
+        .from('wallet_top_ups')
+        .insert({
+            user_id: user.id,
+            amount,
+            status: 'pending',
+            type: 'top_up'
+        })
+        .select()
+        .single()
 
     if (error) {
-        return { error: 'Failed to process top up.' }
+        console.error('Error creating top-up request:', error)
+        return { error: 'Failed to create top-up request.' }
     }
 
     revalidatePath('/customer/wallet')
-    return { success: true }
+    return { success: true, topUpId: data.id }
 }
 
 export async function getCustomerWalletDetails() {
@@ -958,18 +1024,10 @@ export async function getCustomerWalletDetails() {
     const available = profile.available_balance ?? profile.wallet_balance ?? 0
     const pending = profile.pending_balance ?? 0
 
-    // Fetch history (cancelled bookings and payouts)
-    const { data: cancelledBookings } = await supabase
-        .from('bookings')
-        .select('id, created_at, total_price, price_breakdown, status, slots(start_time, studios(name))')
-        .eq('client_id', user.id)
-        .in('status', ['cancelled_refunded', 'cancelled_charged'])
-        .order('created_at', { ascending: false });
-
-    // Assuming we implement customer payout requests
-    const { data: payouts } = await supabase
-        .from('payout_requests')
-        .select('created_at, amount, status, payment_method')
+    // Fetch top-ups and adjustments from wallet_top_ups table
+    const { data: walletActions } = await supabase
+        .from('wallet_top_ups')
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -977,48 +1035,18 @@ export async function getCustomerWalletDetails() {
 
     const getFirst = (item: any) => Array.isArray(item) ? item[0] : item;
 
-    cancelledBookings?.forEach(b => {
-        const breakdown = b.price_breakdown as any;
-        const slotData = getFirst(b.slots);
-        const studioData = getFirst(slotData?.studios);
-
-        // If refunded_amount was saved during cancellation, use it.
-        // Otherwise, fallback to assuming it was a full refund (legacy bookings).
-        let refundAmount = 0;
-        let isRefunded = false;
-
-        if (breakdown && typeof breakdown.refunded_amount !== 'undefined') {
-            refundAmount = Number(breakdown.refunded_amount);
-            isRefunded = refundAmount > 0;
-        } else {
-            // Legacy assumption for older cancellations
-            refundAmount = Number(b.total_price) + Number(breakdown?.wallet_deduction || 0);
-            isRefunded = refundAmount > 0;
+    walletActions?.forEach(wa => {
+        if (wa.status === 'approved' || wa.type === 'admin_adjustment') {
+            transactions.push({
+                id: wa.id,
+                date: wa.updated_at || wa.created_at,
+                type: wa.type === 'admin_adjustment' ? 'Direct Adjustment' : 'Wallet Top-Up',
+                amount: wa.amount, // Could be negative for deductions in admin_adjustment
+                status: 'completed',
+                details: wa.admin_notes || (wa.type === 'admin_adjustment' ? 'Manual balance adjustment' : 'Gcash/Bank Top-up')
+            });
         }
-
-        transactions.push({
-            id: b.id,
-            date: b.created_at, // Ideally when it was cancelled, but created_at is fallback
-            type: isRefunded ? 'Refund (Cancellation)' : 'Cancellation (No Refund)',
-            amount: refundAmount,
-            status: 'completed',
-            details: `Booking at ${studioData?.name || 'Studio'}`
-        });
     });
-
-    payouts?.forEach(p => {
-        transactions.push({
-            id: p.amount + p.created_at,
-            date: p.created_at,
-            type: 'Payout Request',
-            amount: -p.amount,
-            status: p.status,
-            details: `Via ${p.payment_method}`
-        });
-    });
-
-    // We can't officially track top-ups and deductions accurately without a ledger/transactions table.
-    // For MVP, we will only show balance and derived history.
 
     transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 

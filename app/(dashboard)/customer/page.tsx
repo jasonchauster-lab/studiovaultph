@@ -38,7 +38,7 @@ export default async function CustomerDashboard({
     // 1. Fetch Studios + all distinct verified locations (for smart filter)
     let studioQuery = supabase
         .from('studios')
-        .select('*')
+        .select('*, profiles!owner_id(available_balance, is_suspended)')
         .eq('verified', true)
 
     if (params.location && params.location !== 'all') {
@@ -71,7 +71,13 @@ export default async function CustomerDashboard({
         ...new Set((allStudiosForLocations || []).map((s: any) => s.location).filter(Boolean))
     ]
 
-    const { data: studios } = await studioQuery
+    const { data: rawStudios } = await studioQuery
+
+    // Filter out suspended or negative balance studios
+    const studios = rawStudios?.filter((s: any) => {
+        const owner = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles;
+        return !owner?.is_suspended && (owner?.available_balance || 0) >= 0;
+    }) || []
 
     // 2. Fetch Instructors (with certifications)
     // Note: This is a simplified join. 
