@@ -2,16 +2,19 @@
 
 import { useState } from 'react'
 import { User, CheckCircle, Clock, XCircle } from 'lucide-react'
+import clsx from 'clsx'
 
 interface TransactionHistoryProps {
     bookings: {
         id: string;
         created_at: string;
         client: { full_name: string } | null;
-        slots: { start_time: string };
+        slots: { start_time: string } | null;
         price_breakdown: { studio_fee?: number; quantity?: number; equipment?: string } | null;
         total_price?: number;
         equipment?: string;
+        type?: string;
+        admin_notes?: string;
     }[]
     payouts: {
         id: string;
@@ -76,6 +79,9 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                                     const client = wrap(booking.client)
                                     const slot = wrap(booking.slots)
                                     const startTime = slot?.start_time
+                                    const isAdjustment = booking.type === 'admin_adjustment'
+                                    const isTopUp = booking.type === 'top_up'
+                                    const isSpecial = isAdjustment || isTopUp
 
                                     return (
                                         <tr key={booking.id} className="hover:bg-cream-50/50">
@@ -86,24 +92,40 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                                                 <div className="flex items-center gap-2">
                                                     <User className="w-4 h-4 text-charcoal-400" />
                                                     <span className="font-medium text-charcoal-900">
-                                                        {client?.full_name || 'Unknown'}
+                                                        {isAdjustment ? 'System Adjustment' :
+                                                            isTopUp ? 'Wallet Top-Up' :
+                                                                (client?.full_name || 'Unknown')}
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <div className="text-xs text-charcoal-500">
-                                                        {startTime ? new Date(startTime).toLocaleString(undefined, {
-                                                            month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
-                                                        }) : 'N/A'}
-                                                    </div>
-                                                    <div className="text-[10px] text-charcoal-400 font-medium">
-                                                        {(booking.price_breakdown?.quantity || 1)} x {(booking.price_breakdown?.equipment || booking.equipment || 'Unknown')}
-                                                    </div>
+                                                    {isSpecial ? (
+                                                        <div className="text-xs text-charcoal-500 italic max-w-xs truncate">
+                                                            {booking.admin_notes || 'Manual balance update'}
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <div className="text-xs text-charcoal-500">
+                                                                {startTime ? new Date(startTime).toLocaleString(undefined, {
+                                                                    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+                                                                }) : 'N/A'}
+                                                            </div>
+                                                            <div className="text-[10px] text-charcoal-400 font-medium">
+                                                                {(booking.price_breakdown?.quantity || 1)} x {(booking.price_breakdown?.equipment || booking.equipment || 'Unknown')}
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-right font-bold text-green-600">
-                                                +₱{(booking.price_breakdown?.studio_fee || (booking.total_price ? Math.max(0, booking.total_price - 100) : 0)).toLocaleString()}
+                                            <td className={clsx(
+                                                "px-6 py-4 text-right font-bold",
+                                                isAdjustment ? "text-blue-600" : "text-green-600"
+                                            )}>
+                                                {booking.price_breakdown?.studio_fee !== undefined
+                                                    ? (booking.price_breakdown.studio_fee >= 0 ? '+' : '') + `₱${booking.price_breakdown.studio_fee.toLocaleString()}`
+                                                    : `+₱${(booking.total_price ? Math.max(0, booking.total_price - 100) : 0).toLocaleString()}`
+                                                }
                                             </td>
                                         </tr>
                                     )

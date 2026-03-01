@@ -216,7 +216,7 @@ export default function InstructorDashboardClient() {
 
                         if (upcomingSessions.length === 0) {
                             return (
-                                <div className="py-20 text-center bg-cream-50/30">
+                                <div className="py-20 text-center bg-cream-50/30 flex flex-col items-center justify-center min-h-[400px]">
                                     <Calendar className="w-12 h-12 text-charcoal-200 mx-auto mb-4" />
                                     <h3 className="text-lg font-serif text-charcoal-900 mb-1">No upcoming sessions</h3>
                                     <p className="text-charcoal-500 text-sm max-w-xs mx-auto">Your upcoming bookings will appear here. Set your availability to get started.</p>

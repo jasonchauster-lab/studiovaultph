@@ -238,11 +238,24 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             });
         });
 
+        // Map wallet actions to "booking-like" objects for the UI
+        const mappedWalletActions = walletActions?.map(wa => ({
+            id: wa.id,
+            created_at: wa.processed_at || wa.updated_at || wa.created_at,
+            type: wa.type, // 'top_up' or 'admin_adjustment'
+            admin_notes: wa.admin_notes,
+            amount: wa.amount,
+            // Mock empty fields for UI compatibility
+            client: null,
+            slots: null,
+            price_breakdown: { studio_fee: wa.amount }
+        })) || [];
+
         transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
         console.log('[getEarningsData] Success.')
         return {
-            bookings,
+            bookings: [...(bookings || []), ...mappedWalletActions].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
             payouts,
             transactions,
             summary: {
