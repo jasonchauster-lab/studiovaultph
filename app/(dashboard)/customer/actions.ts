@@ -136,7 +136,12 @@ export async function requestBooking(
 
     // --- PRICE CALCULATION START ---
     // 1. Determine Equipment (Use passed argument or default to first in slot)
-    const selectedEquipment = equipment || slot.equipment?.[0] || 'Reformer';
+    const equipmentObj = slot.equipment as Record<string, number> || {};
+    const selectedEquipment = equipment || Object.keys(equipmentObj)[0] || 'Reformer';
+
+    if (!equipmentObj[selectedEquipment] || equipmentObj[selectedEquipment] <= 0) {
+        return { error: `No ${selectedEquipment} available in this slot.` }
+    }
 
     // 2. Studio Price
     const studioPricing = studio.pricing as Record<string, number> | null;
@@ -202,142 +207,115 @@ export async function requestBooking(
     // We need to find X available slots that match the criteria
     // For now, let's assume if quantity > 1, we find other slots with same start/end/studio/equipment
 
-    let allocatedSlotIds: string[] = [slotId];
+    let actualBookedId = slotId;
 
-    // Find additional slots if quantity > 1
-    if (quantity > 1) {
-        const needed = quantity - 1;
-        const { data: additionalSlots } = await supabase
-            .from('slots')
-            .select('id')
-            .eq('studio_id', slot.studio_id)
-            .eq('start_time', slot.start_time) // Must match start
-            .eq('is_available', true)
-            .neq('id', slotId) // Exclude current
-            .contains('equipment', [selectedEquipment]) // Ensure equipment matches
-            .limit(needed);
+    // --- EQUIPMENT EXTRACTION START (Refined for JSONB) ---
+    // 1. Decrement the selected equipment in the PARENT slot
+    const currentEquipment = (slot.equipment as Record<string, number>) || {};
+    const currentTotalQty = slot.quantity || 0;
 
-        if (!additionalSlots || additionalSlots.length < needed) {
-            return { error: `Not enough slots available. Requested: ${quantity}, Found: ${(additionalSlots?.length || 0) + 1}` }
-        }
+    const newEquipment = { ...currentEquipment };
+    newEquipment[selectedEquipment] = (newEquipment[selectedEquipment] || 0) - quantity;
 
-        allocatedSlotIds = [...allocatedSlotIds, ...additionalSlots.map(s => s.id)];
+    // Remove key if 0 (optional)
+    if (newEquipment[selectedEquipment] <= 0) {
+        delete newEquipment[selectedEquipment];
     }
 
-    let finalSlotId = slotId; // This will be the "primary" slot ID stored in booking.slot_id
+    const newTotalQty = Math.max(0, currentTotalQty - quantity);
+    const isStillAvailable = newTotalQty > 0;
 
-    // Iterate through all allocated slots and apply booking/splitting logic
-    // If splitting is required, we do it for EACH slot. 
-    // Complexity: If custom range (partial booking) is used with Quantity > 1, we must split X slots.
+    await supabase.from('slots').update({
+        equipment: newEquipment,
+        equipment_inventory: newEquipment,
+        quantity: newTotalQty,
+        is_available: isStillAvailable
+    }).eq('id', slotId);
 
-    const bookedSlotIdsForRecord: string[] = [];
+    // 2. Create a NEW "Extracted" slot record with ONLY the booked equipment
+    const { data: extractedSlot, error: extractionError } = await supabase
+        .from('slots')
+        .insert({
+            studio_id: slot.studio_id,
+            start_time: slot.start_time,
+            end_time: slot.end_time,
+            is_available: false, // Locked immediately
+            equipment: { [selectedEquipment]: quantity },
+            equipment_inventory: { [selectedEquipment]: quantity },
+            quantity: quantity
+        })
+        .select()
+        .single();
 
-    for (const currentId of allocatedSlotIds) {
-        let actualBookedId = currentId;
+    if (extractionError || !extractedSlot) {
+        console.error('Extraction error:', extractionError);
+        return { error: 'Failed to extract equipment for booking.' };
+    }
 
-        // Fetch current slot details for extraction/splitting
-        const { data: currentSlotData } = await supabase.from('slots').select('*').eq('id', currentId).single();
-        if (!currentSlotData) continue;
+    actualBookedId = extractedSlot.id;
+    // --- EQUIPMENT EXTRACTION END ---
 
-        const currentSlotStart = new Date(currentSlotData.start_time);
-        const currentSlotEnd = new Date(currentSlotData.end_time);
-        const allEquipment = (currentSlotData.equipment as string[]) || [];
+    // Handle TIME splitting if necessary on the actualBookedId (the extracted one)
+    if (bookingStart && bookingEnd) {
+        const reqStart = new Date(bookingStart + '+08:00');
+        const reqEnd = new Date(bookingEnd + '+08:00');
+        const slotStart = new Date(slot.start_time);
+        const slotEnd = new Date(slot.end_time);
 
-        // --- EQUIPMENT EXTRACTION START ---
-        // If the slot has multiple equipment types, we MUST extract the one we are booking
-        // to keep the others available.
-        if (allEquipment.length > 1 && allEquipment.includes(selectedEquipment)) {
-            // 1. Update the ORIGINAL slot to EXCLUDE the selected equipment (keeps others available)
-            const remainingEquipment = allEquipment.filter(e => e !== selectedEquipment);
-            await supabase.from('slots').update({ equipment: remainingEquipment }).eq('id', currentId);
+        const isPartial = reqStart.getTime() > slotStart.getTime() || reqEnd.getTime() < slotEnd.getTime();
 
-            // 2. Create a NEW "working" slot record with ONLY the selected equipment.
-            // This new slot will be the one we actually lock/split for the booking.
-            const { data: extractedSlot, error: extractionError } = await supabase
+        if (isPartial) {
+            // Create the specific time segment requested
+            const { data: newTimeSlot, error: timeSplitError } = await supabase
                 .from('slots')
                 .insert({
-                    studio_id: currentSlotData.studio_id,
-                    start_time: currentSlotData.start_time,
-                    end_time: currentSlotData.end_time,
-                    is_available: true,
-                    equipment: [selectedEquipment]
+                    studio_id: slot.studio_id,
+                    start_time: reqStart.toISOString(),
+                    end_time: reqEnd.toISOString(),
+                    is_available: false, // Locked for the booking
+                    equipment: { [selectedEquipment]: quantity },
+                    quantity: quantity
                 })
                 .select()
                 .single();
 
-            if (extractionError || !extractedSlot) {
-                console.error('Extraction error:', extractionError);
-                return { error: 'Failed to extract equipment for booking.' };
+            if (timeSplitError || !newTimeSlot) {
+                console.error('Time Split error:', timeSplitError);
+                return { error: 'Failed to process partial booking time.' };
             }
 
-            actualBookedId = extractedSlot.id;
-        }
-        // --- EQUIPMENT EXTRACTION END ---
+            // Adjust the "leftover" time on the extracted slot (which is now extra available time)
+            // Actually, the original slot already had its time correctly? No, if we extract 1 hour of Tower, 
+            // and then book only 30 mins, the other 30 mins of THAT extraction should go back?
+            // Usually, time splitting is for the whole slot. 
+            // Simplified: If partial time, the rest of the extraction remains as an available (or unavailable) remainder.
+            // Let's keep it simple: the time segment is carved out of the extraction.
 
-        // Now perform TIME splitting if necessary on the actualBookedId
-        if (bookingStart && bookingEnd) {
-            const reqStart = new Date(bookingStart + '+08:00');
-            const reqEnd = new Date(bookingEnd + '+08:00');
-
-            const isPartial = reqStart.getTime() > currentSlotStart.getTime() || reqEnd.getTime() < currentSlotEnd.getTime();
-
-            if (isPartial) {
-                // Fetch the current state of actualBookedId (it might be the newly extracted one)
-                const { data: targetSlot } = await supabase.from('slots').select('*').eq('id', actualBookedId).single();
-                if (!targetSlot) continue;
-
-                const targetStart = new Date(targetSlot.start_time);
-                const targetEnd = new Date(targetSlot.end_time);
-
-                // Insert the specific time segment requested
-                const { data: newTimeSlot, error: timeSplitError } = await supabase
-                    .from('slots')
-                    .insert({
-                        studio_id: targetSlot.studio_id,
-                        start_time: reqStart.toISOString(),
-                        end_time: reqEnd.toISOString(),
-                        is_available: false, // Locked immediately
-                        equipment: targetSlot.equipment // This is either [selectedEquipment] (if extracted) or original
-                    })
-                    .select()
-                    .single();
-
-                if (timeSplitError || !newTimeSlot) {
-                    console.error('Time Split error:', timeSplitError);
-                    return { error: 'Failed to process partial booking time.' };
-                }
-
-                // Adjust the "leftover" time on the targetSlot
-                if (reqStart.getTime() === targetStart.getTime()) {
-                    await supabase.from('slots').update({ start_time: reqEnd.toISOString() }).eq('id', actualBookedId);
-                } else if (reqEnd.getTime() === targetEnd.getTime()) {
-                    await supabase.from('slots').update({ end_time: reqStart.toISOString() }).eq('id', actualBookedId);
-                } else {
-                    // Triple Split: Middle is booked, start and end remain
-                    await supabase.from('slots').update({ end_time: reqStart.toISOString() }).eq('id', actualBookedId);
-                    await supabase.from('slots').insert({
-                        studio_id: targetSlot.studio_id,
-                        start_time: reqEnd.toISOString(),
-                        end_time: targetEnd.toISOString(),
-                        is_available: true,
-                        equipment: targetSlot.equipment
-                    });
-                }
-                actualBookedId = newTimeSlot.id;
+            if (reqStart.getTime() === slotStart.getTime()) {
+                await supabase.from('slots').update({ start_time: reqEnd.toISOString(), is_available: true }).eq('id', actualBookedId);
+            } else if (reqEnd.getTime() === slotEnd.getTime()) {
+                await supabase.from('slots').update({ end_time: reqStart.toISOString(), is_available: true }).eq('id', actualBookedId);
             } else {
-                // Full Booking of the (maybe extracted) slot
-                await supabase.from('slots').update({ is_available: false }).eq('id', actualBookedId);
+                // Triple Split
+                await supabase.from('slots').update({ end_time: reqStart.toISOString(), is_available: true }).eq('id', actualBookedId);
+                await supabase.from('slots').insert({
+                    studio_id: slot.studio_id,
+                    start_time: reqEnd.toISOString(),
+                    end_time: slotEnd.toISOString(),
+                    is_available: true,
+                    equipment: { [selectedEquipment]: quantity },
+                    equipment_inventory: { [selectedEquipment]: quantity },
+                    quantity: quantity
+                });
             }
-        } else {
-            // Full Booking (No custom range)
-            await supabase.from('slots').update({ is_available: false }).eq('id', actualBookedId);
+            actualBookedId = newTimeSlot.id;
         }
-
-        bookedSlotIdsForRecord.push(actualBookedId);
     }
 
+    const bookedSlotIdsForRecord = [actualBookedId];
+
     // Primary ID is the first one
-    finalSlotId = bookedSlotIdsForRecord[0];
+    let finalSlotId = bookedSlotIdsForRecord[0];
 
     // 4. Create Booking linked to finalSlotId
     // Set expiry 15 minutes from now for unpaid bookings
@@ -639,7 +617,7 @@ export async function bookInstructorSession(
         //.eq('end_time', endDateTime.toISOString()) // Optional, if slots are strict 1 hour
         .eq('studios.location', location)
         .eq('studios.verified', true)
-        .contains('equipment', [equipment])
+        .gte(`equipment->>${equipment}`, '1') // Ensure at least 1 available via JSONB path
 
     if (slotError) {
         console.error('Slot search error:', slotError)
@@ -699,36 +677,41 @@ export async function bookInstructorSession(
         return { error: 'Failed to create booking.' }
     }
 
-    // 5. Update Slot Availability (Lock it)
-    const allEquipment = (selectedSlot.equipment as string[]) || [];
+    // 5. Update Slot Availability (Lock it) via Extraction Logic
+    const currentEquipment = (selectedSlot.equipment as Record<string, number>) || {};
+    const currentTotalQty = parseInt(selectedSlot.quantity as any) || 0;
 
-    if (allEquipment.length > 1 && allEquipment.includes(equipment)) {
-        // Equipment Extraction: Remove booked item from original, create new record for booking
-        const remainingEquipment = allEquipment.filter(e => e !== equipment);
-        await supabase.from('slots').update({ equipment: remainingEquipment }).eq('id', selectedSlot.id);
+    // 1. Decrement from Parent
+    const newEquipment = { ...currentEquipment };
+    newEquipment[equipment] = (newEquipment[equipment] || 0) - 1;
+    if (newEquipment[equipment] <= 0) {
+        delete newEquipment[equipment];
+    }
+    const newTotalQty = Math.max(0, currentTotalQty - 1);
 
-        const { data: newSlot } = await supabase
-            .from('slots')
-            .insert({
-                studio_id: selectedSlot.studio_id,
-                start_time: selectedSlot.start_time,
-                end_time: selectedSlot.end_time,
-                is_available: false,
-                equipment: [equipment]
-            })
-            .select()
-            .single();
+    await supabase.from('slots').update({
+        equipment: newEquipment,
+        quantity: newTotalQty,
+        is_available: newTotalQty > 0
+    }).eq('id', selectedSlot.id);
 
-        if (newSlot) {
-            // Update the booking to point to the new extracted slot
-            await supabase.from('bookings').update({ slot_id: newSlot.id }).eq('id', booking.id);
-        }
-    } else {
-        // Broad Lock: Only one equipment or doesn't match extraction pattern
-        await supabase
-            .from('slots')
-            .update({ is_available: false })
-            .eq('id', selectedSlot.id)
+    // 2. Create Extracted Slot
+    const { data: newSlot } = await supabase
+        .from('slots')
+        .insert({
+            studio_id: selectedSlot.studio_id,
+            start_time: selectedSlot.start_time,
+            end_time: selectedSlot.end_time,
+            is_available: false,
+            equipment: { [equipment]: 1 },
+            quantity: 1
+        })
+        .select()
+        .single();
+
+    if (newSlot) {
+        // Update the booking to point to the new extracted slot
+        await supabase.from('bookings').update({ slot_id: newSlot.id }).eq('id', booking.id);
     }
 
     // 6. Notifications

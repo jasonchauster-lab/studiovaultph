@@ -1,10 +1,10 @@
 'use client'
-import { TrendingUp, CreditCard, Wallet, Clock, Info, X, ShieldCheck, AlertCircle } from 'lucide-react'
+import { TrendingUp, CreditCard, Wallet, Clock, Info, X, ShieldCheck, AlertCircle, ArrowUpRight } from 'lucide-react'
 import PayoutRequestModal from './PayoutRequestModal'
+import TopUpModal from './TopUpModal'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { topUpWallet } from '@/app/(dashboard)/customer/actions'
-import { ArrowUpRight } from 'lucide-react'
 
 interface EarningsOverviewProps {
     studioId: string
@@ -24,23 +24,10 @@ interface EarningsOverviewProps {
 export default function EarningsOverview({ studioId, summary }: EarningsOverviewProps) {
     const [showInfoModal, setShowInfoModal] = useState(false)
     const [showTopUpModal, setShowTopUpModal] = useState(false)
-    const [topUpAmount, setTopUpAmount] = useState('')
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const router = useRouter()
 
-    const handleTopUp = async () => {
-        const amount = parseFloat(topUpAmount)
-        if (isNaN(amount) || amount <= 0) return alert('Please enter a valid amount.')
-
-        setIsSubmitting(true)
-        const result = await topUpWallet(amount)
-        setIsSubmitting(false)
-
-        if (result.error) {
-            alert(result.error)
-        } else {
-            router.push(`/customer/payment/top-up/${result.topUpId}`)
-        }
+    const handleTopUp = () => {
+        setShowTopUpModal(true)
     }
 
     return (
@@ -191,6 +178,11 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                     <p className="text-xs text-charcoal-400 mt-1">Unlocking within 24 hours</p>
                 </div>
             </div>
+            {/* Top-Up Modal */}
+            <TopUpModal
+                isOpen={showTopUpModal}
+                onClose={() => setShowTopUpModal(false)}
+            />
         </div>
     )
 }

@@ -172,8 +172,8 @@ export default async function CustomerDashboard({
 
             if (params.equipment && params.equipment !== 'all') {
                 // Slots/Studios must have this equipment
-                // slots have 'equipment' array
-                slotQuery = slotQuery.contains('equipment', [params.equipment])
+                // equipment is now JSONB { "Reformer": 5 }
+                slotQuery = slotQuery.gte(`equipment->>${params.equipment}`, '1')
             }
 
             if (params.date) {

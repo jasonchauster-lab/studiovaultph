@@ -1344,8 +1344,8 @@ export async function approveTopUp(id: string) {
 
     // 3. Increment Wallet Balance
     const { error: balanceError } = await supabase.rpc('increment_available_balance', {
-        user_id_param: topUp.user_id,
-        amount_param: topUp.amount
+        user_id: topUp.user_id,
+        amount: topUp.amount
     })
 
     if (balanceError) {
@@ -1441,8 +1441,8 @@ export async function adjustUserBalance(userId: string, amount: number, reason: 
 
     // 3. Update Balance
     const { error: balanceError } = await supabase.rpc('increment_available_balance', {
-        user_id_param: userId,
-        amount_param: amount
+        user_id: userId,
+        amount: amount
     })
 
     if (balanceError) return { error: 'Failed to update user balance.' }
@@ -1506,8 +1506,8 @@ export async function settleInstructorDebt(profileId: string) {
 
     // 3. Update Balance to 0
     const { error: balanceError } = await supabase.rpc('increment_available_balance', {
-        user_id_param: profileId,
-        amount_param: settlementAmount
+        user_id: profileId,
+        amount: settlementAmount
     })
 
     if (balanceError) return { error: 'Failed to settle balance.' }

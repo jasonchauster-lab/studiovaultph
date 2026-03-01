@@ -33,17 +33,24 @@ export async function createSlot(formData: FormData) {
     const endTimeStr = formData.get('endTime') as string
     const quantity = parseInt(formData.get('quantity') as string) || 1
 
-    // Parse equipment
-    const equipment: string[] = []
+    // Parse equipment JSON object and total quantity
+    const equipment: Record<string, number> = {}
+    let totalQuantity = 0
     const allKeys = Array.from(formData.keys())
+
     allKeys.forEach(key => {
         if (key.startsWith('eq_') && formData.get(key) === 'on') {
-            equipment.push(key.replace('eq_', ''))
+            const eqName = key.replace('eq_', '')
+            const qty = parseInt(formData.get(`qty_${eqName}`) as string) || 0
+            if (qty > 0) {
+                equipment[eqName] = qty
+                totalQuantity += qty
+            }
         }
     })
 
-    if (equipment.length === 0) {
-        return { error: 'Please select at least one piece of equipment.' }
+    if (Object.keys(equipment).length === 0) {
+        return { error: 'Please select at least one piece of equipment with a quantity greater than 0.' }
     }
 
     if (!studioId || !date || !startTimeStr || !endTimeStr) {
@@ -69,16 +76,15 @@ export async function createSlot(formData: FormData) {
         // Stop if next hour exceeds end time
         if (nextHour > endDateTime) break;
 
-        // Loop for Quantity
-        for (let i = 0; i < quantity; i++) {
-            slotsToInsert.push({
-                studio_id: studioId,
-                start_time: current.toISOString(),
-                end_time: nextHour.toISOString(),
-                is_available: true,
-                equipment: equipment
-            })
-        }
+        // Insert as ONE BUCKET record per hour
+        slotsToInsert.push({
+            studio_id: studioId,
+            start_time: current.toISOString(),
+            end_time: nextHour.toISOString(),
+            is_available: true,
+            equipment: Object.keys(equipment),
+            equipment_inventory: equipment
+        })
 
         // Move to next hour
         current = nextHour
@@ -135,12 +141,19 @@ export async function updateSlot(slotId: string, formData: FormData) {
     const endTimeStr = formData.get('endTime') as string
     const date = formData.get('date') as string
 
-    // Parse equipment
-    const equipment: string[] = []
+    // Parse equipment JSON object and total quantity
+    const equipment: Record<string, number> = {}
+    let totalQuantity = 0
     const allKeys = Array.from(formData.keys())
+
     allKeys.forEach(key => {
         if (key.startsWith('eq_') && formData.get(key) === 'on') {
-            equipment.push(key.replace('eq_', ''))
+            const eqName = key.replace('eq_', '')
+            const qty = parseInt(formData.get(`qty_${eqName}`) as string) || 0
+            if (qty > 0) {
+                equipment[eqName] = qty
+                totalQuantity += qty
+            }
         }
     })
 
@@ -156,7 +169,8 @@ export async function updateSlot(slotId: string, formData: FormData) {
         .update({
             start_time: startDateTime.toISOString(),
             end_time: endDateTime.toISOString(),
-            equipment: equipment
+            equipment: equipment,
+            quantity: totalQuantity
         })
         .eq('id', slotId)
 
@@ -382,6 +396,11 @@ export async function generateRecurringSlots(params: GenerateSlotsParams) {
         if (params.days.includes(currentDay.getDay())) {
 
             // Generate slots for this day
+            const inventory: Record<string, number> = {}
+            params.equipment?.forEach(eq => {
+                inventory[eq] = quantity
+            })
+
             const dayStr = currentDay.toISOString().split('T')[0];
             let slotStart = new Date(`${dayStr}T${params.startTime}:00+08:00`);
             const slotEnd = new Date(`${dayStr}T${params.endTime}:00+08:00`);
@@ -392,16 +411,15 @@ export async function generateRecurringSlots(params: GenerateSlotsParams) {
 
                 if (nextHour > slotEnd) break;
 
-                // Loop for Quantity
-                for (let i = 0; i < quantity; i++) {
-                    slotsToInsert.push({
-                        studio_id: params.studioId,
-                        start_time: slotStart.toISOString(),
-                        end_time: nextHour.toISOString(),
-                        is_available: true,
-                        equipment: params.equipment || []
-                    });
-                }
+                // Insert as ONE BUCKET record per hour
+                slotsToInsert.push({
+                    studio_id: params.studioId,
+                    start_time: slotStart.toISOString(),
+                    end_time: nextHour.toISOString(),
+                    is_available: true,
+                    equipment: params.equipment || [],
+                    equipment_inventory: inventory
+                });
 
                 slotStart = nextHour;
             }

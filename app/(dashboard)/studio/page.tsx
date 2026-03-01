@@ -119,6 +119,7 @@ export default async function StudioDashboard(props: {
                 bookings (
                     id,
                     status,
+                    equipment:price_breakdown->>'equipment',
                     client:profiles!client_id(full_name, avatar_url),
                     instructor:profiles!instructor_id(full_name, avatar_url)
                 )

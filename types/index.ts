@@ -74,7 +74,8 @@ export interface Slot {
     start_time: string; // ISO string
     end_time: string;   // ISO string
     is_available: boolean;
-    equipment?: string[];
+    equipment?: Record<string, number>; // JSONB object stores { "Reformer": 5 }
+    quantity?: number;
     studios?: Studio; // Joined data
 }
 

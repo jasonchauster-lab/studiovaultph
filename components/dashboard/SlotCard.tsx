@@ -25,16 +25,25 @@ export default function SlotCard({ slot }: SlotCardProps) {
                     </span>
                 </div>
 
-                {slot.studios?.equipment && slot.studios.equipment.length > 0 && (
+                {/* Show slot-specific equipment if available, otherwise fallback to studio equipment */}
+                {(slot.equipment || (slot.studios?.equipment && slot.studios.equipment.length > 0)) && (
                     <div className="flex flex-wrap gap-1 mb-3">
-                        {slot.studios.equipment.slice(0, 3).map((item, i) => (
-                            <span key={i} className="px-2 py-0.5 bg-cream-100 text-charcoal-600 text-[10px] rounded-full uppercase tracking-wider font-medium">
-                                {item}
-                            </span>
-                        ))}
-                        {slot.studios.equipment.length > 3 && (
+                        {slot.equipment ? (
+                            Object.entries(slot.equipment).map(([item, qty], i) => (
+                                <span key={i} className="px-2 py-0.5 bg-teal-50 text-teal-700 border border-teal-100 text-[10px] rounded-full uppercase tracking-wider font-semibold">
+                                    {qty}x {item}
+                                </span>
+                            ))
+                        ) : (
+                            slot.studios?.equipment && slot.studios.equipment.slice(0, 3).map((item, i) => (
+                                <span key={i} className="px-2 py-0.5 bg-cream-100 text-charcoal-600 text-[10px] rounded-full uppercase tracking-wider font-medium">
+                                    {item}
+                                </span>
+                            ))
+                        )}
+                        {!slot.equipment && (slot.studios?.equipment?.length || 0) > 3 && (
                             <span className="px-2 py-0.5 bg-cream-50 text-charcoal-400 text-[10px] rounded-full font-medium">
-                                +{slot.studios.equipment.length - 3}
+                                +{slot.studios!.equipment.length - 3}
                             </span>
                         )}
                     </div>
@@ -63,7 +72,10 @@ export default function SlotCard({ slot }: SlotCardProps) {
                 </div>
             </div>
 
-            <BookSlotButton slotId={slot.id} availableEquipment={slot.studios?.equipment || []} />
+            <BookSlotButton
+                slotId={slot.id}
+                availableEquipment={slot.equipment ? Object.keys(slot.equipment) : (slot.studios?.equipment || [])}
+            />
         </div>
     );
 }

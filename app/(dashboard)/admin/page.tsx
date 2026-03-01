@@ -1013,23 +1013,30 @@ export default async function AdminDashboard({
                                     </div>
 
                                     {topUp.payment_proof_url && (
-                                        <div className="mt-2">
+                                        <div className="mt-4">
                                             <p className="text-[10px] font-bold text-charcoal-400 uppercase tracking-widest mb-2">Payment Receipt</p>
-                                            <a
-                                                href={topUp.payment_proof_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-block group relative"
-                                            >
-                                                <img
-                                                    src={topUp.payment_proof_url}
-                                                    alt="Payment Receipt"
-                                                    className="h-32 w-auto object-cover rounded-xl border border-cream-200 shadow-sm group-hover:shadow-md transition-all"
-                                                />
-                                                <div className="absolute inset-0 bg-charcoal-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl text-white text-[10px] font-bold">
-                                                    View Full Size
+                                            <div className="flex items-start gap-4">
+                                                <a
+                                                    href={topUp.payment_proof_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-block group relative"
+                                                >
+                                                    <img
+                                                        src={topUp.payment_proof_url}
+                                                        alt="Payment Receipt"
+                                                        className="h-48 w-auto object-cover rounded-xl border border-cream-200 shadow-sm group-hover:shadow-md transition-all"
+                                                    />
+                                                    <div className="absolute inset-0 bg-charcoal-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl text-white text-[10px] font-bold">
+                                                        View Full Size
+                                                    </div>
+                                                </a>
+                                                <div className="bg-cream-50 p-3 rounded-lg border border-cream-100 max-w-xs">
+                                                    <p className="text-xs text-charcoal-600 leading-relaxed font-medium">
+                                                        Verify the amount <span className="text-charcoal-900 font-bold">₱{topUp.amount.toLocaleString()}</span> and Name/Reference on this receipt before approving.
+                                                    </p>
                                                 </div>
-                                            </a>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

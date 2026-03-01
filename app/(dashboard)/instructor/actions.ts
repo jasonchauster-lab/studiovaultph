@@ -406,38 +406,55 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
     for (const currentId of allocatedSlotIds) {
         let actualBookedId = currentId;
 
-        // Fetch current slot details for extraction
+        // Fetch current slot details for extraction/splitting
+        // Note: We need the most up-to-date data for each iteration if multiple quantity
         const { data: currentSlotData } = await supabase.from('slots').select('*').eq('id', currentId).single();
         if (!currentSlotData) continue;
 
-        const allEquipment = (currentSlotData.equipment as string[]) || [];
+        const currentEquipment = (currentSlotData.equipment as Record<string, number>) || {};
+        const currentTotalQty = currentSlotData.quantity || 0;
 
-        // --- EQUIPMENT EXTRACTION START ---
-        if (allEquipment.length > 1 && allEquipment.includes(equipment)) {
-            const remainingEquipment = allEquipment.filter(e => e !== equipment);
-            await supabase.from('slots').update({ equipment: remainingEquipment }).eq('id', currentId);
+        // --- EQUIPMENT EXTRACTION START (Refined for JSONB) ---
+        // 1. Decrement the selected equipment in the PARENT slot
+        const newEquipment = { ...currentEquipment };
+        newEquipment[equipment] = (newEquipment[equipment] || 0) - 1; // Instructor books 1 by 1 in this loop
 
-            const { data: extractedSlot, error: extractionError } = await supabase
-                .from('slots')
-                .insert({
-                    studio_id: currentSlotData.studio_id,
-                    start_time: currentSlotData.start_time,
-                    end_time: currentSlotData.end_time,
-                    is_available: false, // Lock it immediately
-                    equipment: [equipment]
-                })
-                .select()
-                .single();
-
-            if (extractionError || !extractedSlot) {
-                console.error('Extraction error:', extractionError);
-                return { error: 'Failed to extract equipment.' };
-            }
-            actualBookedId = extractedSlot.id;
-        } else {
-            // Full Booking of the record
-            await supabase.from('slots').update({ is_available: false }).eq('id', currentId);
+        // Remove key if 0
+        if (newEquipment[equipment] <= 0) {
+            delete newEquipment[equipment];
         }
+
+        const newTotalQty = Math.max(0, currentTotalQty - 1);
+        const isStillAvailable = newTotalQty > 0;
+
+        await supabase.from('slots').update({
+            equipment: newEquipment,
+            equipment_inventory: newEquipment,
+            quantity: newTotalQty,
+            is_available: isStillAvailable
+        }).eq('id', currentId);
+
+        // 2. Create a NEW "Extracted" slot record with ONLY the booked equipment
+        const { data: extractedSlot, error: extractionError } = await supabase
+            .from('slots')
+            .insert({
+                studio_id: currentSlotData.studio_id,
+                start_time: currentSlotData.start_time,
+                end_time: currentSlotData.end_time,
+                is_available: false, // Locked immediately
+                equipment: { [equipment]: 1 },
+                equipment_inventory: { [equipment]: 1 },
+                quantity: 1
+            })
+            .select()
+            .single();
+
+        if (extractionError || !extractedSlot) {
+            console.error('Extraction error:', extractionError);
+            return { error: 'Failed to extract equipment for booking.' };
+        }
+
+        actualBookedId = extractedSlot.id;
         // --- EQUIPMENT EXTRACTION END ---
 
         bookedSlotIdsForRecord.push(actualBookedId);
