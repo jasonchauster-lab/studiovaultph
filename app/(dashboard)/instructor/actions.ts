@@ -417,7 +417,11 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
         // --- EQUIPMENT EXTRACTION START (Refined for JSONB) ---
         // 1. Decrement the selected equipment in the PARENT slot
         const newEquipment = { ...currentEquipment };
-        newEquipment[equipment] = (newEquipment[equipment] || 0) - 1; // Instructor books 1 by 1 in this loop
+
+        // Find the matching key in the JSONB object (handling case-sensitivity or whitespace)
+        const equipmentKey = Object.keys(newEquipment).find(k => k.trim().toLowerCase() === equipment.trim().toLowerCase()) || equipment;
+
+        newEquipment[equipmentKey] = (newEquipment[equipmentKey] || 0) - 1;
 
         // Remove key if 0
         if (newEquipment[equipment] <= 0) {

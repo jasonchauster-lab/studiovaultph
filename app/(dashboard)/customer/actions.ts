@@ -675,9 +675,8 @@ export async function bookInstructorSession(
         .eq('is_available', true)
         .eq('start_time', startDateTime.toISOString()) // Exact match for slot start
         //.eq('end_time', endDateTime.toISOString()) // Optional, if slots are strict 1 hour
-        .eq('studios.location', trimmedLocation)
         .eq('studios.verified', true)
-        .gte(`equipment->>${equipment}`, '1') // Ensure at least 1 available via JSONB path
+    // We will filter location and equipment availability in JS for better case-insensitivity support
 
     if (slotError) {
         console.error('Slot search error:', slotError)
@@ -688,8 +687,17 @@ export async function bookInstructorSession(
         return { error: 'No studio slots available with this equipment.' }
     }
 
-    // 2.1 Filter by Studio Owner's Status
+    // 2.1 Filter by Location & Equipment (Case-Insensitive) & Studio Owner's Status
     const filteredSlots = availableSlots.filter((s: any) => {
+        const locationMatch = (s.studios?.location ?? '').trim().toLowerCase() === trimmedLocation.toLowerCase();
+
+        // Check equipment robustly
+        const eqData = s.equipment || {};
+        const actualKey = Object.keys(eqData).find(k => k.trim().toLowerCase() === equipment.trim().toLowerCase());
+        const eqAvailable = actualKey ? (eqData[actualKey] ?? 0) >= 1 : false;
+
+        if (!locationMatch || !eqAvailable) return false;
+
         const owner = Array.isArray(s.studios.profiles) ? s.studios.profiles[0] : s.studios.profiles;
         return !owner?.is_suspended && (owner?.available_balance ?? 0) >= 0;
     });
@@ -743,9 +751,11 @@ export async function bookInstructorSession(
 
     // 1. Decrement from Parent
     const newEquipment = { ...currentEquipment };
-    newEquipment[equipment] = (newEquipment[equipment] || 0) - 1;
-    if (newEquipment[equipment] <= 0) {
-        delete newEquipment[equipment];
+    const equipmentKey = Object.keys(newEquipment).find(k => k.trim().toLowerCase() === equipment.trim().toLowerCase()) || equipment;
+
+    newEquipment[equipmentKey] = (newEquipment[equipmentKey] || 0) - 1;
+    if (newEquipment[equipmentKey] <= 0) {
+        delete newEquipment[equipmentKey];
     }
     const newTotalQty = Math.max(0, currentTotalQty - 1);
 

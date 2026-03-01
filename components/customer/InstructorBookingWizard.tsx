@@ -132,9 +132,10 @@ export default function InstructorBookingWizard({
         const firstEq = allEq[0] || ''
         setSelectedEquipment(firstEq)
 
-        // Max quantity = JSONB value for that key (case-insensitive lookup just in case)
-        const count = firstEq && typeof equipmentData === 'object' && !Array.isArray(equipmentData)
-            ? (equipmentData[allEq[0]] ?? 0)
+        // Max quantity = JSONB value for that key (case-insensitive lookup)
+        const actualKey = allEq.find(k => k.trim().toLowerCase() === firstEq.trim().toLowerCase())
+        const count = actualKey && typeof equipmentData === 'object' && !Array.isArray(equipmentData)
+            ? (equipmentData[actualKey] ?? 0)
             : 0
         setMaxQuantity(Math.max(1, count))
         setQuantity(1)

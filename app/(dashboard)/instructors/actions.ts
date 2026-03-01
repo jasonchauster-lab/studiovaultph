@@ -55,9 +55,9 @@ export async function findMatchingStudios(
     if (!rawSlots || rawSlots.length === 0) return { studios: [] }
 
     // JS-level trim comparison — handles DB values with stray whitespace
-    const slots = rawSlots.filter((s: any) =>
-        (s.studios?.location ?? '').trim() === trimmedLocationArea
-    )
+    const slots = rawSlots?.filter((s: any) =>
+        (s.studios?.location ?? '').trim().toLowerCase() === trimmedLocationArea.toLowerCase()
+    ) || []
 
     if (slots.length === 0) return { studios: [] }
 
