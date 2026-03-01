@@ -49,23 +49,33 @@ export default function BalanceAdjustmentTool() {
     const handleAdjust = async () => {
         if (!selectedUser || !amount || !reason) return
 
+        if (reason.trim().length < 3) {
+            setMessage({ type: 'error', text: 'Please provide a more detailed reason (min 3 characters).' })
+            return
+        }
+
         const numAmount = parseFloat(amount)
-        if (isNaN(numAmount) || numAmount <= 0) {
+        if (isNaN(numAmount) || numAmount === 0) {
             setMessage({ type: 'error', text: 'Invalid amount' })
             return
         }
 
+        const actionText = type === 'credit' ? 'credit' : 'debit'
+        const confirmed = window.confirm(`Are you sure you want to ${actionText} ₱${Math.abs(numAmount).toLocaleString()} ${type === 'credit' ? 'to' : 'from'} ${selectedUser.full_name}'s account?`)
+
+        if (!confirmed) return
+
         setIsSubmitting(true)
         setMessage(null)
 
-        const finalAmount = type === 'credit' ? numAmount : -numAmount
+        const finalAmount = type === 'credit' ? Math.abs(numAmount) : -Math.abs(numAmount)
         const result = await adjustUserBalance(selectedUser.id, finalAmount, reason)
 
         setIsSubmitting(false)
         if (result.error) {
             setMessage({ type: 'error', text: result.error })
         } else {
-            setMessage({ type: 'success', text: `Successfully ${type}ed ₱${numAmount} to ${selectedUser.full_name}'s wallet.` })
+            setMessage({ type: 'success', text: `Successfully ${type === 'credit' ? 'credited' : 'debited'} ₱${Math.abs(numAmount).toLocaleString()} ${type === 'credit' ? 'to' : 'from'} ${selectedUser.full_name}'s wallet.` })
             // Update local balance
             setSelectedUser({
                 ...selectedUser,

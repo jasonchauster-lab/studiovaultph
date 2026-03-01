@@ -58,9 +58,9 @@ export default function Navigation({ role }: NavigationProps) {
                         <div className="h-px w-full md:h-4 md:w-px bg-cream-300 my-1 md:my-0 md:mx-2" />
                     )}
                     {role === 'instructor' && (
-                        <Link href="/instructor" onClick={() => setMobileOpen(false)} className="text-xs font-serif text-charcoal-500 hover:text-charcoal-900 flex items-center gap-1 border border-cream-200 px-3 py-1.5 rounded-full hover:bg-cream-100 transition-colors">
+                        <Link href="/instructor" onClick={() => setMobileOpen(false)} className="text-xs font-serif text-rose-gold hover:text-rose-gold flex items-center gap-1 border border-rose-gold/20 bg-rose-gold/5 px-3 py-1.5 rounded-full transition-all hover:shadow-sm">
                             <LayoutDashboard className="w-3 h-3" />
-                            Instructor Dashboard
+                            Instructor Mode
                         </Link>
                     )}
                     {role === 'studio' && (
@@ -90,11 +90,7 @@ export default function Navigation({ role }: NavigationProps) {
                                 Earnings
                                 {pathname.startsWith('/instructor/earnings') && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
-                            <Link href="/instructor/sessions" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/instructor/sessions'))}>
-                                <Calendar className="w-4 h-4" />
-                                My Sessions
-                                {pathname.startsWith('/instructor/sessions') && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
-                            </Link>
+
                             <Link href="/instructor/schedule" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/instructor/schedule'))}>
                                 <Calendar className="w-4 h-4" />
                                 My Schedule

@@ -499,7 +499,12 @@ export async function submitTopUpPaymentProof(
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) return { error: 'Unauthorized' }
+    console.log('[TopUpSubmission] Starting submission for:', { topUpId, userId: user?.id })
+
+    if (!user) {
+        console.error('[TopUpSubmission] Unauthorized access attempt')
+        return { error: 'Unauthorized' }
+    }
 
     // 1. Upload proof to Supabase Storage
     const fileName = `${topUpId}-${Date.now()}.jpg`
@@ -524,7 +529,7 @@ export async function submitTopUpPaymentProof(
     console.log('[TopUpSubmission] Proof uploaded successfully:', publicUrl)
 
     // 3. Update the wallet_top_ups record
-    const { error: updateError } = await supabase
+    const { data: updatedData, error: updateError, count } = await supabase
         .from('wallet_top_ups')
         .update({
             payment_proof_url: publicUrl,
@@ -532,15 +537,22 @@ export async function submitTopUpPaymentProof(
             updated_at: new Date().toISOString()
         })
         .eq('id', topUpId)
-        .eq('user_id', user.id) // Retain user_id check for security
+        .eq('user_id', user.id)
+        .select()
 
     if (updateError) {
         console.error('[TopUpSubmission] Database Update Error:', updateError)
         return { error: `Failed to save request: ${updateError.message}` }
     }
 
-    console.log('[TopUpSubmission] Record updated successfully for ID:', topUpId)
+    if (!updatedData || updatedData.length === 0) {
+        console.error('[TopUpSubmission] No record found to update:', { topUpId, userId: user.id })
+        return { error: 'Top-up record not found or you do not have permission to update it.' }
+    }
 
+    console.log('[TopUpSubmission] Record updated successfully:', updatedData[0].id)
+
+    revalidatePath('/admin')
     revalidatePath('/customer/wallet')
     return { success: true }
 }

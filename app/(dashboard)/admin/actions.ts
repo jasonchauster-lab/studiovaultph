@@ -1424,28 +1424,26 @@ export async function adjustUserBalance(userId: string, amount: number, reason: 
     const { data: adminProfile } = await supabase.from('profiles').select('role').eq('id', adminUser.id).single()
     if (adminProfile?.role !== 'admin') return { error: 'Unauthorized' }
 
-    // 2. Create Adjustment Record
-    const { error: recordError } = await supabase
-        .from('wallet_top_ups')
-        .insert({
-            user_id: userId,
-            amount: amount, // Signed amount (positive or negative)
-            type: 'admin_adjustment',
-            status: 'approved',
-            admin_notes: reason,
-            processed_at: new Date().toISOString(),
-            payment_proof_url: 'ADMIN_OVERRIDE'
-        })
+    // 2. Validation
+    if (!reason || reason.trim().length < 3) {
+        return { error: 'Reason must be at least 3 characters long.' }
+    }
 
-    if (recordError) return { error: 'Failed to record adjustment.' }
+    if (amount === 0) {
+        return { error: 'Adjustment amount cannot be zero.' }
+    }
 
-    // 3. Update Balance
-    const { error: balanceError } = await supabase.rpc('increment_available_balance', {
-        user_id: userId,
-        amount: amount
+    // 3. Execute Atomic Adjustment via RPC
+    const { data: success, error: rpcError } = await supabase.rpc('execute_admin_balance_adjustment', {
+        p_user_id: userId,
+        p_amount: amount,
+        p_reason: reason.trim()
     })
 
-    if (balanceError) return { error: 'Failed to update user balance.' }
+    if (rpcError) {
+        console.error('Adjustment RPC Error:', rpcError)
+        return { error: rpcError.message || 'Failed to execute adjustment.' }
+    }
 
     // 4. Send Notification Email
     const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', userId).single()
@@ -1465,6 +1463,8 @@ export async function adjustUserBalance(userId: string, amount: number, reason: 
 
     revalidatePath('/admin')
     revalidatePath('/customer/wallet')
+    revalidatePath('/instructor/earnings')
+    revalidatePath('/studio/earnings')
     return { success: true }
 }
 

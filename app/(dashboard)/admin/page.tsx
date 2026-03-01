@@ -272,12 +272,21 @@ export default async function AdminDashboard({
         .from('wallet_top_ups')
         .select(`
             *,
-            profiles:user_id(full_name, email, role)
+            profiles:profiles!user_id(full_name, email, role)
         `)
         .eq('status', 'pending')
         .eq('type', 'top_up')
         .not('payment_proof_url', 'is', null)
         .order('created_at', { ascending: false })
+
+    console.log('[AdminDashboard] Fetched pending top-ups:', pendingTopUps?.length || 0)
+    if (pendingTopUps && pendingTopUps.length > 0) {
+        console.log('[AdminDashboard] First top-up details:', {
+            id: pendingTopUps[0].id,
+            user: pendingTopUps[0].profiles?.full_name,
+            proof: !!pendingTopUps[0].payment_proof_url
+        })
+    }
 
     // 9. Fetch Suspended Studios
     const { data: suspendedStudiosData } = await supabase
