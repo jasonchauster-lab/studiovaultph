@@ -235,7 +235,7 @@ export default function InstructorBookingWizard({
 
                                 const hasSlots = availability.some(a => {
                                     const dateMatch = a.date ? a.date === d.date : a.day_of_week === d.dayIndex;
-                                    const locationMatch = filterLocation ? a.location_area?.trim() === filterLocation?.trim() : true;
+                                    const locationMatch = filterLocation ? a.location_area?.trim().toLowerCase() === filterLocation?.trim().toLowerCase() : true;
                                     const notExpired = isTodayPill ? a.end_time.slice(0, 5) > nowManilaPill : true;
                                     const notBooked = !bookedSlotsSet.has(`${d.date}-${a.start_time.slice(0, 5)}`);
                                     return dateMatch && locationMatch && notExpired && notBooked;
@@ -284,7 +284,7 @@ export default function InstructorBookingWizard({
 
                             const slots = availability.filter(a => {
                                 const dateMatch = a.date ? a.date === activeDate : a.day_of_week === d?.dayIndex;
-                                const locationMatch = filterLocation ? a.location_area?.trim() === filterLocation?.trim() : true;
+                                const locationMatch = filterLocation ? a.location_area?.trim().toLowerCase() === filterLocation?.trim().toLowerCase() : true;
                                 const notExpired = isToday ? a.end_time.slice(0, 5) > nowManilaTime : true;
                                 const notBooked = !bookedSlotsSet.has(`${activeDate}-${a.start_time.slice(0, 5)}`);
                                 return dateMatch && locationMatch && notExpired && notBooked;
@@ -392,15 +392,15 @@ export default function InstructorBookingWizard({
                                         const slotsAtTime = result.matchingSlots.filter((s: any) =>
                                             s.start_time === result.matchingSlots.find((ms: any) => ms.id === selectedStudioSlot)?.start_time
                                         );
-                                        const equipmentData = slotsAtTime[0]?.equipment || {}
-                                        // Always use Object.keys() for JSONB objects — array fallback for legacy data
-                                        const allEq: string[] = (typeof equipmentData === 'object' && !Array.isArray(equipmentData))
+                                        // Robust JSONB extraction: handle objects by keys[0], fallback to equipment_type
+                                        const equipmentData = slotsAtTime[0]?.equipment;
+                                        const allEq: string[] = (equipmentData && typeof equipmentData === 'object' && !Array.isArray(equipmentData))
                                             ? Object.keys(equipmentData)
-                                            : Array.from(new Set(slotsAtTime.flatMap((s: any) =>
-                                                typeof s.equipment === 'object' && !Array.isArray(s.equipment)
-                                                    ? Object.keys(s.equipment || {})
-                                                    : (s.equipment || [])
-                                            )));
+                                            : (Array.isArray(equipmentData) ? equipmentData : []);
+
+                                        if (allEq.length === 0 && (slotsAtTime[0] as any).equipment_type) {
+                                            allEq.push((slotsAtTime[0] as any).equipment_type);
+                                        }
 
                                         return (
                                             <div className="border-t border-cream-100 pt-4 space-y-5 animate-in fade-in slide-in-from-top-2">

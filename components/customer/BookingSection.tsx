@@ -51,7 +51,7 @@ export default function BookingSection({
     // Determine available instructors for the selected time
     const availableInstructors = instructors.filter(inst => {
         if (!selectedSlotTime || !selectedDate) return true;
-        const [startFullStr] = selectedSlotTime.split('-');
+        const [startFullStr] = selectedSlotTime.split('|');
         const start = new Date(startFullStr);
         const dayOfWeek = start.getDay();
         const dateStr = format(start, 'yyyy-MM-dd');
@@ -151,7 +151,7 @@ export default function BookingSection({
     const slotsForDate = selectedDate ? slotsByDate[selectedDate] : [];
 
     const groupedSlots = slotsForDate.reduce((acc, slot) => {
-        const key = `${slot.start_time}-${slot.end_time}`;
+        const key = `${slot.start_time}|${slot.end_time}`;
         if (!acc[key]) {
             acc[key] = [];
         }
@@ -172,8 +172,12 @@ export default function BookingSection({
     const equipmentCounts: Record<string, number> = {};
     if (slotsInGroup) {
         slotsInGroup.forEach(s => {
-            // Priority: equipment[0] or first key in pricing mapping
-            const eq = s.equipment?.[0] || (s as any).equipment_type || 'Unknown';
+            const equipmentData = (s as any).equipment;
+            const keys = (equipmentData && typeof equipmentData === 'object' && !Array.isArray(equipmentData))
+                ? Object.keys(equipmentData)
+                : (Array.isArray(equipmentData) ? equipmentData : []);
+
+            const eq = keys[0] || (s as any).equipment_type || 'Unknown';
             equipmentCounts[eq] = (equipmentCounts[eq] || 0) + 1;
         });
     }
@@ -181,7 +185,12 @@ export default function BookingSection({
 
     // Filter slots by selected equipment to get the right primary ID and count
     const slotsForSelectedEquipment = slotsInGroup?.filter(s => {
-        const eq = s.equipment?.[0] || (s as any).equipment_type || 'Unknown';
+        const equipmentData = (s as any).equipment;
+        const keys = (equipmentData && typeof equipmentData === 'object' && !Array.isArray(equipmentData))
+            ? Object.keys(equipmentData)
+            : (Array.isArray(equipmentData) ? equipmentData : []);
+
+        const eq = keys[0] || (s as any).equipment_type || 'Unknown';
         return eq === selectedEquipment;
     }) || [];
     const maxQuantity = slotsForSelectedEquipment.length;
@@ -315,7 +324,13 @@ export default function BookingSection({
                     const count = group.length;
 
                     // Get equipment overview for card
-                    const eqOverview = new Set(group.map(s => s.equipment?.[0] || 'Unknown'));
+                    const eqOverview = new Set(group.map(s => {
+                        const equipmentData = (s as any).equipment;
+                        if (equipmentData && typeof equipmentData === 'object' && !Array.isArray(equipmentData)) {
+                            return Object.keys(equipmentData)[0] || 'Unknown';
+                        }
+                        return Array.isArray(equipmentData) ? equipmentData[0] : ((s as any).equipment_type || 'Unknown');
+                    }));
 
                     return (
                         <button
