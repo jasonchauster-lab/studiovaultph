@@ -36,7 +36,7 @@ export interface Studio {
     hourly_rate: number;
     owner_id: string;
     verified: boolean;
-    equipment: string[];
+    equipment: string[]; // List of available types (e.g. ["Reformer", "Tower"])
     contact_number?: string;
     address?: string;
     pricing?: Record<string, number>;
@@ -44,6 +44,7 @@ export interface Studio {
     is_founding_partner?: boolean;
     custom_fee_percentage?: number;
     inventory?: Record<string, number>;
+    equipment_inventory?: Record<string, number>; // New JSONB sync
     space_photos_urls?: string[];
     google_maps_url?: string;
     amenities?: string[];

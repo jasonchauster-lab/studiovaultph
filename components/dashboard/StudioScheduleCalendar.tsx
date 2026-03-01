@@ -243,12 +243,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                                                         // Count active bookings for this specific equipment in this slot
                                                                         const bookedForThisEq = s.bookings?.filter(b =>
                                                                             ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '') &&
-                                                                            // Note: We need to know which equipment was booked. 
-                                                                            // This info is in b.price_breakdown which isn't in the Slot.bookings interface.
-                                                                            // I'll need to update the fetching logic or the interface.
-                                                                            // For now, if there's only one eq type, it's easy. 
-                                                                            // If multiple, we might need more data.
-                                                                            true // Placeholder for now
+                                                                            b.equipment === eq
                                                                         ).length || 0;
 
                                                                         equipmentCounts[eq].free += Math.max(0, count - bookedForThisEq);
@@ -456,7 +451,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                         </div>
 
                         {(() => {
-                            const activeBooking = editingSlot.bookings?.find(b => ['approved', 'confirmed', 'pending', 'paid', 'admin_approved'].includes(b.status?.toLowerCase() || ''));
+                            const activeBooking = editingSlot.bookings?.find(b => ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || ''));
                             if (!activeBooking) return null;
                             return (
                                 <div className="mb-6 p-4 bg-teal-50 border border-teal-200 rounded-xl space-y-3">
@@ -606,7 +601,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                                 </p>
                                             </div>
                                             {(() => {
-                                                const activeBooking = slot.bookings?.find(b => ['approved', 'confirmed', 'pending', 'paid', 'admin_approved'].includes(b.status?.toLowerCase() || ''));
+                                                const activeBooking = slot.bookings?.find(b => ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || ''));
                                                 if (!activeBooking) return null;
                                                 return (
                                                     <div className="flex items-center gap-2 pt-1 border-t border-cream-200/50">

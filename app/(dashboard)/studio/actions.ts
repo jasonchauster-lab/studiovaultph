@@ -82,7 +82,7 @@ export async function createSlot(formData: FormData) {
             start_time: current.toISOString(),
             end_time: nextHour.toISOString(),
             is_available: true,
-            equipment: Object.keys(equipment),
+            equipment: equipment,
             equipment_inventory: equipment
         })
 
@@ -417,7 +417,7 @@ export async function generateRecurringSlots(params: GenerateSlotsParams) {
                     start_time: slotStart.toISOString(),
                     end_time: nextHour.toISOString(),
                     is_available: true,
-                    equipment: params.equipment || [],
+                    equipment: inventory,
                     equipment_inventory: inventory
                 });
 

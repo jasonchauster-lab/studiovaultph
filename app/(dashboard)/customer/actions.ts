@@ -329,6 +329,7 @@ export async function requestBooking(
             instructor_id: instructorId,
             client_id: user.id,
             status: 'pending',
+            equipment: selectedEquipment,
             total_price: finalPrice,
             price_breakdown: breakdown,
             quantity: quantity,

@@ -36,7 +36,9 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
         : null;
 
     // Get unique equipment types across all slots for the summary
-    const allEquipment = Array.from(new Set(slots.flatMap(s => s.equipment || [])));
+    const allEquipment = Array.from(new Set(slots.flatMap(s =>
+        s.equipment ? Object.keys(s.equipment) : []
+    )));
 
     return (
         <div className="bg-white border border-cream-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">

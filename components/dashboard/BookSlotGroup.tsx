@@ -10,7 +10,12 @@ interface BookSlotGroupProps {
     endTime: string;   // Display string
     slots: {           // Raw slots in this group
         id: string;
-        equipment?: string[];
+        equipment?: Record<string, number>;
+        bookings?: Array<{
+            id: string;
+            status: string;
+            equipment?: string;
+        }>;
     }[];
     studioPricing?: Record<string, number>;
 }
@@ -26,17 +31,23 @@ export default function BookSlotGroup({ startTime, endTime, slots, studioPricing
 
     const router = useRouter()
 
-    // 1. Aggregate Equipment Counts
+    // 1. Aggregate Equipment Counts (Subtracting Active Bookings)
     const equipmentCounts: Record<string, number> = {};
     slots.forEach(slot => {
         if (slot.equipment) {
-            slot.equipment.forEach(eq => {
-                equipmentCounts[eq] = (equipmentCounts[eq] || 0) + 1;
+            Object.entries(slot.equipment).forEach(([eq, totalCap]) => {
+                const activeBookings = slot.bookings?.filter(b =>
+                    ['pending', 'approved', 'completed'].includes(b.status?.toLowerCase() || '') &&
+                    b.equipment === eq
+                ).length || 0;
+
+                const remaining = Math.max(0, totalCap - activeBookings);
+                equipmentCounts[eq] = (equipmentCounts[eq] || 0) + remaining;
             });
         }
     });
 
-    const equipmentTypes = Object.keys(equipmentCounts);
+    const equipmentTypes = Object.keys(equipmentCounts).filter(eq => equipmentCounts[eq] > 0);
 
     // Initial click handler
     const handleStart = () => {
@@ -55,8 +66,15 @@ export default function BookSlotGroup({ startTime, endTime, slots, studioPricing
 
         try {
             // Find a valid slot ID to start the chain
-            // Ideally we pick one that has the equipment
-            const validSlot = slots.find(s => s.equipment?.includes(selectedEquipment));
+            // Ideally we pick one that has the equipment remaining
+            const validSlot = slots.find(s => {
+                const totalCap = s.equipment?.[selectedEquipment] || 0;
+                const activeBookings = s.bookings?.filter(b =>
+                    ['pending', 'approved', 'completed'].includes(b.status?.toLowerCase() || '') &&
+                    b.equipment === selectedEquipment
+                ).length || 0;
+                return totalCap > activeBookings;
+            });
 
             if (!validSlot) {
                 setErrorMessage('No slot found for this equipment (unexpected).');
@@ -125,7 +143,7 @@ export default function BookSlotGroup({ startTime, endTime, slots, studioPricing
                         >
                             {equipmentTypes.map(eq => (
                                 <option key={eq} value={eq}>
-                                    {eq}: ₱{studioPricing?.[eq] || 0} ({equipmentCounts[eq]} avail)
+                                    {eq}: ₱{studioPricing?.[eq] || 0} ({equipmentCounts[eq]} remaining)
                                 </option>
                             ))}
                         </select>
@@ -201,13 +219,18 @@ export default function BookSlotGroup({ startTime, endTime, slots, studioPricing
             {/* Availability Badge */}
             <div className="flex flex-wrap gap-1 justify-center max-w-[180px]">
                 {equipmentTypes.slice(0, 2).map(eq => (
-                    <span key={eq} className="text-[10px] bg-cream-100 text-charcoal-600 px-1.5 py-0.5 rounded-full">
-                        {eq}: {equipmentCounts[eq]}
+                    <span key={eq} className="text-[10px] bg-teal-50 text-teal-700 border border-teal-100 px-1.5 py-0.5 rounded-full font-bold">
+                        {eq}: {equipmentCounts[eq]} remaining
                     </span>
                 ))}
                 {equipmentTypes.length > 2 && (
                     <span className="text-[10px] bg-cream-100 text-charcoal-600 px-1.5 py-0.5 rounded-full">
                         +{equipmentTypes.length - 2} more
+                    </span>
+                )}
+                {equipmentTypes.length === 0 && (
+                    <span className="text-[10px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded-full font-bold">
+                        Fully Booked
                     </span>
                 )}
             </div>

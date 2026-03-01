@@ -7,8 +7,6 @@ import clsx from 'clsx'
 
 const STATUS_STYLES: Record<string, string> = {
     approved: 'bg-green-100 text-green-700',
-    confirmed: 'bg-green-100 text-green-700',
-    admin_approved: 'bg-green-100 text-green-700',
     completed: 'bg-blue-100 text-blue-700',
     pending: 'bg-amber-100 text-amber-700',
     cancelled: 'bg-red-100 text-red-600',
