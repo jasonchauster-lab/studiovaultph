@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Loader2, Upload, CheckCircle2, QrCode, CreditCard } from 'lucide-react'
 import { topUpWallet, submitTopUpPaymentProof } from '@/app/(dashboard)/customer/actions'
 import { useRouter } from 'next/navigation'
@@ -22,6 +22,16 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
     const [topUpId, setTopUpId] = useState<string | null>(null)
     const [proofFile, setProofFile] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const [isSuccess, setIsSuccess] = useState(false)
+
+    useEffect(() => {
+        // Cleanup the object URL when the component unmounts or previewUrl changes
+        return () => {
+            if (previewUrl && previewUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(previewUrl)
+            }
+        }
+    }, [previewUrl])
 
     if (!isOpen) return null
 
@@ -53,6 +63,10 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
+            // Clean up old preview URL if it exists
+            if (previewUrl && previewUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(previewUrl)
+            }
             setProofFile(file)
             setPreviewUrl(URL.createObjectURL(file))
         }
@@ -90,6 +104,7 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
             if (result.error) {
                 setError(result.error)
             } else {
+                setIsSuccess(true)
                 setStep(4) // Success step
                 router.refresh()
             }
@@ -105,8 +120,12 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
         setAmount('')
         setTopUpId(null)
         setProofFile(null)
+        if (previewUrl && previewUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(previewUrl)
+        }
         setPreviewUrl(null)
         setError(null)
+        setIsSuccess(false)
         onClose()
     }
 
@@ -149,7 +168,7 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                                         value={amount}
                                         onChange={(e) => setAmount(e.target.value)}
                                         placeholder="0.00"
-                                        className="w-full pl-8 pr-4 py-3 bg-cream-50/50 border border-cream-200 rounded-xl focus:ring-2 focus:ring-rose-gold focus:border-rose-gold outline-none transition-all text-lg font-medium"
+                                        className="w-full pl-8 pr-4 py-3 bg-cream-50/50 border border-cream-200 rounded-xl focus:ring-2 focus:ring-rose-gold focus:border-rose-gold outline-none transition-all text-lg font-medium text-charcoal-900 placeholder:text-charcoal-400"
                                         required
                                     />
                                 </div>
@@ -265,7 +284,7 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                             </div>
                             <h4 className="text-2xl font-serif text-charcoal-900 mb-2">Request Submitted!</h4>
                             <p className="text-charcoal-600 mb-8 max-w-sm mx-auto">
-                                We've received your top-up request. Our team will verify the payment and update your balance shortly (usually within 12-24 hours).
+                                Your top-up is pending admin verification. Your balance will update once approved.
                             </p>
                             <button
                                 onClick={resetAndClose}

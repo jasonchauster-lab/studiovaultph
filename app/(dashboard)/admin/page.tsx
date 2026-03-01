@@ -267,7 +267,7 @@ export default async function AdminDashboard({
             .filter((p: any) => p.profile?.role === 'customer')
     }
 
-    // 8. Fetch Pending Wallet Top-Ups
+    // 8. Fetch Pending Wallet Top-Ups (Specifically top_up type)
     const { data: pendingTopUps } = await supabase
         .from('wallet_top_ups')
         .select(`
@@ -275,6 +275,7 @@ export default async function AdminDashboard({
             profiles:user_id(full_name, email, role)
         `)
         .eq('status', 'pending')
+        .eq('type', 'top_up')
         .not('payment_proof_url', 'is', null)
         .order('created_at', { ascending: false })
 

@@ -75,8 +75,10 @@ export default function VerifyButton({ id, action, label, className }: VerifyBut
 
             if (result?.error) {
                 alert(result.error)
+                setIsLoading(false)
             } else {
                 router.refresh()
+                // Keep loading true to prevent double clicks until the page reflects changes
             }
         } catch (error) {
             console.error(error)
