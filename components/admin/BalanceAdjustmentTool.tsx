@@ -11,6 +11,7 @@ interface UserSearchResult {
     email: string
     role: string
     wallet_balance: number
+    available_balance: number
 }
 
 export default function BalanceAdjustmentTool() {
@@ -34,7 +35,7 @@ export default function BalanceAdjustmentTool() {
 
         const { data, error } = await supabase
             .from('profiles')
-            .select('id, full_name, email, role, wallet_balance')
+            .select('id, full_name, email, role, wallet_balance, available_balance')
             .or(`full_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`)
             .limit(5)
 
@@ -79,7 +80,8 @@ export default function BalanceAdjustmentTool() {
             // Update local balance
             setSelectedUser({
                 ...selectedUser,
-                wallet_balance: (selectedUser.wallet_balance || 0) + finalAmount
+                wallet_balance: (selectedUser.wallet_balance || 0) + finalAmount,
+                available_balance: (selectedUser.available_balance || 0) + finalAmount
             })
             setAmount('')
             setReason('')
@@ -127,7 +129,8 @@ export default function BalanceAdjustmentTool() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-xs font-mono text-rose-gold">₱{(user.wallet_balance || 0).toLocaleString()}</p>
+                                        <p className="text-[10px] text-white/40 uppercase font-bold">Available</p>
+                                        <p className="text-xs font-mono text-rose-gold">₱{(user.available_balance || 0).toLocaleString()}</p>
                                     </div>
                                 </button>
                             ))}
@@ -144,7 +147,8 @@ export default function BalanceAdjustmentTool() {
                             </div>
                             <div>
                                 <p className="font-bold text-white">{selectedUser.full_name}</p>
-                                <p className="text-xs text-white/50">Current Balance: ₱{(selectedUser.wallet_balance || 0).toLocaleString()}</p>
+                                <p className="text-xs text-white/50">Current Available: ₱{(selectedUser.available_balance || 0).toLocaleString()}</p>
+                                <p className="text-[10px] text-white/30">Wallet (Legacy): ₱{(selectedUser.wallet_balance || 0).toLocaleString()}</p>
                             </div>
                         </div>
                         <button
