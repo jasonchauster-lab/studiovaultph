@@ -87,12 +87,20 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Certification Body</label>
-                            <input
+                            <select
                                 name="certificationBody"
                                 required
-                                placeholder="e.g. STOTT Pilates, BASI, Polestar"
+                                defaultValue=""
                                 className="w-full px-4 py-2 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm"
-                            />
+                            >
+                                <option value="" disabled>Select a certification body…</option>
+                                <option value="STOTT">STOTT Pilates</option>
+                                <option value="BASI">BASI</option>
+                                <option value="Balanced Body">Balanced Body</option>
+                                <option value="Polestar">Polestar</option>
+                                <option value="Classical">Classical</option>
+                                <option value="Other">Other</option>
+                            </select>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Proof of Certification (PDF/Image)</label>

@@ -122,23 +122,20 @@ export default function InstructorBookingWizard({
         const primarySlot = slotsAtTime[0]
         setSelectedStudioSlot(primarySlot.id)
 
-        // Aggregate unique equipment at this time (handle JSONB object keys)
-        const equipmentData = primarySlot.equipment || {}
-        const allEq = Array.isArray(equipmentData) ? equipmentData : Object.keys(equipmentData)
+        // Aggregate unique equipment at this time — always use Object.keys() for JSONB
+        const equipmentData = primarySlot.equipment
+        const allEq: string[] = equipmentData && typeof equipmentData === 'object' && !Array.isArray(equipmentData)
+            ? Object.keys(equipmentData).filter(k => (equipmentData[k] ?? 0) > 0)
+            : []
 
-        // Use a fallback prompt if no equipment is available or found
+        // Auto-select the first (or only) equipment type so label is never blank
         const firstEq = allEq[0] || ''
         setSelectedEquipment(firstEq)
 
-        // Max quantity for this specific equipment at this time
-        let count = 0
-        if (firstEq) {
-            if (Array.isArray(primarySlot.equipment)) {
-                count = primarySlot.equipment.filter((e: string) => e === firstEq).length
-            } else if (typeof primarySlot.equipment === 'object') {
-                count = primarySlot.equipment[firstEq] || 0
-            }
-        }
+        // Max quantity = JSONB value for that key
+        const count = firstEq && typeof equipmentData === 'object' && !Array.isArray(equipmentData)
+            ? (equipmentData[firstEq] ?? 0)
+            : 0
         setMaxQuantity(Math.max(1, count))
         setQuantity(1)
     }
@@ -151,28 +148,12 @@ export default function InstructorBookingWizard({
         if (!studio) return
 
         const primarySlot = studio.matchingSlots.find((s: any) => s.id === selectedStudioSlot)
-        const slotsAtTime = studio.matchingSlots.filter((s: any) => s.start_time === primarySlot?.start_time)
 
-        // Update selectedStudioSlot to one that actually has this equipment if possible
-        const bestSlot = slotsAtTime.find((s: any) => (s.equipment as string[] | undefined)?.includes(eq))
-        if (bestSlot) {
-            setSelectedStudioSlot(bestSlot.id)
-        }
-
-        const slotsWithEq = slotsAtTime.filter((s: any) => {
-            if (Array.isArray(s.equipment)) return s.equipment.includes(eq)
-            if (typeof s.equipment === 'object') return !!s.equipment[eq]
-            return false
-        })
-
-        // Use the actual count from the primary slot if it's JSONB, or the filtered array length
-        let count = 1
+        // For JSONB equipment, the count is stored directly in the primary slot
         const primaryEquipment = primarySlot?.equipment
-        if (Array.isArray(primaryEquipment)) {
-            count = slotsWithEq.length
-        } else if (typeof primaryEquipment === 'object') {
-            count = primaryEquipment[eq] || 0
-        }
+        const count = primaryEquipment && typeof primaryEquipment === 'object' && !Array.isArray(primaryEquipment)
+            ? (primaryEquipment[eq] ?? 0)
+            : 0
 
         setMaxQuantity(Math.max(1, count))
         setQuantity(1)
@@ -254,7 +235,7 @@ export default function InstructorBookingWizard({
 
                                 const hasSlots = availability.some(a => {
                                     const dateMatch = a.date ? a.date === d.date : a.day_of_week === d.dayIndex;
-                                    const locationMatch = filterLocation ? a.location_area === filterLocation : true;
+                                    const locationMatch = filterLocation ? a.location_area?.trim() === filterLocation?.trim() : true;
                                     const notExpired = isTodayPill ? a.end_time.slice(0, 5) > nowManilaPill : true;
                                     const notBooked = !bookedSlotsSet.has(`${d.date}-${a.start_time.slice(0, 5)}`);
                                     return dateMatch && locationMatch && notExpired && notBooked;
@@ -303,7 +284,7 @@ export default function InstructorBookingWizard({
 
                             const slots = availability.filter(a => {
                                 const dateMatch = a.date ? a.date === activeDate : a.day_of_week === d?.dayIndex;
-                                const locationMatch = filterLocation ? a.location_area === filterLocation : true;
+                                const locationMatch = filterLocation ? a.location_area?.trim() === filterLocation?.trim() : true;
                                 const notExpired = isToday ? a.end_time.slice(0, 5) > nowManilaTime : true;
                                 const notBooked = !bookedSlotsSet.has(`${activeDate}-${a.start_time.slice(0, 5)}`);
                                 return dateMatch && locationMatch && notExpired && notBooked;
@@ -412,9 +393,14 @@ export default function InstructorBookingWizard({
                                             s.start_time === result.matchingSlots.find((ms: any) => ms.id === selectedStudioSlot)?.start_time
                                         );
                                         const equipmentData = slotsAtTime[0]?.equipment || {}
-                                        const allEq = (Array.isArray(equipmentData)
-                                            ? Array.from(new Set(slotsAtTime.flatMap((s: any) => s.equipment || [])))
-                                            : Object.keys(equipmentData)) as string[];
+                                        // Always use Object.keys() for JSONB objects — array fallback for legacy data
+                                        const allEq: string[] = (typeof equipmentData === 'object' && !Array.isArray(equipmentData))
+                                            ? Object.keys(equipmentData)
+                                            : Array.from(new Set(slotsAtTime.flatMap((s: any) =>
+                                                typeof s.equipment === 'object' && !Array.isArray(s.equipment)
+                                                    ? Object.keys(s.equipment || {})
+                                                    : (s.equipment || [])
+                                            )));
 
                                         return (
                                             <div className="border-t border-cream-100 pt-4 space-y-5 animate-in fade-in slide-in-from-top-2">

@@ -115,8 +115,13 @@ export default async function StudioHistoryPage() {
                                             : `${durationMins}m`
 
                                         const studioFee = booking.price_breakdown?.studio_fee ?? 0
+                                        const instructorFee = (booking.price_breakdown as any)?.instructor_fee ?? 0
+                                        const serviceFee = (booking.price_breakdown as any)?.service_fee ?? 0
                                         const qty = booking.price_breakdown?.quantity ?? 1
-                                        const equipmentType = booking.price_breakdown?.equipment || (booking.slots?.equipment?.[0]) || '—'
+                                        // Full booking total: prefer explicit total, else sum breakdown parts
+                                        const fullTotal = booking.total_price
+                                            ?? ((studioFee + instructorFee + serviceFee) || 0)
+                                        const equipmentType = booking.price_breakdown?.equipment || booking.equipment || '—'
                                         const instructor = Array.isArray(booking.instructor) ? booking.instructor[0] : booking.instructor
                                         const statusStyle = STATUS_STYLES[booking.status] ?? 'bg-cream-100 text-charcoal-500'
 
@@ -171,9 +176,14 @@ export default async function StudioHistoryPage() {
 
                                                 {/* Earnings */}
                                                 <td className="px-6 py-4 text-right">
-                                                    <span className="font-semibold text-charcoal-900 font-serif">
-                                                        ₱{Number(studioFee).toLocaleString()}
+                                                    <span className="font-semibold text-charcoal-900 font-serif text-base">
+                                                        ₱{Number(fullTotal).toLocaleString()}
                                                     </span>
+                                                    {studioFee > 0 && studioFee !== fullTotal && (
+                                                        <div className="text-[11px] text-charcoal-400 mt-0.5">
+                                                            Studio: ₱{Number(studioFee).toLocaleString()}
+                                                        </div>
+                                                    )}
                                                 </td>
 
                                                 {/* Status */}

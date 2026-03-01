@@ -89,13 +89,15 @@ export async function requestBooking(
     const timeStr = slotStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00';
 
     // ✅ Run TWO separate queries instead of .or() to avoid PostgREST NULL ambiguity:
-    // Query A: date-specific availability (instructor set a specific date)
+    // Both studio.location and instructor location_area are trimmed to avoid whitespace mismatch.
     const trimmedLocation = studio.location?.trim()
+
+    // Query A: date-specific availability (instructor set a specific date)
     const { data: availByDate } = await supabase
         .from('instructor_availability')
-        .select('id, group_id')
+        .select('id, group_id, location_area')
         .eq('instructor_id', instructorId)
-        .eq('location_area', trimmedLocation)
+        .ilike('location_area', trimmedLocation ?? '')   // case+whitespace-safe match
         .eq('date', manilaDateStr)
         .lte('start_time', timeStr)
         .gt('end_time', timeStr)
@@ -105,9 +107,9 @@ export async function requestBooking(
     // Query B: weekly recurring availability (instructor set a day_of_week)
     const { data: availByDay } = await supabase
         .from('instructor_availability')
-        .select('id, group_id')
+        .select('id, group_id, location_area')
         .eq('instructor_id', instructorId)
-        .eq('location_area', trimmedLocation)
+        .ilike('location_area', trimmedLocation ?? '')   // case+whitespace-safe match
         .eq('day_of_week', manilaDayOfWeek)
         .is('date', null) // Only weekly-recurring entries (not date-specific)
         .lte('start_time', timeStr)
@@ -118,7 +120,7 @@ export async function requestBooking(
     const avail = availByDate || availByDay;
 
     if (!avail) {
-        return { error: `${instructor?.full_name || 'The instructor'} is not available at ${studio.location} during this time.` }
+        return { error: `${instructor?.full_name || 'The instructor'} is not available at ${trimmedLocation} during this time. (Checked location: "${trimmedLocation}")` }
     }
 
     // --- DOUBLE BOOKING VALIDATION START ---
@@ -136,12 +138,21 @@ export async function requestBooking(
     // --- AVAILABILITY VALIDATION END ---
 
     // --- PRICE CALCULATION START ---
-    // 1. Determine Equipment (Use passed argument or default to first in slot)
-    const equipmentObj = slot.equipment as Record<string, number> || {};
-    const selectedEquipment = equipment || Object.keys(equipmentObj)[0] || 'Reformer';
+    // 1. Determine Equipment — JSONB object: { "Reformer": 3, "Tower": 1 }
+    const equipmentObj = (slot.equipment && typeof slot.equipment === 'object' && !Array.isArray(slot.equipment))
+        ? slot.equipment as Record<string, number>
+        : {};
+
+    // Use the caller's selection; fall back to first available key in the JSONB object
+    const selectedEquipment = equipment?.trim() || Object.keys(equipmentObj)[0] || '';
+
+    if (!selectedEquipment) {
+        return { error: 'No equipment type could be determined for this slot. Please select an equipment type and try again.' }
+    }
 
     if (!equipmentObj[selectedEquipment] || equipmentObj[selectedEquipment] <= 0) {
-        return { error: `No ${selectedEquipment} available in this slot.` }
+        const available = Object.keys(equipmentObj).join(', ') || 'none';
+        return { error: `"${selectedEquipment}" is not available in this slot. Available equipment: ${available}.` }
     }
 
     // 2. Studio Price

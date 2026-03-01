@@ -27,8 +27,10 @@ export async function findMatchingStudios(
     const trimmedLocationArea = locationArea?.trim()
 
     // 2. Query Slots in Location
-    // We join studios to filter by location
-    const { data: slots, error } = await supabase
+    // Fetch without the exact .eq() location filter — PostgREST does exact-string match
+    // which fails if DB values have trailing/leading whitespace.
+    // We apply a JS-level trim filter below instead.
+    const { data: rawSlots, error } = await supabase
         .from('slots')
         .select(`
             *,
@@ -41,7 +43,6 @@ export async function findMatchingStudios(
             )
         `)
         .eq('is_available', true)
-        .eq('studios.location', trimmedLocationArea) // Trimmed match
         .gte('start_time', searchStart.toISOString())
         .lte('end_time', searchEnd.toISOString())
         .order('start_time', { ascending: true })
@@ -51,7 +52,14 @@ export async function findMatchingStudios(
         return { studios: [] }
     }
 
-    if (!slots || slots.length === 0) return { studios: [] }
+    if (!rawSlots || rawSlots.length === 0) return { studios: [] }
+
+    // JS-level trim comparison — handles DB values with stray whitespace
+    const slots = rawSlots.filter((s: any) =>
+        (s.studios?.location ?? '').trim() === trimmedLocationArea
+    )
+
+    if (slots.length === 0) return { studios: [] }
 
     // 3. Group by Studio
     const studioMap = new Map()

@@ -226,10 +226,13 @@ export default async function CustomerDashboard({
 
     // Filter Instructors
     const instructors = instructorsRaw?.filter(inst => {
-        // If filter applied, check certs
-        if (params.certification) {
+        // If filter applied, check certs with case-insensitive, trimmed startsWith
+        // This ensures "STOTT Pilates" (free-text entered) matches the filter token "STOTT"
+        if (params.certification && params.certification !== 'all') {
+            const filterToken = params.certification.trim().toLowerCase()
             return inst.certifications?.some((c: any) =>
-                c.certification_body === params.certification && c.verified
+                c.verified &&
+                c.certification_body?.trim().toLowerCase().startsWith(filterToken)
             )
         }
         return true

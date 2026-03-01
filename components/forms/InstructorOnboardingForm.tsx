@@ -150,9 +150,10 @@ export default function InstructorOnboardingForm() {
                         >
                             <option value="" disabled>Select your certification...</option>
                             <option value="STOTT">STOTT Pilates</option>
-                            <option value="BASI">BASI Pilates</option>
+                            <option value="BASI">BASI</option>
                             <option value="Balanced Body">Balanced Body</option>
-                            <option value="Polestar">Polestar Pilates</option>
+                            <option value="Polestar">Polestar</option>
+                            <option value="Classical">Classical</option>
                             <option value="Other">Other (Type below)</option>
                         </select>
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-charcoal-500">
