@@ -269,6 +269,7 @@ export default function PaymentForm({
     // Agreement checkboxes
     const [waiverAgreed, setWaiverAgreed] = useState(userRole === 'instructor')
     const [termsAgreed, setTermsAgreed] = useState(false)
+    const [lateBookingAgreed, setLateBookingAgreed] = useState(false)
     const [showWaiver, setShowWaiver] = useState(false)
     const [showTerms, setShowTerms] = useState(false)
 
@@ -322,7 +323,11 @@ export default function PaymentForm({
     const hasRiskFlags = userRole === 'instructor' ? false : Object.values(parqAnswers).some(v => v === true)
     // Agreements unlock only when PAR-Q is done AND (no risk OR risk acknowledged)
     const agreementsUnlocked = parqComplete && (!hasRiskFlags || medicalAcknowledged)
-    const canSubmit = file && waiverAgreed && termsAgreed && agreementsUnlocked && !isUploading && !isExpired
+
+    const startTime = booking?.slots?.start_time ? new Date(booking.slots.start_time) : null
+    const isLateBooking = startTime ? (startTime.getTime() - Date.now()) < 24 * 60 * 60 * 1000 : false
+
+    const canSubmit = file && waiverAgreed && termsAgreed && agreementsUnlocked && (!isLateBooking || lateBookingAgreed) && !isUploading && !isExpired
 
     const handleParqChange = (key: ParqKey, value: boolean) => {
         const updated = { ...parqAnswers, [key]: value }
@@ -758,15 +763,42 @@ export default function PaymentForm({
                     </label>
                 </div>
 
+                {/* ── Late-Booking Warning ── */}
+                {isLateBooking && (
+                    <div className="bg-amber-50 border-2 border-charcoal-900/10 rounded-xl p-5 space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                        <div className="flex gap-3">
+                            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                            <div className="space-y-1">
+                                <p className="text-sm font-bold text-charcoal-900">Last-Minute Booking Warning</p>
+                                <p className="text-sm text-charcoal-700 leading-relaxed">
+                                    ⚠️ Last-Minute Booking: This session starts in less than 24 hours. If you proceed, our Late Cancellation Policy applies immediately. This booking cannot be cancelled without incurring a penalty.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 pt-2 border-t border-amber-200/50">
+                            <input
+                                id="lateAgreement"
+                                type="checkbox"
+                                checked={lateBookingAgreed}
+                                onChange={(e) => setLateBookingAgreed(e.target.checked)}
+                                className="w-4 h-4 rounded border-amber-300 accent-charcoal-900 cursor-pointer"
+                            />
+                            <label htmlFor="lateAgreement" className="text-sm font-medium text-charcoal-900 cursor-pointer">
+                                I understand and agree.
+                            </label>
+                        </div>
+                    </div>
+                )}
+
                 <button
                     type="submit"
                     disabled={!canSubmit}
-                    className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${file
+                    className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${file && canSubmit
                         ? 'bg-rose-gold text-white hover:bg-rose-gold/90 shadow-md'
                         : 'bg-charcoal-900 text-cream-50 hover:bg-charcoal-800 disabled:opacity-40 disabled:cursor-not-allowed'
                         }`}
                 >
-                    {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Payment'}
+                    {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm Booking'}
                 </button>
                 {!canSubmit && !isUploading && (
                     <p className="text-xs text-center text-charcoal-400">
@@ -776,9 +808,11 @@ export default function PaymentForm({
                                 ? 'Please acknowledge the medical clearance notice.'
                                 : !waiverAgreed || !termsAgreed
                                     ? 'Please agree to the required documents above to continue.'
-                                    : !file
-                                        ? 'Please upload your payment screenshot.'
-                                        : ''}
+                                    : isLateBooking && !lateBookingAgreed
+                                        ? 'Please agree to the late-booking policy above.'
+                                        : !file
+                                            ? 'Please upload your payment screenshot.'
+                                            : ''}
                     </p>
                 )}
             </form>

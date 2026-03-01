@@ -2,6 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { sendEmail } from '@/lib/email'
+import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
+import { formatManilaDate, formatManilaTime } from '@/lib/timezone'
 
 export async function createSlot(formData: FormData) {
     const supabase = await createClient()
@@ -509,6 +512,125 @@ export async function updateStudio(formData: FormData) {
     if (error) {
         console.error('Error updating studio:', error)
         return { error: 'Failed to update studio' }
+    }
+
+    revalidatePath('/studio')
+    return { success: true }
+}
+
+export async function cancelBookingByStudio(bookingId: string, reason: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    if (!reason?.trim()) return { error: 'Cancellation reason is required.' }
+
+    // 1. Fetch booking and verify studio ownership
+    const { data: booking, error: fetchError } = await supabase
+        .from('bookings')
+        .select(`
+            *,
+            client:profiles!client_id(full_name, email),
+            instructor:profiles!instructor_id(full_name, email),
+            slots!inner(
+                start_time,
+                end_time,
+                studios!inner(id, name, owner_id, address)
+            )
+        `)
+        .eq('id', bookingId)
+        .single()
+
+    if (fetchError || !booking) {
+        console.error('Error fetching booking for cancellation:', fetchError)
+        return { error: 'Booking not found.' }
+    }
+
+    const studio = (booking.slots as any)?.studios
+    if (studio?.owner_id !== user.id) {
+        return { error: 'Unauthorized to cancel this booking.' }
+    }
+
+    if (['cancelled_refunded', 'cancelled_charged', 'rejected'].includes(booking.status)) {
+        return { error: 'Booking is already cancelled or rejected.' }
+    }
+
+    // 2. Process 100% Refund to Client
+    const breakdown = booking.price_breakdown as any;
+    const walletDeduction = Number(breakdown?.wallet_deduction || 0);
+    const totalPrice = Number(booking.total_price || 0);
+    const refundAmount = totalPrice + walletDeduction;
+
+    if (refundAmount > 0) {
+        const { error: refundError } = await supabase.rpc('increment_available_balance', {
+            user_id: booking.client_id,
+            amount: refundAmount
+        })
+        if (refundError) {
+            console.error('Studio cancel refund error:', refundError)
+            return { error: 'Failed to process refund to client.' }
+        }
+    }
+
+    // 3. Update status and release slots
+    const { error: updateError } = await supabase.from('bookings').update({
+        status: 'cancelled_refunded',
+        cancel_reason: reason,
+        cancelled_by: user.id,
+        price_breakdown: {
+            ...breakdown,
+            refunded_amount: refundAmount,
+            refund_initiator: 'studio'
+        }
+    }).eq('id', bookingId)
+
+    if (updateError) {
+        console.error('Studio cancel update error:', updateError)
+        return { error: 'Failed to update booking status.' }
+    }
+
+    const allSlotIds = [booking.slot_id, ...(booking.booked_slot_ids || [])].filter(Boolean)
+    if (allSlotIds.length > 0) {
+        await supabase.from('slots').update({ is_available: true }).in('id', allSlotIds)
+    }
+
+    // 4. Send Emails
+    const client = booking.client
+    const instructor = booking.instructor
+    const startTime = (booking.slots as any)?.start_time
+    const date = formatManilaDate(startTime)
+    const time = formatManilaTime(startTime)
+
+    // Notify Client
+    if (client?.email) {
+        await sendEmail({
+            to: client.email,
+            subject: `Session Cancelled by Studio: ${studio.name}`,
+            react: BookingNotificationEmail({
+                recipientName: client.full_name || 'Client',
+                bookingType: 'Booking Cancelled',
+                studioName: studio.name,
+                date,
+                time,
+                cancellationReason: reason
+            })
+        })
+    }
+
+    // Notify Instructor
+    if (instructor?.email && booking.instructor_id !== user.id) {
+        await sendEmail({
+            to: instructor.email,
+            subject: `Studio Cancelled Session: ${studio.name}`,
+            react: BookingNotificationEmail({
+                recipientName: instructor.full_name || 'Instructor',
+                bookingType: 'Booking Cancelled',
+                studioName: studio.name,
+                date,
+                time,
+                cancellationReason: reason
+            })
+        })
     }
 
     revalidatePath('/studio')

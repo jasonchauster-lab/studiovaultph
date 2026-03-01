@@ -5,161 +5,181 @@ import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
 import { revalidatePath } from 'next/cache'
 
 export async function getEarningsData(studioId: string, startDate?: string, endDate?: string) {
+    console.log(`[getEarningsData] Fetching for studio: ${studioId}, range: ${startDate} - ${endDate}`)
     const supabase = await createClient()
 
-    // Run financial jobs lazily when data is requested
-    await Promise.allSettled([
-        autoCompleteBookings(),
-        unlockMaturedFunds()
-    ])
+    try {
+        // Run financial jobs lazily
+        console.log('[getEarningsData] Running wallet jobs...')
+        await Promise.allSettled([
+            autoCompleteBookings(),
+            unlockMaturedFunds()
+        ]).catch(e => console.error('[getEarningsData] Wallet jobs error:', e))
 
-    // 1. Get all approved bookings for total earnings
-    // We only count 'approved' (paid) bookings
-    const { data: studio } = await supabase.from('studios').select('owner_id, payout_approval_status').eq('id', studioId).single()
-    const ownerId = studio?.owner_id
+        // 1. Get Studio & Owner details
+        console.log('[getEarningsData] Fetching studio info...')
+        const { data: studio, error: studioErr } = await supabase
+            .from('studios')
+            .select('owner_id, payout_approval_status')
+            .eq('id', studioId)
+            .maybeSingle()
 
-    const { data: profile } = ownerId
-        ? await supabase.from('profiles').select('available_balance, pending_balance').eq('id', ownerId).single()
-        : { data: null }
+        if (studioErr) {
+            console.error('[getEarningsData] Studio fetch error:', studioErr)
+            return { error: `Studio access error: ${studioErr.message}` }
+        }
 
-    // 1. First, fetch slot IDs for this studio (same approach as admin's getPartnerBookings)
-    const { data: studioSlots, error: slotsError } = await supabase
-        .from('slots')
-        .select('id')
-        .eq('studio_id', studioId)
+        const ownerId = studio?.owner_id
+        console.log(`[getEarningsData] Owner ID: ${ownerId}`)
 
-    if (slotsError) {
-        console.error('Error fetching slots:', slotsError)
-        return { error: `Failed to fetch slot data: ${slotsError.message}` }
-    }
+        const { data: profile, error: profileErr } = ownerId
+            ? await supabase.from('profiles').select('available_balance, pending_balance').eq('id', ownerId).maybeSingle()
+            : { data: null, error: null }
 
-    const slotIds = studioSlots?.map((s: any) => s.id) ?? []
-    if (slotIds.length === 0) {
-        // No slots means no bookings — return empty data
+        if (profileErr) {
+            console.error('[getEarningsData] Profile fetch error:', profileErr)
+        }
+
+        // 2. Fetch slot IDs
+        console.log('[getEarningsData] Fetching slots...')
+        const { data: studioSlots, error: slotsError } = await supabase
+            .from('slots')
+            .select('id')
+            .eq('studio_id', studioId)
+
+        if (slotsError) {
+            console.error('[getEarningsData] Slots fetch error:', slotsError)
+            return { error: `Failed to fetch slot data: ${slotsError.message}` }
+        }
+
+        const slotIds = studioSlots?.map((s: any) => s.id) ?? []
+        if (slotIds.length === 0) {
+            console.log('[getEarningsData] No slots found for studio.')
+            return {
+                bookings: [],
+                payouts: [],
+                transactions: [],
+                summary: {
+                    totalEarnings: 0,
+                    totalPaidOut: 0,
+                    pendingPayouts: 0,
+                    availableBalance: profile?.available_balance || 0,
+                    pendingBalance: profile?.pending_balance || 0,
+                    payoutApprovalStatus: studio?.payout_approval_status || 'none'
+                }
+            }
+        }
+
+        // 3. Get all active bookings
+        console.log(`[getEarningsData] Fetching bookings for ${slotIds.length} slots...`)
+        let bookingsQuery = supabase
+            .from('bookings')
+            .select(`
+                *,
+                client:profiles!client_id(full_name),
+                instructor:profiles!instructor_id(full_name),
+                slots!inner(start_time, end_time, studios(name))
+            `)
+            .in('slot_id', slotIds)
+            .in('status', ['approved', 'completed', 'cancelled_charged'])
+            .order('created_at', { ascending: false })
+
+        if (startDate) bookingsQuery = bookingsQuery.gte('slots.start_time', startDate)
+        if (endDate) bookingsQuery = bookingsQuery.lte('slots.start_time', endDate)
+
+        const { data: bookings, error: bookingsError } = await bookingsQuery
+
+        if (bookingsError) {
+            console.error('[getEarningsData] Bookings fetch error:', bookingsError)
+            return { error: `Failed to fetch earnings data: ${bookingsError.message}` }
+        }
+
+        // 4. Get all payout requests
+        console.log('[getEarningsData] Fetching payouts...')
+        let payoutsQuery = supabase
+            .from('payout_requests')
+            .select('*')
+            .eq('studio_id', studioId)
+            .order('created_at', { ascending: false })
+
+        if (startDate) payoutsQuery = payoutsQuery.gte('created_at', startDate)
+        if (endDate) payoutsQuery = payoutsQuery.lte('created_at', endDate)
+
+        const { data: payouts, error: payoutsError } = await payoutsQuery
+
+        if (payoutsError) {
+            console.error('[getEarningsData] Payouts fetch error:', payoutsError)
+            return { error: `Failed to fetch payout history: ${payoutsError.message}` }
+        }
+
+        // 5. Calculate Totals
+        const totalEarnings = bookings?.reduce((sum, b) => {
+            const studioFee = b.price_breakdown?.studio_fee || (b.total_price ? Math.max(0, b.total_price - 100) : 0);
+            return sum + studioFee;
+        }, 0) || 0
+
+        const totalPaidOut = payouts
+            ?.filter(p => p.status === 'paid')
+            .reduce((sum, p) => sum + Number(p.amount), 0) || 0
+
+        const totalPending = payouts
+            ?.filter(p => p.status === 'pending' || p.status === 'approved')
+            .reduce((sum, p) => sum + Number(p.amount), 0) || 0
+
+        // Available = Total Earnings - (Paid + Pending)
+        const availableBalance = totalEarnings - (totalPaidOut + totalPending)
+
+        // 6. Unified Transactions for CSV
+        const transactions: any[] = []
+        const wrap = (val: any) => Array.isArray(val) ? val[0] : val
+
+        bookings?.forEach(b => {
+            const studioFee = b.price_breakdown?.studio_fee || (b.total_price ? Math.max(0, b.total_price - 100) : 0);
+            const slot = wrap(b.slots)
+            const studioName = slot?.studios?.name
+            const clientName = wrap(b.client)?.full_name
+            const instructorName = wrap(b.instructor)?.full_name
+
+            transactions.push({
+                date: slot?.start_time || b.created_at,
+                type: 'Booking',
+                client: clientName,
+                instructor: instructorName,
+                studio: studioName,
+                total_amount: studioFee,
+                details: `${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}`
+            })
+        })
+
+        payouts?.forEach(p => {
+            transactions.push({
+                date: p.created_at,
+                type: 'Payout',
+                status: p.status,
+                total_amount: -Number(p.amount),
+                details: `Withdrawal via ${p.payment_method}`
+            })
+        })
+
+        transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+        console.log('[getEarningsData] Success.')
         return {
-            bookings: [],
-            payouts: [],
-            transactions: [],
+            bookings,
+            payouts,
+            transactions,
             summary: {
-                totalEarnings: 0,
-                totalPaidOut: 0,
-                pendingPayouts: 0,
+                totalEarnings,
+                totalPaidOut,
+                pendingPayouts: totalPending,
                 availableBalance: profile?.available_balance || 0,
                 pendingBalance: profile?.pending_balance || 0,
                 payoutApprovalStatus: studio?.payout_approval_status || 'none'
             }
         }
-    }
-
-    // 2. Get all active bookings for these slots
-    let bookingsQuery = supabase
-        .from('bookings')
-        .select(`
-            *,
-            client:profiles!client_id(full_name),
-            instructor:profiles!instructor_id(full_name),
-            slots(start_time, end_time, studios(name))
-        `)
-        .in('slot_id', slotIds)
-        .in('status', ['approved', 'confirmed', 'admin_approved', 'paid'])
-        .order('created_at', { ascending: false })
-
-    if (startDate) bookingsQuery = bookingsQuery.gte('created_at', startDate)
-    if (endDate) bookingsQuery = bookingsQuery.lte('created_at', endDate)
-
-    const { data: bookings, error: bookingsError } = await bookingsQuery
-
-    if (bookingsError) {
-        console.error('Error fetching bookings:', bookingsError)
-        return { error: `Failed to fetch earnings data: ${bookingsError.message} (Code: ${bookingsError.code})` }
-    }
-
-    // ... (query payouts) ...
-
-    const first = (val: any) => Array.isArray(val) ? val[0] : val
-
-    // 2. Get all payout requests
-    let payoutsQuery = supabase
-        .from('payout_requests')
-        .select('*')
-        .eq('studio_id', studioId)
-        .order('created_at', { ascending: false })
-
-    if (startDate) payoutsQuery = payoutsQuery.gte('created_at', startDate)
-    if (endDate) payoutsQuery = payoutsQuery.lte('created_at', endDate)
-
-    const { data: payouts, error: payoutsError } = await payoutsQuery
-
-    if (payoutsError) {
-        console.error('Error fetching payouts:', payoutsError)
-        return { error: `Failed to fetch payout history: ${payoutsError.message}` }
-    }
-
-    // 3. Calculate Totals
-    const totalEarnings = bookings?.reduce((sum, b) => {
-        // Studio only earns the studio_fee part (total_price - 100 service fee)
-        const studioFee = b.price_breakdown?.studio_fee || (b.total_price ? Math.max(0, b.total_price - 100) : 0);
-        return sum + studioFee;
-    }, 0) || 0
-
-    // Sum of paid and pending payouts
-    const totalPaidOut = payouts
-        ?.filter(p => p.status === 'paid')
-        .reduce((sum, p) => sum + Number(p.amount), 0) || 0
-
-    const totalPending = payouts
-        ?.filter(p => p.status === 'pending' || p.status === 'approved')
-        .reduce((sum, p) => sum + Number(p.amount), 0) || 0
-
-    // Available = Total Earnings - (Paid + Pending)
-    // We treat pending as "reserved" so they can't double-request it.
-    const availableBalance = totalEarnings - (totalPaidOut + totalPending)
-
-    // 4. Unified Transactions for CSV
-    const transactions: any[] = []
-
-    bookings?.forEach(b => {
-        const studioFee = b.price_breakdown?.studio_fee || (b.total_price ? Math.max(0, b.total_price - 100) : 0);
-
-        const studioName = first(b.slots)?.studios?.name
-        const instructorName = (b.instructor as any)?.full_name
-
-        transactions.push({
-            date: b.created_at,
-            type: 'Booking',
-            client: b.client?.full_name,
-            instructor: instructorName,
-            studio: studioName,
-            total_amount: studioFee,
-            details: `${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}`
-        })
-    })
-
-    payouts?.forEach(p => {
-        transactions.push({
-            date: p.created_at,
-            type: 'Payout',
-            status: p.status,
-            total_amount: -Number(p.amount),
-            details: `Withdrawal via ${p.payment_method}`
-        })
-    })
-
-    // Sort by date desc
-    transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-
-    return {
-        bookings,
-        payouts,
-        transactions,
-        summary: {
-            totalEarnings,
-            totalPaidOut,
-            pendingPayouts: totalPending,
-            availableBalance: profile?.available_balance || 0,
-            pendingBalance: profile?.pending_balance || 0,
-            payoutApprovalStatus: studio?.payout_approval_status || 'none'
-        }
+    } catch (err: any) {
+        console.error('[getEarningsData] Global Crash:', err)
+        return { error: `Critical system error: ${err.message || 'Unknown error'}` }
     }
 }
 

@@ -1,6 +1,7 @@
 import { getEarningsData } from './actions'
 import ExportCsvButton from '@/components/dashboard/ExportCsvButton'
 import DateRangeFilters from '@/components/dashboard/DateRangeFilters'
+import Link from 'next/link'
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -23,10 +24,22 @@ export default async function EarningsPage({
         .from('studios')
         .select('id, name')
         .eq('owner_id', user.id)
-        .single()
+        .maybeSingle()
 
     if (!studio) {
-        return <div className="p-8">Studio not found. Please create a studio first.</div>
+        return (
+            <div className="min-h-screen bg-cream-50 p-8 flex items-center justify-center">
+                <div className="bg-white p-8 rounded-xl border border-cream-200 shadow-sm text-center max-w-md">
+                    <h2 className="text-2xl font-serif text-charcoal-900 mb-4">Studio Not Found</h2>
+                    <p className="text-charcoal-600 mb-6">
+                        We couldn't find a studio associated with your account. Please make sure you have created a studio first.
+                    </p>
+                    <Link href="/studio" className="inline-block px-6 py-2 bg-charcoal-900 text-white rounded-lg hover:bg-charcoal-800 transition-colors">
+                        Go to Dashboard
+                    </Link>
+                </div>
+            </div>
+        )
     }
 
     // specific server action logic is abstracted into getEarningsData 

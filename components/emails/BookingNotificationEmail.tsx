@@ -14,14 +14,15 @@ import {
 
 interface BookingNotificationEmailProps {
     recipientName: string;
-    bookingType: 'New Booking' | 'Booking Confirmed' | 'Booking Rejected';
+    bookingType: 'New Booking' | 'Booking Confirmed' | 'Booking Rejected' | 'Booking Cancelled';
     studioName?: string;
     instructorName?: string;
     clientName?: string;
     date: string;
     time: string;
     address?: string;
-    rejectionReason?: string; // Added reason
+    rejectionReason?: string;
+    cancellationReason?: string;
 }
 
 export default function BookingNotificationEmail({
@@ -34,6 +35,7 @@ export default function BookingNotificationEmail({
     time,
     address,
     rejectionReason,
+    cancellationReason,
 }: BookingNotificationEmailProps) {
     return (
         <Html>
@@ -52,13 +54,15 @@ export default function BookingNotificationEmail({
                             ? `You have a new booking request.`
                             : bookingType === 'Booking Rejected'
                                 ? `Unfortunately, your booking request has been rejected.`
-                                : `Your booking has been successfully confirmed.`}
+                                : bookingType === 'Booking Cancelled'
+                                    ? `This session has been cancelled.`
+                                    : `Your booking has been successfully confirmed.`}
                     </Text>
 
-                    {bookingType === 'Booking Rejected' && rejectionReason && (
+                    {(bookingType === 'Booking Rejected' || bookingType === 'Booking Cancelled') && (rejectionReason || cancellationReason) && (
                         <Section style={rejectionBox}>
                             <Text style={paragraph}>
-                                <strong>Reason:</strong> {rejectionReason}
+                                <strong>Reason for {bookingType === 'Booking Rejected' ? 'Rejection' : 'Cancellation'}:</strong> {rejectionReason || cancellationReason}
                             </Text>
                         </Section>
                     )}

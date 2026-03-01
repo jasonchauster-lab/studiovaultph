@@ -10,8 +10,9 @@ import clsx from 'clsx';
 import ChatWindow from '@/components/dashboard/ChatWindow';
 import MessageCountBadge from '@/components/dashboard/MessageCountBadge';
 import LocationFilterDropdown, { FILTER_CITIES, LOCATION_GROUPS, shortLabel, activeCityPrefix } from '@/components/shared/LocationFilterDropdown';
-
 import { useSearchParams } from 'next/navigation';
+import CancelBookingModal from './CancelBookingModal';
+import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions';
 
 export default function InstructorDashboardClient() {
     const searchParams = useSearchParams();
@@ -26,6 +27,7 @@ export default function InstructorDashboardClient() {
     const locSearchRef = useRef<HTMLDivElement>(null);
     const [activeTab, setActiveTab] = useState<'browse' | 'bookings'>(initialTab);
     const [activeChat, setActiveChat] = useState<{ id: string, recipientId: string, name: string, isExpired: boolean } | null>(null);
+    const [cancellingBooking, setCancellingBooking] = useState<any>(null);
     const supabase = createClient();
     const [userId, setUserId] = useState<string>('');
 
@@ -150,6 +152,15 @@ export default function InstructorDashboardClient() {
         const endTime = new Date(booking.slots.end_time)
         const expirationTime = new Date(endTime.getTime() + 12 * 60 * 60 * 1000)
         return new Date() > expirationTime
+    }
+
+    const handleCancelConfirm = async (reason: string) => {
+        if (!cancellingBooking) return { error: 'No booking selected' }
+        const result = await cancelBookingByInstructor(cancellingBooking.id, reason)
+        if (result.success) {
+            setBookings(prev => prev.filter(b => b.id !== cancellingBooking.id))
+        }
+        return result
     }
 
     // Reuse ChatWindow import dynamically or just import it at top?
@@ -443,6 +454,13 @@ export default function InstructorDashboardClient() {
                                                         {booking.client_id === booking.instructor_id ? 'Chat with Studio' : 'Chat with Client'}
                                                         <MessageCountBadge bookingId={booking.id} currentUserId={userId} isOpen={activeChat?.id === booking.id} />
                                                     </button>
+                                                    <button
+                                                        onClick={() => setCancellingBooking(booking)}
+                                                        className="px-4 py-2 bg-white text-red-600 border border-red-100 rounded-lg hover:bg-red-50 transition-all text-sm font-bold flex items-center gap-2 shadow-sm"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                        Cancel Session
+                                                    </button>
                                                 </div>
                                             </div>
                                         ))}
@@ -462,7 +480,7 @@ export default function InstructorDashboardClient() {
                             ) : (
                                 <div className="space-y-3">
                                     {bookings
-                                        .filter(b => b.status === 'approved' && new Date(b.slots.start_time) < new Date())
+                                        .filter(b => ['approved', 'completed', 'cancelled_charged'].includes(b.status) && new Date(b.slots.start_time) < new Date())
                                         .map(booking => (
                                             <div key={booking.id} className="bg-white/60 p-4 rounded-lg border border-cream-200 flex flex-col sm:flex-row justify-between items-center gap-3">
                                                 <div>
@@ -473,7 +491,9 @@ export default function InstructorDashboardClient() {
                                                             booking.status === 'approved' ? "bg-gray-100 text-gray-600" :
                                                                 booking.status === 'rejected' ? "bg-red-50 text-red-600" : "bg-yellow-50 text-yellow-600"
                                                         )}>
-                                                            {new Date(booking.slots.start_time) < new Date() && booking.status === 'approved' ? 'Completed' : booking.status}
+                                                            {booking.status === 'completed' || (new Date(booking.slots.start_time) < new Date() && booking.status === 'approved') ? 'Completed' :
+                                                                booking.status === 'cancelled_charged' ? 'Cancelled (Charged)' :
+                                                                    booking.status}
                                                         </span>
                                                     </div>
                                                     <p className="text-xs text-charcoal-500 mt-0.5">
@@ -521,6 +541,34 @@ export default function InstructorDashboardClient() {
                     isExpired={activeChat.isExpired}
                 />
             )}
+
+            <CancelBookingModal
+                isOpen={!!cancellingBooking}
+                onClose={() => setCancellingBooking(null)}
+                onConfirm={handleCancelConfirm}
+                title="Cancel Session"
+                description={
+                    cancellingBooking?.client_id === cancellingBooking?.instructor_id
+                        ? "Are you sure you want to cancel your studio rental? The studio owner will be notified."
+                        : "Are you sure you want to cancel this session? 100% of the payment will be refunded to the client. The client and studio owner will be notified."
+                }
+                penaltyNotice={
+                    (() => {
+                        if (!cancellingBooking) return null
+                        const isRental = cancellingBooking.client_id === cancellingBooking.instructor_id
+                        const startTime = new Date(cancellingBooking.slots.start_time)
+                        const now = new Date()
+                        const diffInHours = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60)
+                        const isLate = diffInHours < 24
+
+                        if (isRental && isLate) {
+                            const studioFee = cancellingBooking.price_breakdown?.studio_fee || 0
+                            return `Late Cancellation Penalty: ₱${studioFee.toLocaleString()} (Studio Rental fee) will be deducted from your wallet to compensate the studio.`
+                        }
+                        return null
+                    })() || undefined
+                }
+            />
         </div>
     );
 }

@@ -27,13 +27,13 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
             status, 
             created_at,
             client:profiles!client_id(full_name),
-            slots(studios(name))
+            slots!inner(start_time, studios(name))
         `)
         .eq('instructor_id', user.id)
-        .in('status', ['approved', 'completed'])
+        .in('status', ['approved', 'completed', 'cancelled_charged'])
 
-    if (startDate) bookingsQuery = bookingsQuery.gte('created_at', startDate)
-    if (endDate) bookingsQuery = bookingsQuery.lte('created_at', endDate)
+    if (startDate) bookingsQuery = bookingsQuery.gte('slots.start_time', startDate)
+    if (endDate) bookingsQuery = bookingsQuery.lte('slots.start_time', endDate)
 
     const { data: bookings, error: bookingError } = await bookingsQuery
 
@@ -51,15 +51,15 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
         const breakdown = booking.price_breakdown as any;
         const instructorFee = breakdown?.instructor_fee || 0;
 
-        // Count both approved and completed bookings towards actual earnings
-        if (booking.status === 'approved' || booking.status === 'completed') {
+        // Count approved, completed, and cancelled_charged towards actual earnings
+        if (['approved', 'completed', 'cancelled_charged'].includes(booking.status)) {
             totalEarned += instructorFee;
         }
 
         const studioName = first(booking.slots)?.studios?.name
 
         recentTransactions.push({
-            date: booking.created_at,
+            date: first(booking.slots)?.start_time || booking.created_at,
             type: 'Booking',
             status: booking.status,
             client: (booking.client as any)?.full_name,
@@ -484,4 +484,151 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
     revalidatePath('/instructor')
     revalidatePath('/instructor/schedule')
     return { success: true, bookingId: booking.id }
+}
+
+export async function cancelBookingByInstructor(bookingId: string, reason: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    if (!reason?.trim()) return { error: 'Cancellation reason is required.' }
+
+    // 1. Fetch booking and verify instructor identity
+    const { data: booking, error: fetchError } = await supabase
+        .from('bookings')
+        .select(`
+            *,
+            client:profiles!client_id(full_name, email),
+            slots!inner(
+                start_time,
+                end_time,
+                studios!inner(id, name, owner_id)
+            )
+        `)
+        .eq('id', bookingId)
+        .single()
+
+    if (fetchError || !booking) {
+        console.error('Error fetching booking for cancellation:', fetchError)
+        return { error: 'Booking not found.' }
+    }
+
+    if (booking.instructor_id !== user.id) {
+        return { error: 'Unauthorized to cancel this booking.' }
+    }
+
+    if (['cancelled_refunded', 'cancelled_charged', 'rejected'].includes(booking.status)) {
+        return { error: 'Booking is already cancelled or rejected.' }
+    }
+
+    const isStudioRental = booking.client_id === booking.instructor_id
+    const studio = (booking.slots as any)?.studios
+    const startTimeStr = (booking.slots as any)?.start_time
+    const startTime = new Date(startTimeStr)
+    const now = new Date()
+    const diffInHours = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60)
+    const isLateCancellation = diffInHours < 24
+
+    // 2. Process 100% Refund to Client (in Studio Rental case, client IS the instructor)
+    const breakdown = booking.price_breakdown as any;
+    const walletDeduction = Number(breakdown?.wallet_deduction || 0);
+    const totalPrice = Number(booking.total_price || 0);
+    const refundAmount = totalPrice + walletDeduction;
+
+    if (refundAmount > 0) {
+        const { error: refundError } = await supabase.rpc('increment_available_balance', {
+            user_id: booking.client_id,
+            amount: refundAmount
+        })
+        if (refundError) {
+            console.error('Instructor cancel refund error:', refundError)
+            return { error: 'Failed to process refund to client.' }
+        }
+    }
+
+    // 3. Penalty Logic (ONLY for Studio Rentals < 24h)
+    let penaltyProcessed = false
+    let penaltyAmount = 0
+    if (isStudioRental && isLateCancellation) {
+        penaltyAmount = Number(breakdown?.studio_fee || 0)
+        if (penaltyAmount > 0 && studio?.owner_id) {
+            const { error: penaltyError } = await supabase.rpc('transfer_penalty_instructor_to_studio', {
+                p_instructor_id: user.id,
+                p_studio_owner_id: studio.owner_id,
+                p_amount: penaltyAmount
+            })
+            if (penaltyError) {
+                console.error('Penalty transfer error:', penaltyError)
+                return { error: 'Refund processed, but penalty transfer failed.' }
+            }
+            penaltyProcessed = true
+        }
+    }
+
+    // 4. Update status and release slots
+    const { error: updateError } = await supabase.from('bookings').update({
+        status: 'cancelled_refunded',
+        cancel_reason: reason,
+        cancelled_by: user.id,
+        price_breakdown: {
+            ...breakdown,
+            refunded_amount: refundAmount,
+            penalty_amount: penaltyAmount,
+            penalty_processed: penaltyProcessed,
+            refund_initiator: 'instructor'
+        }
+    }).eq('id', bookingId)
+
+    if (updateError) {
+        console.error('Instructor cancel update error:', updateError)
+        return { error: 'Failed to update booking status.' }
+    }
+
+    const allSlotIds = [booking.slot_id, ...(booking.booked_slot_ids || [])].filter(Boolean)
+    if (allSlotIds.length > 0) {
+        await supabase.from('slots').update({ is_available: true }).in('id', allSlotIds)
+    }
+
+    // 5. Send Emails
+    const client = booking.client
+    const date = formatManilaDate(startTimeStr)
+    const time = formatManilaTime(startTimeStr)
+
+    // Notify Client (if not the instructor themselves)
+    if (client?.email && !isStudioRental) {
+        await sendEmail({
+            to: client.email,
+            subject: `Session Cancelled by Instructor: ${date}`,
+            react: BookingNotificationEmail({
+                recipientName: client.full_name || 'Client',
+                bookingType: 'Booking Cancelled',
+                studioName: studio?.name,
+                date,
+                time,
+                cancellationReason: reason
+            })
+        })
+    }
+
+    // Notify Studio Owner
+    if (studio?.owner_id) {
+        const { data: studioOwner } = await supabase.from('profiles').select('email, full_name').eq('id', studio.owner_id).single()
+        if (studioOwner?.email) {
+            await sendEmail({
+                to: studioOwner.email,
+                subject: `Instructor Cancelled Session: ${studio.name}`,
+                react: BookingNotificationEmail({
+                    recipientName: studioOwner.full_name || 'Owner',
+                    bookingType: 'Booking Cancelled',
+                    studioName: studio.name,
+                    date,
+                    time,
+                    cancellationReason: reason
+                })
+            })
+        }
+    }
+
+    revalidatePath('/instructor')
+    return { success: true }
 }

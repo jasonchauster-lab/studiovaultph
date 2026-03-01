@@ -142,19 +142,7 @@ export default function Navigation({ role }: NavigationProps) {
                         </>
                     )}
 
-                    {role === 'instructor' && (
-                        <>
-                            <div className="h-px w-full md:h-4 md:w-px bg-cream-300 my-1 md:my-0 md:mx-2" />
-                            <Link href="/customer" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/customer')}>
-                                <Search className="w-4 h-4" />
-                                Browse Studios
-                            </Link>
-                            <Link href="/customer/bookings" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/customer/bookings')}>
-                                <Calendar className="w-4 h-4" />
-                                My Bookings
-                            </Link>
-                        </>
-                    )}
+
                 </>
             )}
 

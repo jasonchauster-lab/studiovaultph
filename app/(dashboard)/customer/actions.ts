@@ -800,7 +800,7 @@ export async function cancelBooking(bookingId: string) {
         return { error: 'Unauthorized to cancel this booking.' }
     }
 
-    if (booking.status === 'cancelled') {
+    if (['cancelled_refunded', 'cancelled_charged'].includes(booking.status)) {
         return { error: 'Booking is already cancelled.' }
     }
 
@@ -860,13 +860,20 @@ export async function cancelBooking(bookingId: string) {
         : {};
 
     // Mark as cancelled and release the slot(s)
-    await supabase.from('bookings').update({
-        status: 'cancelled',
+    const newStatus = hoursUntilStart >= 24 ? 'cancelled_refunded' : 'cancelled_charged';
+
+    const { error: updateError } = await supabase.from('bookings').update({
+        status: newStatus,
         price_breakdown: {
             ...currentBreakdown,
             refunded_amount: refundAmount
         }
     }).eq('id', bookingId);
+
+    if (updateError) {
+        console.error('Booking cancel update error:', updateError);
+        return { error: 'Failed to update booking status during cancellation.' };
+    }
 
     // Release all associated slots
     const slotsToRelease = Array.isArray(booking.booked_slot_ids) && booking.booked_slot_ids.length > 0
@@ -956,7 +963,7 @@ export async function getCustomerWalletDetails() {
         .from('bookings')
         .select('id, created_at, total_price, price_breakdown, status, slots(start_time, studios(name))')
         .eq('client_id', user.id)
-        .eq('status', 'cancelled')
+        .in('status', ['cancelled_refunded', 'cancelled_charged'])
         .order('created_at', { ascending: false });
 
     // Assuming we implement customer payout requests

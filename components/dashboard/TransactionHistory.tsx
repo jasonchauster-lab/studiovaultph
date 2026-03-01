@@ -26,6 +26,8 @@ interface TransactionHistoryProps {
 export default function TransactionHistory({ bookings, payouts }: TransactionHistoryProps) {
     const [activeTab, setActiveTab] = useState<'bookings' | 'payouts'>('bookings')
 
+    const wrap = (val: any) => Array.isArray(val) ? val[0] : val
+
     return (
         <div className="bg-white border border-cream-200 rounded-xl shadow-sm overflow-hidden">
             <div className="border-b border-cream-200">
@@ -70,36 +72,42 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                                     </td>
                                 </tr>
                             ) : (
-                                bookings.map((booking) => (
-                                    <tr key={booking.id} className="hover:bg-cream-50/50">
-                                        <td className="px-6 py-4">
-                                            {new Date(booking.created_at).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <User className="w-4 h-4 text-charcoal-400" />
-                                                <span className="font-medium text-charcoal-900">
-                                                    {booking.client?.full_name || 'Unknown'}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col">
-                                                <div className="text-xs text-charcoal-500">
-                                                    {new Date(booking.slots.start_time).toLocaleString(undefined, {
-                                                        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
-                                                    })}
+                                bookings.map((booking) => {
+                                    const client = wrap(booking.client)
+                                    const slot = wrap(booking.slots)
+                                    const startTime = slot?.start_time
+
+                                    return (
+                                        <tr key={booking.id} className="hover:bg-cream-50/50">
+                                            <td className="px-6 py-4">
+                                                {new Date(booking.created_at).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    <User className="w-4 h-4 text-charcoal-400" />
+                                                    <span className="font-medium text-charcoal-900">
+                                                        {client?.full_name || 'Unknown'}
+                                                    </span>
                                                 </div>
-                                                <div className="text-[10px] text-charcoal-400 font-medium">
-                                                    {(booking.price_breakdown?.quantity || 1)} x {(booking.price_breakdown?.equipment || booking.equipment || 'Unknown')}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col">
+                                                    <div className="text-xs text-charcoal-500">
+                                                        {startTime ? new Date(startTime).toLocaleString(undefined, {
+                                                            month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+                                                        }) : 'N/A'}
+                                                    </div>
+                                                    <div className="text-[10px] text-charcoal-400 font-medium">
+                                                        {(booking.price_breakdown?.quantity || 1)} x {(booking.price_breakdown?.equipment || booking.equipment || 'Unknown')}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-right font-bold text-green-600">
-                                            +₱{(booking.price_breakdown?.studio_fee || (booking.total_price ? Math.max(0, booking.total_price - 100) : 0)).toLocaleString()}
-                                        </td>
-                                    </tr>
-                                ))
+                                            </td>
+                                            <td className="px-6 py-4 text-right font-bold text-green-600">
+                                                +₱{(booking.price_breakdown?.studio_fee || (booking.total_price ? Math.max(0, booking.total_price - 100) : 0)).toLocaleString()}
+                                            </td>
+                                        </tr>
+                                    )
+                                })
                             )}
                         </tbody>
                     </table>
@@ -132,7 +140,6 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-xs">
-                                                {/* Check if payment_details exists before accessing */}
                                                 <p><span className="text-charcoal-400">Acct:</span> {payout.payment_details?.account_name || '-'}</p>
                                                 <p><span className="text-charcoal-400">No:</span> {payout.payment_details?.account_number || '-'}</p>
                                             </div>
@@ -146,7 +153,7 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                                                 {payout.status === 'paid' && <CheckCircle className="w-3 h-3" />}
                                                 {payout.status === 'pending' && <Clock className="w-3 h-3" />}
                                                 {payout.status === 'rejected' && <XCircle className="w-3 h-3" />}
-                                                {payout.status?.charAt(0).toUpperCase() + payout.status?.slice(1)}
+                                                {payout.status ? payout.status.charAt(0).toUpperCase() + payout.status.slice(1) : 'Unknown'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right font-bold text-charcoal-900">

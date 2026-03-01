@@ -690,16 +690,17 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
             price_breakdown,
             status,
             client:profiles!client_id(full_name),
-            slots(
+            slots!inner(
+                start_time,
                 studios(name)
             ),
             instructor:profiles!instructor_id(full_name)
         `)
-        .eq('status', 'approved')
+        .in('status', ['approved', 'completed', 'cancelled_charged'])
         .order('created_at', { ascending: true })
 
-    if (startDate) bookingsQuery = bookingsQuery.gte('created_at', startDate)
-    if (endDate) bookingsQuery = bookingsQuery.lte('created_at', endDate)
+    if (startDate) bookingsQuery = bookingsQuery.gte('slots.start_time', startDate)
+    if (endDate) bookingsQuery = bookingsQuery.lte('slots.start_time', endDate)
 
     const { data: bookings, error: bookingsError } = await bookingsQuery
 
@@ -740,7 +741,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         acc.bookingCount += 1
 
         // Daily aggregation for charts
-        const date = new Date(booking.created_at).toISOString().split('T')[0]
+        const date = new Date(booking.slots?.start_time || booking.created_at).toISOString().split('T')[0]
         if (!acc.daily[date]) {
             acc.daily[date] = { date, revenue: 0, platformFees: 0, bookings: 0 }
         }
@@ -751,7 +752,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         // Transaction list for CSV
         acc.transactions.push({
             id: booking.id,
-            date: booking.created_at,
+            date: booking.slots?.start_time || booking.created_at,
             type: 'Booking',
             client: booking.client?.full_name || '-',
             studio: booking.slots?.studios?.name || '-',
@@ -873,13 +874,13 @@ export async function getRevenueExport(startDate?: string, endDate?: string) {
             price_breakdown,
             client: profiles!client_id(full_name),
             instructor: profiles!instructor_id(full_name),
-            slots(start_time, studios(name))
+            slots!inner(start_time, studios(name))
                 `)
-        .eq('status', 'approved')
+        .in('status', ['approved', 'completed', 'cancelled_charged'])
         .order('created_at', { ascending: false })
 
-    if (startDate) query = query.gte('created_at', startDate)
-    if (endDate) query = query.lte('created_at', endDate)
+    if (startDate) query = query.gte('slots.start_time', startDate)
+    if (endDate) query = query.lte('slots.start_time', endDate)
 
     const { data: bookings, error } = await query
     if (error) return { error: 'Failed to fetch revenue data.' }
@@ -900,7 +901,7 @@ export async function getRevenueExport(startDate?: string, endDate?: string) {
 
         return {
             'Booking ID': b.id,
-            'Date': new Date(b.created_at).toLocaleDateString(),
+            'Date': new Date(slots?.start_time || b.created_at).toLocaleDateString(),
             'Session Date': slots?.start_time ? new Date(slots.start_time).toLocaleDateString() : '',
             'Client Name': getFirst(b.client)?.full_name || '',
             'Instructor Name': getFirst(b.instructor)?.full_name || '',
@@ -1017,7 +1018,8 @@ export async function searchAllUsers(query: string) {
 
     const isPhoneQuery = /^\+?[0-9\s\-]+$/.test(cleanQuery);
     const isEmailQuery = cleanQuery.includes('@');
-    const isStatusQuery = ['pending', 'approved', 'admin_approved', 'confirmed', 'paid', 'cancelled', 'expired', 'completed', 'rejected'].includes(cleanQuery.toLowerCase());
+    const isStatusQuery = ['pending', 'approved', 'cancelled_refunded', 'cancelled_charged', 'expired', 'completed', 'rejected'].includes(cleanQuery.toLowerCase());
+
 
     const results: any[] = [];
 
@@ -1227,12 +1229,12 @@ export async function getPartnerBookings(id: string, type: 'profile' | 'studio')
     const now = new Date();
     const active = bookings.filter((b: any) => {
         const endTime = new Date(b.slots?.end_time);
-        return endTime > now && ['approved', 'confirmed', 'admin_approved'].includes(b.status);
+        return endTime > now && b.status === 'approved';
     });
 
     const past = bookings.filter((b: any) => {
         const endTime = new Date(b.slots?.end_time);
-        return endTime <= now || ['completed', 'cancelled', 'expired', 'rejected'].includes(b.status);
+        return endTime <= now || ['completed', 'cancelled_refunded', 'cancelled_charged', 'expired', 'rejected'].includes(b.status);
     });
 
     return { active, past };
