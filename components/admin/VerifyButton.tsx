@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { verifyStudio, approveCertification, rejectStudio, rejectCertification, confirmBooking, approvePayout, rejectPayout, approveStudioPayout, rejectStudioPayout, reinstateStudio, approveTopUp, rejectTopUp } from '@/app/(dashboard)/admin/actions'
+import { verifyStudio, approveCertification, rejectStudio, rejectCertification, confirmBooking, approvePayout, rejectPayout, approveStudioPayout, rejectStudioPayout, reinstateStudio, approveTopUp, rejectTopUp, settleInstructorDebt } from '@/app/(dashboard)/admin/actions'
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-type ActionType = 'verifyStudio' | 'rejectStudio' | 'approveCert' | 'rejectCert' | 'confirmBooking' | 'approvePayout' | 'rejectPayout' | 'approveStudioPayout' | 'rejectStudioPayout' | 'reinstateStudio' | 'approveTopUp' | 'rejectTopUp'
+type ActionType = 'verifyStudio' | 'rejectStudio' | 'approveCert' | 'rejectCert' | 'confirmBooking' | 'approvePayout' | 'rejectPayout' | 'approveStudioPayout' | 'rejectStudioPayout' | 'reinstateStudio' | 'approveTopUp' | 'rejectTopUp' | 'settleInstructorDebt'
 
 interface VerifyButtonProps {
     id: string
@@ -67,6 +67,9 @@ export default function VerifyButton({ id, action, label, className }: VerifyBut
                     break
                 case 'rejectTopUp':
                     result = await rejectTopUp(id, reason)
+                    break
+                case 'settleInstructorDebt':
+                    result = await settleInstructorDebt(id)
                     break
             }
 
