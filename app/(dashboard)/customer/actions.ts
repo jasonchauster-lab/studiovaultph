@@ -501,20 +501,45 @@ export async function submitTopUpPaymentProof(
 
     if (!user) return { error: 'Unauthorized' }
 
-    const { error } = await supabase
+    // 1. Upload proof to Supabase Storage
+    const fileName = `${topUpId}-${Date.now()}.jpg`
+    const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('payment-proofs')
+        .upload(fileName, Buffer.from(proofUrl.split(',')[1], 'base64'), {
+            contentType: 'image/jpeg',
+            cacheControl: '3600',
+            upsert: true
+        })
+
+    if (uploadError) {
+        console.error('[TopUpSubmission] Storage Upload Error:', uploadError)
+        return { error: 'Failed to upload payment proof. Please try again.' }
+    }
+
+    // 2. Get Public URL
+    const { data: { publicUrl } } = supabase.storage
+        .from('payment-proofs')
+        .getPublicUrl(fileName)
+
+    console.log('[TopUpSubmission] Proof uploaded successfully:', publicUrl)
+
+    // 3. Update the wallet_top_ups record
+    const { error: updateError } = await supabase
         .from('wallet_top_ups')
         .update({
-            payment_proof_url: proofUrl,
+            payment_proof_url: publicUrl,
             status: 'pending',
             updated_at: new Date().toISOString()
         })
         .eq('id', topUpId)
-        .eq('user_id', user.id)
+        .eq('user_id', user.id) // Retain user_id check for security
 
-    if (error) {
-        console.error('Top-up payment proof submission error:', error)
-        return { error: `DB Error: ${error.message}` }
+    if (updateError) {
+        console.error('[TopUpSubmission] Database Update Error:', updateError)
+        return { error: `Failed to save request: ${updateError.message}` }
     }
+
+    console.log('[TopUpSubmission] Record updated successfully for ID:', topUpId)
 
     revalidatePath('/customer/wallet')
     return { success: true }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Slot } from '@/types';
 import StudioAvailabilityGroup from '@/components/dashboard/StudioAvailabilityGroup';
-import { Filter, Search, Loader2, User, Calendar, X } from 'lucide-react';
+import { Filter, Search, Loader2, User, Calendar, X, Wallet, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import clsx from 'clsx';
 import ChatWindow from '@/components/dashboard/ChatWindow';
@@ -16,7 +16,7 @@ import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions'
 
 export default function InstructorDashboardClient() {
     const searchParams = useSearchParams();
-    const initialTab = searchParams.get('tab') === 'bookings' ? 'bookings' : 'browse';
+    const initialTab = searchParams.get('tab') || 'home';
 
     const [slots, setSlots] = useState<Slot[]>([]);
     const [bookings, setBookings] = useState<any[]>([]);
@@ -25,19 +25,23 @@ export default function InstructorDashboardClient() {
     const [locSearch, setLocSearch] = useState('');
     const [showLocDropdown, setShowLocDropdown] = useState(false);
     const locSearchRef = useRef<HTMLDivElement>(null);
-    const [activeTab, setActiveTab] = useState<'browse' | 'bookings'>(initialTab);
+    const [activeTab, setActiveTab] = useState<'home' | 'browse' | 'bookings'>(initialTab as any);
     const [activeChat, setActiveChat] = useState<{ id: string, recipientId: string, name: string, isExpired: boolean } | null>(null);
     const [cancellingBooking, setCancellingBooking] = useState<any>(null);
     const supabase = createClient();
     const [userId, setUserId] = useState<string>('');
+    const [availableBalance, setAvailableBalance] = useState<number | null>(null);
+    const [hasPendingPayout, setHasPendingPayout] = useState(false);
 
     // Sync activeTab with URL search params
     useEffect(() => {
         const tab = searchParams.get('tab');
         if (tab === 'bookings') {
             setActiveTab('bookings');
-        } else {
+        } else if (tab === 'browse') {
             setActiveTab('browse');
+        } else {
+            setActiveTab('home');
         }
     }, [searchParams]);
 
@@ -76,13 +80,15 @@ export default function InstructorDashboardClient() {
                     .from('bookings')
                     .select(`
                         *,
+                        price_breakdown,
                         slots (
                             start_time,
                             end_time,
                             studios (
                                 name,
                                 location,
-                                logo_url
+                                logo_url,
+                                owner_id
                             )
                         ),
                         client:profiles!client_id (
@@ -101,6 +107,22 @@ export default function InstructorDashboardClient() {
                     .order('created_at', { ascending: false });
 
                 if (bookingsData) setBookings(bookingsData);
+
+                // Fetch Available Balance & Pending Payout Status
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('available_balance')
+                    .eq('id', user.id)
+                    .single();
+                if (profile) setAvailableBalance(profile.available_balance || 0);
+
+                const { data: pendingPayouts } = await supabase
+                    .from('payout_requests')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .eq('status', 'pending')
+                    .limit(1);
+                setHasPendingPayout(!!(pendingPayouts && pendingPayouts.length > 0));
             }
 
             setIsLoading(false);
@@ -174,36 +196,39 @@ export default function InstructorDashboardClient() {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-serif text-charcoal-900 mb-1">Instructor Dashboard</h1>
-                        <p className="text-charcoal-600 font-medium">Find spaces or manage your bookings.</p>
+                        <p className="text-charcoal-600 font-medium">Manage your professional schedule and earnings.</p>
                     </div>
 
                     <div className="flex gap-2">
                         <Link
-                            href="/instructor/schedule"
-                            className="flex items-center gap-2 px-4 py-2 bg-white text-charcoal-900 border border-cream-200 rounded-lg hover:bg-cream-50 transition-colors shadow-sm"
+                            href="/customer"
+                            className="flex items-center gap-2 px-4 py-2 bg-white text-charcoal-900 border border-cream-200 rounded-lg hover:bg-cream-50 transition-colors shadow-sm font-bold"
                         >
-                            <Calendar className="w-4 h-4" />
-                            <span className="hidden sm:inline">Manage Schedule</span>
+                            <User className="w-4 h-4" />
+                            <span>Switch to Client Mode</span>
                         </Link>
                         <Link
                             href="/instructor/profile"
                             className="flex items-center gap-2 px-4 py-2 bg-rose-gold text-white rounded-lg hover:brightness-110 transition-all shadow-sm font-bold"
                         >
                             <User className="w-4 h-4" />
-                            <span className="hidden sm:inline">My Instructor Profile</span>
-                        </Link>
-                        <Link
-                            href="/customer/profile"
-                            className="flex items-center gap-2 px-4 py-2 bg-white text-charcoal-900 border border-cream-200 rounded-lg hover:bg-cream-50 transition-colors shadow-sm"
-                        >
-                            <User className="w-4 h-4" />
-                            <span className="hidden sm:inline">My Customer Profile</span>
+                            <span className="hidden sm:inline">My Professional Profile</span>
                         </Link>
                     </div>
                 </div>
 
                 {/* Tabs */}
                 <div className="flex gap-4 border-b border-cream-200">
+                    <button
+                        onClick={() => setActiveTab('home')}
+                        className={clsx(
+                            "pb-3 px-1 font-medium text-sm transition-colors relative",
+                            activeTab === 'home' ? "text-charcoal-900" : "text-charcoal-500 hover:text-charcoal-700"
+                        )}
+                    >
+                        Home
+                        {activeTab === 'home' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-charcoal-900 rounded-t-full" />}
+                    </button>
                     <button
                         onClick={() => setActiveTab('browse')}
                         className={clsx(
@@ -226,7 +251,120 @@ export default function InstructorDashboardClient() {
                     </button>
                 </div>
 
-                {activeTab === 'browse' ? (
+                {activeTab === 'home' ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* My Schedule Summary Card */}
+                        <div className="bg-white p-6 rounded-2xl border border-cream-200 shadow-sm hover:shadow-md transition-all">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-cream-50 rounded-xl flex items-center justify-center">
+                                        <Calendar className="w-5 h-5 text-charcoal-900" />
+                                    </div>
+                                    <h2 className="text-xl font-serif text-charcoal-900">My Schedule</h2>
+                                </div>
+                                <Link
+                                    href="/instructor/schedule"
+                                    className="text-sm font-bold text-rose-gold hover:underline"
+                                >
+                                    Manage Schedule
+                                </Link>
+                            </div>
+
+                            {(() => {
+                                const upcomingSessions = bookings.filter(b =>
+                                    b.status === 'approved' && new Date(b.slots.start_time) >= new Date()
+                                ).sort((a, b) => new Date(a.slots.start_time).getTime() - new Date(b.slots.start_time).getTime()).slice(0, 3);
+
+                                if (upcomingSessions.length === 0) {
+                                    return (
+                                        <div className="py-8 text-center bg-cream-50/50 rounded-xl border border-dashed border-cream-200">
+                                            <p className="text-charcoal-500 text-sm">No upcoming sessions.</p>
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <div className="space-y-4">
+                                        {upcomingSessions.map(session => (
+                                            <div key={session.id} className="flex items-center justify-between p-3 bg-cream-50/50 rounded-xl border border-cream-100">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-lg overflow-hidden border border-cream-200 bg-white">
+                                                        <img
+                                                            src={session.slots.studios.logo_url || "/logo.png"}
+                                                            alt={session.slots.studios.name}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-charcoal-900">{session.slots.studios.name}</p>
+                                                        <p className="text-[10px] text-charcoal-500 uppercase tracking-wider font-bold">
+                                                            {new Date(session.slots.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' })} at {new Date(session.slots.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' })}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded-full tracking-wider">
+                                                    Confirmed
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+                            })()}
+                        </div>
+
+                        {/* Earnings Summary Card */}
+                        <div className="bg-white p-6 rounded-2xl border border-cream-200 shadow-sm hover:shadow-md transition-all">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-cream-50 rounded-xl flex items-center justify-center">
+                                        <Wallet className="w-5 h-5 text-charcoal-900" />
+                                    </div>
+                                    <h2 className="text-xl font-serif text-charcoal-900">Earnings Summary</h2>
+                                </div>
+                                <Link
+                                    href="/instructor/earnings"
+                                    className="text-sm font-bold text-rose-gold hover:underline"
+                                >
+                                    View Detailed Stats
+                                </Link>
+                            </div>
+
+                            <div className="flex flex-col gap-6">
+                                <div>
+                                    <p className="text-xs font-bold text-charcoal-500 uppercase tracking-widest mb-1">Available Balance</p>
+                                    <div className="flex items-center gap-3">
+                                        <p className="text-4xl font-bold text-charcoal-900">
+                                            {availableBalance !== null ? `₱${availableBalance.toLocaleString()}` : '₱0'}
+                                        </p>
+                                        {availableBalance === null ? (
+                                            <div className="px-2 py-1 bg-cream-100 text-charcoal-600 text-[10px] font-bold uppercase rounded tracking-wider border border-cream-200 animate-pulse">
+                                                Loading Balance...
+                                            </div>
+                                        ) : hasPendingPayout ? (
+                                            <div className="px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold uppercase rounded tracking-wider border border-amber-200">
+                                                Payout Pending
+                                            </div>
+                                        ) : (
+                                            <div className="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded tracking-wider border border-green-200">
+                                                Active
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-cream-100">
+                                    <Link
+                                        href="/instructor/payout"
+                                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-charcoal-900 text-white rounded-xl font-bold hover:bg-charcoal-800 transition-colors shadow-sm"
+                                    >
+                                        <ArrowUpRight className="w-4 h-4 text-rose-gold" />
+                                        Request Payout
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ) : activeTab === 'browse' ? (
                     <>
                         {/* Filters */}
                         <div className="bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-cream-200 shadow-sm space-y-3">

@@ -14,7 +14,6 @@ interface TopUpModalProps {
 
 export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
     const router = useRouter()
-    const supabase = createClient()
     const [step, setStep] = useState(1)
     const [amount, setAmount] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -23,6 +22,7 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
     const [proofFile, setProofFile] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [isSuccess, setIsSuccess] = useState(false)
+    const [zoomedImage, setZoomedImage] = useState<string | null>(null)
 
     useEffect(() => {
         // Cleanup the object URL when the component unmounts or previewUrl changes
@@ -82,24 +82,18 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
         setError(null)
 
         try {
-            // 1. Upload File
-            const fileExt = proofFile.name.split('.').pop()
-            const fileName = `topup_${topUpId}_${Date.now()}.${fileExt}`
-            const filePath = `${fileName}`
+            // 1. Convert file to base64
+            const reader = new FileReader()
+            const base64Promise = new Promise<string>((resolve, reject) => {
+                reader.onload = () => resolve(reader.result as string)
+                reader.onerror = reject
+                reader.readAsDataURL(proofFile)
+            })
 
-            const { error: uploadError } = await supabase.storage
-                .from('payment-proofs')
-                .upload(filePath, proofFile)
+            const base64String = await base64Promise
 
-            if (uploadError) throw uploadError
-
-            // 2. Get Public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('payment-proofs')
-                .getPublicUrl(filePath)
-
-            // 3. Submit Top-up proof
-            const result = await submitTopUpPaymentProof(topUpId, publicUrl)
+            // 2. Submit Top-up proof via server action (handles storage upload & DB update)
+            const result = await submitTopUpPaymentProof(topUpId!, base64String)
 
             if (result.error) {
                 setError(result.error)
@@ -109,7 +103,8 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                 router.refresh()
             }
         } catch (err: any) {
-            setError(err.message || 'Failed to upload proof of payment.')
+            console.error('Submission error:', err)
+            setError('Failed to process payment proof. Please try again.')
         } finally {
             setIsLoading(false)
         }
@@ -132,6 +127,26 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-charcoal-900/60 backdrop-blur-sm" onClick={resetAndClose} />
+
+            {/* Zoom Overlay */}
+            {zoomedImage && (
+                <div
+                    className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-charcoal-900/90 backdrop-blur-md animate-in fade-in duration-200 cursor-zoom-out"
+                    onClick={() => setZoomedImage(null)}
+                >
+                    <button
+                        onClick={() => setZoomedImage(null)}
+                        className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+                    <img
+                        src={zoomedImage}
+                        alt="Zoomed View"
+                        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in duration-300"
+                    />
+                </div>
+            )}
 
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
                 {/* Header */}
@@ -192,7 +207,10 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* GCash */}
                                 <div className="group bg-blue-50/50 border border-blue-100 rounded-2xl p-6 text-center hover:bg-blue-50 transition-all cursor-default">
-                                    <div className="bg-white p-2 rounded-xl shadow-md mb-4 inline-block transform group-hover:scale-105 transition-transform duration-300">
+                                    <div
+                                        className="bg-white p-2 rounded-xl shadow-md mb-4 inline-block transform group-hover:scale-105 transition-transform duration-300 cursor-zoom-in"
+                                        onClick={() => setZoomedImage('/gcash-qr.jpg')}
+                                    >
                                         <img src="/gcash-qr.jpg" alt="GCash QR" className="w-48 h-48 object-contain mx-auto rounded-lg" onError={(e) => { e.currentTarget.src = 'https://placehold.co/400x400?text=GCash+QR' }} />
                                     </div>
                                     <h4 className="font-bold text-blue-900 flex items-center justify-center gap-2 mb-1">
@@ -204,7 +222,10 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
 
                                 {/* BPI */}
                                 <div className="group bg-red-50/50 border border-red-100 rounded-2xl p-6 text-center hover:bg-red-50 transition-all cursor-default">
-                                    <div className="bg-white p-2 rounded-xl shadow-md mb-4 inline-block transform group-hover:scale-105 transition-transform duration-300">
+                                    <div
+                                        className="bg-white p-2 rounded-xl shadow-md mb-4 inline-block transform group-hover:scale-105 transition-transform duration-300 cursor-zoom-in"
+                                        onClick={() => setZoomedImage('/bpi-qr.jpg')}
+                                    >
                                         <img src="/bpi-qr.jpg" alt="BPI QR" className="w-48 h-48 object-contain mx-auto rounded-lg" onError={(e) => { e.currentTarget.src = 'https://placehold.co/400x400?text=BPI+QR' }} />
                                     </div>
                                     <h4 className="font-bold text-red-900 flex items-center justify-center gap-2 mb-1">
@@ -238,7 +259,12 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                             <div className="border-2 border-dashed border-cream-200 rounded-2xl p-8 text-center bg-cream-50/30">
                                 {previewUrl ? (
                                     <div className="relative inline-block group">
-                                        <img src={previewUrl} alt="Proof Preview" className="max-h-64 rounded-lg shadow-md border border-white" />
+                                        <img
+                                            src={previewUrl}
+                                            alt="Proof Preview"
+                                            className="max-h-64 rounded-lg shadow-md border border-white cursor-zoom-in hover:opacity-90 transition-opacity"
+                                            onClick={() => setZoomedImage(previewUrl)}
+                                        />
                                         <button
                                             onClick={() => { setProofFile(null); setPreviewUrl(null); }}
                                             className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"

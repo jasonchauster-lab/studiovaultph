@@ -80,6 +80,11 @@ export default function Navigation({ role }: NavigationProps) {
                 <>
                     {role === 'instructor' && (
                         <>
+                            <Link href="/instructor" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/instructor')}>
+                                <LayoutDashboard className="w-4 h-4" />
+                                Home
+                                {pathname === '/instructor' && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
+                            </Link>
                             <Link href="/instructor/earnings" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/instructor/earnings'))}>
                                 <DollarSign className="w-4 h-4" />
                                 Earnings
@@ -95,10 +100,10 @@ export default function Navigation({ role }: NavigationProps) {
                                 My Schedule
                                 {pathname.startsWith('/instructor/schedule') && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
-                            <Link href="/instructor/profile" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/instructor/profile'))}>
+                            <Link href="/instructor/profile" onClick={() => setMobileOpen(false)} className={linkClass(pathname.includes('/instructor/profile'))}>
                                 <User className="w-4 h-4" />
                                 Profile
-                                {pathname.startsWith('/instructor/profile') && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
+                                {pathname.includes('/instructor/profile') && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
                         </>
                     )}
