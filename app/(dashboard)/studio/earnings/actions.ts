@@ -22,16 +22,45 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
         ? await supabase.from('profiles').select('available_balance, pending_balance').eq('id', ownerId).single()
         : { data: null }
 
-    // 1. Get all approved bookings for total earnings
+    // 1. First, fetch slot IDs for this studio (same approach as admin's getPartnerBookings)
+    const { data: studioSlots, error: slotsError } = await supabase
+        .from('slots')
+        .select('id')
+        .eq('studio_id', studioId)
+
+    if (slotsError) {
+        console.error('Error fetching slots:', slotsError)
+        return { error: `Failed to fetch slot data: ${slotsError.message}` }
+    }
+
+    const slotIds = studioSlots?.map((s: any) => s.id) ?? []
+    if (slotIds.length === 0) {
+        // No slots means no bookings — return empty data
+        return {
+            bookings: [],
+            payouts: [],
+            transactions: [],
+            summary: {
+                totalEarnings: 0,
+                totalPaidOut: 0,
+                pendingPayouts: 0,
+                availableBalance: profile?.available_balance || 0,
+                pendingBalance: profile?.pending_balance || 0,
+                payoutApprovalStatus: studio?.payout_approval_status || 'none'
+            }
+        }
+    }
+
+    // 2. Get all active bookings for these slots
     let bookingsQuery = supabase
         .from('bookings')
         .select(`
             *,
             client:profiles!client_id(full_name),
             instructor:profiles!instructor_id(full_name),
-            slots!inner(start_time, end_time, studios(name))
+            slots(start_time, end_time, studios(name))
         `)
-        .eq('slots.studio_id', studioId)
+        .in('slot_id', slotIds)
         .in('status', ['approved', 'confirmed', 'admin_approved', 'paid'])
         .order('created_at', { ascending: false })
 

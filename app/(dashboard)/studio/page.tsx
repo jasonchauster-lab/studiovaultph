@@ -45,25 +45,65 @@ export default async function StudioDashboard(props: {
     const currentDate = new Date(dateParam + "T00:00:00+08:00")
 
     if (myStudio) {
-        // Fetch Upcoming Bookings for THIS studio directly
-        const { data: studioBookings } = await supabase
-            .from('bookings')
-            .select(`
-                *,
-                client:profiles!client_id(full_name, avatar_url),
-                instructor:profiles!instructor_id(full_name, avatar_url),
-                slots!inner(*)
-            `)
-            .eq('slots.studio_id', myStudio.id)
-            .in('status', ['approved', 'pending', 'confirmed', 'admin_approved', 'paid'])
-            .order('created_at', { ascending: false })
-            .limit(10);
+        // STEP 1: Fetch slot IDs for this studio (reliable, same approach as admin's getPartnerBookings)
+        const { data: studioSlots } = await supabase
+            .from('slots')
+            .select('id')
+            .eq('studio_id', myStudio.id)
 
-        if (studioBookings) {
-            upcomingBookings = studioBookings;
+        const studioSlotIds = studioSlots?.map((s: any) => s.id) ?? []
+
+        if (studioSlotIds.length > 0) {
+            // STEP 2a: Fetch Upcoming Bookings using slot IDs
+            const { data: studioBookings } = await supabase
+                .from('bookings')
+                .select(`
+                    *,
+                    client:profiles!client_id(full_name, avatar_url),
+                    instructor:profiles!instructor_id(full_name, avatar_url),
+                    slots(*)
+                `)
+                .in('slot_id', studioSlotIds)
+                .in('status', ['approved', 'pending', 'confirmed', 'admin_approved', 'paid'])
+                .order('created_at', { ascending: false })
+                .limit(10)
+
+            if (studioBookings) {
+                upcomingBookings = studioBookings
+            }
+
+            // STEP 2b: Stats Bookings (Last 30 Days)
+            const thirtyDaysAgo = new Date()
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+            const { data: statsBookings } = await supabase
+                .from('bookings')
+                .select(`
+                    *,
+                    instructor:profiles!instructor_id(full_name, avatar_url)
+                `)
+                .in('slot_id', studioSlotIds)
+                .gte('created_at', thirtyDaysAgo.toISOString())
+                .in('status', ['approved', 'confirmed', 'admin_approved', 'paid'])
+
+            if (statsBookings && statsBookings.length > 0) {
+                // Calc Revenue
+                monthlyRevenue = statsBookings.reduce((sum, b) => {
+                    const fee = b.price_breakdown?.studio_fee || (b.total_price ? Math.max(0, b.total_price - 100) : 0)
+                    return sum + fee
+                }, 0)
+
+                // Calc Top Instructor
+                const instructorCounts: Record<string, number> = {}
+                statsBookings.forEach(b => {
+                    const name = b.instructor?.full_name || 'Unknown'
+                    instructorCounts[name] = (instructorCounts[name] || 0) + 1
+                })
+                topInstructorName = Object.entries(instructorCounts).sort((a, b) => b[1] - a[1])[0][0]
+            }
         }
 
-        // Fetch Weekly Slots
+        // STEP 2c: Fetch Weekly Slots for the calendar (always, regardless of bookings)
         const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
         const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 })
         weekEnd.setHours(23, 59, 59, 999)
@@ -87,41 +127,10 @@ export default async function StudioDashboard(props: {
             weeklySlots = slots
         }
 
-        // 4. Calculate Stats (Last 30 Days)
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-        const { data: statsBookings } = await supabase
-            .from('bookings')
-            .select(`
-                *,
-                instructor:profiles!instructor_id(full_name, avatar_url),
-                slots!inner(studio_id)
-            `)
-            .eq('slots.studio_id', myStudio.id)
-            .gte('created_at', thirtyDaysAgo.toISOString())
-            .in('status', ['approved', 'confirmed', 'admin_approved', 'paid']);
-
-        if (statsBookings && statsBookings.length > 0) {
-            // Calc Revenue
-            monthlyRevenue = statsBookings.reduce((sum, b) => {
-                const fee = b.price_breakdown?.studio_fee || (b.total_price ? Math.max(0, b.total_price - 100) : 0);
-                return sum + fee;
-            }, 0);
-
-            // Calc Top Instructor
-            const instructorCounts: Record<string, number> = {};
-            statsBookings.forEach(b => {
-                const name = b.instructor?.full_name || 'Unknown';
-                instructorCounts[name] = (instructorCounts[name] || 0) + 1;
-            });
-            topInstructorName = Object.entries(instructorCounts).sort((a, b) => b[1] - a[1])[0][0];
-        }
-
         // Calc Occupancy for currently viewed week
         if (weeklySlots.length > 0) {
-            const bookedSlotsCount = weeklySlots.filter(s => !s.is_available).length;
-            occupancyRate = Math.round((bookedSlotsCount / weeklySlots.length) * 100);
+            const bookedSlotsCount = weeklySlots.filter(s => !s.is_available).length
+            occupancyRate = Math.round((bookedSlotsCount / weeklySlots.length) * 100)
         }
     }
 
@@ -246,10 +255,11 @@ export default async function StudioDashboard(props: {
                                         ) : (
                                             <div className="space-y-4">
                                                 {upcomingBookings.map((booking: any) => {
-                                                    const start = new Date(booking.slots.start_time)
-                                                    const payout = booking.price_breakdown?.studio_fee || (booking.total_price ? Math.max(0, booking.total_price - 100) : 0);
-                                                    const equipment = booking.price_breakdown?.equipment || booking.equipment || 'Session';
-                                                    const qty = booking.price_breakdown?.quantity || 1;
+                                                    const slotData = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots
+                                                    const start = slotData?.start_time ? new Date(slotData.start_time) : new Date()
+                                                    const payout = booking.price_breakdown?.studio_fee || (booking.total_price ? Math.max(0, booking.total_price - 100) : 0)
+                                                    const equipment = booking.price_breakdown?.equipment || booking.equipment || 'Session'
+                                                    const qty = booking.price_breakdown?.quantity || 1
 
                                                     return (
                                                         <div key={booking.id} className="border border-cream-100 rounded-xl p-4 bg-cream-50/30 hover:bg-cream-50 transition-colors shadow-sm mb-4 last:mb-0">
@@ -263,7 +273,7 @@ export default async function StudioDashboard(props: {
                                                                             height={40}
                                                                             className="object-cover w-full h-full"
                                                                             onError={(e) => {
-                                                                                (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.instructor?.full_name || 'instructor')}`;
+                                                                                (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.instructor?.full_name || 'instructor')}`
                                                                             }}
                                                                         />
                                                                     </div>
@@ -288,7 +298,7 @@ export default async function StudioDashboard(props: {
                                                                             height={16}
                                                                             className="object-cover w-full h-full"
                                                                             onError={(e) => {
-                                                                                (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.client?.full_name || 'client')}`;
+                                                                                (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.client?.full_name || 'client')}`
                                                                             }}
                                                                         />
                                                                     </div>
