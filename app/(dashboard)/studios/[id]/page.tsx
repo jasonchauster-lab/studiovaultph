@@ -37,6 +37,8 @@ export default async function StudioDetailsPage({
         .gte('start_time', new Date().toISOString())
         .order('start_time', { ascending: true })
 
+    const trimmedStudioLocation = studio.location?.trim()
+
     // 3. Fetch Verified Instructors who have availability in this Studio's Location
     const { data: instructorsRaw } = await supabase
         .from('profiles')
@@ -52,7 +54,7 @@ export default async function StudioDetailsPage({
             )
         `)
         .eq('role', 'instructor')
-        .eq('instructor_availability.location_area', studio.location)
+        .eq('instructor_availability.location_area', trimmedStudioLocation)
 
     const instructors = instructorsRaw?.filter(i =>
         i.certifications && i.certifications.some((c: any) => c.verified)
@@ -62,7 +64,7 @@ export default async function StudioDetailsPage({
     const { data: locationAvailability } = await supabase
         .from('instructor_availability')
         .select('instructor_id, day_of_week, date, start_time, end_time')
-        .eq('location_area', studio.location)
+        .eq('location_area', trimmedStudioLocation)
 
     // 5. Fetch public reviews for the studio owner's profile
     const { reviews, averageRating, totalCount } = await getPublicReviews(studio.owner_id)

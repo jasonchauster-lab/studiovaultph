@@ -427,6 +427,16 @@ export default function InstructorBookingWizard({
                                                                 <div className="bg-cream-100 text-charcoal-500 px-4 py-2.5 rounded-xl text-sm border border-cream-200 italic">
                                                                     No specific equipment listed for this slot.
                                                                 </div>
+                                                            ) : allEq.length === 1 ? (
+                                                                <div className="bg-cream-50 text-charcoal-800 px-5 py-3 rounded-2xl border border-cream-200 flex items-center gap-3">
+                                                                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                                                                        <CheckCircle className="w-5 h-5 text-green-600" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <span className="text-xs text-charcoal-400 uppercase tracking-widest font-bold block leading-none mb-1">Auto-Selected</span>
+                                                                        <span className="text-sm font-medium text-charcoal-900">{allEq[0]}</span>
+                                                                    </div>
+                                                                </div>
                                                             ) : (
                                                                 allEq.map((eq: string) => {
                                                                     const slotWithEq = slotsAtTime.find((s: any) => {

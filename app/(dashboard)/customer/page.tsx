@@ -106,10 +106,11 @@ export default async function CustomerDashboard({
 
         // Filter by Location if set
         if (params.location && params.location !== 'all') {
-            if (params.location.includes(' - ')) {
-                availQuery = availQuery.eq('location_area', params.location)
+            const trimmedLocation = params.location.trim();
+            if (trimmedLocation.includes(' - ')) {
+                availQuery = availQuery.eq('location_area', trimmedLocation)
             } else {
-                availQuery = availQuery.like('location_area', params.location + ' - %')
+                availQuery = availQuery.like('location_area', trimmedLocation + ' - %')
             }
         }
 
@@ -259,70 +260,80 @@ export default async function CustomerDashboard({
                                 </span>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {instructors.map(inst => (
-                                    <div key={inst.id} className="bg-white p-6 rounded-2xl border border-cream-200 shadow-sm hover:shadow-md transition-all">
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div className="flex items-center gap-4">
-                                                <Link href={`/instructors/${inst.id}`} className="shrink-0 w-12 h-12 rounded-full overflow-hidden bg-cream-100 flex items-center justify-center border border-cream-200 hover:opacity-80 transition-opacity">
-                                                    {inst.avatar_url ? (
-                                                        <Image
-                                                            src={inst.avatar_url}
-                                                            alt={inst.full_name}
-                                                            width={48}
-                                                            height={48}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <User className="w-6 h-6 text-charcoal-400" />
-                                                    )}
-                                                </Link>
-                                                <div>
-                                                    <h3 className="font-medium text-charcoal-900">{inst.full_name}</h3>
-                                                    {inst.instagram_handle && (
-                                                        <p className="text-xs text-charcoal-500 mb-1">@{inst.instagram_handle}</p>
-                                                    )}
-                                                    <StarRating rating={ratingsMap[inst.id]?.average || null} count={ratingsMap[inst.id]?.count} size="sm" />
-                                                </div>
-                                            </div>
-                                            {inst.certifications?.some((c: any) => c.verified) && (
-                                                <div className="text-green-600">
-                                                    <Award className="w-5 h-5" />
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="space-y-2 mb-6">
-                                            <div className="flex flex-wrap gap-2">
-                                                {inst.certifications?.filter((c: any) => c.verified).map((c: any) => (
-                                                    <span key={c.id} className="text-[10px] uppercase tracking-wider bg-cream-100 text-charcoal-600 px-2 py-1 rounded-md">
-                                                        {c.certification_body}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        <Link href={`/instructors/${inst.id}`} className="block w-full text-center py-2 mt-4 rounded-lg border border-charcoal-200 text-charcoal-900 hover:bg-charcoal-50 transition-colors">
-                                            View Profile
-                                        </Link>
-
-                                        {/* Book Button (Only if filters active) */}
-                                        {
-                                            params.date && params.time && params.location && params.location !== 'all' && params.equipment && params.equipment !== 'all' && (
-                                                <div className="mt-2">
-                                                    <BookSessionButton
-                                                        instructorId={inst.id}
-                                                        date={params.date}
-                                                        time={params.time}
-                                                        location={params.location} // Validated as string above
-                                                        equipment={params.equipment}
-                                                    />
-                                                </div>
-                                            )
-                                        }
+                            {instructors.length === 0 ? (
+                                <div className="text-center py-12 bg-white rounded-xl border border-cream-200">
+                                    <div className="w-16 h-16 bg-cream-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-cream-100">
+                                        <User className="w-8 h-8 text-charcoal-300" />
                                     </div>
-                                ))}
-                            </div>
+                                    <h3 className="text-lg font-medium text-charcoal-900">No instructors available for this equipment at this time</h3>
+                                    <p className="text-charcoal-500 max-w-sm mx-auto mt-1">Try adjusting your filters, location, or checking a different date.</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {instructors.map(inst => (
+                                        <div key={inst.id} className="bg-white p-6 rounded-2xl border border-cream-200 shadow-sm hover:shadow-md transition-all">
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div className="flex items-center gap-4">
+                                                    <Link href={`/instructors/${inst.id}`} className="shrink-0 w-12 h-12 rounded-full overflow-hidden bg-cream-100 flex items-center justify-center border border-cream-200 hover:opacity-80 transition-opacity">
+                                                        {inst.avatar_url ? (
+                                                            <Image
+                                                                src={inst.avatar_url}
+                                                                alt={inst.full_name}
+                                                                width={48}
+                                                                height={48}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <User className="w-6 h-6 text-charcoal-400" />
+                                                        )}
+                                                    </Link>
+                                                    <div>
+                                                        <h3 className="font-medium text-charcoal-900">{inst.full_name}</h3>
+                                                        {inst.instagram_handle && (
+                                                            <p className="text-xs text-charcoal-500 mb-1">@{inst.instagram_handle}</p>
+                                                        )}
+                                                        <StarRating rating={ratingsMap[inst.id]?.average || null} count={ratingsMap[inst.id]?.count} size="sm" />
+                                                    </div>
+                                                </div>
+                                                {inst.certifications?.some((c: any) => c.verified) && (
+                                                    <div className="text-green-600">
+                                                        <Award className="w-5 h-5" />
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="space-y-2 mb-6">
+                                                <div className="flex flex-wrap gap-2">
+                                                    {inst.certifications?.filter((c: any) => c.verified).map((c: any) => (
+                                                        <span key={c.id} className="text-[10px] uppercase tracking-wider bg-cream-100 text-charcoal-600 px-2 py-1 rounded-md">
+                                                            {c.certification_body}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <Link href={`/instructors/${inst.id}`} className="block w-full text-center py-2 mt-4 rounded-lg border border-charcoal-200 text-charcoal-900 hover:bg-charcoal-50 transition-colors">
+                                                View Profile
+                                            </Link>
+
+                                            {/* Book Button (Only if filters active) */}
+                                            {
+                                                params.date && params.time && params.location && params.location !== 'all' && params.equipment && params.equipment !== 'all' && (
+                                                    <div className="mt-2">
+                                                        <BookSessionButton
+                                                            instructorId={inst.id}
+                                                            date={params.date}
+                                                            time={params.time}
+                                                            location={params.location} // Validated as string above
+                                                            equipment={params.equipment}
+                                                        />
+                                                    </div>
+                                                )
+                                            }
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </section>
                     )}
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
-import { Loader2, CheckCircle, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Loader2, CheckCircle, Calendar, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react'
 import clsx from 'clsx'
 import { useRouter } from 'next/navigation'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays } from 'date-fns'
@@ -382,26 +382,28 @@ export default function BookingSection({
 
                     <div className="max-w-md space-y-4">
 
-                        {/* Equipment Selector */}
-                        <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-1">
-                                Select Equipment
-                            </label>
-                            <select
-                                value={selectedEquipment}
-                                onChange={(e) => {
-                                    setSelectedEquipment(e.target.value);
-                                    setQuantity(1); // Reset qty on equipment change
-                                }}
-                                className="w-full px-4 py-2 bg-white border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-                            >
-                                {equipmentTypes.map(eq => (
-                                    <option key={eq} value={eq}>
-                                        {eq} ({equipmentCounts[eq]} available)
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        {/* Equipment Selector - Hide if only one option to save space/clicks */}
+                        {equipmentTypes.length > 1 ? (
+                            <div>
+                                <label className="block text-sm font-medium text-charcoal-700 mb-1">
+                                    Select Equipment
+                                </label>
+                                <select
+                                    value={selectedEquipment}
+                                    onChange={(e) => {
+                                        setSelectedEquipment(e.target.value);
+                                        setQuantity(1); // Reset qty on equipment change
+                                    }}
+                                    className="w-full px-4 py-2 bg-white border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
+                                >
+                                    {equipmentTypes.map(eq => (
+                                        <option key={eq} value={eq}>
+                                            {eq} ({equipmentCounts[eq]} available)
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        ) : null}
 
                         {/* Quantity Selector */}
                         <div>
@@ -430,24 +432,27 @@ export default function BookingSection({
                             <label className="block text-sm font-medium text-charcoal-700 mb-1">
                                 Select Your Instructor
                             </label>
-                            <select
-                                value={selectedInstructor}
-                                onChange={(e) => setSelectedInstructor(e.target.value)}
-                                className="w-full px-4 py-2 bg-white border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-                            >
-                                <option value="">-- Choose an Instructor --</option>
-                                {availableInstructors.length > 0 ? (
-                                    availableInstructors.map(inst => (
+                            {availableInstructors.length > 0 ? (
+                                <select
+                                    value={selectedInstructor}
+                                    onChange={(e) => setSelectedInstructor(e.target.value)}
+                                    className="w-full px-4 py-2 bg-white border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
+                                >
+                                    <option value="">-- Choose an Instructor --</option>
+                                    {availableInstructors.map(inst => (
                                         <option key={inst.id} value={inst.id}>
                                             {inst.full_name}
                                         </option>
-                                    ))
-                                ) : (
-                                    <option value="" disabled>No instructors available at this time</option>
-                                )}
-                            </select>
+                                    ))}
+                                </select>
+                            ) : (
+                                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-700 text-sm flex items-center gap-2">
+                                    <AlertCircle className="w-4 h-4 shrink-0" />
+                                    <span>No instructors available for this equipment at this time.</span>
+                                </div>
+                            )}
                             <p className="text-xs text-charcoal-500 mt-1">
-                                {availableInstructors.length === 0 ? "None of our verified instructors are available for this specific time slot." : "Don't see your instructor? Tell them to verify their profile on StudioVaultPH!"}
+                                {availableInstructors.length > 0 && "Don't see your instructor? Tell them to verify their profile on StudioVaultPH!"}
                             </p>
                         </div>
 
