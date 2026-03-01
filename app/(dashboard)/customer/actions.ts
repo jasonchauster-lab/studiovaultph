@@ -58,7 +58,7 @@ export async function requestBooking(
     if (studioOwnerProfile?.is_suspended) {
         return { error: `The studio "${studioOwnerProfile.full_name || 'Partner Studio'}" is currently not accepting new bookings.` }
     }
-    if (studioOwnerProfile && (studioOwnerProfile.available_balance || 0) < 0) {
+    if (studioOwnerProfile && (studioOwnerProfile.available_balance ?? 0) < 0) {
         return { error: `The studio "${studioOwnerProfile.full_name || 'Partner Studio'}" is currently not accepting new bookings due to a pending balance settlement.` }
     }
 
@@ -69,7 +69,7 @@ export async function requestBooking(
         .eq('id', instructorId)
         .single()
 
-    if (instructor && (instructor.available_balance || 0) < 0) {
+    if (instructor && (instructor.available_balance ?? 0) < 0) {
         return { error: `${instructor.full_name || 'The instructor'} is currently not accepting new bookings due to a pending balance settlement.` }
     }
 
@@ -90,11 +90,12 @@ export async function requestBooking(
 
     // ✅ Run TWO separate queries instead of .or() to avoid PostgREST NULL ambiguity:
     // Query A: date-specific availability (instructor set a specific date)
+    const trimmedLocation = studio.location?.trim()
     const { data: availByDate } = await supabase
         .from('instructor_availability')
         .select('id, group_id')
         .eq('instructor_id', instructorId)
-        .eq('location_area', studio.location)
+        .eq('location_area', trimmedLocation)
         .eq('date', manilaDateStr)
         .lte('start_time', timeStr)
         .gt('end_time', timeStr)
@@ -106,7 +107,7 @@ export async function requestBooking(
         .from('instructor_availability')
         .select('id, group_id')
         .eq('instructor_id', instructorId)
-        .eq('location_area', studio.location)
+        .eq('location_area', trimmedLocation)
         .eq('day_of_week', manilaDayOfWeek)
         .is('date', null) // Only weekly-recurring entries (not date-specific)
         .lte('start_time', timeStr)
@@ -175,7 +176,7 @@ export async function requestBooking(
         .eq('id', user.id)
         .single();
 
-    const walletBalance = profile?.available_balance || 0;
+    const walletBalance = profile?.available_balance ?? 0;
     const deduction = Math.min(walletBalance, totalPrice);
     const finalPrice = totalPrice - deduction;
 
@@ -589,7 +590,7 @@ export async function bookInstructorSession(
         return { error: 'This instructor is not currently accepting bookings.' }
     }
 
-    if (instructorProfile && (instructorProfile.available_balance || 0) < 0) {
+    if (instructorProfile && (instructorProfile.available_balance ?? 0) < 0) {
         return { error: `${instructorProfile.full_name || 'The instructor'} is currently not accepting new bookings due to a pending balance settlement.` }
     }
 
@@ -597,13 +598,14 @@ export async function bookInstructorSession(
     const manilaDateStr = date;
     const manilaDayOfWeek = startDateTime.getDay();
     const timeStr = time.length === 5 ? time + ':00' : time;
+    const trimmedLocation = location?.trim();
 
     // Query A: date-specific availability
     const { data: availByDate } = await supabase
         .from('instructor_availability')
         .select('id, group_id')
         .eq('instructor_id', instructorId)
-        .eq('location_area', location)
+        .eq('location_area', trimmedLocation)
         .eq('date', manilaDateStr)
         .lte('start_time', timeStr)
         .gt('end_time', timeStr)
@@ -615,7 +617,7 @@ export async function bookInstructorSession(
         .from('instructor_availability')
         .select('id, group_id')
         .eq('instructor_id', instructorId)
-        .eq('location_area', location)
+        .eq('location_area', trimmedLocation)
         .eq('day_of_week', manilaDayOfWeek)
         .is('date', null)
         .lte('start_time', timeStr)
@@ -653,7 +655,7 @@ export async function bookInstructorSession(
         .eq('is_available', true)
         .eq('start_time', startDateTime.toISOString()) // Exact match for slot start
         //.eq('end_time', endDateTime.toISOString()) // Optional, if slots are strict 1 hour
-        .eq('studios.location', location)
+        .eq('studios.location', trimmedLocation)
         .eq('studios.verified', true)
         .gte(`equipment->>${equipment}`, '1') // Ensure at least 1 available via JSONB path
 
@@ -669,7 +671,7 @@ export async function bookInstructorSession(
     // 2.1 Filter by Studio Owner's Status
     const filteredSlots = availableSlots.filter((s: any) => {
         const owner = Array.isArray(s.studios.profiles) ? s.studios.profiles[0] : s.studios.profiles;
-        return !owner?.is_suspended && (owner?.available_balance || 0) >= 0;
+        return !owner?.is_suspended && (owner?.available_balance ?? 0) >= 0;
     });
 
     if (filteredSlots.length === 0) {

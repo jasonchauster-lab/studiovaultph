@@ -126,8 +126,8 @@ export default function BookingSection({
                     className={clsx(
                         "h-12 flex flex-col items-center justify-center rounded-xl text-sm transition-all focus:outline-none",
                         !isSameMonth(day, monthStart) ? "text-cream-300 pointer-events-none" : "",
-                        isSameMonth(day, monthStart) && !hasSlots && !isPast && !isSelected ? "text-charcoal-400 opacity-50" : "",
-                        isPast ? "text-cream-300 pointer-events-none opacity-50" : "",
+                        isSameMonth(day, monthStart) && !hasSlots && !isPast && !isSelected ? "text-charcoal-500 opacity-60" : "",
+                        isPast ? "text-cream-400 pointer-events-none opacity-40" : "",
                         hasSlots && !isSelected ? "bg-cream-100 text-charcoal-900 font-medium hover:bg-cream-200 cursor-pointer border border-cream-200" : "",
                         isSelected ? "bg-charcoal-900 text-cream-50 font-bold shadow-md transform scale-105" : ""
                     )}
@@ -172,14 +172,18 @@ export default function BookingSection({
     const equipmentCounts: Record<string, number> = {};
     if (slotsInGroup) {
         slotsInGroup.forEach(s => {
-            const eq = s.equipment?.[0] || 'Unknown';
+            // Priority: equipment[0] or first key in pricing mapping
+            const eq = s.equipment?.[0] || (s as any).equipment_type || 'Unknown';
             equipmentCounts[eq] = (equipmentCounts[eq] || 0) + 1;
         });
     }
-    const equipmentTypes = Object.keys(equipmentCounts);
+    const equipmentTypes = Object.keys(equipmentCounts).filter(e => e !== 'Unknown');
 
     // Filter slots by selected equipment to get the right primary ID and count
-    const slotsForSelectedEquipment = slotsInGroup?.filter(s => (s.equipment?.[0] || 'Unknown') === selectedEquipment) || [];
+    const slotsForSelectedEquipment = slotsInGroup?.filter(s => {
+        const eq = s.equipment?.[0] || (s as any).equipment_type || 'Unknown';
+        return eq === selectedEquipment;
+    }) || [];
     const maxQuantity = slotsForSelectedEquipment.length;
 
     // Helper to calculate price
@@ -322,11 +326,16 @@ export default function BookingSection({
 
                                 // Default to first equipment type found in this new group
                                 const newGroup = groupedSlots[key];
-                                const firstEq = newGroup[0]?.equipment?.[0] || 'Unknown';
+                                const firstEq = newGroup[0]?.equipment?.[0] || (newGroup[0] as any).equipment_type || 'Unknown';
                                 setSelectedEquipment(firstEq);
 
-                                window.localStorage.setItem('booking_start', start.toISOString());
-                                window.localStorage.setItem('booking_end', end.toISOString());
+                                // Safety check for date values before toISOString()
+                                try {
+                                    window.localStorage.setItem('booking_start', start.toISOString());
+                                    window.localStorage.setItem('booking_end', end.toISOString());
+                                } catch (e) {
+                                    console.error("Invalid date for storage:", e);
+                                }
                             }}
                             className={clsx(
                                 "p-5 rounded-2xl border text-left transition-all relative overflow-hidden",
@@ -350,9 +359,9 @@ export default function BookingSection({
                                 {Array.from(eqOverview).map(eq => (
                                     <span key={eq} className={clsx(
                                         "text-[10px] uppercase tracking-widest px-2 py-1 rounded-lg inline-block border font-bold",
-                                        isSelected ? "border-white/30 text-white/80" : "border-cream-200 text-charcoal-400"
+                                        isSelected ? "border-white/30 text-white/80" : "border-cream-200 text-charcoal-500"
                                     )}>
-                                        {eq}
+                                        {eq !== 'Unknown' ? eq : 'Equipment'}
                                     </span>
                                 ))}
                             </div>

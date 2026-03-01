@@ -122,14 +122,24 @@ export default function InstructorBookingWizard({
         const primarySlot = slotsAtTime[0]
         setSelectedStudioSlot(primarySlot.id)
 
-        // Aggregate unique equipment at this time
-        const allEq = Array.from(new Set(slotsAtTime.flatMap((s: any) => s.equipment || []))) as string[]
-        const firstEq = allEq[0] || 'Reformer'
+        // Aggregate unique equipment at this time (handle JSONB object keys)
+        const equipmentData = primarySlot.equipment || {}
+        const allEq = Array.isArray(equipmentData) ? equipmentData : Object.keys(equipmentData)
+
+        // Use a fallback prompt if no equipment is available or found
+        const firstEq = allEq[0] || ''
         setSelectedEquipment(firstEq)
 
         // Max quantity for this specific equipment at this time
-        const slotsWithEq = slotsAtTime.filter((s: any) => (s.equipment as string[] | undefined)?.includes(firstEq))
-        setMaxQuantity(Math.max(1, slotsWithEq.length))
+        let count = 0
+        if (firstEq) {
+            if (Array.isArray(primarySlot.equipment)) {
+                count = primarySlot.equipment.filter((e: string) => e === firstEq).length
+            } else if (typeof primarySlot.equipment === 'object') {
+                count = primarySlot.equipment[firstEq] || 0
+            }
+        }
+        setMaxQuantity(Math.max(1, count))
         setQuantity(1)
     }
 
@@ -149,8 +159,22 @@ export default function InstructorBookingWizard({
             setSelectedStudioSlot(bestSlot.id)
         }
 
-        const slotsWithEq = slotsAtTime.filter((s: any) => (s.equipment as string[] | undefined)?.includes(eq))
-        setMaxQuantity(Math.max(1, slotsWithEq.length))
+        const slotsWithEq = slotsAtTime.filter((s: any) => {
+            if (Array.isArray(s.equipment)) return s.equipment.includes(eq)
+            if (typeof s.equipment === 'object') return !!s.equipment[eq]
+            return false
+        })
+
+        // Use the actual count from the primary slot if it's JSONB, or the filtered array length
+        let count = 1
+        const primaryEquipment = primarySlot?.equipment
+        if (Array.isArray(primaryEquipment)) {
+            count = slotsWithEq.length
+        } else if (typeof primaryEquipment === 'object') {
+            count = primaryEquipment[eq] || 0
+        }
+
+        setMaxQuantity(Math.max(1, count))
         setQuantity(1)
     }
 
@@ -248,7 +272,7 @@ export default function InstructorBookingWizard({
                                             "flex flex-col items-center min-w-[72px] py-3 rounded-2xl border transition-all snap-start flex-shrink-0",
                                             isSelected
                                                 ? "bg-charcoal-900 border-charcoal-900 text-cream-50 shadow-md"
-                                                : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
+                                                : "bg-white border-charcoal-400 text-charcoal-700 hover:border-charcoal-600"
                                         )}
                                     >
                                         <span className="text-[10px] uppercase tracking-widest font-bold opacity-60 mb-0.5">{isTodayPill ? 'Today' : d.label.split(' ')[0]}</span>
@@ -387,7 +411,10 @@ export default function InstructorBookingWizard({
                                         const slotsAtTime = result.matchingSlots.filter((s: any) =>
                                             s.start_time === result.matchingSlots.find((ms: any) => ms.id === selectedStudioSlot)?.start_time
                                         );
-                                        const allEq = Array.from(new Set(slotsAtTime.flatMap((s: any) => s.equipment || [])));
+                                        const equipmentData = slotsAtTime[0]?.equipment || {}
+                                        const allEq = (Array.isArray(equipmentData)
+                                            ? Array.from(new Set(slotsAtTime.flatMap((s: any) => s.equipment || [])))
+                                            : Object.keys(equipmentData)) as string[];
 
                                         return (
                                             <div className="border-t border-cream-100 pt-4 space-y-5 animate-in fade-in slide-in-from-top-2">
@@ -396,31 +423,45 @@ export default function InstructorBookingWizard({
                                                     <div className="sm:col-span-2">
                                                         <label className="text-xs font-bold text-charcoal-400 uppercase tracking-widest block mb-3">Select Equipment</label>
                                                         <div className="flex flex-wrap gap-2">
-                                                            {allEq.map(eq => {
-                                                                const count = slotsAtTime.filter((s: any) => (s.equipment as string[] | undefined)?.includes(eq as string)).length;
-                                                                const isSelected = selectedEquipment === eq;
-                                                                return (
-                                                                    <button
-                                                                        key={eq as string}
-                                                                        type="button"
-                                                                        onClick={() => handleEquipmentChange(eq as string)}
-                                                                        className={clsx(
-                                                                            "px-4 py-2.5 rounded-xl border text-sm font-medium transition-all flex items-center gap-2",
-                                                                            isSelected
-                                                                                ? "bg-charcoal-900 border-charcoal-900 text-cream-50 shadow-md ring-2 ring-charcoal-900/10"
-                                                                                : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
-                                                                        )}
-                                                                    >
-                                                                        <span>{eq as string}</span>
-                                                                        <span className={clsx(
-                                                                            "text-[10px] px-1.5 py-0.5 rounded-full",
-                                                                            isSelected ? "bg-charcoal-800 text-cream-200" : "bg-cream-100 text-charcoal-500"
-                                                                        )}>
-                                                                            {count} {count === 1 ? 'slot' : 'slots'}
-                                                                        </span>
-                                                                    </button>
-                                                                );
-                                                            })}
+                                                            {allEq.length === 0 ? (
+                                                                <div className="bg-cream-100 text-charcoal-500 px-4 py-2.5 rounded-xl text-sm border border-cream-200 italic">
+                                                                    No specific equipment listed for this slot.
+                                                                </div>
+                                                            ) : (
+                                                                allEq.map((eq: string) => {
+                                                                    const slotWithEq = slotsAtTime.find((s: any) => {
+                                                                        if (Array.isArray(s.equipment)) return s.equipment.includes(eq)
+                                                                        if (typeof s.equipment === 'object' && s.equipment !== null) return !!(s.equipment as Record<string, any>)[eq]
+                                                                        return false
+                                                                    });
+                                                                    const count = Array.isArray(slotWithEq?.equipment)
+                                                                        ? slotsAtTime.filter((s: any) => s.equipment?.includes(eq)).length
+                                                                        : (slotWithEq?.equipment as Record<string, any>)?.[eq] || 0;
+
+                                                                    const isSelected = selectedEquipment === eq;
+                                                                    return (
+                                                                        <button
+                                                                            key={eq as string}
+                                                                            type="button"
+                                                                            onClick={() => handleEquipmentChange(eq as string)}
+                                                                            className={clsx(
+                                                                                "px-4 py-2.5 rounded-xl border text-sm font-medium transition-all flex items-center gap-2",
+                                                                                isSelected
+                                                                                    ? "bg-charcoal-900 border-charcoal-900 text-cream-50 shadow-md ring-2 ring-charcoal-900/10"
+                                                                                    : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
+                                                                            )}
+                                                                        >
+                                                                            <span>{eq as string}</span>
+                                                                            <span className={clsx(
+                                                                                "text-[10px] px-1.5 py-0.5 rounded-full",
+                                                                                isSelected ? "bg-charcoal-800 text-cream-200" : "bg-cream-100 text-charcoal-500"
+                                                                            )}>
+                                                                                {count} {count === 1 ? 'slot' : 'slots'}
+                                                                            </span>
+                                                                        </button>
+                                                                    );
+                                                                })
+                                                            )}
                                                         </div>
                                                     </div>
 

@@ -24,6 +24,8 @@ export async function findMatchingStudios(
     const searchStart = new Date(`${dateStr}T${startTimeStr}+08:00`)
     const searchEnd = new Date(`${dateStr}T${endTimeStr}+08:00`)
 
+    const trimmedLocationArea = locationArea?.trim()
+
     // 2. Query Slots in Location
     // We join studios to filter by location
     const { data: slots, error } = await supabase
@@ -39,7 +41,7 @@ export async function findMatchingStudios(
             )
         `)
         .eq('is_available', true)
-        .eq('studios.location', locationArea) // Assumes exact match on location area text
+        .eq('studios.location', trimmedLocationArea) // Trimmed match
         .gte('start_time', searchStart.toISOString())
         .lte('end_time', searchEnd.toISOString())
         .order('start_time', { ascending: true })

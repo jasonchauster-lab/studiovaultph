@@ -84,7 +84,7 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
                 slots!inner(start_time, end_time, studios(name))
             `)
             .in('slot_id', slotIds)
-            .in('status', ['approved', 'completed', 'cancelled_charged', 'cancelled_refunded'])
+            .or('status.in.(approved,completed,cancelled_charged,cancelled_refunded),payment_status.eq.submitted')
             .order('created_at', { ascending: false })
 
         if (startDate) bookingsQuery = bookingsQuery.gte('slots.start_time', startDate)
@@ -127,8 +127,8 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             const penaltyAmount = Number(breakdown?.penalty_amount || 0)
             const initiator = breakdown?.refund_initiator
 
-            // Scenario A: Successful Booking
-            if (['approved', 'completed', 'cancelled_charged'].includes(b.status)) {
+            // Scenario A: Successful or Pending Booking (awaiting approval)
+            if (['approved', 'completed', 'cancelled_charged'].includes(b.status) || b.payment_status === 'submitted') {
                 grossEarnings += studioFee
             }
 
@@ -170,11 +170,11 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             const penaltyAmount = Number(breakdown?.penalty_amount || 0)
             const initiator = breakdown?.refund_initiator
 
-            // Add the booking transaction itself if valid
-            if (['approved', 'completed', 'cancelled_charged'].includes(b.status)) {
+            // Add the booking transaction itself if valid or pending verification
+            if (['approved', 'completed', 'cancelled_charged'].includes(b.status) || b.payment_status === 'submitted') {
                 transactions.push({
                     date: slot?.start_time || b.created_at,
-                    type: 'Booking',
+                    type: b.payment_status === 'submitted' && b.status === 'pending' ? 'Booking (Verification)' : 'Booking',
                     client: clientName,
                     instructor: instructorName,
                     studio: studioName,
