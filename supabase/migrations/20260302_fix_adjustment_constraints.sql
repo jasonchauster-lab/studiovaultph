@@ -5,6 +5,7 @@
 ALTER TABLE public.wallet_top_ups DROP CONSTRAINT IF EXISTS wallet_top_ups_amount_check;
 
 -- 2. Add a more appropriate check (amount should not be zero)
+ALTER TABLE public.wallet_top_ups DROP CONSTRAINT IF EXISTS wallet_top_ups_amount_nonzero_check;
 ALTER TABLE public.wallet_top_ups ADD CONSTRAINT wallet_top_ups_amount_nonzero_check CHECK (amount <> 0);
 
 -- 3. Create Atomic RPC for Admin Balance Adjustments

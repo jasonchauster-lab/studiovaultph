@@ -276,7 +276,6 @@ export default async function AdminDashboard({
         `)
         .eq('status', 'pending')
         .eq('type', 'top_up')
-        .not('payment_proof_url', 'is', null)
         .order('created_at', { ascending: false })
 
     console.log('[AdminDashboard] Fetched pending top-ups:', pendingTopUps?.length || 0)

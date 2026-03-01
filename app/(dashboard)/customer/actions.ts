@@ -1011,9 +1011,11 @@ export async function topUpWallet(amount: number) {
         .single()
 
     if (error) {
-        console.error('Error creating top-up request:', error)
+        console.error('[TopUpWallet] Error creating top-up request:', error)
         return { error: 'Failed to create top-up request.' }
     }
+
+    console.log('[TopUpWallet] Created record successfully:', data.id)
 
     revalidatePath('/customer/wallet')
     return { success: true, topUpId: data.id }

@@ -270,8 +270,13 @@ export default function InstructorDashboardClient() {
                                                     <div className="flex items-center gap-2">
                                                         <Box className="w-4 h-4 text-charcoal-400" />
                                                         <p className="text-sm font-bold text-charcoal-700">
-                                                            {session.price_breakdown?.equipment || 'Standard'}
-                                                            <span className="ml-1.5 px-1.5 py-0.5 bg-cream-100 text-charcoal-500 text-[10px] rounded">x{session.price_breakdown?.quantity || 1}</span>
+                                                            {Array.isArray(session.equipment) && session.equipment.length > 0
+                                                                ? session.equipment.join(', ')
+                                                                : (session.price_breakdown?.equipment || 'Standard')
+                                                            }
+                                                            {(!Array.isArray(session.equipment) || session.equipment.length === 0) && (
+                                                                <span className="ml-1.5 px-1.5 py-0.5 bg-cream-100 text-charcoal-500 text-[10px] rounded">x{session.price_breakdown?.quantity || 1}</span>
+                                                            )}
                                                         </p>
                                                     </div>
                                                 </div>
