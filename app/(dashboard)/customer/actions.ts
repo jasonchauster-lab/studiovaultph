@@ -73,6 +73,19 @@ export async function requestBooking(
         return { error: `${instructor.full_name || 'The instructor'} is currently not accepting new bookings due to a pending balance settlement.` }
     }
 
+    // --- EQUIPMENT DETERMINATION START ---
+    const equipmentObj = (slot.equipment && typeof slot.equipment === 'object' && !Array.isArray(slot.equipment))
+        ? slot.equipment as Record<string, number>
+        : {};
+
+    const requestedEqStripped = (equipment || '').trim().toLowerCase();
+    const actualKey = Object.keys(equipmentObj).find(k => k.trim().toLowerCase() === requestedEqStripped)
+        || Object.keys(equipmentObj)[0]
+        || '';
+
+    const selectedEquipment = actualKey;
+    // --- EQUIPMENT DETERMINATION END ---
+
     // --- AVAILABILITY VALIDATION START ---
     const slotStart = new Date(slot.start_time);
 
@@ -98,6 +111,7 @@ export async function requestBooking(
         .select('id, group_id, location_area')
         .eq('instructor_id', instructorId)
         .ilike('location_area', trimmedLocation ?? '')   // case+whitespace-safe match
+        .ilike('equipment_type', selectedEquipment ?? '%') // Added equipment sync
         .eq('date', manilaDateStr)
         .lte('start_time', timeStr)
         .gt('end_time', timeStr)
@@ -110,6 +124,7 @@ export async function requestBooking(
         .select('id, group_id, location_area')
         .eq('instructor_id', instructorId)
         .ilike('location_area', trimmedLocation ?? '')   // case+whitespace-safe match
+        .ilike('equipment_type', selectedEquipment ?? '%') // Added equipment sync
         .eq('day_of_week', manilaDayOfWeek)
         .is('date', null) // Only weekly-recurring entries (not date-specific)
         .lte('start_time', timeStr)
@@ -138,14 +153,6 @@ export async function requestBooking(
     // --- AVAILABILITY VALIDATION END ---
 
     // --- PRICE CALCULATION START ---
-    // 1. Determine Equipment — JSONB object: { "Reformer": 3, "Tower": 1 }
-    const equipmentObj = (slot.equipment && typeof slot.equipment === 'object' && !Array.isArray(slot.equipment))
-        ? slot.equipment as Record<string, number>
-        : {};
-
-    // Use the caller's selection; fall back to first available key in the JSONB object
-    const selectedEquipment = equipment?.trim() || Object.keys(equipmentObj)[0] || '';
-
     if (!selectedEquipment) {
         return { error: 'No equipment type could be determined for this slot. Please select an equipment type and try again.' }
     }
@@ -616,7 +623,8 @@ export async function bookInstructorSession(
         .from('instructor_availability')
         .select('id, group_id')
         .eq('instructor_id', instructorId)
-        .eq('location_area', trimmedLocation)
+        .ilike('location_area', trimmedLocation)
+        .ilike('equipment_type', equipment ?? '%') // Added equipment sync
         .eq('date', manilaDateStr)
         .lte('start_time', timeStr)
         .gt('end_time', timeStr)
@@ -628,7 +636,8 @@ export async function bookInstructorSession(
         .from('instructor_availability')
         .select('id, group_id')
         .eq('instructor_id', instructorId)
-        .eq('location_area', trimmedLocation)
+        .ilike('location_area', trimmedLocation)
+        .ilike('equipment_type', equipment ?? '%') // Added equipment sync
         .eq('day_of_week', manilaDayOfWeek)
         .is('date', null)
         .lte('start_time', timeStr)

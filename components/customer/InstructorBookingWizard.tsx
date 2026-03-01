@@ -124,17 +124,17 @@ export default function InstructorBookingWizard({
 
         // Aggregate unique equipment at this time — always use Object.keys() for JSONB
         const equipmentData = primarySlot.equipment
-        const allEq: string[] = equipmentData && typeof equipmentData === 'object' && !Array.isArray(equipmentData)
+        const allEq: string[] = (equipmentData && typeof equipmentData === 'object' && !Array.isArray(equipmentData))
             ? Object.keys(equipmentData).filter(k => (equipmentData[k] ?? 0) > 0)
             : []
 
-        // Auto-select the first (or only) equipment type so label is never blank
+        // Case-insensitive equipment selection
         const firstEq = allEq[0] || ''
         setSelectedEquipment(firstEq)
 
-        // Max quantity = JSONB value for that key
+        // Max quantity = JSONB value for that key (case-insensitive lookup just in case)
         const count = firstEq && typeof equipmentData === 'object' && !Array.isArray(equipmentData)
-            ? (equipmentData[firstEq] ?? 0)
+            ? (equipmentData[allEq[0]] ?? 0)
             : 0
         setMaxQuantity(Math.max(1, count))
         setQuantity(1)
@@ -151,9 +151,11 @@ export default function InstructorBookingWizard({
 
         // For JSONB equipment, the count is stored directly in the primary slot
         const primaryEquipment = primarySlot?.equipment
-        const count = primaryEquipment && typeof primaryEquipment === 'object' && !Array.isArray(primaryEquipment)
-            ? (primaryEquipment[eq] ?? 0)
-            : 0
+        const actualKey = (primaryEquipment && typeof primaryEquipment === 'object' && !Array.isArray(primaryEquipment))
+            ? Object.keys(primaryEquipment).find(k => k.trim().toLowerCase() === eq.trim().toLowerCase())
+            : null;
+
+        const count = actualKey ? (primaryEquipment[actualKey] ?? 0) : 0
 
         setMaxQuantity(Math.max(1, count))
         setQuantity(1)
