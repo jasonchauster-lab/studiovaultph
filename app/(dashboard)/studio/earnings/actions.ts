@@ -61,10 +61,13 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
                 transactions: [],
                 summary: {
                     totalEarnings: 0,
+                    totalCompensation: 0,
+                    totalPenalty: 0,
+                    netEarnings: 0,
                     totalPaidOut: 0,
                     pendingPayouts: 0,
-                    availableBalance: profile?.available_balance || 0,
-                    pendingBalance: profile?.pending_balance || 0,
+                    availableBalance: Number(profile?.available_balance || 0),
+                    pendingBalance: Number(profile?.pending_balance || 0),
                     payoutApprovalStatus: studio?.payout_approval_status || 'none'
                 }
             }
@@ -249,8 +252,8 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
                 netEarnings,
                 totalPaidOut,
                 pendingPayouts: totalPending,
-                availableBalance: profile?.available_balance || 0,
-                pendingBalance: profile?.pending_balance || 0,
+                availableBalance: Number(profile?.available_balance || 0),
+                pendingBalance: Number(profile?.pending_balance || 0),
                 payoutApprovalStatus: studio?.payout_approval_status || 'none'
             }
         }
