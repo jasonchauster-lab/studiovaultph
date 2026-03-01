@@ -136,46 +136,48 @@ export default function InstructorDashboardClient() {
                 </div>
 
                 {/* Earnings Bar */}
-                <div className="bg-white p-6 rounded-2xl border border-cream-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-cream-50 rounded-2xl flex items-center justify-center">
-                            <Wallet className="w-6 h-6 text-charcoal-900" />
+                <div className="bg-charcoal-900 text-white p-6 rounded-2xl border border-charcoal-800 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-rose-gold/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-rose-gold/10 transition-colors" />
+
+                    <div className="flex items-center gap-5 relative z-10">
+                        <div className="w-14 h-14 bg-white/5 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 shadow-inner">
+                            <Wallet className="w-7 h-7 text-rose-gold" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold text-charcoal-500 uppercase tracking-widest mb-0.5">Available Balance</p>
-                            <div className="flex items-center gap-3">
-                                <p className="text-3xl font-bold text-charcoal-900">
+                            <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-1">Available Balance</p>
+                            <div className="flex items-center gap-4">
+                                <p className="text-4xl font-bold tracking-tight">
                                     {availableBalance !== null ? `₱${availableBalance.toLocaleString()}` : '₱0'}
                                 </p>
                                 {availableBalance === null ? (
-                                    <div className="px-2 py-1 bg-cream-100 text-charcoal-600 text-[10px] font-bold uppercase rounded tracking-wider border border-cream-200 animate-pulse">
-                                        Loading...
+                                    <div className="px-2.5 py-1 bg-white/10 text-white/60 text-[10px] font-bold uppercase rounded border border-white/10 animate-pulse">
+                                        Syncing...
                                     </div>
                                 ) : hasPendingPayout ? (
-                                    <div className="px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold uppercase rounded tracking-wider border border-amber-200">
+                                    <div className="px-2.5 py-1 bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase rounded border border-amber-500/20">
                                         Payout Pending
                                     </div>
                                 ) : (
-                                    <div className="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded tracking-wider border border-green-200">
-                                        Active
+                                    <div className="px-2.5 py-1 bg-rose-gold/20 text-rose-gold text-[10px] font-bold uppercase rounded border border-rose-gold/20">
+                                        Verified
                                     </div>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 w-full md:w-auto">
+                    <div className="flex items-center gap-4 w-full md:w-auto relative z-10">
                         <Link
                             href="/instructor/earnings"
-                            className="flex-1 md:flex-none text-center px-4 py-2 text-sm font-bold text-charcoal-600 hover:text-charcoal-900 transition-colors"
+                            className="flex-1 md:flex-none text-center px-4 py-2.5 text-sm font-bold text-white/60 hover:text-white transition-colors"
                         >
-                            View Earnings Stats
+                            History
                         </Link>
                         <Link
                             href="/instructor/payout"
-                            className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-6 py-2 bg-charcoal-900 text-white rounded-xl font-bold hover:bg-charcoal-800 transition-colors shadow-sm"
+                            className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-8 py-3 bg-rose-gold text-white rounded-xl font-bold hover:brightness-110 transition-all shadow-lg shadow-rose-gold/20"
                         >
-                            <ArrowUpRight className="w-4 h-4 text-rose-gold" />
+                            <ArrowUpRight className="w-4 h-4" />
                             Request Payout
                         </Link>
                     </div>
@@ -270,11 +272,11 @@ export default function InstructorDashboardClient() {
                                                     <div className="flex items-center gap-2">
                                                         <Box className="w-4 h-4 text-charcoal-400" />
                                                         <p className="text-sm font-bold text-charcoal-700">
-                                                            {Array.isArray(session.equipment) && session.equipment.length > 0
-                                                                ? session.equipment.join(', ')
+                                                            {Array.isArray(session.slots?.equipment) && session.slots.equipment.length > 0
+                                                                ? session.slots.equipment.join(', ')
                                                                 : (session.price_breakdown?.equipment || 'Standard')
                                                             }
-                                                            {(!Array.isArray(session.equipment) || session.equipment.length === 0) && (
+                                                            {(!Array.isArray(session.slots?.equipment) || session.slots?.equipment?.length === 0) && (
                                                                 <span className="ml-1.5 px-1.5 py-0.5 bg-cream-100 text-charcoal-500 text-[10px] rounded">x{session.price_breakdown?.quantity || 1}</span>
                                                             )}
                                                         </p>
@@ -298,11 +300,11 @@ export default function InstructorDashboardClient() {
                                                             name: session.slots.studios.name,
                                                             isExpired: isChatExpired(session)
                                                         })}
-                                                        className="p-2.5 bg-cream-50 text-charcoal-600 rounded-xl hover:bg-rose-gold hover:text-white transition-all shadow-sm border border-cream-200 relative flex items-center gap-2"
+                                                        className="p-2.5 bg-white text-charcoal-600 rounded-xl hover:bg-rose-gold hover:text-white transition-all shadow-sm border border-cream-200 relative flex items-center gap-2 group/btn"
                                                         title="Message Studio"
                                                     >
                                                         <MessageSquare className="w-4 h-4" />
-                                                        <span className="text-xs font-bold lg:hidden">Message Studio</span>
+                                                        <span className="text-xs font-bold lg:hidden">Studio</span>
                                                         <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} isOpen={activeChat?.id === session.id} />
                                                     </button>
                                                     <button
@@ -312,14 +314,13 @@ export default function InstructorDashboardClient() {
                                                             name: session.client.full_name,
                                                             isExpired: isChatExpired(session)
                                                         })}
-                                                        className="p-2.5 bg-white text-charcoal-600 rounded-xl hover:bg-charcoal-900 hover:text-white transition-all shadow-sm border border-charcoal-200/50 relative flex items-center gap-2"
+                                                        className="p-2.5 bg-white text-charcoal-600 rounded-xl hover:bg-charcoal-900 hover:text-white transition-all shadow-sm border border-charcoal-200/50 relative flex items-center gap-2 group/btn"
                                                         title="Message Client"
                                                     >
                                                         <User className="w-4 h-4" />
-                                                        <span className="text-xs font-bold lg:hidden">Message Client</span>
+                                                        <span className="text-xs font-bold lg:hidden">Client</span>
                                                         <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} isOpen={activeChat?.id === session.id} />
                                                     </button>
-
                                                 </div>
                                             </div>
                                         </div>

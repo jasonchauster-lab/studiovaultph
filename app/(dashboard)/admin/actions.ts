@@ -1333,25 +1333,14 @@ export async function approveTopUp(id: string) {
     if (fetchError || !topUp) return { error: 'Top-up request not found.' }
     if (topUp.status !== 'pending') return { error: 'Top-up request already processed.' }
 
-    // 2. Update status and credit user wallet in a transaction (via RPC or sequential updates)
-    // For simplicity here, we do sequential updates. In production, an RPC or transaction is better.
-    const { error: updateError } = await supabase
-        .from('wallet_top_ups')
-        .update({ status: 'approved', processed_at: new Date().toISOString() })
-        .eq('id', id)
-
-    if (updateError) return { error: 'Failed to approve top-up.' }
-
-    // 3. Increment Wallet Balance
-    const { error: balanceError } = await supabase.rpc('increment_available_balance', {
-        user_id: topUp.user_id,
-        amount: topUp.amount
+    // 2. Execute Atomic Approval via RPC
+    const { error: rpcError } = await supabase.rpc('approve_wallet_top_up', {
+        p_top_up_id: id
     })
 
-    if (balanceError) {
-        console.error('Balance Credit Error:', balanceError)
-        // Note: In an ideal system, we'd rollback the top_up status if this fails.
-        return { error: 'Top-up approved but failed to credit balance.' }
+    if (rpcError) {
+        console.error('Approve RPC Error:', rpcError)
+        return { error: `Failed to approve top-up: ${rpcError.message}` }
     }
 
     // 4. Send Approval Email
@@ -1371,6 +1360,7 @@ export async function approveTopUp(id: string) {
 
     revalidatePath('/admin')
     revalidatePath('/customer/wallet')
+    revalidatePath('/instructor/earnings')
     return { success: true }
 }
 
@@ -1383,16 +1373,16 @@ export async function rejectTopUp(id: string, reason?: string) {
     const { data: topUp } = await supabase.from('wallet_top_ups').select('*').eq('id', id).single()
     if (!topUp) return { error: 'Top-up request not found.' }
 
-    const { error: updateError } = await supabase
-        .from('wallet_top_ups')
-        .update({
-            status: 'rejected',
-            rejection_reason: reason || 'Receipt unreadable or incorrect amount.',
-            processed_at: new Date().toISOString()
-        })
-        .eq('id', id)
+    // 2. Execute Atomic Rejection via RPC
+    const { error: rpcError } = await supabase.rpc('reject_wallet_top_up', {
+        p_top_up_id: id,
+        p_reason: reason || 'Receipt unreadable or incorrect amount.'
+    })
 
-    if (updateError) return { error: 'Failed to reject top-up.' }
+    if (rpcError) {
+        console.error('Reject RPC Error:', rpcError)
+        return { error: `Failed to reject top-up: ${rpcError.message}` }
+    }
 
     // Send Rejection Email
     const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', topUp.user_id).single()
@@ -1486,31 +1476,18 @@ export async function settleInstructorDebt(profileId: string) {
     const currentBalance = profile.available_balance || 0
     if (currentBalance >= 0) return { error: 'Instructor does not have a negative balance.' }
 
-    // 2. Settle the debt (increment by the absolute value of the negative balance)
+    // 2. Settle the debt using Atomic RPC
     const settlementAmount = Math.abs(currentBalance)
-
-    // Create Adjustment Record for Audit Trail
-    const { error: recordError } = await supabase
-        .from('wallet_top_ups')
-        .insert({
-            user_id: profileId,
-            amount: settlementAmount,
-            type: 'admin_adjustment',
-            status: 'approved',
-            admin_notes: `Manual debt settlement by Admin. Original balance: ₱${currentBalance.toLocaleString()}`,
-            processed_at: new Date().toISOString(),
-            payment_proof_url: 'DEBT_SETTLEMENT'
-        })
-
-    if (recordError) return { error: 'Failed to record settlement.' }
-
-    // 3. Update Balance to 0
-    const { error: balanceError } = await supabase.rpc('increment_available_balance', {
-        user_id: profileId,
-        amount: settlementAmount
+    const { error: rpcError } = await supabase.rpc('execute_admin_balance_adjustment', {
+        p_user_id: profileId,
+        p_amount: settlementAmount,
+        p_reason: `Manual debt settlement by Admin. Original balance: ₱${currentBalance.toLocaleString()}`
     })
 
-    if (balanceError) return { error: 'Failed to settle balance.' }
+    if (rpcError) {
+        console.error('Settlement RPC Error:', rpcError)
+        return { error: `Failed to settle balance: ${rpcError.message}` }
+    }
 
     // 4. Send Confirmation Email
     if (profile.email) {
