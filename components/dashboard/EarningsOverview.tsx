@@ -1,3 +1,4 @@
+'use client'
 import { TrendingUp, CreditCard, Wallet, Clock, Info, X, ShieldCheck, AlertCircle } from 'lucide-react'
 import PayoutRequestModal from './PayoutRequestModal'
 import { useState } from 'react'
