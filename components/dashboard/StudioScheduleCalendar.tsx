@@ -31,10 +31,11 @@ interface StudioScheduleCalendarProps {
     studioId: string
     slots: Slot[]
     currentDate: Date
+    dayStrings?: string[]
     availableEquipment: string[]
 }
 
-export default function StudioScheduleCalendar({ studioId, slots, currentDate, availableEquipment }: StudioScheduleCalendarProps) {
+export default function StudioScheduleCalendar({ studioId, slots, currentDate, dayStrings, availableEquipment }: StudioScheduleCalendarProps) {
     const router = useRouter()
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [addMode, setAddMode] = useState<'single' | 'bulk'>('single')
@@ -51,7 +52,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
     // Calendar Calculations
     const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 }) // Monday start
     const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 })
-    const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
+
+    // Use server-provided day strings if available, otherwise fallback to potentially shifted client dates
+    const days = dayStrings ? dayStrings.map((s: string) => new Date(s + "T00:00:00+08:00")) : eachDayOfInterval({ start: weekStart, end: weekEnd })
     const hours = Array.from({ length: 16 }, (_, i) => i + 6) // 6 AM to 9 PM
 
     const handlePrevWeek = () => {
@@ -194,7 +197,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                     <div className="min-w-[800px]">
                         <div className="grid grid-cols-8 border-b border-cream-200 bg-cream-50">
                             <div className="p-4 text-xs font-medium text-charcoal-900 border-r border-cream-200 sticky left-0 bg-cream-50 z-20">TIME</div>
-                            {days.map(day => (
+                            {days.map((day: Date) => (
                                 <div key={day.toString()} className={clsx("p-3 text-center border-r border-cream-200 last:border-r-0 min-w-[100px]", isSameDay(day, new Date()) ? "bg-blue-50/50" : "")}>
                                     <div className="text-xs text-charcoal-800 uppercase mb-1 font-bold tracking-tighter">{format(day, 'EEE')}</div>
                                     <div className={clsx("text-lg font-serif", isSameDay(day, new Date()) ? "text-rose-gold font-black" : "text-charcoal-900")}>{format(day, 'd')}</div>
@@ -209,7 +212,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                         {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                     </div>
 
-                                    {days.map(day => {
+                                    {days.map((day: Date) => {
                                         const dayStr = toManilaDateStr(day)
                                         const cellSlots = slots.filter(s => {
                                             const startHour = parseInt(s.start_time.split(':')[0], 10);
@@ -221,7 +224,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                                 <div
                                                     className="absolute inset-0 opacity-0 group-hover:opacity-10 opacity-0 transition-opacity bg-charcoal-900 flex items-center justify-center cursor-pointer z-0"
                                                     onClick={() => {
-                                                        setSingleDate(format(day, 'yyyy-MM-dd'))
+                                                        setSingleDate(toManilaDateStr(day))
                                                         setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
                                                         setSingleEndTime(`${(hour + 1).toString().padStart(2, '0')}:00`)
                                                         setAddMode('single')
@@ -530,7 +533,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                                         type="checkbox"
                                                         name={`eq_${eq}`}
                                                         id={`edit_eq_${eq}`}
-                                                        defaultChecked={editingSlot.equipment && !!(editingSlot.equipment[eq] || editingSlot.equipment[eq.toUpperCase()])}
+                                                        defaultChecked={editingSlot.equipment && !!(
+                                                            editingSlot.equipment[eq] ||
+                                                            editingSlot.equipment[eq.toUpperCase()] ||
+                                                            editingSlot.equipment[eq.toLowerCase()]
+                                                        )}
                                                         className="w-4 h-4 text-charcoal-900 rounded border-cream-300"
                                                     />
                                                     <label htmlFor={`edit_eq_${eq}`} className="text-sm text-charcoal-700">{eq}</label>
@@ -541,7 +548,12 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                                         name={`qty_${eq}`}
                                                         type="number"
                                                         min="1"
-                                                        defaultValue={editingSlot.equipment?.[eq] || editingSlot.equipment?.[eq.toUpperCase()] || 1}
+                                                        defaultValue={
+                                                            editingSlot.equipment?.[eq] ||
+                                                            editingSlot.equipment?.[eq.toUpperCase()] ||
+                                                            editingSlot.equipment?.[eq.toLowerCase()] ||
+                                                            1
+                                                        }
                                                         className="w-16 px-2 py-1 border border-cream-200 rounded-md bg-white text-sm"
                                                     />
                                                 </div>

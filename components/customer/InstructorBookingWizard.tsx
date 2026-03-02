@@ -294,7 +294,7 @@ export default function InstructorBookingWizard({
                                 const dateMatch = a.date ? a.date === activeDate : a.day_of_week === d?.dayIndex;
                                 const locationMatch = filterLocation ? a.location_area?.trim().toLowerCase() === filterLocation?.trim().toLowerCase() : true;
                                 const notExpired = isToday ? a.end_time.slice(0, 5) > nowManilaTime : true;
-                                const notBooked = !bookedSlotsSet.has(`${activeDate}-${a.start_time.slice(0, 5)}`);
+                                const notBooked = !bookedSlotsSet.has(`${activeDate}|${a.start_time.slice(0, 5)}`);
                                 return dateMatch && locationMatch && notExpired && notBooked;
                             });
 

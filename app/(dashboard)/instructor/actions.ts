@@ -319,9 +319,9 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
         return { error: `The studio "${slot.studios?.name || 'Partner Studio'}" is currently not accepting new bookings due to a pending balance settlement.` }
     }
 
-    // Calculate Duration
-    const start = new Date(slot.start_time);
-    const end = new Date(slot.end_time);
+    // Calculate Duration using combined date and time for robust comparison
+    const start = new Date(`${slot.date}T${slot.start_time}+08:00`);
+    const end = new Date(`${slot.date}T${slot.end_time}+08:00`);
     const durationHours = Math.max(0.5, (end.getTime() - start.getTime()) / (1000 * 60 * 60));
 
     // Calculate Price
@@ -625,8 +625,9 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
     }
 
     const startTimeStr = (booking.slots as any)?.start_time
+    const dateStr = (booking.slots as any)?.date
     const approvedAtStr = booking.approved_at
-    const sessionStart = new Date(startTimeStr)
+    const sessionStart = new Date(`${dateStr}T${startTimeStr}+08:00`)
     const now = new Date()
 
     const diffInHours = (sessionStart.getTime() - now.getTime()) / (1000 * 60 * 60)

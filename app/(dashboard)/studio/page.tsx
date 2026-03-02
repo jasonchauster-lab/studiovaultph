@@ -12,7 +12,7 @@ import Image from 'next/image'
 import StudioStatCards from '@/components/dashboard/StudioStatCards'
 
 import StudioUpcomingBookings from '@/components/dashboard/StudioUpcomingBookings'
-import { toManilaTimeString } from '@/lib/timezone'
+import { toManilaTimeString, toManilaDateStr } from '@/lib/timezone'
 import { format } from 'date-fns'
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
@@ -43,6 +43,7 @@ export default async function StudioDashboard(props: {
     let monthlyRevenue = 0
     let occupancyRate = 0
     let topInstructorName = 'N/A'
+    let dayStrings: string[] = []
 
     const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' })
     const dateParam = typeof searchParams.date === 'string' ? searchParams.date : todayStr
@@ -114,8 +115,13 @@ export default async function StudioDashboard(props: {
 
         // STEP 2c: Fetch Weekly Slots for the calendar (always, regardless of bookings)
         const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
-        const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 })
-        weekEnd.setHours(23, 59, 59, 999)
+
+        // Generate the 7 day strings for this week in Manila time
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(weekStart)
+            d.setDate(d.getDate() + i)
+            dayStrings.push(toManilaDateStr(d))
+        }
 
         const { data: slots } = await supabase
             .from('slots')
@@ -130,8 +136,8 @@ export default async function StudioDashboard(props: {
                 )
             `)
             .eq('studio_id', myStudio.id)
-            .gte('date', format(weekStart, 'yyyy-MM-dd'))
-            .lte('date', format(weekEnd, 'yyyy-MM-dd'))
+            .gte('date', dayStrings[0])
+            .lte('date', dayStrings[6])
 
         if (slots) {
             weeklySlots = slots
@@ -238,6 +244,7 @@ export default async function StudioDashboard(props: {
                                     studioId={myStudio.id}
                                     slots={weeklySlots}
                                     currentDate={currentDate}
+                                    dayStrings={dayStrings}
                                     availableEquipment={myStudio.equipment || []}
                                 />
                             </div>
