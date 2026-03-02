@@ -241,7 +241,9 @@ export default function InstructorBookingWizard({
 
                                 const hasSlots = availability.some(a => {
                                     const dateMatch = a.date ? a.date === d.date : a.day_of_week === d.dayIndex;
-                                    const locationMatch = filterLocation ? a.location_area?.trim().toLowerCase() === filterLocation?.trim().toLowerCase() : true;
+                                    const aLoc = a.location_area?.trim().toLowerCase();
+                                    const fLoc = filterLocation?.trim().toLowerCase();
+                                    const locationMatch = fLoc ? (aLoc === fLoc || aLoc.startsWith(fLoc + ' - ')) : true;
                                     const notExpired = isTodayPill ? a.end_time.slice(0, 5) > nowManilaPill : true;
                                     const notBooked = !bookedSlotsSet.has(`${d.date}|${a.start_time.slice(0, 5)}`);
                                     return dateMatch && locationMatch && notExpired && notBooked;
@@ -292,7 +294,9 @@ export default function InstructorBookingWizard({
 
                             const slots = availability.filter(a => {
                                 const dateMatch = a.date ? a.date === activeDate : a.day_of_week === d?.dayIndex;
-                                const locationMatch = filterLocation ? a.location_area?.trim().toLowerCase() === filterLocation?.trim().toLowerCase() : true;
+                                const aLoc = a.location_area?.trim().toLowerCase();
+                                const fLoc = filterLocation?.trim().toLowerCase();
+                                const locationMatch = fLoc ? (aLoc === fLoc || aLoc.startsWith(fLoc + ' - ')) : true;
                                 const notExpired = isToday ? a.end_time.slice(0, 5) > nowManilaTime : true;
                                 const notBooked = !bookedSlotsSet.has(`${activeDate}|${a.start_time.slice(0, 5)}`);
                                 return dateMatch && locationMatch && notExpired && notBooked;

@@ -46,7 +46,7 @@ export default async function InstructorProfilePage({
     // 2.5 Fetch Active Bookings to filter out taken slots
     const { data: activeBookings } = await supabase
         .from('bookings')
-        .select('id, slots(start_time)')
+        .select('id, slots(start_time, date)')
         .eq('instructor_id', id)
         .in('status', ['pending', 'approved'])
 

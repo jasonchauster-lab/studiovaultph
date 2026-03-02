@@ -108,21 +108,15 @@ export default async function CustomerDashboard({
         // Filter by Location if set
         if (params.location && params.location !== 'all') {
             const trimmedLocation = params.location.trim();
-            if (trimmedLocation.includes(' - ')) {
-                availQuery = availQuery.eq('location_area', trimmedLocation)
-            } else {
-                availQuery = availQuery.like('location_area', trimmedLocation + ' - %')
-            }
+            // Match exactly or as a prefix (e.g., "BGC" matches "BGC - Studio")
+            availQuery = availQuery.or(`location_area.eq."${trimmedLocation}",location_area.like."${trimmedLocation} - %"`)
         }
 
         if (params.date) {
             // Use local PHT date to avoid day-shift issues
             const dayOfWeek = new Date(params.date + "T00:00:00+08:00").getDay()
-            availQuery = availQuery.eq('day_of_week', dayOfWeek)
-
-            // Optional: If the table supports specific dates ('date' column), we could also check:
-            // .or(`date.eq.${params.date},date.is.null`) 
-            // But relying on day_of_week seems to be the primary model for now.
+            // Match specific date OR recurring day_of_week (if date is null)
+            availQuery = availQuery.or(`date.eq.${params.date},and(day_of_week.eq.${dayOfWeek},date.is.null)`)
         }
 
         if (params.time) {
@@ -153,7 +147,10 @@ export default async function CustomerDashboard({
     if (params.type === 'slot' || (!params.type && (params.date || params.time))) {
         // If explicitly searching slots OR filtering by date/time without type preference, prioritize slots view?
         // Actually adhering to explicit type is safer. Let's just do it if type === 'slot'
-        if (params.type === 'slot') {
+        // If type is not 'instructor' or 'studio', and filters are set, we show slots
+        const shouldShowSlots = params.type === 'slot' || (!params.type && (params.date || params.time))
+
+        if (shouldShowSlots) {
             const nowManilaDate = getManilaTodayStr()
             const nowManilaTime = toManilaTimeString(new Date())
 
@@ -169,17 +166,16 @@ export default async function CustomerDashboard({
                 .order('start_time', { ascending: true })
 
             if (params.location && params.location !== 'all') {
-                if (params.location.includes(' - ')) {
-                    slotQuery = slotQuery.eq('studios.location', params.location)
-                } else {
-                    slotQuery = slotQuery.like('studios.location', params.location + ' - %')
-                }
+                const trimmedLocation = params.location.trim();
+                // Relaxed ilike match on joined studio location
+                slotQuery = slotQuery.ilike('studios.location', `%${trimmedLocation}%`)
             }
 
             if (params.equipment && params.equipment !== 'all') {
-                // Slots/Studios must have this equipment
-                // equipment is now JSONB { "Reformer": 5 }
-                slotQuery = slotQuery.gte(`equipment->>${params.equipment.toUpperCase()}`, '1')
+                // Check both uppercase (standardized) and original casing for equipment keys
+                const eq = params.equipment.trim();
+                const eqUpper = eq.toUpperCase();
+                slotQuery = slotQuery.or(`equipment->>${eq}.gte.1,equipment->>${eqUpper}.gte.1`)
             }
 
             if (params.date) {
@@ -394,7 +390,7 @@ export default async function CustomerDashboard({
                     )}
 
                     {/* Slots Section (Browse Slots) */}
-                    {params.type === 'slot' && (
+                    {(params.type === 'slot' || (!params.type && (params.date || params.time))) && (
                         <section>
                             <div className="flex items-center gap-3 mb-6">
                                 <h2 className="text-2xl font-serif text-charcoal-900">Available Sessions</h2>
