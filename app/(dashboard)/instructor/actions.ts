@@ -6,7 +6,7 @@ import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 
 import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
-import { formatManilaDate, formatManilaTime } from '@/lib/timezone'
+import { formatManilaDate, formatManilaTime, toManilaDateStr, toManilaTimeString, formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
 
 export async function getInstructorEarnings(startDate?: string, endDate?: string) {
     const supabase = await createClient()
@@ -389,10 +389,10 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
             .from('slots')
             .select('id')
             .eq('studio_id', slot.studio_id)
+            .eq('date', slot.date)
             .eq('start_time', slot.start_time)
             .eq('is_available', true)
             .neq('id', slotId)
-            .contains('equipment', [equipment])
             .limit(needed);
 
         if (!additionalSlots || additionalSlots.length < needed) {
@@ -443,6 +443,7 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
             .from('slots')
             .insert({
                 studio_id: currentSlotData.studio_id,
+                date: currentSlotData.date,
                 start_time: currentSlotData.start_time,
                 end_time: currentSlotData.end_time,
                 is_available: false, // Locked immediately
@@ -512,8 +513,8 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
     const instructorName = instructor?.full_name || 'Instructor';
     const studioName = studios?.name;
     const studioAddress = studios?.address;
-    const date = formatManilaDate(slots?.start_time);
-    const time = formatManilaTime(slots?.start_time);
+    const date = formatManilaDateStr(slots?.date);
+    const time = formatTo12Hour(slots?.start_time);
 
     if (instructorEmail && slots?.start_time) {
         await sendEmail({
@@ -554,10 +555,10 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
     // --- AUTO-SLOTTING START ---
     // Automatically create an availability slot for the instructor at this studio/time
     try {
-        const bookingDate = start.toISOString().split('T')[0];
+        const bookingDate = toManilaDateStr(start);
         const dayOfWeek = start.getDay();
-        const startTimeStr = start.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour12: false, hour: '2-digit', minute: '2-digit' });
-        const endTimeStr = end.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour12: false, hour: '2-digit', minute: '2-digit' });
+        const startTimeStr = toManilaTimeString(start);
+        const endTimeStr = toManilaTimeString(end);
 
         // Check if availability already exists to avoid duplicates
         const { data: existingAvail } = await supabase
@@ -701,8 +702,9 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
 
     // 5. Send Emails
     const client = booking.client
-    const date = formatManilaDate(startTimeStr)
-    const time = formatManilaTime(startTimeStr)
+    const slotData = (booking.slots as any)
+    const date = formatManilaDateStr(slotData?.date)
+    const time = formatTo12Hour(slotData?.start_time)
 
     // Notify Client (if not the instructor themselves)
     if (client?.email && !isStudioRental) {

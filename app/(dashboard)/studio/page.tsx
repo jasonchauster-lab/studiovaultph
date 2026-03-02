@@ -12,6 +12,8 @@ import Image from 'next/image'
 import StudioStatCards from '@/components/dashboard/StudioStatCards'
 
 import StudioUpcomingBookings from '@/components/dashboard/StudioUpcomingBookings'
+import { toManilaTimeString } from '@/lib/timezone'
+import { format } from 'date-fns'
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
 
@@ -57,6 +59,7 @@ export default async function StudioDashboard(props: {
 
         if (studioSlotIds.length > 0) {
             // STEP 2a: Fetch Upcoming Bookings using slot IDs
+            const nowTimeStr = toManilaTimeString(new Date());
             const { data: studioBookings } = await supabase
                 .from('bookings')
                 .select(`
@@ -67,8 +70,9 @@ export default async function StudioDashboard(props: {
                 `)
                 .in('slot_id', studioSlotIds)
                 .in('status', ['approved', 'pending'])
-                .gte('slots.start_time', new Date().toISOString())
-                .order('slots.start_time', { ascending: true }) // Sort by session time
+                .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`)
+                .order('date', { foreignTable: 'slots', ascending: true })
+                .order('start_time', { foreignTable: 'slots', ascending: true })
                 .limit(10)
 
             if (studioBookings) {
@@ -78,6 +82,7 @@ export default async function StudioDashboard(props: {
             // STEP 2b: Stats Bookings (Last 30 Days) - Based on SESSION date
             const thirtyDaysAgo = new Date()
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+            const thirtyDaysAgoStr = format(thirtyDaysAgo, 'yyyy-MM-dd')
 
             const { data: statsBookings } = await supabase
                 .from('bookings')
@@ -88,7 +93,7 @@ export default async function StudioDashboard(props: {
                 `)
                 .in('slot_id', studioSlotIds)
                 .in('status', ['approved', 'completed', 'cancelled_charged'])
-                .gte('slots.start_time', thirtyDaysAgo.toISOString())
+                .gte('slots.date', thirtyDaysAgoStr)
 
             if (statsBookings && statsBookings.length > 0) {
                 // Calc Revenue
@@ -125,8 +130,8 @@ export default async function StudioDashboard(props: {
                 )
             `)
             .eq('studio_id', myStudio.id)
-            .gte('start_time', weekStart.toISOString())
-            .lte('start_time', weekEnd.toISOString())
+            .gte('date', format(weekStart, 'yyyy-MM-dd'))
+            .lte('date', format(weekEnd, 'yyyy-MM-dd'))
 
         if (slots) {
             weeklySlots = slots

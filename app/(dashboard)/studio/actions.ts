@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import AccountFrozenEmail from '@/components/emails/AccountFrozenEmail'
-import { formatManilaDate, formatManilaTime } from '@/lib/timezone'
+import { formatManilaDate, formatManilaTime, toManilaTimeString, formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
 
 export async function createSlot(formData: FormData) {
     const supabase = await createClient()
@@ -79,8 +79,9 @@ export async function createSlot(formData: FormData) {
         // Insert as ONE BUCKET record per hour
         slotsToInsert.push({
             studio_id: studioId,
-            start_time: current.toISOString(),
-            end_time: nextHour.toISOString(),
+            date: date,
+            start_time: toManilaTimeString(current),
+            end_time: toManilaTimeString(nextHour),
             is_available: true,
             equipment: equipment,
             equipment_inventory: equipment
@@ -167,8 +168,9 @@ export async function updateSlot(slotId: string, formData: FormData) {
     const { error } = await supabase
         .from('slots')
         .update({
-            start_time: startDateTime.toISOString(),
-            end_time: endDateTime.toISOString(),
+            date: date,
+            start_time: toManilaTimeString(startDateTime),
+            end_time: toManilaTimeString(endDateTime),
             equipment: equipment,
             quantity: totalQuantity
         })
@@ -414,8 +416,9 @@ export async function generateRecurringSlots(params: GenerateSlotsParams) {
                 // Insert as ONE BUCKET record per hour
                 slotsToInsert.push({
                     studio_id: params.studioId,
-                    start_time: slotStart.toISOString(),
-                    end_time: nextHour.toISOString(),
+                    date: dayStr,
+                    start_time: toManilaTimeString(slotStart),
+                    end_time: toManilaTimeString(nextHour),
                     is_available: true,
                     equipment: inventory,
                     equipment_inventory: inventory
@@ -742,9 +745,9 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
     // 4. Send Emails
     const client = booking.client
     const instructor = booking.instructor
-    const startTime = (booking.slots as any)?.start_time
-    const date = formatManilaDate(startTime)
-    const time = formatManilaTime(startTime)
+    const slotData = (booking.slots as any)
+    const date = formatManilaDateStr(slotData?.date)
+    const time = formatTo12Hour(slotData?.start_time)
 
     // Notify Client
     if (client?.email) {

@@ -1,12 +1,11 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { roundToISOString } from '@/lib/timezone'
 import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
-import { formatManilaDate, formatManilaTime } from '@/lib/timezone'
+import { formatManilaDate, formatManilaTime, roundToISOString, formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
 
 export async function requestBooking(
     slotId: string,
@@ -593,12 +592,10 @@ export async function bookInstructorSession(
         return { error: 'Missing booking details. Please select Date, Time, Location and Equipment.' }
     }
 
-    const startDateTime = new Date(`${date}T${time.length === 5 ? time + ':00' : time}+08:00`)
-    const startISO = roundToISOString(startDateTime)
-
-    // Assume 1 hour session for now as per "hourly slot" standard
-    const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000)
-    const endISO = roundToISOString(endDateTime)
+    const normalizedTime = time.length === 5 ? time + ':00' : time;
+    const startDateTime = new Date(`${date}T${normalizedTime}+08:00`)
+    // We no longer rely on startISO for slot matching, but keep it for legacy if needed elsewhere
+    // However, it's safer to just use strings now.
 
     // 0. Check Instructor Suspension & Balance
     const { data: instructorProfile } = await supabase
@@ -657,10 +654,11 @@ export async function bookInstructorSession(
     // --- DOUBLE BOOKING VALIDATION START ---
     const { data: overlappingBookings } = await supabase
         .from('bookings')
-        .select('id, slots!inner(start_time)')
+        .select('id, slots!inner(start_time, date)')
         .eq('instructor_id', instructorId)
         .in('status', ['pending', 'approved'])
-        .eq('slots.start_time', startISO);
+        .eq('slots.date', date)
+        .eq('slots.start_time', timeStr);
 
     if (overlappingBookings && overlappingBookings.length > 0) {
         return { error: 'The instructor is already booked for this time slot.' }
@@ -676,7 +674,8 @@ export async function bookInstructorSession(
             studios!inner(*, profiles!owner_id(available_balance, is_suspended, full_name))
         `)
         .eq('is_available', true)
-        .eq('start_time', startISO) // Exact match for slot start
+        .eq('date', date)
+        .eq('start_time', timeStr) // Exact match for slot start
         //.eq('end_time', endDateTime.toISOString()) // Optional, if slots are strict 1 hour
         .eq('studios.verified', true)
     // We will filter location and equipment availability in JS for better case-insensitivity support
@@ -801,6 +800,7 @@ export async function bookInstructorSession(
             client:profiles!client_id(full_name, email),
             instructor:profiles!instructor_id(full_name, email),
             slots(
+                date,
                 start_time,
                 studios(
                     name,
@@ -826,8 +826,8 @@ export async function bookInstructorSession(
         const studioAddress = studios?.address;
 
         if (clientEmail && slots?.start_time) {
-            const dateStr = formatManilaDate(slots.start_time);
-            const timeStr = formatManilaTime(slots.start_time);
+            const dateStr = formatManilaDateStr(slots?.date);
+            const timeStr = formatTo12Hour(slots?.start_time);
 
             // Notify Client
             await sendEmail({
@@ -902,7 +902,8 @@ export async function cancelBooking(bookingId: string) {
         .select(`
             *,
             slots (
-                start_time
+                start_time,
+                date
             )
         `)
         .eq('id', bookingId)
@@ -928,7 +929,7 @@ export async function cancelBooking(bookingId: string) {
         return { error: 'Invalid booking data (missing slot start time).' }
     }
 
-    const startTime = new Date(slotData.start_time).getTime()
+    const startTime = new Date(`${slotData.date}T${slotData.start_time}+08:00`).getTime()
     const now = new Date().getTime()
     const hoursUntilStart = (startTime - now) / (1000 * 60 * 60)
 

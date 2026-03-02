@@ -11,6 +11,7 @@ import Image from 'next/image'
 
 interface Slot {
     id: string
+    date: string
     start_time: string
     end_time: string
     is_available: boolean
@@ -210,8 +211,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
 
                                     {days.map(day => {
                                         const cellSlots = slots.filter(s => {
-                                            const sDate = parseISO(s.start_time)
-                                            return isSameDay(sDate, day) && getHours(sDate) === hour
+                                            const dayStr = format(day, 'yyyy-MM-dd')
+                                            const startHour = parseInt(s.start_time.split(':')[0], 10);
+                                            return s.date === dayStr && startHour === hour
                                         })
 
                                         return (

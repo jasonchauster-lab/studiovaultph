@@ -8,7 +8,7 @@ import Link from 'next/link';
 import clsx from 'clsx';
 import ChatWindow from '@/components/dashboard/ChatWindow';
 import MessageCountBadge from '@/components/dashboard/MessageCountBadge';
-import { formatManilaTime } from '@/lib/timezone';
+import { formatManilaDateStr, formatTo12Hour } from '@/lib/timezone';
 import { useSearchParams } from 'next/navigation';
 import CancelBookingModal from './CancelBookingModal';
 import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions';
@@ -40,6 +40,7 @@ export default function InstructorDashboardClient() {
                         *,
                         price_breakdown,
                         slots (
+                            date,
                             start_time,
                             end_time,
                             equipment,
@@ -92,8 +93,9 @@ export default function InstructorDashboardClient() {
     }, []);
 
     const isChatExpired = (booking: any) => {
-        if (!booking.slots?.end_time) return false;
-        const endTime = new Date(booking.slots.end_time);
+        const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
+        if (!slot?.end_time || !slot?.date) return false;
+        const endTime = new Date(`${slot.date}T${slot.end_time}+08:00`);
         const expirationTime = new Date(endTime.getTime() + 12 * 60 * 60 * 1000);
         return new Date() > expirationTime;
     };
@@ -249,7 +251,7 @@ export default function InstructorDashboardClient() {
                                                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                                                         <div className="flex items-center gap-1.5 text-xs text-charcoal-500 font-medium">
                                                             <Calendar className="w-3.5 h-3.5" />
-                                                            {new Date(session.slots.start_time).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', weekday: 'short', month: 'short', day: 'numeric' })}
+                                                            {formatManilaDateStr(session.slots.date)}
                                                         </div>
                                                         <div className="flex items-center gap-1.5 text-xs text-charcoal-500 font-medium">
                                                             <MapPin className="w-3.5 h-3.5" />
@@ -264,7 +266,7 @@ export default function InstructorDashboardClient() {
                                                 <div className="flex flex-col gap-1">
                                                     <p className="text-[10px] font-bold text-charcoal-400 uppercase tracking-widest">Time Slot</p>
                                                     <p className="text-sm font-bold text-charcoal-700">
-                                                        {formatManilaTime(session.slots.start_time)}
+                                                        {formatTo12Hour(session.slots.start_time)}
                                                     </p>
                                                 </div>
 

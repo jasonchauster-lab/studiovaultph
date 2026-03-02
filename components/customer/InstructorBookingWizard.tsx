@@ -85,20 +85,10 @@ export default function InstructorBookingWizard({
     const bookedSlotsSet = new Set(
         activeBookings.flatMap(b => {
             const slotsData = Array.isArray(b.slots) ? b.slots[0] : b.slots;
-            if (!slotsData?.start_time) return [];
+            if (!slotsData?.start_time || !slotsData?.date) return [];
 
-            const startDate = new Date(slotsData.start_time);
-            // Apply Manila offset manually to guarantee correctness independent of runtime ICU/locale
-            const manilaDate = new Date(startDate.getTime() + 8 * 60 * 60 * 1000);
-
-            const year = manilaDate.getUTCFullYear();
-            const month = (manilaDate.getUTCMonth() + 1).toString().padStart(2, '0');
-            const day = manilaDate.getUTCDate().toString().padStart(2, '0');
-            const dateStr = `${year}-${month}-${day}`;
-
-            const hours = manilaDate.getUTCHours().toString().padStart(2, '0');
-            const minutes = manilaDate.getUTCMinutes().toString().padStart(2, '0');
-            const timeStr = `${hours}:${minutes}`;
+            const dateStr = slotsData.date;
+            const timeStr = slotsData.start_time.slice(0, 5);
 
             return [`${dateStr}-${timeStr}`];
         })

@@ -7,7 +7,7 @@ import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import ApplicationApprovalEmail from '@/components/emails/ApplicationApprovalEmail'
 import ApplicationRejectionEmail from '@/components/emails/ApplicationRejectionEmail'
-import { formatManilaDate, formatManilaTime } from '@/lib/timezone'
+import { formatManilaDate, formatManilaTime, formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
 import WalletNotificationEmail from '@/components/emails/WalletNotificationEmail'
 import AccountReactivatedEmail from '@/components/emails/AccountReactivatedEmail'
 
@@ -410,6 +410,7 @@ export async function confirmBooking(bookingId: string) {
             client:profiles!client_id(full_name, email),
             instructor:profiles!instructor_id(full_name, email),
             slots(
+                date,
                 start_time,
                 end_time,
                 studios(
@@ -453,8 +454,8 @@ export async function confirmBooking(bookingId: string) {
         return { error: 'Booking approved, but failed to send confirmation emails due to missing participant data.' };
     }
 
-    const date = formatManilaDate(slots.start_time);
-    const time = formatManilaTime(slots.start_time);
+    const date = formatManilaDateStr(slots?.date);
+    const time = formatTo12Hour(slots?.start_time);
 
     const clientEmail = client.email;
     const clientName = client.full_name || 'Valued Client';
@@ -565,6 +566,7 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
             price_breakdown,
             client:profiles!client_id(full_name, email),
             slots(
+                date,
                 start_time,
                 studios(name)
             )
@@ -626,9 +628,8 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
     // If an instructor's studio rental is rejected, remove the auto-created availability
     if (booking.client_id === booking.instructor_id) {
         try {
-            const startDateTime = new Date(slots?.start_time);
-            const dateStr = startDateTime.toISOString().split('T')[0];
-            const timeStr = startDateTime.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
+            const dateStr = slots?.date;
+            const timeStr = slots?.start_time;
 
             await supabase
                 .from('instructor_availability')
@@ -649,8 +650,8 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
         return { error: `Booking rejected, but failed to send email: Client email not found. (ID: ${bookingId})` };
     }
 
-    const date = formatManilaDate(slots?.start_time);
-    const time = formatManilaTime(slots?.start_time);
+    const date = formatManilaDateStr(slots?.date);
+    const time = formatTo12Hour(slots?.start_time);
     const studioName = studios?.name || 'Pilates Studio';
 
     const emailResult = await sendEmail({
@@ -696,6 +697,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
             status,
             client:profiles!client_id(full_name),
             slots!inner(
+                date,
                 start_time,
                 studios(name)
             ),
@@ -879,7 +881,7 @@ export async function getRevenueExport(startDate?: string, endDate?: string) {
             price_breakdown,
             client: profiles!client_id(full_name),
             instructor: profiles!instructor_id(full_name),
-            slots!inner(start_time, studios(name))
+            slots!inner(date, start_time, studios(name))
                 `)
         .in('status', ['approved', 'completed', 'cancelled_charged'])
         .order('created_at', { ascending: false })

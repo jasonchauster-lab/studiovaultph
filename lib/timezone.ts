@@ -24,6 +24,21 @@ export function toManilaDate(utcDate: Date | string): Date {
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /**
+ * Formats a "YYYY-MM-DD" date string into a readable format.
+ * Does NOT perform any timezone shifting.
+ * Example: "2026-02-28" -> "Feb 28, 2026"
+ */
+export function formatManilaDateStr(dateStr: string): string {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return dateStr;
+    const year = parts[0];
+    const month = MONTH_NAMES[parseInt(parts[1], 10) - 1];
+    const day = parseInt(parts[2], 10);
+    return `${month} ${day}, ${year}`;
+}
+
+/**
  * Formats a UTC date string/Date as a readable date in Manila time.
  * Example: "Feb 28, 2026"
  */
@@ -78,8 +93,30 @@ export function formatTo12Hour(timeStr: string): string {
 }
 
 /**
+ * Returns a date string in YYYY-MM-DD format for a given date, shifted to Manila.
+ */
+export function toManilaDateStr(utcDate: Date | string): string {
+    const d = toManilaDate(utcDate);
+    const year = d.getUTCFullYear();
+    const month = (d.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = d.getUTCDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+/**
+ * Returns a time string in HH:mm:ss format for a given date, shifted to Manila.
+ */
+export function toManilaTimeString(utcDate: Date | string): string {
+    const d = toManilaDate(utcDate);
+    const h = d.getUTCHours().toString().padStart(2, '0');
+    const m = d.getUTCMinutes().toString().padStart(2, '0');
+    const s = d.getUTCSeconds().toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
+}
+
+/**
  * Returns an ISO string rounded to the nearest minute, zeroing out seconds and milliseconds.
- * This ensures consistency for database comparisons.
+ * NOTE: Use with caution as we shift towards string-based wall-clock time.
  */
 export function roundToISOString(date: Date | string): string {
     const d = typeof date === 'string' ? new Date(date) : date;

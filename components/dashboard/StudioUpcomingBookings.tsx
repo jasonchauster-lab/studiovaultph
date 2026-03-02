@@ -5,7 +5,7 @@ import { Calendar, Clock, X, AlertCircle } from 'lucide-react'
 import clsx from 'clsx'
 import CancelBookingModal from './CancelBookingModal'
 import { cancelBookingByStudio } from '@/app/(dashboard)/studio/actions'
-import { formatManilaTime } from '@/lib/timezone'
+import { formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
 import StudioChatButton from './StudioChatButton'
 
 interface StudioUpcomingBookingsProps {
@@ -83,7 +83,7 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                             </div>
                             <div className="flex items-center gap-2 text-charcoal-900 text-[11px] font-medium">
                                 <Calendar className="w-3 h-3 text-rose-gold" />
-                                <span>{start.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' })} at {formatManilaTime(slotData.start_time)}</span>
+                                <span>{formatManilaDateStr(slotData.date)} at {formatTo12Hour(slotData.start_time)}</span>
                             </div>
                             <div className="flex items-center gap-2 text-charcoal-900 text-[11px] font-medium">
                                 <Clock className="w-3 h-3 text-rose-gold" />

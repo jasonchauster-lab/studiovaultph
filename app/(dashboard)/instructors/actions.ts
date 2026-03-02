@@ -24,20 +24,9 @@ export async function findMatchingStudios(
     const normalizedStart = startTimeStr.length === 5 ? startTimeStr + ':00' : startTimeStr
     const normalizedEnd = endTimeStr.length === 5 ? endTimeStr + ':00' : endTimeStr
 
-    const searchStart = new Date(`${dateStr}T${normalizedStart}+08:00`)
-    const searchEnd = new Date(`${dateStr}T${normalizedEnd}+08:00`)
-    // Add a 1-minute buffer to avoid clipping slots that end precisely at searchEnd
-    searchEnd.setMinutes(searchEnd.getMinutes() + 1)
-
-    const searchStartISO = searchStart.toISOString()
-    const searchEndISO = searchEnd.toISOString()
-
     const trimmedLocationArea = locationArea?.trim()
 
     // 2. Query Slots in Location
-    // Fetch without the exact .eq() location filter — PostgREST does exact-string match
-    // which fails if DB values have trailing/leading whitespace.
-    // We apply a JS-level trim filter below instead.
     const { data: rawSlots, error } = await supabase
         .from('slots')
         .select(`
@@ -51,8 +40,9 @@ export async function findMatchingStudios(
             )
         `)
         .eq('is_available', true)
-        .gte('start_time', searchStartISO)
-        .lte('end_time', searchEndISO)
+        .eq('date', dateStr)
+        .gte('start_time', normalizedStart)
+        .lte('end_time', normalizedEnd)
         .order('start_time', { ascending: true })
 
     if (error) {
