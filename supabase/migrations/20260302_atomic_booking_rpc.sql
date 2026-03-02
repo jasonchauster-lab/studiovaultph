@@ -106,38 +106,31 @@ BEGIN
         IF p_req_start_time > v_parent_slot.start_time OR p_req_end_time < v_parent_slot.end_time THEN
             -- We are booking a partial segment
             
-            -- Insert the specifically booked segment
-            INSERT INTO slots (
-                studio_id,
-                date,
-                start_time,
-                end_time,
-                is_available,
-                equipment,
-                quantity
-            ) VALUES (
-                v_parent_slot.studio_id,
-                v_parent_slot.date,
-                p_req_start_time,
-                p_req_end_time,
-                false,
-                jsonb_build_object(p_equipment_key, p_quantity),
-                p_quantity
-            ) RETURNING id INTO v_final_slot_id;
+            -- Update the extracted slot to represent JUST the specifically booked segment
+            UPDATE slots 
+            SET start_time = p_req_start_time, 
+                end_time = p_req_end_time
+            WHERE id = v_extracted_slot_id;
+            
+            -- v_final_slot_id is already v_extracted_slot_id, no change needed
 
-            -- Adjust the remaining time on the extracted slot to make it available again
-            IF p_req_start_time = v_parent_slot.start_time THEN
-                UPDATE slots SET start_time = p_req_end_time, is_available = true WHERE id = v_extracted_slot_id;
-            ELSIF p_req_end_time = v_parent_slot.end_time THEN
-                UPDATE slots SET end_time = p_req_start_time, is_available = true WHERE id = v_extracted_slot_id;
-            ELSE
-                -- Triple split: update the first chunk, insert the second chunk
-                UPDATE slots SET end_time = p_req_start_time, is_available = true WHERE id = v_extracted_slot_id;
+            -- Only create the 'before' slot if there is an actual time gap
+            IF v_parent_slot.start_time < p_req_start_time THEN
                 INSERT INTO slots (
                     studio_id, date, start_time, end_time, is_available, equipment, equipment_inventory, quantity
                 ) VALUES (
-                    v_parent_slot.studio_id, v_parent_slot.date, p_req_end_time, v_parent_slot.end_time, true,
-                    jsonb_build_object(p_equipment_key, p_quantity), jsonb_build_object(p_equipment_key, p_quantity), p_quantity
+                    v_parent_slot.studio_id, v_parent_slot.date, v_parent_slot.start_time, p_req_start_time,
+                    true, jsonb_build_object(p_equipment_key, p_quantity), jsonb_build_object(p_equipment_key, p_quantity), p_quantity
+                );
+            END IF;
+
+            -- Only create the 'after' slot if there is an actual time gap
+            IF p_req_end_time < v_parent_slot.end_time THEN
+                INSERT INTO slots (
+                    studio_id, date, start_time, end_time, is_available, equipment, equipment_inventory, quantity
+                ) VALUES (
+                    v_parent_slot.studio_id, v_parent_slot.date, p_req_end_time, v_parent_slot.end_time,
+                    true, jsonb_build_object(p_equipment_key, p_quantity), jsonb_build_object(p_equipment_key, p_quantity), p_quantity
                 );
             END IF;
         END IF;
