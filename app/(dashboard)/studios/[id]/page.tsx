@@ -66,6 +66,7 @@ export default async function StudioDetailsPage({
             )
         `)
         .eq('role', 'instructor')
+        .not('rates', 'is', null)
 
     // JS-level fuzzy location filter: instructor location must overlap at least one token
     const instructors = (instructorsRaw || []).filter(i => {

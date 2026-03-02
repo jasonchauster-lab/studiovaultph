@@ -155,8 +155,10 @@ export async function requestBooking(
         return { error: `"${selectedEquipment}" is not available in this slot. Available equipment: ${available}.` }
     }
 
-    // 2. Studio Price: Always use the single hourly_rate
-    const studioFee = Number(studio.hourly_rate) || 0;
+    // 2. Studio Price: Use the specific equipment rate, fallback to hourly_rate
+    const studioPricing = studio.pricing as Record<string, number> | null;
+    const sKey = Object.keys(studioPricing || {}).find(k => k.toLowerCase() === selectedEquipment.toLowerCase());
+    const studioFee = sKey ? (studioPricing?.[sKey] || 0) : (Number(studio.hourly_rate) || 0);
 
     // 3. Instructor Price: Always use the REFORMER rate as their base fee
     const instructorRates = instructor?.rates as Record<string, number> | null;

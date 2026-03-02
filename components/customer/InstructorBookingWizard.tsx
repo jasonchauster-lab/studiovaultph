@@ -540,7 +540,10 @@ export default function InstructorBookingWizard({
 
                                                 {/* Pricing */}
                                                 {(() => {
-                                                    const studioRate = Number(result.studio.hourly_rate) || 0;
+                                                    const studioPricing = result.studio.pricing || {};
+                                                    const sKey = Object.keys(studioPricing).find(k => k.toLowerCase() === selectedEquipment.toLowerCase());
+                                                    const studioRate = sKey ? (studioPricing[sKey] || 0) : (Number(result.studio.hourly_rate) || 0);
+
                                                     const reformerKey = Object.keys(instructorRates).find(k => k.toUpperCase() === 'REFORMER');
                                                     const instructorRate = reformerKey ? (instructorRates[reformerKey] || 0) : 0;
 

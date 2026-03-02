@@ -87,10 +87,17 @@ export default function BookingSection({
         const [startTime] = selectedSlotTime.split('|');
         const dayOfWeek = new Date(selectedDate + "T00:00:00+08:00").getDay();
 
-        // Normalize time strings for robust comparison
+        // 1. Check if Instructor has a rate for the selected equipment (case-insensitive)
+        const instRates = inst.rates || {};
+        const hasEquipmentRate = selectedEquipment
+            ? Object.keys(instRates).some(key => key.toUpperCase() === selectedEquipment.toUpperCase())
+            : true;
+        if (!hasEquipmentRate) return false;
+
+        // 2. Normalize time strings for robust comparison
         const normalizedSlotStart = normalizeTimeTo24h(startTime);
 
-        // Find at least one availability block for this instructor that covers the slot time
+        // 3. Find at least one availability block for this instructor that covers the slot time
         return availabilityBlocks.some(block =>
             block.instructor_id === inst.id &&
             (block.date === selectedDate || (block.date === null && block.day_of_week === dayOfWeek)) &&
@@ -241,8 +248,9 @@ export default function BookingSection({
         // Valid Check
         if (maxQuantity === 0) return null;
 
-        // Studio Rate: Always use the single hourly_rate
-        const sRate = studioHourlyRate || 0;
+        // Studio Rate: Use the specific equipment rate, fallback to hourly_rate
+        const sKey = Object.keys(studioPricing || {}).find(k => k.toLowerCase() === selectedEquipment.toLowerCase());
+        const sRate = sKey ? (studioPricing?.[sKey] || 0) : (studioHourlyRate || 0);
 
         // Instructor Rate: Always use the REFORMER rate as their base fee
         const instructor = instructors.find(i => i.id === selectedInstructor);
