@@ -418,18 +418,24 @@ export default function InstructorBookingWizard({
 
                                     {/* Booking Details — only for selected studio */}
                                     {selectedStudioSlot && result.matchingSlots.some((s: any) => s.id === selectedStudioSlot) && (() => {
+                                        const primarySlot = result.matchingSlots.find((ms: any) => ms.id === selectedStudioSlot);
+                                        const primaryNormTime = normalizeTimeTo24h(primarySlot?.start_time || '');
                                         const slotsAtTime = result.matchingSlots.filter((s: any) =>
-                                            s.start_time === result.matchingSlots.find((ms: any) => ms.id === selectedStudioSlot)?.start_time
+                                            normalizeTimeTo24h(s.start_time) === primaryNormTime
                                         );
-                                        // Robust JSONB extraction: handle objects by keys[0], fallback to equipment_type
-                                        const equipmentData = slotsAtTime[0]?.equipment;
-                                        const allEq: string[] = (equipmentData && typeof equipmentData === 'object' && !Array.isArray(equipmentData))
-                                            ? Object.keys(equipmentData)
-                                            : (Array.isArray(equipmentData) ? equipmentData : []);
 
-                                        if (allEq.length === 0 && (slotsAtTime[0] as any).equipment_type) {
-                                            allEq.push((slotsAtTime[0] as any).equipment_type);
-                                        }
+                                        // Aggregate equipment from ALL slots at this time, summing JSONB values
+                                        const aggregatedEq: Record<string, number> = {};
+                                        slotsAtTime.forEach((s: any) => {
+                                            const eq = s.equipment;
+                                            if (!eq || typeof eq !== 'object' || Array.isArray(eq)) return;
+                                            Object.entries(eq).forEach(([k, v]) => {
+                                                const key = k.trim().toUpperCase();
+                                                const qty = typeof v === 'number' ? v : parseInt(v as string, 10) || 0;
+                                                if (qty > 0) aggregatedEq[key] = (aggregatedEq[key] || 0) + qty;
+                                            });
+                                        });
+                                        const allEq = Object.keys(aggregatedEq);
 
                                         return (
                                             <div className="border-t border-cream-100 pt-4 space-y-5 animate-in fade-in slide-in-from-top-2">
@@ -454,12 +460,8 @@ export default function InstructorBookingWizard({
                                                                 </div>
                                                             ) : (
                                                                 allEq.map((eq: string) => {
-                                                                    const slotWithEq = slotsAtTime.find((s: any) => {
-                                                                        if (Array.isArray(s.equipment)) return s.equipment.includes(eq)
-                                                                        if (typeof s.equipment === 'object' && s.equipment !== null) return !!(s.equipment as Record<string, any>)[eq]
-                                                                        return false
-                                                                    });
-                                                                    const count = getEquipmentCount(slotsAtTime[0]?.equipment, eq);
+                                                                    // Read count from aggregated JSONB values directly
+                                                                    const count = aggregatedEq[eq] ?? 0;
                                                                     const isSelected = selectedEquipment === eq;
                                                                     return (
                                                                         <button
@@ -478,7 +480,7 @@ export default function InstructorBookingWizard({
                                                                                 "text-[10px] px-1.5 py-0.5 rounded-full",
                                                                                 isSelected ? "bg-charcoal-800 text-cream-200" : "bg-cream-100 text-charcoal-500"
                                                                             )}>
-                                                                                {count} {count === 1 ? 'slot' : 'slots'}
+                                                                                {count} {count === 1 ? 'available' : 'available'}
                                                                             </span>
                                                                         </button>
                                                                     );
