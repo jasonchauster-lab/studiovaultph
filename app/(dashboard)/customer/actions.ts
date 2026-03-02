@@ -689,12 +689,14 @@ export async function bookInstructorSession(
 
     // 2.1 Filter by Location & Equipment (Case-Insensitive) & Studio Owner's Status
     const filteredSlots = availableSlots.filter((s: any) => {
-        const locationMatch = (s.studios?.location ?? '').trim().toLowerCase() === trimmedLocation.toLowerCase();
+        const studioLoc = (s.studios?.location ?? '').trim().toLowerCase();
+        const inputLoc = trimmedLocation.toLowerCase();
+        const locationMatch = studioLoc === inputLoc || studioLoc.includes(inputLoc) || inputLoc.includes(studioLoc);
 
         // Check equipment robustly
         const eqData = s.equipment || {};
-        const actualKey = Object.keys(eqData).find(k => k.trim().toLowerCase() === equipment.trim().toLowerCase());
-        const eqAvailable = actualKey ? (eqData[actualKey] ?? 0) >= 1 : false;
+        const equipmentKey = Object.keys(eqData).find(k => k.trim().toLowerCase() === equipment.trim().toLowerCase());
+        const eqAvailable = equipmentKey ? (eqData[equipmentKey] ?? 0) >= 1 : false;
 
         if (!locationMatch || !eqAvailable) return false;
 

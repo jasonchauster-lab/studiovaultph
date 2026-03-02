@@ -38,10 +38,27 @@ export default function InstructorBookingWizard({
     const searchParams = useSearchParams()
     const filterLocation = searchParams.get('location')
 
+    // Helper: Case-insensitive map to link DB keys to UI labels
+    const EQUIPMENT_MAP: Record<string, string> = {
+        'reformer': 'REFORMER',
+        'chair': 'CHAIR',
+        'mat': 'MAT',
+        'reformer_chair': 'REFORMER + CHAIR',
+        'cadillac': 'CADILLAC',
+        'tower': 'TOWER'
+    };
+
     // Helper: Case-insensitive lookup for equipment count in JSONB
     const getEquipmentCount = (equipmentData: any, type: string) => {
         if (!equipmentData || typeof equipmentData !== 'object' || Array.isArray(equipmentData)) return 0;
-        const actualKey = Object.keys(equipmentData).find(k => k.trim().toLowerCase() === type.trim().toLowerCase());
+
+        // Find matching key case-insensitively
+        const actualKey = Object.keys(equipmentData).find(k => {
+            const tk = k.trim().toLowerCase();
+            const tt = type.trim().toLowerCase();
+            return tk === tt || (EQUIPMENT_MAP[tk] || tk).toLowerCase() === tt;
+        });
+
         return actualKey ? (equipmentData[actualKey] ?? 0) : 0;
     };
 
@@ -225,8 +242,12 @@ export default function InstructorBookingWizard({
                             {nextDays.map((d) => {
                                 const todayManilaStr = getManilaTodayStr();
                                 const isTodayPill = d.date === todayManilaStr;
-                                const nowManilaPill = toManilaDate(new Date()).getUTCHours().toString().padStart(2, '0') + ':' +
-                                    toManilaDate(new Date()).getUTCMinutes().toString().padStart(2, '0');
+
+                                // Relaxed expiration: allow slots that ended up to 30 minutes ago
+                                const nowInstance = toManilaDate(new Date());
+                                const nowMinus30Shift = new Date(nowInstance.getTime() - 30 * 60 * 1000);
+                                const nowManilaPill = nowMinus30Shift.getUTCHours().toString().padStart(2, '0') + ':' +
+                                    nowMinus30Shift.getUTCMinutes().toString().padStart(2, '0');
 
                                 const hasSlots = availability.some(a => {
                                     const dateMatch = a.date ? a.date === d.date : a.day_of_week === d.dayIndex;
@@ -274,7 +295,9 @@ export default function InstructorBookingWizard({
 
                             const d = nextDays.find(nd => nd.date === activeDate);
                             const nowInstance = toManilaDate(new Date());
-                            const nowManilaTime = nowInstance.getUTCHours().toString().padStart(2, '0') + ':' + nowInstance.getUTCMinutes().toString().padStart(2, '0');
+                            // Relaxed expiration for display
+                            const nowMinus30Shift = new Date(nowInstance.getTime() - 30 * 60 * 1000);
+                            const nowManilaTime = nowMinus30Shift.getUTCHours().toString().padStart(2, '0') + ':' + nowMinus30Shift.getUTCMinutes().toString().padStart(2, '0');
                             const isToday = activeDate === getManilaTodayStr();
 
                             const slots = availability.filter(a => {
