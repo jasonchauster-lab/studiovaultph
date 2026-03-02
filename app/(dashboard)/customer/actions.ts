@@ -155,13 +155,13 @@ export async function requestBooking(
         return { error: `"${selectedEquipment}" is not available in this slot. Available equipment: ${available}.` }
     }
 
-    // 2. Studio Price
-    const studioPricing = studio.pricing as Record<string, number> | null;
-    const studioFee = studioPricing?.[selectedEquipment] || 0;
+    // 2. Studio Price: Always use the single hourly_rate
+    const studioFee = Number(studio.hourly_rate) || 0;
 
-    // 3. Instructor Price
+    // 3. Instructor Price: Always use the REFORMER rate as their base fee
     const instructorRates = instructor?.rates as Record<string, number> | null;
-    const instructorFee = instructorRates?.[selectedEquipment] || 0;
+    const instructorKey = Object.keys(instructorRates || {}).find(k => k.toUpperCase() === 'REFORMER');
+    const instructorFee = instructorKey ? (instructorRates?.[instructorKey] || 0) : 0;
 
     // 4. Calculate Service Fee
     const baseFee = studioFee + instructorFee;

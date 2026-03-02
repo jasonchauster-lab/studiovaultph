@@ -540,24 +540,41 @@ export default function InstructorBookingWizard({
 
                                                 {/* Pricing */}
                                                 {(() => {
-                                                    const studioRate = result.studio.pricing?.[selectedEquipment] || 0;
-                                                    const instructorRate = instructorRates[selectedEquipment] || 0;
-                                                    const subtotal = (studioRate + instructorRate) * quantity;
-                                                    const serviceFee = Math.max(100, subtotal * 0.2);
-                                                    const total = subtotal + serviceFee;
+                                                    const studioRate = Number(result.studio.hourly_rate) || 0;
+                                                    const reformerKey = Object.keys(instructorRates).find(k => k.toUpperCase() === 'REFORMER');
+                                                    const instructorRate = reformerKey ? (instructorRates[reformerKey] || 0) : 0;
+
+                                                    const sessionFee = studioRate + instructorRate;
+                                                    const serviceFee = Math.max(100, sessionFee * 0.2);
+
+                                                    const total = (sessionFee + serviceFee) * quantity;
 
                                                     return (
                                                         <div className="bg-cream-50 p-5 rounded-2xl border border-cream-100 space-y-2.5">
                                                             <div className="flex justify-between text-xs text-charcoal-500">
-                                                                <span>Session Fee ({quantity}x)</span>
-                                                                <span>₱{subtotal.toLocaleString()}</span>
+                                                                <span>Session Fee (1x)</span>
+                                                                <span>₱{sessionFee.toLocaleString()}</span>
                                                             </div>
-                                                            <div className="flex justify-between text-xs text-charcoal-500">
-                                                                <span>Service Fee (20%)</span>
+                                                            <div className="flex justify-between text-[10px] text-charcoal-400 pl-2">
+                                                                <span>↳ Instructor Base <span className="opacity-70">({selectedEquipment})</span></span>
+                                                                <span>₱{instructorRate.toLocaleString()}</span>
+                                                            </div>
+                                                            <div className="flex justify-between text-[10px] text-charcoal-400 pl-2">
+                                                                <span>↳ Studio Fee <span className="opacity-70">({selectedEquipment})</span></span>
+                                                                <span>₱{studioRate.toLocaleString()}</span>
+                                                            </div>
+                                                            <div className="flex justify-between text-xs text-charcoal-500 mt-2">
+                                                                <span>Service Fee (20% min. ₱100)</span>
                                                                 <span>₱{serviceFee.toLocaleString()}</span>
                                                             </div>
-                                                            <div className="flex justify-between text-base font-bold text-charcoal-900 pt-2.5 border-t border-cream-200/50">
-                                                                <span>Total</span>
+                                                            {quantity > 1 && (
+                                                                <div className="flex justify-between text-[10px] text-charcoal-400 mt-1">
+                                                                    <span>Quantity:</span>
+                                                                    <span>× {quantity} {selectedEquipment}s</span>
+                                                                </div>
+                                                            )}
+                                                            <div className="flex justify-between text-base font-bold text-charcoal-900 pt-2.5 border-t border-cream-200/50 mt-2">
+                                                                <span>Grand Total</span>
                                                                 <span className="font-serif text-xl">₱{total.toLocaleString()}</span>
                                                             </div>
                                                         </div>
