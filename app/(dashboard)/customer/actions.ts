@@ -102,32 +102,46 @@ export async function requestBooking(
         .from('instructor_availability')
         .select('id, group_id, location_area')
         .eq('instructor_id', instructorId)
-        .ilike('location_area', trimmedLocation ?? '')   // case+whitespace-safe match
-        .ilike('equipment_type', selectedEquipment ?? '%') // Added equipment sync
         .eq('date', manilaDateStr)
         .lte('start_time', timeStr)
-        .gt('end_time', timeStr)
-        .limit(1)
-        .maybeSingle();
+        .gt('end_time', timeStr);
 
     // Query B: weekly recurring availability (instructor set a day_of_week)
     const { data: availByDay } = await supabase
         .from('instructor_availability')
         .select('id, group_id, location_area')
         .eq('instructor_id', instructorId)
-        .ilike('location_area', trimmedLocation ?? '')   // case+whitespace-safe match
-        .ilike('equipment_type', selectedEquipment ?? '%') // Added equipment sync
         .eq('day_of_week', manilaDayOfWeek)
         .is('date', null) // Only weekly-recurring entries (not date-specific)
         .lte('start_time', timeStr)
-        .gt('end_time', timeStr)
-        .limit(1)
-        .maybeSingle();
+        .gt('end_time', timeStr);
 
-    const avail = availByDate || availByDay;
+    const matchingTimeBlocks = [...(availByDate || []), ...(availByDay || [])];
 
-    if (!avail) {
-        return { error: `${instructor?.full_name || 'The instructor'} is not available at ${trimmedLocation} during this time. (Checked location: "${trimmedLocation}")` }
+    // Fuzzy Location Match
+    let isValidLocation = false;
+
+    if (matchingTimeBlocks.length > 0) {
+        const studioLocLower = (trimmedLocation || '').toLowerCase();
+        isValidLocation = matchingTimeBlocks.some(block => {
+            const blockLocLower = (block.location_area || '').toLowerCase();
+            return !blockLocLower || studioLocLower.includes(blockLocLower) || blockLocLower.includes(studioLocLower);
+        });
+
+        if (!isValidLocation) {
+            return { error: `${instructor?.full_name || 'The instructor'} is not available at ${trimmedLocation} during this time. (Location mismatch)` }
+        }
+    } else {
+        // If there are no matching time blocks, check if they have ANY blocks globally
+        const { count: globalBlockCount } = await supabase
+            .from('instructor_availability')
+            .select('*', { count: 'exact', head: true })
+            .eq('instructor_id', instructorId);
+
+        if (globalBlockCount && globalBlockCount > 0) {
+            return { error: `${instructor?.full_name || 'The instructor'} is not available at this date and time.` }
+        }
+        // If 0 blocks globally, we allow the booking (fallback)
     }
 
     // --- DOUBLE BOOKING VALIDATION START ---
@@ -628,34 +642,47 @@ export async function bookInstructorSession(
     // Query A: date-specific availability
     const { data: availByDate } = await supabase
         .from('instructor_availability')
-        .select('id, group_id')
+        .select('id, group_id, location_area') // Changed select to fetch location
         .eq('instructor_id', instructorId)
-        .ilike('location_area', `%${trimmedLocation}%`)
-        .ilike('equipment_type', equipment ?? '%') // Added equipment sync
         .eq('date', manilaDateStr)
         .lte('start_time', timeStr)
-        .gt('end_time', timeStr)
-        .limit(1)
-        .maybeSingle();
+        .gt('end_time', timeStr);
 
     // Query B: weekly recurring availability
     const { data: availByDay } = await supabase
         .from('instructor_availability')
-        .select('id, group_id')
+        .select('id, group_id, location_area') // Changed select to fetch location
         .eq('instructor_id', instructorId)
-        .ilike('location_area', `%${trimmedLocation}%`)
-        .ilike('equipment_type', equipment ?? '%') // Added equipment sync
         .eq('day_of_week', manilaDayOfWeek)
         .is('date', null)
         .lte('start_time', timeStr)
-        .gt('end_time', timeStr)
-        .limit(1)
-        .maybeSingle();
+        .gt('end_time', timeStr);
 
-    const avail = availByDate || availByDay;
+    const matchingTimeBlocks = [...(availByDate || []), ...(availByDay || [])];
 
-    if (!avail) {
-        return { error: 'Instructor is not available at this time and location.' }
+    let isValidLocation = false;
+
+    if (matchingTimeBlocks.length > 0) {
+        const studioLocLower = (trimmedLocation || '').toLowerCase();
+        isValidLocation = matchingTimeBlocks.some(block => {
+            const blockLocLower = (block.location_area || '').toLowerCase();
+            return !blockLocLower || studioLocLower.includes(blockLocLower) || blockLocLower.includes(studioLocLower);
+        });
+
+        if (!isValidLocation) {
+            return { error: `Instructor is not available at "${trimmedLocation}" during this time.` }
+        }
+    } else {
+        // If there are no matching time blocks, check if they have ANY blocks globally
+        const { count: globalBlockCount } = await supabase
+            .from('instructor_availability')
+            .select('*', { count: 'exact', head: true })
+            .eq('instructor_id', instructorId);
+
+        if (globalBlockCount && globalBlockCount > 0) {
+            return { error: `Instructor is not available at this date and time.` }
+        }
+        // If 0 blocks globally, we allow the booking (fallback)
     }
 
     // --- DOUBLE BOOKING VALIDATION START ---

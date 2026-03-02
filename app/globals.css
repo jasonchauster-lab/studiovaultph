@@ -8,6 +8,11 @@
   --cream-300: #efe2c6;
   --cream-400: #e4cf9f;
 
+  --charcoal-50: #f9fafb;
+  --charcoal-100: #f3f4f6;
+  --charcoal-200: #e5e7eb;
+  --charcoal-300: #d1d5db;
+  --charcoal-400: #9ca3af;
   --charcoal-500: #6b7280;
   --charcoal-600: #4b5563;
   --charcoal-700: #374151;
@@ -57,6 +62,11 @@
   --color-cream-300: var(--cream-300);
   --color-cream-400: var(--cream-400);
 
+  --color-charcoal-50: var(--charcoal-50);
+  --color-charcoal-100: var(--charcoal-100);
+  --color-charcoal-200: var(--charcoal-200);
+  --color-charcoal-300: var(--charcoal-300);
+  --color-charcoal-400: var(--charcoal-400);
   --color-charcoal-500: var(--charcoal-500);
   --color-charcoal-600: var(--charcoal-600);
   --color-charcoal-700: var(--charcoal-700);
