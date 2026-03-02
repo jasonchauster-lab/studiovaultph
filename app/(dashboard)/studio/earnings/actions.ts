@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getManilaTodayStr } from '@/lib/timezone'
 import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
 import { revalidatePath } from 'next/cache'
 
@@ -308,7 +309,7 @@ export async function requestPayout(prevState: any, formData: FormData) {
         return { error: 'Withdrawals are currently locked for your studio. Please contact support.' }
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = getManilaTodayStr()
     if ((studio?.bir_certificate_expiry && studio.bir_certificate_expiry < today)
         || (studio?.mayors_permit_expiry && studio.mayors_permit_expiry < today)) {
         return { error: 'One or more of your mandatory documents (BIR 2303 or Mayor\'s Permit) have expired. Please update them before requesting a payout.' }

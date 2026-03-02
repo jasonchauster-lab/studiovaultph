@@ -8,6 +8,7 @@ import clsx from 'clsx'
 import { createSlot, deleteSlot, updateSlot } from '@/app/(dashboard)/studio/actions' // For single slot
 import ScheduleManager from './ScheduleManager' // Bulk generator
 import Image from 'next/image'
+import { toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
 
 interface Slot {
     id: string
@@ -55,17 +56,16 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
 
     const handlePrevWeek = () => {
         const newDate = subWeeks(currentDate, 1)
-        router.push(`?date=${newDate.toISOString().split('T')[0]}`)
+        router.push(`?date=${toManilaDateStr(newDate)}`)
     }
 
     const handleNextWeek = () => {
         const newDate = addWeeks(currentDate, 1)
-        router.push(`?date=${newDate.toISOString().split('T')[0]}`)
+        router.push(`?date=${toManilaDateStr(newDate)}`)
     }
 
     const handleToday = () => {
-        const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' })
-        router.push('?date=' + todayStr)
+        router.push('?date=' + getManilaTodayStr())
     }
 
     // Modal State for Single Slot
@@ -210,7 +210,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                     </div>
 
                                     {days.map(day => {
-                                        const dayStr = format(day, 'yyyy-MM-dd')
+                                        const dayStr = toManilaDateStr(day)
                                         const cellSlots = slots.filter(s => {
                                             const startHour = parseInt(s.start_time.split(':')[0], 10);
                                             return s.date === dayStr && startHour === hour
@@ -530,7 +530,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                                         type="checkbox"
                                                         name={`eq_${eq}`}
                                                         id={`edit_eq_${eq}`}
-                                                        defaultChecked={editingSlot.equipment && !!editingSlot.equipment[eq]}
+                                                        defaultChecked={editingSlot.equipment && !!(editingSlot.equipment[eq] || editingSlot.equipment[eq.toUpperCase()])}
                                                         className="w-4 h-4 text-charcoal-900 rounded border-cream-300"
                                                     />
                                                     <label htmlFor={`edit_eq_${eq}`} className="text-sm text-charcoal-700">{eq}</label>
@@ -541,7 +541,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                                         name={`qty_${eq}`}
                                                         type="number"
                                                         min="1"
-                                                        defaultValue={editingSlot.equipment?.[eq] || 1}
+                                                        defaultValue={editingSlot.equipment?.[eq] || editingSlot.equipment?.[eq.toUpperCase()] || 1}
                                                         className="w-16 px-2 py-1 border border-cream-200 rounded-md bg-white text-sm"
                                                     />
                                                 </div>

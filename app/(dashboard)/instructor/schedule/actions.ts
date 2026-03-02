@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { getManilaTodayStr, toManilaDateStr, toManilaTimeString } from '@/lib/timezone'
 
 export async function addAvailability(formData: FormData) {
     const supabase = await createClient()
@@ -160,7 +161,7 @@ export async function generateRecurringAvailability(params: GenerateAvailability
         // Advance to next day by incrementing the date string
         const nextDay = parseDateStr(currentDateStr);
         nextDay.setUTCDate(nextDay.getUTCDate() + 1);
-        currentDateStr = nextDay.toISOString().split('T')[0];
+        currentDateStr = toManilaDateStr(nextDay);
     }
 
     if (availabilitiesToInsert.length === 0) {

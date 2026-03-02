@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getManilaTodayStr } from '@/lib/timezone'
 import InstructorScheduleCalendar from '@/components/instructor/InstructorScheduleCalendar'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
@@ -15,7 +16,7 @@ export default async function InstructorSchedulePage(props: {
 
     if (!user) redirect('/login')
 
-    const dateParam = typeof searchParams.date === 'string' ? searchParams.date : new Date().toISOString().split('T')[0]
+    const dateParam = typeof searchParams.date === 'string' ? searchParams.date : getManilaTodayStr()
     const currentDate = new Date(dateParam)
 
     // Fetch existing availability

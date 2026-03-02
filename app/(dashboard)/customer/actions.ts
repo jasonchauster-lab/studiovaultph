@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
-import { formatManilaDate, formatManilaTime, roundToISOString, formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
+import { formatManilaDate, formatManilaTime, roundToISOString, formatManilaDateStr, formatTo12Hour, toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
 
 export async function requestBooking(
     slotId: string,
@@ -1010,7 +1010,7 @@ export async function cancelBooking(bookingId: string) {
     if (booking.client_id === booking.instructor_id) {
         try {
             const startDateTime = new Date(slotData.start_time);
-            const dateStr = startDateTime.toISOString().split('T')[0];
+            const dateStr = toManilaDateStr(startDateTime);
             const timeStr = startDateTime.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour12: false, hour: '2-digit', minute: '2-digit' });
 
             await supabase

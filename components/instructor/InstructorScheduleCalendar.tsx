@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X } from 'lucide-react'
 import clsx from 'clsx'
+import { toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
 import InstructorScheduleGenerator from './InstructorScheduleGenerator'
 
@@ -65,16 +66,16 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
 
     const handlePrevWeek = () => {
         const newDate = subWeeks(currentDate, 1)
-        router.push(`?date=${newDate.toISOString().split('T')[0]}`)
+        router.push(`?date=${toManilaDateStr(newDate)}`)
     }
 
     const handleNextWeek = () => {
         const newDate = addWeeks(currentDate, 1)
-        router.push(`?date=${newDate.toISOString().split('T')[0]}`)
+        router.push(`?date=${toManilaDateStr(newDate)}`)
     }
 
     const handleToday = () => {
-        router.push('?date=' + new Date().toISOString().split('T')[0])
+        router.push('?date=' + getManilaTodayStr())
     }
 
     const handleDelete = async (id: string) => {
@@ -236,7 +237,7 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                                     // Filter availability that STARTS in this hour
                                     const startingSlots = availability.filter(a => {
                                         if (a.date) {
-                                            if (!isSameDay(parseISO(a.date), day)) return false
+                                            if (a.date !== toManilaDateStr(day)) return false
                                         } else {
                                             if (a.day_of_week !== getDay(day)) return false
                                         }

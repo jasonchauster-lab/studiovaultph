@@ -5,6 +5,7 @@ import { useCallback } from 'react'
 import { Filter } from 'lucide-react'
 import { STUDIO_AMENITIES } from '@/types'
 import LocationFilterDropdown from '@/components/shared/LocationFilterDropdown'
+import { getManilaTodayStr } from '@/lib/timezone'
 
 interface DiscoveryFiltersProps {
     /** Sub-location strings of verified studios that currently exist in the DB */
@@ -101,7 +102,7 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
             {/* Date Filter */}
             <input
                 type="date"
-                min={new Date().toISOString().split('T')[0]}
+                min={getManilaTodayStr()}
                 onChange={(e) => handleFilter('date', e.target.value)}
                 value={searchParams.get('date') || ''}
                 className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
@@ -111,7 +112,7 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
             <input
                 type="time"
                 min={
-                    searchParams.get('date') === new Date().toISOString().split('T')[0]
+                    searchParams.get('date') === getManilaTodayStr()
                         ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
                         : undefined
                 }

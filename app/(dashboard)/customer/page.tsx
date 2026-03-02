@@ -8,6 +8,7 @@ import SlotCard from '@/components/dashboard/SlotCard'
 import { Slot } from '@/types'
 import BookSessionButton from '@/components/customer/BookSessionButton'
 import StarRating from '@/components/reviews/StarRating'
+import { getManilaTodayStr, toManilaTimeString } from '@/lib/timezone'
 
 interface SearchParams {
     q?: string;
@@ -153,6 +154,9 @@ export default async function CustomerDashboard({
         // If explicitly searching slots OR filtering by date/time without type preference, prioritize slots view?
         // Actually adhering to explicit type is safer. Let's just do it if type === 'slot'
         if (params.type === 'slot') {
+            const nowManilaDate = getManilaTodayStr()
+            const nowManilaTime = toManilaTimeString(new Date())
+
             let slotQuery = supabase
                 .from('slots')
                 .select(`
@@ -160,7 +164,8 @@ export default async function CustomerDashboard({
                     studios!inner(*)
                 `)
                 .eq('is_available', true)
-                .gte('start_time', new Date().toISOString())
+                .or(`date.gt.${nowManilaDate},and(date.eq.${nowManilaDate},start_time.gte.${nowManilaTime})`)
+                .order('date', { ascending: true })
                 .order('start_time', { ascending: true })
 
             if (params.location && params.location !== 'all') {
@@ -174,29 +179,17 @@ export default async function CustomerDashboard({
             if (params.equipment && params.equipment !== 'all') {
                 // Slots/Studios must have this equipment
                 // equipment is now JSONB { "Reformer": 5 }
-                slotQuery = slotQuery.gte(`equipment->>${params.equipment}`, '1')
+                slotQuery = slotQuery.gte(`equipment->>${params.equipment.toUpperCase()}`, '1')
             }
 
             if (params.date) {
-                // Filter by date range (start of day to end of day)
-                const startOfDay = new Date(params.date + "T00:00:00+08:00")
-                const endOfDay = new Date(params.date + "T23:59:59+08:00")
-                slotQuery = slotQuery.gte('start_time', startOfDay.toISOString()).lte('start_time', endOfDay.toISOString())
+                slotQuery = slotQuery.eq('date', params.date)
             }
 
             if (params.time) {
-                // Simple filter: slots starting after this time? 
-                // Or slots containing this time? 
                 // "Show me 10 AM slots" usually means slots starting around 10 AM.
-                // Let's filter for start_time >= params.date + params.time
-                // If only time is provided, assume today/future dates matching valid time?
-                // Matching repeated time across days is hard in SQL ISO strings.
-                // Let's rely on date + time combination for precise lookups, or just Client side filter if needed.
-                // For MVP: if Date AND Time provided, combine them.
-                if (params.date) {
-                    const specificStart = new Date(`${params.date}T${params.time}+08:00`)
-                    slotQuery = slotQuery.gte('start_time', specificStart.toISOString())
-                }
+                const timeStr = params.time.length === 5 ? params.time + ':00' : params.time
+                slotQuery = slotQuery.gte('start_time', timeStr)
             }
 
 

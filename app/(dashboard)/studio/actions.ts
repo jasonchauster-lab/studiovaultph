@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import AccountFrozenEmail from '@/components/emails/AccountFrozenEmail'
-import { formatManilaDate, formatManilaTime, toManilaTimeString, formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
+import { formatManilaDate, formatManilaTime, toManilaTimeString, formatManilaDateStr, formatTo12Hour, toManilaDateStr } from '@/lib/timezone'
 
 export async function createSlot(formData: FormData) {
     const supabase = await createClient()
@@ -50,7 +50,20 @@ export async function createSlot(formData: FormData) {
     })
 
     if (Object.keys(equipment).length === 0) {
-        return { error: 'Please select at least one piece of equipment with a quantity greater than 0.' }
+        // Harden: Try to fetch studio's primary equipment if none provided
+        const { data: studio } = await supabase
+            .from('studios')
+            .select('equipment')
+            .eq('id', studioId)
+            .single()
+
+        if (studio?.equipment && studio.equipment.length > 0) {
+            const primaryEq = studio.equipment[0]
+            equipment[primaryEq.toUpperCase()] = 1
+            totalQuantity = 1
+        } else {
+            return { error: 'Please select at least one piece of equipment with a quantity greater than 0.' }
+        }
     }
 
     if (!studioId || !date || !startTimeStr || !endTimeStr) {
@@ -79,14 +92,20 @@ export async function createSlot(formData: FormData) {
         if (nextHour > endDateTime) break;
 
         // Insert as ONE BUCKET record per hour
+        const standardizedEquipment: Record<string, number> = {}
+        Object.entries(equipment).forEach(([k, v]) => {
+            standardizedEquipment[k.toUpperCase()] = v
+        })
+
         slotsToInsert.push({
             studio_id: studioId,
             date: date,
             start_time: toManilaTimeString(current),
             end_time: toManilaTimeString(nextHour),
             is_available: true,
-            equipment: equipment,
-            equipment_inventory: equipment
+            equipment: standardizedEquipment,
+            equipment_inventory: standardizedEquipment,
+            quantity: totalQuantity
         })
 
         // Move to next hour
@@ -167,13 +186,19 @@ export async function updateSlot(slotId: string, formData: FormData) {
     const startDateTime = new Date(`${date}T${startTimeStr}:00+08:00`)
     const endDateTime = new Date(`${date}T${endTimeStr}:00+08:00`)
 
+    const standardizedEquipment: Record<string, number> = {}
+    Object.entries(equipment).forEach(([k, v]) => {
+        standardizedEquipment[k.toUpperCase()] = v
+    })
+
     const { error } = await supabase
         .from('slots')
         .update({
             date: date,
             start_time: toManilaTimeString(startDateTime),
             end_time: toManilaTimeString(endDateTime),
-            equipment: equipment,
+            equipment: standardizedEquipment,
+            equipment_inventory: standardizedEquipment, // Keep inventory in sync
             quantity: totalQuantity
         })
         .eq('id', slotId)
@@ -405,7 +430,7 @@ export async function generateRecurringSlots(params: GenerateSlotsParams) {
                 inventory[eq] = quantity
             })
 
-            const dayStr = currentDay.toISOString().split('T')[0];
+            const dayStr = toManilaDateStr(currentDay);
             let slotStart = new Date(`${dayStr}T${params.startTime}:00+08:00`);
             const slotEnd = new Date(`${dayStr}T${params.endTime}:00+08:00`);
 
@@ -415,6 +440,11 @@ export async function generateRecurringSlots(params: GenerateSlotsParams) {
 
                 if (nextHour > slotEnd) break;
 
+                const standardizedEquipment: Record<string, number> = {}
+                params.equipment?.forEach(eq => {
+                    standardizedEquipment[eq.toUpperCase()] = quantity
+                })
+
                 // Insert as ONE BUCKET record per hour
                 slotsToInsert.push({
                     studio_id: params.studioId,
@@ -422,8 +452,9 @@ export async function generateRecurringSlots(params: GenerateSlotsParams) {
                     start_time: toManilaTimeString(slotStart),
                     end_time: toManilaTimeString(nextHour),
                     is_available: true,
-                    equipment: inventory,
-                    equipment_inventory: inventory
+                    equipment: standardizedEquipment,
+                    equipment_inventory: standardizedEquipment,
+                    quantity: quantity * (params.equipment?.length || 1)
                 });
 
                 slotStart = nextHour;
