@@ -9,9 +9,11 @@ import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, en
 
 interface Slot {
     id: string;
-    start_time: string;
+    date: string; // YYYY-MM-DD
+    start_time: string; // HH:mm:ss
     end_time: string;
-    equipment?: string[];
+    equipment?: Record<string, number>;
+    equipment_type?: string;
 }
 
 interface Instructor {
@@ -51,15 +53,13 @@ export default function BookingSection({
     // Determine available instructors for the selected time
     const availableInstructors = instructors.filter(inst => {
         if (!selectedSlotTime || !selectedDate) return true;
-        const [startFullStr] = selectedSlotTime.split('|');
-        const start = new Date(startFullStr);
-        const dayOfWeek = start.getDay();
-        const dateStr = format(start, 'yyyy-MM-dd');
-        const timeStr = format(start, 'HH:mm');
+        const [startTime] = selectedSlotTime.split('|');
+        const dayOfWeek = new Date(selectedDate + "T00:00:00+08:00").getDay();
+        const timeStr = startTime.slice(0, 5);
 
         return availabilityBlocks.some(block =>
             block.instructor_id === inst.id &&
-            (block.date === dateStr || (block.date === null && block.day_of_week === dayOfWeek)) &&
+            (block.date === selectedDate || (block.date === null && block.day_of_week === dayOfWeek)) &&
             block.start_time <= timeStr &&
             block.end_time > timeStr
         );
@@ -67,7 +67,7 @@ export default function BookingSection({
 
     // 1. Group by Date
     const slotsByDate = slots.reduce((acc, slot) => {
-        const date = slot.start_time.split('T')[0];
+        const date = slot.date;
         if (!acc[date]) acc[date] = [];
         acc[date].push(slot);
         return acc;
@@ -160,9 +160,9 @@ export default function BookingSection({
     }, {} as Record<string, Slot[]>);
 
     const sortedKeys = Object.keys(groupedSlots).sort((a, b) => {
-        const dateA = new Date(groupedSlots[a][0].start_time);
-        const dateB = new Date(groupedSlots[b][0].start_time);
-        return dateA.getTime() - dateB.getTime();
+        const timeA = a.split('|')[0];
+        const timeB = b.split('|')[0];
+        return timeA.localeCompare(timeB);
     });
 
     // ... (rest of logic remains similar but uses groupedSlots)
@@ -203,11 +203,13 @@ export default function BookingSection({
         if (maxQuantity === 0) return null;
 
         // Studio Rate
-        const sRate = studioPricing?.[selectedEquipment] || 0;
+        const sKey = Object.keys(studioPricing || {}).find(k => k.toLowerCase() === selectedEquipment.toLowerCase());
+        const sRate = sKey ? (studioPricing?.[sKey] || 0) : 0;
 
         // Instructor Rate
         const instructor = instructors.find(i => i.id === selectedInstructor);
-        const iRate = instructor?.rates?.[selectedEquipment] || 0;
+        const iKey = Object.keys(instructor?.rates || {}).find(k => k.toLowerCase() === selectedEquipment.toLowerCase());
+        const iRate = iKey ? (instructor?.rates?.[iKey] || 0) : 0;
 
         // Platform Service Fee: 20% of (studio + instructor) or ₱100 minimum, per slot
         const subtotalPerSlot = sRate + iRate;
@@ -318,10 +320,11 @@ export default function BookingSection({
                 {sortedKeys.map(key => {
                     const group = groupedSlots[key];
                     const firstSlot = group[0];
-                    const start = new Date(firstSlot.start_time);
-                    const end = new Date(firstSlot.end_time);
                     const isSelected = selectedSlotTime === key;
                     const count = group.length;
+
+                    const startTimeDisp = firstSlot.start_time.slice(0, 5);
+                    const endTimeDisp = firstSlot.end_time.slice(0, 5);
 
                     // Get equipment overview for card
                     const eqOverview = new Set(group.map(s => {
@@ -344,10 +347,10 @@ export default function BookingSection({
                                 const firstEq = newGroup[0]?.equipment?.[0] || (newGroup[0] as any).equipment_type || 'Unknown';
                                 setSelectedEquipment(firstEq);
 
-                                // Safety check for date values before toISOString()
+                                // Safety check for date values
                                 try {
-                                    window.localStorage.setItem('booking_start', start.toISOString());
-                                    window.localStorage.setItem('booking_end', end.toISOString());
+                                    window.localStorage.setItem('booking_start', selectedDate + 'T' + firstSlot.start_time);
+                                    window.localStorage.setItem('booking_end', selectedDate + 'T' + firstSlot.end_time);
                                 } catch (e) {
                                     console.error("Invalid date for storage:", e);
                                 }
@@ -360,9 +363,9 @@ export default function BookingSection({
                             )}
                         >
                             <div className="font-serif text-xl mb-2">
-                                {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                {startTimeDisp}
                                 <span className="text-sm opacity-50 mx-2">to</span>
-                                {end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                {endTimeDisp}
                             </div>
                             <div className="flex flex-wrap gap-1.5">
                                 <span className={clsx(

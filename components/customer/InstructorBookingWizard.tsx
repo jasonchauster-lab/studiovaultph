@@ -88,7 +88,7 @@ export default function InstructorBookingWizard({
             if (!slotsData?.start_time || !slotsData?.date) return [];
 
             const dateStr = slotsData.date;
-            const timeStr = slotsData.start_time.slice(0, 5);
+            const timeStr = slotsData.start_time.length === 5 ? slotsData.start_time + ':00' : slotsData.start_time;
 
             return [`${dateStr}|${timeStr}`];
         })
@@ -245,7 +245,7 @@ export default function InstructorBookingWizard({
                                     const fLoc = filterLocation?.trim().toLowerCase();
                                     const locationMatch = fLoc ? (aLoc === fLoc || aLoc.startsWith(fLoc + ' - ')) : true;
                                     const notExpired = isTodayPill ? a.end_time.slice(0, 5) > nowManilaPill : true;
-                                    const notBooked = !bookedSlotsSet.has(`${d.date}|${a.start_time.slice(0, 5)}`);
+                                    const notBooked = !bookedSlotsSet.has(`${d.date}|${a.start_time.length === 5 ? a.start_time + ':00' : a.start_time}`);
                                     return dateMatch && locationMatch && notExpired && notBooked;
                                 });
 
@@ -298,7 +298,7 @@ export default function InstructorBookingWizard({
                                 const fLoc = filterLocation?.trim().toLowerCase();
                                 const locationMatch = fLoc ? (aLoc === fLoc || aLoc.startsWith(fLoc + ' - ')) : true;
                                 const notExpired = isToday ? a.end_time.slice(0, 5) > nowManilaTime : true;
-                                const notBooked = !bookedSlotsSet.has(`${activeDate}|${a.start_time.slice(0, 5)}`);
+                                const notBooked = !bookedSlotsSet.has(`${activeDate}|${a.start_time.length === 5 ? a.start_time + ':00' : a.start_time}`);
                                 return dateMatch && locationMatch && notExpired && notBooked;
                             });
 

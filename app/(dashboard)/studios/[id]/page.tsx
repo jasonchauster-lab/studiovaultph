@@ -6,6 +6,7 @@ import StarRating from '@/components/reviews/StarRating'
 import ReviewList from '@/components/reviews/ReviewList'
 import { getPublicReviews } from '@/app/(dashboard)/reviews/actions'
 import NextImage from 'next/image'
+import { getManilaTodayStr, toManilaTimeString } from '@/lib/timezone'
 
 export default async function StudioDetailsPage({
     params
@@ -28,13 +29,17 @@ export default async function StudioDetailsPage({
 
     if (!studio) notFound()
 
-    // 2. Fetch Available Slots
+    // 2. Fetch Available Slots (Upcoming only, Manila Time)
+    const nowDate = getManilaTodayStr()
+    const nowTime = toManilaTimeString(new Date())
+
     const { data: slots } = await supabase
         .from('slots')
         .select('*')
         .eq('studio_id', id)
         .eq('is_available', true)
-        .gte('start_time', new Date().toISOString())
+        .or(`date.gt.${nowDate},and(date.eq.${nowDate},start_time.gte.${nowTime})`)
+        .order('date', { ascending: true })
         .order('start_time', { ascending: true })
 
     const trimmedStudioLocation = studio.location?.trim()

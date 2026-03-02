@@ -161,6 +161,7 @@ export default async function CustomerDashboard({
                     studios!inner(*)
                 `)
                 .eq('is_available', true)
+                .eq('studios.verified', true)
                 .or(`date.gt.${nowManilaDate},and(date.eq.${nowManilaDate},start_time.gte.${nowManilaTime})`)
                 .order('date', { ascending: true })
                 .order('start_time', { ascending: true })
@@ -175,7 +176,8 @@ export default async function CustomerDashboard({
                 // Check both uppercase (standardized) and original casing for equipment keys
                 const eq = params.equipment.trim();
                 const eqUpper = eq.toUpperCase();
-                slotQuery = slotQuery.or(`equipment->>${eq}.gte.1,equipment->>${eqUpper}.gte.1`)
+                // Quote JSONB keys for PostgREST robustness (handles spaces/chars)
+                slotQuery = slotQuery.or(`equipment->>"${eq}".gte.1,equipment->>"${eqUpper}".gte.1`)
             }
 
             if (params.date) {
