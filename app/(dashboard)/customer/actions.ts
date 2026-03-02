@@ -206,18 +206,6 @@ export async function requestBooking(
     const walletBalance = profile?.available_balance ?? 0;
     const deduction = Math.min(walletBalance, totalPrice);
     const finalPrice = totalPrice - deduction;
-
-    if (deduction > 0) {
-        const { error: walletError } = await supabase.rpc('deduct_available_balance', {
-            user_id: user.id,
-            amount: deduction
-        });
-
-        if (walletError) {
-            console.error('Wallet deduction error:', walletError);
-            return { error: 'Failed to process wallet payment.' };
-        }
-    }
     // --- WALLET AUTO-DEDUCTION END ---
 
     const breakdown = {
@@ -229,162 +217,60 @@ export async function requestBooking(
         wallet_deduction: deduction > 0 ? deduction : undefined,
         original_price: deduction > 0 ? totalPrice : undefined
     };
-    // --- PRICE CALCULATION END ---
 
-    // 2. Logic for Quantity & Partial Booking
-    // We need to find X available slots that match the criteria
-    // For now, let's assume if quantity > 1, we find other slots with same start/end/studio/equipment
-
-    let actualBookedId = slotId;
-
-    // --- EQUIPMENT EXTRACTION START (Refined for JSONB) ---
-    // 1. Decrement the selected equipment in the PARENT slot
+    // --- ATOMIC BOOKING VIA RPC START ---
+    // 1. Resolve exact Key matching (case-insensitive) to prevent "REFORMER" vs "Reformer" mismatch
     const currentEquipment = (slot.equipment as Record<string, number>) || {};
-    const currentTotalQty = slot.quantity || 0;
-
-    // Find the correct case-sensitive key in the DB
-    const eqKey = Object.keys(currentEquipment).find(
-        key => key.toUpperCase() === selectedEquipment.toUpperCase()
+    const exactDbKey = Object.keys(currentEquipment).find(
+        key => key.trim().toUpperCase() === selectedEquipment.trim().toUpperCase()
     );
 
-    if (!eqKey || currentEquipment[eqKey] < quantity) {
-        return { error: 'Failed to extract equipment for booking.' };
+    if (!exactDbKey || currentEquipment[exactDbKey] < quantity) {
+        return { error: `Failed to extract equipment for booking. Requested: ${selectedEquipment}` };
     }
 
-    const newEquipment = { ...currentEquipment };
-    newEquipment[eqKey] -= quantity;
+    // Prepare time parameters if it's a partial time booking
+    let reqStartTime: string | null = null;
+    let reqEndTime: string | null = null;
 
-    // Remove key if 0 (optional)
-    if (newEquipment[eqKey] <= 0) {
-        delete newEquipment[eqKey];
-    }
-
-    const newTotalQty = Math.max(0, currentTotalQty - quantity);
-    const isStillAvailable = newTotalQty > 0;
-
-    await supabase.from('slots').update({
-        equipment: newEquipment,
-        equipment_inventory: newEquipment,
-        quantity: newTotalQty,
-        is_available: isStillAvailable
-    }).eq('id', slotId);
-
-    // 2. Create a NEW "Extracted" slot record with ONLY the booked equipment
-    const { data: extractedSlot, error: extractionError } = await supabase
-        .from('slots')
-        .insert({
-            studio_id: slot.studio_id,
-            date: slot.date,
-            start_time: slot.start_time,
-            end_time: slot.end_time,
-            is_available: false, // Locked immediately
-            equipment: { [eqKey]: quantity },
-            equipment_inventory: { [eqKey]: quantity },
-            quantity: quantity
-        })
-        .select()
-        .single();
-
-    if (extractionError || !extractedSlot) {
-        console.error('Extraction error:', extractionError);
-        return { error: 'Failed to extract equipment for booking.' };
-    }
-
-    actualBookedId = extractedSlot.id;
-    // --- EQUIPMENT EXTRACTION END ---
-
-    // Handle TIME splitting if necessary on the actualBookedId (the extracted one)
     if (bookingStart && bookingEnd) {
-        const reqStart = new Date(bookingStart + '+08:00');
-        const reqEnd = new Date(bookingEnd + '+08:00');
-        const slotStart = new Date(slot.start_time);
-        const slotEnd = new Date(slot.end_time);
-
-        const isPartial = reqStart.getTime() > slotStart.getTime() || reqEnd.getTime() < slotEnd.getTime();
-
-        if (isPartial) {
-            // Create the specific time segment requested
-            const { data: newTimeSlot, error: timeSplitError } = await supabase
-                .from('slots')
-                .insert({
-                    studio_id: slot.studio_id,
-                    date: slot.date,
-                    start_time: reqStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00',
-                    end_time: reqEnd.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00',
-                    is_available: false, // Locked for the booking
-                    equipment: { [selectedEquipment]: quantity },
-                    quantity: quantity
-                })
-                .select()
-                .single();
-
-            if (timeSplitError || !newTimeSlot) {
-                console.error('Time Split error:', timeSplitError);
-                return { error: 'Failed to process partial booking time.' };
-            }
-
-            // Adjust the "leftover" time on the extracted slot (which is now extra available time)
-            // Actually, the original slot already had its time correctly? No, if we extract 1 hour of Tower, 
-            // and then book only 30 mins, the other 30 mins of THAT extraction should go back?
-            // Usually, time splitting is for the whole slot. 
-            // Simplified: If partial time, the rest of the extraction remains as an available (or unavailable) remainder.
-            // Let's keep it simple: the time segment is carved out of the extraction.
-
-            if (reqStart.getTime() === slotStart.getTime()) {
-                await supabase.from('slots').update({
-                    start_time: reqEnd.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00',
-                    is_available: true
-                }).eq('id', actualBookedId);
-            } else if (reqEnd.getTime() === slotEnd.getTime()) {
-                await supabase.from('slots').update({
-                    end_time: reqStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00',
-                    is_available: true
-                }).eq('id', actualBookedId);
-            } else {
-                // Triple Split
-                await supabase.from('slots').update({
-                    end_time: reqStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00',
-                    is_available: true
-                }).eq('id', actualBookedId);
-                await supabase.from('slots').insert({
-                    studio_id: slot.studio_id,
-                    date: slot.date,
-                    start_time: reqEnd.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00',
-                    end_time: slot.end_time,
-                    is_available: true,
-                    equipment: { [selectedEquipment]: quantity },
-                    equipment_inventory: { [selectedEquipment]: quantity },
-                    quantity: quantity
-                });
-            }
-            actualBookedId = newTimeSlot.id;
-        }
+        const rStart = new Date(bookingStart + '+08:00');
+        const rEnd = new Date(bookingEnd + '+08:00');
+        // Extract just the HH:MM:SS for the RPC
+        reqStartTime = rStart.toTimeString().split(' ')[0];
+        reqEndTime = rEnd.toTimeString().split(' ')[0];
     }
 
-    const bookedSlotIdsForRecord = [actualBookedId];
+    // 2. Execute Atomic RPC
+    const { data: rpcResult, error: rpcError } = await supabase.rpc('book_slot_atomic', {
+        p_slot_id: slotId,
+        p_instructor_id: instructorId,
+        p_client_id: user.id,
+        p_equipment_key: exactDbKey,
+        p_quantity: quantity,
+        p_db_price: finalPrice,
+        p_price_breakdown: breakdown,
+        p_wallet_deduction: deduction,
+        p_req_start_time: reqStartTime,
+        p_req_end_time: reqEndTime
+    });
 
-    // Primary ID is the first one
-    let finalSlotId = bookedSlotIdsForRecord[0];
+    if (rpcError) {
+        console.error('Atomic Booking RPC Error:', rpcError);
+        return { error: `Booking failed. Please try again. (${rpcError.message})` };
+    }
 
-    // 4. Create Booking linked to finalSlotId
-    // Set expiry 15 minutes from now for unpaid bookings
-    const expiresAt = new Date()
-    expiresAt.setMinutes(expiresAt.getMinutes() + 15)
+    if (!rpcResult?.success) {
+        console.error('Atomic Booking RPC Error returned false:', rpcResult);
+        return { error: `Booking failed. Please try again.` };
+    }
 
-    const { data: booking, error: bookingError } = await supabase
+    const { booking_id: actualBookingId } = rpcResult;
+    // --- ATOMIC BOOKING VIA RPC END ---
+
+    // Fetch the enriched booking to send emails
+    const { data: booking, error: fetchBookingError } = await supabase
         .from('bookings')
-        .insert({
-            slot_id: finalSlotId,
-            instructor_id: instructorId,
-            client_id: user.id,
-            status: 'pending',
-            equipment: selectedEquipment,
-            total_price: finalPrice,
-            price_breakdown: breakdown,
-            quantity: quantity,
-            booked_slot_ids: bookedSlotIdsForRecord,
-            expires_at: expiresAt.toISOString()
-        })
         .select(`
             *,
             slots (
@@ -402,13 +288,14 @@ export async function requestBooking(
                 email
             )
         `)
-        .single()
+        .eq('id', actualBookingId)
+        .single();
 
-    if (bookingError || !booking) {
-        console.error('Booking error:', bookingError)
-        return { error: `Failed to request booking. DB Error: ${bookingError?.message} (Code: ${bookingError?.code})` }
+    if (fetchBookingError || !booking) {
+        console.error('Enriched Booking fetch error:', fetchBookingError);
+        // We log and return success because the booking *actually* succeeded!
+        // We just skip emails if this fails gracefully.
     }
-
     // --- First Come, First Served logic ---
     // Removed old deletion logic that wiped the instructor's recurring availability.
     // The overlap validation above + UI filtering prevents double bookings.
@@ -630,7 +517,7 @@ export async function bookInstructorSession(
     // 0. Check Instructor Suspension & Balance
     const { data: instructorProfile } = await supabase
         .from('profiles')
-        .select('is_suspended, available_balance, full_name')
+        .select('is_suspended, available_balance, full_name, rates, is_founding_partner, custom_fee_percentage')
         .eq('id', instructorId)
         .single()
 
@@ -775,62 +662,76 @@ export async function bookInstructorSession(
         return { error: 'All matching slots are currently booked.' }
     }
 
-    // 4. Create Booking
-    const { data: booking, error: bookingError } = await supabase
-        .from('bookings')
-        .insert({
-            slot_id: selectedSlot.id,
-            instructor_id: instructorId,
-            client_id: user.id,
-            status: 'approved'
-        })
-        .select()
-        .single()
-
-    if (bookingError || !booking) {
-        console.error('Booking creation error:', bookingError)
-        return { error: 'Failed to create booking.' }
-    }
-
-    // 5. Update Slot Availability (Lock it) via Extraction Logic
+    // --- ATOMIC BOOKING VIA RPC START ---
     const currentEquipment = (selectedSlot.equipment as Record<string, number>) || {};
-    const currentTotalQty = parseInt(selectedSlot.quantity as any) || 0;
+    const exactDbKey = Object.keys(currentEquipment).find(
+        k => k.trim().toUpperCase() === equipment.trim().toUpperCase()
+    );
 
-    // 1. Decrement from Parent
-    const newEquipment = { ...currentEquipment };
-    const equipmentKey = Object.keys(newEquipment).find(k => k.trim().toLowerCase() === equipment.trim().toLowerCase()) || equipment;
-
-    newEquipment[equipmentKey] = (newEquipment[equipmentKey] || 0) - 1;
-    if (newEquipment[equipmentKey] <= 0) {
-        delete newEquipment[equipmentKey];
+    if (!exactDbKey || currentEquipment[exactDbKey] < 1) {
+        return { error: 'Failed to extract equipment for booking.' };
     }
-    const newTotalQty = Math.max(0, currentTotalQty - 1);
 
-    await supabase.from('slots').update({
-        equipment: newEquipment,
-        quantity: newTotalQty,
-        is_available: newTotalQty > 0
-    }).eq('id', selectedSlot.id);
+    // Determine the base fee & service fee dynamically for the RPC
+    const studioPricing = selectedSlot.studios?.pricing as Record<string, number> | null;
+    const sKey = Object.keys(studioPricing || {}).find(k => k.toLowerCase() === equipment.toLowerCase());
+    const studioFee = sKey ? (studioPricing?.[sKey] || 0) : (Number(selectedSlot.studios?.hourly_rate) || 0);
 
-    // 2. Create Extracted Slot
-    const { data: newSlot } = await supabase
-        .from('slots')
-        .insert({
-            studio_id: selectedSlot.studio_id,
-            date: selectedSlot.date,
-            start_time: selectedSlot.start_time,
-            end_time: selectedSlot.end_time,
-            is_available: false,
-            equipment: { [equipmentKey]: 1 },
-            quantity: 1
-        })
-        .select()
-        .single();
+    const instructorRates = instructorProfile?.rates as Record<string, number> | null;
+    const instructorKey = Object.keys(instructorRates || {}).find(k => k.toUpperCase() === 'REFORMER');
+    const instructorFee = instructorKey ? (instructorRates?.[instructorKey] || 0) : 0;
 
-    if (newSlot) {
-        // Update the booking to point to the new extracted slot
-        await supabase.from('bookings').update({ slot_id: newSlot.id }).eq('id', booking.id);
+    const baseFee = studioFee + instructorFee;
+    let feePercentage = 20;
+
+    if (selectedSlot.studios?.is_founding_partner && selectedSlot.studios?.custom_fee_percentage !== undefined) {
+        feePercentage = selectedSlot.studios.custom_fee_percentage;
+    } else if (instructorProfile?.is_founding_partner && instructorProfile?.custom_fee_percentage !== undefined) {
+        feePercentage = instructorProfile.custom_fee_percentage;
     }
+
+    const calculatedServiceFee = baseFee * (feePercentage / 100);
+    const serviceFee = Math.max(100, calculatedServiceFee);
+    const totalPrice = baseFee + serviceFee;
+
+    const breakdown = {
+        studio_fee: studioFee,
+        instructor_fee: instructorFee,
+        service_fee: serviceFee,
+        equipment: equipment,
+        quantity: 1
+    };
+
+    // Note: bookInstructorSession seems to create "approved" bookings for immediate sessions or direct matches
+    // But we use the atomic RPC to ensure structure. We will default to RPC pending and immediately update to approved here,
+    // or rely on the RPC logic. For full atomic safety, the booking is created pending.
+    const { data: rpcResult, error: rpcError } = await supabase.rpc('book_slot_atomic', {
+        p_slot_id: selectedSlot.id,
+        p_instructor_id: instructorId,
+        p_client_id: user.id,
+        p_equipment_key: exactDbKey,
+        p_quantity: 1,
+        p_db_price: totalPrice,
+        p_price_breakdown: breakdown,
+        p_wallet_deduction: 0 // Assume no direct wallet hit here unless later processed
+    });
+
+    if (rpcError) {
+        console.error('Atomic Booking RPC Error:', rpcError);
+        return { error: `Booking creation failed. (${rpcError.message})` };
+    }
+
+    if (!rpcResult?.success) {
+        return { error: 'Failed to create booking securely.' };
+    }
+
+    const { booking_id: actualBookingId } = rpcResult;
+
+    // Immediately mark as approved since this is a direct instructor session matching
+    await supabase.from('bookings').update({ status: 'approved' }).eq('id', actualBookingId);
+
+    const booking = { id: actualBookingId };
+    // --- ATOMIC BOOKING VIA RPC END ---
 
     // 6. Notifications
     // Helper to extract first item if array
