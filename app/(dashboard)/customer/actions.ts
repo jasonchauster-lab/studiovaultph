@@ -74,9 +74,18 @@ export async function requestBooking(
     }
 
     // --- EQUIPMENT DETERMINATION START ---
-    const equipmentObj = (slot.equipment && typeof slot.equipment === 'object' && !Array.isArray(slot.equipment))
-        ? slot.equipment as Record<string, number>
-        : {};
+    let equipmentObj: Record<string, number> = {};
+    if (slot.equipment && typeof slot.equipment === 'object') {
+        if (Array.isArray(slot.equipment)) {
+            slot.equipment.forEach((item: any) => {
+                if (typeof item === 'string') {
+                    equipmentObj[item.trim().toUpperCase()] = 1;
+                }
+            });
+        } else {
+            equipmentObj = slot.equipment as Record<string, number>;
+        }
+    }
 
     const requestedEqStripped = (equipment || '').trim().toLowerCase();
     const actualKey = Object.keys(equipmentObj).find(k => k.trim().toLowerCase() === requestedEqStripped)
@@ -220,12 +229,12 @@ export async function requestBooking(
 
     // --- ATOMIC BOOKING VIA RPC START ---
     // 1. Resolve exact Key matching (case-insensitive) to prevent "REFORMER" vs "Reformer" mismatch
-    const currentEquipment = (slot.equipment as Record<string, number>) || {};
+    const currentEquipment = equipmentObj;
     const exactDbKey = Object.keys(currentEquipment).find(
         key => key.trim().toUpperCase() === selectedEquipment.trim().toUpperCase()
     );
 
-    if (!exactDbKey || currentEquipment[exactDbKey] < quantity) {
+    if (!exactDbKey || (currentEquipment[exactDbKey] ?? 0) < quantity) {
         return { error: `Failed to extract equipment for booking. Requested: ${selectedEquipment}` };
     }
 
@@ -663,12 +672,24 @@ export async function bookInstructorSession(
     }
 
     // --- ATOMIC BOOKING VIA RPC START ---
-    const currentEquipment = (selectedSlot.equipment as Record<string, number>) || {};
+    let currentEquipment: Record<string, number> = {};
+    if (selectedSlot.equipment && typeof selectedSlot.equipment === 'object') {
+        if (Array.isArray(selectedSlot.equipment)) {
+            selectedSlot.equipment.forEach((item: any) => {
+                if (typeof item === 'string') {
+                    currentEquipment[item.trim().toUpperCase()] = 1;
+                }
+            });
+        } else {
+            currentEquipment = selectedSlot.equipment as Record<string, number>;
+        }
+    }
+
     const exactDbKey = Object.keys(currentEquipment).find(
         k => k.trim().toUpperCase() === equipment.trim().toUpperCase()
     );
 
-    if (!exactDbKey || currentEquipment[exactDbKey] < 1) {
+    if (!exactDbKey || (currentEquipment[exactDbKey] ?? 0) < 1) {
         return { error: 'Failed to extract equipment for booking.' };
     }
 

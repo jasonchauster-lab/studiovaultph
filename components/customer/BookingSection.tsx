@@ -68,7 +68,20 @@ export default function BookingSection({
         const inventory: Record<string, number> = {};
         slotsInGroup.forEach(s => {
             const eq = (s as any).equipment;
-            if (!eq || typeof eq !== 'object' || Array.isArray(eq)) return;
+            if (!eq || typeof eq !== 'object') return;
+
+            // Handle array safely
+            if (Array.isArray(eq)) {
+                eq.forEach((item) => {
+                    if (typeof item === 'string') {
+                        const key = item.trim().toUpperCase();
+                        inventory[key] = (inventory[key] || 0) + 1; // Default qty 1 for arrays
+                    }
+                });
+                return;
+            }
+
+            // Normal object handling
             Object.entries(eq).forEach(([k, v]) => {
                 const key = k.trim().toUpperCase();
                 const val = typeof v === 'number' ? v : parseInt(v as string, 10) || 0;
@@ -225,7 +238,18 @@ export default function BookingSection({
         const inventory: Record<string, number> = {};
         slots.forEach(s => {
             const equipmentData = (s as any).equipment;
-            if (!equipmentData || typeof equipmentData !== 'object' || Array.isArray(equipmentData)) return;
+            if (!equipmentData || typeof equipmentData !== 'object') return;
+
+            if (Array.isArray(equipmentData)) {
+                equipmentData.forEach((item) => {
+                    if (typeof item === 'string') {
+                        const key = item.trim().toUpperCase();
+                        inventory[key] = (inventory[key] || 0) + 1;
+                    }
+                });
+                return;
+            }
+
             Object.entries(equipmentData).forEach(([rawKey, rawVal]) => {
                 const key = rawKey.trim().toUpperCase(); // normalize to uppercase
                 const val = typeof rawVal === 'number' ? rawVal : parseInt(rawVal as string, 10) || 0;
@@ -251,7 +275,12 @@ export default function BookingSection({
     // Primary slot for booking: first slot that contains the selected equipment
     const slotsForSelectedEquipment = (slotsInGroup || []).filter(s => {
         const equipmentData = (s as any).equipment;
-        if (!equipmentData || typeof equipmentData !== 'object' || Array.isArray(equipmentData)) return false;
+        if (!equipmentData || typeof equipmentData !== 'object') return false;
+
+        if (Array.isArray(equipmentData)) {
+            return equipmentData.some(k => typeof k === 'string' && k.trim().toLowerCase() === selectedEquipment.toLowerCase());
+        }
+
         return Object.keys(equipmentData).some(
             k => k.trim().toLowerCase() === selectedEquipment.toLowerCase()
                 && ((equipmentData[k] ?? 0) > 0)

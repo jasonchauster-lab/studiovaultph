@@ -50,7 +50,17 @@ export default function InstructorBookingWizard({
 
     // Helper: Case-insensitive lookup for equipment count in JSONB
     const getEquipmentCount = (equipmentData: any, type: string) => {
-        if (!equipmentData || typeof equipmentData !== 'object' || Array.isArray(equipmentData)) return 0;
+        if (!equipmentData || typeof equipmentData !== 'object') return 0;
+
+        if (Array.isArray(equipmentData)) {
+            const actualMatched = equipmentData.find(k => {
+                if (typeof k !== 'string') return false;
+                const tk = k.trim().toLowerCase();
+                const tt = type.trim().toLowerCase();
+                return tk === tt || (EQUIPMENT_MAP[tk] || tk).toLowerCase() === tt;
+            });
+            return actualMatched ? 1 : 0;
+        }
 
         // 1. Direct Case-Insensitive Match
         const actualKey = Object.keys(equipmentData).find(k => {
@@ -152,7 +162,18 @@ export default function InstructorBookingWizard({
         const aggregatedEquipment: Record<string, number> = {}
         slotsAtTime.forEach((s: any) => {
             const eq = s.equipment
-            if (!eq || typeof eq !== 'object' || Array.isArray(eq)) return
+            if (!eq || typeof eq !== 'object') return
+
+            if (Array.isArray(eq)) {
+                eq.forEach((item) => {
+                    if (typeof item === 'string') {
+                        const normalizedKey = item.trim().toUpperCase()
+                        aggregatedEquipment[normalizedKey] = (aggregatedEquipment[normalizedKey] || 0) + 1
+                    }
+                })
+                return
+            }
+
             Object.entries(eq).forEach(([k, v]) => {
                 const normalizedKey = k.trim().toUpperCase()
                 const qty = typeof v === 'number' ? v : parseInt(v as string, 10) || 0
@@ -183,7 +204,18 @@ export default function InstructorBookingWizard({
         const aggregated: Record<string, number> = {}
         slotsAtTime.forEach((s: any) => {
             const eqData = s.equipment
-            if (!eqData || typeof eqData !== 'object' || Array.isArray(eqData)) return
+            if (!eqData || typeof eqData !== 'object') return
+
+            if (Array.isArray(eqData)) {
+                eqData.forEach((item) => {
+                    if (typeof item === 'string') {
+                        const key = item.trim().toUpperCase()
+                        aggregated[key] = (aggregated[key] || 0) + 1
+                    }
+                })
+                return
+            }
+
             Object.entries(eqData).forEach(([k, v]) => {
                 const key = k.trim().toUpperCase()
                 const qty = typeof v === 'number' ? v : parseInt(v as string, 10) || 0
@@ -447,7 +479,18 @@ export default function InstructorBookingWizard({
                                         const aggregatedEq: Record<string, number> = {};
                                         slotsAtTime.forEach((s: any) => {
                                             const eq = s.equipment;
-                                            if (!eq || typeof eq !== 'object' || Array.isArray(eq)) return;
+                                            if (!eq || typeof eq !== 'object') return;
+
+                                            if (Array.isArray(eq)) {
+                                                eq.forEach((item) => {
+                                                    if (typeof item === 'string') {
+                                                        const key = item.trim().toUpperCase();
+                                                        aggregatedEq[key] = (aggregatedEq[key] || 0) + 1;
+                                                    }
+                                                });
+                                                return;
+                                            }
+
                                             Object.entries(eq).forEach(([k, v]) => {
                                                 const key = k.trim().toUpperCase();
                                                 const qty = typeof v === 'number' ? v : parseInt(v as string, 10) || 0;
@@ -586,7 +629,7 @@ export default function InstructorBookingWizard({
 
                                                 <button
                                                     onClick={handleBooking}
-                                                    disabled={isBooking}
+                                                    disabled={isBooking || !selectedEquipment}
                                                     className="w-full bg-charcoal-900 text-cream-50 py-4 rounded-xl font-bold hover:bg-charcoal-800 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
                                                 >
                                                     {isBooking && <Loader2 className="w-5 h-5 animate-spin" />}
