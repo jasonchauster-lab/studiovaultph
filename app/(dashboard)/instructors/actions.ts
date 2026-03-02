@@ -23,6 +23,8 @@ export async function findMatchingStudios(
 
     const searchStart = new Date(`${dateStr}T${startTimeStr}+08:00`)
     const searchEnd = new Date(`${dateStr}T${endTimeStr}+08:00`)
+    // Add a 1-minute buffer to avoid clipping slots that end precisely at searchEnd
+    searchEnd.setMinutes(searchEnd.getMinutes() + 1)
 
     const trimmedLocationArea = locationArea?.trim()
 

@@ -62,13 +62,13 @@ export default function CancelBookingModal({
                         onClick={onClose}
                         className="p-1 hover:bg-cream-100 rounded-full transition-colors text-charcoal-400"
                     >
-                        <X className="w-5 h-5" />
+                        <X className="w-5 h-5 text-charcoal-800" />
                     </button>
                 </div>
 
                 {/* Content */}
                 <div className="p-6 space-y-4">
-                    <p className="text-sm text-charcoal-600 leading-relaxed">
+                    <p className="text-sm text-gray-600 leading-relaxed">
                         {description}
                     </p>
 
@@ -80,14 +80,14 @@ export default function CancelBookingModal({
                     )}
 
                     <div className="space-y-2">
-                        <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider">
+                        <label className="block text-xs font-bold text-charcoal-800 uppercase tracking-wider">
                             Cancellation Reason <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                             placeholder="e.g. Schedule conflict, Studio maintenance, etc."
-                            className="w-full min-h-[100px] p-3 text-sm bg-cream-50 border border-cream-200 rounded-xl focus:ring-2 focus:ring-rose-gold outline-none transition-all placeholder:text-charcoal-300 text-charcoal-900"
+                            className="w-full min-h-[100px] p-3 text-sm bg-cream-50 border border-cream-200 rounded-xl focus:ring-2 focus:ring-rose-gold outline-none transition-all placeholder:text-charcoal-500 text-charcoal-900"
                             autoFocus
                         />
                         {error && (
@@ -102,7 +102,7 @@ export default function CancelBookingModal({
                 <div className="px-6 py-4 bg-cream-50/50 border-t border-cream-100 flex gap-3">
                     <button
                         onClick={onClose}
-                        className="flex-1 px-4 py-2.5 bg-white border border-cream-200 text-charcoal-600 rounded-xl text-sm font-bold hover:bg-cream-100 transition-colors"
+                        className="flex-1 px-4 py-2.5 bg-white border border-cream-200 text-charcoal-800 rounded-xl text-sm font-bold hover:bg-cream-100 transition-colors"
                     >
                         Keep Booking
                     </button>

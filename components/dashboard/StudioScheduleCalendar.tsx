@@ -192,11 +192,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                 <div className="overflow-x-auto">
                     <div className="min-w-[800px]">
                         <div className="grid grid-cols-8 border-b border-cream-200 bg-cream-50">
-                            <div className="p-4 text-xs font-medium text-black border-r border-cream-200 sticky left-0 bg-cream-50 z-20">TIME</div>
+                            <div className="p-4 text-xs font-medium text-charcoal-900 border-r border-cream-200 sticky left-0 bg-cream-50 z-20">TIME</div>
                             {days.map(day => (
                                 <div key={day.toString()} className={clsx("p-3 text-center border-r border-cream-200 last:border-r-0 min-w-[100px]", isSameDay(day, new Date()) ? "bg-blue-50/50" : "")}>
-                                    <div className="text-xs text-charcoal-500 uppercase mb-1 font-bold tracking-tighter">{format(day, 'EEE')}</div>
-                                    <div className={clsx("text-lg font-serif", isSameDay(day, new Date()) ? "text-rose-gold font-black" : "text-black")}>{format(day, 'd')}</div>
+                                    <div className="text-xs text-charcoal-800 uppercase mb-1 font-bold tracking-tighter">{format(day, 'EEE')}</div>
+                                    <div className={clsx("text-lg font-serif", isSameDay(day, new Date()) ? "text-rose-gold font-black" : "text-charcoal-900")}>{format(day, 'd')}</div>
                                 </div>
                             ))}
                         </div>
@@ -204,7 +204,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                         <div className="divide-y divide-cream-100">
                             {hours.map(hour => (
                                 <div key={hour} className="grid grid-cols-8 min-h-[80px]">
-                                    <div className="p-2 text-xs text-black font-medium border-r border-cream-200 text-center sticky left-0 bg-white z-20">
+                                    <div className="p-2 text-xs text-charcoal-900 font-medium border-r border-cream-200 text-center sticky left-0 bg-white z-20">
                                         {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                     </div>
 

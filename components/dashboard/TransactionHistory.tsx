@@ -70,7 +70,7 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                         <tbody className="divide-y divide-cream-100">
                             {bookings.length === 0 ? (
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-8 text-center text-charcoal-500">
+                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-600">
                                         No bookings found.
                                     </td>
                                 </tr>
@@ -147,7 +147,7 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                         <tbody className="divide-y divide-cream-100">
                             {payouts.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-charcoal-500">
+                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-600">
                                         No payout requests found.
                                     </td>
                                 </tr>

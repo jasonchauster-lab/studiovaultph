@@ -623,7 +623,7 @@ export async function bookInstructorSession(
         .from('instructor_availability')
         .select('id, group_id')
         .eq('instructor_id', instructorId)
-        .ilike('location_area', trimmedLocation)
+        .ilike('location_area', `%${trimmedLocation}%`)
         .ilike('equipment_type', equipment ?? '%') // Added equipment sync
         .eq('date', manilaDateStr)
         .lte('start_time', timeStr)
@@ -636,7 +636,7 @@ export async function bookInstructorSession(
         .from('instructor_availability')
         .select('id, group_id')
         .eq('instructor_id', instructorId)
-        .ilike('location_area', trimmedLocation)
+        .ilike('location_area', `%${trimmedLocation}%`)
         .ilike('equipment_type', equipment ?? '%') // Added equipment sync
         .eq('day_of_week', manilaDayOfWeek)
         .is('date', null)

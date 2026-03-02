@@ -158,7 +158,7 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                         {step === 4 && 'Request Submitted'}
                     </h3>
                     <button onClick={resetAndClose} className="p-2 hover:bg-cream-100 rounded-full transition-colors">
-                        <X className="w-5 h-5 text-charcoal-500" />
+                        <X className="w-5 h-5 text-charcoal-800" />
                     </button>
                 </div>
 
@@ -177,17 +177,17 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                                     How much would you like to top up?
                                 </label>
                                 <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-400 font-medium">₱</span>
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-600 font-medium">₱</span>
                                     <input
                                         type="number"
                                         value={amount}
                                         onChange={(e) => setAmount(e.target.value)}
                                         placeholder="0.00"
-                                        className="w-full pl-8 pr-4 py-3 bg-cream-50/50 border border-cream-200 rounded-xl focus:ring-2 focus:ring-rose-gold focus:border-rose-gold outline-none transition-all text-lg font-medium text-charcoal-900 placeholder:text-charcoal-400"
+                                        className="w-full pl-8 pr-4 py-3 bg-cream-50/50 border border-cream-200 rounded-xl focus:ring-2 focus:ring-rose-gold focus:border-rose-gold outline-none transition-all text-lg font-medium text-charcoal-900 placeholder:text-charcoal-500"
                                         required
                                     />
                                 </div>
-                                <p className="mt-2 text-xs text-charcoal-500">
+                                <p className="mt-2 text-xs text-charcoal-700">
                                     This amount will be added to your balance once the payment is verified.
                                 </p>
                             </div>
@@ -278,7 +278,7 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                                             <Upload className="w-8 h-8 text-rose-gold" />
                                         </div>
                                         <p className="font-medium text-charcoal-900">Upload Transfer Receipt</p>
-                                        <p className="text-xs text-charcoal-500 mt-1">PNG, JPG or JPEG (Max 5MB)</p>
+                                        <p className="text-xs text-charcoal-700 mt-1">PNG, JPG or JPEG (Max 5MB)</p>
                                         <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
                                     </label>
                                 )}

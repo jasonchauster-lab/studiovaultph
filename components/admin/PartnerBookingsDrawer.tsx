@@ -111,10 +111,10 @@ function BookingSection({ title, bookings }: { title: string, bookings: Booking[
     if (bookings.length === 0) {
         return (
             <div>
-                <h3 className="text-sm font-bold uppercase tracking-wider text-charcoal-400 mb-4">{title}</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-charcoal-900 mb-4">{title}</h3>
                 <div className="bg-white border border-dashed border-cream-300 rounded-xl py-10 flex flex-col items-center justify-center text-center px-6">
                     <CalendarX2 className="w-8 h-8 text-charcoal-200 mb-2" />
-                    <p className="text-sm text-charcoal-400">No {title.toLowerCase()} found.</p>
+                    <p className="text-sm text-gray-600">No {title.toLowerCase()} found.</p>
                 </div>
             </div>
         )
@@ -122,15 +122,15 @@ function BookingSection({ title, bookings }: { title: string, bookings: Booking[
 
     return (
         <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-charcoal-400 mb-4">{title}</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-charcoal-900 mb-4">{title}</h3>
             <div className="bg-white border border-cream-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs text-charcoal-600">
                         <thead className="bg-cream-50 border-b border-cream-200">
                             <tr>
-                                <th className="px-4 py-3 font-bold uppercase tracking-wider text-charcoal-500">Date / Time</th>
-                                <th className="px-4 py-3 font-bold uppercase tracking-wider text-charcoal-500">Studio / Instructor</th>
-                                <th className="px-4 py-3 font-bold uppercase tracking-wider text-charcoal-500">Status</th>
+                                <th className="px-4 py-3 font-bold uppercase tracking-wider text-charcoal-700">Date / Time</th>
+                                <th className="px-4 py-3 font-bold uppercase tracking-wider text-charcoal-700">Studio / Instructor</th>
+                                <th className="px-4 py-3 font-bold uppercase tracking-wider text-charcoal-700">Status</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-cream-100">

@@ -38,6 +38,13 @@ export default function InstructorBookingWizard({
     const searchParams = useSearchParams()
     const filterLocation = searchParams.get('location')
 
+    // Helper: Case-insensitive lookup for equipment count in JSONB
+    const getEquipmentCount = (equipmentData: any, type: string) => {
+        if (!equipmentData || typeof equipmentData !== 'object' || Array.isArray(equipmentData)) return 0;
+        const actualKey = Object.keys(equipmentData).find(k => k.trim().toLowerCase() === type.trim().toLowerCase());
+        return actualKey ? (equipmentData[actualKey] ?? 0) : 0;
+    };
+
     // Helper: Generate next 14 days based on Manila Time
     const nextDays = Array.from({ length: 14 }).map((_, i) => {
         const todayAtNoon = new Date();
@@ -131,13 +138,7 @@ export default function InstructorBookingWizard({
         // Case-insensitive equipment selection
         const firstEq = allEq[0] || ''
         setSelectedEquipment(firstEq)
-
-        // Max quantity = JSONB value for that key (case-insensitive lookup)
-        const actualKey = allEq.find(k => k.trim().toLowerCase() === firstEq.trim().toLowerCase())
-        const count = actualKey && typeof equipmentData === 'object' && !Array.isArray(equipmentData)
-            ? (equipmentData[actualKey] ?? 0)
-            : 0
-        setMaxQuantity(Math.max(1, count))
+        setMaxQuantity(Math.max(1, getEquipmentCount(equipmentData, firstEq)))
         setQuantity(1)
     }
 
@@ -149,16 +150,7 @@ export default function InstructorBookingWizard({
         if (!studio) return
 
         const primarySlot = studio.matchingSlots.find((s: any) => s.id === selectedStudioSlot)
-
-        // For JSONB equipment, the count is stored directly in the primary slot
-        const primaryEquipment = primarySlot?.equipment
-        const actualKey = (primaryEquipment && typeof primaryEquipment === 'object' && !Array.isArray(primaryEquipment))
-            ? Object.keys(primaryEquipment).find(k => k.trim().toLowerCase() === eq.trim().toLowerCase())
-            : null;
-
-        const count = actualKey ? (primaryEquipment[actualKey] ?? 0) : 0
-
-        setMaxQuantity(Math.max(1, count))
+        setMaxQuantity(Math.max(1, getEquipmentCount(primarySlot?.equipment, eq)))
         setQuantity(1)
     }
 
@@ -433,10 +425,7 @@ export default function InstructorBookingWizard({
                                                                         if (typeof s.equipment === 'object' && s.equipment !== null) return !!(s.equipment as Record<string, any>)[eq]
                                                                         return false
                                                                     });
-                                                                    const count = Array.isArray(slotWithEq?.equipment)
-                                                                        ? slotsAtTime.filter((s: any) => s.equipment?.includes(eq)).length
-                                                                        : (slotWithEq?.equipment as Record<string, any>)?.[eq] || 0;
-
+                                                                    const count = getEquipmentCount(slotsAtTime[0]?.equipment, eq);
                                                                     const isSelected = selectedEquipment === eq;
                                                                     return (
                                                                         <button
