@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { findMatchingStudios } from '@/app/(dashboard)/instructors/actions'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
-import { getManilaTodayStr, toManilaDate, formatTo12Hour } from '@/lib/timezone'
+import { getManilaTodayStr, toManilaDate, formatTo12Hour, normalizeTimeTo24h } from '@/lib/timezone'
 import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -52,25 +52,23 @@ export default function InstructorBookingWizard({
     const getEquipmentCount = (equipmentData: any, type: string) => {
         if (!equipmentData || typeof equipmentData !== 'object' || Array.isArray(equipmentData)) return 0;
 
-        // Find matching key case-insensitively
+        // 1. Direct Case-Insensitive Match
         const actualKey = Object.keys(equipmentData).find(k => {
             const tk = k.trim().toLowerCase();
             const tt = type.trim().toLowerCase();
             return tk === tt || (EQUIPMENT_MAP[tk] || tk).toLowerCase() === tt;
         });
 
-        // If not found by equipment name, check if keys are time-based (safety for specific DB anomalies)
-        if (!actualKey) {
-            const timeKey = Object.keys(equipmentData).find(k => {
-                const tk = k.trim();
-                const tt = type.trim();
-                // Match if both are times, even with different seconds or AM/PM (using slice(0,5))
-                return tk.includes(':') && tt.includes(':') && tk.slice(0, 5) === tt.slice(0, 5);
-            });
-            if (timeKey) return equipmentData[timeKey] ?? 0;
-        }
+        if (actualKey) return equipmentData[actualKey] ?? 0;
 
-        return actualKey ? (equipmentData[actualKey] ?? 0) : 0;
+        // 2. Time-Based Normalization Match (Safety for specific DB anomalies)
+        const typeAsTime = normalizeTimeTo24h(type);
+        const timeKey = Object.keys(equipmentData).find(k => {
+            if (!k.includes(':')) return false;
+            return normalizeTimeTo24h(k) === typeAsTime;
+        });
+
+        return timeKey ? (equipmentData[timeKey] ?? 0) : 0;
     };
 
     // Helper: Generate next 14 days based on Manila Time
@@ -92,14 +90,14 @@ export default function InstructorBookingWizard({
         }
     })
 
-    // Pre-process active bookings into a set of 'YYYY-MM-DD|HH:MM' strings in Manila time
+    // Pre-process active bookings into a set of 'YYYY-MM-DD|HH:mm:ss' strings in Manila time
     const bookedSlotsSet = new Set(
         activeBookings.flatMap(b => {
             const slotsData = Array.isArray(b.slots) ? b.slots[0] : b.slots;
             if (!slotsData?.start_time || !slotsData?.date) return [];
 
             const dateStr = slotsData.date;
-            const timeStr = slotsData.start_time.length === 5 ? slotsData.start_time + ':00' : slotsData.start_time;
+            const timeStr = normalizeTimeTo24h(slotsData.start_time);
 
             return [`${dateStr}|${timeStr}`];
         })
@@ -256,7 +254,7 @@ export default function InstructorBookingWizard({
                                     const fLoc = filterLocation?.trim().toLowerCase();
                                     const locationMatch = fLoc ? (aLoc === fLoc || aLoc.startsWith(fLoc + ' - ')) : true;
                                     const notExpired = isTodayPill ? a.end_time.slice(0, 5) > nowManilaPill : true;
-                                    const notBooked = !bookedSlotsSet.has(`${d.date}|${a.start_time.length === 5 ? a.start_time + ':00' : a.start_time}`);
+                                    const notBooked = !bookedSlotsSet.has(`${d.date}|${normalizeTimeTo24h(a.start_time)}`);
                                     return dateMatch && locationMatch && notExpired && notBooked;
                                 });
 
@@ -309,7 +307,7 @@ export default function InstructorBookingWizard({
                                 const fLoc = filterLocation?.trim().toLowerCase();
                                 const locationMatch = fLoc ? (aLoc === fLoc || aLoc.startsWith(fLoc + ' - ')) : true;
                                 const notExpired = isToday ? a.end_time.slice(0, 5) > nowManilaTime : true;
-                                const notBooked = !bookedSlotsSet.has(`${activeDate}|${a.start_time.length === 5 ? a.start_time + ':00' : a.start_time}`);
+                                const notBooked = !bookedSlotsSet.has(`${activeDate}|${normalizeTimeTo24h(a.start_time)}`);
                                 return dateMatch && locationMatch && notExpired && notBooked;
                             });
 

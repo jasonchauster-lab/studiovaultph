@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
-import { formatManilaDate, formatManilaTime, roundToISOString, formatManilaDateStr, formatTo12Hour, toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
+import { formatManilaDate, formatManilaTime, roundToISOString, formatManilaDateStr, formatTo12Hour, toManilaDateStr, getManilaTodayStr, normalizeTimeTo24h } from '@/lib/timezone'
 
 export async function requestBooking(
     slotId: string,
@@ -88,10 +88,10 @@ export async function requestBooking(
 
     // ✅ Derive date & day using the new date and start_time columns (pure strings)
     const manilaDateStr = slot.date;
-    const slotStartTimeArr = slot.start_time.split(':');
     const tempDate = new Date(`${slot.date}T${slot.start_time}+08:00`);
     const manilaDayOfWeek = tempDate.getDay();
-    const timeStr = slot.start_time;
+    // Normalize to HH:mm:ss for consistent instructor_availability comparison
+    const timeStr = normalizeTimeTo24h(slot.start_time);
 
     // ✅ Run TWO separate queries instead of .or() to avoid PostgREST NULL ambiguity:
     // Both studio.location and instructor location_area are trimmed to avoid whitespace mismatch.
@@ -617,10 +617,10 @@ export async function bookInstructorSession(
         return { error: `${instructorProfile.full_name || 'The instructor'} is currently not accepting new bookings due to a pending balance settlement.` }
     }
 
-    // 1. Validate Instructor Availability
+    // Normalize time to HH:mm:ss for consistent instructor_availability comparison
     const manilaDateStr = date;
     const manilaDayOfWeek = startDateTime.getDay();
-    const timeStr = time.length === 5 ? time + ':00' : time;
+    const timeStr = normalizeTimeTo24h(time);
     const trimmedLocation = location?.trim();
 
     // Query A: date-specific availability

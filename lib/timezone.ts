@@ -124,3 +124,34 @@ export function roundToISOString(date: Date | string): string {
     rounded.setSeconds(0, 0);
     return rounded.toISOString();
 }
+
+/**
+ * Normalizes any time string (HH:mm, HH:mm:ss, or 12h AM/PM) to HH:mm:ss (24h).
+ */
+export function normalizeTimeTo24h(timeStr: string): string {
+    if (!timeStr) return '00:00:00';
+    const clean = timeStr.trim();
+
+    // Handle AM/PM
+    const is12h = /AM|PM/i.test(clean);
+    if (is12h) {
+        const parts = clean.split(/\s+/);
+        const timeParts = parts[0].split(':');
+        let hours = parseInt(timeParts[0], 10);
+        const minutes = timeParts[1] || '00';
+        const seconds = timeParts[2] || '00';
+        const ampm = parts[1]?.toUpperCase();
+
+        if (ampm === 'PM' && hours < 12) hours += 12;
+        if (ampm === 'AM' && hours === 12) hours = 0;
+
+        return `${hours.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')}`;
+    }
+
+    // Handle HH:mm or HH:mm:ss
+    const parts = clean.split(':');
+    const h = parts[0].padStart(2, '0');
+    const m = (parts[1] || '00').padStart(2, '0');
+    const s = (parts[2] || '00').padStart(2, '0');
+    return `${h}:${m}:${s}`;
+}

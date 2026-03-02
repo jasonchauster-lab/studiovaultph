@@ -6,7 +6,7 @@ import { Loader2, CheckCircle, Calendar, ChevronLeft, ChevronRight, AlertCircle 
 import clsx from 'clsx'
 import { useRouter } from 'next/navigation'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays } from 'date-fns'
-import { formatTo12Hour, toManilaTimeString } from '@/lib/timezone'
+import { formatTo12Hour, toManilaTimeString, normalizeTimeTo24h } from '@/lib/timezone'
 
 interface Slot {
     id: string;
@@ -57,14 +57,14 @@ export default function BookingSection({
         const [startTime] = selectedSlotTime.split('|');
         const dayOfWeek = new Date(selectedDate + "T00:00:00+08:00").getDay();
 
-        // Normalize time strings to HH:mm for comparison with availability blocks
-        const timeStr = startTime.slice(0, 5);
+        // Normalize time strings for robust comparison
+        const normalizedSlotStart = normalizeTimeTo24h(startTime);
 
         return availabilityBlocks.some(block =>
             block.instructor_id === inst.id &&
             (block.date === selectedDate || (block.date === null && block.day_of_week === dayOfWeek)) &&
-            block.start_time.slice(0, 5) <= timeStr &&
-            block.end_time.slice(0, 5) > timeStr
+            normalizeTimeTo24h(block.start_time) <= normalizedSlotStart &&
+            normalizeTimeTo24h(block.end_time) > normalizedSlotStart
         );
     });
 
