@@ -21,10 +21,16 @@ export async function findMatchingStudios(
     // So we search for slots where:
     // slot.start_time >= (Date + StartTime) AND slot.end_time <= (Date + EndTime)
 
-    const searchStart = new Date(`${dateStr}T${startTimeStr}+08:00`)
-    const searchEnd = new Date(`${dateStr}T${endTimeStr}+08:00`)
+    const normalizedStart = startTimeStr.length === 5 ? startTimeStr + ':00' : startTimeStr
+    const normalizedEnd = endTimeStr.length === 5 ? endTimeStr + ':00' : endTimeStr
+
+    const searchStart = new Date(`${dateStr}T${normalizedStart}+08:00`)
+    const searchEnd = new Date(`${dateStr}T${normalizedEnd}+08:00`)
     // Add a 1-minute buffer to avoid clipping slots that end precisely at searchEnd
     searchEnd.setMinutes(searchEnd.getMinutes() + 1)
+
+    const searchStartISO = searchStart.toISOString()
+    const searchEndISO = searchEnd.toISOString()
 
     const trimmedLocationArea = locationArea?.trim()
 
@@ -45,8 +51,8 @@ export async function findMatchingStudios(
             )
         `)
         .eq('is_available', true)
-        .gte('start_time', searchStart.toISOString())
-        .lte('end_time', searchEnd.toISOString())
+        .gte('start_time', searchStartISO)
+        .lte('end_time', searchEndISO)
         .order('start_time', { ascending: true })
 
     if (error) {

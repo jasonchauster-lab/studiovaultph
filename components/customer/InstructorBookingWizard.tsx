@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { findMatchingStudios } from '@/app/(dashboard)/instructors/actions'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
-import { getManilaTodayStr, toManilaDate } from '@/lib/timezone'
+import { getManilaTodayStr, toManilaDate, formatTo12Hour } from '@/lib/timezone'
 import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -329,7 +329,7 @@ export default function InstructorBookingWizard({
                                             >
                                                 <div>
                                                     <div className="font-serif text-lg text-charcoal-900">
-                                                        {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}
+                                                        {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
                                                     </div>
                                                     <div className="text-xs text-charcoal-500 flex items-center gap-1.5 mt-1 font-medium">
                                                         <MapPin className="w-3.5 h-3.5 text-charcoal-300" />
@@ -398,7 +398,7 @@ export default function InstructorBookingWizard({
                                                                 : "bg-cream-50 text-charcoal-700 border-cream-200 hover:border-charcoal-400"
                                                         )}
                                                     >
-                                                        {new Date(startTime).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                        {formatTo12Hour(startTime)}
                                                     </button>
                                                 );
                                             });

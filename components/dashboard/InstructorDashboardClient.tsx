@@ -8,6 +8,7 @@ import Link from 'next/link';
 import clsx from 'clsx';
 import ChatWindow from '@/components/dashboard/ChatWindow';
 import MessageCountBadge from '@/components/dashboard/MessageCountBadge';
+import { formatManilaTime } from '@/lib/timezone';
 import { useSearchParams } from 'next/navigation';
 import CancelBookingModal from './CancelBookingModal';
 import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions';
@@ -263,7 +264,7 @@ export default function InstructorDashboardClient() {
                                                 <div className="flex flex-col gap-1">
                                                     <p className="text-[10px] font-bold text-charcoal-400 uppercase tracking-widest">Time Slot</p>
                                                     <p className="text-sm font-bold text-charcoal-700">
-                                                        {new Date(session.slots.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' })}
+                                                        {formatManilaTime(session.slots.start_time)}
                                                     </p>
                                                 </div>
 

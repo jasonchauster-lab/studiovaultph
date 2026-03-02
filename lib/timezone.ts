@@ -61,3 +61,29 @@ export function getManilaTodayStr(): string {
     const day = d.getUTCDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
 }
+/**
+ * Converts an HH:mm or HH:mm:ss string to a 12-hour AM/PM format.
+ * Example: "09:00" -> "9:00 AM", "13:30" -> "1:30 PM"
+ */
+export function formatTo12Hour(timeStr: string): string {
+    if (!timeStr) return '';
+    const [hStr, mStr] = timeStr.split(':');
+    let hours = parseInt(hStr, 10);
+    const minutes = parseInt(mStr, 10);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    if (hours === 0) hours = 12;
+    const minuteStr = minutes.toString().padStart(2, '0');
+    return `${hours}:${minuteStr} ${ampm}`;
+}
+
+/**
+ * Returns an ISO string rounded to the nearest minute, zeroing out seconds and milliseconds.
+ * This ensures consistency for database comparisons.
+ */
+export function roundToISOString(date: Date | string): string {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const rounded = new Date(d.getTime());
+    rounded.setSeconds(0, 0);
+    return rounded.toISOString();
+}

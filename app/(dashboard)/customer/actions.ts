@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { roundToISOString } from '@/lib/timezone'
 import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
@@ -592,10 +593,12 @@ export async function bookInstructorSession(
         return { error: 'Missing booking details. Please select Date, Time, Location and Equipment.' }
     }
 
-    const startDateTime = new Date(`${date}T${time}+08:00`)
+    const startDateTime = new Date(`${date}T${time.length === 5 ? time + ':00' : time}+08:00`)
+    const startISO = roundToISOString(startDateTime)
+
     // Assume 1 hour session for now as per "hourly slot" standard
-    const endDateTime = new Date(startDateTime)
-    endDateTime.setHours(startDateTime.getHours() + 1)
+    const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000)
+    const endISO = roundToISOString(endDateTime)
 
     // 0. Check Instructor Suspension & Balance
     const { data: instructorProfile } = await supabase
@@ -657,7 +660,7 @@ export async function bookInstructorSession(
         .select('id, slots!inner(start_time)')
         .eq('instructor_id', instructorId)
         .in('status', ['pending', 'approved'])
-        .eq('slots.start_time', startDateTime.toISOString());
+        .eq('slots.start_time', startISO);
 
     if (overlappingBookings && overlappingBookings.length > 0) {
         return { error: 'The instructor is already booked for this time slot.' }
@@ -673,7 +676,7 @@ export async function bookInstructorSession(
             studios!inner(*, profiles!owner_id(available_balance, is_suspended, full_name))
         `)
         .eq('is_available', true)
-        .eq('start_time', startDateTime.toISOString()) // Exact match for slot start
+        .eq('start_time', startISO) // Exact match for slot start
         //.eq('end_time', endDateTime.toISOString()) // Optional, if slots are strict 1 hour
         .eq('studios.verified', true)
     // We will filter location and equipment availability in JS for better case-insensitivity support
