@@ -168,35 +168,44 @@ export default function BookingSection({
         return timeA.localeCompare(timeB);
     });
 
-    // ... (rest of logic remains similar but uses groupedSlots)
+    // Slots for the currently selected time slot
+    const slotsInGroup: Slot[] = selectedSlotTime ? (groupedSlots[selectedSlotTime] || []) : [];
 
-    // Determine available equipment for the selected time
-    const slotsInGroup = selectedSlotTime ? groupedSlots[selectedSlotTime] : [];
-    const equipmentCounts: Record<string, number> = {};
-    if (slotsInGroup) {
-        slotsInGroup.forEach(s => {
+    // Helper: case-insensitive JSONB equipment lookup — sums actual inventory values
+    const getEquipmentInventory = (slots: Slot[]): Record<string, number> => {
+        const inventory: Record<string, number> = {};
+        slots.forEach(s => {
             const equipmentData = (s as any).equipment;
-            const keys = (equipmentData && typeof equipmentData === 'object' && !Array.isArray(equipmentData))
-                ? Object.keys(equipmentData)
-                : (Array.isArray(equipmentData) ? equipmentData : []);
-
-            const eq = keys[0] || (s as any).equipment_type || 'Unknown';
-            equipmentCounts[eq] = (equipmentCounts[eq] || 0) + 1;
+            if (!equipmentData || typeof equipmentData !== 'object' || Array.isArray(equipmentData)) return;
+            Object.entries(equipmentData).forEach(([rawKey, rawVal]) => {
+                const key = rawKey.trim().toUpperCase(); // normalize to uppercase
+                const val = typeof rawVal === 'number' ? rawVal : parseInt(rawVal as string, 10) || 0;
+                if (val > 0) {
+                    inventory[key] = (inventory[key] || 0) + val;
+                }
+            });
         });
-    }
-    const equipmentTypes = Object.keys(equipmentCounts).filter(e => e !== 'Unknown');
+        return inventory;
+    };
 
-    // Filter slots by selected equipment to get the right primary ID and count
-    const slotsForSelectedEquipment = slotsInGroup?.filter(s => {
+    const equipmentInventory = getEquipmentInventory(slotsInGroup || []);
+    const equipmentTypes = Object.keys(equipmentInventory);
+
+    // maxQuantity: actual inventory count for selected equipment (case-insensitive)
+    const selectedEqKey = Object.keys(equipmentInventory).find(
+        k => k.toLowerCase() === selectedEquipment.toLowerCase()
+    ) || '';
+    const maxQuantity = selectedEqKey ? (equipmentInventory[selectedEqKey] || 0) : 0;
+
+    // Primary slot for booking: first slot that contains the selected equipment
+    const slotsForSelectedEquipment = (slotsInGroup || []).filter(s => {
         const equipmentData = (s as any).equipment;
-        const keys = (equipmentData && typeof equipmentData === 'object' && !Array.isArray(equipmentData))
-            ? Object.keys(equipmentData)
-            : (Array.isArray(equipmentData) ? equipmentData : []);
-
-        const eq = keys[0] || (s as any).equipment_type || 'Unknown';
-        return eq === selectedEquipment;
-    }) || [];
-    const maxQuantity = slotsForSelectedEquipment.length;
+        if (!equipmentData || typeof equipmentData !== 'object' || Array.isArray(equipmentData)) return false;
+        return Object.keys(equipmentData).some(
+            k => k.trim().toLowerCase() === selectedEquipment.toLowerCase()
+                && ((equipmentData[k] ?? 0) > 0)
+        );
+    });
 
     // Helper to calculate price
     const calculateTotal = () => {
@@ -419,7 +428,7 @@ export default function BookingSection({
                                 >
                                     {equipmentTypes.map(eq => (
                                         <option key={eq} value={eq}>
-                                            {eq} ({equipmentCounts[eq]} available)
+                                            {eq} ({equipmentInventory[eq]} available)
                                         </option>
                                     ))}
                                 </select>

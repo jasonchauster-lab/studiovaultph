@@ -138,23 +138,31 @@ export default function InstructorBookingWizard({
         const studio = matchingStudios.find(s => s.studio.id === studioId)
         if (!studio) return
 
-        const slotsAtTime = studio.matchingSlots.filter((s: any) => s.start_time === startTime)
+        // Normalize to HH:mm:ss for safe comparison against DB values
+        const normalizedStartTime = normalizeTimeTo24h(startTime)
+        const slotsAtTime = studio.matchingSlots.filter((s: any) =>
+            normalizeTimeTo24h(s.start_time) === normalizedStartTime
+        )
         if (slotsAtTime.length === 0) return
 
-        // Pick first slot as primary
         const primarySlot = slotsAtTime[0]
         setSelectedStudioSlot(primarySlot.id)
 
-        // Aggregate unique equipment at this time — always use Object.keys() for JSONB
-        const equipmentData = primarySlot.equipment
-        const allEq: string[] = (equipmentData && typeof equipmentData === 'object' && !Array.isArray(equipmentData))
-            ? Object.keys(equipmentData).filter(k => (equipmentData[k] ?? 0) > 0)
-            : []
+        // Aggregate equipment from ALL slots at this time, summing actual JSONB values
+        const aggregatedEquipment: Record<string, number> = {}
+        slotsAtTime.forEach((s: any) => {
+            const eq = s.equipment
+            if (!eq || typeof eq !== 'object' || Array.isArray(eq)) return
+            Object.entries(eq).forEach(([k, v]) => {
+                const normalizedKey = k.trim().toUpperCase()
+                const qty = typeof v === 'number' ? v : parseInt(v as string, 10) || 0
+                if (qty > 0) aggregatedEquipment[normalizedKey] = (aggregatedEquipment[normalizedKey] || 0) + qty
+            })
+        })
 
-        // Case-insensitive equipment selection
-        const firstEq = allEq[0] || ''
+        const firstEq = Object.keys(aggregatedEquipment)[0] || ''
         setSelectedEquipment(firstEq)
-        setMaxQuantity(Math.max(1, getEquipmentCount(equipmentData, firstEq)))
+        setMaxQuantity(firstEq ? Math.max(1, aggregatedEquipment[firstEq]) : 1)
         setQuantity(1)
     }
 
