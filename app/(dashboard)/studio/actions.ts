@@ -62,6 +62,8 @@ export async function createSlot(formData: FormData) {
         return { error: 'Time must be on the hour (e.g. 8:00, 9:00)' }
     }
 
+    // We use Date objects ONLY for the iteration loop (adding 1 hour at a time)
+    // We append the +08:00 to ensure the Date object represents the correct Manila time
     const startDateTime = new Date(`${date}T${startTimeStr}:00+08:00`)
     const endDateTime = new Date(`${date}T${endTimeStr}:00+08:00`)
 

@@ -86,20 +86,12 @@ export async function requestBooking(
     const selectedEquipment = actualKey;
     // --- EQUIPMENT DETERMINATION END ---
 
-    // --- AVAILABILITY VALIDATION START ---
-    const slotStart = new Date(slot.start_time);
-
-    // ✅ Derive date & day using Manila timezone (not UTC) to avoid midnight-crossing bugs
-    const manilaDateStr = slotStart.toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }); // YYYY-MM-DD
-    const manilaDayOfWeek = Number(
-        slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Sun' ? 0
-            : slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Mon' ? 1
-                : slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Tue' ? 2
-                    : slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Wed' ? 3
-                        : slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Thu' ? 4
-                            : slotStart.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short' }) === 'Fri' ? 5 : 6
-    );
-    const timeStr = slotStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00';
+    // ✅ Derive date & day using the new date and start_time columns (pure strings)
+    const manilaDateStr = slot.date;
+    const slotStartTimeArr = slot.start_time.split(':');
+    const tempDate = new Date(`${slot.date}T${slot.start_time}+08:00`);
+    const manilaDayOfWeek = tempDate.getDay();
+    const timeStr = slot.start_time;
 
     // ✅ Run TWO separate queries instead of .or() to avoid PostgREST NULL ambiguity:
     // Both studio.location and instructor location_area are trimmed to avoid whitespace mismatch.
@@ -141,9 +133,10 @@ export async function requestBooking(
     // --- DOUBLE BOOKING VALIDATION START ---
     const { data: overlappingBookings } = await supabase
         .from('bookings')
-        .select('id, slots!inner(start_time)')
+        .select('id, slots!inner(start_time, date)')
         .eq('instructor_id', instructorId)
         .in('status', ['pending', 'approved'])
+        .eq('slots.date', slot.date)
         .eq('slots.start_time', slot.start_time);
 
     if (overlappingBookings && overlappingBookings.length > 0) {
@@ -256,6 +249,7 @@ export async function requestBooking(
         .from('slots')
         .insert({
             studio_id: slot.studio_id,
+            date: slot.date,
             start_time: slot.start_time,
             end_time: slot.end_time,
             is_available: false, // Locked immediately
@@ -289,8 +283,9 @@ export async function requestBooking(
                 .from('slots')
                 .insert({
                     studio_id: slot.studio_id,
-                    start_time: reqStart.toISOString(),
-                    end_time: reqEnd.toISOString(),
+                    date: slot.date,
+                    start_time: reqStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00',
+                    end_time: reqEnd.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00',
                     is_available: false, // Locked for the booking
                     equipment: { [selectedEquipment]: quantity },
                     quantity: quantity
@@ -311,16 +306,26 @@ export async function requestBooking(
             // Let's keep it simple: the time segment is carved out of the extraction.
 
             if (reqStart.getTime() === slotStart.getTime()) {
-                await supabase.from('slots').update({ start_time: reqEnd.toISOString(), is_available: true }).eq('id', actualBookedId);
+                await supabase.from('slots').update({
+                    start_time: reqEnd.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00',
+                    is_available: true
+                }).eq('id', actualBookedId);
             } else if (reqEnd.getTime() === slotEnd.getTime()) {
-                await supabase.from('slots').update({ end_time: reqStart.toISOString(), is_available: true }).eq('id', actualBookedId);
+                await supabase.from('slots').update({
+                    end_time: reqStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00',
+                    is_available: true
+                }).eq('id', actualBookedId);
             } else {
                 // Triple Split
-                await supabase.from('slots').update({ end_time: reqStart.toISOString(), is_available: true }).eq('id', actualBookedId);
+                await supabase.from('slots').update({
+                    end_time: reqStart.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00',
+                    is_available: true
+                }).eq('id', actualBookedId);
                 await supabase.from('slots').insert({
                     studio_id: slot.studio_id,
-                    start_time: reqEnd.toISOString(),
-                    end_time: slotEnd.toISOString(),
+                    date: slot.date,
+                    start_time: reqEnd.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ':00',
+                    end_time: slot.end_time,
                     is_available: true,
                     equipment: { [selectedEquipment]: quantity },
                     equipment_inventory: { [selectedEquipment]: quantity },
@@ -390,8 +395,8 @@ export async function requestBooking(
     const studioAddress = booking.slots.studios.address;
     const instructorName = booking.profiles?.full_name || 'Instructor';
     const instructorEmail = booking.profiles?.email;
-    const date = formatManilaDate(booking.slots.start_time);
-    const time = formatManilaTime(booking.slots.start_time);
+    const date = formatManilaDateStr(booking.slots.date);
+    const time = formatTo12Hour(booking.slots.start_time);
 
     // 1. Notify Client
     if (clientEmail) {
@@ -774,6 +779,7 @@ export async function bookInstructorSession(
         .from('slots')
         .insert({
             studio_id: selectedSlot.studio_id,
+            date: selectedSlot.date,
             start_time: selectedSlot.start_time,
             end_time: selectedSlot.end_time,
             is_available: false,

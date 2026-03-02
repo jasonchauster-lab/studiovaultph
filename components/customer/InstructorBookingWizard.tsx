@@ -81,7 +81,7 @@ export default function InstructorBookingWizard({
         }
     })
 
-    // Pre-process active bookings into a set of 'YYYY-MM-DD-HH:MM' strings in Manila time
+    // Pre-process active bookings into a set of 'YYYY-MM-DD|HH:MM' strings in Manila time
     const bookedSlotsSet = new Set(
         activeBookings.flatMap(b => {
             const slotsData = Array.isArray(b.slots) ? b.slots[0] : b.slots;
@@ -90,7 +90,7 @@ export default function InstructorBookingWizard({
             const dateStr = slotsData.date;
             const timeStr = slotsData.start_time.slice(0, 5);
 
-            return [`${dateStr}-${timeStr}`];
+            return [`${dateStr}|${timeStr}`];
         })
     );
 
@@ -243,7 +243,7 @@ export default function InstructorBookingWizard({
                                     const dateMatch = a.date ? a.date === d.date : a.day_of_week === d.dayIndex;
                                     const locationMatch = filterLocation ? a.location_area?.trim().toLowerCase() === filterLocation?.trim().toLowerCase() : true;
                                     const notExpired = isTodayPill ? a.end_time.slice(0, 5) > nowManilaPill : true;
-                                    const notBooked = !bookedSlotsSet.has(`${d.date}-${a.start_time.slice(0, 5)}`);
+                                    const notBooked = !bookedSlotsSet.has(`${d.date}|${a.start_time.slice(0, 5)}`);
                                     return dateMatch && locationMatch && notExpired && notBooked;
                                 });
 

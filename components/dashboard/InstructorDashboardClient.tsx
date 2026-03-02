@@ -204,9 +204,16 @@ export default function InstructorDashboardClient() {
                     </div>
 
                     {(() => {
-                        const upcomingSessions = bookings.filter(b =>
-                            b.status === 'approved' && b.slots?.start_time && new Date(b.slots.start_time) >= new Date()
-                        ).sort((a, b) => new Date(a.slots.start_time).getTime() - new Date(b.slots.start_time).getTime()).slice(0, 5);
+                        const upcomingSessions = bookings.filter(b => {
+                            const slot = b.slots;
+                            if (!slot?.date || !slot?.start_time) return false;
+                            const sessionStart = new Date(`${slot.date}T${slot.start_time}+08:00`);
+                            return b.status === 'approved' && sessionStart >= new Date();
+                        }).sort((a, b) => {
+                            const startA = new Date(`${a.slots.date}T${a.slots.start_time}+08:00`);
+                            const startB = new Date(`${b.slots.date}T${b.slots.start_time}+08:00`);
+                            return startA.getTime() - startB.getTime();
+                        }).slice(0, 5);
 
                         if (isLoading) {
                             return (

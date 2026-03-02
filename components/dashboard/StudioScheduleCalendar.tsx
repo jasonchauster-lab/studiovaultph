@@ -132,9 +132,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
 
     const onSlotClick = (slot: Slot) => {
         setEditingSlot(slot)
-        setSingleDate(format(parseISO(slot.start_time), 'yyyy-MM-dd'))
-        setSingleTime(format(parseISO(slot.start_time), 'HH:mm'))
-        setSingleEndTime(format(parseISO(slot.end_time), 'HH:mm'))
+        setSingleDate(slot.date)
+        setSingleTime(slot.start_time.slice(0, 5))
+        setSingleEndTime(slot.end_time.slice(0, 5))
         setIsEditModalOpen(true)
     }
 
@@ -210,8 +210,8 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                     </div>
 
                                     {days.map(day => {
+                                        const dayStr = format(day, 'yyyy-MM-dd')
                                         const cellSlots = slots.filter(s => {
-                                            const dayStr = format(day, 'yyyy-MM-dd')
                                             const startHour = parseInt(s.start_time.split(':')[0], 10);
                                             return s.date === dayStr && startHour === hour
                                         })
@@ -596,7 +596,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, a
                                         <div className="space-y-1.5">
                                             <div>
                                                 <p className="text-sm font-medium text-charcoal-900 leading-none mb-1">
-                                                    {format(parseISO(slot.start_time), 'h:mm')} - {format(parseISO(slot.end_time), 'h:mm a')}
+                                                    {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}
                                                 </p>
                                                 <p className="text-xs text-charcoal-500 leading-none">
                                                     {slot.equipment ? Object.entries(slot.equipment).map(([eq, qty]) => `${qty}x ${eq}`).join(', ') : 'Open Space'}

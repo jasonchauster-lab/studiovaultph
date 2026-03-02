@@ -748,18 +748,18 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         acc.bookingCount += 1
 
         // Daily aggregation for charts
-        const date = new Date(booking.slots?.start_time || booking.created_at).toISOString().split('T')[0]
-        if (!acc.daily[date]) {
-            acc.daily[date] = { date, revenue: 0, platformFees: 0, bookings: 0 }
+        const sessionDate = booking.slots?.date || booking.created_at.split('T')[0]
+        if (!acc.daily[sessionDate]) {
+            acc.daily[sessionDate] = { date: sessionDate, revenue: 0, platformFees: 0, bookings: 0 }
         }
-        acc.daily[date].revenue += total
-        acc.daily[date].platformFees += platformFee
-        acc.daily[date].bookings += 1
+        acc.daily[sessionDate].revenue += total
+        acc.daily[sessionDate].platformFees += platformFee
+        acc.daily[sessionDate].bookings += 1
 
         // Transaction list for CSV
         acc.transactions.push({
             id: booking.id,
-            date: booking.slots?.start_time || booking.created_at,
+            date: booking.slots ? `${booking.slots.date} ${booking.slots.start_time}` : booking.created_at,
             type: 'Booking',
             client: booking.client?.full_name || '-',
             studio: booking.slots?.studios?.name || '-',
@@ -908,8 +908,8 @@ export async function getRevenueExport(startDate?: string, endDate?: string) {
 
         return {
             'Booking ID': b.id,
-            'Date': new Date(slots?.start_time || b.created_at).toLocaleDateString(),
-            'Session Date': slots?.start_time ? new Date(slots.start_time).toLocaleDateString() : '',
+            'Date': slots?.date ? formatManilaDateStr(slots.date) : new Date(b.created_at).toLocaleDateString(),
+            'Session Date': slots?.date ? formatManilaDateStr(slots.date) : '',
             'Client Name': getFirst(b.client)?.full_name || '',
             'Instructor Name': getFirst(b.instructor)?.full_name || '',
             'Studio Name': studio?.name || '',
@@ -1235,12 +1235,16 @@ export async function getPartnerBookings(id: string, type: 'profile' | 'studio')
 
     const now = new Date();
     const active = bookings.filter((b: any) => {
-        const endTime = new Date(b.slots?.end_time);
+        const slot = b.slots;
+        if (!slot?.date || !slot?.end_time) return false;
+        const endTime = new Date(`${slot.date}T${slot.end_time}+08:00`);
         return endTime > now && b.status === 'approved';
     });
 
     const past = bookings.filter((b: any) => {
-        const endTime = new Date(b.slots?.end_time);
+        const slot = b.slots;
+        if (!slot?.date || !slot?.end_time) return true;
+        const endTime = new Date(`${slot.date}T${slot.end_time}+08:00`);
         return endTime <= now || ['completed', 'cancelled_refunded', 'cancelled_charged', 'expired', 'rejected'].includes(b.status);
     });
 

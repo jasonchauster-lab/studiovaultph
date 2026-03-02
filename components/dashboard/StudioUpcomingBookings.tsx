@@ -43,7 +43,6 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
         <div className="space-y-4">
             {bookings.map((booking: any) => {
                 const slotData = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots
-                const start = slotData?.start_time ? new Date(slotData.start_time) : new Date()
                 const payout = booking.price_breakdown?.studio_fee || (booking.total_price ? Math.max(0, booking.total_price - 100) : 0)
                 const equipment = booking.price_breakdown?.equipment || booking.equipment || 'Session'
                 const qty = booking.price_breakdown?.quantity || 1
@@ -128,7 +127,8 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                     (() => {
                         if (!cancellingBooking) return null
                         const slotData = Array.isArray(cancellingBooking.slots) ? cancellingBooking.slots[0] : cancellingBooking.slots
-                        const startTime = new Date(slotData.start_time)
+                        // Combine date and time to create a reliable Manila-pinned Date object for the calculation
+                        const startTime = new Date(`${slotData.date}T${slotData.start_time}+08:00`)
                         const now = new Date()
                         const diffInHours = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60)
                         const isLate = diffInHours < 24
