@@ -42,9 +42,16 @@ export default async function StudioDetailsPage({
         .order('date', { ascending: true })
         .order('start_time', { ascending: true })
 
-    const trimmedStudioLocation = studio.location?.trim()
+    const trimmedStudioLocation = studio.location?.trim() ?? ''
+    // Build a list of tokens from the location for fuzzy matching
+    // e.g., "QC - Fairview/Commonwealth" → ["QC", "Fairview", "Commonwealth"]
+    const locationTokens = trimmedStudioLocation
+        .split(/[\s\-\/,]+/)
+        .map((t: string) => t.trim())
+        .filter((t: string) => t.length > 1)
 
-    // 3. Fetch Verified Instructors who have availability in this Studio's Location
+    // 3. Fetch ALL verified instructors with availability (broad fetch, filter in JS)
+    // We deliberately don't filter by location here to avoid missing fuzzy matches.
     const { data: instructorsRaw } = await supabase
         .from('profiles')
         .select(`
@@ -59,17 +66,35 @@ export default async function StudioDetailsPage({
             )
         `)
         .eq('role', 'instructor')
-        .eq('instructor_availability.location_area', trimmedStudioLocation)
 
-    const instructors = instructorsRaw?.filter(i =>
-        i.certifications && i.certifications.some((c: any) => c.verified)
-    ) || []
+    // JS-level fuzzy location filter: instructor location must overlap at least one token
+    const instructors = (instructorsRaw || []).filter(i => {
+        const verified = i.certifications && i.certifications.some((c: any) => c.verified)
+        if (!verified) return false
+        const instrLocations: string[] = Array.isArray(i.instructor_availability)
+            ? i.instructor_availability.map((a: any) => (a.location_area ?? '').trim().toLowerCase())
+            : []
+        return instrLocations.some(loc =>
+            loc === trimmedStudioLocation.toLowerCase() ||
+            locationTokens.some((token: string) => loc.includes(token.toLowerCase()) || loc.startsWith(token.toLowerCase()))
+        )
+    })
 
-    // 4. Fetch Availability for all these instructors in this location
-    const { data: locationAvailability } = await supabase
-        .from('instructor_availability')
-        .select('instructor_id, day_of_week, date, start_time, end_time')
-        .eq('location_area', trimmedStudioLocation)
+    // 4. Fetch Availability blocks for this location (fuzzy — all instructors from the list above)
+    const instructorIds = instructors.map((i: any) => i.id)
+    const { data: locationAvailabilityRaw } = instructorIds.length > 0
+        ? await supabase
+            .from('instructor_availability')
+            .select('instructor_id, day_of_week, date, start_time, end_time, location_area')
+            .in('instructor_id', instructorIds)
+        : { data: [] }
+
+    // JS-level location filter on availability blocks
+    const locationAvailability = (locationAvailabilityRaw || []).filter((block: any) => {
+        const bLoc = (block.location_area ?? '').trim().toLowerCase()
+        return bLoc === trimmedStudioLocation.toLowerCase() ||
+            locationTokens.some((token: string) => bLoc.includes(token.toLowerCase()) || bLoc.startsWith(token.toLowerCase()))
+    })
 
     // 5. Fetch public reviews for the studio owner's profile
     const { reviews, averageRating, totalCount } = await getPublicReviews(studio.owner_id)

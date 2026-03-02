@@ -29,6 +29,8 @@ interface AvailabilityBlock {
     date: string | null;
     start_time: string;
     end_time: string;
+    location_area?: string;
+    equipment_type?: string | null;
 }
 
 export default function BookingSection({
@@ -76,13 +78,17 @@ export default function BookingSection({
 
     // Determine available instructors for the selected time
     const availableInstructors = instructors.filter(inst => {
+        // If no time selected OR no availability data at all, show everyone
         if (!selectedSlotTime || !selectedDate) return true;
+        if (availabilityBlocks.length === 0) return true;
+
         const [startTime] = selectedSlotTime.split('|');
         const dayOfWeek = new Date(selectedDate + "T00:00:00+08:00").getDay();
 
         // Normalize time strings for robust comparison
         const normalizedSlotStart = normalizeTimeTo24h(startTime);
 
+        // Find at least one availability block for this instructor that covers the slot time
         return availabilityBlocks.some(block =>
             block.instructor_id === inst.id &&
             (block.date === selectedDate || (block.date === null && block.day_of_week === dayOfWeek)) &&
