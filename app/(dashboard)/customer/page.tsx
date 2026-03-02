@@ -121,8 +121,9 @@ export default async function CustomerDashboard({
 
         if (params.time) {
             // Find windows that cover this start time
-            // start_time <= time AND end_time > time
-            availQuery = availQuery.lte('start_time', params.time).gt('end_time', params.time)
+            // Normalize time to HH:mm:ss for consistent string comparison
+            const timeStr = params.time.length === 5 ? params.time + ':00' : params.time;
+            availQuery = availQuery.lte('start_time', timeStr).gt('end_time', timeStr)
         }
 
         const { data: availableIds, error: availError } = await availQuery

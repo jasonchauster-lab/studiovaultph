@@ -59,6 +59,17 @@ export default function InstructorBookingWizard({
             return tk === tt || (EQUIPMENT_MAP[tk] || tk).toLowerCase() === tt;
         });
 
+        // If not found by equipment name, check if keys are time-based (safety for specific DB anomalies)
+        if (!actualKey) {
+            const timeKey = Object.keys(equipmentData).find(k => {
+                const tk = k.trim();
+                const tt = type.trim();
+                // Match if both are times, even with different seconds or AM/PM (using slice(0,5))
+                return tk.includes(':') && tt.includes(':') && tk.slice(0, 5) === tt.slice(0, 5);
+            });
+            if (timeKey) return equipmentData[timeKey] ?? 0;
+        }
+
         return actualKey ? (equipmentData[actualKey] ?? 0) : 0;
     };
 
@@ -352,7 +363,7 @@ export default function InstructorBookingWizard({
                     </div>
 
                     <div className="bg-charcoal-900 text-cream-50 p-4 rounded-xl text-sm">
-                        Searching studios in <strong>{selectedSlot?.location_area}</strong> on <strong>{selectedDate}</strong> at <strong>{selectedSlot?.start_time.slice(0, 5)}</strong>
+                        Searching studios in <strong>{selectedSlot?.location_area}</strong> on <strong>{selectedDate}</strong> at <strong>{formatTo12Hour(selectedSlot?.start_time)}</strong>
                     </div>
 
                     {isSearching ? (

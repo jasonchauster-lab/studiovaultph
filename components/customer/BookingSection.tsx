@@ -6,6 +6,7 @@ import { Loader2, CheckCircle, Calendar, ChevronLeft, ChevronRight, AlertCircle 
 import clsx from 'clsx'
 import { useRouter } from 'next/navigation'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays } from 'date-fns'
+import { formatTo12Hour, toManilaTimeString } from '@/lib/timezone'
 
 interface Slot {
     id: string;
@@ -55,13 +56,15 @@ export default function BookingSection({
         if (!selectedSlotTime || !selectedDate) return true;
         const [startTime] = selectedSlotTime.split('|');
         const dayOfWeek = new Date(selectedDate + "T00:00:00+08:00").getDay();
+
+        // Normalize time strings to HH:mm for comparison with availability blocks
         const timeStr = startTime.slice(0, 5);
 
         return availabilityBlocks.some(block =>
             block.instructor_id === inst.id &&
             (block.date === selectedDate || (block.date === null && block.day_of_week === dayOfWeek)) &&
-            block.start_time <= timeStr &&
-            block.end_time > timeStr
+            block.start_time.slice(0, 5) <= timeStr &&
+            block.end_time.slice(0, 5) > timeStr
         );
     });
 
@@ -323,8 +326,8 @@ export default function BookingSection({
                     const isSelected = selectedSlotTime === key;
                     const count = group.length;
 
-                    const startTimeDisp = firstSlot.start_time.slice(0, 5);
-                    const endTimeDisp = firstSlot.end_time.slice(0, 5);
+                    const startTimeDisp = formatTo12Hour(firstSlot.start_time);
+                    const endTimeDisp = formatTo12Hour(firstSlot.end_time);
 
                     // Get equipment overview for card
                     const eqOverview = new Set(group.map(s => {
