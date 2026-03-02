@@ -240,6 +240,8 @@ export default function BookingSection({
     const equipmentInventory = getEquipmentInventory(slotsInGroup || []);
     const equipmentTypes = Object.keys(equipmentInventory);
 
+    console.log("Selected Equipment:", selectedEquipment);
+
     // maxQuantity: actual inventory count for selected equipment (case-insensitive)
     const selectedEqKey = Object.keys(equipmentInventory).find(
         k => k.toLowerCase() === selectedEquipment.toLowerCase()
@@ -391,12 +393,14 @@ export default function BookingSection({
                     const endTimeDisp = formatTo12Hour(firstSlot.end_time);
 
                     // Get equipment overview for card
-                    const eqOverview = new Set(group.map(s => {
+                    const eqOverview = new Set(group.flatMap(s => {
                         const equipmentData = (s as any).equipment;
                         if (equipmentData && typeof equipmentData === 'object' && !Array.isArray(equipmentData)) {
-                            return Object.keys(equipmentData)[0] || 'Unknown';
+                            const keys = Object.keys(equipmentData);
+                            return keys.length > 0 ? keys : ['Unknown'];
                         }
-                        return Array.isArray(equipmentData) ? equipmentData[0] : ((s as any).equipment_type || 'Unknown');
+                        const fallback = Array.isArray(equipmentData) ? equipmentData[0] : ((s as any).equipment_type || 'Unknown');
+                        return fallback ? [fallback] : ['Unknown'];
                     }));
 
                     return (
@@ -408,7 +412,8 @@ export default function BookingSection({
 
                                 // Default to first equipment type found in this new group
                                 const newGroup = groupedSlots[key];
-                                const firstEq = newGroup[0]?.equipment?.[0] || (newGroup[0] as any).equipment_type || 'Unknown';
+                                const inventory = getEquipmentInventory(newGroup || []);
+                                const firstEq = Object.keys(inventory)[0] || '';
                                 setSelectedEquipment(firstEq);
 
                                 // Safety check for date values
@@ -464,28 +469,42 @@ export default function BookingSection({
 
                     <div className="max-w-md space-y-4">
 
-                        {/* Equipment Selector - Hide if only one option to save space/clicks */}
-                        {equipmentTypes.length > 1 ? (
+                        {/* Equipment Selector */}
+                        {equipmentTypes.length > 0 && (
                             <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-1">
+                                <label className="block text-sm font-medium text-charcoal-700 mb-2">
                                     Select Equipment
                                 </label>
-                                <select
-                                    value={selectedEquipment}
-                                    onChange={(e) => {
-                                        setSelectedEquipment(e.target.value);
-                                        setQuantity(1); // Reset qty on equipment change
-                                    }}
-                                    className="w-full px-4 py-2 bg-white border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-                                >
+                                <div className="grid grid-cols-2 gap-2">
                                     {equipmentTypes.map(eq => (
-                                        <option key={eq} value={eq}>
-                                            {eq} ({equipmentInventory[eq]} available)
-                                        </option>
+                                        <button
+                                            key={eq}
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedEquipment(eq);
+                                                setQuantity(1); // Reset qty on equipment change
+                                            }}
+                                            className={clsx(
+                                                "p-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-between text-left",
+                                                selectedEquipment.toLowerCase() === eq.toLowerCase()
+                                                    ? "bg-charcoal-900 border-charcoal-900 text-cream-50"
+                                                    : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
+                                            )}
+                                        >
+                                            <div>
+                                                <div className="uppercase tracking-wider text-xs mb-0.5">{eq}</div>
+                                                <div className={clsx("text-[10px]", selectedEquipment.toLowerCase() === eq.toLowerCase() ? "text-cream-200" : "text-charcoal-400")}>
+                                                    {equipmentInventory[eq]} available
+                                                </div>
+                                            </div>
+                                            {selectedEquipment.toLowerCase() === eq.toLowerCase() && (
+                                                <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                                            )}
+                                        </button>
                                     ))}
-                                </select>
+                                </div>
                             </div>
-                        ) : null}
+                        )}
 
                         {/* Quantity Selector */}
                         <div>

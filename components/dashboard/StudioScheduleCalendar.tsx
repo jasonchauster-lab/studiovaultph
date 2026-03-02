@@ -538,9 +538,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                             editingSlot.equipment[eq.toUpperCase()] ||
                                                             editingSlot.equipment[eq.toLowerCase()]
                                                         )}
-                                                        className="w-4 h-4 text-charcoal-900 rounded border-cream-300"
+                                                        className="w-4 h-4 text-charcoal-900 rounded border-cream-300 focus:ring-rose-gold"
                                                     />
-                                                    <label htmlFor={`edit_eq_${eq}`} className="text-sm text-charcoal-700">{eq}</label>
+                                                    <label htmlFor={`edit_eq_${eq}`} className="text-sm font-medium text-charcoal-700 cursor-pointer">{eq}</label>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-xs text-charcoal-400">Qty:</span>
@@ -554,7 +554,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                             editingSlot.equipment?.[eq.toLowerCase()] ||
                                                             1
                                                         }
-                                                        className="w-16 px-2 py-1 border border-cream-200 rounded-md bg-white text-sm"
+                                                        className="w-16 px-2 py-1 border border-cream-200 rounded-md bg-white text-sm text-charcoal-900 focus:ring-2 focus:ring-charcoal-500 outline-none"
                                                     />
                                                 </div>
                                             </div>

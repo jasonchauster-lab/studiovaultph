@@ -242,12 +242,21 @@ export async function requestBooking(
     const currentEquipment = (slot.equipment as Record<string, number>) || {};
     const currentTotalQty = slot.quantity || 0;
 
+    // Find the correct case-sensitive key in the DB
+    const eqKey = Object.keys(currentEquipment).find(
+        key => key.toUpperCase() === selectedEquipment.toUpperCase()
+    );
+
+    if (!eqKey || currentEquipment[eqKey] < quantity) {
+        return { error: 'Failed to extract equipment for booking.' };
+    }
+
     const newEquipment = { ...currentEquipment };
-    newEquipment[selectedEquipment] = (newEquipment[selectedEquipment] || 0) - quantity;
+    newEquipment[eqKey] -= quantity;
 
     // Remove key if 0 (optional)
-    if (newEquipment[selectedEquipment] <= 0) {
-        delete newEquipment[selectedEquipment];
+    if (newEquipment[eqKey] <= 0) {
+        delete newEquipment[eqKey];
     }
 
     const newTotalQty = Math.max(0, currentTotalQty - quantity);
@@ -269,8 +278,8 @@ export async function requestBooking(
             start_time: slot.start_time,
             end_time: slot.end_time,
             is_available: false, // Locked immediately
-            equipment: { [selectedEquipment]: quantity },
-            equipment_inventory: { [selectedEquipment]: quantity },
+            equipment: { [eqKey]: quantity },
+            equipment_inventory: { [eqKey]: quantity },
             quantity: quantity
         })
         .select()
@@ -812,7 +821,7 @@ export async function bookInstructorSession(
             start_time: selectedSlot.start_time,
             end_time: selectedSlot.end_time,
             is_available: false,
-            equipment: { [equipment]: 1 },
+            equipment: { [equipmentKey]: 1 },
             quantity: 1
         })
         .select()
