@@ -174,7 +174,26 @@ export default function InstructorBookingWizard({
         if (!studio) return
 
         const primarySlot = studio.matchingSlots.find((s: any) => s.id === selectedStudioSlot)
-        setMaxQuantity(Math.max(1, getEquipmentCount(primarySlot?.equipment, eq)))
+        const primaryNormTime = normalizeTimeTo24h(primarySlot?.start_time || '')
+
+        // Aggregate across ALL slots at the selected time for accurate count
+        const slotsAtTime = studio.matchingSlots.filter((s: any) =>
+            normalizeTimeTo24h(s.start_time) === primaryNormTime
+        )
+        const aggregated: Record<string, number> = {}
+        slotsAtTime.forEach((s: any) => {
+            const eqData = s.equipment
+            if (!eqData || typeof eqData !== 'object' || Array.isArray(eqData)) return
+            Object.entries(eqData).forEach(([k, v]) => {
+                const key = k.trim().toUpperCase()
+                const qty = typeof v === 'number' ? v : parseInt(v as string, 10) || 0
+                if (qty > 0) aggregated[key] = (aggregated[key] || 0) + qty
+            })
+        })
+
+        // Case-insensitive lookup in aggregated map
+        const matchKey = Object.keys(aggregated).find(k => k.toLowerCase() === eq.trim().toLowerCase()) || ''
+        setMaxQuantity(matchKey ? Math.max(1, aggregated[matchKey]) : 1)
         setQuantity(1)
     }
 

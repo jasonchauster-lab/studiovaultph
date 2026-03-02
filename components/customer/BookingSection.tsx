@@ -46,10 +46,33 @@ export default function BookingSection({
 }) {
     const [selectedSlotTime, setSelectedSlotTime] = useState<string | null>(null) // Key: start-end
     const [selectedInstructor, setSelectedInstructor] = useState<string>('')
-    const [selectedEquipment, setSelectedEquipment] = useState<string>('') // New state
+    const [selectedEquipment, setSelectedEquipment] = useState<string>('')
     const [quantity, setQuantity] = useState<number>(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [successMessage, setSuccessMessage] = useState<string | null>(null)
+
+    // 2. State for active date & month — declared early so useEffects below can reference them
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+
+    // Auto-select equipment whenever the slot changes
+    useEffect(() => {
+        if (!selectedSlotTime || !selectedDate) return;
+        const slotsInGroup = slots.filter(s => s.date === selectedDate && `${s.start_time}|${s.end_time}` === selectedSlotTime);
+        const inventory: Record<string, number> = {};
+        slotsInGroup.forEach(s => {
+            const eq = (s as any).equipment;
+            if (!eq || typeof eq !== 'object' || Array.isArray(eq)) return;
+            Object.entries(eq).forEach(([k, v]) => {
+                const key = k.trim().toUpperCase();
+                const val = typeof v === 'number' ? v : parseInt(v as string, 10) || 0;
+                if (val > 0) inventory[key] = (inventory[key] || 0) + val;
+            });
+        });
+        const firstEq = Object.keys(inventory)[0] || '';
+        setSelectedEquipment(firstEq);
+        setQuantity(1);
+    }, [selectedSlotTime, selectedDate, slots]);
 
     // Determine available instructors for the selected time
     const availableInstructors = instructors.filter(inst => {
@@ -77,10 +100,6 @@ export default function BookingSection({
     }, {} as Record<string, Slot[]>);
 
     const availableDates = Object.keys(slotsByDate).sort();
-
-    // 2. State for active date & month
-    const [selectedDate, setSelectedDate] = useState<string | null>(null);
-    const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
     // Auto-select first date on mount, and sync month to it
     useEffect(() => {
