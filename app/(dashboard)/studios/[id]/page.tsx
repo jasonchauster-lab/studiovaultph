@@ -135,6 +135,7 @@ export default async function StudioDetailsPage({
                                 availabilityBlocks={locationAvailability || []}
                                 studioPricing={studio.pricing as Record<string, number> | undefined}
                                 studioHourlyRate={studio.hourly_rate || 0}
+                                studioLocation={studio.location || ''}
                             />
                         );
                     })()}

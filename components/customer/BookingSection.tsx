@@ -39,7 +39,8 @@ export default function BookingSection({
     instructors,
     availabilityBlocks,
     studioPricing,
-    studioHourlyRate
+    studioHourlyRate,
+    studioLocation
 }: {
     studioId: string
     slots: Slot[]
@@ -47,6 +48,7 @@ export default function BookingSection({
     availabilityBlocks: AvailabilityBlock[]
     studioPricing?: Record<string, number>
     studioHourlyRate?: number
+    studioLocation?: string
 }) {
     const [selectedSlotTime, setSelectedSlotTime] = useState<string | null>(null) // Key: start-end
     const [selectedInstructor, setSelectedInstructor] = useState<string>('')
@@ -79,31 +81,44 @@ export default function BookingSection({
     }, [selectedSlotTime, selectedDate, slots]);
 
     // Determine available instructors for the selected time
-    const availableInstructors = instructors.filter(inst => {
+    const availableInstructors = instructors.filter((instructor) => {
         // If no time selected OR no availability data at all, show everyone
         if (!selectedSlotTime || !selectedDate) return true;
-        if (availabilityBlocks.length === 0) return true;
 
+        // 1. Case-Insensitive Equipment Check
+        const instructorRates = instructor.rates || {};
+        const hasEquipment = Object.keys(instructorRates).some(
+            (key) => key.toUpperCase() === selectedEquipment.toUpperCase()
+        );
+        if (!hasEquipment) return false;
+
+        // 2. Isolate blocks for THIS specific instructor
+        const instBlocks = availabilityBlocks.filter(b => b.instructor_id === instructor.id);
+
+        // Fallback: If no blocks exist for THIS instructor, assume they are available 
+        if (instBlocks.length === 0) return true;
+
+        // 3. Time and Fuzzy Location Match
         const [startTime] = selectedSlotTime.split('|');
+        const slotTimeNormalized = normalizeTimeTo24h(startTime);
+        const studioLocLower = (studioLocation || '').toLowerCase();
         const dayOfWeek = new Date(selectedDate + "T00:00:00+08:00").getDay();
 
-        // 1. Check if Instructor has a rate for the selected equipment (case-insensitive)
-        const instRates = inst.rates || {};
-        const hasEquipmentRate = selectedEquipment
-            ? Object.keys(instRates).some(key => key.toUpperCase() === selectedEquipment.toUpperCase())
-            : true;
-        if (!hasEquipmentRate) return false;
+        return instBlocks.some((block) => {
+            const blockTimeNormalized = normalizeTimeTo24h(block.start_time);
+            const blockLocLower = (block.location_area || '').toLowerCase();
 
-        // 2. Normalize time strings for robust comparison
-        const normalizedSlotStart = normalizeTimeTo24h(startTime);
+            // Check if block covers the slot time
+            const timeMatches = blockTimeNormalized <= slotTimeNormalized && normalizeTimeTo24h(block.end_time) > slotTimeNormalized;
 
-        // 3. Find at least one availability block for this instructor that covers the slot time
-        return availabilityBlocks.some(block =>
-            block.instructor_id === inst.id &&
-            (block.date === selectedDate || (block.date === null && block.day_of_week === dayOfWeek)) &&
-            normalizeTimeTo24h(block.start_time) <= normalizedSlotStart &&
-            normalizeTimeTo24h(block.end_time) > normalizedSlotStart
-        );
+            // Fuzzy match: Does the studio "qc - fairview" include the block's "qc"?
+            const locationMatches = !blockLocLower || studioLocLower.includes(blockLocLower);
+
+            // Date match
+            const dateMatches = block.date === selectedDate || (block.date === null && block.day_of_week === dayOfWeek);
+
+            return timeMatches && locationMatches && dateMatches;
+        });
     });
 
     // 1. Group by Date
