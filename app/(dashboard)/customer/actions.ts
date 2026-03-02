@@ -723,6 +723,10 @@ export async function bookInstructorSession(
         quantity: 1
     };
 
+    const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
+    const reqStartTime = startDateTime.toTimeString().split(' ')[0];
+    const reqEndTime = endDateTime.toTimeString().split(' ')[0];
+
     // Note: bookInstructorSession seems to create "approved" bookings for immediate sessions or direct matches
     // But we use the atomic RPC to ensure structure. We will default to RPC pending and immediately update to approved here,
     // or rely on the RPC logic. For full atomic safety, the booking is created pending.
@@ -734,7 +738,9 @@ export async function bookInstructorSession(
         p_quantity: 1,
         p_db_price: totalPrice,
         p_price_breakdown: breakdown,
-        p_wallet_deduction: 0 // Assume no direct wallet hit here unless later processed
+        p_wallet_deduction: 0, // Assume no direct wallet hit here unless later processed
+        p_req_start_time: reqStartTime,
+        p_req_end_time: reqEndTime
     });
 
     if (rpcError) {
