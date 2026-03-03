@@ -201,9 +201,12 @@ export default function InstructorDashboardClient() {
 
                 {/* Dashboard Grid Container */}
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                    {/* Calendar Section */}
                     <div className="xl:col-span-2">
-                        <InstructorScheduleCalendar availability={availability} currentDate={new Date(searchParams.get('date') || getManilaTodayStr())} />
+                        <InstructorScheduleCalendar
+                            availability={availability}
+                            bookings={bookings}
+                            currentDate={new Date(searchParams.get('date') || getManilaTodayStr())}
+                        />
                     </div>
 
                     {/* Upcoming Bookings Sidebar */}

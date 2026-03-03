@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User } from 'lucide-react'
 import clsx from 'clsx'
 import { toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
@@ -22,10 +22,11 @@ interface Availability {
 
 interface InstructorScheduleCalendarProps {
     availability: Availability[]
+    bookings?: any[]
     currentDate?: Date // Made optional with default
 }
 
-export default function InstructorScheduleCalendar({ availability, currentDate = new Date() }: InstructorScheduleCalendarProps) {
+export default function InstructorScheduleCalendar({ availability, bookings = [], currentDate = new Date() }: InstructorScheduleCalendarProps) {
     const router = useRouter()
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [addMode, setAddMode] = useState<'single' | 'bulk'>('single')
@@ -231,18 +232,28 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                                 </div>
 
                                 {days.map(day => {
+                                    const dayStr = toManilaDateStr(day)
                                     // Start of hour for this cell
                                     const cellStartTime = setMinutes(setHours(day, hour), 0)
 
                                     // Filter availability that STARTS in this hour
                                     const startingSlots = availability.filter(a => {
                                         if (a.date) {
-                                            if (a.date !== toManilaDateStr(day)) return false
+                                            if (a.date !== dayStr) return false
                                         } else {
                                             if (a.day_of_week !== getDay(day)) return false
                                         }
                                         const startH = parseInt(a.start_time.split(':')[0])
                                         return startH === hour
+                                    })
+
+                                    // Filter bookings that START in this hour
+                                    const startingBookings = bookings.filter(b => {
+                                        const slot = b.slots;
+                                        if (!slot?.date || !slot?.start_time) return false;
+                                        if (slot.date !== dayStr) return false;
+                                        const startH = parseInt(slot.start_time.split(':')[0]);
+                                        return startH === hour;
                                     })
 
                                     return (
@@ -261,15 +272,34 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                                                 const startMin = parseInt(slot.start_time.split(':')[1])
                                                 const [endH, endM] = slot.end_time.split(':').map(Number)
 
-                                                // Calculate duration in minutes
                                                 const startTotal = hour * 60 + startMin
                                                 const endTotal = endH * 60 + endM
                                                 const duration = endTotal - startTotal
 
-                                                // Convert to pixels (ensure it actually fits)
-                                                // 60 minutes = 80px
                                                 const topOffset = (startMin / 60) * ROW_HEIGHT
                                                 const heightPx = (duration / 60) * ROW_HEIGHT
+
+                                                // Check for ANY overlapping approved/pending booking
+                                                const isBooked = bookings.some(b => {
+                                                    const bSlot = b.slots;
+                                                    if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time) return false;
+                                                    if (bSlot.date !== dayStr) return false;
+                                                    if (['pending', 'approved'].includes(b.status)) {
+                                                        const bStartH = parseInt(bSlot.start_time.split(':')[0]);
+                                                        const bStartM = parseInt(bSlot.start_time.split(':')[1]);
+                                                        const bEndH = parseInt(bSlot.end_time.split(':')[0]);
+                                                        const bEndM = parseInt(bSlot.end_time.split(':')[1]);
+
+                                                        const bStartTotal = bStartH * 60 + bStartM;
+                                                        const bEndTotal = bEndH * 60 + bEndM;
+
+                                                        // Check for overlap between slot [startTotal, endTotal] and booking [bStartTotal, bEndTotal]
+                                                        return (startTotal < bEndTotal && endTotal > bStartTotal);
+                                                    }
+                                                    return false;
+                                                });
+
+                                                if (isBooked) return null; // Don't show availability if it's booked (booking will be shown instead)
 
                                                 return (
                                                     <div
@@ -281,8 +311,8 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                                                         style={{
                                                             top: `${topOffset}px`,
                                                             height: `${heightPx}px`,
-                                                            width: startingSlots.length > 1 ? `${90 / startingSlots.length}%` : '95%',
-                                                            left: startingSlots.length > 1 ? `${(idx * 100) / startingSlots.length}%` : '2.5%'
+                                                            width: (startingSlots.length + startingBookings.length) > 1 ? `${90 / (startingSlots.length + startingBookings.length)}%` : '95%',
+                                                            left: (startingSlots.length + startingBookings.length) > 1 ? `${(idx * 100) / (startingSlots.length + startingBookings.length)}%` : '2.5%'
                                                         }}
                                                         onClick={(e) => {
                                                             e.stopPropagation()
@@ -300,6 +330,59 @@ export default function InstructorScheduleCalendar({ availability, currentDate =
                                                         <div className="text-[10px] mt-0.5 flex items-center gap-1">
                                                             <MapPin className="w-3 h-3 flex-shrink-0" />
                                                             <span className="truncate">{slot.location_area}</span>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+
+                                            {startingBookings.map((booking, bIdx) => {
+                                                const slotData = booking.slots;
+                                                const [startH, startM] = slotData.start_time.split(':').map(Number);
+                                                const [endH, endM] = slotData.end_time.split(':').map(Number);
+
+                                                const startTotal = startH * 60 + startM;
+                                                const endTotal = endH * 60 + endM;
+                                                const duration = endTotal - startTotal;
+
+                                                const topOffset = (startM / 60) * ROW_HEIGHT;
+                                                const heightPx = (duration / 60) * ROW_HEIGHT;
+
+                                                const studioName = slotData.studios?.name || 'Partner Studio';
+                                                const clientName = booking.client?.full_name || 'A Client';
+
+                                                return (
+                                                    <div
+                                                        key={booking.id}
+                                                        className={clsx(
+                                                            "absolute rounded-md text-[10px] shadow-sm border z-20 p-2 overflow-hidden",
+                                                            booking.status === 'approved' ? "bg-green-600 border-green-700 text-white" : "bg-amber-100 border-amber-200 text-amber-800"
+                                                        )}
+                                                        style={{
+                                                            top: `${topOffset}px`,
+                                                            height: `${heightPx}px`,
+                                                            width: (startingSlots.length + startingBookings.length) > 1 ? `${90 / (startingSlots.length + startingBookings.length)}%` : '95%',
+                                                            left: (startingSlots.length + startingBookings.length) > 1 ? `${((startingSlots.filter(s => {
+                                                                const sH = parseInt(s.start_time.split(':')[0]);
+                                                                const sM = parseInt(s.start_time.split(':')[1]);
+                                                                const sE = parseInt(s.end_time.split(':')[0]) * 60 + parseInt(s.end_time.split(':')[1]);
+                                                                const sT = sH * 60 + sM;
+                                                                // This is a bit complex for a one-liner, but essentially we want to offset after the availability slots that were NOT hidden
+                                                                // For simplicity, let's just use bIdx and start after availability.
+                                                                return true; // placeholder
+                                                            }).length + bIdx) * 100) / (startingSlots.length + startingBookings.length)}%` : '2.5%'
+                                                        }}
+                                                        title={`${booking.status === 'approved' ? 'Confirmed Booking' : 'Pending Request'}\nStudio: ${studioName}\nClient: ${clientName}`}
+                                                    >
+                                                        <div className="font-bold flex items-center justify-between mb-0.5">
+                                                            <span className="truncate">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 font-medium mb-0.5">
+                                                            <MapPin className="w-2.5 h-2.5" />
+                                                            <span className="truncate">{studioName}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 opacity-90 truncate">
+                                                            <User className="w-2.5 h-2.5" />
+                                                            <span>{clientName}</span>
                                                         </div>
                                                     </div>
                                                 )

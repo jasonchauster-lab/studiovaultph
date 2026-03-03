@@ -21,7 +21,8 @@ interface Slot {
     bookings?: Array<{
         id: string;
         status: string;
-        equipment?: string; // Track which equipment was booked
+        equipment?: string;
+        price_breakdown?: any;
         client?: { full_name: string; avatar_url: string };
         instructor?: { full_name: string; avatar_url: string };
     }>
@@ -248,7 +249,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                         // Count active bookings for this specific equipment in this slot
                                                                         const bookedForThisEq = s.bookings?.filter(b =>
                                                                             ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '') &&
-                                                                            b.equipment === eq
+                                                                            (b.price_breakdown?.equipment?.toUpperCase() === eq.toUpperCase() || b.equipment?.toUpperCase() === eq.toUpperCase())
                                                                         ).length || 0;
 
                                                                         equipmentCounts[eq].free += Math.max(0, count - bookedForThisEq);
