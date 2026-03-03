@@ -116,10 +116,10 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             return { error: `Failed to fetch payout history: ${payoutsError.message}` }
         }
 
-        // 5. Calculate Totals
         let grossEarnings = 0
         let totalCompensation = 0 // Received from Instructor Penalties
         let totalPenalty = 0 // Paid as Displacement Fees
+        let upcomingEarnings = 0 // Approved/Submitted but not yet completed
 
         bookings?.forEach(b => {
             const breakdown = b.price_breakdown as any
@@ -131,6 +131,11 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             // Scenario A: Successful or Pending Booking (awaiting approval)
             if (['approved', 'completed', 'cancelled_charged'].includes(b.status) || b.payment_status === 'submitted') {
                 grossEarnings += studioFee
+
+                // BUSINESS LOGIC: If it's not yet completed, it's "Upcoming" (not yet in profile.pending_balance)
+                if (b.status !== 'completed') {
+                    upcomingEarnings += studioFee
+                }
             }
 
             // Scenario B: Compensation (Instructor cancelled late)
@@ -273,7 +278,7 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
                 totalPaidOut,
                 pendingPayouts: totalPending,
                 availableBalance: Number(profile?.available_balance || 0),
-                pendingBalance: Number(profile?.pending_balance || 0),
+                pendingBalance: Number(profile?.pending_balance || 0) + upcomingEarnings,
                 payoutApprovalStatus: studio?.payout_approval_status || 'none'
             }
         }

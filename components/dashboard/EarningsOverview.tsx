@@ -173,9 +173,9 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
 
                 {/* Security Hold Card */}
                 <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm border-l-4" style={{ borderLeftColor: '#BC926E' }}>
-                    <p className="text-sm text-charcoal-500 mb-1">Security Hold (24h)</p>
+                    <p className="text-sm text-charcoal-500 mb-1">Security Hold & Upcoming</p>
                     <h3 className="text-2xl font-bold text-charcoal-900"><strong>₱</strong>{summary.pendingBalance.toLocaleString()}</h3>
-                    <p className="text-xs text-charcoal-400 mt-1">Unlocking within 24 hours</p>
+                    <p className="text-xs text-charcoal-400 mt-1">Upcoming earnings + 24h hold</p>
                 </div>
             </div>
             {/* Top-Up Modal */}
