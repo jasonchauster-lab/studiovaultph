@@ -44,24 +44,32 @@ export default function EarningsPage({
     useEffect(() => {
         // --- DATE FILTER LOGIC ---
         let startDate: string | undefined
-        let endDate: string | undefined = new Date().toISOString()
-        const now = new Date()
+        let endDate: string | undefined
 
-        if (range === '7d') {
-            const d = new Date()
-            d.setDate(d.getDate() - 7)
-            startDate = d.toISOString()
-        } else if (range === '30d') {
-            const d = new Date()
-            d.setDate(d.getDate() - 30)
-            startDate = d.toISOString()
-        } else if (range === 'this-month') {
-            startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-        } else if (range === 'this-quarter') {
-            const quarter = Math.floor(now.getMonth() / 3)
-            startDate = new Date(now.getFullYear(), quarter * 3, 1).toISOString()
-        } else if (range === 'this-year') {
-            startDate = new Date(now.getFullYear(), 0, 1).toISOString()
+        if (range && range !== 'all') {
+            const now = new Date()
+
+            if (range === '7d') {
+                const d = new Date()
+                d.setDate(d.getDate() - 7)
+                startDate = d.toISOString().split('T')[0]
+                endDate = new Date().toISOString().split('T')[0]
+            } else if (range === '30d') {
+                const d = new Date()
+                d.setDate(d.getDate() - 30)
+                startDate = d.toISOString().split('T')[0]
+                endDate = new Date().toISOString().split('T')[0]
+            } else if (range === 'this-month') {
+                startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+                endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+            } else if (range === 'this-quarter') {
+                const quarter = Math.floor(now.getMonth() / 3)
+                startDate = new Date(now.getFullYear(), quarter * 3, 1).toISOString().split('T')[0]
+                endDate = new Date(now.getFullYear(), quarter * 3 + 3, 0).toISOString().split('T')[0]
+            } else if (range === 'this-year') {
+                startDate = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
+                endDate = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0]
+            }
         }
 
         getInstructorEarnings(startDate, endDate).then(setData)

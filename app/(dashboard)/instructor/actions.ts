@@ -28,13 +28,13 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
             created_at,
             updated_at,
             client:profiles!client_id(full_name),
-            slots!inner(start_time, studios(name))
+            slots!inner(date, start_time, studios(name))
         `)
         .eq('instructor_id', user.id)
         .in('status', ['approved', 'completed', 'cancelled_charged', 'cancelled_refunded'])
 
-    if (startDate) bookingsQuery = bookingsQuery.gte('slots.start_time', startDate)
-    if (endDate) bookingsQuery = bookingsQuery.lte('slots.start_time', endDate)
+    if (startDate) bookingsQuery = bookingsQuery.gte('slots.date', startDate)
+    if (endDate) bookingsQuery = bookingsQuery.lte('slots.date', endDate)
 
     const { data: bookings, error: bookingError } = await bookingsQuery
 
@@ -61,9 +61,12 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
         if (['approved', 'completed', 'cancelled_charged'].includes(booking.status)) {
             grossEarned += instructorFee;
 
-            const studioName = first(booking.slots)?.studios?.name
+            const slot = first(booking.slots);
+            const studioName = slot?.studios?.name;
+            const txDate = slot?.date && slot?.start_time ? `${slot.date}T${slot.start_time}+08:00` : booking.created_at;
+
             recentTransactions.push({
-                date: first(booking.slots)?.start_time || booking.created_at,
+                date: txDate,
                 type: 'Booking',
                 status: booking.status,
                 client: (booking.client as any)?.full_name,
