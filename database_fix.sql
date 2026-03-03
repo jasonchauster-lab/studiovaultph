@@ -141,3 +141,37 @@ BEGIN
     WHERE id = p_to_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 6. Create missing studio_strikes table
+CREATE TABLE IF NOT EXISTS public.studio_strikes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    studio_id UUID NOT NULL REFERENCES public.studios(id) ON DELETE CASCADE,
+    booking_id UUID NOT NULL REFERENCES public.bookings(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- RLS
+ALTER TABLE public.studio_strikes ENABLE ROW LEVEL SECURITY;
+
+-- Policy for Select (Studio owners can view their own strikes)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies WHERE policyname = 'Allow studio owners to view their own strikes'
+    ) THEN
+        CREATE POLICY "Allow studio owners to view their own strikes"
+            ON public.studio_strikes
+            FOR SELECT
+            USING (
+                EXISTS (
+                    SELECT 1 FROM public.studios
+                    WHERE studios.id = studio_strikes.studio_id
+                    AND studios.owner_id = auth.uid()
+                )
+            );
+    END IF;
+END $$;
+
+-- Index for performance
+CREATE INDEX IF NOT EXISTS idx_studio_strikes_studio_id ON public.studio_strikes(studio_id);
+CREATE INDEX IF NOT EXISTS idx_studio_strikes_created_at ON public.studio_strikes(created_at);
