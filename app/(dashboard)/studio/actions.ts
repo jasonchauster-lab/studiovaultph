@@ -651,7 +651,8 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
         return { error: 'Booking not found.' }
     }
 
-    const studio = (booking.slots as any)?.studios
+    const slotData = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots
+    const studio = (slotData as any)?.studios
     if (studio?.owner_id !== user.id) {
         return { error: 'Unauthorized to cancel this booking.' }
     }
@@ -677,7 +678,6 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
         }
     }
 
-    const slotData = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots
     const startTimeStr = slotData?.start_time
     const dateStr = slotData?.date
     const approvedAtStr = booking.approved_at

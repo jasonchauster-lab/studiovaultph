@@ -659,7 +659,7 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
     const isWithinGracePeriod = !approvedAt || (now.getTime() - approvedAt.getTime() <= 15 * 60 * 1000)
 
     const isStudioRental = booking.client_id === booking.instructor_id
-    const studio = (booking.slots as any)?.studios
+    const studio = (slotData as any)?.studios
 
     // 2. Process 100% Refund to Client (in Studio Rental case, client IS the instructor)
     const breakdown = booking.price_breakdown as any;
