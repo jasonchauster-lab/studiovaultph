@@ -9,7 +9,7 @@ interface TransactionHistoryProps {
         id: string;
         created_at: string;
         client: { full_name: string } | null;
-        slots: { start_time: string } | null;
+        slots: { date: string, start_time: string } | null;
         price_breakdown: { studio_fee?: number; quantity?: number; equipment?: string } | null;
         total_price?: number;
         equipment?: string;
@@ -78,7 +78,7 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                                 bookings.map((booking) => {
                                     const client = wrap(booking.client)
                                     const slot = wrap(booking.slots)
-                                    const startTime = slot?.start_time
+                                    const startTimeStr = slot?.start_time && slot?.date ? `${slot.date}T${slot.start_time}+08:00` : null
                                     const isAdjustment = booking.type === 'admin_adjustment'
                                     const isTopUp = booking.type === 'top_up'
                                     const isSpecial = isAdjustment || isTopUp
@@ -107,8 +107,8 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                                                     ) : (
                                                         <>
                                                             <div className="text-xs text-charcoal-500">
-                                                                {startTime ? new Date(startTime).toLocaleString(undefined, {
-                                                                    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+                                                                {startTimeStr ? new Date(startTimeStr).toLocaleString('en-PH', {
+                                                                    timeZone: 'Asia/Manila', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
                                                                 }) : 'N/A'}
                                                             </div>
                                                             <div className="text-[10px] text-charcoal-400 font-medium">
