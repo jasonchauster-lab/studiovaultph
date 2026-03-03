@@ -733,8 +733,12 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
 
     const totalPayouts = payouts?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0
 
+    // Helper to extract first item if array (Supabase relationship safeguard)
+    const getFirst = (val: any) => Array.isArray(val) ? val[0] : val;
+
     // 3. Aggregate statistics and prepare transaction list
-    const stats = bookings.reduce((acc: any, booking: any) => {
+    const stats = (bookings || []).reduce((acc: any, booking: any) => {
+        // FIXED: Safely cast all JSONB and DB values to Numbers
         const total = Number(booking.total_price || 0)
         const breakdown = booking.price_breakdown || {}
         const platformFee = Number(breakdown.service_fee || 100)
@@ -747,8 +751,15 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         acc.totalInstructorFees += instructorFee
         acc.bookingCount += 1
 
-        // Daily aggregation for charts
-        const sessionDate = booking.slots?.date || booking.created_at?.split('T')[0] || new Date().toISOString().split('T')[0]
+        // FIXED: Safely extract nested relation data
+        const slots = getFirst(booking.slots)
+        const studio = getFirst(slots?.studios)
+        const client = getFirst(booking.client)
+        const instructor = getFirst(booking.instructor)
+
+        // FIXED: Safe fallback for session date
+        const sessionDate = slots?.date || (booking.created_at ? booking.created_at.split('T')[0] : new Date().toISOString().split('T')[0])
+
         if (!acc.daily[sessionDate]) {
             acc.daily[sessionDate] = { date: sessionDate, revenue: 0, platformFees: 0, bookings: 0 }
         }
@@ -759,11 +770,11 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         // Transaction list for CSV
         acc.transactions.push({
             id: booking.id,
-            date: booking.slots ? `${booking.slots.date} ${booking.slots.start_time}` : booking.created_at,
+            date: slots ? `${slots.date} ${slots.start_time}` : booking.created_at,
             type: 'Booking',
-            client: booking.client?.full_name || '-',
-            studio: booking.slots?.studios?.name || '-',
-            instructor: booking.instructor?.full_name || '-',
+            client: client?.full_name || '-',
+            studio: studio?.name || '-',
+            instructor: instructor?.full_name || '-',
             total_amount: total,
             platform_fee: platformFee,
             studio_fee: studioFee,
