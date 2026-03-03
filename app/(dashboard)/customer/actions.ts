@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
-import { formatManilaDate, formatManilaTime, roundToISOString, formatManilaDateStr, formatTo12Hour, toManilaDateStr, getManilaTodayStr, normalizeTimeTo24h } from '@/lib/timezone'
+import { formatManilaDate, formatManilaTime, roundToISOString, formatManilaDateStr, formatTo12Hour, toManilaDateStr, getManilaTodayStr, normalizeTimeTo24h, toManilaTimeString } from '@/lib/timezone'
 
 export async function requestBooking(
     slotId: string,
@@ -246,8 +246,8 @@ export async function requestBooking(
         const rStart = new Date(bookingStart + '+08:00');
         const rEnd = new Date(bookingEnd + '+08:00');
         // Extract just the HH:MM:SS for the RPC
-        reqStartTime = rStart.toTimeString().split(' ')[0];
-        reqEndTime = rEnd.toTimeString().split(' ')[0];
+        reqStartTime = toManilaTimeString(rStart);
+        reqEndTime = toManilaTimeString(rEnd);
     }
 
     // 2. Execute Atomic RPC
@@ -724,8 +724,8 @@ export async function bookInstructorSession(
     };
 
     const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
-    const reqStartTime = startDateTime.toTimeString().split(' ')[0];
-    const reqEndTime = endDateTime.toTimeString().split(' ')[0];
+    const reqStartTime = toManilaTimeString(startDateTime);
+    const reqEndTime = toManilaTimeString(endDateTime);
 
     // Note: bookInstructorSession seems to create "approved" bookings for immediate sessions or direct matches
     // But we use the atomic RPC to ensure structure. We will default to RPC pending and immediately update to approved here,
