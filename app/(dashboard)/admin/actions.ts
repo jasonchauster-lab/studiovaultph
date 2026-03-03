@@ -1224,6 +1224,7 @@ export async function getPartnerBookings(id: string, type: 'profile' | 'studio')
             *,
             instructor:profiles!instructor_id(full_name, avatar_url),
             slots(
+                date,
                 start_time,
                 end_time,
                 equipment,
