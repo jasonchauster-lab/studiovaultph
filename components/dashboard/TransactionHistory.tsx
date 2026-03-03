@@ -8,6 +8,7 @@ interface TransactionHistoryProps {
     bookings: {
         id: string;
         created_at: string;
+        status?: string;
         client: { full_name: string } | null;
         slots: { date: string, start_time: string } | null;
         price_breakdown: { studio_fee?: number; quantity?: number; equipment?: string } | null;
@@ -81,6 +82,7 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                                     const startTimeStr = slot?.start_time && slot?.date ? `${slot.date}T${slot.start_time}+08:00` : null
                                     const isAdjustment = booking.type === 'admin_adjustment'
                                     const isTopUp = booking.type === 'top_up'
+                                    const isRefunded = booking.status === 'cancelled_refunded'
                                     const isSpecial = isAdjustment || isTopUp
 
                                     return (
@@ -106,10 +108,15 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <div className="text-xs text-charcoal-500">
+                                                            <div className="text-xs text-charcoal-500 flex items-center gap-2">
                                                                 {startTimeStr ? new Date(startTimeStr).toLocaleString('en-PH', {
                                                                     timeZone: 'Asia/Manila', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
                                                                 }) : 'N/A'}
+                                                                {isRefunded && (
+                                                                    <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-bold uppercase">
+                                                                        Refunded
+                                                                    </span>
+                                                                )}
                                                             </div>
                                                             <div className="text-[10px] text-charcoal-400 font-medium">
                                                                 {(booking.price_breakdown?.quantity || 1)} x {(booking.price_breakdown?.equipment || booking.equipment || 'Unknown')}
@@ -119,13 +126,16 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                                                 </div>
                                             </td>
                                             <td className={clsx(
-                                                "px-6 py-4 text-right font-bold",
-                                                isAdjustment ? "text-blue-600" : "text-green-600"
+                                                "px-6 py-4 text-right font-bold transition-colors",
+                                                isRefunded ? "text-charcoal-400" : (isAdjustment ? "text-blue-600" : "text-green-600")
                                             )}>
-                                                {booking.price_breakdown?.studio_fee !== undefined
-                                                    ? (booking.price_breakdown.studio_fee >= 0 ? '+' : '') + `₱${booking.price_breakdown.studio_fee.toLocaleString()}`
-                                                    : `+₱${(booking.total_price ? Math.max(0, booking.total_price - 100) : 0).toLocaleString()}`
-                                                }
+                                                {isRefunded ? (
+                                                    "₱0"
+                                                ) : (
+                                                    booking.price_breakdown?.studio_fee !== undefined
+                                                        ? (booking.price_breakdown.studio_fee >= 0 ? '+' : '') + `₱${booking.price_breakdown.studio_fee.toLocaleString()}`
+                                                        : `+₱${(booking.total_price ? Math.max(0, booking.total_price - 100) : 0).toLocaleString()}`
+                                                )}
                                             </td>
                                         </tr>
                                     )
