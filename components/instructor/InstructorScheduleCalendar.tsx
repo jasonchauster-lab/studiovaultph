@@ -64,7 +64,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 })
     const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
     const hours = Array.from({ length: 16 }, (_, i) => i + 6) // 6 AM to 9 PM
-    const ROW_HEIGHT = 80 // Match the min-h-[80px] in the grid
+    const ROW_HEIGHT = 120 // Increased from 80 for better readability
 
     const handlePrevWeek = () => {
         const newDate = subWeeks(currentDate, 1)
@@ -227,7 +227,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                     <div className="divide-y divide-cream-100 relative">
                         {hours.map(hour => (
-                            <div key={hour} className="grid grid-cols-8 min-h-[80px]">
+                            <div key={hour} className="grid grid-cols-8" style={{ minHeight: `${ROW_HEIGHT}px` }}>
                                 <div className="p-2 text-xs text-charcoal-900 font-medium border-r border-cream-200 text-center sticky left-0 bg-white z-20 w-20 flex items-center justify-center">
                                     {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                 </div>
@@ -261,7 +261,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     })
 
                                     return (
-                                        <div key={day.toString() + hour} className="border-r border-cream-100 last:border-r-0 relative group p-0 min-h-[80px]">
+                                        <div key={day.toString() + hour} className="border-r border-cream-100 last:border-r-0 relative group p-0" style={{ minHeight: `${ROW_HEIGHT}px` }}>
                                             <div
                                                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-charcoal-900/5 cursor-pointer z-0"
                                                 onClick={() => {
@@ -272,7 +272,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     setIsAddModalOpen(true)
                                                 }}
                                             />
-                                            {startingSlots.map((slot, idx) => {
+                                            {startingSlots.map((slot) => {
                                                 const startMin = parseInt(slot.start_time.split(':')[1])
                                                 const [endH, endM] = slot.end_time.split(':').map(Number)
 
@@ -305,7 +305,22 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                                                 if (isBooked) return null; // Don't show availability if it's booked (booking will be shown instead)
 
-                                                const totalItems = startingSlots.length + startingBookings.length;
+                                                // Improved Overlap Logic for Width/Left Pos
+                                                // Find all items (slots and bookings) that actually overlap in TIME with this specific slot
+                                                const siblings = [
+                                                    ...startingSlots,
+                                                    ...startingBookings.map(sb => sb.slots)
+                                                ].filter(s => {
+                                                    if (!s && !s?.start_time) return false;
+                                                    const [sh, sm] = s.start_time.split(':').map(Number);
+                                                    const [eh, em] = s.end_time.split(':').map(Number);
+                                                    const sStart = sh * 60 + sm;
+                                                    const sEnd = eh * 60 + em;
+                                                    return (startTotal < sEnd && endTotal > sStart);
+                                                });
+
+                                                const totalItems = siblings.length;
+                                                const myIdx = siblings.findIndex(s => s.id === slot.id);
 
                                                 return (
                                                     <div
@@ -314,13 +329,14 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                             "absolute rounded-lg text-xs hover:shadow-xl transition-all cursor-pointer overflow-hidden border z-10 p-2.5 group/slot",
                                                             slot.date
                                                                 ? "bg-white border-rose-gold text-charcoal-900 shadow-sm"
-                                                                : "bg-teal-50 border-teal-200 text-teal-800 shadow-sm"
+                                                                : "bg-teal-50 border-teal-200 text-teal-800 shadow-sm",
+                                                            duration < 45 ? "flex flex-row items-center gap-2 py-1 px-2" : "flex flex-col"
                                                         )}
                                                         style={{
                                                             top: `${topOffset}px`,
                                                             height: `${heightPx}px`,
                                                             width: totalItems > 1 ? `${(100 / totalItems) - 2}%` : '96%',
-                                                            left: totalItems > 1 ? `${(idx * 100) / totalItems + 1}%` : '2%'
+                                                            left: totalItems > 1 ? `${(myIdx * 100) / totalItems + 1}%` : '2%'
                                                         }}
                                                         onClick={(e) => {
                                                             e.stopPropagation()
@@ -328,37 +344,85 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         }}
                                                         title="Click to edit"
                                                     >
-                                                        <div className="font-bold flex items-center justify-between text-[10px] truncate mb-1">
-                                                            <span className="tracking-wider uppercase opacity-70">{slot.date ? 'Date Specific' : 'Weekly'}</span>
-                                                        </div>
-                                                        <div className="text-[10px] flex items-center gap-1.5 font-bold text-charcoal-900 mb-1">
-                                                            <Clock className="w-3 h-3 flex-shrink-0 text-rose-gold" />
-                                                            <span className="truncate">{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
-                                                        </div>
-                                                        <div className="text-[10px] flex items-center gap-1.5 font-medium text-charcoal-500">
-                                                            <MapPin className="w-3 h-3 flex-shrink-0" />
-                                                            <span className="truncate">{slot.location_area}</span>
-                                                        </div>
+                                                        {duration < 45 ? (
+                                                            <>
+                                                                <Clock className="w-3 h-3 flex-shrink-0 text-rose-gold" />
+                                                                <span className="font-bold text-[10px] whitespace-nowrap">
+                                                                    {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}
+                                                                </span>
+                                                                <span className="truncate text-[10px] opacity-70">
+                                                                    {slot.location_area.split(' - ')[1] || slot.location_area}
+                                                                </span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <div className="font-bold flex items-center justify-between text-[10px] truncate mb-1">
+                                                                    <span className="tracking-wider uppercase opacity-70">{slot.date ? 'Date Specific' : 'Weekly'}</span>
+                                                                </div>
+                                                                <div className="text-[10px] flex items-center gap-1.5 font-bold text-charcoal-900 mb-1">
+                                                                    <Clock className="w-3 h-3 flex-shrink-0 text-rose-gold" />
+                                                                    <span className="truncate">{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
+                                                                </div>
+                                                                <div className="text-[10px] flex items-center gap-1.5 font-medium text-charcoal-500">
+                                                                    <MapPin className="w-3 h-3 flex-shrink-0" />
+                                                                    <span className="truncate">{slot.location_area}</span>
+                                                                </div>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 )
                                             })}
 
-                                            {startingBookings.map((booking, bIdx) => {
+                                            {startingBookings.map((booking) => {
                                                 const slotData = booking.slots;
-                                                const [startH, startM] = slotData.start_time.split(':').map(Number);
-                                                const [endH, endM] = slotData.end_time.split(':').map(Number);
+                                                const [s_startH, s_startM] = slotData.start_time.split(':').map(Number);
+                                                const [s_endH, s_endM] = slotData.end_time.split(':').map(Number);
 
-                                                const startTotal = startH * 60 + startM;
-                                                const endTotal = endH * 60 + endM;
+                                                const startTotal = s_startH * 60 + s_startM;
+                                                const endTotal = s_endH * 60 + s_endM;
                                                 const duration = endTotal - startTotal;
 
-                                                const topOffset = (startM / 60) * ROW_HEIGHT;
+                                                const topOffset = (s_startM / 60) * ROW_HEIGHT;
                                                 const heightPx = (duration / 60) * ROW_HEIGHT;
 
                                                 const studioName = slotData.studios?.name || 'Partner Studio';
                                                 const clientName = booking.client?.full_name || 'A Client';
 
-                                                const totalItems = startingSlots.length + startingBookings.length;
+                                                // Improved Overlap Logic for Width/Left Pos
+                                                const siblings = [
+                                                    ...startingSlots.filter(s => {
+                                                        // filter out slots that are replaced by bookings
+                                                        const isBooked = bookings.some(b => {
+                                                            const bSlot = b.slots;
+                                                            if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time) return false;
+                                                            if (bSlot.date !== dayStr) return false;
+                                                            if (['pending', 'approved'].includes(b.status)) {
+                                                                const [bsh, bsm] = bSlot.start_time.split(':').map(Number);
+                                                                const [beh, bem] = bSlot.end_time.split(':').map(Number);
+                                                                const bStart = bsh * 60 + bsm;
+                                                                const bEnd = beh * 60 + bem;
+                                                                const [ssh, ssm] = s.start_time.split(':').map(Number);
+                                                                const [seh, sem] = s.end_time.split(':').map(Number);
+                                                                const sStart = ssh * 60 + ssm;
+                                                                const sEnd = seh * 60 + sem;
+                                                                return (sStart < bEnd && sEnd > bStart);
+                                                            }
+                                                            return false;
+                                                        });
+                                                        return !isBooked;
+                                                    }),
+                                                    ...startingBookings.map(sb => sb.slots)
+                                                ].filter(s => {
+                                                    if (!s && !s?.start_time) return false;
+                                                    const [sh, sm] = s.start_time.split(':').map(Number);
+                                                    const [eh, em] = s.end_time.split(':').map(Number);
+                                                    const sStart = sh * 60 + sm;
+                                                    const sEnd = eh * 60 + em;
+                                                    return (startTotal < sEnd && endTotal > sStart);
+                                                });
+
+                                                const totalItems = siblings.length;
+                                                const myIdx = siblings.findIndex(s => s.id === booking.slot_id);
 
                                                 return (
                                                     <div
@@ -367,31 +431,45 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                             "absolute rounded-lg text-[10px] shadow-md border z-20 p-2.5 overflow-hidden transition-all hover:scale-[1.02] cursor-pointer group/booking",
                                                             booking.status === 'approved'
                                                                 ? "bg-green-600 border-green-500 text-white shadow-green-900/10"
-                                                                : "bg-amber-500 border-amber-400 text-white shadow-amber-900/10"
+                                                                : "bg-amber-50 border-amber-400 text-white shadow-amber-900/10",
+                                                            duration < 45 ? "flex flex-row items-center gap-2 py-1 px-2" : "flex flex-col"
                                                         )}
                                                         style={{
                                                             top: `${topOffset}px`,
                                                             height: `${heightPx}px`,
                                                             width: totalItems > 1 ? `${(100 / totalItems) - 2}%` : '96%',
-                                                            left: totalItems > 1 ? `${((startingSlots.length + bIdx) * 100) / totalItems + 1}%` : '2%'
+                                                            left: totalItems > 1 ? `${(myIdx * 100) / totalItems + 1}%` : '2%'
                                                         }}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setSelectedBooking(booking);
                                                         }}
                                                     >
-                                                        <div className="font-bold flex items-center justify-between mb-1">
-                                                            <span className="truncate tracking-wider">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</span>
-                                                            <ArrowUpRight className="w-3 h-3 opacity-0 group-hover/booking:opacity-100 transition-opacity" />
-                                                        </div>
-                                                        <div className="flex items-center gap-1.5 font-semibold mb-1">
-                                                            <MapPin className="w-3 h-3 shrink-0" />
-                                                            <span className="truncate">{studioName}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1.5 opacity-90 font-medium italic">
-                                                            <User className="w-3 h-3 shrink-0" />
-                                                            <span className="truncate">{clientName}</span>
-                                                        </div>
+                                                        {duration < 45 ? (
+                                                            <>
+                                                                <span className="font-bold whitespace-nowrap">
+                                                                    {booking.status === 'approved' ? 'BOOKED' : 'PENDING'}
+                                                                </span>
+                                                                <span className="truncate opacity-90">
+                                                                    {studioName}
+                                                                </span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <div className="font-bold flex items-center justify-between mb-1">
+                                                                    <span className="truncate tracking-wider">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</span>
+                                                                    <ArrowUpRight className="w-3 h-3 opacity-0 group-hover/booking:opacity-100 transition-opacity" />
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 font-semibold mb-1">
+                                                                    <MapPin className="w-3 h-3 shrink-0" />
+                                                                    <span className="truncate">{studioName}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 opacity-90 font-medium italic">
+                                                                    <User className="w-3 h-3 shrink-0" />
+                                                                    <span className="truncate">{clientName}</span>
+                                                                </div>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 )
                                             })}
