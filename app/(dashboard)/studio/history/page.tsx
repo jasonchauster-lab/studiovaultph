@@ -41,12 +41,9 @@ export default async function StudioHistoryPage() {
         ? { data: [] }
         : await supabase
             .from('bookings')
-    slots(
-        date,
-        start_time,
-        end_time,
-        equipment
-    )
+            .select(`
+                *
+                ${/* The client needs everything else */ ''}
             `)
             .in('slot_id', slotIds)
             .order('created_at', { ascending: false })
@@ -106,12 +103,12 @@ export default async function StudioHistoryPage() {
                                 <tbody className="divide-y divide-cream-100">
                                     {bookings.map((booking: any) => {
                                         // Fixed Server Crash - Combine date and time for valid Date parsing
-                                        const start = new Date(`${ booking.slots?.date }T${ booking.slots?.start_time } +08:00`)
-                                        const end = new Date(`${ booking.slots?.date }T${ booking.slots?.end_time } +08:00`)
+                                        const start = new Date(`${booking.slots?.date}T${booking.slots?.start_time} +08:00`)
+                                        const end = new Date(`${booking.slots?.date}T${booking.slots?.end_time} +08:00`)
                                         const durationMins = Math.round((end.getTime() - start.getTime()) / 60000)
                                         const durationStr = durationMins >= 60
-                                            ? `${ Math.floor(durationMins / 60) }h${ durationMins % 60 ? ` ${durationMins % 60}m` : '' } `
-                                            : `${ durationMins } m`
+                                            ? `${Math.floor(durationMins / 60)}h${durationMins % 60 ? ` ${durationMins % 60}m` : ''} `
+                                            : `${durationMins} m`
 
                                         const studioFee = booking.price_breakdown?.studio_fee ?? 0
                                         const instructorFee = (booking.price_breakdown as any)?.instructor_fee ?? 0
@@ -143,58 +140,58 @@ export default async function StudioHistoryPage() {
                                                         <div className="w-8 h-8 rounded-full overflow-hidden bg-cream-100 border border-cream-200 shrink-0">
                                                             <img
                                                                 src={instructor?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(instructor?.full_name || 'instructor')}`}
-    alt = { instructor?.full_name || 'Instructor'
-}
-width = { 32}
-height = { 32}
-className = "w-full h-full object-cover"
-onError = {(e) => {
-    (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(instructor?.full_name || 'instructor')}`;
-}}
+                                                                alt={instructor?.full_name || 'Instructor'
+                                                                }
+                                                                width={32}
+                                                                height={32}
+                                                                className="w-full h-full object-cover"
+                                                                onError={(e) => {
+                                                                    (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(instructor?.full_name || 'instructor')}`;
+                                                                }}
                                                             />
                                                         </div >
-    <span className="text-charcoal-900 font-medium">
-        {instructor?.full_name || 'Unknown'}
-    </span>
+                                                        <span className="text-charcoal-900 font-medium">
+                                                            {instructor?.full_name || 'Unknown'}
+                                                        </span>
                                                     </div >
                                                 </td >
 
-    {/* Equipment */ }
-    < td className = "px-6 py-4" >
-        <span className="inline-flex items-center px-2.5 py-1 bg-cream-100 text-charcoal-700 text-xs font-semibold rounded-full">
-            {equipmentType}
-        </span>
-{
-    qty > 1 && (
-        <span className="ml-1.5 text-xs text-charcoal-400">×{qty}</span>
-    )
-}
+                                                {/* Equipment */}
+                                                < td className="px-6 py-4" >
+                                                    <span className="inline-flex items-center px-2.5 py-1 bg-cream-100 text-charcoal-700 text-xs font-semibold rounded-full">
+                                                        {equipmentType}
+                                                    </span>
+                                                    {
+                                                        qty > 1 && (
+                                                            <span className="ml-1.5 text-xs text-charcoal-400">×{qty}</span>
+                                                        )
+                                                    }
                                                 </td >
 
-    {/* Duration */ }
-    < td className = "px-6 py-4 text-charcoal-700 font-medium" >
-        { durationStr }
+                                                {/* Duration */}
+                                                < td className="px-6 py-4 text-charcoal-700 font-medium" >
+                                                    {durationStr}
                                                 </td >
 
-    {/* Earnings */ }
-    < td className = "px-6 py-4 text-right" >
-        <span className="font-semibold text-charcoal-900 font-serif text-base">
-            ₱{Number(fullTotal).toLocaleString()}
-        </span>
-{
-    studioFee > 0 && studioFee !== fullTotal && (
-        <div className="text-[11px] text-charcoal-400 mt-0.5">
-            Studio: ₱{Number(studioFee).toLocaleString()}
-        </div>
-    )
-}
+                                                {/* Earnings */}
+                                                < td className="px-6 py-4 text-right" >
+                                                    <span className="font-semibold text-charcoal-900 font-serif text-base">
+                                                        ₱{Number(fullTotal).toLocaleString()}
+                                                    </span>
+                                                    {
+                                                        studioFee > 0 && studioFee !== fullTotal && (
+                                                            <div className="text-[11px] text-charcoal-400 mt-0.5">
+                                                                Studio: ₱{Number(studioFee).toLocaleString()}
+                                                            </div>
+                                                        )
+                                                    }
                                                 </td >
 
-    {/* Status */ }
-    < td className = "px-6 py-4" >
-        <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${statusStyle}`}>
-            {booking.status}
-        </span>
+                                                {/* Status */}
+                                                < td className="px-6 py-4" >
+                                                    <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${statusStyle}`}>
+                                                        {booking.status}
+                                                    </span>
                                                 </td >
                                             </tr >
                                         )
