@@ -735,11 +735,11 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
 
     // 3. Aggregate statistics and prepare transaction list
     const stats = bookings.reduce((acc: any, booking: any) => {
-        const total = booking.total_price || 0
+        const total = Number(booking.total_price || 0)
         const breakdown = booking.price_breakdown || {}
-        const platformFee = breakdown.service_fee || 100
-        const instructorFee = breakdown.instructor_fee || 0
-        const studioFee = breakdown.studio_fee || (total - platformFee - instructorFee)
+        const platformFee = Number(breakdown.service_fee || 100)
+        const instructorFee = Number(breakdown.instructor_fee || 0)
+        const studioFee = Number(breakdown.studio_fee || (total - platformFee - instructorFee))
 
         acc.totalRevenue += total
         acc.totalPlatformFees += platformFee
