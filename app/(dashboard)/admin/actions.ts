@@ -748,7 +748,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         acc.bookingCount += 1
 
         // Daily aggregation for charts
-        const sessionDate = booking.slots?.date || booking.created_at.split('T')[0]
+        const sessionDate = booking.slots?.date || booking.created_at?.split('T')[0] || new Date().toISOString().split('T')[0]
         if (!acc.daily[sessionDate]) {
             acc.daily[sessionDate] = { date: sessionDate, revenue: 0, platformFees: 0, bookings: 0 }
         }
