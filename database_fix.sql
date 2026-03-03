@@ -10,6 +10,7 @@ CREATE INDEX IF NOT EXISTS idx_bookings_unlocked_completed ON public.bookings(fu
 WHERE status = 'completed';
 
 -- 3. Create Atomic RPC for processing booking completion
+DROP FUNCTION IF EXISTS public.process_booking_completion_atomic(uuid);
 CREATE OR REPLACE FUNCTION public.process_booking_completion_atomic(target_booking_id uuid)
 RETURNS boolean AS $$
 DECLARE
@@ -61,6 +62,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 4. Create Atomic RPC for unlocking matured funds
+DROP FUNCTION IF EXISTS public.unlock_booking_funds_atomic(uuid);
 CREATE OR REPLACE FUNCTION public.unlock_booking_funds_atomic(target_booking_id uuid)
 RETURNS boolean AS $$
 DECLARE
@@ -121,6 +123,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 5. Update transfer_balance to update both columns
+DROP FUNCTION IF EXISTS public.transfer_balance(uuid, uuid, numeric);
 CREATE OR REPLACE FUNCTION public.transfer_balance(
     p_from_id UUID,
     p_to_id UUID,
@@ -175,3 +178,82 @@ END $$;
 -- Index for performance
 CREATE INDEX IF NOT EXISTS idx_studio_strikes_studio_id ON public.studio_strikes(studio_id);
 CREATE INDEX IF NOT EXISTS idx_studio_strikes_created_at ON public.studio_strikes(created_at);
+
+-- 7. Wallet Top-Up Approval & Rejection RPCs
+DROP FUNCTION IF EXISTS public.approve_wallet_top_up(uuid);
+CREATE OR REPLACE FUNCTION public.approve_wallet_top_up(p_top_up_id uuid)
+RETURNS void AS $$
+DECLARE
+    v_user_id uuid;
+    v_amount numeric;
+    v_status text;
+BEGIN
+    SELECT user_id, amount, status INTO v_user_id, v_amount, v_status
+    FROM public.wallet_top_ups
+    WHERE id = p_top_up_id
+    FOR UPDATE;
+
+    IF v_status != 'pending' THEN
+        RAISE EXCEPTION 'Top-up request is already processed.';
+    END IF;
+
+    -- Update Top-Up Status
+    UPDATE public.wallet_top_ups
+    SET status = 'approved', processed_at = NOW(), updated_at = NOW()
+    WHERE id = p_top_up_id;
+
+    -- Credit User Balance
+    UPDATE public.profiles
+    SET available_balance = available_balance + v_amount,
+        wallet_balance = wallet_balance + v_amount
+    WHERE id = v_user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP FUNCTION IF EXISTS public.reject_wallet_top_up(uuid, text);
+CREATE OR REPLACE FUNCTION public.reject_wallet_top_up(p_top_up_id uuid, p_reason text)
+RETURNS void AS $$
+BEGIN
+    UPDATE public.wallet_top_ups
+    SET status = 'rejected', rejection_reason = p_reason, processed_at = NOW(), updated_at = NOW()
+    WHERE id = p_top_up_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 8. Admin Balance Adjustment RPC
+DROP FUNCTION IF EXISTS public.execute_admin_balance_adjustment(uuid, numeric, text);
+CREATE OR REPLACE FUNCTION public.execute_admin_balance_adjustment(
+    p_user_id uuid,
+    p_amount numeric,
+    p_reason text
+)
+RETURNS boolean AS $$
+BEGIN
+    -- Create record in wallet_top_ups as an audit trail
+    INSERT INTO public.wallet_top_ups (
+        user_id,
+        amount,
+        status,
+        admin_notes,
+        type,
+        processed_at,
+        payment_proof_url
+    ) VALUES (
+        p_user_id,
+        p_amount,
+        'approved',
+        p_reason,
+        'admin_adjustment',
+        NOW(),
+        'ADMIN_OVERRIDE'
+    );
+
+    -- Update Profile Balance
+    UPDATE public.profiles
+    SET available_balance = available_balance + p_amount,
+        wallet_balance = wallet_balance + p_amount
+    WHERE id = p_user_id;
+
+    RETURN true;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
