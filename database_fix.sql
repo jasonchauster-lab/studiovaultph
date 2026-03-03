@@ -119,3 +119,25 @@ BEGIN
     RETURN true;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 5. Update transfer_balance to update both columns
+CREATE OR REPLACE FUNCTION public.transfer_balance(
+    p_from_id UUID,
+    p_to_id UUID,
+    p_amount numeric
+)
+RETURNS VOID AS $$
+BEGIN
+    -- Deduct from sender (allow negative)
+    UPDATE public.profiles
+    SET available_balance = available_balance - p_amount,
+        wallet_balance = wallet_balance - p_amount
+    WHERE id = p_from_id;
+
+    -- Credit to receiver
+    UPDATE public.profiles
+    SET available_balance = available_balance + p_amount,
+        wallet_balance = wallet_balance + p_amount
+    WHERE id = p_to_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
