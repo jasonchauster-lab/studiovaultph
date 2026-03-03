@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { topUpWallet } from '@/app/(dashboard)/customer/actions'
 import ExportCsvButton from '@/components/dashboard/ExportCsvButton'
 import DateRangeFilters from '@/components/dashboard/DateRangeFilters'
+import { getManilaTodayStr } from '@/lib/timezone'
 
 export default function EarningsPage({
     searchParams
@@ -47,25 +48,28 @@ export default function EarningsPage({
         let endDate: string | undefined
 
         if (range && range !== 'all') {
-            const now = new Date()
+            const todayStr = getManilaTodayStr()
+            const now = new Date(todayStr)
 
             if (range === '7d') {
-                const d = new Date()
+                const d = new Date(now)
                 d.setDate(d.getDate() - 7)
                 startDate = d.toISOString().split('T')[0]
-                endDate = new Date().toISOString().split('T')[0]
+                endDate = todayStr
             } else if (range === '30d') {
-                const d = new Date()
+                const d = new Date(now)
                 d.setDate(d.getDate() - 30)
                 startDate = d.toISOString().split('T')[0]
-                endDate = new Date().toISOString().split('T')[0]
+                endDate = todayStr
             } else if (range === 'this-month') {
                 startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
-                endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+                const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+                endDate = lastDay
             } else if (range === 'this-quarter') {
                 const quarter = Math.floor(now.getMonth() / 3)
                 startDate = new Date(now.getFullYear(), quarter * 3, 1).toISOString().split('T')[0]
-                endDate = new Date(now.getFullYear(), quarter * 3 + 3, 0).toISOString().split('T')[0]
+                const lastDay = new Date(now.getFullYear(), quarter * 3 + 3, 0).toISOString().split('T')[0]
+                endDate = lastDay
             } else if (range === 'this-year') {
                 startDate = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
                 endDate = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0]

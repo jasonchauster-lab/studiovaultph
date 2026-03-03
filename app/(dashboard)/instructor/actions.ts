@@ -145,12 +145,17 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
     const netEarnings = grossEarned + totalCompensation - totalPenalty;
 
     // 4. Get Wallet Top-ups & Admin Adjustments
-    const { data: walletActions } = await supabase
+    let walletQuery = supabase
         .from('wallet_top_ups')
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'approved')
         .order('created_at', { ascending: false });
+
+    if (startDate) walletQuery = walletQuery.gte('created_at', `${startDate}T00:00:00.000Z`)
+    if (endDate) walletQuery = walletQuery.lte('created_at', `${endDate}T23:59:59.999Z`)
+
+    const { data: walletActions } = await walletQuery;
 
     walletActions?.forEach(wa => {
         const isAdjustment = wa.type === 'admin_adjustment';

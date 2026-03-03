@@ -748,8 +748,8 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         // FIXED: Safe fallback for session date
         const sessionDate = slots?.date || (booking.created_at ? booking.created_at.split('T')[0] : new Date().toISOString().split('T')[0])
 
-        // BUSINESS LOGIC FIX: Only calculate revenue if booking is actually confirmed/completed
-        const isConfirmed = booking.status === 'confirmed' || booking.status === 'completed' || booking.status === 'paid'
+        // BUSINESS LOGIC FIX: Only calculate revenue if booking is actually confirmed/completed/approved
+        const isConfirmed = ['approved', 'completed', 'paid', 'cancelled_charged'].includes(booking.status)
 
         if (isConfirmed) {
             // FIXED: Safely cast all JSONB and DB values to Numbers

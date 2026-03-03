@@ -222,12 +222,18 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
         })
 
         // 4.5. Get Wallet Top-ups & Admin Adjustments
-        const { data: walletActions } = ownerId ? await supabase
+        let walletQuery = ownerId ? supabase
             .from('wallet_top_ups')
             .select('*')
             .eq('user_id', ownerId)
             .eq('status', 'approved')
-            : { data: null };
+            .order('created_at', { ascending: false })
+            : null;
+
+        if (walletQuery && startDate) walletQuery = walletQuery.gte('created_at', `${startDate}T00:00:00.000Z`)
+        if (walletQuery && endDate) walletQuery = walletQuery.lte('created_at', `${endDate}T23:59:59.999Z`)
+
+        const { data: walletActions } = walletQuery ? await walletQuery : { data: null };
 
         walletActions?.forEach(wa => {
             const isAdjustment = wa.type === 'admin_adjustment';

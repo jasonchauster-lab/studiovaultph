@@ -22,24 +22,29 @@ export default async function AdminDashboard({
 
     // --- DATE FILTER LOGIC ---
     let startDate: string | undefined
-    let endDate: string | undefined = new Date().toISOString()
+    let endDate: string | undefined // BUSINESS LOGIC: Undefined endDate means no upper bound (includes future bookings)
     const now = new Date()
 
     if (range === '7d') {
         const d = new Date()
         d.setDate(d.getDate() - 7)
         startDate = d.toISOString()
+        endDate = now.toISOString()
     } else if (range === '30d') {
         const d = new Date()
         d.setDate(d.getDate() - 30)
         startDate = d.toISOString()
+        endDate = now.toISOString()
     } else if (range === 'this-month') {
         startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+        endDate = now.toISOString()
     } else if (range === 'this-quarter') {
         const quarter = Math.floor(now.getMonth() / 3)
         startDate = new Date(now.getFullYear(), quarter * 3, 1).toISOString()
+        endDate = now.toISOString()
     } else if (range === 'this-year') {
         startDate = new Date(now.getFullYear(), 0, 1).toISOString()
+        endDate = now.toISOString()
     }
     // --- END DATE FILTER LOGIC ---
 

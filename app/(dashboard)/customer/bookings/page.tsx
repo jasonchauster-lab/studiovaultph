@@ -50,8 +50,15 @@ export default async function CustomerBookingsPage() {
     // Fetch pending reviews for the customer
     const { bookings: pendingReviews, isInstructor } = await getPendingReviews()
 
-    const upcomingBookings = bookings?.filter(b => new Date(b.slots.start_time) > new Date()) || []
-    const pastBookings = bookings?.filter(b => new Date(b.slots.start_time) <= new Date()) || []
+    // Helper to combine date and time into a comparable Date object (Manila time)
+    const getSlotDateTime = (date: string, time: string) => {
+        // time is HH:mm:ss, date is YYYY-MM-DD
+        return new Date(`${date}T${time}+08:00`)
+    }
+
+    const now = new Date()
+    const upcomingBookings = bookings?.filter(b => getSlotDateTime(b.slots.date, b.slots.start_time) > now) || []
+    const pastBookings = bookings?.filter(b => getSlotDateTime(b.slots.date, b.slots.start_time) <= now) || []
 
     return (
         <div className="min-h-screen bg-cream-50 p-8">
@@ -87,9 +94,15 @@ export default async function CustomerBookingsPage() {
                                 </p>
                             )}
                             <p className="text-charcoal-300 mb-6">
-                                {new Date(upcomingBookings.find(b => b.status === 'approved')?.slots.start_time).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+                                {getSlotDateTime(
+                                    upcomingBookings.find(b => b.status === 'approved')?.slots.date,
+                                    upcomingBookings.find(b => b.status === 'approved')?.slots.start_time
+                                ).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
                                 {' • '}
-                                {new Date(upcomingBookings.find(b => b.status === 'approved')?.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                {getSlotDateTime(
+                                    upcomingBookings.find(b => b.status === 'approved')?.slots.date,
+                                    upcomingBookings.find(b => b.status === 'approved')?.slots.start_time
+                                ).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
                             </p>
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-charcoal-800 rounded-full flex items-center justify-center text-lg font-bold">
@@ -138,7 +151,8 @@ export default async function CustomerBookingsPage() {
                                     <div className="flex items-center gap-3">
                                         {/* Show Leave Review button only for completed sessions or passed approved sessions */}
                                         {(() => {
-                                            const isPast = new Date(booking.slots?.end_time) < new Date()
+                                            const slotEnd = getSlotDateTime(booking.slots?.date, booking.slots?.end_time)
+                                            const isPast = slotEnd < now
                                             const canReview = booking.status === 'completed' || (booking.status === 'approved' && isPast)
 
                                             if (!canReview) return null
