@@ -738,20 +738,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
 
     // 3. Aggregate statistics and prepare transaction list
     const stats = (bookings || []).reduce((acc: any, booking: any) => {
-        // FIXED: Safely cast all JSONB and DB values to Numbers
-        const total = Number(booking.total_price || 0)
-        const breakdown = booking.price_breakdown || {}
-        const platformFee = Number(breakdown.service_fee || 100)
-        const instructorFee = Number(breakdown.instructor_fee || 0)
-        const studioFee = Number(breakdown.studio_fee || (total - platformFee - instructorFee))
-
-        acc.totalRevenue += total
-        acc.totalPlatformFees += platformFee
-        acc.totalStudioFees += studioFee
-        acc.totalInstructorFees += instructorFee
-        acc.bookingCount += 1
-
-        // FIXED: Safely extract nested relation data
+        // FIXED: Safely extract nested relation data to avoid undefined crashes
         const slots = getFirst(booking.slots)
         const studio = getFirst(slots?.studios)
         const client = getFirst(booking.client)
@@ -760,25 +747,46 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         // FIXED: Safe fallback for session date
         const sessionDate = slots?.date || (booking.created_at ? booking.created_at.split('T')[0] : new Date().toISOString().split('T')[0])
 
-        if (!acc.daily[sessionDate]) {
-            acc.daily[sessionDate] = { date: sessionDate, revenue: 0, platformFees: 0, bookings: 0 }
+        // BUSINESS LOGIC FIX: Only calculate revenue if booking is actually confirmed/completed
+        const isConfirmed = booking.status === 'confirmed' || booking.status === 'completed' || booking.status === 'paid'
+
+        if (isConfirmed) {
+            // FIXED: Safely cast all JSONB and DB values to Numbers
+            const total = Number(booking.total_price || 0)
+            const breakdown = booking.price_breakdown || {}
+            const platformFee = Number(breakdown.service_fee || 100)
+            const instructorFee = Number(breakdown.instructor_fee || 0)
+            const studioFee = Number(breakdown.studio_fee || (total - platformFee - instructorFee))
+
+            acc.totalRevenue += total
+            acc.totalPlatformFees += platformFee
+            acc.totalStudioFees += studioFee
+            acc.totalInstructorFees += instructorFee
+
+            if (!acc.daily[sessionDate]) {
+                acc.daily[sessionDate] = { date: sessionDate, revenue: 0, platformFees: 0, bookings: 0 }
+            }
+            acc.daily[sessionDate].revenue += total
+            acc.daily[sessionDate].platformFees += platformFee
+            acc.daily[sessionDate].bookings += 1
         }
-        acc.daily[sessionDate].revenue += total
-        acc.daily[sessionDate].platformFees += platformFee
-        acc.daily[sessionDate].bookings += 1
+
+        // Always count total bookings requested (optional, adjust if you only want confirmed)
+        acc.bookingCount += 1
 
         // Transaction list for CSV
         acc.transactions.push({
             id: booking.id,
             date: slots ? `${slots.date} ${slots.start_time}` : booking.created_at,
             type: 'Booking',
+            status: booking.status, // Added status for admin visibility
             client: client?.full_name || '-',
             studio: studio?.name || '-',
             instructor: instructor?.full_name || '-',
-            total_amount: total,
-            platform_fee: platformFee,
-            studio_fee: studioFee,
-            instructor_fee: instructorFee
+            total_amount: Number(booking.total_price || 0),
+            platform_fee: Number(booking.price_breakdown?.service_fee || 100),
+            studio_fee: Number(booking.price_breakdown?.studio_fee || 0),
+            instructor_fee: Number(booking.price_breakdown?.instructor_fee || 0)
         })
 
         return acc
