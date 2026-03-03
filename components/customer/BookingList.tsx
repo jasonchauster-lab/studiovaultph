@@ -14,13 +14,18 @@ interface BookingListProps {
 export default function BookingList({ bookings, userId }: BookingListProps) {
     const [selectedBooking, setSelectedBooking] = useState<string | null>(null)
 
-    const upcomingBookings = bookings.filter(b => new Date(b.slots.start_time) > new Date())
+    const getSlotDateTime = (date: string, time: string) => {
+        return new Date(`${date}T${time}+08:00`)
+    }
+
+    const now = new Date()
+    const upcomingBookings = bookings.filter(b => getSlotDateTime(b.slots.date, b.slots.start_time) > now)
 
     // Helper to check expiration (12 hours after end time)
     const isChatExpired = (booking: any) => {
-        const endTime = new Date(booking.slots.end_time)
+        const endTime = getSlotDateTime(booking.slots.date, booking.slots.end_time)
         const expirationTime = new Date(endTime.getTime() + 12 * 60 * 60 * 1000)
-        return new Date() > expirationTime
+        return now > expirationTime
     }
 
     const handleChatClick = (bookingId: string) => {
@@ -30,9 +35,9 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
     const [cancellingId, setCancellingId] = useState<string | null>(null)
 
     const handleCancel = async (booking: any) => {
-        const startTime = new Date(booking.slots.start_time).getTime()
-        const now = new Date().getTime()
-        const hoursUntilStart = (startTime - now) / (1000 * 60 * 60)
+        const startTime = getSlotDateTime(booking.slots.date, booking.slots.start_time).getTime()
+        const currentTime = now.getTime()
+        const hoursUntilStart = (startTime - currentTime) / (1000 * 60 * 60)
 
         const isRefunding = hoursUntilStart >= 24
 
@@ -68,15 +73,15 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                         <div key={booking.id} className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div className="flex gap-4">
                                 <div className="flex flex-col items-center justify-center bg-cream-100 w-16 h-16 rounded-lg text-charcoal-900">
-                                    <span className="text-xs font-bold uppercase">{new Date(booking.slots.start_time).toLocaleString('default', { month: 'short' })}</span>
-                                    <span className="text-xl font-serif">{new Date(booking.slots.start_time).getDate()}</span>
+                                    <span className="text-xs font-bold uppercase">{getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleString('default', { month: 'short' })}</span>
+                                    <span className="text-xl font-serif">{getSlotDateTime(booking.slots.date, booking.slots.start_time).getDate()}</span>
                                 </div>
                                 <div>
                                     <h3 className="font-medium text-charcoal-900 text-lg mb-1">{booking.slots.studios.name}</h3>
                                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm text-charcoal-500">
                                         <span className="flex items-center gap-1">
                                             <Clock className="w-4 h-4" />
-                                            {new Date(booking.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                            {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                         </span>
                                         <span className="flex items-center gap-1">
                                             <MapPin className="w-4 h-4" />
@@ -113,7 +118,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     {booking.status}
                                 </span>
 
-                                {booking.status === 'approved' && new Date(booking.slots.start_time) > new Date() && (
+                                {booking.status === 'approved' && getSlotDateTime(booking.slots.date, booking.slots.start_time) > now && (
                                     <button
                                         onClick={() => handleCancel(booking)}
                                         disabled={cancellingId === booking.id}

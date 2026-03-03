@@ -29,22 +29,17 @@ export default async function AdminDashboard({
         const d = new Date()
         d.setDate(d.getDate() - 7)
         startDate = d.toISOString()
-        endDate = now.toISOString()
     } else if (range === '30d') {
         const d = new Date()
         d.setDate(d.getDate() - 30)
         startDate = d.toISOString()
-        endDate = now.toISOString()
     } else if (range === 'this-month') {
         startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-        endDate = now.toISOString()
     } else if (range === 'this-quarter') {
         const quarter = Math.floor(now.getMonth() / 3)
         startDate = new Date(now.getFullYear(), quarter * 3, 1).toISOString()
-        endDate = now.toISOString()
     } else if (range === 'this-year') {
         startDate = new Date(now.getFullYear(), 0, 1).toISOString()
-        endDate = now.toISOString()
     }
     // --- END DATE FILTER LOGIC ---
 
@@ -199,6 +194,7 @@ export default async function AdminDashboard({
       *,
       client:profiles!client_id(full_name),
       slots(
+        date,
         start_time,
         end_time,
         studios(name, location, address)
@@ -784,7 +780,8 @@ export default async function AdminDashboard({
                         <div className="space-y-4">
                             {pendingBookings?.map((booking: any) => {
                                 const studio = booking.slots?.studios;
-                                const startTime = new Date(booking.slots?.start_time).toLocaleString('en-PH', { timeZone: 'Asia/Manila' });
+                                const combinedDateTime = new Date(`${booking.slots?.date}T${booking.slots?.start_time}+08:00`);
+                                const startTime = combinedDateTime.toLocaleString('en-PH', { timeZone: 'Asia/Manila' });
                                 const hasPaymentProof = !!booking.payment_proof_url;
 
                                 return (

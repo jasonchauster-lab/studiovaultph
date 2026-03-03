@@ -975,9 +975,9 @@ export async function cancelBooking(bookingId: string) {
     // If an instructor is cancelling their own studio rental, remove the auto-created availability
     if (booking.client_id === booking.instructor_id) {
         try {
-            const startDateTime = new Date(slotData.start_time);
+            const startDateTime = new Date(`${slotData.date}T${slotData.start_time}+08:00`);
             const dateStr = toManilaDateStr(startDateTime);
-            const timeStr = startDateTime.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour12: false, hour: '2-digit', minute: '2-digit' });
+            const timeStr = slotData.start_time.slice(0, 5);
 
             await supabase
                 .from('instructor_availability')

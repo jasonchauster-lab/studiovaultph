@@ -337,7 +337,9 @@ export default function PaymentForm({
     // Agreements unlock only when PAR-Q is done AND (no risk OR risk acknowledged)
     const agreementsUnlocked = parqComplete && (!hasRiskFlags || medicalAcknowledged)
 
-    const startTime = booking?.slots?.start_time ? new Date(booking.slots.start_time) : null
+    const startTime = (booking?.slots?.start_time && booking?.slots?.date)
+        ? new Date(`${booking.slots.date}T${booking.slots.start_time}+08:00`)
+        : null
     const isLateBooking = startTime ? (startTime.getTime() - Date.now()) < 24 * 60 * 60 * 1000 : false
 
     const canSubmit = file && waiverAgreed && termsAgreed && agreementsUnlocked && (!isLateBooking || lateBookingAgreed) && !isUploading && !isExpired

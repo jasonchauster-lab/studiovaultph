@@ -23,6 +23,7 @@ export default async function CustomerBookingsPage() {
         .select(`
             *,
             slots (
+                date,
                 start_time,
                 end_time,
                 studios (
@@ -144,7 +145,7 @@ export default async function CustomerBookingsPage() {
                                 <div key={booking.id} className="bg-white p-4 rounded-xl border border-cream-200 flex justify-between items-center">
                                     <div className="flex items-center gap-4">
                                         <div className="text-charcoal-500 text-sm">
-                                            {new Date(booking.slots.start_time).toLocaleDateString()}
+                                            {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleDateString()}
                                         </div>
                                         <div className="font-medium text-charcoal-700">{booking.slots.studios.name}</div>
                                     </div>
