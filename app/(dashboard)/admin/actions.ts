@@ -706,8 +706,9 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         .in('status', ['approved', 'completed', 'cancelled_charged'])
         .order('created_at', { ascending: true })
 
-    if (startDate) bookingsQuery = bookingsQuery.gte('slots.start_time', startDate)
-    if (endDate) bookingsQuery = bookingsQuery.lte('slots.start_time', endDate)
+    // FIX: Extract just the date string to match the 'date' column
+    if (startDate) bookingsQuery = bookingsQuery.gte('slots.date', startDate.split('T')[0])
+    if (endDate) bookingsQuery = bookingsQuery.lte('slots.date', endDate.split('T')[0])
 
     const { data: bookings, error: bookingsError } = await bookingsQuery
 
