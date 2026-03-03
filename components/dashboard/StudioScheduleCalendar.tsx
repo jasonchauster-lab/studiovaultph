@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, startOfDay } from 'date-fns'
+import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, startOfDay, isPast } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Users, User, Calendar as CalendarIcon, Clock, Trash2, Edit2, X, Sparkles } from 'lucide-react'
 import clsx from 'clsx'
 import { createSlot, deleteSlot, updateSlot } from '@/app/(dashboard)/studio/actions' // For single slot
@@ -220,8 +220,10 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                             return s.date === dayStr && startHour === hour
                                         })
 
+                                        const isPastCell = isPast(new Date(dayStr + "T" + hour.toString().padStart(2, '0') + ":59:59+08:00"))
+
                                         return (
-                                            <div key={day.toString() + hour} className="border-r border-cream-100 last:border-r-0 relative group p-1 min-h-[80px]">
+                                            <div key={day.toString() + hour} className={clsx("border-r border-cream-100 last:border-r-0 relative group p-1 min-h-[80px]", isPastCell && "bg-gray-50/20")} style={{ colorScheme: 'light' }}>
                                                 <div
                                                     className="absolute inset-0 opacity-0 group-hover:opacity-10 opacity-0 transition-opacity bg-charcoal-900 flex items-center justify-center cursor-pointer z-0"
                                                     onClick={() => {
@@ -259,13 +261,22 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                                                             return Object.entries(equipmentCounts).map(([eqType, counts]) => {
                                                                 const isFullyBooked = counts.free === 0;
+                                                                const hasPending = cellSlots.some(s =>
+                                                                    s.bookings?.some(b => b.status === 'pending' && (b.price_breakdown?.equipment?.toUpperCase() === eqType.toUpperCase() || b.equipment?.toUpperCase() === eqType.toUpperCase()))
+                                                                );
 
                                                                 return (
                                                                     <div
                                                                         key={eqType}
                                                                         className={clsx(
                                                                             "border rounded-md p-2 hover:shadow-md transition-all group/eq",
-                                                                            isFullyBooked ? "bg-amber-50 border-amber-200" : "bg-teal-50 border-teal-200"
+                                                                            isPastCell
+                                                                                ? "bg-[#fdf9f4] border-transparent opacity-60"
+                                                                                : hasPending
+                                                                                    ? "bg-[#f5e8de] border-[#f5e8de]"
+                                                                                    : isFullyBooked
+                                                                                        ? "bg-[#ebd3cf] border-[#ebd3cf]"
+                                                                                        : "bg-white border-[#ebd3cf] border-dashed"
                                                                         )}
                                                                         onClick={() => {
                                                                             setBucketSlots(cellSlots.filter(s => s.equipment?.[eqType]))
@@ -275,14 +286,14 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     >
                                                                         <div className={clsx(
                                                                             "text-[10px] font-bold uppercase tracking-wider flex justify-between",
-                                                                            isFullyBooked ? "text-amber-800" : "text-teal-800"
+                                                                            isPastCell ? "text-gray-400" : "text-[#333333]"
                                                                         )}>
                                                                             {eqType}
                                                                             <Edit2 className="w-2.5 h-2.5 opacity-0 group-hover/eq:opacity-100" />
                                                                         </div>
                                                                         <div className={clsx(
                                                                             "text-[11px] font-medium leading-tight mt-1",
-                                                                            isFullyBooked ? "text-amber-900" : "text-teal-900"
+                                                                            isPastCell ? "text-gray-400" : "text-[#333333]"
                                                                         )}>
                                                                             {counts.free} of {counts.total} free
                                                                         </div>
@@ -297,12 +308,19 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                             const availableCount = openSlots.reduce((sum, s) => sum + (s.is_available ? (s.quantity || 1) : 0), 0)
                                                             const totalCount = openSlots.reduce((sum, s) => sum + (s.quantity || 1), 0)
                                                             const isFullyBooked = availableCount === 0
+                                                            const hasPending = openSlots.some(s => s.bookings?.some(b => b.status === 'pending'))
 
                                                             return (
                                                                 <div
                                                                     className={clsx(
                                                                         "border rounded-md p-2 hover:shadow-md transition-all group/open",
-                                                                        isFullyBooked ? "bg-amber-50 border-amber-200" : "bg-teal-50 border-teal-200"
+                                                                        isPastCell
+                                                                            ? "bg-[#fdf9f4] border-transparent opacity-60"
+                                                                            : hasPending
+                                                                                ? "bg-[#f5e8de] border-[#f5e8de]"
+                                                                                : isFullyBooked
+                                                                                    ? "bg-[#ebd3cf] border-[#ebd3cf]"
+                                                                                    : "bg-white border-[#ebd3cf] border-dashed"
                                                                     )}
                                                                     onClick={() => {
                                                                         setBucketSlots(openSlots)

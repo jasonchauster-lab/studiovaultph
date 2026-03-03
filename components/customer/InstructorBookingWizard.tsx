@@ -5,8 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { findMatchingStudios } from '@/app/(dashboard)/instructors/actions'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
 import { getManilaTodayStr, toManilaDate, formatTo12Hour, normalizeTimeTo24h } from '@/lib/timezone'
-import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info } from 'lucide-react'
+import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info, Calendar } from 'lucide-react'
 import clsx from 'clsx'
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isToday as isTodayFns, isPast, isSameMonth } from 'date-fns'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -81,24 +82,32 @@ export default function InstructorBookingWizard({
         return timeKey ? (equipmentData[timeKey] ?? 0) : 0;
     };
 
-    // Helper: Generate next 14 days based on Manila Time
-    const nextDays = Array.from({ length: 14 }).map((_, i) => {
-        const todayAtNoon = new Date();
-        todayAtNoon.setHours(12, 0, 0, 0); // Noon to avoid boundary issues
-        const d = toManilaDate(todayAtNoon);
-        d.setUTCDate(d.getUTCDate() + i);
-
-        const year = d.getUTCFullYear();
-        const month = (d.getUTCMonth() + 1).toString().padStart(2, '0');
-        const day = d.getUTCDate().toString().padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
+    // Helper: Generate days for the viewed month
+    const viewedMonth = searchParams.get('month') || format(new Date(), 'yyyy-MM')
+    const monthStart = startOfMonth(new Date(viewedMonth + '-01'))
+    const nextDays = eachDayOfInterval({
+        start: monthStart,
+        end: endOfMonth(monthStart)
+    }).map(d => {
+        const year = d.getFullYear()
+        const month = (d.getMonth() + 1).toString().padStart(2, '0')
+        const day = d.getDate().toString().padStart(2, '0')
+        const dateStr = `${year}-${month}-${day}`
 
         return {
             date: dateStr,
-            dayIndex: d.getUTCDay(),
+            dayIndex: d.getDay(),
             label: d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
         }
     })
+
+    const handleMonthChange = (offset: number) => {
+        const current = new Date(viewedMonth + '-01')
+        const next = offset > 0 ? addMonths(current, 1) : subMonths(current, 1)
+        const params = new URLSearchParams(searchParams)
+        params.set('month', format(next, 'yyyy-MM'))
+        router.push(`?${params.toString()}`, { scroll: false })
+    }
 
     // Pre-process active bookings into a set of 'YYYY-MM-DD|HH:mm:ss' strings in Manila time
     const bookedSlotsSet = new Set(
@@ -278,10 +287,28 @@ export default function InstructorBookingWizard({
             {/* Step 1: Select Date & Time */}
             {step === 1 && (
                 <div className="space-y-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <h3 className="font-medium text-charcoal-900 text-lg font-serif">1. Select a Date & Time</h3>
-                        <div className="text-xs text-charcoal-500 font-medium uppercase tracking-widest">
-                            Available next 14 days
+
+                        {/* Month Selector */}
+                        <div className="flex items-center gap-2 bg-cream-50 p-1 rounded-xl border border-cream-200">
+                            <button
+                                onClick={() => handleMonthChange(-1)}
+                                className="p-2 hover:bg-white rounded-lg transition-all text-charcoal-400 hover:text-charcoal-900 disabled:opacity-30"
+                                disabled={isPast(subMonths(new Date(viewedMonth + '-01'), 0)) && !isSameMonth(new Date(viewedMonth + '-01'), new Date())}
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                            </button>
+                            <div className="px-4 text-xs font-bold text-charcoal-900 uppercase tracking-widest flex items-center gap-2">
+                                <Calendar className="w-3.5 h-3.5 text-rose-gold" />
+                                {format(monthStart, 'MMMM yyyy')}
+                            </div>
+                            <button
+                                onClick={() => handleMonthChange(1)}
+                                className="p-2 hover:bg-white rounded-lg transition-all text-charcoal-400 hover:text-charcoal-900"
+                            >
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
                         </div>
                     </div>
 
@@ -328,8 +355,8 @@ export default function InstructorBookingWizard({
                                         className={clsx(
                                             "flex flex-col items-center min-w-[72px] py-3 rounded-2xl border transition-all snap-start flex-shrink-0",
                                             isSelected
-                                                ? "bg-charcoal-900 border-charcoal-900 text-cream-50 shadow-md"
-                                                : "bg-white border-charcoal-400 text-charcoal-700 hover:border-charcoal-600"
+                                                ? "bg-[#ebd3cf] border-[#ebd3cf] text-[#333333] shadow-md"
+                                                : "bg-white border-[#ebd3cf] text-[#333333] hover:border-[#ebd3cf] hover:shadow-sm"
                                         )}
                                     >
                                         <span className="text-[10px] uppercase tracking-widest font-bold opacity-60 mb-0.5">{isTodayPill ? 'Today' : d.label.split(' ')[0]}</span>
@@ -387,7 +414,7 @@ export default function InstructorBookingWizard({
                                             <button
                                                 key={slot.id}
                                                 onClick={() => handleSearchCheck(slot, activeDate)}
-                                                className="w-full text-left bg-white p-4 rounded-xl border border-cream-200 hover:border-charcoal-900 hover:shadow-md transition-all flex justify-between items-center group"
+                                                className="w-full text-left bg-white p-4 rounded-xl border border-[#ebd3cf] hover:border-[#ebd3cf] hover:shadow-md transition-all flex justify-between items-center group"
                                             >
                                                 <div>
                                                     <div className="font-serif text-lg text-charcoal-900">
@@ -456,8 +483,8 @@ export default function InstructorBookingWizard({
                                                         className={clsx(
                                                             "px-4 py-2 rounded-xl text-sm border font-medium transition-all",
                                                             isSelected
-                                                                ? "bg-charcoal-900 text-cream-50 border-charcoal-900 shadow-sm"
-                                                                : "bg-cream-50 text-charcoal-700 border-cream-200 hover:border-charcoal-400"
+                                                                ? "bg-[#ebd3cf] text-[#333333] border-[#ebd3cf] shadow-sm"
+                                                                : "bg-white text-[#333333] border-[#ebd3cf] hover:shadow-sm"
                                                         )}
                                                     >
                                                         {formatTo12Hour(startTime)}

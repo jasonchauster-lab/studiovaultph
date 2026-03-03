@@ -9,12 +9,14 @@ import PublicInstructorGallery from '@/components/instructor/PublicInstructorGal
 import { getPublicReviews } from '@/app/(dashboard)/reviews/actions'
 
 
-export default async function InstructorProfilePage({
-    params
-}: {
-    params: Promise<{ id: string }>
+import { startOfMonth, endOfMonth, format } from 'date-fns'
+
+export default async function InstructorProfilePage(props: {
+    params: Promise<{ id: string }>,
+    searchParams: Promise<{ month?: string }>
 }) {
-    const { id } = await params
+    const { id } = await props.params
+    const searchParams = await props.searchParams
     const supabase = await createClient()
 
     // 1. Fetch Instructor Profile & Certs
@@ -36,19 +38,28 @@ export default async function InstructorProfilePage({
 
     if (!instructor) notFound()
 
-    // 2. Fetch Availability
+    // 2. Fetch Availability for the visible month
+    const monthParam = searchParams.month || format(new Date(), 'yyyy-MM')
+    const rangeStart = startOfMonth(new Date(monthParam + '-01'))
+    const rangeEnd = endOfMonth(rangeStart)
+    const startDateStr = format(rangeStart, 'yyyy-MM-dd')
+    const endDateStr = format(rangeEnd, 'yyyy-MM-dd')
+
     const { data: availability } = await supabase
         .from('instructor_availability')
         .select('*')
         .eq('instructor_id', id)
+        .or(`date.is.null,and(date.gte.${startDateStr},date.lte.${endDateStr})`)
         .order('day_of_week', { ascending: true })
 
-    // 2.5 Fetch Active Bookings to filter out taken slots
+    // 2.5 Fetch Active Bookings to filter out taken slots for this month
     const { data: activeBookings } = await supabase
         .from('bookings')
-        .select('id, slots(start_time, date)')
+        .select('id, slots!inner(start_time, date)')
         .eq('instructor_id', id)
         .in('status', ['pending', 'approved'])
+        .gte('slots.date', startDateStr)
+        .lte('slots.date', endDateStr)
 
     // 3. Fetch public reviews for this instructor
     const { reviews, averageRating, totalCount } = await getPublicReviews(id)

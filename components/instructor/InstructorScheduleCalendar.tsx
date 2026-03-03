@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes } from 'date-fns'
+import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes, isPast } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare } from 'lucide-react'
 import clsx from 'clsx'
 import { toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
@@ -260,8 +260,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                         return startH === hour;
                                     })
 
+                                    const isPastCell = isPast(setMinutes(setHours(day, hour + 1), 0))
+
                                     return (
-                                        <div key={day.toString() + hour} className="border-r border-cream-100 last:border-r-0 relative group p-0" style={{ minHeight: `${ROW_HEIGHT}px` }}>
+                                        <div key={day.toString() + hour} className={clsx("border-r border-cream-100 last:border-r-0 relative group p-0", isPastCell && "bg-gray-50/30")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
                                             <div
                                                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-charcoal-900/5 cursor-pointer z-0"
                                                 onClick={() => {
@@ -327,9 +329,9 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         key={slot.id}
                                                         className={clsx(
                                                             "absolute rounded-lg text-xs hover:shadow-xl transition-all cursor-pointer overflow-hidden border z-10 p-2.5 group/slot",
-                                                            slot.date
-                                                                ? "bg-white border-rose-gold text-charcoal-900 shadow-sm"
-                                                                : "bg-teal-50 border-teal-200 text-teal-800 shadow-sm",
+                                                            isPastCell
+                                                                ? "bg-[#fdf9f4] border-transparent text-gray-400 opacity-60"
+                                                                : "bg-white border-[#ebd3cf] text-[#333333] shadow-sm",
                                                             duration < 45 ? "flex flex-row items-center gap-2 py-1 px-2" : "flex flex-col"
                                                         )}
                                                         style={{
@@ -347,7 +349,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         {duration < 45 ? (
                                                             <div className="flex flex-col h-full justify-center">
                                                                 <div className="flex items-center gap-1 font-bold text-[9px] text-charcoal-900 leading-tight">
-                                                                    <Clock className="w-2.5 h-2.5 flex-shrink-0 text-rose-gold" />
+                                                                    <Clock className={clsx("w-2.5 h-2.5 flex-shrink-0", isPastCell ? "text-gray-300" : "text-rose-gold")} />
                                                                     <span className="truncate">{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                                 </div>
                                                                 <div className="flex items-center gap-1 text-[8px] text-charcoal-500 truncate mt-0.5">
@@ -358,7 +360,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         ) : (
                                                             <>
                                                                 <div className="text-[10px] flex items-center gap-1.5 font-bold text-charcoal-900 mb-1.5">
-                                                                    <Clock className="w-3.5 h-3.5 flex-shrink-0 text-rose-gold" />
+                                                                    <Clock className={clsx("w-3.5 h-3.5 flex-shrink-0", isPastCell ? "text-gray-300" : "text-rose-gold")} />
                                                                     <span className="truncate">{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                                 </div>
                                                                 <div className="text-[10px] flex items-center gap-1.5 font-medium text-charcoal-600 leading-snug">
@@ -427,9 +429,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         key={booking.id}
                                                         className={clsx(
                                                             "absolute rounded-lg text-[10px] shadow-md border z-20 p-2.5 overflow-hidden transition-all hover:scale-[1.02] cursor-pointer group/booking",
-                                                            booking.status === 'approved'
-                                                                ? "bg-green-600 border-green-500 text-white shadow-green-900/10"
-                                                                : "bg-amber-50 border-amber-400 text-white shadow-amber-900/10",
+                                                            isPastCell
+                                                                ? "bg-[#fdf9f4] border-transparent text-gray-400 opacity-80"
+                                                                : booking.status === 'approved'
+                                                                    ? "bg-[#ebd3cf] border-[#ebd3cf] text-[#333333]"
+                                                                    : "bg-[#f5e8de] border-[#f5e8de] text-[#333333]",
                                                             duration < 45 ? "flex flex-row items-center gap-2 py-1 px-2" : "flex flex-col"
                                                         )}
                                                         style={{

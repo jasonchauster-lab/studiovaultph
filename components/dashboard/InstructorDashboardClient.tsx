@@ -8,18 +8,19 @@ import Link from 'next/link';
 import clsx from 'clsx';
 import ChatWindow from '@/components/dashboard/ChatWindow';
 import MessageCountBadge from '@/components/dashboard/MessageCountBadge';
-import { formatManilaDateStr, formatTo12Hour } from '@/lib/timezone';
+import { formatManilaDateStr, formatTo12Hour, getManilaTodayStr, toManilaDateStr } from '@/lib/timezone';
 import { useSearchParams } from 'next/navigation';
 import CancelBookingModal from './CancelBookingModal';
 import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions';
 import InstructorScheduleCalendar from '@/components/instructor/InstructorScheduleCalendar';
-import { getManilaTodayStr } from '@/lib/timezone';
+import { startOfWeek, endOfWeek, format } from 'date-fns';
 
 export default function InstructorDashboardClient() {
     const searchParams = useSearchParams();
     const supabase = createClient();
 
-    const [bookings, setBookings] = useState<any[]>([]);
+    const [calendarBookings, setCalendarBookings] = useState<any[]>([]);
+    const [upcomingBookings, setUpcomingBookings] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [userId, setUserId] = useState<string | null>(null);
     const [availableBalance, setAvailableBalance] = useState<number | null>(null);
@@ -36,13 +37,16 @@ export default function InstructorDashboardClient() {
             if (user) setUserId(user.id);
 
             if (user) {
-                // Fetch My Bookings (Where I am the instructor)
-                const { data: bookingsData } = await supabase
+                // 1. Fetch Sidebar "Upcoming" (Global)
+                const todayStr = getManilaTodayStr();
+                const nowTimeStr = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+                const { data: sidebarData } = await supabase
                     .from('bookings')
                     .select(`
                         *,
                         price_breakdown,
-                        slots (
+                        slots!inner (
                             date,
                             start_time,
                             end_time,
@@ -59,19 +63,58 @@ export default function InstructorDashboardClient() {
                             email,
                             avatar_url,
                             medical_conditions
-                        ),
-                        instructor:profiles!instructor_id (
-                            full_name,
-                            email,
-                            avatar_url
                         )
                     `)
                     .eq('instructor_id', user.id)
-                    .order('created_at', { ascending: false });
+                    .eq('status', 'approved')
+                    .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`)
+                    .order('slots(date)', { ascending: true })
+                    .order('slots(start_time)', { ascending: true })
+                    .limit(5);
 
-                if (bookingsData) setBookings(bookingsData);
+                if (sidebarData) setUpcomingBookings(sidebarData);
 
-                // Fetch Available Balance
+                // 2. Determine visible week for dynamic calendar fetching
+                const dateParam = searchParams.get('date') || todayStr;
+                const currentDate = new Date(dateParam + "T00:00:00+08:00");
+                const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+                const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
+                const startDateStr = format(weekStart, 'yyyy-MM-dd');
+                const endDateStr = format(weekEnd, 'yyyy-MM-dd');
+
+                // 3. Fetch Calendar Bookings (Range bound)
+                const { data: calendarData } = await supabase
+                    .from('bookings')
+                    .select(`
+                        *,
+                        price_breakdown,
+                        slots!inner (
+                            id,
+                            date,
+                            start_time,
+                            end_time,
+                            equipment,
+                            studios (
+                                name,
+                                location,
+                                logo_url,
+                                owner_id
+                            )
+                        ),
+                        client:profiles!client_id (
+                            full_name,
+                            email,
+                            avatar_url,
+                            medical_conditions
+                        )
+                    `)
+                    .eq('instructor_id', user.id)
+                    .gte('slots.date', startDateStr)
+                    .lte('slots.date', endDateStr);
+
+                if (calendarData) setCalendarBookings(calendarData);
+
+                // 4. Fetch Available Balance (Static)
                 const { data: profile } = await supabase
                     .from('profiles')
                     .select('available_balance')
@@ -79,7 +122,7 @@ export default function InstructorDashboardClient() {
                     .single();
                 if (profile) setAvailableBalance(profile.available_balance || 0);
 
-                // Check for Pending Payouts
+                // 5. Check for Pending Payouts (Static)
                 const { data: pendingPayouts } = await supabase
                     .from('payout_requests')
                     .select('id')
@@ -88,11 +131,12 @@ export default function InstructorDashboardClient() {
                     .limit(1);
                 setHasPendingPayout(!!(pendingPayouts && pendingPayouts.length > 0));
 
-                // Fetch Existing Availability
+                // 6. Fetch Existing Availability for this week (Specific or Recurring)
                 const { data: availabilityData } = await supabase
                     .from('instructor_availability')
                     .select('*')
                     .eq('instructor_id', user.id)
+                    .or(`date.is.null,and(date.gte.${startDateStr},date.lte.${endDateStr})`)
                     .order('day_of_week', { ascending: true })
                     .order('start_time', { ascending: true });
 
@@ -103,7 +147,7 @@ export default function InstructorDashboardClient() {
         }
 
         fetchData();
-    }, []);
+    }, [searchParams.get('date')]);
 
     const isChatExpired = (booking: any) => {
         const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
@@ -117,7 +161,8 @@ export default function InstructorDashboardClient() {
         if (!cancellingBooking) return { error: 'No booking selected' };
         const result = await cancelBookingByInstructor(cancellingBooking.id, reason);
         if (result.success) {
-            setBookings(prev => prev.filter(b => b.id !== cancellingBooking.id));
+            setCalendarBookings(prev => prev.filter(b => b.id !== cancellingBooking.id));
+            setUpcomingBookings(prev => prev.filter(b => b.id !== cancellingBooking.id));
         }
         return result;
     };
@@ -204,7 +249,7 @@ export default function InstructorDashboardClient() {
                     <div className="xl:col-span-2">
                         <InstructorScheduleCalendar
                             availability={availability}
-                            bookings={bookings}
+                            bookings={calendarBookings}
                             currentDate={new Date(searchParams.get('date') || getManilaTodayStr())}
                         />
                     </div>
@@ -221,18 +266,6 @@ export default function InstructorDashboardClient() {
                             </div>
                             <div className="p-6">
                                 {(() => {
-                                    const upcomingSessions = bookings.filter(b => {
-                                        const slot = b.slots;
-                                        if (!slot?.date || !slot?.start_time) return false;
-                                        const sessionStart = new Date(`${slot.date}T${slot.start_time}+08:00`);
-                                        // Only show confirmed/approved sessions in the sidebar
-                                        return b.status === 'approved' && sessionStart >= new Date();
-                                    }).sort((a, b) => {
-                                        const startA = new Date(`${a.slots.date}T${a.slots.start_time}+08:00`);
-                                        const startB = new Date(`${b.slots.date}T${b.slots.start_time}+08:00`);
-                                        return startA.getTime() - startB.getTime();
-                                    }).slice(0, 5);
-
                                     if (isLoading) {
                                         return (
                                             <div className="py-12 flex justify-center">
@@ -241,7 +274,7 @@ export default function InstructorDashboardClient() {
                                         );
                                     }
 
-                                    if (upcomingSessions.length === 0) {
+                                    if (upcomingBookings.length === 0) {
                                         return (
                                             <div className="py-8 text-center bg-cream-50/50 rounded-xl border border-dashed border-cream-200 flex flex-col items-center justify-center">
                                                 <Calendar className="w-8 h-8 text-charcoal-200 mx-auto mb-3" />
@@ -253,7 +286,7 @@ export default function InstructorDashboardClient() {
 
                                     return (
                                         <div className="space-y-4">
-                                            {upcomingSessions.map(session => (
+                                            {upcomingBookings.map(session => (
                                                 <div key={session.id} className="p-4 border border-cream-200 bg-cream-50/50 rounded-xl hover:border-rose-gold/30 hover:bg-white transition-all shadow-sm group">
                                                     <div className="flex justify-between items-start mb-3">
                                                         <div className="flex flex-col gap-1 w-full">

@@ -8,12 +8,14 @@ import { getPublicReviews } from '@/app/(dashboard)/reviews/actions'
 import NextImage from 'next/image'
 import { getManilaTodayStr, toManilaTimeString } from '@/lib/timezone'
 
-export default async function StudioDetailsPage({
-    params
-}: {
-    params: Promise<{ id: string }>
+import { startOfMonth, endOfMonth, format } from 'date-fns'
+
+export default async function StudioDetailsPage(props: {
+    params: Promise<{ id: string }>,
+    searchParams: Promise<{ month?: string }>
 }) {
-    const { id } = await params
+    const { id } = await props.params
+    const searchParams = await props.searchParams
     const supabase = await createClient()
 
     // Lazily expire any abandoned bookings to release their slots
@@ -29,7 +31,14 @@ export default async function StudioDetailsPage({
 
     if (!studio) notFound()
 
-    // 2. Fetch Available Slots (Upcoming only, Manila Time)
+    // 2. Fetch Available Slots for the visible month
+    const monthParam = searchParams.month || format(new Date(), 'yyyy-MM')
+    const rangeStart = startOfMonth(new Date(monthParam + '-01'))
+    const rangeEnd = endOfMonth(rangeStart)
+    const startDateStr = format(rangeStart, 'yyyy-MM-dd')
+    const endDateStr = format(rangeEnd, 'yyyy-MM-dd')
+
+    // Also consider today for the "past" filter
     const nowDate = getManilaTodayStr()
     const nowTime = toManilaTimeString(new Date())
 
@@ -38,6 +47,9 @@ export default async function StudioDetailsPage({
         .select('*')
         .eq('studio_id', id)
         .eq('is_available', true)
+        .gte('date', startDateStr)
+        .lte('date', endDateStr)
+        // Still filter out past slots within the month
         .or(`date.gt.${nowDate},and(date.eq.${nowDate},start_time.gte.${nowTime})`)
         .order('date', { ascending: true })
         .order('start_time', { ascending: true })

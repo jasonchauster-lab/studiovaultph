@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
 import { Loader2, CheckCircle, Calendar, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react'
 import clsx from 'clsx'
-import { useRouter } from 'next/navigation'
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays } from 'date-fns'
 import { formatTo12Hour, toManilaTimeString, normalizeTimeTo24h } from '@/lib/timezone'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays, isPast } from 'date-fns'
 
 interface Slot {
     id: string;
@@ -57,9 +57,19 @@ export default function BookingSection({
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
-    // 2. State for active date & month — declared early so useEffects below can reference them
+    // 2. State for active date & month
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
-    const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const viewedMonth = searchParams.get('month') || format(new Date(), 'yyyy-MM')
+    const currentMonth = startOfMonth(new Date(viewedMonth + '-01'))
+
+    const handleMonthChange = (offset: number) => {
+        const next = offset > 0 ? addMonths(currentMonth, 1) : subMonths(currentMonth, 1)
+        const params = new URLSearchParams(searchParams)
+        params.set('month', format(next, 'yyyy-MM'))
+        router.push(`?${params.toString()}`, { scroll: false })
+    }
 
     // Auto-select equipment whenever the slot changes
     useEffect(() => {
@@ -144,17 +154,16 @@ export default function BookingSection({
 
     const availableDates = Object.keys(slotsByDate).sort();
 
-    // Auto-select first date on mount, and sync month to it
+    // Auto-select first date on mount
     useEffect(() => {
         if (availableDates.length > 0 && !selectedDate) {
             setSelectedDate(availableDates[0]);
-            setCurrentMonth(new Date(availableDates[0]));
         }
     }, [availableDates, selectedDate]);
 
     // Calendar logic
-    const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1))
-    const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1))
+    const nextMonth = () => handleMonthChange(1)
+    const prevMonth = () => handleMonthChange(-1)
 
     const monthStart = startOfMonth(currentMonth)
     const monthEnd = endOfMonth(monthStart)
@@ -193,8 +202,8 @@ export default function BookingSection({
                         !isSameMonth(day, monthStart) ? "text-cream-300 pointer-events-none" : "",
                         isSameMonth(day, monthStart) && !hasSlots && !isPast && !isSelected ? "text-charcoal-500 opacity-60" : "",
                         isPast ? "text-cream-400 pointer-events-none opacity-40" : "",
-                        hasSlots && !isSelected ? "bg-cream-100 text-charcoal-900 font-medium hover:bg-cream-200 cursor-pointer border border-cream-200" : "",
-                        isSelected ? "bg-charcoal-900 text-cream-50 font-bold shadow-md transform scale-105" : ""
+                        hasSlots && !isSelected ? "bg-white text-[#333333] font-medium hover:bg-cream-50 cursor-pointer border border-[#ebd3cf]" : "",
+                        isSelected ? "bg-[#ebd3cf] text-[#333333] font-bold shadow-md transform scale-105 border border-[#ebd3cf]" : ""
                     )}
                     disabled={!hasSlots || isPast}
                 >
@@ -319,7 +328,6 @@ export default function BookingSection({
     }
 
     const totalPrice = calculateTotal();
-    const router = useRouter()
 
     const handleBook = async () => {
         if (!selectedSlotTime || !selectedInstructor || !selectedEquipment) return
@@ -378,7 +386,11 @@ export default function BookingSection({
             {/* Monthly Calendar View */}
             <div className="bg-white border border-cream-200 rounded-2xl p-4 sm:p-6 shadow-sm max-w-md mx-auto">
                 <div className="flex items-center justify-between mb-4">
-                    <button onClick={prevMonth} className="p-2 hover:bg-cream-50 rounded-full transition-colors text-charcoal-500 hover:text-charcoal-900">
+                    <button
+                        onClick={prevMonth}
+                        className="p-2 hover:bg-cream-50 rounded-full transition-colors text-charcoal-500 hover:text-charcoal-900 disabled:opacity-30"
+                        disabled={isPast(subMonths(currentMonth, 0)) && !isSameMonth(currentMonth, new Date())}
+                    >
                         <ChevronLeft className="w-5 h-5" />
                     </button>
                     <h3 className="font-serif text-lg text-charcoal-900">
@@ -456,8 +468,8 @@ export default function BookingSection({
                             className={clsx(
                                 "p-5 rounded-2xl border text-left transition-all relative overflow-hidden",
                                 isSelected
-                                    ? "bg-charcoal-900 border-charcoal-900 text-cream-50 shadow-md transform scale-[1.02]"
-                                    : "bg-white border-cream-200 hover:border-charcoal-300 text-charcoal-900"
+                                    ? "bg-[#ebd3cf] border-[#ebd3cf] text-[#333333] shadow-md transform scale-[1.02]"
+                                    : "bg-white border-[#ebd3cf] hover:shadow-md text-[#333333]"
                             )}
                         >
                             <div className="font-serif text-xl mb-2">
