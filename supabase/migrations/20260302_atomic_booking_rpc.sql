@@ -120,7 +120,7 @@ BEGIN
                     studio_id, date, start_time, end_time, is_available, equipment, equipment_inventory, quantity
                 ) VALUES (
                     v_parent_slot.studio_id, v_parent_slot.date, v_parent_slot.start_time, p_req_start_time,
-                    true, jsonb_build_object(p_equipment_key, p_quantity), jsonb_build_object(p_equipment_key, p_quantity), p_quantity
+                    true, v_new_equipment, v_new_equipment, v_parent_quantity
                 );
             END IF;
 
@@ -130,7 +130,7 @@ BEGIN
                     studio_id, date, start_time, end_time, is_available, equipment, equipment_inventory, quantity
                 ) VALUES (
                     v_parent_slot.studio_id, v_parent_slot.date, p_req_end_time, v_parent_slot.end_time,
-                    true, jsonb_build_object(p_equipment_key, p_quantity), jsonb_build_object(p_equipment_key, p_quantity), p_quantity
+                    true, v_new_equipment, v_new_equipment, v_parent_quantity
                 );
             END IF;
         END IF;

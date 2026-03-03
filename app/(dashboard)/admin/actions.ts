@@ -1254,16 +1254,18 @@ export async function getPartnerBookings(id: string, type: 'profile' | 'studio')
         return { error: 'Failed to fetch bookings.' };
     }
 
+    const getFirst = (val: any) => Array.isArray(val) ? val[0] : val;
     const now = new Date();
+
     const active = bookings.filter((b: any) => {
-        const slot = b.slots;
+        const slot = getFirst(b.slots);
         if (!slot?.date || !slot?.end_time) return false;
         const endTime = new Date(`${slot.date}T${slot.end_time}+08:00`);
         return endTime > now && b.status === 'approved';
     });
 
     const past = bookings.filter((b: any) => {
-        const slot = b.slots;
+        const slot = getFirst(b.slots);
         if (!slot?.date || !slot?.end_time) return true;
         const endTime = new Date(`${slot.date}T${slot.end_time}+08:00`);
         return endTime <= now || ['completed', 'cancelled_refunded', 'cancelled_charged', 'expired', 'rejected'].includes(b.status);
