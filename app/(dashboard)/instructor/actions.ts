@@ -59,8 +59,10 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
 
         // 1. Gross Earnings (Approved/Completed/Charged sessions or status pending but payment submitted)
         const isRefunded = booking.status === 'cancelled_refunded';
-        if (['approved', 'completed', 'cancelled_charged', 'cancelled_refunded'].includes(booking.status) || booking.payment_status === 'submitted') {
-            if (!isRefunded) grossEarned += instructorFee;
+        const isRealized = ['approved', 'completed', 'cancelled_charged'].includes(booking.status) || (booking.status === 'pending' && booking.payment_status === 'submitted');
+
+        if (isRealized || isRefunded) {
+            if (isRealized) grossEarned += instructorFee;
 
             const slot = first(booking.slots);
             const studioName = slot?.studios?.name;

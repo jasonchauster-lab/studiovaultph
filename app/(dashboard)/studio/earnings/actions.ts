@@ -129,7 +129,9 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             const initiator = breakdown?.refund_initiator
 
             // Scenario A: Successful or Pending Booking (awaiting approval)
-            if (['approved', 'completed', 'cancelled_charged'].includes(b.status) || b.payment_status === 'submitted') {
+            const isRealized = ['approved', 'completed', 'cancelled_charged'].includes(b.status) || (b.status === 'pending' && b.payment_status === 'submitted')
+
+            if (isRealized) {
                 grossEarnings += studioFee
 
                 // BUSINESS LOGIC: If it's not yet completed, it's "Upcoming" (not yet in profile.pending_balance)
@@ -178,7 +180,9 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
 
             // Add the booking transaction itself if valid, pending verification, or refunded
             const isRefunded = b.status === 'cancelled_refunded'
-            if (['approved', 'completed', 'cancelled_charged', 'cancelled_refunded'].includes(b.status) || b.payment_status === 'submitted') {
+            const isRealizedTx = ['approved', 'completed', 'cancelled_charged'].includes(b.status) || (b.status === 'pending' && b.payment_status === 'submitted')
+
+            if (isRealizedTx || isRefunded) {
                 transactions.push({
                     date: slot?.start_time || b.created_at,
                     type: isRefunded ? 'Booking (Refunded)' : (b.payment_status === 'submitted' && b.status === 'pending' ? 'Booking (Verification)' : 'Booking'),
