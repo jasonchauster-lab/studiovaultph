@@ -91,11 +91,6 @@ export default function Navigation({ role }: NavigationProps) {
                                 {pathname.startsWith('/instructor/earnings') && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
 
-                            <Link href="/instructor/schedule" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/instructor/schedule'))}>
-                                <Calendar className="w-4 h-4" />
-                                My Schedule
-                                {pathname.startsWith('/instructor/schedule') && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
-                            </Link>
                             <Link href="/instructor/profile" onClick={() => setMobileOpen(false)} className={linkClass(pathname.includes('/instructor/profile'))}>
                                 <User className="w-4 h-4" />
                                 Profile

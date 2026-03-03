@@ -176,16 +176,17 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             const penaltyAmount = Number(breakdown?.penalty_amount || 0)
             const initiator = breakdown?.refund_initiator
 
-            // Add the booking transaction itself if valid or pending verification
-            if (['approved', 'completed', 'cancelled_charged'].includes(b.status) || b.payment_status === 'submitted') {
+            // Add the booking transaction itself if valid, pending verification, or refunded
+            const isRefunded = b.status === 'cancelled_refunded'
+            if (['approved', 'completed', 'cancelled_charged', 'cancelled_refunded'].includes(b.status) || b.payment_status === 'submitted') {
                 transactions.push({
                     date: slot?.start_time || b.created_at,
-                    type: b.payment_status === 'submitted' && b.status === 'pending' ? 'Booking (Verification)' : 'Booking',
+                    type: isRefunded ? 'Booking (Refunded)' : (b.payment_status === 'submitted' && b.status === 'pending' ? 'Booking (Verification)' : 'Booking'),
                     client: clientName,
                     instructor: instructorName,
                     studio: studioName,
-                    total_amount: studioFee,
-                    details: `${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}`
+                    total_amount: isRefunded ? 0 : studioFee,
+                    details: isRefunded ? `REFUNDED: ${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}` : `${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}`
                 })
             }
 

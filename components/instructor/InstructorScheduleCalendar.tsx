@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare } from 'lucide-react'
 import clsx from 'clsx'
 import { toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
@@ -31,6 +31,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [addMode, setAddMode] = useState<'single' | 'bulk'>('single')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [selectedBooking, setSelectedBooking] = useState<any>(null)
 
     // Single Add Form State
     const [singleDate, setSingleDate] = useState(format(new Date(), 'yyyy-MM-dd'))
@@ -301,18 +302,22 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                                                 if (isBooked) return null; // Don't show availability if it's booked (booking will be shown instead)
 
+                                                const totalItems = startingSlots.length + startingBookings.length;
+
                                                 return (
                                                     <div
                                                         key={slot.id}
                                                         className={clsx(
-                                                            "absolute left-1 right-1 rounded-md text-xs hover:shadow-lg transition-all cursor-pointer overflow-hidden border z-10 p-2",
-                                                            slot.date ? "bg-rose-gold border-rose-gold/20 text-charcoal-900" : "bg-teal-100 border-teal-200 text-teal-800"
+                                                            "absolute rounded-lg text-xs hover:shadow-xl transition-all cursor-pointer overflow-hidden border z-10 p-2.5 group/slot",
+                                                            slot.date
+                                                                ? "bg-white border-rose-gold text-charcoal-900 shadow-sm"
+                                                                : "bg-teal-50 border-teal-200 text-teal-800 shadow-sm"
                                                         )}
                                                         style={{
                                                             top: `${topOffset}px`,
                                                             height: `${heightPx}px`,
-                                                            width: (startingSlots.length + startingBookings.length) > 1 ? `${90 / (startingSlots.length + startingBookings.length)}%` : '95%',
-                                                            left: (startingSlots.length + startingBookings.length) > 1 ? `${(idx * 100) / (startingSlots.length + startingBookings.length)}%` : '2.5%'
+                                                            width: totalItems > 1 ? `${(100 / totalItems) - 2}%` : '96%',
+                                                            left: totalItems > 1 ? `${(idx * 100) / totalItems + 1}%` : '2%'
                                                         }}
                                                         onClick={(e) => {
                                                             e.stopPropagation()
@@ -320,14 +325,14 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         }}
                                                         title="Click to edit"
                                                     >
-                                                        <div className="font-bold flex items-center justify-between text-[10px] truncate">
-                                                            <span>{slot.date ? 'Date Specific' : 'Weekly'}</span>
+                                                        <div className="font-bold flex items-center justify-between text-[10px] truncate mb-1">
+                                                            <span className="tracking-wider uppercase opacity-70">{slot.date ? 'Date Specific' : 'Weekly'}</span>
                                                         </div>
-                                                        <div className="text-[10px] mt-0.5 flex items-center gap-1 font-medium">
-                                                            <Clock className="w-3 h-3 flex-shrink-0" />
+                                                        <div className="text-[10px] flex items-center gap-1.5 font-bold text-charcoal-900 mb-1">
+                                                            <Clock className="w-3 h-3 flex-shrink-0 text-rose-gold" />
                                                             <span className="truncate">{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                         </div>
-                                                        <div className="text-[10px] mt-0.5 flex items-center gap-1">
+                                                        <div className="text-[10px] flex items-center gap-1.5 font-medium text-charcoal-500">
                                                             <MapPin className="w-3 h-3 flex-shrink-0" />
                                                             <span className="truncate">{slot.location_area}</span>
                                                         </div>
@@ -350,39 +355,39 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                 const studioName = slotData.studios?.name || 'Partner Studio';
                                                 const clientName = booking.client?.full_name || 'A Client';
 
+                                                const totalItems = startingSlots.length + startingBookings.length;
+
                                                 return (
                                                     <div
                                                         key={booking.id}
                                                         className={clsx(
-                                                            "absolute rounded-md text-[10px] shadow-sm border z-20 p-2 overflow-hidden",
-                                                            booking.status === 'approved' ? "bg-green-600 border-green-700 text-white" : "bg-amber-100 border-amber-200 text-amber-800"
+                                                            "absolute rounded-lg text-[10px] shadow-md border z-20 p-2.5 overflow-hidden transition-all hover:scale-[1.02] cursor-pointer group/booking",
+                                                            booking.status === 'approved'
+                                                                ? "bg-green-600 border-green-500 text-white shadow-green-900/10"
+                                                                : "bg-amber-500 border-amber-400 text-white shadow-amber-900/10"
                                                         )}
                                                         style={{
                                                             top: `${topOffset}px`,
                                                             height: `${heightPx}px`,
-                                                            width: (startingSlots.length + startingBookings.length) > 1 ? `${90 / (startingSlots.length + startingBookings.length)}%` : '95%',
-                                                            left: (startingSlots.length + startingBookings.length) > 1 ? `${((startingSlots.filter(s => {
-                                                                const sH = parseInt(s.start_time.split(':')[0]);
-                                                                const sM = parseInt(s.start_time.split(':')[1]);
-                                                                const sE = parseInt(s.end_time.split(':')[0]) * 60 + parseInt(s.end_time.split(':')[1]);
-                                                                const sT = sH * 60 + sM;
-                                                                // This is a bit complex for a one-liner, but essentially we want to offset after the availability slots that were NOT hidden
-                                                                // For simplicity, let's just use bIdx and start after availability.
-                                                                return true; // placeholder
-                                                            }).length + bIdx) * 100) / (startingSlots.length + startingBookings.length)}%` : '2.5%'
+                                                            width: totalItems > 1 ? `${(100 / totalItems) - 2}%` : '96%',
+                                                            left: totalItems > 1 ? `${((startingSlots.length + bIdx) * 100) / totalItems + 1}%` : '2%'
                                                         }}
-                                                        title={`${booking.status === 'approved' ? 'Confirmed Booking' : 'Pending Request'}\nStudio: ${studioName}\nClient: ${clientName}`}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedBooking(booking);
+                                                        }}
                                                     >
-                                                        <div className="font-bold flex items-center justify-between mb-0.5">
-                                                            <span className="truncate">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</span>
+                                                        <div className="font-bold flex items-center justify-between mb-1">
+                                                            <span className="truncate tracking-wider">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</span>
+                                                            <ArrowUpRight className="w-3 h-3 opacity-0 group-hover/booking:opacity-100 transition-opacity" />
                                                         </div>
-                                                        <div className="flex items-center gap-1 font-medium mb-0.5">
-                                                            <MapPin className="w-2.5 h-2.5" />
+                                                        <div className="flex items-center gap-1.5 font-semibold mb-1">
+                                                            <MapPin className="w-3 h-3 shrink-0" />
                                                             <span className="truncate">{studioName}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-1 opacity-90 truncate">
-                                                            <User className="w-2.5 h-2.5" />
-                                                            <span>{clientName}</span>
+                                                        <div className="flex items-center gap-1.5 opacity-90 font-medium italic">
+                                                            <User className="w-3 h-3 shrink-0" />
+                                                            <span className="truncate">{clientName}</span>
                                                         </div>
                                                     </div>
                                                 )
@@ -568,6 +573,125 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {/* Booking Detail Modal */}
+            {selectedBooking && (
+                <div
+                    className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-md animate-in fade-in duration-300"
+                    onClick={() => setSelectedBooking(null)}
+                >
+                    <div
+                        className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div className={clsx(
+                            "px-8 py-6 flex justify-between items-center text-white relative overflow-hidden",
+                            selectedBooking.status === 'approved' ? "bg-green-600" : "bg-amber-500"
+                        )}>
+                            <div className="relative z-10">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mb-1 block">
+                                    {selectedBooking.status === 'approved' ? 'Confirmed Session' : 'Pending Verification'}
+                                </span>
+                                <h3 className="text-2xl font-serif">Session Details</h3>
+                            </div>
+                            <button
+                                onClick={() => setSelectedBooking(null)}
+                                className="relative z-10 p-2 hover:bg-white/10 rounded-full transition-colors"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                            {/* Decorative background circle */}
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+                        </div>
+
+                        <div className="p-8 space-y-8">
+                            {/* Time & Location */}
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-1.5">
+                                    <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-wider block">Date & Time</span>
+                                    <div className="flex items-center gap-2 text-charcoal-900 font-bold">
+                                        <Clock className="w-4 h-4 text-rose-gold" />
+                                        <span>{format(parseISO(selectedBooking.slots.date), 'EEE, MMM d')}</span>
+                                    </div>
+                                    <p className="text-sm text-charcoal-500 ml-6">
+                                        {selectedBooking.slots.start_time.slice(0, 5)} - {selectedBooking.slots.end_time.slice(0, 5)}
+                                    </p>
+                                </div>
+                                <div className="space-y-1.5 text-right">
+                                    <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-wider block">Location</span>
+                                    <div className="flex items-center justify-end gap-2 text-charcoal-900 font-bold">
+                                        <MapPin className="w-4 h-4 text-rose-gold" />
+                                        <span className="truncate max-w-[150px]">{selectedBooking.slots.studios.name}</span>
+                                    </div>
+                                    <p className="text-xs text-charcoal-500 italic">
+                                        {selectedBooking.slots.studios.location}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <hr className="border-cream-100" />
+
+                            {/* Client Info */}
+                            <div className="flex items-center gap-6">
+                                <div className="w-16 h-16 rounded-2xl bg-cream-100 overflow-hidden border-2 border-cream-200 flex-shrink-0">
+                                    <img
+                                        src={selectedBooking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-wider block mb-1">Client 정보</span>
+                                    <h4 className="text-lg font-bold text-charcoal-900">{selectedBooking.client?.full_name}</h4>
+                                    <p className="text-sm text-charcoal-500">{selectedBooking.client?.email}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button className="p-3 bg-cream-50 text-charcoal-600 rounded-xl hover:bg-rose-gold hover:text-white transition-all shadow-sm border border-cream-200">
+                                        <MessageSquare className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Booking Specifics */}
+                            <div className="bg-cream-50/50 rounded-2xl p-6 border border-cream-100 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center border border-cream-200 shadow-sm">
+                                            <Box className="w-4 h-4 text-rose-gold" />
+                                        </div>
+                                        <div>
+                                            <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-wider block">Equipment</span>
+                                            <span className="text-sm font-bold text-charcoal-900">
+                                                {selectedBooking.price_breakdown?.equipment || 'Standard Set'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-wider block">Earnings</span>
+                                        <span className="text-lg font-bold text-green-600">₱{(selectedBooking.price_breakdown?.instructor_fee || 0).toLocaleString()}</span>
+                                    </div>
+                                </div>
+
+                                {selectedBooking.notes && (
+                                    <div className="pt-4 border-t border-cream-200/50">
+                                        <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-wider block mb-1">Session Notes</span>
+                                        <p className="text-sm text-charcoal-600 italic">"{selectedBooking.notes}"</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="px-8 py-6 bg-cream-50 border-t border-cream-200 flex gap-4">
+                            <button
+                                onClick={() => setSelectedBooking(null)}
+                                className="flex-1 py-3 bg-charcoal-900 text-white rounded-xl font-bold hover:bg-charcoal-800 transition-colors shadow-lg shadow-charcoal-900/10"
+                            >
+                                Close Details
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

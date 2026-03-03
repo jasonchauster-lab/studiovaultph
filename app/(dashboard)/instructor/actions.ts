@@ -58,8 +58,9 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
         const initiator = breakdown?.refund_initiator;
 
         // 1. Gross Earnings (Approved/Completed/Charged sessions or status pending but payment submitted)
-        if (['approved', 'completed', 'cancelled_charged'].includes(booking.status) || booking.payment_status === 'submitted') {
-            grossEarned += instructorFee;
+        const isRefunded = booking.status === 'cancelled_refunded';
+        if (['approved', 'completed', 'cancelled_charged', 'cancelled_refunded'].includes(booking.status) || booking.payment_status === 'submitted') {
+            if (!isRefunded) grossEarned += instructorFee;
 
             const slot = first(booking.slots);
             const studioName = slot?.studios?.name;
@@ -67,12 +68,12 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
 
             recentTransactions.push({
                 date: txDate,
-                type: booking.payment_status === 'submitted' && booking.status === 'pending' ? 'Booking (Verification)' : 'Booking',
+                type: isRefunded ? 'Booking (Refunded)' : (booking.payment_status === 'submitted' && booking.status === 'pending' ? 'Booking (Verification)' : 'Booking'),
                 status: booking.status,
                 client: (booking.client as any)?.full_name,
                 studio: studioName,
-                total_amount: instructorFee,
-                details: `${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}`
+                total_amount: isRefunded ? 0 : instructorFee,
+                details: isRefunded ? `REFUNDED: ${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}` : `${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}`
             });
         }
 
@@ -171,7 +172,16 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
     recentTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const availableBalance = Number(profile?.available_balance || 0);
-    const pendingBalance = Number(profile?.pending_balance || 0);
+    const dbPendingBalance = Number(profile?.pending_balance || 0);
+
+    // Calculate "Virtual" Pending Balance: DB pending + any approved bookings that aren't completed yet
+    let virtualPending = dbPendingBalance;
+    bookings?.forEach(b => {
+        if (b.status === 'approved') {
+            const breakdown = b.price_breakdown as any;
+            virtualPending += Number(breakdown?.instructor_fee || 0);
+        }
+    });
 
     return {
         totalEarned: grossEarned,
@@ -181,7 +191,7 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
         totalWithdrawn,
         pendingPayouts,
         availableBalance,
-        pendingBalance,
+        pendingBalance: virtualPending,
         recentTransactions,
         bookingsCount: bookings?.filter(b => ['approved', 'completed', 'cancelled_charged'].includes(b.status) || b.payment_status === 'submitted')?.length || 0
     };
