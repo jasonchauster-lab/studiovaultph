@@ -345,27 +345,25 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         title="Click to edit"
                                                     >
                                                         {duration < 45 ? (
-                                                            <>
-                                                                <Clock className="w-3 h-3 flex-shrink-0 text-rose-gold" />
-                                                                <span className="font-bold text-[10px] whitespace-nowrap">
-                                                                    {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}
-                                                                </span>
-                                                                <span className="truncate text-[10px] opacity-70">
-                                                                    {slot.location_area.split(' - ')[1] || slot.location_area}
-                                                                </span>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <div className="font-bold flex items-center justify-between text-[10px] truncate mb-1">
-                                                                    <span className="tracking-wider uppercase opacity-70">{slot.date ? 'Date Specific' : 'Weekly'}</span>
-                                                                </div>
-                                                                <div className="text-[10px] flex items-center gap-1.5 font-bold text-charcoal-900 mb-1">
-                                                                    <Clock className="w-3 h-3 flex-shrink-0 text-rose-gold" />
+                                                            <div className="flex flex-col h-full justify-center">
+                                                                <div className="flex items-center gap-1 font-bold text-[9px] text-charcoal-900 leading-tight">
+                                                                    <Clock className="w-2.5 h-2.5 flex-shrink-0 text-rose-gold" />
                                                                     <span className="truncate">{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                                 </div>
-                                                                <div className="text-[10px] flex items-center gap-1.5 font-medium text-charcoal-500">
-                                                                    <MapPin className="w-3 h-3 flex-shrink-0" />
-                                                                    <span className="truncate">{slot.location_area}</span>
+                                                                <div className="flex items-center gap-1 text-[8px] text-charcoal-500 truncate mt-0.5">
+                                                                    <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+                                                                    <span className="truncate">{slot.location_area.split(' - ')[1] || slot.location_area}</span>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                <div className="text-[10px] flex items-center gap-1.5 font-bold text-charcoal-900 mb-1.5">
+                                                                    <Clock className="w-3.5 h-3.5 flex-shrink-0 text-rose-gold" />
+                                                                    <span className="truncate">{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
+                                                                </div>
+                                                                <div className="text-[10px] flex items-center gap-1.5 font-medium text-charcoal-600 leading-snug">
+                                                                    <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-charcoal-400" />
+                                                                    <span className="break-words line-clamp-2">{slot.location_area}</span>
                                                                 </div>
                                                             </>
                                                         )}
@@ -446,26 +444,27 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         }}
                                                     >
                                                         {duration < 45 ? (
-                                                            <>
-                                                                <span className="font-bold whitespace-nowrap">
-                                                                    {booking.status === 'approved' ? 'BOOKED' : 'PENDING'}
-                                                                </span>
-                                                                <span className="truncate opacity-90">
-                                                                    {studioName}
-                                                                </span>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <div className="font-bold flex items-center justify-between mb-1">
-                                                                    <span className="truncate tracking-wider">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</span>
-                                                                    <ArrowUpRight className="w-3 h-3 opacity-0 group-hover/booking:opacity-100 transition-opacity" />
+                                                            <div className="flex flex-col h-full justify-center">
+                                                                <div className="flex items-center gap-1 font-bold text-[9px] white-space-nowrap">
+                                                                    <span className="truncate">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</span>
                                                                 </div>
-                                                                <div className="flex items-center gap-1.5 font-semibold mb-1">
-                                                                    <MapPin className="w-3 h-3 shrink-0" />
+                                                                <div className="flex items-center gap-1 text-[8px] opacity-90 truncate mt-0.5">
+                                                                    <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
                                                                     <span className="truncate">{studioName}</span>
                                                                 </div>
-                                                                <div className="flex items-center gap-1.5 opacity-90 font-medium italic">
-                                                                    <User className="w-3 h-3 shrink-0" />
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                <div className="font-bold flex items-center justify-between mb-1.5">
+                                                                    <span className="truncate tracking-wider text-[11px]">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</span>
+                                                                    <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover/booking:opacity-100 transition-opacity" />
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 font-semibold mb-1.5 text-[10px]">
+                                                                    <MapPin className="w-3.5 h-3.5 shrink-0" />
+                                                                    <span className="break-words line-clamp-2">{studioName}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 opacity-90 font-medium italic text-[10px]">
+                                                                    <User className="w-3.5 h-3.5 shrink-0" />
                                                                     <span className="truncate">{clientName}</span>
                                                                 </div>
                                                             </>
