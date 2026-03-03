@@ -31,7 +31,7 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
             slots!inner(date, start_time, studios(name))
         `)
         .eq('instructor_id', user.id)
-        .in('status', ['approved', 'completed', 'cancelled_charged', 'cancelled_refunded'])
+        .or('status.in.(approved,completed,cancelled_charged,cancelled_refunded),payment_status.eq.submitted')
 
     if (startDate) bookingsQuery = bookingsQuery.gte('slots.date', startDate)
     if (endDate) bookingsQuery = bookingsQuery.lte('slots.date', endDate)
@@ -57,8 +57,8 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
         const penaltyAmount = Number(breakdown?.penalty_amount || 0);
         const initiator = breakdown?.refund_initiator;
 
-        // 1. Gross Earnings (Approved/Completed/Charged sessions)
-        if (['approved', 'completed', 'cancelled_charged'].includes(booking.status)) {
+        // 1. Gross Earnings (Approved/Completed/Charged sessions or status pending but payment submitted)
+        if (['approved', 'completed', 'cancelled_charged'].includes(booking.status) || booking.payment_status === 'submitted') {
             grossEarned += instructorFee;
 
             const slot = first(booking.slots);
@@ -67,7 +67,7 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
 
             recentTransactions.push({
                 date: txDate,
-                type: 'Booking',
+                type: booking.payment_status === 'submitted' && booking.status === 'pending' ? 'Booking (Verification)' : 'Booking',
                 status: booking.status,
                 client: (booking.client as any)?.full_name,
                 studio: studioName,
@@ -107,8 +107,8 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
         .select('amount, status, created_at, payment_method')
         .eq('user_id', user.id)
 
-    if (startDate) payoutsQuery = payoutsQuery.gte('created_at', startDate)
-    if (endDate) payoutsQuery = payoutsQuery.lte('created_at', endDate)
+    if (startDate) payoutsQuery = payoutsQuery.gte('created_at', `${startDate}T00:00:00.000Z`)
+    if (endDate) payoutsQuery = payoutsQuery.lte('created_at', `${endDate}T23:59:59.999Z`)
 
     const { data: payouts, error: payoutError } = await payoutsQuery
 
@@ -165,8 +165,8 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
 
     recentTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    const availableBalance = profile?.available_balance || 0;
-    const pendingBalance = profile?.pending_balance || 0;
+    const availableBalance = Number(profile?.available_balance || 0);
+    const pendingBalance = Number(profile?.pending_balance || 0);
 
     return {
         totalEarned: grossEarned,
@@ -178,7 +178,7 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
         availableBalance,
         pendingBalance,
         recentTransactions,
-        bookingsCount: bookings?.filter(b => ['approved', 'completed', 'cancelled_charged'].includes(b.status))?.length || 0
+        bookingsCount: bookings?.filter(b => ['approved', 'completed', 'cancelled_charged'].includes(b.status) || b.payment_status === 'submitted')?.length || 0
     };
 }
 
