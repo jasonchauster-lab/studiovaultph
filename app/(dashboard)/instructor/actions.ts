@@ -194,7 +194,7 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
     });
 
     return {
-        totalEarned: grossEarned,
+        totalEarned: grossEarned + totalCompensation,
         totalCompensation,
         totalPenalty,
         netEarnings,

@@ -225,6 +225,7 @@ export default function InstructorDashboardClient() {
                                         const slot = b.slots;
                                         if (!slot?.date || !slot?.start_time) return false;
                                         const sessionStart = new Date(`${slot.date}T${slot.start_time}+08:00`);
+                                        // Only show confirmed/approved sessions in the sidebar
                                         return b.status === 'approved' && sessionStart >= new Date();
                                     }).sort((a, b) => {
                                         const startA = new Date(`${a.slots.date}T${a.slots.start_time}+08:00`);

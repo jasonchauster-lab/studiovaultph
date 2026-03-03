@@ -2,7 +2,6 @@ const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
 
-// Manually parse .env.local
 const envPath = path.resolve(__dirname, '..', '.env.local');
 const envContent = fs.readFileSync(envPath, 'utf8');
 const env = {};
@@ -18,49 +17,50 @@ const supabase = createClient(
     env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-async function verifyTimothyData() {
-    console.log("--- FINDING PROFILE ---");
-    const { data: profile, error: pError } = await supabase
+async function deepVerification() {
+    console.log("--- FINDING PROFLE ---");
+    const { data: profile } = await supabase
         .from('profiles')
-        .select('id, full_name, available_balance, pending_balance, wallet_balance')
+        .select('*')
         .ilike('full_name', '%Timothy Kim%')
         .single();
 
-    if (pError || !profile) {
-        console.error("Error finding profile:", pError);
-        return;
-    }
+    console.log("Profile:", profile);
+    const userId = profile.id;
 
-    console.log("Profile Found:", profile);
-
-    const instructorId = profile.id;
-
-    console.log("\n--- RECENT BOOKINGS ---");
-    const { data: bookings, error: bError } = await supabase
+    console.log("\n--- FETCHING ALL BOOKINGS ---");
+    const { data: allBookings } = await supabase
         .from('bookings')
-        .select('id, status, total_price, price_breakdown, payment_status, created_at, slots(date, start_time)')
-        .eq('instructor_id', instructorId)
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-    if (bError) {
-        console.error("Error fetching bookings:", bError);
-    } else {
-        console.log("Bookings:", JSON.stringify(bookings, null, 2));
-    }
-
-    console.log("\n--- WALLET ADJUSTMENTS ---");
-    const { data: adjustments, error: aError } = await supabase
-        .from('wallet_top_ups')
-        .select('*')
-        .eq('user_id', instructorId)
+        .select('*, slots(date, start_time, studios(name))')
+        .eq('instructor_id', userId)
         .order('created_at', { ascending: false });
 
-    if (aError) {
-        console.error("Error fetching adjustments:", aError);
-    } else {
-        console.log("Adjustments:", JSON.stringify(adjustments, null, 2));
-    }
+    console.log(`Found ${allBookings?.length || 0} bookings.`);
+    allBookings?.forEach(b => {
+        console.log(`ID: ${b.id}, Status: ${b.status}, Price: ${b.total_price}, Created: ${b.created_at}`);
+        console.log(`Breakdown: ${JSON.stringify(b.price_breakdown)}`);
+        console.log(`Slot: ${b.slots?.date} ${b.slots?.start_time} - ${b.slots?.studios?.name}`);
+        console.log("-------------------");
+    });
+
+    console.log("\n--- FETCHING ALL WALLET TOP UPS / ADJUSTMENTS ---");
+    const { data: walletActions } = await supabase
+        .from('wallet_top_ups')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+    console.log(`Found ${walletActions?.length || 0} wallet actions.`);
+    walletActions?.forEach(wa => {
+        console.log(JSON.stringify(wa, null, 2));
+    });
+
+    console.log("\n--- CHECKING IF ANY OTHER TIMOTHY KIMS EXIST ---");
+    const { data: others } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .ilike('full_name', '%Timothy%');
+    console.log("Other Timothy-like profiles:", others);
 }
 
-verifyTimothyData();
+deepVerification();

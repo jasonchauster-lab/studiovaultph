@@ -253,6 +253,9 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                         const slot = b.slots;
                                         if (!slot?.date || !slot?.start_time) return false;
                                         if (slot.date !== dayStr) return false;
+                                        // ONLY show active/pending/charged bookings. Hide refunded/cancelled ones.
+                                        if (['cancelled_refunded', 'rejected', 'expired'].includes(b.status)) return false;
+
                                         const startH = parseInt(slot.start_time.split(':')[0]);
                                         return startH === hour;
                                     })
