@@ -82,7 +82,7 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
                 *,
                 client:profiles!client_id(full_name),
                 instructor:profiles!instructor_id(full_name),
-                slots!inner(start_time, end_time, studios(name))
+                slots!inner(date, start_time, end_time, studios(name))
             `)
             .in('slot_id', slotIds)
             .or('status.in.(approved,completed,cancelled_charged,cancelled_refunded),payment_status.eq.submitted')
