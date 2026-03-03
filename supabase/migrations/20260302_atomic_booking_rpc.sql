@@ -63,10 +63,10 @@ BEGIN
         to_jsonb(v_available_qty - p_quantity)
     );
 
-    -- Clean up key if it hits 0 (optional but cleaner jsonb)
-    IF (v_available_qty - p_quantity) <= 0 THEN
-        v_new_equipment := v_new_equipment - p_equipment_key;
-    END IF;
+    -- Clean up key if it hits 0 (We will NO LONGER clean it up, as this causes the UI to render the slot as 'Open Space' when NO equipment keys exist.)
+    -- IF (v_available_qty - p_quantity) <= 0 THEN
+    --     v_new_equipment := v_new_equipment - p_equipment_key;
+    -- END IF;
 
     v_parent_quantity := GREATEST(0, v_parent_quantity - p_quantity);
 

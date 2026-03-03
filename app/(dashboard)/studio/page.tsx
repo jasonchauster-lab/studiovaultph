@@ -71,7 +71,7 @@ export default async function StudioDashboard(props: {
                 `)
                 .in('slot_id', studioSlotIds)
                 .in('status', ['approved', 'pending'])
-                .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`)
+                .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' })
                 .order('date', { foreignTable: 'slots', ascending: true })
                 .order('start_time', { foreignTable: 'slots', ascending: true })
                 .limit(10)
