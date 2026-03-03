@@ -83,6 +83,7 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                                     const isAdjustment = booking.type === 'admin_adjustment'
                                     const isTopUp = booking.type === 'top_up'
                                     const isRefunded = booking.status === 'cancelled_refunded'
+                                    const isLateCancel = booking.status === 'cancelled_charged'
                                     const isSpecial = isAdjustment || isTopUp
 
                                     return (
@@ -115,6 +116,11 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                                                                 {isRefunded && (
                                                                     <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-bold uppercase">
                                                                         Refunded
+                                                                    </span>
+                                                                )}
+                                                                {isLateCancel && (
+                                                                    <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold uppercase">
+                                                                        Late Cancel
                                                                     </span>
                                                                 )}
                                                             </div>

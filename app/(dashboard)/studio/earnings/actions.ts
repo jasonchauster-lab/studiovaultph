@@ -180,17 +180,25 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
 
             // Add the booking transaction itself if valid, pending verification, or refunded
             const isRefunded = b.status === 'cancelled_refunded'
+            const isLateCancel = b.status === 'cancelled_charged'
             const isRealizedTx = ['approved', 'completed', 'cancelled_charged'].includes(b.status) || (b.status === 'pending' && b.payment_status === 'submitted')
 
             if (isRealizedTx || isRefunded) {
+                let txType = 'Booking'
+                if (isRefunded) txType = 'Booking (Refunded)'
+                else if (isLateCancel) txType = 'Booking (Late Cancel)'
+                else if (b.payment_status === 'submitted' && b.status === 'pending') txType = 'Booking (Verification)'
+
                 transactions.push({
                     date: slot?.start_time || b.created_at,
-                    type: isRefunded ? 'Booking (Refunded)' : (b.payment_status === 'submitted' && b.status === 'pending' ? 'Booking (Verification)' : 'Booking'),
+                    type: txType,
                     client: clientName,
                     instructor: instructorName,
                     studio: studioName,
                     total_amount: isRefunded ? 0 : studioFee,
-                    details: isRefunded ? `REFUNDED: ${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}` : `${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}`
+                    details: isRefunded ? `REFUNDED: ${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}` :
+                        isLateCancel ? `CHARGED: ${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}` :
+                            `${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}`
                 })
             }
 

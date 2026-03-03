@@ -62,14 +62,14 @@ export async function autoCompleteBookings() {
     const cutoffTime = new Date()
     cutoffTime.setHours(cutoffTime.getHours() - 1)
 
-    // Find bookings that are 'approved' and the slot end_time is past the cutoff
+    // Find bookings that are 'approved' or 'cancelled_charged' and the slot end_time is past the cutoff
     const { data: pastBookings, error } = await supabase
         .from('bookings')
         .select(`
             id,
             slots!inner(end_time)
         `)
-        .eq('status', 'approved')
+        .or('status.eq.approved,status.eq.cancelled_charged')
         .lte('slots.end_time', cutoffTime.toISOString())
 
     if (error) {

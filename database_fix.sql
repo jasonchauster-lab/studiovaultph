@@ -40,7 +40,7 @@ BEGIN
     WHERE b.id = target_booking_id
     FOR UPDATE;
 
-    IF NOT FOUND OR v_status != 'approved' THEN
+    IF NOT FOUND OR (v_status != 'approved' AND v_status != 'cancelled_charged') THEN
         RETURN false;
     END IF;
 

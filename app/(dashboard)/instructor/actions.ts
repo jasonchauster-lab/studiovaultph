@@ -67,15 +67,23 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
             const slot = first(booking.slots);
             const studioName = slot?.studios?.name;
             const txDate = slot?.date && slot?.start_time ? `${slot.date}T${slot.start_time}+08:00` : booking.created_at;
+            const isLateCancel = booking.status === 'cancelled_charged';
+
+            let txType = 'Booking';
+            if (isRefunded) txType = 'Booking (Refunded)';
+            else if (isLateCancel) txType = 'Booking (Late Cancel)';
+            else if (booking.payment_status === 'submitted' && booking.status === 'pending') txType = 'Booking (Verification)';
 
             recentTransactions.push({
                 date: txDate,
-                type: isRefunded ? 'Booking (Refunded)' : (booking.payment_status === 'submitted' && booking.status === 'pending' ? 'Booking (Verification)' : 'Booking'),
+                type: txType,
                 status: booking.status,
                 client: (booking.client as any)?.full_name,
                 studio: studioName,
                 total_amount: isRefunded ? 0 : instructorFee,
-                details: isRefunded ? `REFUNDED: ${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}` : `${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}`
+                details: isRefunded ? `REFUNDED: ${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}` :
+                    isLateCancel ? `CHARGED: ${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}` :
+                        `${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}`
             });
         }
 
