@@ -115,8 +115,7 @@ export default async function EarningsPage({
                 <div>
                     <h2 className="text-xl font-medium text-charcoal-900 mb-4">Transaction History</h2>
                     <TransactionHistory
-                        bookings={bookings || []}
-                        payouts={payouts || []}
+                        transactions={transactions || []}
                     />
                 </div>
             </div>

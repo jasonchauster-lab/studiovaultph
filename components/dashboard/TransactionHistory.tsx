@@ -4,46 +4,41 @@ import { useState } from 'react'
 import { User, CheckCircle, Clock, XCircle } from 'lucide-react'
 import clsx from 'clsx'
 
-interface TransactionHistoryProps {
-    bookings: {
-        id: string;
-        created_at: string;
-        status?: string;
-        client: { full_name: string } | null;
-        slots: { date: string, start_time: string } | null;
-        price_breakdown: { studio_fee?: number; quantity?: number; equipment?: string } | null;
-        total_price?: number;
-        equipment?: string;
-        type?: string;
-        admin_notes?: string;
-    }[]
-    payouts: {
-        id: string;
-        created_at: string;
-        payment_method: string | null;
-        payment_details: { account_name?: string; account_number?: string } | null;
-        status: string;
-        amount: number;
-    }[]
+interface TransactionRecord {
+    date: string;
+    type: string;
+    client?: string;
+    instructor?: string;
+    studio?: string;
+    total_amount: number;
+    details?: string;
+    status?: string;
 }
 
-export default function TransactionHistory({ bookings, payouts }: TransactionHistoryProps) {
-    const [activeTab, setActiveTab] = useState<'bookings' | 'payouts'>('bookings')
+interface TransactionHistoryProps {
+    transactions: TransactionRecord[];
+}
 
-    const wrap = (val: any) => Array.isArray(val) ? val[0] : val
+export default function TransactionHistory({ transactions }: TransactionHistoryProps) {
+    const [activeTab, setActiveTab] = useState<'income' | 'payouts'>('income')
+
+    const incomeTransactions = transactions.filter(t => t.type !== 'Payout');
+    const payoutTransactions = transactions.filter(t => t.type === 'Payout');
+
+    const currentData = activeTab === 'income' ? incomeTransactions : payoutTransactions;
 
     return (
         <div className="bg-white border border-cream-200 rounded-xl shadow-sm overflow-hidden">
             <div className="border-b border-cream-200">
                 <div className="flex">
                     <button
-                        onClick={() => setActiveTab('bookings')}
-                        className={`px-6 py-4 text-sm font-medium transition-colors border-b-2 ${activeTab === 'bookings'
+                        onClick={() => setActiveTab('income')}
+                        className={`px-6 py-4 text-sm font-medium transition-colors border-b-2 ${activeTab === 'income'
                             ? 'border-charcoal-900 text-charcoal-900'
                             : 'border-transparent text-charcoal-500 hover:text-charcoal-700'
                             }`}
                     >
-                        Income (Bookings)
+                        Income (Bookings/Adjustments)
                     </button>
                     <button
                         onClick={() => setActiveTab('payouts')}
@@ -58,90 +53,84 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
             </div>
 
             <div className="overflow-x-auto">
-                {activeTab === 'bookings' ? (
+                {activeTab === 'income' ? (
                     <table className="w-full text-left text-sm text-charcoal-600">
                         <thead className="bg-cream-50 text-charcoal-900 font-medium border-b border-cream-200">
                             <tr>
                                 <th className="px-6 py-4">Date</th>
-                                <th className="px-6 py-4">Client / Instructor</th>
-                                <th className="px-6 py-4">Session Info</th>
+                                <th className="px-6 py-4">Participant</th>
+                                <th className="px-6 py-4">Transaction Details</th>
                                 <th className="px-6 py-4 text-right">Amount</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-cream-100">
-                            {bookings.length === 0 ? (
+                            {currentData.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-8 text-center text-gray-600">
-                                        No bookings found.
+                                        No transactions found.
                                     </td>
                                 </tr>
                             ) : (
-                                bookings.map((booking) => {
-                                    const client = wrap(booking.client)
-                                    const slot = wrap(booking.slots)
-                                    const startTimeStr = slot?.start_time && slot?.date ? `${slot.date}T${slot.start_time}+08:00` : null
-                                    const isAdjustment = booking.type === 'admin_adjustment'
-                                    const isTopUp = booking.type === 'top_up'
-                                    const isRefunded = booking.status === 'cancelled_refunded'
-                                    const isLateCancel = booking.status === 'cancelled_charged'
-                                    const isSpecial = isAdjustment || isTopUp
+                                currentData.map((tx, idx) => {
+                                    const txDate = new Date(tx.date)
+                                    const isPositive = tx.total_amount > 0
+                                    const isNegative = tx.total_amount < 0
+                                    const isRefunded = tx.type === 'Booking (Refunded)'
+                                    const isPenalty = tx.type === 'Cancellation Penalty'
+                                    const isTopUp = tx.type === 'Wallet Top-Up'
 
                                     return (
-                                        <tr key={booking.id} className="hover:bg-cream-50/50">
+                                        <tr key={idx} className="hover:bg-cream-50/50">
                                             <td className="px-6 py-4">
-                                                {new Date(booking.created_at).toLocaleDateString()}
+                                                {txDate.toLocaleDateString()}
+                                                <span className="block text-[10px] text-charcoal-400">
+                                                    {txDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
                                                     <User className="w-4 h-4 text-charcoal-400" />
-                                                    <span className="font-medium text-charcoal-900">
-                                                        {isAdjustment ? 'System Adjustment' :
-                                                            isTopUp ? 'Wallet Top-Up' :
-                                                                (client?.full_name || 'Unknown')}
-                                                    </span>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium text-charcoal-900">
+                                                            {tx.client || tx.instructor || 'System'}
+                                                        </span>
+                                                        {(tx.client && tx.instructor) && (
+                                                            <span className="text-[10px] text-charcoal-400">
+                                                                with {tx.instructor}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    {isSpecial ? (
-                                                        <div className="text-xs text-charcoal-500 italic max-w-xs truncate">
-                                                            {booking.admin_notes || 'Manual balance update'}
-                                                        </div>
-                                                    ) : (
-                                                        <>
-                                                            <div className="text-xs text-charcoal-500 flex items-center gap-2">
-                                                                {startTimeStr ? new Date(startTimeStr).toLocaleString('en-PH', {
-                                                                    timeZone: 'Asia/Manila', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
-                                                                }) : 'N/A'}
-                                                                {isRefunded && (
-                                                                    <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-bold uppercase">
-                                                                        Refunded
-                                                                    </span>
-                                                                )}
-                                                                {isLateCancel && (
-                                                                    <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold uppercase">
-                                                                        Late Cancel
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                            <div className="text-[10px] text-charcoal-400 font-medium">
-                                                                {(booking.price_breakdown?.quantity || 1)} x {(booking.price_breakdown?.equipment || booking.equipment || 'Unknown')}
-                                                            </div>
-                                                        </>
-                                                    )}
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-medium text-charcoal-900">{tx.type}</span>
+                                                        {isRefunded && (
+                                                            <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-bold uppercase">
+                                                                Refunded
+                                                            </span>
+                                                        )}
+                                                        {tx.type === 'Booking (Late Cancel)' && (
+                                                            <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold uppercase">
+                                                                Late Cancel
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-[10px] text-charcoal-500 italic max-w-xs truncate">
+                                                        {tx.details}
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td className={clsx(
-                                                "px-6 py-4 text-right font-bold transition-colors",
-                                                isRefunded ? "text-charcoal-400" : (isAdjustment ? "text-blue-600" : "text-green-600")
+                                                "px-6 py-4 text-right font-bold transition-colors whitespace-nowrap",
+                                                isRefunded ? "text-charcoal-400" :
+                                                    isPenalty ? "text-red-600" :
+                                                        isPositive ? "text-green-600" :
+                                                            isNegative ? "text-blue-600" : "text-charcoal-900"
                                             )}>
-                                                {isRefunded ? (
-                                                    "₱0"
-                                                ) : (
-                                                    booking.price_breakdown?.studio_fee !== undefined
-                                                        ? (booking.price_breakdown.studio_fee >= 0 ? '+' : '') + `₱${booking.price_breakdown.studio_fee.toLocaleString()}`
-                                                        : `+₱${(booking.total_price ? Math.max(0, booking.total_price - 100) : 0).toLocaleString()}`
-                                                )}
+                                                {isRefunded ? "₱0" :
+                                                    (isPositive ? '+' : '') + `₱${tx.total_amount.toLocaleString()}`}
                                             </td>
                                         </tr>
                                     )
@@ -154,48 +143,43 @@ export default function TransactionHistory({ bookings, payouts }: TransactionHis
                         <thead className="bg-cream-50 text-charcoal-900 font-medium border-b border-cream-200">
                             <tr>
                                 <th className="px-6 py-4">Date Requested</th>
-                                <th className="px-6 py-4">Method</th>
                                 <th className="px-6 py-4">Details</th>
                                 <th className="px-6 py-4">Status</th>
                                 <th className="px-6 py-4 text-right">Amount</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-cream-100">
-                            {payouts.length === 0 ? (
+                            {payoutTransactions.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-600">
+                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-600">
                                         No payout requests found.
                                     </td>
                                 </tr>
                             ) : (
-                                payouts.map((payout) => (
-                                    <tr key={payout.id} className="hover:bg-cream-50/50">
+                                payoutTransactions.map((tx, idx) => (
+                                    <tr key={idx} className="hover:bg-cream-50/50">
                                         <td className="px-6 py-4">
-                                            {new Date(payout.created_at).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4 capitalize">
-                                            {payout.payment_method?.replace('_', ' ')}
+                                            {new Date(tx.date).toLocaleDateString()}
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-xs">
-                                                <p><span className="text-charcoal-400">Acct:</span> {payout.payment_details?.account_name || '-'}</p>
-                                                <p><span className="text-charcoal-400">No:</span> {payout.payment_details?.account_number || '-'}</p>
+                                                <p className="font-medium text-charcoal-900">{tx.details}</p>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${payout.status === 'paid' ? 'bg-green-100 text-green-700' :
-                                                payout.status === 'pending' ? 'bg-orange-100 text-orange-700' :
-                                                    payout.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${tx.status === 'paid' ? 'bg-green-100 text-green-700' :
+                                                tx.status === 'pending' ? 'bg-orange-100 text-orange-700' :
+                                                    tx.status === 'rejected' ? 'bg-red-100 text-red-700' :
                                                         'bg-gray-100 text-gray-700'
                                                 }`}>
-                                                {payout.status === 'paid' && <CheckCircle className="w-3 h-3" />}
-                                                {payout.status === 'pending' && <Clock className="w-3 h-3" />}
-                                                {payout.status === 'rejected' && <XCircle className="w-3 h-3" />}
-                                                {payout.status ? payout.status.charAt(0).toUpperCase() + payout.status.slice(1) : 'Unknown'}
+                                                {tx.status === 'paid' && <CheckCircle className="w-3 h-3" />}
+                                                {tx.status === 'pending' && <Clock className="w-3 h-3" />}
+                                                {tx.status === 'rejected' && <XCircle className="w-3 h-3" />}
+                                                {tx.status ? tx.status.charAt(0).toUpperCase() + tx.status.slice(1) : 'Unknown'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right font-bold text-charcoal-900">
-                                            ₱{payout.amount?.toLocaleString()}
+                                        <td className="px-6 py-4 text-right font-bold text-charcoal-900 whitespace-nowrap">
+                                            -₱{Math.abs(tx.total_amount).toLocaleString()}
                                         </td>
                                     </tr>
                                 ))
