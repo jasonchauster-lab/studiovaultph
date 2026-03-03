@@ -88,8 +88,8 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             .or('status.in.(approved,completed,cancelled_charged,cancelled_refunded),payment_status.eq.submitted')
             .order('created_at', { ascending: false })
 
-        if (startDate) bookingsQuery = bookingsQuery.gte('slots.start_time', startDate)
-        if (endDate) bookingsQuery = bookingsQuery.lte('slots.start_time', endDate)
+        if (startDate) bookingsQuery = bookingsQuery.gte('slots.date', startDate)
+        if (endDate) bookingsQuery = bookingsQuery.lte('slots.date', endDate)
 
         const { data: bookings, error: bookingsError } = await bookingsQuery
 
@@ -106,8 +106,8 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             .eq('studio_id', studioId)
             .order('created_at', { ascending: false })
 
-        if (startDate) payoutsQuery = payoutsQuery.gte('created_at', startDate)
-        if (endDate) payoutsQuery = payoutsQuery.lte('created_at', endDate)
+        if (startDate) payoutsQuery = payoutsQuery.gte('created_at', `${startDate}T00:00:00.000Z`)
+        if (endDate) payoutsQuery = payoutsQuery.lte('created_at', `${endDate}T23:59:59.999Z`)
 
         const { data: payouts, error: payoutsError } = await payoutsQuery
 
