@@ -62,48 +62,50 @@ export default async function StudioDetailsPage(props: {
         .map((t: string) => t.trim())
         .filter((t: string) => t.length > 1)
 
-    // 3. Fetch ALL verified instructors with availability (broad fetch, filter in JS)
-    // We deliberately don't filter by location here to avoid missing fuzzy matches.
-    const { data: instructorsRaw } = await supabase
+    // 3. Fetch verified instructors (Bypassing broken joins due to schema cache issues)
+    // 3. Fetch verified instructors and their availability
+    const { data: profiles } = await supabase
         .from('profiles')
-        .select(`
-            id,
-            full_name,
-            rates,
-            certifications!inner (
-                verified
-            ),
-            instructor_availability!inner (
-                location_area
-            )
-        `)
+        .select('id, full_name, rates')
         .eq('role', 'instructor')
         .not('rates', 'is', null)
 
-    // JS-level fuzzy location filter: instructor location must overlap at least one token
-    const instructors = (instructorsRaw || []).filter(i => {
-        const verified = i.certifications && i.certifications.some((c: any) => c.verified)
-        if (!verified) return false
-        const instrLocations: string[] = Array.isArray(i.instructor_availability)
-            ? i.instructor_availability.map((a: any) => (a.location_area ?? '').trim().toLowerCase())
-            : []
+    const allInstructorIds = (profiles || []).map(p => p.id)
+
+    // Parallel fetch for all related instructor data
+    const [{ data: certsRaw }, { data: availabilityRaw }] = await Promise.all([
+        supabase
+            .from('certifications')
+            .select('instructor_id, verified')
+            .in('instructor_id', allInstructorIds)
+            .eq('verified', true),
+        supabase
+            .from('instructor_availability')
+            .select('instructor_id, day_of_week, date, start_time, end_time, location_area')
+            .in('instructor_id', allInstructorIds)
+    ])
+
+    // Filter and build definitive Instructor objects
+    const instructors = (profiles || []).map(p => ({
+        ...p,
+        certifications: (certsRaw || []).filter(c => c.instructor_id === p.id),
+        instructor_availability: (availabilityRaw || []).filter(a => a.instructor_id === p.id)
+    })).filter(i => {
+        // Must have at least one verified certification
+        if (i.certifications.length === 0) return false
+
+        // Location check: must have at least one availability entry that matches studio location
+        const instrLocations = i.instructor_availability.map((a: any) => (a.location_area ?? '').trim().toLowerCase())
         return instrLocations.some(loc =>
             loc === trimmedStudioLocation.toLowerCase() ||
             locationTokens.some((token: string) => loc.includes(token.toLowerCase()) || loc.startsWith(token.toLowerCase()))
         )
     })
 
-    // 4. Fetch Availability blocks for this location (fuzzy — all instructors from the list above)
-    const instructorIds = instructors.map((i: any) => i.id)
-    const { data: locationAvailabilityRaw } = instructorIds.length > 0
-        ? await supabase
-            .from('instructor_availability')
-            .select('instructor_id, day_of_week, date, start_time, end_time, location_area')
-            .in('instructor_id', instructorIds)
-        : { data: [] }
-
-    // JS-level location filter on availability blocks
-    const locationAvailability = (locationAvailabilityRaw || []).filter((block: any) => {
+    // 4. Filter availability blocks to only those matching the studio's location
+    const matchedInstructorIds = instructors.map(i => i.id)
+    const locationAvailability = (availabilityRaw || []).filter((block: any) => {
+        if (!matchedInstructorIds.includes(block.instructor_id)) return false
         const bLoc = (block.location_area ?? '').trim().toLowerCase()
         return bLoc === trimmedStudioLocation.toLowerCase() ||
             locationTokens.some((token: string) => bLoc.includes(token.toLowerCase()) || bLoc.startsWith(token.toLowerCase()))

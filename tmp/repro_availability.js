@@ -8,10 +8,10 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function checkAvailability() {
     const studioId = 'e6a2d39e-b888-4b84-9c6d-5711a62c9920';
-    const selectedDate = '2026-03-03';
+    const selectedDate = '2026-03-05';
     const selectedTime = '09:00:00';
     const selectedEnd = '10:00:00';
-    const selectedEquipment = 'CHAIR';
+    const selectedEquipment = 'REFORMER';
 
     console.log(`--- Checking Availability for Studio: ${studioId} ---`);
     console.log(`Date: ${selectedDate}, Time: ${selectedTime}, Equipment: ${selectedEquipment}`);
@@ -37,34 +37,35 @@ async function checkAvailability() {
         .filter(t => t.length > 1);
     console.log(`Location Tokens: ${JSON.stringify(locationTokens)}`);
 
-    // 2. Fetch Instructors (Page logic)
-    const { data: instructorsRaw, error: instrError } = await supabase
+    // 2. Fetch Instructors (Bypass Join for Investigation)
+    console.log('Fetching instructors and merging in JS...');
+    const { data: profiles, error: pError } = await supabase
         .from('profiles')
-        .select(`
-            id,
-            full_name,
-            rates,
-            certifications!inner (
-                verified
-            ),
-            instructor_availability!inner (
-                location_area
-            )
-        `)
+        .select('id, full_name, rates')
         .eq('role', 'instructor')
         .not('rates', 'is', null);
 
-    if (instrError) {
-        console.error('Instructor Query Error:', instrError);
+    if (pError) {
+        console.error('Profiles Query Error:', pError);
         return;
     }
 
-    if (!instructorsRaw) {
-        console.log('No instructors found (null data)');
-        return;
-    }
+    const { data: certs } = await supabase
+        .from('certifications')
+        .select('instructor_id, verified')
+        .eq('verified', true);
 
-    console.log(`Total instructors with availability entries: ${instructorsRaw.length}`);
+    const { data: avails } = await supabase
+        .from('instructor_availability')
+        .select('instructor_id, location_area');
+
+    const instructorsRaw = profiles.map(p => ({
+        ...p,
+        certifications: (certs || []).filter(c => c.instructor_id === p.id),
+        instructor_availability: (avails || []).filter(a => a.instructor_id === p.id)
+    })).filter(p => p.certifications.length > 0 && p.instructor_availability.length > 0);
+
+    console.log(`Total instructors with required data: ${instructorsRaw.length}`);
 
     const instructors = (instructorsRaw || []).filter(i => {
         const verified = i.certifications && i.certifications.some(c => c.verified);
