@@ -623,6 +623,7 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
             slots!inner(
                 start_time,
                 end_time,
+                date,
                 studios!inner(id, name, owner_id)
             )
         `)
@@ -642,8 +643,9 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
         return { error: 'Booking is already cancelled or rejected.' }
     }
 
-    const startTimeStr = (booking.slots as any)?.start_time
-    const dateStr = (booking.slots as any)?.date
+    const slotData = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots
+    const startTimeStr = slotData?.start_time
+    const dateStr = slotData?.date
     const approvedAtStr = booking.approved_at
     const sessionStart = new Date(`${dateStr}T${startTimeStr}+08:00`)
     const now = new Date()
@@ -720,8 +722,7 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
     }
 
     // 5. Send Emails
-    const client = booking.client
-    const slotData = (booking.slots as any)
+    const client = Array.isArray(booking.client) ? booking.client[0] : booking.client
     const date = formatManilaDateStr(slotData?.date)
     const time = formatTo12Hour(slotData?.start_time)
 

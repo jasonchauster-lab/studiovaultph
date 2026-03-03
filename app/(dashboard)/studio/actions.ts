@@ -639,6 +639,7 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
             slots!inner(
                 start_time,
                 end_time,
+                date,
                 studios!inner(id, name, owner_id, address)
             )
         `)
@@ -676,9 +677,11 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
         }
     }
 
-    const startTimeStr = (booking.slots as any)?.start_time
+    const slotData = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots
+    const startTimeStr = slotData?.start_time
+    const dateStr = slotData?.date
     const approvedAtStr = booking.approved_at
-    const sessionStart = new Date(startTimeStr)
+    const sessionStart = new Date(`${dateStr}T${startTimeStr}+08:00`)
     const now = new Date()
 
     const diffInHours = (sessionStart.getTime() - now.getTime()) / (1000 * 60 * 60)
@@ -776,9 +779,8 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
     }
 
     // 4. Send Emails
-    const client = booking.client
-    const instructor = booking.instructor
-    const slotData = (booking.slots as any)
+    const client = Array.isArray(booking.client) ? booking.client[0] : booking.client
+    const instructor = Array.isArray(booking.instructor) ? booking.instructor[0] : booking.instructor
     const date = formatManilaDateStr(slotData?.date)
     const time = formatTo12Hour(slotData?.start_time)
 
