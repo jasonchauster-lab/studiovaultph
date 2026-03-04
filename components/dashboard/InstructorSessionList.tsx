@@ -36,7 +36,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
         // Status Filter
         if (filters.status !== 'all') {
             if (filters.status === 'cancelled') {
-                if (!['cancelled', 'cancelled_refunded'].includes(b.status)) return false
+                if (!['cancelled_refunded', 'cancelled_charged'].includes(b.status)) return false
             } else if (b.status !== filters.status) return false
         }
 
@@ -60,7 +60,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     const pastBookings = filteredBookings.filter(b => {
         const slot = getFirst(b.slots)
         if (!slot) return false
-        return (b.status === 'completed' || b.status === 'cancelled' || b.status === 'cancelled_refunded' || (b.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) <= now))
+        return (b.status === 'completed' || b.status === 'cancelled_refunded' || b.status === 'cancelled_charged' || (b.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) <= now))
     })
 
     return (

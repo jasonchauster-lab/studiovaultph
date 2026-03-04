@@ -36,7 +36,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
         // Status Filter
         if (filters.status !== 'all') {
             if (filters.status === 'cancelled') {
-                if (!['cancelled', 'cancelled_refunded'].includes(b.status)) return false
+                if (!['cancelled_refunded', 'cancelled_charged'].includes(b.status)) return false
             } else if (b.status !== filters.status) return false
         }
 
@@ -58,8 +58,8 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
     // Past: Completed or Cancelled, or Approved that passed
     const pastBookings = filteredBookings.filter(b =>
         b.status === 'completed' ||
-        b.status === 'cancelled' ||
         b.status === 'cancelled_refunded' ||
+        b.status === 'cancelled_charged' ||
         (b.status === 'approved' && getSlotDateTime(b.slots.date, b.slots.start_time) <= now)
     )
 

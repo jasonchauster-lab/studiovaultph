@@ -34,7 +34,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
         // Status Filter
         if (filters.status !== 'all') {
             if (filters.status === 'cancelled') {
-                if (!['cancelled', 'cancelled_refunded'].includes(b.status)) return false
+                if (!['cancelled_refunded', 'cancelled_charged'].includes(b.status)) return false
             } else if (b.status !== filters.status) return false
         }
 
@@ -56,8 +56,8 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
     const pastBookings = baseFilteredBookings.filter(b => {
         const slot = getFirst(b.slots)
         return b.status === 'completed' ||
-            b.status === 'cancelled' ||
             b.status === 'cancelled_refunded' ||
+            b.status === 'cancelled_charged' ||
             (b.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) <= now)
     })
 

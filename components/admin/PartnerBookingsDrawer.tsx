@@ -9,7 +9,8 @@ const STATUS_STYLES: Record<string, string> = {
     approved: 'bg-green-100 text-green-700',
     completed: 'bg-blue-100 text-blue-700',
     pending: 'bg-amber-100 text-amber-700',
-    cancelled: 'bg-red-100 text-red-600',
+    cancelled_refunded: 'bg-red-100 text-red-600',
+    cancelled_charged: 'bg-red-100 text-red-600',
     expired: 'bg-cream-100 text-charcoal-500',
     rejected: 'bg-red-100 text-red-600',
 }
@@ -172,7 +173,7 @@ function BookingSection({ title, bookings }: { title: string, bookings: Booking[
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className="font-medium text-charcoal-900 truncate">
-                                                        {booking.slots?.studios?.name || 'Unknown Studio'}
+                                                        {slot?.studios?.name || 'Unknown Studio'}
                                                     </p>
                                                     <p className="text-[10px] text-charcoal-400 truncate">
                                                         With {booking.instructor?.full_name || 'Unknown'}
