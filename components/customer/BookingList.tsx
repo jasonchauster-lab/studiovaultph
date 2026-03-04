@@ -50,8 +50,17 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
     })
 
     // 2. Split filtered bookings into upcoming/past
-    const upcomingBookings = filteredBookings.filter(b => getSlotDateTime(b.slots.date, b.slots.start_time) > now)
-    const pastBookings = filteredBookings.filter(b => getSlotDateTime(b.slots.date, b.slots.start_time) <= now)
+    // Upcoming: Approved or Pending that are in the future
+    const upcomingBookings = filteredBookings.filter(b =>
+        (b.status === 'approved' || b.status === 'pending') &&
+        getSlotDateTime(b.slots.date, b.slots.start_time) > now
+    )
+    // Past: Completed or Cancelled, or Approved that passed
+    const pastBookings = filteredBookings.filter(b =>
+        b.status === 'completed' ||
+        b.status === 'cancelled' ||
+        (b.status === 'approved' && getSlotDateTime(b.slots.date, b.slots.start_time) <= now)
+    )
 
     // Helper to check expiration (12 hours after end time)
     const isChatExpired = (booking: any) => {
@@ -215,7 +224,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
             {/* Past List */}
             {pastBookings.length > 0 && (
                 <section>
-                    <h2 className="text-xl font-serif text-charcoal-900 mb-6">Past Sessions (Filtered)</h2>
+                    <h2 className="text-xl font-serif text-charcoal-900 mb-6">Session History</h2>
                     <div className="space-y-4">
                         {pastBookings.map((booking: any) => (
                             <div key={booking.id} className="bg-white p-4 rounded-xl border border-cream-200 flex justify-between items-center sm:flex-row flex-col gap-4">
@@ -249,13 +258,13 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                         "text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded border",
                                         booking.status === 'completed' ? "bg-green-100/50 text-green-700 border-green-200" :
                                             booking.status === 'approved' ? "bg-blue-100/50 text-blue-700 border-blue-200" :
-                                                booking.status === 'rejected' ? "bg-red-100/50 text-red-700 border-red-200" :
-                                                    "bg-charcoal-100/50 text-charcoal-600 border-cream-200"
+                                                booking.status === 'cancelled' ? "bg-red-100/50 text-red-700 border-red-200" :
+                                                    booking.status === 'pending' ? "bg-amber-100/50 text-amber-700 border-amber-200" :
+                                                        "bg-charcoal-100/50 text-charcoal-600 border-cream-200"
                                     )}>
                                         {booking.status === 'completed' ? 'Completed' :
                                             booking.status === 'approved' ? 'Completed' :
-                                                booking.status === 'pending' ? 'Expired' :
-                                                    booking.status}
+                                                booking.status}
                                     </span>
                                 </div>
                             </div>

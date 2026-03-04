@@ -54,10 +54,15 @@ export default async function StudioHistoryPage() {
                     id,
                     full_name,
                     avatar_url
+                ),
+                client:profiles!client_id (
+                    id,
+                    full_name,
+                    avatar_url
                 )
             `)
             .in('slot_id', slotIds)
-            .in('status', ['approved', 'completed', 'pending'])
+            .in('status', ['approved', 'completed', 'pending', 'cancelled'])
             .order('created_at', { ascending: false })
 
     return (

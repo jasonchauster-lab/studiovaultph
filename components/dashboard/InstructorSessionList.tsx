@@ -48,16 +48,18 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
         return true
     })
 
-    const ACTIVE_STATUSES = ['approved']
+    // 2. Split filtered bookings into upcoming/past
+    const upcomingBookings = filteredBookings.filter(b => {
+        const slot = getFirst(b.slots)
+        if (!slot) return false
+        return (b.status === 'approved' || b.status === 'pending') && getSlotDateTime(slot.date, slot.start_time) > now
+    })
 
-    // Split into upcoming and past
-    const upcomingBookings = filteredBookings.filter(b =>
-        ACTIVE_STATUSES.includes(b.status) && new Date(getFirst(b.slots)?.start_time) > now
-    )
-
-    const pastBookings = filteredBookings.filter(b =>
-        !ACTIVE_STATUSES.includes(b.status) || new Date(getFirst(b.slots)?.start_time) <= now
-    )
+    const pastBookings = filteredBookings.filter(b => {
+        const slot = getFirst(b.slots)
+        if (!slot) return false
+        return (b.status === 'completed' || b.status === 'cancelled' || (b.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) <= now))
+    })
 
     return (
         <div className="space-y-8">
@@ -100,7 +102,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                 <span className={clsx(
                                                                     "px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border shrink-0",
                                                                     booking.status === 'approved' ? "bg-green-100/50 text-green-700 border-green-200" :
-                                                                        booking.status === 'rejected' || booking.status === 'cancelled' ? "bg-red-100/50 text-red-700 border-red-200" :
+                                                                        booking.status === 'cancelled' ? "bg-red-100/50 text-red-700 border-red-200" :
                                                                             "bg-amber-100/50 text-amber-700 border-amber-200"
                                                                 )}>
                                                                     {booking.status === 'approved' ? 'Confirmed' : booking.status}
@@ -202,13 +204,14 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                     booking.status === 'completed'
                                                                         ? (booking.funds_unlocked ? 'bg-green-100/50 text-green-700 border-green-200' : 'bg-amber-100/50 text-amber-700 border-amber-200') :
                                                                         booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
-                                                                            booking.status === 'rejected' ? 'bg-red-100/50 text-red-700 border-red-200' :
-                                                                                'bg-charcoal-100/50 text-charcoal-600 border-cream-200'
+                                                                            booking.status === 'cancelled' ? 'bg-red-100/50 text-red-700 border-red-200' :
+                                                                                booking.status === 'pending' ? 'bg-amber-100/50 text-amber-700 border-amber-200' :
+                                                                                    'bg-charcoal-100/50 text-charcoal-600 border-cream-200'
                                                                 )}>
                                                                     {booking.status === 'completed'
                                                                         ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)') :
-                                                                        booking.status === 'approved' ? 'Awaiting Completion' :
-                                                                            booking.status === 'pending' ? 'Pending' :
+                                                                        booking.status === 'approved' ? 'Approved' :
+                                                                            booking.status === 'cancelled' ? 'Cancelled' :
                                                                                 booking.status}
                                                                 </span>
                                                             </div>

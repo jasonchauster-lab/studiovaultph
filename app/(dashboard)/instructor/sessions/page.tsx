@@ -51,7 +51,7 @@ export default async function InstructorSessionsPage() {
             )
         `)
         .eq('instructor_id', user.id)
-        .in('status', ['approved', 'completed', 'pending'])
+        .in('status', ['approved', 'completed', 'pending', 'cancelled'])
         .order('created_at', { ascending: false })
 
 

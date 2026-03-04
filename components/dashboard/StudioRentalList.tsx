@@ -24,8 +24,10 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
         return new Date(`${date}T${time}+08:00`)
     }
 
-    // Filter ALL bookings based on local state
-    const filteredBookings = bookings.filter((b) => {
+    const now = new Date()
+
+    // 1. Filter ALL bookings based on local state
+    const baseFilteredBookings = bookings.filter((b) => {
         const slot = getFirst(b.slots)
         if (!slot) return false
 
@@ -42,6 +44,27 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
         }
 
         return true
+    })
+
+    // 2. Split filtered bookings into upcoming/past
+    const upcomingBookings = baseFilteredBookings.filter(b => {
+        const slot = getFirst(b.slots)
+        return (b.status === 'approved' || b.status === 'pending') &&
+            getSlotDateTime(slot.date, slot.start_time) > now
+    })
+    const pastBookings = baseFilteredBookings.filter(b => {
+        const slot = getFirst(b.slots)
+        return b.status === 'completed' ||
+            b.status === 'cancelled' ||
+            (b.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) <= now)
+    })
+
+    const filteredBookings = [...upcomingBookings, ...pastBookings].sort((a, b) => {
+        const slotA = getFirst(a.slots)
+        const slotB = getFirst(b.slots)
+        const dateA = getSlotDateTime(slotA.date, slotA.start_time).getTime()
+        const dateB = getSlotDateTime(slotB.date, slotB.start_time).getTime()
+        return dateB - dateA // Sort descending by date
     })
 
     return (
@@ -76,6 +99,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                         const slot = getFirst(booking.slots)
                         const studioData = getFirst(slot?.studios)
                         const instructor = getFirst(booking.instructor)
+                        const client = getFirst(booking.client)
 
                         const start = new Date(`${slot?.date}T${slot?.start_time}+08:00`)
 
@@ -100,22 +124,40 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-start justify-between gap-2">
                                                         <div className="flex flex-col gap-1 items-start min-w-0">
-                                                            <Link href={`/instructors/${instructor?.id}`} className="text-sm font-bold text-charcoal-900 truncate w-full hover:text-rose-gold transition-colors">
-                                                                {instructor?.full_name || "Instructor"}
-                                                            </Link>
+                                                            <div className="flex items-center gap-2">
+                                                                <Link href={`/instructors/${instructor?.id}`} className="text-sm font-bold text-charcoal-900 truncate hover:text-rose-gold transition-colors">
+                                                                    {instructor?.full_name || "Instructor"}
+                                                                </Link>
+                                                                {client && (
+                                                                    <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-cream-200">
+                                                                        <div className="w-5 h-5 rounded-full overflow-hidden border border-cream-100 bg-white shrink-0">
+                                                                            <img
+                                                                                src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`}
+                                                                                alt={client.full_name || "Client"}
+                                                                                className="w-full h-full object-cover"
+                                                                            />
+                                                                        </div>
+                                                                        <span className="text-[11px] font-medium text-charcoal-500">
+                                                                            Student: <span className="font-bold text-charcoal-700">{client.full_name}</span>
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                             <span className={clsx(
                                                                 'px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border shrink-0',
                                                                 booking.status === 'completed'
                                                                     ? (booking.funds_unlocked ? 'bg-green-100/50 text-green-700 border-green-200' : 'bg-amber-100/50 text-amber-700 border-amber-200') :
                                                                     booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
-                                                                        booking.status === 'rejected' ? 'bg-red-100/50 text-red-700 border-red-200' :
-                                                                            'bg-charcoal-100/50 text-charcoal-600 border-cream-200'
+                                                                        booking.status === 'cancelled' ? 'bg-red-100/50 text-red-700 border-red-200' :
+                                                                            booking.status === 'pending' ? 'bg-amber-100/50 text-amber-700 border-amber-200' :
+                                                                                'bg-charcoal-100/50 text-charcoal-600 border-cream-200'
                                                             )}>
                                                                 {booking.status === 'completed'
                                                                     ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)') :
-                                                                    booking.status === 'approved' ? 'Awaiting Completion' :
-                                                                        booking.status === 'pending' ? 'Pending' :
-                                                                            booking.status}
+                                                                    booking.status === 'approved' ? 'Approved' :
+                                                                        booking.status === 'cancelled' ? 'Cancelled' :
+                                                                            booking.status === 'pending' ? 'Pending' :
+                                                                                booking.status}
                                                             </span>
                                                         </div>
                                                         <div className="text-right shrink-0">
