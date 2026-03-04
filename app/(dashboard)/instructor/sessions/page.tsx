@@ -84,6 +84,7 @@ export default async function InstructorSessionsPage() {
                             {upcomingBookings.map((booking: any) => {
                                 const slot = getFirst(booking.slots)
                                 const studio = getFirst(slot?.studios)
+                                const client = getFirst(booking.client)
                                 return (
                                     <div key={booking.id} className="bg-white p-4 rounded-xl border border-cream-200 flex justify-between items-center">
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
@@ -100,7 +101,12 @@ export default async function InstructorSessionsPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <StudioChatButton booking={booking} currentUserId={user.id} />
+                                            {client && client.id !== user.id && (
+                                                <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={client.id} partnerName={client.full_name || 'Client'} label="Message Client" />
+                                            )}
+                                            {studio && studio.owner_id && (
+                                                <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={studio.owner_id} partnerName={studio.name || 'Studio'} label="Message Studio" />
+                                            )}
                                             <span className={clsx(
                                                 'text-xs px-2 py-1 rounded',
                                                 booking.status === 'approved' ? 'bg-green-100 text-green-700' :
@@ -148,7 +154,12 @@ export default async function InstructorSessionsPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <StudioChatButton booking={booking} currentUserId={user.id} />
+                                            {client && client.id !== user.id && (
+                                                <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={client.id} partnerName={client.full_name || 'Client'} label="Message Client" />
+                                            )}
+                                            {studio && studio.owner_id && (
+                                                <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={studio.owner_id} partnerName={studio.name || 'Studio'} label="Message Studio" />
+                                            )}
                                             {booking.status === 'completed' && (
                                                 <InstructorLeaveReviewButton
                                                     booking={booking}
