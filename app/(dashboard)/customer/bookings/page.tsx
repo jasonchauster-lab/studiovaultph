@@ -26,12 +26,14 @@ export default async function CustomerBookingsPage() {
                 date,
                 start_time,
                 end_time,
+                equipment,
                 studios (
                     id,
                     name,
                     location,
                     address,
-                    owner_id
+                    owner_id,
+                    logo_url
                 )
             ),
             instructor:profiles!instructor_id (

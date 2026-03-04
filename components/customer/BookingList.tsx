@@ -86,23 +86,27 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                             </Link>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-start justify-between gap-2">
-                                                    <Link href={`/studios/${booking.slots.studios?.id}`} className="text-sm font-bold text-charcoal-900 truncate hover:text-rose-gold transition-colors">
-                                                        {booking.slots.studios?.name || "Studio"}
-                                                    </Link>
-                                                    <span className={clsx(
-                                                        "px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border shrink-0",
-                                                        booking.status === 'approved' ? "bg-green-100/50 text-green-700 border-green-200" :
-                                                            booking.status === 'rejected' || booking.status === 'cancelled' ? "bg-red-100/50 text-red-700 border-red-200" :
-                                                                "bg-amber-100/50 text-amber-700 border-amber-200"
-                                                    )}>
-                                                        {booking.status === 'approved' ? 'Confirmed' : booking.status}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5 text-[10px] text-charcoal-500 font-medium mt-0.5">
-                                                    <Calendar className="w-3 h-3 text-rose-gold" />
-                                                    <span>
-                                                        {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} at {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                    </span>
+                                                    <div className="flex flex-col gap-1 items-start min-w-0">
+                                                        <Link href={`/studios/${booking.slots.studios?.id}`} className="text-sm font-bold text-charcoal-900 truncate w-full hover:text-rose-gold transition-colors">
+                                                            {booking.slots.studios?.name || "Studio"}
+                                                        </Link>
+                                                        <span className={clsx(
+                                                            "px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border shrink-0",
+                                                            booking.status === 'approved' ? "bg-green-100/50 text-green-700 border-green-200" :
+                                                                booking.status === 'rejected' || booking.status === 'cancelled' ? "bg-red-100/50 text-red-700 border-red-200" :
+                                                                    "bg-amber-100/50 text-amber-700 border-amber-200"
+                                                        )}>
+                                                            {booking.status === 'approved' ? 'Confirmed' : booking.status}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-right shrink-0">
+                                                        <p className="text-[13px] font-bold text-charcoal-900 leading-none">
+                                                            {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                                        </p>
+                                                        <p className="text-[11px] text-charcoal-500 font-medium mt-1">
+                                                            {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -126,12 +130,22 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                 )}
                             </div>
 
-                            <div className="flex items-center justify-between text-xs mt-3 pt-3 border-t border-cream-200/50">
-                                <div className="flex items-center gap-2">
-                                    <MapPin className="w-3.5 h-3.5 text-charcoal-400" />
-                                    <span className="font-semibold text-charcoal-700 truncate max-w-[120px]">
-                                        {booking.slots.studios?.location || "N/A"}
-                                    </span>
+                            <div className="flex flex-col sm:flex-row sm:items-end justify-between text-xs mt-3 pt-3 border-t border-cream-200/50 gap-3">
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-start gap-2">
+                                        <MapPin className="w-3.5 h-3.5 text-charcoal-400 shrink-0 mt-0.5" />
+                                        <span className="font-semibold text-charcoal-700 leading-tight">
+                                            {booking.slots.studios?.location || "N/A"}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Box className="w-3.5 h-3.5 text-charcoal-400 shrink-0" />
+                                        <span className="font-semibold text-charcoal-700">
+                                            {Array.isArray(booking.slots?.equipment) && booking.slots.equipment.length > 0
+                                                ? booking.slots.equipment[0]
+                                                : (booking.price_breakdown?.equipment || booking.equipment || 'Standard Session')}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
