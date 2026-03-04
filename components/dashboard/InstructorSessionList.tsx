@@ -35,7 +35,9 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
         // Status Filter
         if (filters.status !== 'all') {
-            if (b.status !== filters.status) return false
+            if (filters.status === 'cancelled') {
+                if (!['cancelled', 'cancelled_refunded'].includes(b.status)) return false
+            } else if (b.status !== filters.status) return false
         }
 
         // Date Filter
@@ -58,7 +60,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     const pastBookings = filteredBookings.filter(b => {
         const slot = getFirst(b.slots)
         if (!slot) return false
-        return (b.status === 'completed' || b.status === 'cancelled' || (b.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) <= now))
+        return (b.status === 'completed' || b.status === 'cancelled' || b.status === 'cancelled_refunded' || (b.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) <= now))
     })
 
     return (
@@ -109,10 +111,10 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                             </div>
                                                             <div className="text-right shrink-0">
                                                                 <p className="text-[13px] font-bold text-charcoal-900 leading-none">
-                                                                    {new Date(slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                    {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                                                                 </p>
                                                                 <p className="text-[11px] text-charcoal-500 font-medium mt-1">
-                                                                    {new Date(slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                                    {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -205,18 +207,19 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                         booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
                                                                             'bg-red-100/50 text-red-700 border-red-200'
                                                                 )}>
-                                                                    {booking.status === 'completed'
-                                                                        ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)') :
-                                                                        booking.status === 'approved' ? 'Approved' :
-                                                                            'Cancelled'}
+                                                                    {['completed', 'approved'].includes(booking.status)
+                                                                        ? (booking.status === 'completed'
+                                                                            ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)')
+                                                                            : 'Approved')
+                                                                        : 'Cancelled'}
                                                                 </span>
                                                             </div>
                                                             <div className="text-right shrink-0">
                                                                 <p className="text-[13px] font-bold text-charcoal-900 leading-none">
-                                                                    {new Date(slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                    {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                                                                 </p>
                                                                 <p className="text-[11px] text-charcoal-500 font-medium mt-1">
-                                                                    {new Date(slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                                    {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                                 </p>
                                                             </div>
                                                         </div>

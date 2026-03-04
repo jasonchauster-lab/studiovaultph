@@ -33,7 +33,9 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
 
         // Status Filter
         if (filters.status !== 'all') {
-            if (b.status !== filters.status) return false
+            if (filters.status === 'cancelled') {
+                if (!['cancelled', 'cancelled_refunded'].includes(b.status)) return false
+            } else if (b.status !== filters.status) return false
         }
 
         // Date Filter
@@ -55,6 +57,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
         const slot = getFirst(b.slots)
         return b.status === 'completed' ||
             b.status === 'cancelled' ||
+            b.status === 'cancelled_refunded' ||
             (b.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) <= now)
     })
 
@@ -149,10 +152,11 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                                     booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
                                                                         'bg-red-100/50 text-red-700 border-red-200'
                                                             )}>
-                                                                {booking.status === 'completed'
-                                                                    ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)') :
-                                                                    booking.status === 'approved' ? 'Approved' :
-                                                                        'Cancelled'}
+                                                                {['completed', 'approved'].includes(booking.status)
+                                                                    ? (booking.status === 'completed'
+                                                                        ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)')
+                                                                        : 'Approved')
+                                                                    : 'Cancelled'}
                                                             </span>
                                                         </div>
                                                         <div className="text-right shrink-0">

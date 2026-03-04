@@ -48,7 +48,7 @@ export default async function CustomerBookingsPage() {
             )
         `)
         .eq('client_id', user.id)
-        .in('status', ['approved', 'completed', 'cancelled'])
+        .in('status', ['approved', 'completed', 'cancelled', 'cancelled_refunded'])
         .order('created_at', { ascending: false })
 
     // Fetch pending reviews for the customer

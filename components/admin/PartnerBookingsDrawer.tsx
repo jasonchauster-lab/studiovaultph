@@ -135,7 +135,11 @@ function BookingSection({ title, bookings }: { title: string, bookings: Booking[
                         </thead>
                         <tbody className="divide-y divide-cream-100">
                             {bookings.map((booking: any) => {
-                                const start = new Date(booking.slots?.start_time)
+                                const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
+                                const slot = getFirst(booking.slots)
+                                const start = slot?.date && slot?.start_time
+                                    ? new Date(`${slot.date}T${slot.start_time}+08:00`)
+                                    : new Date()
                                 const statusStyle = STATUS_STYLES[booking.status] ?? 'bg-cream-100 text-charcoal-500'
 
                                 return (

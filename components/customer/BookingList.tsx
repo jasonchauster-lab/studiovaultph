@@ -35,8 +35,9 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
 
         // Status Filter
         if (filters.status !== 'all') {
-            // Customer mapping for status if needed, but they use the exact words
-            if (b.status !== filters.status) return false
+            if (filters.status === 'cancelled') {
+                if (!['cancelled', 'cancelled_refunded'].includes(b.status)) return false
+            } else if (b.status !== filters.status) return false
         }
 
         // Date Filter
@@ -58,6 +59,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
     const pastBookings = filteredBookings.filter(b =>
         b.status === 'completed' ||
         b.status === 'cancelled' ||
+        b.status === 'cancelled_refunded' ||
         (b.status === 'approved' && getSlotDateTime(b.slots.date, b.slots.start_time) <= now)
     )
 
@@ -257,12 +259,12 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                         "text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded border",
                                         booking.status === 'completed' ? "bg-green-100/50 text-green-700 border-green-200" :
                                             booking.status === 'approved' ? "bg-blue-100/50 text-blue-700 border-blue-200" :
-                                                booking.status === 'cancelled' ? "bg-red-100/50 text-red-700 border-red-200" :
+                                                ['cancelled', 'cancelled_refunded'].includes(booking.status) ? "bg-red-100/50 text-red-700 border-red-200" :
                                                     "bg-charcoal-100/50 text-charcoal-600 border-cream-200"
                                     )}>
                                         {booking.status === 'completed' ? 'Completed' :
                                             booking.status === 'approved' ? 'Completed' :
-                                                booking.status}
+                                                'Cancelled'}
                                     </span>
                                 </div>
                             </div>

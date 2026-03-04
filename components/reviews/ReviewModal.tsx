@@ -9,7 +9,7 @@ interface PendingBooking {
     id: string
     client_id: string
     instructor_id: string
-    slots: { start_time: string; studios: { name: string } | { name: string }[] } | null
+    slots: { date: string; start_time: string; studios: { name: string } | { name: string }[] } | null
     client: { id: string; full_name: string } | null
     instructor: { id: string; full_name: string } | null
 }
@@ -67,8 +67,8 @@ export default function ReviewModal({ booking, isInstructor, revieweeId: reviewe
 
     const slots = getFirst(booking.slots)
     const studioName = getFirst(slots?.studios)?.name ?? 'Studio'
-    const sessionDate = slots?.start_time
-        ? new Date(slots.start_time).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })
+    const sessionDate = slots?.date && slots?.start_time
+        ? new Date(`${slots.date}T${slots.start_time}+08:00`).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })
         : ''
 
     // Use explicit props if provided, else derive from booking
