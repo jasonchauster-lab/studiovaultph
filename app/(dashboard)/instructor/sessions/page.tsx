@@ -44,7 +44,8 @@ export default async function InstructorSessionsPage() {
                 email,
                 email,
                 medical_conditions,
-                other_medical_condition
+                other_medical_condition,
+                bio
             ),
             instructor:profiles!instructor_id (
                 id,

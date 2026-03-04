@@ -61,7 +61,8 @@ export default async function StudioHistoryPage() {
                     avatar_url,
                     email,
                     medical_conditions,
-                    other_medical_condition
+                    other_medical_condition,
+                    bio
                 )
             `)
             .in('slot_id', slotIds)

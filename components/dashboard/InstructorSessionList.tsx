@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, MapPin, Box, X, AlertCircle } from 'lucide-react'
+import { Calendar, MapPin, Box, X, AlertCircle, Clock } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
@@ -109,11 +109,12 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                     {booking.status === 'approved' ? 'Confirmed' : 'Cancelled'}
                                                                 </span>
                                                             </div>
-                                                            <div className="text-right shrink-0">
-                                                                <p className="text-[13px] font-bold text-charcoal-900 leading-none">
+                                                            <div className="text-right shrink-0 bg-cream-100/30 p-3 rounded-xl border border-cream-200/50 min-w-[140px]">
+                                                                <p className="text-lg font-black text-charcoal-900 leading-tight">
                                                                     {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                                                                 </p>
-                                                                <p className="text-[11px] text-charcoal-500 font-medium mt-1">
+                                                                <p className="text-sm text-rose-gold font-bold mt-1.5 flex items-center justify-end gap-1">
+                                                                    <Clock className="w-3.5 h-3.5" />
                                                                     {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                                 </p>
                                                             </div>
@@ -226,11 +227,12 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                         : 'Cancelled'}
                                                                 </span>
                                                             </div>
-                                                            <div className="text-right shrink-0">
-                                                                <p className="text-[13px] font-bold text-charcoal-900 leading-none">
+                                                            <div className="text-right shrink-0 bg-cream-100/30 p-3 rounded-xl border border-cream-200/50 min-w-[140px]">
+                                                                <p className="text-lg font-black text-charcoal-900 leading-tight">
                                                                     {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                                                                 </p>
-                                                                <p className="text-[11px] text-charcoal-500 font-medium mt-1">
+                                                                <p className="text-sm text-rose-gold font-bold mt-1.5 flex items-center justify-end gap-1">
+                                                                    <Clock className="w-3.5 h-3.5" />
                                                                     {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                                 </p>
                                                             </div>
@@ -320,6 +322,12 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             <h3 className="text-xl font-serif text-charcoal-900">{selectedClient.full_name}</h3>
                             <p className="text-sm text-charcoal-500">{selectedClient.email}</p>
                         </div>
+                        {selectedClient.bio && (
+                            <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50 mb-3">
+                                <h4 className="text-sm font-bold text-charcoal-700 mb-1">About</h4>
+                                <p className="text-sm text-charcoal-600 leading-relaxed italic">"{selectedClient.bio}"</p>
+                            </div>
+                        )}
                         {(() => {
                             const conditions = typeof selectedClient.medical_conditions === 'string'
                                 ? selectedClient.medical_conditions.split(',').map((c: string) => c.trim())
