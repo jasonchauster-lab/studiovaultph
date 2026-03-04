@@ -8,7 +8,7 @@ interface PendingBooking {
     id: string
     client_id: string
     instructor_id: string
-    slots: { start_time: string; studios: { name: string } | { name: string }[] } | null
+    slots: { date: string; start_time: string; studios: { name: string } | { name: string }[] } | null
     client: { id: string; full_name: string } | null
     instructor: { id: string; full_name: string } | null
 }

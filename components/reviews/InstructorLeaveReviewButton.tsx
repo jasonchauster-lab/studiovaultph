@@ -10,7 +10,7 @@ interface InstructorBookingForReview {
     instructor_id: string
     instructor_reviewed?: boolean
     instructor_reviewed_studio?: boolean
-    slots: { start_time: string; studios: { name: string } | { name: string }[] } | null
+    slots: { date: string; start_time: string; studios: { name: string } | { name: string }[] } | null
     instructor: { id: string; full_name: string } | null
     client: { id: string; full_name: string } | null
 }

@@ -131,6 +131,7 @@ export async function getPendingReviews() {
             client_id,
             instructor_id,
             slots (
+                date,
                 start_time,
                 end_time,
                 studios (
