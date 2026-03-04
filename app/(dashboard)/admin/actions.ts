@@ -18,6 +18,21 @@ async function verifyAdmin(supabase: any) {
     return profile?.role === 'admin'
 }
 
+async function logAdminAction(supabase: any, actionType: string, entityType: string, entityId: string | null, details: string) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { error } = await supabase.from('admin_activity_logs').insert({
+        admin_id: user.id,
+        action_type: actionType,
+        entity_type: entityType,
+        entity_id: entityId,
+        details: details
+    })
+    if (error) {
+        console.error('Failed to log admin action:', error)
+    }
+}
+
 export async function approvePayout(payoutId: string) {
     const supabase = await createClient()
 
@@ -62,6 +77,8 @@ export async function approvePayout(payoutId: string) {
         return { error: 'Failed to update payout status.' }
     }
 
+    await logAdminAction(supabase, 'APPROVE_PAYOUT', 'payout_requests', payoutId, `Approved payout request of ₱${payout.amount} for user/instructor ID ${targetId}`)
+
     revalidatePath('/admin')
     revalidatePath('/instructor/earnings')
     revalidatePath('/studio/earnings')
@@ -96,6 +113,8 @@ export async function rejectPayout(payoutId: string) {
         return { error: 'Payout request not found or permission denied.' }
     }
 
+    await logAdminAction(supabase, 'REJECT_PAYOUT', 'payout_requests', payoutId, `Rejected payout request ID ${payoutId}`)
+
     revalidatePath('/admin')
     revalidatePath('/instructor/earnings')
     revalidatePath('/studio/earnings')
@@ -122,6 +141,8 @@ export async function approveCertification(certificationId: string) {
         console.error('Error approving certification:', fetchError)
         return { error: 'Failed to approve certification' }
     }
+
+    await logAdminAction(supabase, 'APPROVE_CERTIFICATION', 'certifications', certificationId, `Verified instructor certification for ${cert.profiles?.full_name || 'Unknown'}`)
 
     // Send notification email
     if (cert.profiles?.email) {
@@ -176,6 +197,8 @@ export async function rejectCertification(certificationId: string, customReason?
         return { error: 'Permission denied or item not found. Are you an admin?' }
     }
 
+    await logAdminAction(supabase, 'REJECT_CERTIFICATION', 'certifications', certificationId, `Rejected instructor certification for ${cert?.profiles?.full_name || 'Unknown'} - Reason: ${customReason || 'Standard'}`)
+
     // Send rejection email
     if (cert?.profiles?.email) {
         const host = (await headers()).get('host')
@@ -219,6 +242,8 @@ export async function verifyStudio(studioId: string) {
         console.error('Error verifying studio:', fetchError)
         return { error: 'Failed to verify studio' }
     }
+
+    await logAdminAction(supabase, 'VERIFY_STUDIO', 'studios', studioId, `Verified studio application for ${studio.name}`)
 
     // Send notification email
     if (studio.profiles?.email) {
@@ -273,6 +298,8 @@ export async function rejectStudio(studioId: string, customReason?: string) {
         return { error: 'Permission denied or item not found. Are you an admin?' }
     }
 
+    await logAdminAction(supabase, 'REJECT_STUDIO', 'studios', studioId, `Rejected studio application for ${studio?.name || 'Unknown'} - Reason: ${customReason || 'Standard'}`)
+
     // Send rejection email
     if (studio?.profiles?.email) {
         const host = (await headers()).get('host')
@@ -316,6 +343,8 @@ export async function approveStudioPayout(studioId: string) {
         console.error('Error approving studio payout:', fetchError)
         return { error: 'Failed to approve studio payout' }
     }
+
+    await logAdminAction(supabase, 'APPROVE_STUDIO_PAYOUT_SETUP', 'studios', studioId, `Approved studio payout setup for ${studio.name}`)
 
     if (studio.profiles?.email) {
         const host = (await headers()).get('host')
@@ -364,6 +393,8 @@ export async function rejectStudioPayout(studioId: string, customReason?: string
         console.error('Error rejecting studio payout:', error)
         return { error: 'Failed to reject studio payout' }
     }
+
+    await logAdminAction(supabase, 'REJECT_STUDIO_PAYOUT_SETUP', 'studios', studioId, `Rejected studio payout setup for ${studio?.name || 'Unknown'}`)
 
     // Send rejection email
     if (studio?.profiles?.email) {
@@ -440,6 +471,8 @@ export async function confirmBooking(bookingId: string) {
         console.error('Error confirming booking:', updateError)
         return { error: 'Failed to update booking status.' }
     }
+
+    await logAdminAction(supabase, 'APPROVE_BOOKING', 'bookings', bookingId, `Approved booking ID ${bookingId}`)
 
     // 3. Extract Data Safely
     const slots = first(booking.slots);
@@ -601,6 +634,7 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
     }
 
     // 3.5 Process Refund if requested
+    let hasRefund = false;
     if (withRefund && booking.client_id) {
         const breakdown = booking.price_breakdown as any;
         const walletDeduction = Number(breakdown?.wallet_deduction || 0);
@@ -616,6 +650,17 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
                 console.error('Error processing refund during rejection:', refundError)
                 return { error: `Booking rejected, but refund failed: ${refundError.message}` }
             }
+
+            // Log the refund transaction
+            await supabase.from('wallet_top_ups').insert({
+                user_id: booking.client_id,
+                amount: refundAmount,
+                status: 'approved', // instantly approved
+                type: 'refund',
+                admin_notes: `Refund for rejected studio booking`
+            })
+
+            hasRefund = true;
         }
     }
 
@@ -663,7 +708,8 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
             studioName: studioName,
             date,
             time,
-            rejectionReason: reason
+            rejectionReason: reason,
+            hasRefund
         })
     });
 
@@ -672,6 +718,8 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
         // We'll still return success for the rejection itself, but maybe a warning?
         // Actually, returning success: true but with a message is better.
     }
+
+    await logAdminAction(supabase, 'REJECT_BOOKING', 'bookings', bookingId, `Rejected booking ID ${bookingId} - Reason: ${reason} - Refund: ${hasRefund ? 'Yes' : 'No'}`)
 
     revalidatePath('/admin')
     revalidatePath('/studio')
@@ -1206,6 +1254,8 @@ export async function updatePartnerFeeSettings(
         return { error: 'Failed to update partner fee settings.' };
     }
 
+    await logAdminAction(supabase, 'UPDATE_PARTNER_FEES', table, id, `Updated partner fee settings for ${type} ID ${id}: Founding Partner = ${isFoundingPartner}, Fee = ${customFeePercentage}%`)
+
     revalidatePath('/admin');
     revalidatePath('/admin/partners');
     return { success: true };
@@ -1320,6 +1370,8 @@ export async function reinstateStudio(profileId: string) {
         return { error: 'Failed to reset suspension.' }
     }
 
+    await logAdminAction(supabase, 'REINSTATE_STUDIO', 'profiles', profileId, `Reinstated suspended studio owner ID ${profileId} and cleared strikes for studio ID ${studio.id}`)
+
     // 3. Send Reactivation Email
     const { data: profile } = await supabase
         .from('profiles')
@@ -1372,6 +1424,8 @@ export async function approveTopUp(id: string) {
         return { error: `Failed to approve top-up: ${rpcError.message}` }
     }
 
+    await logAdminAction(supabase, 'APPROVE_TOP_UP', 'wallet_top_ups', id, `Approved wallet top-up of ₱${topUp.amount} for user ID ${topUp.user_id}`)
+
     // 4. Send Approval Email
     const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', topUp.user_id).single()
     if (profile?.email) {
@@ -1412,6 +1466,8 @@ export async function rejectTopUp(id: string, reason?: string) {
         console.error('Reject RPC Error:', rpcError)
         return { error: `Failed to reject top-up: ${rpcError.message}` }
     }
+
+    await logAdminAction(supabase, 'REJECT_TOP_UP', 'wallet_top_ups', id, `Rejected wallet top-up of ₱${topUp.amount} for user ID ${topUp.user_id} - Reason: ${reason || 'Receipt unreadable or incorrect amount.'}`)
 
     // Send Rejection Email
     const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', topUp.user_id).single()
@@ -1463,6 +1519,8 @@ export async function adjustUserBalance(userId: string, amount: number, reason: 
         console.error('Adjustment RPC Error:', rpcError)
         return { error: rpcError.message || 'Failed to execute adjustment.' }
     }
+
+    await logAdminAction(supabase, 'MANUAL_BALANCE_ADJUSTMENT', 'profiles', userId, `Admin adjusted balance by ₱${amount} for user ID ${userId} - Reason: ${reason}`)
 
     // 4. Send Notification Email
     const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', userId).single()
@@ -1517,6 +1575,8 @@ export async function settleInstructorDebt(profileId: string) {
         console.error('Settlement RPC Error:', rpcError)
         return { error: `Failed to settle balance: ${rpcError.message}` }
     }
+
+    await logAdminAction(supabase, 'SETTLE_INSTRUCTOR_DEBT', 'profiles', profileId, `Settled instructor debt of ₱${settlementAmount} for ID ${profileId}`)
 
     // 4. Send Confirmation Email
     if (profile.email) {

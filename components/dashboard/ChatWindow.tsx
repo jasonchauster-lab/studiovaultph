@@ -9,6 +9,7 @@ interface Message {
     id: string
     booking_id: string
     sender_id: string
+    recipient_id?: string | null
     content: string
     created_at: string
 }
@@ -49,6 +50,7 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
                 .from('messages')
                 .select('*')
                 .eq('booking_id', bookingId)
+                .or(`and(sender_id.eq.${currentUserId},recipient_id.eq.${recipientId}),and(sender_id.eq.${recipientId},recipient_id.eq.${currentUserId}),recipient_id.is.null`)
                 .order('created_at', { ascending: true })
 
             if (data) setMessages(data)
@@ -70,6 +72,15 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
                 },
                 (payload) => {
                     const newMsg = payload.new as Message
+
+                    // Filter realtime messages meant for this specific 1-on-1 chat
+                    const isForThisChat =
+                        (newMsg.sender_id === currentUserId && newMsg.recipient_id === recipientId) ||
+                        (newMsg.sender_id === recipientId && newMsg.recipient_id === currentUserId) ||
+                        (newMsg.recipient_id === null)
+
+                    if (!isForThisChat) return
+
                     setMessages((prev) => {
                         if (prev.find(m => m.id === newMsg.id)) return prev
                         // Remove optimistic message if it match the new one
@@ -98,6 +109,7 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
             id: `temp-${Date.now()}`,
             booking_id: bookingId,
             sender_id: currentUserId,
+            recipient_id: recipientId,
             content: text,
             created_at: new Date().toISOString()
         }
@@ -109,6 +121,7 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
             .insert({
                 booking_id: bookingId,
                 sender_id: currentUserId,
+                recipient_id: recipientId,
                 content: text
             })
 
@@ -119,6 +132,18 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
             alert('Failed to send message.')
         }
     }
+
+    // Update presence when opened
+    useEffect(() => {
+        if (isOpen && currentUserId && recipientId) {
+            supabase.rpc('update_chat_presence', {
+                p_booking_id: bookingId,
+                p_partner_id: recipientId
+            }).then(({ error }) => {
+                if (error) console.error('Failed to update presence:', error)
+            })
+        }
+    }, [isOpen, bookingId, currentUserId, recipientId, supabase])
 
     if (!isOpen) return null
 

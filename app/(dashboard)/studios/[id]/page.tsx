@@ -31,7 +31,19 @@ export default async function StudioDetailsPage(props: {
 
     if (!studio) notFound()
 
+    const { data: { user } } = await supabase.auth.getUser()
+
     // 2. Fetch Available Slots for the visible month
+    // Also fetch slots that are currently locked by the CURRENT user's pending bookings
+    const { data: pendingBookings } = user ? await supabase
+        .from('bookings')
+        .select('id, slot_id, status, booked_slot_ids')
+        .eq('client_id', user.id)
+        .eq('status', 'pending') : { data: [] }
+
+    // Extract all slot IDs currently locked by this specific user
+    const lockedSlotIds = (pendingBookings || []).flatMap(b => b.booked_slot_ids || []);
+
     const monthParam = searchParams.month || format(new Date(), 'yyyy-MM')
     const rangeStart = startOfMonth(new Date(monthParam + '-01'))
     const rangeEnd = endOfMonth(rangeStart)
@@ -42,17 +54,25 @@ export default async function StudioDetailsPage(props: {
     const nowDate = getManilaTodayStr()
     const nowTime = toManilaTimeString(new Date())
 
-    const { data: slots } = await supabase
+    let slotsQuery = supabase
         .from('slots')
         .select('*')
         .eq('studio_id', id)
-        .eq('is_available', true)
         .gte('date', startDateStr)
         .lte('date', endDateStr)
-        // Still filter out past slots within the month
         .or(`date.gt.${nowDate},and(date.eq.${nowDate},start_time.gte.${nowTime})`)
         .order('date', { ascending: true })
         .order('start_time', { ascending: true })
+
+    if (lockedSlotIds.length > 0) {
+        // If the user has locked slots, fetch available slots OR their locked slots
+        slotsQuery = slotsQuery.or(`is_available.eq.true,id.in.(${lockedSlotIds.join(',')})`)
+    } else {
+        // Otherwise, just fetch available slots
+        slotsQuery = slotsQuery.eq('is_available', true)
+    }
+
+    const { data: slots } = await slotsQuery
 
     const trimmedStudioLocation = studio.location?.trim() ?? ''
     // Build a list of tokens from the location for fuzzy matching
@@ -66,7 +86,7 @@ export default async function StudioDetailsPage(props: {
     // 3. Fetch verified instructors and their availability
     const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, full_name, rates')
+        .select('id, full_name, rates, avatar_url')
         .eq('role', 'instructor')
         .not('rates', 'is', null)
 
@@ -146,10 +166,11 @@ export default async function StudioDetailsPage(props: {
                                 studioId={studio.id}
                                 slots={slots || []}
                                 instructors={instructors}
-                                availabilityBlocks={locationAvailability || []}
-                                studioPricing={studio.pricing as Record<string, number> | undefined}
-                                studioHourlyRate={studio.hourly_rate || 0}
-                                studioLocation={studio.location || ''}
+                                availabilityBlocks={locationAvailability}
+                                studioPricing={studio.pricing}
+                                studioHourlyRate={studio.hourly_rate}
+                                studioLocation={studio.location}
+                                pendingBookings={pendingBookings || []}
                             />
                         );
                     })()}

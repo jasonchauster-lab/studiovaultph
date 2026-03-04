@@ -3,40 +3,48 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-export default function MessageCountBadge({ bookingId, currentUserId, isOpen }: { bookingId: string, currentUserId: string, isOpen: boolean }) {
+export default function MessageCountBadge({ bookingId, currentUserId, partnerId, isOpen }: { bookingId: string, currentUserId: string, partnerId: string, isOpen: boolean }) {
     const [unreadCount, setUnreadCount] = useState(0)
     const supabase = createClient()
 
     useEffect(() => {
-        const key = `last_seen_msg_count_${bookingId}`
+        if (!partnerId) return;
 
         async function fetchInitialCount() {
-            const { count } = await supabase
+            // Get the last time the current user checked this specific 1-on-1 chat
+            const { data: presence } = await supabase
+                .from('chat_presence')
+                .select('last_seen_at')
+                .eq('booking_id', bookingId)
+                .eq('user_id', currentUserId)
+                .eq('chat_partner_id', partnerId)
+                .single()
+
+            const lastSeen = presence?.last_seen_at || new Date(0).toISOString()
+
+            // Count messages sent TO current user BY partner, since last seen
+            let query = supabase
                 .from('messages')
                 .select('*', { count: 'exact', head: true })
                 .eq('booking_id', bookingId)
+                .eq('sender_id', partnerId)
+                .gt('created_at', lastSeen)
 
-            const lastSeen = parseInt(localStorage.getItem(key) || '0')
-            if (count && count > lastSeen) {
-                // We need to verify if the new messages are NOT from the current user
-                const { data: newMsgs } = await supabase
-                    .from('messages')
-                    .select('sender_id')
-                    .eq('booking_id', bookingId)
-                    .order('created_at', { ascending: false })
-                    .limit(count - lastSeen)
+            // Include backward compatibility (null recipient) OR explicit recipient
+            query = query.or(`recipient_id.eq.${currentUserId},recipient_id.is.null`)
 
-                const hasOthers = newMsgs?.some(m => m.sender_id !== currentUserId)
-                if (hasOthers) {
-                    setUnreadCount(count - lastSeen)
-                }
+            const { count } = await query
+
+            if (count) {
+                setUnreadCount(count)
             }
         }
 
         fetchInitialCount()
 
+        // Listen for new messages incoming FROM the partner
         const channel = supabase
-            .channel(`notify-${bookingId}`)
+            .channel(`notify-${bookingId}-${partnerId}`)
             .on(
                 'postgres_changes',
                 {
@@ -46,7 +54,9 @@ export default function MessageCountBadge({ bookingId, currentUserId, isOpen }: 
                     filter: `booking_id=eq.${bookingId}`
                 },
                 (payload) => {
-                    if (payload.new.sender_id !== currentUserId) {
+                    const newMsg = payload.new
+                    if (newMsg.sender_id === partnerId &&
+                        (newMsg.recipient_id === currentUserId || newMsg.recipient_id === null)) {
                         setUnreadCount(prev => prev + 1)
                     }
                 }
@@ -56,24 +66,14 @@ export default function MessageCountBadge({ bookingId, currentUserId, isOpen }: 
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [bookingId, currentUserId, supabase])
+    }, [bookingId, currentUserId, partnerId, supabase])
 
     // Clear the badge immediately when the chat is opened
     useEffect(() => {
         if (isOpen) {
             setUnreadCount(0)
-            // Also fetch the current count so localStorage stays accurate after closing
-            supabase
-                .from('messages')
-                .select('*', { count: 'exact', head: true })
-                .eq('booking_id', bookingId)
-                .then(({ count }) => {
-                    if (count != null) {
-                        localStorage.setItem(`last_seen_msg_count_${bookingId}`, count.toString())
-                    }
-                })
         }
-    }, [isOpen, bookingId, supabase])
+    }, [isOpen])
 
 
     if (unreadCount === 0) return null

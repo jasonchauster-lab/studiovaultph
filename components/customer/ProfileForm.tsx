@@ -186,6 +186,18 @@ export default function ProfileForm({ profile }: { profile: any }) {
                         </label>
                     ))}
                 </div>
+                {selectedMedicalConditions.includes('Others') && (
+                    <div className="mt-3">
+                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Please Specify</label>
+                        <input
+                            type="text"
+                            name="otherMedicalCondition"
+                            defaultValue={profile?.other_medical_condition || ''}
+                            placeholder="e.g. Recent knee surgery, Pregnancy complications..."
+                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                        />
+                    </div>
+                )}
                 <p className="text-xs text-charcoal-500 mt-2 italic">Select any conditions you have. This helps your instructor tailor sessions to your needs.</p>
             </div>
 

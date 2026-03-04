@@ -193,6 +193,7 @@ export default async function AdminDashboard({
         .select(`
       *,
       client:profiles!client_id(full_name),
+      instructor:profiles!instructor_id(full_name),
       slots(
         date,
         start_time,
@@ -306,6 +307,16 @@ export default async function AdminDashboard({
         .eq('role', 'instructor')
         .lt('available_balance', 0)
         .order('available_balance', { ascending: true })
+
+    // 11. Fetch Admin Activity Logs
+    const { data: activityLogs } = await supabase
+        .from('admin_activity_logs')
+        .select(`
+            id, action_type, entity_type, entity_id, details, created_at,
+            admin:profiles!admin_id(full_name, email)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(50)
 
     return (
         <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
@@ -792,8 +803,13 @@ export default async function AdminDashboard({
                                                 <p className="text-sm text-charcoal-600">
                                                     Requested: <span className="font-medium">{studio?.name}</span> ({studio?.location})
                                                 </p>
+                                                {booking.instructor?.full_name && (
+                                                    <p className="text-sm text-charcoal-600 mt-0.5">
+                                                        Instructor: <span className="font-medium">{booking.instructor.full_name}</span>
+                                                    </p>
+                                                )}
                                                 {studio?.address && (
-                                                    <p className="text-xs text-charcoal-500">{studio.address}</p>
+                                                    <p className="text-xs text-charcoal-500 mt-1">{studio.address}</p>
                                                 )}
                                                 <p className="text-xs text-charcoal-500 mt-1">{startTime}</p>
 
@@ -1097,6 +1113,51 @@ export default async function AdminDashboard({
                                     />
                                 </div>
                             ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Admin Activity Log */}
+                <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm col-span-1 lg:col-span-2 mt-8">
+                    <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-charcoal-500" />
+                        Recent Admin Activity Log (Last 50 Actions)
+                    </h2>
+
+                    {!activityLogs || activityLogs.length === 0 ? (
+                        <p className="text-charcoal-500 text-sm">No recent activity logs.</p>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-cream-200 text-xs text-charcoal-500 uppercase tracking-wider">
+                                        <th className="py-3 px-4 font-medium">Date & Time</th>
+                                        <th className="py-3 px-4 font-medium">Admin</th>
+                                        <th className="py-3 px-4 font-medium">Action</th>
+                                        <th className="py-3 px-4 font-medium">Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="text-sm">
+                                    {activityLogs.map((log: any) => (
+                                        <tr key={log.id} className="border-b border-cream-100 hover:bg-cream-50/50 transition-colors">
+                                            <td className="py-3 px-4 text-charcoal-600 whitespace-nowrap">
+                                                {new Date(log.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            </td>
+                                            <td className="py-3 px-4 font-medium text-charcoal-900">
+                                                {Array.isArray(log.admin) ? log.admin[0]?.full_name : log.admin?.full_name || 'System / Unknown'}
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <span className="inline-block bg-charcoal-100 text-charcoal-700 text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap">
+                                                    {log.action_type.replace(/_/g, ' ')}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 px-4 text-charcoal-700 max-w-md truncate" title={log.details}>
+                                                {log.details}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                 </div>

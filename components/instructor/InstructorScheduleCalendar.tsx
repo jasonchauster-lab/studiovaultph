@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes, isPast } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle } from 'lucide-react'
 import clsx from 'clsx'
 import { toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
@@ -737,6 +737,19 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     </button>
                                 </div>
                             </div>
+
+                            {/* Medical Conditions Alert if exists */}
+                            {selectedBooking.client?.medical_conditions && (
+                                <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 mt-4">
+                                    <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />
+                                    <div>
+                                        <h4 className="text-sm font-bold text-red-800 mb-1">Medical Conditions</h4>
+                                        <p className="text-sm text-red-700 leading-relaxed break-words whitespace-pre-wrap">
+                                            {selectedBooking.client.medical_conditions}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Booking Specifics */}
                             <div className="bg-cream-50/50 rounded-2xl p-6 border border-cream-100 space-y-4">

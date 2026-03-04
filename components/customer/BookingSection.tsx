@@ -21,6 +21,7 @@ interface Instructor {
     id: string;
     full_name: string;
     rates?: Record<string, number>;
+    avatar_url?: string | null;
 }
 
 interface AvailabilityBlock {
@@ -40,7 +41,8 @@ export default function BookingSection({
     availabilityBlocks,
     studioPricing,
     studioHourlyRate,
-    studioLocation
+    studioLocation,
+    pendingBookings = []
 }: {
     studioId: string
     slots: Slot[]
@@ -49,6 +51,7 @@ export default function BookingSection({
     studioPricing?: Record<string, number>
     studioHourlyRate?: number
     studioLocation?: string
+    pendingBookings?: any[]
 }) {
     const [selectedSlotTime, setSelectedSlotTime] = useState<string | null>(null) // Key: start-end
     const [selectedInstructor, setSelectedInstructor] = useState<string>('')
@@ -504,142 +507,212 @@ export default function BookingSection({
                 )}
             </div>
 
-            {selectedSlotTime && (
-                <div className="bg-cream-50 p-6 rounded-xl border border-cream-200 animate-in fade-in slide-in-from-top-2">
-                    <h3 className="font-serif text-lg text-charcoal-900 mb-4">Complete your Request</h3>
+            {selectedSlotTime && (() => {
+                const slotsInGroup = groupedSlots[selectedSlotTime] || [];
+                // Check if the current selected slot corresponds to a pending booking
+                const activePendingBooking = pendingBookings.find(pb => {
+                    return pb.booked_slot_ids?.some((id: string) => slotsInGroup.map(s => s.id).includes(id))
+                });
 
-                    <div className="max-w-md space-y-4">
-
-                        {/* Equipment Selector */}
-                        {equipmentTypes.length > 0 && (
-                            <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-2">
-                                    Select Equipment
-                                </label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {equipmentTypes.map(eq => (
-                                        <button
-                                            key={eq}
-                                            type="button"
-                                            onClick={() => {
-                                                setSelectedEquipment(eq);
-                                                setQuantity(1); // Reset qty on equipment change
-                                            }}
-                                            className={clsx(
-                                                "p-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-between text-left",
-                                                selectedEquipment.toLowerCase() === eq.toLowerCase()
-                                                    ? "bg-charcoal-900 border-charcoal-900 text-cream-50"
-                                                    : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
-                                            )}
-                                        >
-                                            <div>
-                                                <div className="uppercase tracking-wider text-xs mb-0.5">{eq}</div>
-                                                <div className={clsx("text-[10px]", selectedEquipment.toLowerCase() === eq.toLowerCase() ? "text-cream-200" : "text-charcoal-400")}>
-                                                    {equipmentInventory[eq]} available
-                                                </div>
-                                            </div>
-                                            {selectedEquipment.toLowerCase() === eq.toLowerCase() && (
-                                                <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Quantity Selector */}
-                        <div>
-                            <div className="flex justify-between items-center mb-1">
-                                <label className="text-sm font-medium text-charcoal-700">Quantity</label>
-                                <span className="text-xs text-charcoal-500">Max: {maxQuantity}</span>
-                            </div>
-                            <input
-                                type="number"
-                                min="1"
-                                max={maxQuantity}
-                                value={quantity}
-                                onChange={(e) => {
-                                    const val = parseInt(e.target.value);
-                                    if (!isNaN(val)) {
-                                        if (val > maxQuantity) setQuantity(maxQuantity);
-                                        else if (val < 1) setQuantity(1);
-                                        else setQuantity(val);
-                                    }
-                                }}
-                                className="w-full px-4 py-2 bg-white border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-1">
-                                Select Your Instructor
-                            </label>
-                            {availableInstructors.length > 0 ? (
-                                <select
-                                    value={selectedInstructor}
-                                    onChange={(e) => setSelectedInstructor(e.target.value)}
-                                    className="w-full px-4 py-2 bg-white border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-                                >
-                                    <option value="">-- Choose an Instructor --</option>
-                                    {availableInstructors.map(inst => (
-                                        <option key={inst.id} value={inst.id}>
-                                            {inst.full_name}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-700 text-sm flex items-center gap-2">
-                                    <AlertCircle className="w-4 h-4 shrink-0" />
-                                    <span>No instructors available for this equipment at this time.</span>
-                                </div>
-                            )}
-                            <p className="text-xs text-charcoal-500 mt-1">
-                                {availableInstructors.length > 0 && "Don't see your instructor? Tell them to verify their profile on StudioVaultPH!"}
+                if (activePendingBooking) {
+                    return (
+                        <div className="bg-orange-50 p-6 rounded-xl border border-orange-200 animate-in fade-in slide-in-from-top-2 text-center">
+                            <h3 className="font-serif text-lg text-orange-900 mb-2">Resume Your Reservation</h3>
+                            <p className="text-orange-700 text-sm mb-6 max-w-md mx-auto">
+                                You already have a pending reservation for this time slot. Please complete your payment to finalize the booking.
                             </p>
+                            <button
+                                onClick={() => router.push(`/customer/payment/${activePendingBooking.id}`)}
+                                className="bg-orange-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors inline-block mx-auto"
+                            >
+                                Continue to Payment
+                            </button>
                         </div>
+                    );
+                }
 
-                        {/* Price Display */}
-                        {totalPrice !== null && (
-                            <div className="bg-white p-4 rounded-lg border border-cream-200 space-y-2 text-sm">
-                                <div className="flex justify-between text-charcoal-600">
-                                    <span>Session Fee (1x)</span>
-                                    <span>₱{totalPrice.sessionFee.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between text-charcoal-500 text-xs pl-2">
-                                    <span>↳ Instructor Base <span className="text-charcoal-400">({selectedEquipment})</span></span>
-                                    <span>₱{totalPrice.instructorRate.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between text-charcoal-500 text-xs pl-2">
-                                    <span>↳ Studio Fee <span className="text-charcoal-400">({selectedEquipment})</span></span>
-                                    <span>₱{totalPrice.studioRate.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between text-charcoal-600 mt-2">
-                                    <span>Platform Service Fee <span className="text-xs text-charcoal-400 italic">(20% min. ₱100)</span></span>
-                                    <span>₱{totalPrice.serviceFee.toLocaleString()}</span>
-                                </div>
-                                {quantity > 1 && (
-                                    <div className="flex justify-between text-charcoal-500 text-xs mt-1">
-                                        <span>Quantity:</span>
-                                        <span>× {quantity} {selectedEquipment}s</span>
+                return (
+                    <div className="bg-cream-50 p-6 rounded-xl border border-cream-200 animate-in fade-in slide-in-from-top-2">
+                        <h3 className="font-serif text-lg text-charcoal-900 mb-4">Complete your Request</h3>
+
+                        <div className="flex flex-col md:flex-row gap-8">
+                            <div className="flex-1 max-w-md space-y-4">
+                                {/* Equipment Selector */}
+                                {equipmentTypes.length > 0 && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-charcoal-700 mb-2">
+                                            Select Equipment
+                                        </label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {equipmentTypes.map(eq => (
+                                                <button
+                                                    key={eq}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setSelectedEquipment(eq);
+                                                        setQuantity(1); // Reset qty on equipment change
+                                                    }}
+                                                    className={clsx(
+                                                        "p-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-between text-left",
+                                                        selectedEquipment.toLowerCase() === eq.toLowerCase()
+                                                            ? "bg-charcoal-900 border-charcoal-900 text-cream-50"
+                                                            : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
+                                                    )}
+                                                >
+                                                    <div>
+                                                        <div className="uppercase tracking-wider text-xs mb-0.5">{eq}</div>
+                                                        <div className={clsx("text-[10px]", selectedEquipment.toLowerCase() === eq.toLowerCase() ? "text-cream-200" : "text-charcoal-400")}>
+                                                            {equipmentInventory[eq]} available
+                                                        </div>
+                                                    </div>
+                                                    {selectedEquipment.toLowerCase() === eq.toLowerCase() && (
+                                                        <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
-                                <div className="border-t border-cream-200 pt-3 mt-2 flex justify-between items-center">
-                                    <p className="font-bold text-charcoal-900">Grand Total</p>
-                                    <span className="text-xl font-serif text-charcoal-900">₱{totalPrice.total.toLocaleString()}</span>
-                                </div>
-                            </div>
-                        )}
 
-                        <button
-                            onClick={handleBook}
-                            disabled={!selectedInstructor || isSubmitting || !selectedEquipment}
-                            className="w-full bg-charcoal-900 text-cream-50 py-3 rounded-lg font-medium hover:bg-charcoal-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-                        >
-                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : `Request Booking (${quantity})`}
-                        </button>
+                                {/* Quantity Selector */}
+                                <div>
+                                    <div className="flex justify-between items-center mb-1">
+                                        <label className="text-sm font-medium text-charcoal-700">Quantity</label>
+                                        <span className="text-xs text-charcoal-500">Max: {maxQuantity}</span>
+                                    </div>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max={maxQuantity}
+                                        value={quantity}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value);
+                                            if (!isNaN(val)) {
+                                                if (val > maxQuantity) setQuantity(maxQuantity);
+                                                else if (val < 1) setQuantity(1);
+                                                else setQuantity(val);
+                                            }
+                                        }}
+                                        className="w-full px-4 py-2 bg-white border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-charcoal-700 mb-1">
+                                        Select Your Instructor
+                                    </label>
+                                    {availableInstructors.length > 0 ? (
+                                        <select
+                                            value={selectedInstructor}
+                                            onChange={(e) => setSelectedInstructor(e.target.value)}
+                                            className="w-full px-4 py-2 bg-white border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
+                                        >
+                                            <option value="">-- Choose an Instructor --</option>
+                                            {availableInstructors.map(inst => (
+                                                <option key={inst.id} value={inst.id}>
+                                                    {inst.full_name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-700 text-sm flex items-center gap-2">
+                                            <AlertCircle className="w-4 h-4 shrink-0" />
+                                            <span>No instructors available for this equipment at this time.</span>
+                                        </div>
+                                    )}
+                                    <p className="text-xs text-charcoal-500 mt-1">
+                                        {availableInstructors.length > 0 && "Don't see your instructor? Tell them to verify their profile on StudioVaultPH!"}
+                                    </p>
+                                </div>
+
+                                {/* Price Display */}
+                                {totalPrice !== null && (
+                                    <div className="bg-white p-4 rounded-lg border border-cream-200 space-y-2 text-sm">
+                                        <div className="flex justify-between text-charcoal-600">
+                                            <span>Session Fee (1x)</span>
+                                            <span>₱{totalPrice.sessionFee.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex justify-between text-charcoal-500 text-xs pl-2">
+                                            <span>↳ Instructor Base <span className="text-charcoal-400">({selectedEquipment})</span></span>
+                                            <span>₱{totalPrice.instructorRate.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex justify-between text-charcoal-500 text-xs pl-2">
+                                            <span>↳ Studio Fee <span className="text-charcoal-400">({selectedEquipment})</span></span>
+                                            <span>₱{totalPrice.studioRate.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex justify-between text-charcoal-600 mt-2">
+                                            <span>Platform Service Fee <span className="text-xs text-charcoal-400 italic">(20% min. ₱100)</span></span>
+                                            <span>₱{totalPrice.serviceFee.toLocaleString()}</span>
+                                        </div>
+                                        {quantity > 1 && (
+                                            <div className="flex justify-between text-charcoal-500 text-xs mt-1">
+                                                <span>Quantity:</span>
+                                                <span>× {quantity} {selectedEquipment}s</span>
+                                            </div>
+                                        )}
+                                        <div className="border-t border-cream-200 pt-3 mt-2 flex justify-between items-center">
+                                            <p className="font-bold text-charcoal-900">Grand Total</p>
+                                            <span className="text-xl font-serif text-charcoal-900">₱{totalPrice.total.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={handleBook}
+                                    disabled={!selectedInstructor || isSubmitting || !selectedEquipment}
+                                    className="w-full bg-charcoal-900 text-cream-50 py-3 rounded-lg font-medium hover:bg-charcoal-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        'Request Booking (' + quantity + ')'
+                                    )}
+                                </button>
+                            </div>
+
+                            {/* Instructor Profile Card */}
+                            <div className="w-full md:w-72 shrink-0">
+                                {selectedInstructor && (() => {
+                                    const instructor = availableInstructors.find(i => i.id === selectedInstructor);
+                                    if (!instructor) return null;
+                                    const initial = instructor.full_name ? instructor.full_name.charAt(0).toUpperCase() : 'I';
+
+                                    return (
+                                        <div className="bg-white p-5 rounded-2xl border border-cream-200 shadow-sm sticky top-4 flex flex-col items-center text-center animate-in fade-in">
+                                            <div className="w-20 h-20 bg-cream-100 rounded-full flex items-center justify-center text-2xl font-serif text-charcoal-700 overflow-hidden mb-3 border-[3px] border-white shadow-sm ring-1 ring-cream-200">
+                                                {instructor.avatar_url ? (
+                                                    <img src={`https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${instructor.avatar_url}`} alt={instructor.full_name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    initial
+                                                )}
+                                            </div>
+                                            <h4 className="font-serif text-lg text-charcoal-900 font-bold mb-1 flex items-center justify-center gap-1">
+                                                {instructor.full_name}
+                                                <CheckCircle className="w-4 h-4 text-green-500 fill-green-50" />
+                                            </h4>
+                                            <p className="text-xs text-charcoal-500 mb-4 bg-cream-50 px-2 py-1 rounded-md inline-block">Verified Instructor</p>
+
+                                            <div className="w-full border-t border-cream-100 pt-3 text-left">
+                                                <p className="text-xs text-charcoal-600 font-medium mb-2">Qualifications & Equipment</p>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {Object.keys(instructor.rates || {}).map(eq => (
+                                                        <span key={eq} className="text-[10px] uppercase bg-cream-50 text-charcoal-600 px-2 py-1 rounded border border-cream-200">
+                                                            {eq}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
         </div>
     )
 }

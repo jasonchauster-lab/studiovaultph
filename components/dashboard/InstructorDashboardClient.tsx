@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Slot } from '@/types';
-import { Loader2, User, Calendar, Wallet, ArrowUpRight, MessageSquare, ChevronRight, MapPin, Box, X } from 'lucide-react';
+import { Loader2, User, Calendar, Wallet, ArrowUpRight, MessageSquare, ChevronRight, MapPin, Box, X, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import clsx from 'clsx';
 import ChatWindow from '@/components/dashboard/ChatWindow';
@@ -29,6 +29,7 @@ export default function InstructorDashboardClient() {
 
     const [activeChat, setActiveChat] = useState<{ id: string, recipientId: string, name: string, isExpired: boolean } | null>(null);
     const [cancellingBooking, setCancellingBooking] = useState<any>(null);
+    const [selectedClient, setSelectedClient] = useState<any>(null);
 
     useEffect(() => {
         async function fetchData() {
@@ -52,6 +53,7 @@ export default function InstructorDashboardClient() {
                             end_time,
                             equipment,
                             studios (
+                                id,
                                 name,
                                 location,
                                 logo_url,
@@ -67,7 +69,7 @@ export default function InstructorDashboardClient() {
                     `)
                     .eq('instructor_id', user.id)
                     .eq('status', 'approved')
-                    .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`)
+                    .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' })
                     .order('slots(date)', { ascending: true })
                     .order('slots(start_time)', { ascending: true })
                     .limit(5);
@@ -95,6 +97,7 @@ export default function InstructorDashboardClient() {
                             end_time,
                             equipment,
                             studios (
+                                id,
                                 name,
                                 location,
                                 logo_url,
@@ -179,13 +182,6 @@ export default function InstructorDashboardClient() {
                     </div>
 
                     <div className="flex gap-2">
-                        <Link
-                            href="/customer/browse"
-                            className="flex items-center gap-2 px-4 py-2 bg-white text-charcoal-900 border border-cream-200 rounded-lg hover:bg-cream-50 transition-colors shadow-sm font-bold"
-                        >
-                            <User className="w-4 h-4" />
-                            <span>Switch to Client Mode</span>
-                        </Link>
                         <Link
                             href="/instructor/profile"
                             className="flex items-center gap-2 px-4 py-2 bg-rose-gold text-white rounded-lg hover:brightness-110 transition-all shadow-sm font-bold"
@@ -291,18 +287,18 @@ export default function InstructorDashboardClient() {
                                                     <div className="flex justify-between items-start mb-3">
                                                         <div className="flex flex-col gap-1 w-full">
                                                             <div className="flex items-center gap-3">
-                                                                <div className="w-10 h-10 rounded-full overflow-hidden border border-cream-200 bg-white shadow-sm shrink-0">
+                                                                <Link href={`/studios/${session.slots.studios.id}`} className="w-10 h-10 rounded-full overflow-hidden border border-cream-200 bg-white shadow-sm shrink-0 hover:opacity-80 transition-opacity">
                                                                     <img
                                                                         src={session.slots.studios.logo_url || "/logo.png"}
                                                                         alt={session.slots.studios.name}
                                                                         className="w-full h-full object-cover"
                                                                     />
-                                                                </div>
+                                                                </Link>
                                                                 <div className="flex-1 min-w-0">
                                                                     <div className="flex items-start justify-between gap-2">
-                                                                        <h3 className="text-sm font-bold text-charcoal-900 truncate">
+                                                                        <Link href={`/studios/${session.slots.studios.id}`} className="text-sm font-bold text-charcoal-900 truncate hover:text-rose-gold transition-colors">
                                                                             {session.slots.studios.name}
-                                                                        </h3>
+                                                                        </Link>
                                                                         <span className="px-2 py-0.5 bg-green-100/50 text-green-700 text-[9px] font-bold uppercase rounded-md tracking-wider border border-green-200 shrink-0">
                                                                             Confirmed
                                                                         </span>
@@ -317,12 +313,15 @@ export default function InstructorDashboardClient() {
                                                     </div>
 
                                                     <div className="pt-3 border-t border-cream-200/50 space-y-2">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-6 h-6 rounded-full overflow-hidden bg-cream-200 shrink-0">
+                                                        <div
+                                                            className="flex items-center gap-2 cursor-pointer group"
+                                                            onClick={() => setSelectedClient(session.client)}
+                                                        >
+                                                            <div className="w-6 h-6 rounded-full overflow-hidden bg-cream-200 shrink-0 border border-cream-200 group-hover:border-rose-gold transition-colors">
                                                                 <img src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                                             </div>
-                                                            <div className="text-xs text-charcoal-600 truncate flex-1">
-                                                                Client: <span className="font-semibold text-charcoal-900">{session.client?.full_name}</span>
+                                                            <div className="text-xs text-charcoal-600 truncate flex-1 group-hover:text-charcoal-900 transition-colors">
+                                                                Client: <span className="font-semibold text-charcoal-900 group-hover:text-rose-gold transition-colors">{session.client?.full_name}</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -353,8 +352,26 @@ export default function InstructorDashboardClient() {
                                                                 title="Message Client"
                                                             >
                                                                 <MessageSquare className="w-3 h-3" />
-                                                                <span className="text-[10px] font-bold">Chat</span>
-                                                                <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} isOpen={activeChat?.id === session.id} />
+                                                                <span className="text-[10px] font-bold">Client</span>
+                                                                <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.client_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.client_id} />
+                                                            </button>
+
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    setActiveChat({
+                                                                        id: session.id,
+                                                                        recipientId: session.slots.studios.owner_id,
+                                                                        name: session.slots.studios.name,
+                                                                        isExpired: isChatExpired(session)
+                                                                    })
+                                                                }}
+                                                                className="px-2 py-1.5 bg-white text-charcoal-600 border border-cream-200 rounded-lg hover:bg-charcoal-900 hover:text-white hover:border-charcoal-900 transition-all flex items-center gap-1 shadow-sm relative group/btn2"
+                                                                title="Message Studio"
+                                                            >
+                                                                <MessageSquare className="w-3 h-3" />
+                                                                <span className="text-[10px] font-bold">Studio</span>
+                                                                <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.slots.studios.owner_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.slots.studios.owner_id} />
                                                             </button>
                                                         </div>
                                                     </div>
@@ -390,6 +407,33 @@ export default function InstructorDashboardClient() {
                     title="Cancel Session"
                     description="Are you sure you want to cancel this session? The client and studio owner will be notified."
                 />
+            )}
+
+            {selectedClient && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
+                    <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden p-6 relative" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedClient(null)} className="absolute top-4 right-4 text-charcoal-400 hover:text-charcoal-900"><X className="w-5 h-5" /></button>
+                        <div className="flex flex-col items-center mt-2 mb-6 text-center">
+                            <div className="w-20 h-20 rounded-full overflow-hidden mb-3 border border-cream-200">
+                                <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+                            </div>
+                            <h3 className="text-xl font-bold text-charcoal-900">{selectedClient.full_name}</h3>
+                            <p className="text-sm text-charcoal-500">{selectedClient.email}</p>
+                        </div>
+                        {selectedClient.medical_conditions ? (
+                            <div className="bg-red-50 p-4 rounded-xl border border-red-100">
+                                <h4 className="text-sm font-bold text-red-800 mb-1 flex items-center gap-1.5"><AlertCircle className="w-4 h-4" /> Medical Conditions</h4>
+                                <p className="text-sm text-red-700 whitespace-pre-wrap">{selectedClient.medical_conditions}</p>
+                            </div>
+                        ) : (
+                            <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50">
+                                <h4 className="text-sm font-bold text-charcoal-700 mb-1">Medical Conditions</h4>
+                                <p className="text-sm text-charcoal-500">None reported.</p>
+                            </div>
+                        )}
+                        <button onClick={() => setSelectedClient(null)} className="w-full mt-6 py-2.5 bg-cream-100 text-charcoal-900 rounded-xl font-bold hover:bg-cream-200 transition-colors">Close</button>
+                    </div>
+                </div>
             )}
         </div>
     );

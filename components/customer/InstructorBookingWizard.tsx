@@ -327,6 +327,7 @@ export default function InstructorBookingWizard({
                             {nextDays.map((d) => {
                                 const todayManilaStr = getManilaTodayStr();
                                 const isTodayPill = d.date === todayManilaStr;
+                                const isPastPill = d.date < todayManilaStr;
 
                                 // Relaxed expiration: allow slots that ended up to 30 minutes ago
                                 const nowInstance = toManilaDate(new Date());
@@ -339,7 +340,7 @@ export default function InstructorBookingWizard({
                                     const aLoc = a.location_area?.trim().toLowerCase();
                                     const fLoc = filterLocation?.trim().toLowerCase();
                                     const locationMatch = fLoc ? (aLoc === fLoc || aLoc.startsWith(fLoc + ' - ')) : true;
-                                    const notExpired = isTodayPill ? a.end_time.slice(0, 5) > nowManilaPill : true;
+                                    const notExpired = isPastPill ? false : (isTodayPill ? a.end_time.slice(0, 5) > nowManilaPill : true);
                                     const notBooked = !bookedSlotsSet.has(`${d.date}|${normalizeTimeTo24h(a.start_time)}`);
                                     return dateMatch && locationMatch && notExpired && notBooked;
                                 });
@@ -386,13 +387,14 @@ export default function InstructorBookingWizard({
                             const nowMinus30Shift = new Date(nowInstance.getTime() - 30 * 60 * 1000);
                             const nowManilaTime = nowMinus30Shift.getUTCHours().toString().padStart(2, '0') + ':' + nowMinus30Shift.getUTCMinutes().toString().padStart(2, '0');
                             const isToday = activeDate === getManilaTodayStr();
+                            const isPastDate = activeDate < getManilaTodayStr();
 
                             const slots = availability.filter(a => {
                                 const dateMatch = a.date ? a.date === activeDate : a.day_of_week === d?.dayIndex;
                                 const aLoc = a.location_area?.trim().toLowerCase();
                                 const fLoc = filterLocation?.trim().toLowerCase();
                                 const locationMatch = fLoc ? (aLoc === fLoc || aLoc.startsWith(fLoc + ' - ')) : true;
-                                const notExpired = isToday ? a.end_time.slice(0, 5) > nowManilaTime : true;
+                                const notExpired = isPastDate ? false : (isToday ? a.end_time.slice(0, 5) > nowManilaTime : true);
                                 const notBooked = !bookedSlotsSet.has(`${activeDate}|${normalizeTimeTo24h(a.start_time)}`);
                                 return dateMatch && locationMatch && notExpired && notBooked;
                             });

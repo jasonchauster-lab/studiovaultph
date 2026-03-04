@@ -23,6 +23,7 @@ interface BookingNotificationEmailProps {
     address?: string;
     rejectionReason?: string;
     cancellationReason?: string;
+    hasRefund?: boolean;
 }
 
 export default function BookingNotificationEmail({
@@ -36,6 +37,7 @@ export default function BookingNotificationEmail({
     address,
     rejectionReason,
     cancellationReason,
+    hasRefund,
 }: BookingNotificationEmailProps) {
     return (
         <Html>
@@ -58,6 +60,12 @@ export default function BookingNotificationEmail({
                                     ? `This session has been cancelled.`
                                     : `Your booking has been successfully confirmed.`}
                     </Text>
+
+                    {hasRefund && (
+                        <Text style={refundText}>
+                            Your wallet has been refunded for this booking. You can view the refunded amount in your Wallet transactions.
+                        </Text>
+                    )}
 
                     {(bookingType === 'Booking Rejected' || bookingType === 'Booking Cancelled') && (rejectionReason || cancellationReason) && (
                         <Section style={rejectionBox}>
@@ -93,6 +101,26 @@ export default function BookingNotificationEmail({
                             <strong>Time:</strong> {time}
                         </Text>
                     </Section>
+
+                    {bookingType === 'Booking Confirmed' && (
+                        <Section style={tncBox}>
+                            <Text style={tncHeader}>Terms & Conditions</Text>
+                            <ul style={tncList}>
+                                <li style={tncItem}>
+                                    <strong>Cancellations:</strong> Can be made up to 24 hours before the session start time for a full refund to your wallet. Cancellations within 24 hours are non-refundable.
+                                </li>
+                                <li style={tncItem}>
+                                    <strong>No-Shows:</strong> If you do not arrive for your scheduled session, it will be considered a no-show and the session fee will be forfeited.
+                                </li>
+                                <li style={tncItem}>
+                                    <strong>Rebooking:</strong> Rebooking is treated as a cancellation. Please cancel your existing session (if eligible) and book a new one.
+                                </li>
+                                <li style={tncItem}>
+                                    <strong>Refunds:</strong> All eligible refunds are credited directly back to your StudioVaultPH Wallet and are not refundable to the original payment method.
+                                </li>
+                            </ul>
+                        </Section>
+                    )}
 
                     <Hr style={hr} />
                     <Text style={footer}>StudioVaultPH Notification</Text>
@@ -154,6 +182,14 @@ const box = {
     margin: '24px 20px',
 };
 
+const refundText = {
+    color: '#059669', // A clear green to indicate a positive financial action
+    fontSize: '15px',
+    lineHeight: '22px',
+    padding: '0 20px',
+    fontWeight: 'bold',
+};
+
 const rejectionBox = {
     padding: '24px',
     backgroundColor: '#fff5f5',
@@ -178,4 +214,30 @@ const footer = {
     fontSize: '12px',
     lineHeight: '16px',
     textAlign: 'center' as const,
+};
+
+const tncBox = {
+    padding: '24px',
+    backgroundColor: '#fafbfc',
+    borderTop: '1px solid #e6ebf1',
+    marginTop: '12px',
+};
+
+const tncHeader = {
+    fontSize: '14px',
+    fontWeight: 'bold',
+    color: '#333',
+    margin: '0 0 12px 0',
+};
+
+const tncList = {
+    margin: '0',
+    paddingLeft: '20px',
+};
+
+const tncItem = {
+    fontSize: '13px',
+    lineHeight: '20px',
+    color: '#555',
+    marginBottom: '8px',
 };

@@ -941,6 +941,15 @@ export async function cancelBooking(bookingId: string) {
             console.error('Wallet increment error:', refundError)
             return { error: `Failed to process refund to wallet: ${refundError.message} (Code: ${refundError.code})` }
         }
+
+        // Log the refund transaction
+        await supabase.from('wallet_top_ups').insert({
+            user_id: user.id,
+            amount: refundAmount,
+            status: 'approved', // instantly approved
+            type: 'refund',
+            admin_notes: `Refund for cancelled booking`
+        })
     }
 
     // Preserve existing breakdown and add refunded_amount
@@ -1069,14 +1078,14 @@ export async function getCustomerWalletDetails() {
     const getFirst = (item: any) => Array.isArray(item) ? item[0] : item;
 
     walletActions?.forEach(wa => {
-        if (wa.status === 'approved' || wa.type === 'admin_adjustment') {
+        if (wa.status === 'approved' || wa.type === 'admin_adjustment' || wa.type === 'refund') {
             transactions.push({
                 id: wa.id,
                 date: wa.updated_at || wa.created_at,
-                type: wa.type === 'admin_adjustment' ? 'Direct Adjustment' : 'Wallet Top-Up',
+                type: wa.type === 'admin_adjustment' ? 'Direct Adjustment' : wa.type === 'refund' ? 'Booking Refund' : 'Wallet Top-Up',
                 amount: wa.amount, // Could be negative for deductions in admin_adjustment
                 status: 'completed',
-                details: wa.admin_notes || (wa.type === 'admin_adjustment' ? 'Manual balance adjustment' : 'Gcash/Bank Top-up')
+                details: wa.admin_notes || (wa.type === 'admin_adjustment' ? 'Manual balance adjustment' : wa.type === 'refund' ? 'Refund for cancelled/declined booking' : 'Gcash/Bank Top-up')
             });
         }
     });

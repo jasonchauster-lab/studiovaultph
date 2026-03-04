@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, MapPin, Clock, MessageCircle, XCircle } from 'lucide-react'
+import { Calendar, MapPin, Clock, MessageCircle, XCircle, Box } from 'lucide-react'
+import Link from 'next/link'
 import clsx from 'clsx'
 import ChatWindow from '@/components/dashboard/ChatWindow'
+import MessageCountBadge from '@/components/dashboard/MessageCountBadge'
 import { cancelBooking } from '@/app/(dashboard)/customer/actions'
 
 interface BookingListProps {
@@ -70,65 +72,92 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                     </div>
                 ) : (
                     upcomingBookings.map((booking) => (
-                        <div key={booking.id} className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div className="flex gap-4">
-                                <div className="flex flex-col items-center justify-center bg-cream-100 w-16 h-16 rounded-lg text-charcoal-900">
-                                    <span className="text-xs font-bold uppercase">{getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleString('default', { month: 'short' })}</span>
-                                    <span className="text-xl font-serif">{getSlotDateTime(booking.slots.date, booking.slots.start_time).getDate()}</span>
-                                </div>
-                                <div>
-                                    <h3 className="font-medium text-charcoal-900 text-lg mb-1">{booking.slots.studios.name}</h3>
-                                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm text-charcoal-500">
-                                        <span className="flex items-center gap-1">
-                                            <Clock className="w-4 h-4" />
-                                            {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <MapPin className="w-4 h-4" />
-                                            {booking.slots.studios.location}
-                                        </span>
+                        <div key={booking.id} className="p-4 border border-cream-200 bg-cream-50/50 rounded-xl hover:border-rose-gold/30 hover:bg-white transition-all shadow-sm group">
+                            <div className="flex justify-between items-start mb-3">
+                                <div className="flex flex-col gap-1 w-full">
+                                    <div className="flex items-center justify-between w-full">
+                                        <div className="flex items-center gap-3 w-full">
+                                            <Link href={`/studios/${booking.slots.studios?.id}`} className="w-10 h-10 rounded-full overflow-hidden border border-cream-200 bg-white shadow-sm shrink-0 hover:opacity-80 transition-opacity">
+                                                <img
+                                                    src={booking.slots.studios?.logo_url || "/logo.png"}
+                                                    alt={booking.slots.studios?.name || "Studio"}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </Link>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <Link href={`/studios/${booking.slots.studios?.id}`} className="text-sm font-bold text-charcoal-900 truncate hover:text-rose-gold transition-colors">
+                                                        {booking.slots.studios?.name || "Studio"}
+                                                    </Link>
+                                                    <span className={clsx(
+                                                        "px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border shrink-0",
+                                                        booking.status === 'approved' ? "bg-green-100/50 text-green-700 border-green-200" :
+                                                            booking.status === 'rejected' || booking.status === 'cancelled' ? "bg-red-100/50 text-red-700 border-red-200" :
+                                                                "bg-amber-100/50 text-amber-700 border-amber-200"
+                                                    )}>
+                                                        {booking.status === 'approved' ? 'Confirmed' : booking.status}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-[10px] text-charcoal-500 font-medium mt-0.5">
+                                                    <Calendar className="w-3 h-3 text-rose-gold" />
+                                                    <span>
+                                                        {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} at {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <p className="text-sm text-charcoal-600 mt-2">
-                                        Valid w/ <span className="font-medium">{booking.profiles?.full_name || 'Instructor'}</span>
-                                    </p>
-                                    {booking.status === 'rejected' && booking.rejection_reason && (
-                                        <p className="text-sm text-red-600 mt-2 bg-red-50 p-2 rounded-md border border-red-100">
-                                            <strong>Reason:</strong> {booking.rejection_reason}
-                                        </p>
-                                    )}
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3">
-                                {booking.status !== 'rejected' && (
-                                    <button
-                                        onClick={() => handleChatClick(booking.id)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-cream-100 text-charcoal-900 rounded-lg hover:bg-cream-200 transition-colors text-sm font-medium"
-                                    >
-                                        <MessageCircle className="w-4 h-4" />
-                                        Chat
-                                    </button>
+                            <div className="pt-3 border-t border-cream-200/50 space-y-2">
+                                <div className="flex items-center gap-2 group/inst">
+                                    <Link href={`/instructors/${booking.instructor_id}`} className="w-6 h-6 rounded-full overflow-hidden bg-cream-200 shrink-0 border border-cream-200 hover:border-rose-gold transition-colors">
+                                        <img src={booking.instructor?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.instructor?.full_name || 'I')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+                                    </Link>
+                                    <div className="text-xs text-charcoal-600 truncate flex-1 group-hover/inst:text-charcoal-900 transition-colors">
+                                        Instructor: <Link href={`/instructors/${booking.instructor_id}`} className="font-semibold text-charcoal-900 hover:text-rose-gold transition-colors">{booking.instructor?.full_name || booking.profiles?.full_name || 'N/A'}</Link>
+                                    </div>
+                                </div>
+                                {booking.status === 'rejected' && booking.rejection_reason && (
+                                    <p className="text-[10px] text-red-600 mt-1 bg-red-50 p-1.5 rounded-md border border-red-100 flex items-center gap-1">
+                                        <strong>Reason:</strong> {booking.rejection_reason}
+                                    </p>
                                 )}
-                                <span className={clsx(
-                                    "px-3 py-1 text-xs font-medium rounded-full uppercase tracking-wider",
-                                    booking.status === 'approved' ? "bg-green-100 text-green-700" :
-                                        booking.status === 'rejected' || booking.status === 'cancelled' ? "bg-red-100 text-red-700" :
-                                            "bg-yellow-100 text-yellow-700"
-                                )}>
-                                    {booking.status}
-                                </span>
+                            </div>
 
-                                {booking.status === 'approved' && getSlotDateTime(booking.slots.date, booking.slots.start_time) > now && (
-                                    <button
-                                        onClick={() => handleCancel(booking)}
-                                        disabled={cancellingId === booking.id}
-                                        className="flex items-center gap-1 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-xs font-medium disabled:opacity-50"
-                                        title="Cancel Booking"
-                                    >
-                                        <XCircle className="w-4 h-4" />
-                                        {cancellingId === booking.id ? '...' : 'Cancel'}
-                                    </button>
-                                )}
+                            <div className="flex items-center justify-between text-xs mt-3 pt-3 border-t border-cream-200/50">
+                                <div className="flex items-center gap-2">
+                                    <MapPin className="w-3.5 h-3.5 text-charcoal-400" />
+                                    <span className="font-semibold text-charcoal-700 truncate max-w-[120px]">
+                                        {booking.slots.studios?.location || "N/A"}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                    {booking.status === 'approved' && getSlotDateTime(booking.slots.date, booking.slots.start_time) > now && (
+                                        <button
+                                            onClick={() => handleCancel(booking)}
+                                            disabled={cancellingId === booking.id}
+                                            className="px-2 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-[10px] font-bold disabled:opacity-50 flex items-center gap-1 border border-red-100"
+                                            title="Cancel Booking"
+                                        >
+                                            <XCircle className="w-3 h-3" />
+                                            {cancellingId === booking.id ? '...' : 'Cancel'}
+                                        </button>
+                                    )}
+                                    {booking.status !== 'rejected' && (
+                                        <button
+                                            onClick={() => handleChatClick(booking.id)}
+                                            className="px-2 py-1.5 bg-white text-charcoal-600 border border-cream-200 rounded-lg hover:bg-rose-gold hover:text-white hover:border-rose-gold transition-all flex items-center gap-1 shadow-sm relative group/btn"
+                                            title="Message Instructor"
+                                        >
+                                            <MessageCircle className="w-3 h-3" />
+                                            <span className="text-[10px] font-bold">Chat</span>
+                                            <MessageCountBadge bookingId={booking.id} currentUserId={userId} partnerId={booking.instructor_id} isOpen={selectedBooking === booking.id} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))

@@ -27,6 +27,7 @@ export default async function CustomerBookingsPage() {
                 start_time,
                 end_time,
                 studios (
+                    id,
                     name,
                     location,
                     address,
