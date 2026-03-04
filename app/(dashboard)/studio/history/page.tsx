@@ -1,15 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Clock, CalendarX2, PlusCircle } from 'lucide-react'
+import { Clock, CalendarX2, PlusCircle, MapPin, Box } from 'lucide-react'
 import Link from 'next/link'
-
-const STATUS_STYLES: Record<string, string> = {
-    approved: 'bg-green-100 text-green-700',
-    completed: 'bg-blue-100 text-blue-700',
-    pending: 'bg-amber-100 text-amber-700',
-    cancelled: 'bg-red-100 text-red-600',
-    expired: 'bg-cream-100 text-charcoal-500',
-}
+import StudioChatButton from '@/components/dashboard/StudioChatButton'
+import clsx from 'clsx'
 
 export default async function StudioHistoryPage() {
     const supabase = await createClient()
@@ -42,8 +36,26 @@ export default async function StudioHistoryPage() {
         : await supabase
             .from('bookings')
             .select(`
-                *
-                ${/* The client needs everything else */ ''}
+                *,
+                slots (
+                    date,
+                    start_time,
+                    end_time,
+                    equipment,
+                    studios (
+                        id,
+                        name,
+                        location,
+                        address,
+                        owner_id,
+                        logo_url
+                    )
+                ),
+                instructor:profiles!instructor_id (
+                    id,
+                    full_name,
+                    avatar_url
+                )
             `)
             .in('slot_id', slotIds)
             .order('created_at', { ascending: false })
@@ -67,11 +79,11 @@ export default async function StudioHistoryPage() {
                     </Link>
                 </div>
 
-                {/* Table card */}
-                <div className="bg-white border border-cream-200 rounded-2xl shadow-sm overflow-hidden">
+                {/* Card List */}
+                <div className="space-y-4">
                     {!bookings || bookings.length === 0 ? (
                         /* ── Empty State ── */
-                        <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
+                        <div className="bg-white border border-cream-200 rounded-2xl shadow-sm flex flex-col items-center justify-center py-20 px-8 text-center">
                             <div className="w-16 h-16 bg-cream-100 rounded-full flex items-center justify-center mb-5">
                                 <CalendarX2 className="w-8 h-8 text-charcoal-300" />
                             </div>
@@ -88,119 +100,106 @@ export default async function StudioHistoryPage() {
                             </Link>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm text-charcoal-600">
-                                <thead className="bg-cream-50 border-b border-cream-200">
-                                    <tr>
-                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-charcoal-500">Date / Time</th>
-                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-charcoal-500">Instructor</th>
-                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-charcoal-500">Equipment</th>
-                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-charcoal-500">Duration</th>
-                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-charcoal-500 text-right">Earnings</th>
-                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-charcoal-500">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-cream-100">
-                                    {bookings.map((booking: any) => {
-                                        // Fixed Server Crash - Combine date and time for valid Date parsing
-                                        const start = new Date(`${booking.slots?.date}T${booking.slots?.start_time} +08:00`)
-                                        const end = new Date(`${booking.slots?.date}T${booking.slots?.end_time} +08:00`)
-                                        const durationMins = Math.round((end.getTime() - start.getTime()) / 60000)
-                                        const durationStr = durationMins >= 60
-                                            ? `${Math.floor(durationMins / 60)}h${durationMins % 60 ? ` ${durationMins % 60}m` : ''} `
-                                            : `${durationMins} m`
+                        bookings.map((booking: any) => {
+                            const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
+                            const slot = getFirst(booking.slots)
+                            const studioData = getFirst(slot?.studios)
+                            const instructor = getFirst(booking.instructor)
 
-                                        const studioFee = booking.price_breakdown?.studio_fee ?? 0
-                                        const instructorFee = (booking.price_breakdown as any)?.instructor_fee ?? 0
-                                        const serviceFee = (booking.price_breakdown as any)?.service_fee ?? 0
-                                        const qty = booking.price_breakdown?.quantity ?? 1
-                                        // Full booking total: prefer explicit total, else sum breakdown parts
-                                        const fullTotal = booking.total_price
-                                            ?? ((studioFee + instructorFee + serviceFee) || 0)
-                                        const equipmentType = booking.price_breakdown?.equipment || booking.equipment || '—'
-                                        const instructor = Array.isArray(booking.instructor) ? booking.instructor[0] : booking.instructor
-                                        const statusStyle = STATUS_STYLES[booking.status] ?? 'bg-cream-100 text-charcoal-500'
+                            const start = new Date(`${slot?.date}T${slot?.start_time}+08:00`)
+                            const end = new Date(`${slot?.date}T${slot?.end_time}+08:00`)
 
-                                        return (
-                                            <tr key={booking.id} className="hover:bg-cream-50/60 transition-colors">
-                                                {/* Date / Time */}
-                                                <td className="px-6 py-4">
-                                                    <div className="font-medium text-charcoal-900">
-                                                        {start.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', weekday: 'short', month: 'short', day: 'numeric' })}
+                            const studioFee = booking.price_breakdown?.studio_fee ?? 0
+                            const instructorFee = (booking.price_breakdown as any)?.instructor_fee ?? 0
+                            const serviceFee = (booking.price_breakdown as any)?.service_fee ?? 0
+                            const fullTotal = booking.total_price ?? ((studioFee + instructorFee + serviceFee) || 0)
+
+                            return (
+                                <div key={booking.id} className="p-4 border border-cream-200 bg-cream-50/50 rounded-xl hover:border-rose-gold/30 hover:bg-white transition-all shadow-sm group">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="flex flex-col gap-1 w-full">
+                                            <div className="flex items-center justify-between w-full">
+                                                <div className="flex items-center gap-3 w-full">
+                                                    <div className="w-10 h-10 rounded-full overflow-hidden border border-cream-200 bg-white shadow-sm shrink-0">
+                                                        <img
+                                                            src={instructor?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(instructor?.full_name || 'I')}&background=F5F2EB&color=2C3230`}
+                                                            alt={instructor?.full_name || "Instructor"}
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     </div>
-                                                    <div className="text-xs text-charcoal-500 flex items-center gap-1 mt-0.5">
-                                                        <Clock className="w-3 h-3" />
-                                                        {start.toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit' })}
-                                                    </div>
-                                                </td>
-
-                                                {/* Instructor */}
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2.5">
-                                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-cream-100 border border-cream-200 shrink-0">
-                                                            <img
-                                                                src={instructor?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(instructor?.full_name || 'instructor')}`}
-                                                                alt={instructor?.full_name || 'Instructor'
-                                                                }
-                                                                width={32}
-                                                                height={32}
-                                                                className="w-full h-full object-cover"
-                                                                onError={(e) => {
-                                                                    (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(instructor?.full_name || 'instructor')}`;
-                                                                }}
-                                                            />
-                                                        </div >
-                                                        <span className="text-charcoal-900 font-medium">
-                                                            {instructor?.full_name || 'Unknown'}
-                                                        </span>
-                                                    </div >
-                                                </td >
-
-                                                {/* Equipment */}
-                                                < td className="px-6 py-4" >
-                                                    <span className="inline-flex items-center px-2.5 py-1 bg-cream-100 text-charcoal-700 text-xs font-semibold rounded-full">
-                                                        {equipmentType}
-                                                    </span>
-                                                    {
-                                                        qty > 1 && (
-                                                            <span className="ml-1.5 text-xs text-charcoal-400">×{qty}</span>
-                                                        )
-                                                    }
-                                                </td >
-
-                                                {/* Duration */}
-                                                < td className="px-6 py-4 text-charcoal-700 font-medium" >
-                                                    {durationStr}
-                                                </td >
-
-                                                {/* Earnings */}
-                                                < td className="px-6 py-4 text-right" >
-                                                    <span className="font-semibold text-charcoal-900 font-serif text-base">
-                                                        ₱{Number(fullTotal).toLocaleString()}
-                                                    </span>
-                                                    {
-                                                        studioFee > 0 && studioFee !== fullTotal && (
-                                                            <div className="text-[11px] text-charcoal-400 mt-0.5">
-                                                                Studio: ₱{Number(studioFee).toLocaleString()}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <div className="flex flex-col gap-1 items-start min-w-0">
+                                                                <span className="text-sm font-bold text-charcoal-900 truncate w-full">
+                                                                    {instructor?.full_name || "Instructor"}
+                                                                </span>
+                                                                <span className={clsx(
+                                                                    'px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border shrink-0',
+                                                                    booking.status === 'completed'
+                                                                        ? (booking.funds_unlocked ? 'bg-green-100/50 text-green-700 border-green-200' : 'bg-amber-100/50 text-amber-700 border-amber-200') :
+                                                                        booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
+                                                                            booking.status === 'rejected' ? 'bg-red-100/50 text-red-700 border-red-200' :
+                                                                                'bg-charcoal-100/50 text-charcoal-600 border-cream-200'
+                                                                )}>
+                                                                    {booking.status === 'completed'
+                                                                        ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)') :
+                                                                        booking.status === 'approved' ? 'Awaiting Completion' :
+                                                                            booking.status === 'pending' ? 'Pending' :
+                                                                                booking.status}
+                                                                </span>
                                                             </div>
-                                                        )
-                                                    }
-                                                </td >
+                                                            <div className="text-right shrink-0">
+                                                                <p className="text-[13px] font-bold text-charcoal-900 leading-none">
+                                                                    {start.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                </p>
+                                                                <p className="text-[11px] text-charcoal-500 font-medium mt-1">
+                                                                    {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                                {/* Status */}
-                                                < td className="px-6 py-4" >
-                                                    <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${statusStyle}`}>
-                                                        {booking.status}
+                                    <div className="flex flex-col sm:flex-row sm:items-end justify-between text-xs mt-3 pt-3 border-t border-cream-200/50 gap-3">
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex items-start gap-2">
+                                                <MapPin className="w-3.5 h-3.5 text-charcoal-400 shrink-0 mt-0.5" />
+                                                <span className="font-semibold text-charcoal-700 leading-tight">
+                                                    {studioData?.location || "N/A"}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Box className="w-3.5 h-3.5 text-charcoal-400 shrink-0" />
+                                                <span className="font-semibold text-charcoal-700">
+                                                    {Array.isArray(slot?.equipment) && slot.equipment.length > 0
+                                                        ? slot.equipment[0]
+                                                        : (booking.price_breakdown?.equipment || booking.equipment || 'Standard Space')}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className="font-bold text-[13px] text-charcoal-900 border border-green-200 bg-green-50 px-2 py-0.5 rounded text-green-700">Earnings: ₱{Number(fullTotal).toLocaleString()}</span>
+                                                {studioFee > 0 && studioFee !== fullTotal && (
+                                                    <span className="text-[11px] text-charcoal-500">
+                                                        (Studio Cut: ₱{Number(studioFee).toLocaleString()})
                                                     </span>
-                                                </td >
-                                            </tr >
-                                        )
-                                    })}
-                                </tbody >
-                            </table >
-                        </div >
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                            {instructor && instructor.id !== user.id && (
+                                                <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={instructor.id} partnerName={instructor.full_name || 'Instructor'} label="Message Instructor" />
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })
                     )}
-                </div >
+                </div>
             </div >
         </div >
     )

@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { autoCompleteBookings, unlockMaturedFunds, expireAbandonedBookings } from '@/lib/wallet'
 import { redirect } from 'next/navigation'
-import { Calendar, ArrowLeft } from 'lucide-react'
+import { Calendar, ArrowLeft, MapPin, Box } from 'lucide-react'
 import clsx from 'clsx'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
 import InstructorLeaveReviewButton from '@/components/reviews/InstructorLeaveReviewButton'
@@ -26,13 +26,17 @@ export default async function InstructorSessionsPage() {
         .select(`
             *,
             slots (
+                date,
                 start_time,
                 end_time,
+                equipment,
                 studios (
                     id,
                     name,
                     location,
-                    owner_id
+                    address,
+                    owner_id,
+                    logo_url
                 )
             ),
             client:profiles!client_id (
@@ -86,35 +90,87 @@ export default async function InstructorSessionsPage() {
                                 const studio = getFirst(slot?.studios)
                                 const client = getFirst(booking.client)
                                 return (
-                                    <div key={booking.id} className="bg-white p-4 rounded-xl border border-cream-200 flex justify-between items-center">
-                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                                            <div className="text-charcoal-500 text-sm font-medium">
-                                                {new Date(slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <div className="font-bold text-charcoal-700">{studio?.name}</div>
-                                                <div className="text-xs text-charcoal-500 flex items-center gap-1.5">
-                                                    <span>{new Date(slot?.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' })} - {new Date(slot?.end_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' })}</span>
-                                                    <span className="w-1 h-1 rounded-full bg-cream-300" />
-                                                    <span className="font-medium text-charcoal-600">{booking.price_breakdown?.equipment || booking.equipment || 'Session'}</span>
+                                    <div key={booking.id} className="p-4 border border-cream-200 bg-cream-50/50 rounded-xl hover:border-rose-gold/30 hover:bg-white transition-all shadow-sm group">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className="flex flex-col gap-1 w-full">
+                                                <div className="flex items-center justify-between w-full">
+                                                    <div className="flex items-center gap-3 w-full">
+                                                        <Link href={`/studios/${studio?.id}`} className="w-10 h-10 rounded-full overflow-hidden border border-cream-200 bg-white shadow-sm shrink-0 hover:opacity-80 transition-opacity">
+                                                            <img
+                                                                src={studio?.logo_url || "/logo.png"}
+                                                                alt={studio?.name || "Studio"}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </Link>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-start justify-between gap-2">
+                                                                <div className="flex flex-col gap-1 items-start min-w-0">
+                                                                    <Link href={`/studios/${studio?.id}`} className="text-sm font-bold text-charcoal-900 truncate w-full hover:text-rose-gold transition-colors">
+                                                                        {studio?.name || "Studio"}
+                                                                    </Link>
+                                                                    <span className={clsx(
+                                                                        "px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border shrink-0",
+                                                                        booking.status === 'approved' ? "bg-green-100/50 text-green-700 border-green-200" :
+                                                                            booking.status === 'rejected' || booking.status === 'cancelled' ? "bg-red-100/50 text-red-700 border-red-200" :
+                                                                                "bg-amber-100/50 text-amber-700 border-amber-200"
+                                                                    )}>
+                                                                        {booking.status === 'approved' ? 'Confirmed' : booking.status}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="text-right shrink-0">
+                                                                    <p className="text-[13px] font-bold text-charcoal-900 leading-none">
+                                                                        {new Date(slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                    </p>
+                                                                    <p className="text-[11px] text-charcoal-500 font-medium mt-1">
+                                                                        {new Date(slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            {client && client.id !== user.id && (
-                                                <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={client.id} partnerName={client.full_name || 'Client'} label="Message Client" />
-                                            )}
-                                            {studio && studio.owner_id && (
-                                                <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={studio.owner_id} partnerName={studio.name || 'Studio'} label="Message Studio" />
-                                            )}
-                                            <span className={clsx(
-                                                'text-xs px-2 py-1 rounded',
-                                                booking.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                                    booking.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                        'bg-charcoal-100 text-charcoal-600'
-                                            )}>
-                                                {booking.status}
-                                            </span>
+
+                                        {client && client.id !== user.id && (
+                                            <div className="pt-3 border-t border-cream-200/50 space-y-2">
+                                                <div className="flex items-center gap-2 group/inst">
+                                                    <div className="w-6 h-6 rounded-full overflow-hidden bg-cream-200 shrink-0 border border-cream-200 hover:border-rose-gold transition-colors">
+                                                        <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+                                                    </div>
+                                                    <div className="text-xs text-charcoal-600 truncate flex-1 group-hover/inst:text-charcoal-900 transition-colors">
+                                                        Client: <span className="font-semibold text-charcoal-900">{client.full_name || 'N/A'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="flex flex-col sm:flex-row sm:items-end justify-between text-xs mt-3 pt-3 border-t border-cream-200/50 gap-3">
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex items-start gap-2">
+                                                    <MapPin className="w-3.5 h-3.5 text-charcoal-400 shrink-0 mt-0.5" />
+                                                    <span className="font-semibold text-charcoal-700 leading-tight">
+                                                        {studio?.location || "N/A"}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Box className="w-3.5 h-3.5 text-charcoal-400 shrink-0" />
+                                                    <span className="font-semibold text-charcoal-700">
+                                                        {Array.isArray(slot?.equipment) && slot.equipment.length > 0
+                                                            ? slot.equipment[0]
+                                                            : (booking.price_breakdown?.equipment || booking.equipment || 'Standard Session')}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                                {client && client.id !== user.id && (
+                                                    <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={client.id} partnerName={client.full_name || 'Client'} label="Message Client" />
+                                                )}
+                                                {studio && studio.owner_id && (
+                                                    <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={studio.owner_id} partnerName={studio.name || 'Studio'} label="Message Studio" />
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 )
@@ -133,58 +189,104 @@ export default async function InstructorSessionsPage() {
                                 const studio = getFirst(slot?.studios)
                                 const client = getFirst(booking.client)
                                 return (
-                                    <div key={booking.id} className="bg-white p-4 rounded-xl border border-cream-200 flex justify-between items-center flex-wrap gap-3">
-                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                                            <div className="text-charcoal-500 text-sm font-medium">
-                                                {new Date(slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <div className="font-bold text-charcoal-700">{studio?.name}</div>
-                                                <div className="text-xs text-charcoal-500 flex items-center gap-1.5">
-                                                    <span>{new Date(slot?.start_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' })}</span>
-                                                    <span className="w-1 h-1 rounded-full bg-cream-300" />
-                                                    <span className="font-medium text-charcoal-600">{booking.price_breakdown?.equipment || booking.equipment || 'Session'}</span>
-                                                    {client && client.id !== user.id && (
-                                                        <>
-                                                            <span className="w-1 h-1 rounded-full bg-cream-300" />
-                                                            <span>w/ {client.full_name}</span>
-                                                        </>
-                                                    )}
+                                    <div key={booking.id} className="p-4 border border-cream-200 bg-cream-50/50 rounded-xl hover:border-rose-gold/30 hover:bg-white transition-all shadow-sm group">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className="flex flex-col gap-1 w-full">
+                                                <div className="flex items-center justify-between w-full">
+                                                    <div className="flex items-center gap-3 w-full">
+                                                        <Link href={`/studios/${studio?.id}`} className="w-10 h-10 rounded-full overflow-hidden border border-cream-200 bg-white shadow-sm shrink-0 hover:opacity-80 transition-opacity">
+                                                            <img
+                                                                src={studio?.logo_url || "/logo.png"}
+                                                                alt={studio?.name || "Studio"}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </Link>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-start justify-between gap-2">
+                                                                <div className="flex flex-col gap-1 items-start min-w-0">
+                                                                    <Link href={`/studios/${studio?.id}`} className="text-sm font-bold text-charcoal-900 truncate w-full hover:text-rose-gold transition-colors">
+                                                                        {studio?.name || "Studio"}
+                                                                    </Link>
+                                                                    <span className={clsx(
+                                                                        'px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border shrink-0',
+                                                                        booking.status === 'completed'
+                                                                            ? (booking.funds_unlocked ? 'bg-green-100/50 text-green-700 border-green-200' : 'bg-amber-100/50 text-amber-700 border-amber-200') :
+                                                                            booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
+                                                                                booking.status === 'rejected' ? 'bg-red-100/50 text-red-700 border-red-200' :
+                                                                                    'bg-charcoal-100/50 text-charcoal-600 border-cream-200'
+                                                                    )}>
+                                                                        {booking.status === 'completed'
+                                                                            ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)') :
+                                                                            booking.status === 'approved' ? 'Awaiting Completion' :
+                                                                                booking.status === 'pending' ? 'Pending' :
+                                                                                    booking.status}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="text-right shrink-0">
+                                                                    <p className="text-[13px] font-bold text-charcoal-900 leading-none">
+                                                                        {new Date(slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                    </p>
+                                                                    <p className="text-[11px] text-charcoal-500 font-medium mt-1">
+                                                                        {new Date(slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            {client && client.id !== user.id && (
-                                                <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={client.id} partnerName={client.full_name || 'Client'} label="Message Client" />
-                                            )}
-                                            {studio && studio.owner_id && (
-                                                <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={studio.owner_id} partnerName={studio.name || 'Studio'} label="Message Studio" />
-                                            )}
-                                            {booking.status === 'completed' && (
-                                                <InstructorLeaveReviewButton
-                                                    booking={booking}
-                                                    currentUserId={user.id}
-                                                    studioOwnerId={studio?.owner_id ?? null}
-                                                    studioName={studio?.name ?? 'Studio'}
-                                                    clientId={client?.id ?? null}
-                                                    clientName={client?.full_name ?? 'Client'}
-                                                    hideClientReview={client?.id === user.id}
-                                                />
-                                            )}
-                                            <span className={clsx(
-                                                'text-xs px-2 py-1 rounded font-medium',
-                                                booking.status === 'completed'
-                                                    ? (booking.funds_unlocked ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700') :
-                                                    booking.status === 'approved' ? 'bg-blue-100 text-blue-700' :
-                                                        booking.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                            'bg-charcoal-100 text-charcoal-600'
-                                            )}>
-                                                {booking.status === 'completed'
-                                                    ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)') :
-                                                    booking.status === 'approved' ? 'Awaiting Completion' :
-                                                        booking.status === 'pending' ? 'Pending' :
-                                                            booking.status}
-                                            </span>
+
+                                        {client && client.id !== user.id && (
+                                            <div className="pt-3 border-t border-cream-200/50 space-y-2">
+                                                <div className="flex items-center gap-2 group/inst">
+                                                    <div className="w-6 h-6 rounded-full overflow-hidden bg-cream-200 shrink-0 border border-cream-200 hover:border-rose-gold transition-colors">
+                                                        <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+                                                    </div>
+                                                    <div className="text-xs text-charcoal-600 truncate flex-1 group-hover/inst:text-charcoal-900 transition-colors">
+                                                        Client: <span className="font-semibold text-charcoal-900">{client.full_name || 'N/A'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="flex flex-col sm:flex-row sm:items-end justify-between text-xs mt-3 pt-3 border-t border-cream-200/50 gap-3">
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex items-start gap-2">
+                                                    <MapPin className="w-3.5 h-3.5 text-charcoal-400 shrink-0 mt-0.5" />
+                                                    <span className="font-semibold text-charcoal-700 leading-tight">
+                                                        {studio?.location || "N/A"}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Box className="w-3.5 h-3.5 text-charcoal-400 shrink-0" />
+                                                    <span className="font-semibold text-charcoal-700">
+                                                        {Array.isArray(slot?.equipment) && slot.equipment.length > 0
+                                                            ? slot.equipment[0]
+                                                            : (booking.price_breakdown?.equipment || booking.equipment || 'Standard Session')}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                                {client && client.id !== user.id && (
+                                                    <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={client.id} partnerName={client.full_name || 'Client'} label="Message Client" />
+                                                )}
+                                                {studio && studio.owner_id && (
+                                                    <StudioChatButton bookingId={booking.id} currentUserId={user.id} partnerId={studio.owner_id} partnerName={studio.name || 'Studio'} label="Message Studio" />
+                                                )}
+                                                {booking.status === 'completed' && (
+                                                    <InstructorLeaveReviewButton
+                                                        booking={booking}
+                                                        currentUserId={user.id}
+                                                        studioOwnerId={studio?.owner_id ?? null}
+                                                        studioName={studio?.name ?? 'Studio'}
+                                                        clientId={client?.id ?? null}
+                                                        clientName={client?.full_name ?? 'Client'}
+                                                        hideClientReview={client?.id === user.id}
+                                                    />
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 )

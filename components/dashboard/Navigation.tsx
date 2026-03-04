@@ -91,6 +91,12 @@ export default function Navigation({ role }: NavigationProps) {
                                 {pathname.startsWith('/instructor/earnings') && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
                             </Link>
 
+                            <Link href="/instructor/sessions" onClick={() => setMobileOpen(false)} className={linkClass(pathname.startsWith('/instructor/sessions'))}>
+                                <Calendar className="w-4 h-4" />
+                                My Sessions
+                                {pathname.startsWith('/instructor/sessions') && <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-rose-gold rounded-full" />}
+                            </Link>
+
                             <Link href="/instructor/profile" onClick={() => setMobileOpen(false)} className={linkClass(pathname.includes('/instructor/profile'))}>
                                 <User className="w-4 h-4" />
                                 Profile
