@@ -331,8 +331,8 @@ export default function InstructorDashboardClient() {
                                                             <Box className="w-3.5 h-3.5 text-charcoal-400" />
                                                             <span className="font-semibold text-charcoal-700 truncate max-w-[120px]">
                                                                 {Array.isArray(session.slots?.equipment) && session.slots.equipment.length > 0
-                                                                    ? session.slots.equipment[0]
-                                                                    : (session.price_breakdown?.equipment || 'Standard')
+                                                                    ? `${session.slots.equipment[0]} (${session.quantity || 1})`
+                                                                    : (`${session.price_breakdown?.equipment || 'Standard'} (${session.quantity || 1})`)
                                                                 }
                                                             </span>
                                                         </div>

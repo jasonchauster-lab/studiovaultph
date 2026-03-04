@@ -4,7 +4,6 @@ import { QrCode, Calendar } from 'lucide-react'
 import clsx from 'clsx'
 import BookingList from '@/components/customer/BookingList'
 import ReviewTrigger from '@/components/reviews/ReviewTrigger'
-import LeaveReviewButton from '@/components/reviews/LeaveReviewButton'
 import { getPendingReviews } from '@/app/(dashboard)/reviews/actions'
 
 export default async function CustomerBookingsPage() {
@@ -49,6 +48,7 @@ export default async function CustomerBookingsPage() {
             )
         `)
         .eq('client_id', user.id)
+        .in('status', ['approved', 'completed', 'pending'])
         .order('created_at', { ascending: false })
 
     // Fetch pending reviews for the customer
@@ -59,10 +59,8 @@ export default async function CustomerBookingsPage() {
         // time is HH:mm:ss, date is YYYY-MM-DD
         return new Date(`${date}T${time}+08:00`)
     }
-
     const now = new Date()
     const upcomingBookings = bookings?.filter(b => getSlotDateTime(b.slots.date, b.slots.start_time) > now) || []
-    const pastBookings = bookings?.filter(b => getSlotDateTime(b.slots.date, b.slots.start_time) <= now) || []
 
     return (
         <div className="min-h-screen bg-cream-50 p-8">
@@ -133,63 +131,11 @@ export default async function CustomerBookingsPage() {
                 <section>
                     <h2 className="text-xl font-serif text-charcoal-900 mb-6 flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-charcoal-500" />
-                        Upcoming Sessions
+                        My Sessions
                     </h2>
 
                     <BookingList bookings={bookings || []} userId={user.id} />
                 </section>
-
-                {/* Past List */}
-                {pastBookings.length > 0 && (
-                    <section>
-                        <h2 className="text-xl font-serif text-charcoal-900 mb-6">Past Sessions</h2>
-                        <div className="space-y-4">
-                            {pastBookings.map((booking: any) => (
-                                <div key={booking.id} className="bg-white p-4 rounded-xl border border-cream-200 flex justify-between items-center">
-                                    <div className="flex items-center gap-4">
-                                        <div className="text-charcoal-500 text-sm">
-                                            {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleDateString()}
-                                        </div>
-                                        <div className="font-medium text-charcoal-700">{booking.slots.studios.name}</div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        {/* Show Leave Review button only for completed sessions or passed approved sessions */}
-                                        {(() => {
-                                            const slotEnd = getSlotDateTime(booking.slots?.date, booking.slots?.end_time)
-                                            const isPast = slotEnd < now
-                                            const canReview = booking.status === 'completed' || (booking.status === 'approved' && isPast)
-
-                                            if (!canReview) return null
-
-                                            const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
-                                            const studio = getFirst(booking.slots?.studios)
-                                            return (
-                                                <LeaveReviewButton
-                                                    booking={booking}
-                                                    currentUserId={user.id}
-                                                    studioOwnerId={studio?.owner_id ?? null}
-                                                    studioName={studio?.name ?? 'Studio'}
-                                                />
-                                            )
-                                        })()}
-                                        <span className={clsx(
-                                            "text-xs px-2 py-1 rounded",
-                                            booking.status === 'completed' ? "bg-green-100 text-green-700" :
-                                                booking.status === 'approved' ? "bg-green-100 text-green-700" :
-                                                    booking.status === 'rejected' ? "bg-red-100 text-red-700" :
-                                                        "bg-charcoal-100 text-charcoal-600"
-                                        )}>
-                                            {booking.status === 'completed' ? 'Completed' :
-                                                booking.status === 'approved' ? 'Completed' :
-                                                    booking.status === 'pending' ? 'Expired' :
-                                                        booking.status}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
             </div>
         </div>
     )
