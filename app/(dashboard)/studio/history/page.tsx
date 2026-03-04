@@ -58,7 +58,9 @@ export default async function StudioHistoryPage() {
                 client:profiles!client_id (
                     id,
                     full_name,
-                    avatar_url
+                    avatar_url,
+                    email,
+                    medical_conditions
                 )
             `)
             .in('slot_id', slotIds)

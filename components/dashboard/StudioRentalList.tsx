@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CalendarX2, PlusCircle, MapPin, Box } from 'lucide-react'
+import { CalendarX2, PlusCircle, MapPin, Box, X, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
@@ -17,6 +17,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
         status: 'all',
         dateRange: { from: null, to: null }
     })
+    const [selectedClient, setSelectedClient] = useState<any>(null)
 
     const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
 
@@ -130,20 +131,27 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                                 <Link href={`/instructors/${instructor?.id}`} className="text-sm font-bold text-charcoal-900 truncate hover:text-rose-gold transition-colors">
                                                                     {instructor?.full_name || "Instructor"}
                                                                 </Link>
-                                                                {client && (
-                                                                    <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-cream-200">
-                                                                        <div className="w-5 h-5 rounded-full overflow-hidden border border-cream-100 bg-white shrink-0">
-                                                                            <img
-                                                                                src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`}
-                                                                                alt={client.full_name || "Client"}
-                                                                                className="w-full h-full object-cover"
-                                                                            />
-                                                                        </div>
-                                                                        <span className="text-[11px] font-medium text-charcoal-500">
-                                                                            Student: <span className="font-bold text-charcoal-700">{client.full_name}</span>
+                                                                <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-cream-200">
+                                                                    <button
+                                                                        onClick={() => setSelectedClient(client)}
+                                                                        className="w-5 h-5 rounded-full overflow-hidden border border-cream-100 bg-white shrink-0 hover:opacity-80 transition-opacity"
+                                                                    >
+                                                                        <img
+                                                                            src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`}
+                                                                            alt={client.full_name || "Client"}
+                                                                            className="w-full h-full object-cover"
+                                                                        />
+                                                                    </button>
+                                                                    <span className="text-[11px] font-medium text-charcoal-500">
+                                                                        Student: <button onClick={() => setSelectedClient(client)} className="font-bold text-charcoal-700 hover:text-rose-gold transition-colors">{client.full_name}</button>
+                                                                    </span>
+                                                                    {client.medical_conditions && (
+                                                                        <span className="ml-1 px-1.5 py-0.5 bg-red-100 text-red-700 text-[9px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-0.5">
+                                                                            <AlertCircle className="w-2.5 h-2.5" />
+                                                                            Medical
                                                                         </span>
-                                                                    </div>
-                                                                )}
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                             <span className={clsx(
                                                                 'px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border shrink-0',
@@ -213,6 +221,41 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                     })
                 )}
             </div>
-        </div>
+
+            {/* Client Medical Modal */}
+            {
+                selectedClient && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
+                        <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden p-6 relative" onClick={e => e.stopPropagation()}>
+                            <button onClick={() => setSelectedClient(null)} className="absolute top-4 right-4 text-charcoal-400 hover:text-charcoal-900 transition-colors"><X className="w-5 h-5" /></button>
+                            <div className="flex flex-col items-center mt-2 mb-6 text-center">
+                                <div className="w-20 h-20 rounded-full overflow-hidden mb-3 border border-cream-200 bg-cream-50">
+                                    <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+                                </div>
+                                <h3 className="text-xl font-serif text-charcoal-900">{selectedClient.full_name}</h3>
+                                <p className="text-sm text-charcoal-500">{selectedClient.email}</p>
+                            </div>
+                            {selectedClient.medical_conditions ? (
+                                <div className="bg-red-50 p-4 rounded-xl border border-red-100 mb-2">
+                                    <h4 className="text-sm font-bold text-red-800 mb-1 flex items-center gap-1.5"><AlertCircle className="w-4 h-4" /> Medical Conditions</h4>
+                                    <p className="text-sm text-red-700 whitespace-pre-wrap">{selectedClient.medical_conditions}</p>
+                                </div>
+                            ) : (
+                                <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50 mb-2">
+                                    <h4 className="text-sm font-bold text-charcoal-700 mb-1">Medical Conditions</h4>
+                                    <p className="text-sm text-charcoal-500 italic">None reported.</p>
+                                </div>
+                            )}
+                            <button
+                                onClick={() => setSelectedClient(null)}
+                                className="w-full mt-4 py-3 bg-charcoal-900 text-white rounded-xl font-bold hover:bg-charcoal-800 transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
     )
 }

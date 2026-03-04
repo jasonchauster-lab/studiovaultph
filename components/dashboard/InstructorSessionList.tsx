@@ -130,8 +130,14 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                 <button onClick={() => setSelectedClient(client)} className="w-6 h-6 rounded-full overflow-hidden bg-cream-200 shrink-0 border border-cream-200 hover:border-rose-gold transition-colors">
                                                     <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                                 </button>
-                                                <div className="text-xs text-charcoal-600 truncate flex-1 group-hover/inst:text-charcoal-900 transition-colors">
+                                                <div className="text-xs text-charcoal-600 truncate flex-1 flex items-center gap-2 group-hover/inst:text-charcoal-900 transition-colors">
                                                     Client: <button onClick={() => setSelectedClient(client)} className="font-semibold text-charcoal-900 hover:text-rose-gold transition-colors">{client.full_name || 'N/A'}</button>
+                                                    {client.medical_conditions && (
+                                                        <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-[9px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-0.5">
+                                                            <AlertCircle className="w-2.5 h-2.5" />
+                                                            Medical
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -235,8 +241,14 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                 <button onClick={() => setSelectedClient(client)} className="w-6 h-6 rounded-full overflow-hidden bg-cream-200 shrink-0 border border-cream-200 hover:border-rose-gold transition-colors">
                                                     <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                                 </button>
-                                                <div className="text-xs text-charcoal-600 truncate flex-1 group-hover/inst:text-charcoal-900 transition-colors">
+                                                <div className="text-xs text-charcoal-600 truncate flex-1 flex items-center gap-2 group-hover/inst:text-charcoal-900 transition-colors">
                                                     Client: <button onClick={() => setSelectedClient(client)} className="font-semibold text-charcoal-900 hover:text-rose-gold transition-colors">{client.full_name || 'N/A'}</button>
+                                                    {client.medical_conditions && (
+                                                        <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-[9px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-0.5">
+                                                            <AlertCircle className="w-2.5 h-2.5" />
+                                                            Medical
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
