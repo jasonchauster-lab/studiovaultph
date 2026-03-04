@@ -60,7 +60,8 @@ export default async function StudioHistoryPage() {
                     full_name,
                     avatar_url,
                     email,
-                    medical_conditions
+                    medical_conditions,
+                    other_medical_condition
                 )
             `)
             .in('slot_id', slotIds)

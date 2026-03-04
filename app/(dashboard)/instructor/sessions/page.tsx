@@ -42,7 +42,9 @@ export default async function InstructorSessionsPage() {
                 full_name,
                 avatar_url,
                 email,
-                medical_conditions
+                email,
+                medical_conditions,
+                other_medical_condition
             ),
             instructor:profiles!instructor_id (
                 id,

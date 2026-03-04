@@ -148,7 +148,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                                     {client.medical_conditions && (
                                                                         <span className="ml-1 px-1.5 py-0.5 bg-red-100 text-red-700 text-[9px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-0.5">
                                                                             <AlertCircle className="w-2.5 h-2.5" />
-                                                                            Medical
+                                                                            Customer has medical condition
                                                                         </span>
                                                                     )}
                                                                 </div>
@@ -235,17 +235,30 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                 <h3 className="text-xl font-serif text-charcoal-900">{selectedClient.full_name}</h3>
                                 <p className="text-sm text-charcoal-500">{selectedClient.email}</p>
                             </div>
-                            {selectedClient.medical_conditions ? (
-                                <div className="bg-red-50 p-4 rounded-xl border border-red-100 mb-2">
-                                    <h4 className="text-sm font-bold text-red-800 mb-1 flex items-center gap-1.5"><AlertCircle className="w-4 h-4" /> Medical Conditions</h4>
-                                    <p className="text-sm text-red-700 whitespace-pre-wrap">{selectedClient.medical_conditions}</p>
-                                </div>
-                            ) : (
-                                <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50 mb-2">
-                                    <h4 className="text-sm font-bold text-charcoal-700 mb-1">Medical Conditions</h4>
-                                    <p className="text-sm text-charcoal-500 italic">None reported.</p>
-                                </div>
-                            )}
+                            {(() => {
+                                const conditions = typeof selectedClient.medical_conditions === 'string'
+                                    ? selectedClient.medical_conditions.split(',').map((c: string) => c.trim())
+                                    : Array.isArray(selectedClient.medical_conditions)
+                                        ? selectedClient.medical_conditions
+                                        : [];
+
+                                const displayConditions = conditions
+                                    .map((c: string) => c === 'Others' ? selectedClient.other_medical_condition : c)
+                                    .filter(Boolean)
+                                    .join(', ');
+
+                                return displayConditions ? (
+                                    <div className="bg-red-50 p-4 rounded-xl border border-red-100 mb-2">
+                                        <h4 className="text-sm font-bold text-red-800 mb-1 flex items-center gap-1.5"><AlertCircle className="w-4 h-4" /> Medical Conditions</h4>
+                                        <p className="text-sm text-red-700 whitespace-pre-wrap leading-relaxed">{displayConditions}</p>
+                                    </div>
+                                ) : (
+                                    <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50 mb-2">
+                                        <h4 className="text-sm font-bold text-charcoal-700 mb-1">Medical Conditions</h4>
+                                        <p className="text-sm text-charcoal-500 italic">None reported.</p>
+                                    </div>
+                                );
+                            })()}
                             <button
                                 onClick={() => setSelectedClient(null)}
                                 className="w-full mt-4 py-3 bg-charcoal-900 text-white rounded-xl font-bold hover:bg-charcoal-800 transition-colors"
