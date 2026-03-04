@@ -54,25 +54,35 @@ export default async function StudioDetailsPage(props: {
     const nowDate = getManilaTodayStr()
     const nowTime = toManilaTimeString(new Date())
 
-    let slotsQuery = supabase
-        .from('slots')
-        .select('*')
-        .eq('studio_id', id)
-        .gte('date', startDateStr)
-        .lte('date', endDateStr)
-        .or(`date.gt.${nowDate},and(date.eq.${nowDate},start_time.gte.${nowTime})`)
-        .order('date', { ascending: true })
-        .order('start_time', { ascending: true })
+    // 2.1 Fetch Slots: (TimeFilter AND available) OR (ID in user's locked list)
+    // We run two queries and merge them to avoid complex PostgREST OR nesting issues
+    // and to ensure locked slots bypass the "is_available" and "nowTime" filters.
+    const [availableSlotsRes, lockedSlotsRes] = await Promise.all([
+        supabase
+            .from('slots')
+            .select('*')
+            .eq('studio_id', id)
+            .eq('is_available', true)
+            .gte('date', startDateStr)
+            .lte('date', endDateStr)
+            .or(`date.gt.${nowDate},and(date.eq.${nowDate},start_time.gte.${nowTime})`)
+            .order('date', { ascending: true })
+            .order('start_time', { ascending: true }),
+        lockedSlotIds.length > 0 ? supabase
+            .from('slots')
+            .select('*')
+            .in('id', lockedSlotIds)
+            .order('date', { ascending: true })
+            .order('start_time', { ascending: true }) : { data: [] as any[] }
+    ])
 
-    if (lockedSlotIds.length > 0) {
-        // If the user has locked slots, fetch available slots OR their locked slots
-        slotsQuery = slotsQuery.or(`is_available.eq.true,id.in.(${lockedSlotIds.join(',')})`)
-    } else {
-        // Otherwise, just fetch available slots
-        slotsQuery = slotsQuery.eq('is_available', true)
-    }
-
-    const { data: slots } = await slotsQuery
+    const rawSlots = [...(availableSlotsRes.data || []), ...(lockedSlotsRes.data || [])]
+    // Unique by ID
+    const slots = Array.from(new Map(rawSlots.map(s => [s.id, s])).values())
+        .sort((a, b) => {
+            if (a.date !== b.date) return a.date.localeCompare(b.date)
+            return a.start_time.localeCompare(b.start_time)
+        })
 
     const trimmedStudioLocation = studio.location?.trim() ?? ''
     // Build a list of tokens from the location for fuzzy matching
