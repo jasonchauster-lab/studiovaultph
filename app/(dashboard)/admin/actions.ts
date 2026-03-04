@@ -811,41 +811,68 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
 
         if (isConfirmed) {
             // FIXED: Safely cast all JSONB and DB values to Numbers
-            const total = Number(booking.total_price || 0)
             const breakdown = booking.price_breakdown || {}
-            const platformFee = Number(breakdown.service_fee || 100)
-            const instructorFee = Number(breakdown.instructor_fee || 0)
-            const studioFee = Number(breakdown.studio_fee || (total - platformFee - instructorFee))
 
-            acc.totalRevenue += total
-            acc.totalPlatformFees += platformFee
-            acc.totalStudioFees += studioFee
-            acc.totalInstructorFees += instructorFee
+            // Total Revenue should be the SUM of the shares to be mathematically consistent
+            // especially if discounts/credits were applied.
+            const platformFee = Number(breakdown.service_fee || 0)
+            const instructorFee = Number(breakdown.instructor_fee || 0)
+            const studioFee = Number(breakdown.studio_fee || 0)
+
+            // If breakdown is missing/empty, we should attempt to derive from total_price
+            // but the goal is consistency.
+            let total = platformFee + instructorFee + studioFee
+
+            // Fallback if breakdown is completely empty
+            if (total === 0) {
+                total = Number(booking.total_price || 0)
+                // Default split logic if no breakdown exists
+                // 20% platform, 50% instructor, 30% studio
+                const fallbackPlatform = total * 0.2
+                const fallbackInstructor = total * 0.5
+                const fallbackStudio = total * 0.3
+
+                acc.totalRevenue += total
+                acc.totalPlatformFees += fallbackPlatform
+                acc.totalStudioFees += fallbackStudio
+                acc.totalInstructorFees += fallbackInstructor
+            } else {
+                acc.totalRevenue += total
+                acc.totalPlatformFees += platformFee
+                acc.totalStudioFees += studioFee
+                acc.totalInstructorFees += instructorFee
+            }
 
             if (!acc.daily[sessionDate]) {
                 acc.daily[sessionDate] = { date: sessionDate, revenue: 0, platformFees: 0, bookings: 0 }
             }
             acc.daily[sessionDate].revenue += total
-            acc.daily[sessionDate].platformFees += platformFee
+            acc.daily[sessionDate].platformFees += (total === 0 ? (Number(booking.total_price || 0) * 0.2) : platformFee)
             acc.daily[sessionDate].bookings += 1
         }
 
-        // Always count total bookings requested (optional, adjust if you only want confirmed)
+        // Always count total bookings requested
         acc.bookingCount += 1
 
         // Transaction list for CSV
+        const breakdown = booking.price_breakdown || {}
+        const platformFee = Number(breakdown.service_fee || 0)
+        const instructorFee = Number(breakdown.instructor_fee || 0)
+        const studioFee = Number(breakdown.studio_fee || 0)
+        const calcTotal = platformFee + instructorFee + studioFee
+
         acc.transactions.push({
             id: booking.id,
             date: slots ? `${slots.date} ${slots.start_time}` : booking.created_at,
             type: 'Booking',
-            status: booking.status, // Added status for admin visibility
+            status: booking.status,
             client: client?.full_name || '-',
             studio: studio?.name || '-',
             instructor: instructor?.full_name || '-',
-            total_amount: Number(booking.total_price || 0),
-            platform_fee: Number(booking.price_breakdown?.service_fee || 100),
-            studio_fee: Number(booking.price_breakdown?.studio_fee || 0),
-            instructor_fee: Number(booking.price_breakdown?.instructor_fee || 0)
+            total_amount: calcTotal || Number(booking.total_price || 0),
+            platform_fee: platformFee || (Number(booking.total_price || 0) * 0.2),
+            studio_fee: studioFee || (Number(booking.total_price || 0) * 0.3),
+            instructor_fee: instructorFee || (Number(booking.total_price || 0) * 0.5)
         })
 
         return acc

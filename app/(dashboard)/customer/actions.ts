@@ -1136,13 +1136,18 @@ export async function getCustomerWalletDetails() {
             const slot = getFirst(b.slots);
             const studioName = slot?.studios?.name || 'Studio';
 
+            // Correct mapping for cancellation/rejection
+            let displayStatus = b.status === 'pending' || b.status === 'submitted' ? 'pending'
+                : b.status === 'approved' || b.status === 'completed' ? 'completed'
+                    : b.status; // expired, rejected, cancelled, cancelled_refunded, cancelled_charged
+
             transactions.push({
                 id: b.id,
                 date: b.created_at,
                 type: 'Booking Payment',
                 amount: -deduction, // Negative for spending
-                status: b.status === 'rejected' ? 'cancelled' : 'completed',
-                details: `Payment for booking at ${studioName}`
+                status: displayStatus,
+                details: `Payment for booking at ${studioName}${b.status === 'cancelled_refunded' ? ' (Refunded)' : b.status === 'cancelled_charged' ? ' (No Refund)' : ''}`
             });
         }
     });

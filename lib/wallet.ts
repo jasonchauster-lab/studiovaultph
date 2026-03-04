@@ -150,6 +150,15 @@ export async function expireAbandonedBookings() {
                     user_id: booking.client_id,
                     amount: walletDeduction
                 })
+
+                // Log the refund transaction
+                await supabase.from('wallet_top_ups').insert({
+                    user_id: booking.client_id,
+                    amount: walletDeduction,
+                    status: 'approved',
+                    type: 'refund',
+                    admin_notes: `Refund for expired booking (id: ${booking.id.slice(0, 8)})`
+                })
             }
 
             expiredCount++
