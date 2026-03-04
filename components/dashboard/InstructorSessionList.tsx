@@ -127,18 +127,24 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                     {client && client.id !== currentUserId && (
                                         <div className="pt-3 border-t border-cream-200/50 space-y-2">
                                             <div className="flex items-center gap-2 group/inst">
-                                                <button onClick={() => setSelectedClient(client)} className="w-6 h-6 rounded-full overflow-hidden bg-cream-200 shrink-0 border border-cream-200 hover:border-rose-gold transition-colors">
-                                                    <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
-                                                </button>
-                                                <div className="text-xs text-charcoal-600 truncate flex-1 flex items-center gap-2 group-hover/inst:text-charcoal-900 transition-colors">
-                                                    Client: <button onClick={() => setSelectedClient(client)} className="font-semibold text-charcoal-900 hover:text-rose-gold transition-colors">{client.full_name || 'N/A'}</button>
+                                                <button
+                                                    onClick={() => setSelectedClient(client)}
+                                                    className="flex items-center gap-2.5 group/student transition-all"
+                                                >
+                                                    <div className="w-8 h-8 rounded-full overflow-hidden border border-cream-200 bg-cream-100 shadow-sm shrink-0 group-hover/student:border-rose-gold transition-colors">
+                                                        <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+                                                    </div>
+                                                    <div className="flex flex-col items-start leading-tight">
+                                                        <span className="text-[10px] text-charcoal-400 font-medium uppercase tracking-wider">Client</span>
+                                                        <span className="text-[13px] font-bold text-charcoal-900 group-hover/student:text-rose-gold transition-colors">{client.full_name || 'N/A'}</span>
+                                                    </div>
                                                     {client.medical_conditions && (
-                                                        <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-[9px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-0.5">
-                                                            <AlertCircle className="w-2.5 h-2.5" />
+                                                        <span className="ml-1 px-2 py-1 bg-red-100 text-red-700 text-[10px] font-black uppercase rounded-lg border border-red-200 animate-pulse flex items-center gap-1">
+                                                            <AlertCircle className="w-3 h-3" />
                                                             Customer has medical condition
                                                         </span>
                                                     )}
-                                                </div>
+                                                </button>
                                             </div>
                                         </div>
                                     )}
@@ -237,20 +243,24 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
                                     {client && client.id !== currentUserId && (
                                         <div className="pt-3 border-t border-cream-200/50 space-y-2">
-                                            <div className="flex items-center gap-2 group/inst">
-                                                <button onClick={() => setSelectedClient(client)} className="w-6 h-6 rounded-full overflow-hidden bg-cream-200 shrink-0 border border-cream-200 hover:border-rose-gold transition-colors">
+                                            <button
+                                                onClick={() => setSelectedClient(client)}
+                                                className="flex items-center gap-2.5 group/student transition-all"
+                                            >
+                                                <div className="w-8 h-8 rounded-full overflow-hidden border border-cream-200 bg-cream-100 shadow-sm shrink-0 group-hover/student:border-rose-gold transition-colors">
                                                     <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
-                                                </button>
-                                                <div className="text-xs text-charcoal-600 truncate flex-1 flex items-center gap-2 group-hover/inst:text-charcoal-900 transition-colors">
-                                                    Client: <button onClick={() => setSelectedClient(client)} className="font-semibold text-charcoal-900 hover:text-rose-gold transition-colors">{client.full_name || 'N/A'}</button>
-                                                    {client.medical_conditions && (
-                                                        <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-[9px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-0.5">
-                                                            <AlertCircle className="w-2.5 h-2.5" />
-                                                            Customer has medical condition
-                                                        </span>
-                                                    )}
                                                 </div>
-                                            </div>
+                                                <div className="flex flex-col items-start leading-tight">
+                                                    <span className="text-[10px] text-charcoal-400 font-medium uppercase tracking-wider">Client</span>
+                                                    <span className="text-[13px] font-bold text-charcoal-900 group-hover/student:text-rose-gold transition-colors">{client.full_name || 'N/A'}</span>
+                                                </div>
+                                                {client.medical_conditions && (
+                                                    <span className="ml-1 px-2 py-1 bg-red-100 text-red-700 text-[10px] font-bold uppercase rounded border border-red-200 animate-pulse flex items-center gap-1">
+                                                        <AlertCircle className="w-3 h-3" />
+                                                        Customer has medical condition
+                                                    </span>
+                                                )}
+                                            </button>
                                         </div>
                                     )}
 

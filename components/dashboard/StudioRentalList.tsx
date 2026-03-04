@@ -131,23 +131,26 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                                 <Link href={`/instructors/${instructor?.id}`} className="text-sm font-bold text-charcoal-900 truncate hover:text-rose-gold transition-colors">
                                                                     {instructor?.full_name || "Instructor"}
                                                                 </Link>
-                                                                <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-cream-200">
+                                                                <div className="flex items-center gap-2 ml-2 pl-3 border-l border-cream-200">
                                                                     <button
                                                                         onClick={() => setSelectedClient(client)}
-                                                                        className="w-5 h-5 rounded-full overflow-hidden border border-cream-100 bg-white shrink-0 hover:opacity-80 transition-opacity"
+                                                                        className="flex items-center gap-2 group/student transition-all"
                                                                     >
-                                                                        <img
-                                                                            src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`}
-                                                                            alt={client.full_name || "Client"}
-                                                                            className="w-full h-full object-cover"
-                                                                        />
+                                                                        <div className="w-8 h-8 rounded-full overflow-hidden border border-cream-200 bg-white shadow-sm shrink-0 group-hover/student:border-rose-gold transition-colors">
+                                                                            <img
+                                                                                src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`}
+                                                                                alt={client.full_name || "Client"}
+                                                                                className="w-full h-full object-cover"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="flex flex-col items-start leading-tight">
+                                                                            <span className="text-[10px] text-charcoal-400 font-medium uppercase tracking-wider">Student</span>
+                                                                            <span className="text-[13px] font-bold text-charcoal-900 group-hover/student:text-rose-gold transition-colors">{client.full_name}</span>
+                                                                        </div>
                                                                     </button>
-                                                                    <span className="text-[11px] font-medium text-charcoal-500">
-                                                                        Student: <button onClick={() => setSelectedClient(client)} className="font-bold text-charcoal-700 hover:text-rose-gold transition-colors">{client.full_name}</button>
-                                                                    </span>
                                                                     {client.medical_conditions && (
-                                                                        <span className="ml-1 px-1.5 py-0.5 bg-red-100 text-red-700 text-[9px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-0.5">
-                                                                            <AlertCircle className="w-2.5 h-2.5" />
+                                                                        <span className="ml-1 px-2 py-1 bg-red-100 text-red-700 text-[10px] font-bold uppercase rounded border border-red-200 animate-pulse flex items-center gap-1">
+                                                                            <AlertCircle className="w-3 h-3" />
                                                                             Customer has medical condition
                                                                         </span>
                                                                     )}
