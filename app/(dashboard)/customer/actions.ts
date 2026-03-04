@@ -282,7 +282,9 @@ export async function requestBooking(
         .from('bookings')
         .select(`
             *,
+            price_breakdown,
             slots (
+                date,
                 start_time,
                 end_time,
                 studios (
@@ -331,7 +333,9 @@ export async function requestBooking(
                 address: studioAddress,
                 instructorName,
                 date,
-                time
+                time,
+                equipment: (booking.price_breakdown as any)?.equipment,
+                quantity: (booking.price_breakdown as any)?.quantity
             })
         });
     }
@@ -347,7 +351,9 @@ export async function requestBooking(
                 studioName,
                 clientName: 'A Client', // Privacy or use name
                 date,
-                time
+                time,
+                equipment: booking.price_breakdown?.equipment,
+                quantity: booking.price_breakdown?.quantity
             })
         });
     }
@@ -367,7 +373,9 @@ export async function requestBooking(
                 studioName,
                 instructorName,
                 date,
-                time
+                time,
+                equipment: (booking.price_breakdown as any)?.equipment,
+                quantity: (booking.price_breakdown as any)?.quantity
             })
         });
     }
@@ -812,7 +820,9 @@ export async function bookInstructorSession(
                     address: studioAddress,
                     instructorName,
                     date: dateStr,
-                    time: timeStr
+                    time: timeStr,
+                    equipment: (booking.price_breakdown as any)?.equipment,
+                    quantity: (booking.price_breakdown as any)?.quantity
                 })
             });
 
@@ -827,7 +837,9 @@ export async function bookInstructorSession(
                         studioName,
                         clientName,
                         date: dateStr,
-                        time: timeStr
+                        time: timeStr,
+                        equipment: (booking.price_breakdown as any)?.equipment,
+                        quantity: (booking.price_breakdown as any)?.quantity
                     })
                 });
             }
@@ -847,7 +859,9 @@ export async function bookInstructorSession(
                             instructorName,
                             clientName,
                             date: dateStr,
-                            time: timeStr
+                            time: timeStr,
+                            equipment: (booking.price_breakdown as any)?.equipment,
+                            quantity: (booking.price_breakdown as any)?.quantity
                         })
                     });
                 }
@@ -862,7 +876,7 @@ export async function bookInstructorSession(
     return { success: true, studioName: selectedSlot.studios.name, bookingId: booking.id }
 }
 
-export async function cancelBooking(bookingId: string) {
+export async function cancelBooking(bookingId: string, reason: string = 'Cancelled by client') {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -962,9 +976,12 @@ export async function cancelBooking(bookingId: string) {
 
     const { error: updateError } = await supabase.from('bookings').update({
         status: newStatus,
+        cancel_reason: reason,
+        cancelled_by: user.id,
         price_breakdown: {
             ...currentBreakdown,
-            refunded_amount: refundAmount
+            refunded_amount: refundAmount,
+            refund_initiator: 'client'
         }
     }).eq('id', bookingId);
 
@@ -1073,10 +1090,30 @@ export async function getCustomerWalletDetails() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
+    // Fetch bookings with wallet deductions
+    const { data: walletBookings } = await supabase
+        .from('bookings')
+        .select(`
+            id,
+            created_at,
+            status,
+            price_breakdown,
+            slots (
+                date,
+                start_time,
+                studios (
+                    name
+                )
+            )
+        `)
+        .eq('client_id', user.id)
+        .not('price_breakdown', 'is', null);
+
     const transactions: any[] = [];
 
     const getFirst = (item: any) => Array.isArray(item) ? item[0] : item;
 
+    // 1. Process Wallet Top-ups/Adjustments
     walletActions?.forEach(wa => {
         if (wa.status === 'approved' || wa.type === 'admin_adjustment' || wa.type === 'refund') {
             transactions.push({
@@ -1086,6 +1123,26 @@ export async function getCustomerWalletDetails() {
                 amount: wa.amount, // Could be negative for deductions in admin_adjustment
                 status: 'completed',
                 details: wa.admin_notes || (wa.type === 'admin_adjustment' ? 'Manual balance adjustment' : wa.type === 'refund' ? 'Refund for cancelled/declined booking' : 'Gcash/Bank Top-up')
+            });
+        }
+    });
+
+    // 2. Process Booking Deductions
+    walletBookings?.forEach(b => {
+        const breakdown = b.price_breakdown as any;
+        const deduction = Number(breakdown?.wallet_deduction || 0);
+
+        if (deduction > 0) {
+            const slot = getFirst(b.slots);
+            const studioName = slot?.studios?.name || 'Studio';
+
+            transactions.push({
+                id: b.id,
+                date: b.created_at,
+                type: 'Booking Payment',
+                amount: -deduction, // Negative for spending
+                status: b.status === 'rejected' ? 'cancelled' : 'completed',
+                details: `Payment for booking at ${studioName}`
             });
         }
     });

@@ -822,6 +822,12 @@ export default async function AdminDashboard({
                                                         Payment: {booking.payment_status || 'Pending'}
                                                     </span>
 
+                                                    {(booking.total_price ?? 0) === 0 && booking.payment_status === 'submitted' && (
+                                                        <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">
+                                                            Wallet Payment (Fully Covered)
+                                                        </span>
+                                                    )}
+
                                                     {hasPaymentProof && (
                                                         <div className="mt-1">
                                                             <a

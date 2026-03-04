@@ -20,6 +20,8 @@ interface BookingNotificationEmailProps {
     clientName?: string;
     date: string;
     time: string;
+    equipment?: string;
+    quantity?: number;
     address?: string;
     rejectionReason?: string;
     cancellationReason?: string;
@@ -34,6 +36,8 @@ export default function BookingNotificationEmail({
     clientName,
     date,
     time,
+    equipment,
+    quantity,
     address,
     rejectionReason,
     cancellationReason,
@@ -100,6 +104,16 @@ export default function BookingNotificationEmail({
                         <Text style={paragraph}>
                             <strong>Time:</strong> {time}
                         </Text>
+                        {equipment && (
+                            <Text style={paragraph}>
+                                <strong>Equipment:</strong> {equipment}
+                            </Text>
+                        )}
+                        {quantity !== undefined && (
+                            <Text style={paragraph}>
+                                <strong>Quantity:</strong> {quantity}
+                            </Text>
+                        )}
                     </Section>
 
                     {bookingType === 'Booking Confirmed' && (

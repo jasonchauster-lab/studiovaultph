@@ -513,7 +513,9 @@ export async function confirmBooking(bookingId: string) {
                     studioName,
                     address: studioAddress,
                     date,
-                    time
+                    time,
+                    equipment: (booking.price_breakdown as any)?.equipment,
+                    quantity: (booking.price_breakdown as any)?.quantity
                 })
             });
         }
@@ -531,7 +533,9 @@ export async function confirmBooking(bookingId: string) {
                     address: studioAddress,
                     instructorName,
                     date,
-                    time
+                    time,
+                    equipment: (booking.price_breakdown as any)?.equipment,
+                    quantity: (booking.price_breakdown as any)?.quantity
                 })
             });
         }
@@ -547,7 +551,9 @@ export async function confirmBooking(bookingId: string) {
                     studioName,
                     clientName,
                     date,
-                    time
+                    time,
+                    equipment: (booking.price_breakdown as any)?.equipment,
+                    quantity: (booking.price_breakdown as any)?.quantity
                 })
             });
         }
@@ -568,7 +574,9 @@ export async function confirmBooking(bookingId: string) {
                     instructorName,
                     clientName,
                     date,
-                    time
+                    time,
+                    equipment: (booking.price_breakdown as any)?.equipment,
+                    quantity: (booking.price_breakdown as any)?.quantity
                 })
             });
         }
@@ -709,7 +717,9 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
             date,
             time,
             rejectionReason: reason,
-            hasRefund
+            hasRefund,
+            equipment: (booking.price_breakdown as any)?.equipment,
+            quantity: (booking.price_breakdown as any)?.quantity
         })
     });
 

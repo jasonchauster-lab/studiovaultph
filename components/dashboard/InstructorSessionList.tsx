@@ -7,6 +7,8 @@ import clsx from 'clsx'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
 import InstructorLeaveReviewButton from '@/components/reviews/InstructorLeaveReviewButton'
 import BookingFilter, { FilterState } from '@/components/dashboard/BookingFilter'
+import CancelBookingModal from './CancelBookingModal'
+import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions'
 
 interface InstructorSessionListProps {
     bookings: any[]
@@ -19,11 +21,30 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
         dateRange: { from: null, to: null }
     })
     const [selectedClient, setSelectedClient] = useState<any>(null)
+    const [cancellingBooking, setCancellingBooking] = useState<any>(null)
+
+    const handleCancelConfirm = async (reason: string) => {
+        if (!cancellingBooking) return { error: 'No booking selected' }
+        const result = await cancelBookingByInstructor(cancellingBooking.id, reason)
+        return result
+    }
 
     const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
 
     const getSlotDateTime = (date: string, time: string) => {
         return new Date(`${date}T${time}+08:00`)
+    }
+
+    const calculateAge = (birthday: string) => {
+        if (!birthday) return null
+        const birthDate = new Date(birthday)
+        const today = new Date()
+        let age = today.getFullYear() - birthDate.getFullYear()
+        const m = today.getMonth() - birthDate.getMonth()
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--
+        }
+        return age
     }
 
     const now = new Date()
@@ -310,6 +331,31 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                     </div>
                 </section>
             )}
+
+            <CancelBookingModal
+                isOpen={!!cancellingBooking}
+                onClose={() => setCancellingBooking(null)}
+                onConfirm={handleCancelConfirm}
+                title="Cancel Session"
+                description="Are you sure you want to cancel this session? The client and studio owner will be notified."
+                penaltyNotice={
+                    (() => {
+                        if (!cancellingBooking) return null
+                        const slotData = getFirst(cancellingBooking.slots)
+                        if (!slotData) return null
+                        const startTime = new Date(`${slotData.date}T${slotData.start_time}+08:00`)
+                        const diffInHours = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60)
+                        const isLate = diffInHours < 24
+
+                        if (isLate) {
+                            const studioFee = cancellingBooking.price_breakdown?.studio_fee || 0
+                            return `Late Cancellation Penalty: ₱${studioFee.toLocaleString()} will be deducted from your earnings and credited to the studio.`
+                        }
+                        return null
+                    })() || undefined
+                }
+            />
+
             {/* Client Medical Modal */}
             {selectedClient && (
                 <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
@@ -320,7 +366,15 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                 <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                             </div>
                             <h3 className="text-xl font-serif text-charcoal-900">{selectedClient.full_name}</h3>
-                            <p className="text-sm text-charcoal-500">{selectedClient.email}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                                <p className="text-sm text-charcoal-500">{selectedClient.email}</p>
+                                {selectedClient.date_of_birth && (
+                                    <>
+                                        <span className="text-charcoal-300">•</span>
+                                        <p className="text-sm font-bold text-rose-gold">{calculateAge(selectedClient.date_of_birth)} years old</p>
+                                    </>
+                                )}
+                            </div>
                         </div>
                         {selectedClient.bio && (
                             <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50 mb-3">

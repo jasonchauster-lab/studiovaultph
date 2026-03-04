@@ -43,6 +43,28 @@ BEGIN
          RAISE EXCEPTION 'Slot is no longer available';
     END IF;
 
+    -- 1.1 Prevents Instructor Double-Booking Race Condition
+    -- Check if instructor is already booked for this time range (across ANY slot)
+    IF EXISTS (
+        SELECT 1 
+        FROM bookings b
+        JOIN slots s ON b.slot_id = s.id
+        WHERE b.instructor_id = p_instructor_id
+          AND (
+            b.status = 'approved'
+            OR (b.status = 'pending' AND (b.expires_at IS NULL OR b.expires_at > CURRENT_TIMESTAMP))
+          )
+          AND s.date = v_parent_slot.date
+          AND (
+            (s.start_time, s.end_time) OVERLAPS (
+                COALESCE(p_req_start_time, v_parent_slot.start_time), 
+                COALESCE(p_req_end_time, v_parent_slot.end_time)
+            )
+          )
+    ) THEN
+        RAISE EXCEPTION 'Instructor is already booked for this time slot';
+    END IF;
+
     -- 2. Validate and Deduct Inventory
     v_parent_equipment := v_parent_slot.equipment;
     v_parent_quantity := COALESCE(v_parent_slot.quantity, 0);

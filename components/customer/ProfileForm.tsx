@@ -145,6 +145,15 @@ export default function ProfileForm({ profile }: { profile: any }) {
                             className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
                         />
                     </div>
+                    <div>
+                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Date of Birth</label>
+                        <input
+                            type="date"
+                            name="birthday"
+                            defaultValue={profile?.date_of_birth || ''}
+                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                        />
+                    </div>
                     <p className="text-xs text-charcoal-400 mt-2 italic">
                         Highly recommended for safety during in-studio sessions.
                     </p>

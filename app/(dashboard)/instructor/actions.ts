@@ -497,6 +497,7 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
         .select(`
             *,
             slots (
+                date,
                 start_time,
                 end_time,
                 studios (
@@ -544,7 +545,9 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
                 studioName,
                 address: studioAddress,
                 date,
-                time
+                time,
+                equipment: (booking.price_breakdown as any)?.equipment,
+                quantity: (booking.price_breakdown as any)?.quantity
             })
         });
     }
@@ -563,7 +566,9 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
                     studioName,
                     instructorName,
                     date,
-                    time
+                    time,
+                    equipment: (booking.price_breakdown as any)?.equipment,
+                    quantity: (booking.price_breakdown as any)?.quantity
                 })
             });
         }

@@ -16,6 +16,7 @@ function LoginContent() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [fullName, setFullName] = useState('')
+    const [birthday, setBirthday] = useState('')
     const [role, setRole] = useState(initialRole)
     const [isSignUp, setIsSignUp] = useState(initialMode)
     const [loading, setLoading] = useState(false)
@@ -57,8 +58,9 @@ function LoginContent() {
                 options: {
                     data: {
                         full_name: fullName,
-                        email: email,
-                        role: role
+                        email: email.toLowerCase(),
+                        role: role,
+                        date_of_birth: birthday
                     },
                     emailRedirectTo: `${window.location.origin}/auth/callback?next=/verified`
                 }
@@ -237,6 +239,19 @@ function LoginContent() {
                                     required={isSignUp}
                                     placeholder="e.g. Jane Doe"
                                     className="w-full px-5 py-3.5 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-300"
+                                />
+                            </div>
+                        )}
+
+                        {isSignUp && (
+                            <div>
+                                <label className="block text-sm font-semibold text-charcoal-800 mb-2">Date of Birth</label>
+                                <input
+                                    type="date"
+                                    value={birthday}
+                                    onChange={(e) => setBirthday(e.target.value)}
+                                    required={isSignUp}
+                                    className="w-full px-5 py-3.5 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all"
                                 />
                             </div>
                         )}

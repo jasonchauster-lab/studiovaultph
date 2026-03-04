@@ -19,6 +19,18 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
     const [cancellingBooking, setCancellingBooking] = useState<any>(null)
     const [selectedClient, setSelectedClient] = useState<any>(null)
 
+    const calculateAge = (birthday: string) => {
+        if (!birthday) return null
+        const birthDate = new Date(birthday)
+        const today = new Date()
+        let age = today.getFullYear() - birthDate.getFullYear()
+        const m = today.getMonth() - birthDate.getMonth()
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--
+        }
+        return age
+    }
+
     const handleCancelConfirm = async (reason: string) => {
         if (!cancellingBooking) return { error: 'No booking selected' }
 
@@ -170,7 +182,15 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                 <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                             </div>
                             <h3 className="text-xl font-bold text-charcoal-900">{selectedClient.full_name}</h3>
-                            <p className="text-sm text-charcoal-500">{selectedClient.email}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                                <p className="text-sm text-charcoal-500">{selectedClient.email}</p>
+                                {selectedClient.date_of_birth && (
+                                    <>
+                                        <span className="text-charcoal-300">•</span>
+                                        <p className="text-sm font-bold text-rose-gold">{calculateAge(selectedClient.date_of_birth)} years old</p>
+                                    </>
+                                )}
+                            </div>
                         </div>
                         {selectedClient.medical_conditions ? (
                             <div className="bg-red-50 p-4 rounded-xl border border-red-100">

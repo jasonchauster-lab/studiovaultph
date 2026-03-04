@@ -6,6 +6,9 @@ import Link from 'next/link'
 import clsx from 'clsx'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
 import BookingFilter, { FilterState } from '@/components/dashboard/BookingFilter'
+import CancelBookingModal from './CancelBookingModal'
+import { cancelBookingByStudio } from '@/app/(dashboard)/studio/actions'
+import { formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
 
 interface StudioRentalListProps {
     bookings: any[]
@@ -18,11 +21,34 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
         dateRange: { from: null, to: null }
     })
     const [selectedClient, setSelectedClient] = useState<any>(null)
+    const [cancellingBooking, setCancellingBooking] = useState<any>(null)
+
+    const handleCancelConfirm = async (reason: string) => {
+        if (!cancellingBooking) return { error: 'No booking selected' }
+        const result = await cancelBookingByStudio(cancellingBooking.id, reason)
+        if (result.success) {
+            // Revalidate happens on server, but we can update local state if needed
+            // For now, let the page revalidation handle it or filter out locally
+        }
+        return result
+    }
 
     const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
 
     const getSlotDateTime = (date: string, time: string) => {
         return new Date(`${date}T${time}+08:00`)
+    }
+
+    const calculateAge = (birthday: string) => {
+        if (!birthday) return null
+        const birthDate = new Date(birthday)
+        const today = new Date()
+        let age = today.getFullYear() - birthDate.getFullYear()
+        const m = today.getMonth() - birthDate.getMonth()
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--
+        }
+        return age
     }
 
     const now = new Date()
@@ -215,6 +241,16 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                     </div>
 
                                     <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                        {booking.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) > now && (
+                                            <button
+                                                onClick={() => setCancellingBooking(booking)}
+                                                className="text-[10px] font-bold text-red-600 hover:text-red-700 px-2 py-1.5 rounded-lg border border-red-100 hover:bg-red-50 transition-all flex items-center gap-1"
+                                                title="Cancel"
+                                            >
+                                                <X className="w-3 h-3" />
+                                                <span>Cancel</span>
+                                            </button>
+                                        )}
                                         {instructor && instructor.id !== currentUserId && (
                                             <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={instructor.id} partnerName={instructor.full_name || 'Instructor'} label="Message Instructor" />
                                         )}
@@ -225,6 +261,30 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                     })
                 )}
             </div>
+
+            <CancelBookingModal
+                isOpen={!!cancellingBooking}
+                onClose={() => setCancellingBooking(null)}
+                onConfirm={handleCancelConfirm}
+                title="Cancel Session"
+                description="Are you sure you want to cancel this session? A 100% refund will be issued to the client immediately. The instructor will also be notified."
+                penaltyNotice={
+                    (() => {
+                        if (!cancellingBooking) return null
+                        const slotData = getFirst(cancellingBooking.slots)
+                        if (!slotData) return null
+                        const startTime = new Date(`${slotData.date}T${slotData.start_time}+08:00`)
+                        const diffInHours = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60)
+                        const isLate = diffInHours < 24
+
+                        if (isLate) {
+                            const studioFee = cancellingBooking.price_breakdown?.studio_fee || 0
+                            return `Late Cancellation Displacement Fee: ₱${studioFee.toLocaleString()} will be deducted from your wallet and credited to the instructor.`
+                        }
+                        return null
+                    })() || undefined
+                }
+            />
 
             {/* Client Medical Modal */}
             {
@@ -237,7 +297,15 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                     <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                 </div>
                                 <h3 className="text-xl font-serif text-charcoal-900">{selectedClient.full_name}</h3>
-                                <p className="text-sm text-charcoal-500">{selectedClient.email}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <p className="text-sm text-charcoal-500">{selectedClient.email}</p>
+                                    {selectedClient.date_of_birth && (
+                                        <>
+                                            <span className="text-charcoal-300">•</span>
+                                            <p className="text-sm font-bold text-rose-gold">{calculateAge(selectedClient.date_of_birth)} years old</p>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                             {selectedClient.bio && (
                                 <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50 mb-3">

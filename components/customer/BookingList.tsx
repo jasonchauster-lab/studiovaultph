@@ -9,6 +9,7 @@ import MessageCountBadge from '@/components/dashboard/MessageCountBadge'
 import { cancelBooking } from '@/app/(dashboard)/customer/actions'
 import BookingFilter, { FilterState } from '@/components/dashboard/BookingFilter'
 import LeaveReviewButton from '@/components/reviews/LeaveReviewButton'
+import CancelBookingModal from '@/components/dashboard/CancelBookingModal'
 
 interface BookingListProps {
     bookings: any[]
@@ -75,29 +76,15 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
     }
 
     const [cancellingId, setCancellingId] = useState<string | null>(null)
+    const [cancellingBooking, setCancellingBooking] = useState<any>(null)
 
-    const handleCancel = async (booking: any) => {
-        const startTime = getSlotDateTime(booking.slots.date, booking.slots.start_time).getTime()
-        const currentTime = now.getTime()
-        const hoursUntilStart = (startTime - currentTime) / (1000 * 60 * 60)
-
-        const isRefunding = hoursUntilStart >= 24
-
-        const msg = isRefunding
-            ? 'Are you sure you want to cancel? Your refund will be credited to your Wallet Balance.'
-            : 'Are you sure you want to cancel? This booking is less than 24 hours away and will NOT be refunded.'
-
-        if (!window.confirm(msg)) return
-
-        setCancellingId(booking.id)
-        const res = await cancelBooking(booking.id)
-
-        if (res.error) {
-            alert(res.error)
-        } else {
-            alert(res.refunded ? `Cancelled successfully. ₱${res.refundAmount} refunded to Wallet.` : 'Cancelled successfully (No refund).')
-        }
+    const handleCancelConfirm = async (reason: string) => {
+        if (!cancellingBooking) return { error: 'No booking selected' }
+        setCancellingId(cancellingBooking.id)
+        const res = await cancelBooking(cancellingBooking.id, reason)
         setCancellingId(null)
+        setCancellingBooking(null)
+        return res
     }
 
     const activeBooking = bookings.find(b => b.id === selectedBooking)
@@ -194,7 +181,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                         {booking.status === 'approved' && getSlotDateTime(booking.slots.date, booking.slots.start_time) > now && (
                                             <button
-                                                onClick={() => handleCancel(booking)}
+                                                onClick={() => setCancellingBooking(booking)}
                                                 disabled={cancellingId === booking.id}
                                                 className="px-2 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-[10px] font-bold disabled:opacity-50 flex items-center gap-1 border border-red-100"
                                                 title="Cancel Booking"
@@ -285,6 +272,21 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                     isExpired={isChatExpired(activeBooking)}
                 />
             )}
+
+            <CancelBookingModal
+                isOpen={!!cancellingBooking}
+                onClose={() => setCancellingBooking(null)}
+                onConfirm={handleCancelConfirm}
+                title="Cancel Booking"
+                description={(() => {
+                    if (!cancellingBooking) return ""
+                    const startTime = getSlotDateTime(cancellingBooking.slots.date, cancellingBooking.slots.start_time).getTime()
+                    const hoursUntilStart = (startTime - now.getTime()) / (1000 * 60 * 60)
+                    return hoursUntilStart >= 24
+                        ? "Are you sure you want to cancel? Your refund will be credited to your Wallet Balance."
+                        : "Are you sure you want to cancel? This booking is less than 24 hours away and will NOT be refunded."
+                })()}
+            />
         </div>
     )
 }

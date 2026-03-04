@@ -341,8 +341,8 @@ export default function PaymentForm({
         ? new Date(`${booking.slots.date}T${booking.slots.start_time}+08:00`)
         : null
     const isLateBooking = startTime ? (startTime.getTime() - Date.now()) < 24 * 60 * 60 * 1000 : false
-
-    const canSubmit = file && waiverAgreed && termsAgreed && agreementsUnlocked && (!isLateBooking || lateBookingAgreed) && !isUploading && !isExpired
+    const isZeroPrice = (booking?.total_price ?? 0) === 0
+    const canSubmit = (isZeroPrice || file) && waiverAgreed && termsAgreed && agreementsUnlocked && (!isLateBooking || lateBookingAgreed) && !isUploading && !isExpired
 
     const handleParqChange = (key: ParqKey, value: boolean) => {
         const updated = { ...parqAnswers, [key]: value }
@@ -386,43 +386,40 @@ export default function PaymentForm({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!file) {
-            setError('Please select a screenshot of your payment.')
-            return
-        }
-        if (!waiverAgreed) {
-            setError('You must agree to the Health Waiver before proceeding.')
-            return
-        }
-        if (!termsAgreed) {
-            setError('You must agree to the Terms and Conditions before proceeding.')
-            return
-        }
-
         setIsUploading(true)
         setError(null)
 
         try {
-            // 1. Upload File
-            const fileExt = file.name.split('.').pop()
-            const fileName = `${booking.id}_${Date.now()}.${fileExt}`
-            const filePath = `${fileName}`
+            let proofUrl = null;
 
-            const { error: uploadError } = await supabase.storage
-                .from('payment-proofs')
-                .upload(filePath, file)
+            if (!isZeroPrice) {
+                if (!file) {
+                    setError('Please select a screenshot of your payment.')
+                    return
+                }
+                // 1. Upload File
+                const fileExt = file.name.split('.').pop()
+                const fileName = `${booking.id}_${Date.now()}.${fileExt}`
+                const filePath = `${fileName}`
 
-            if (uploadError) throw uploadError
+                const { error: uploadError } = await supabase.storage
+                    .from('payment-proofs')
+                    .upload(filePath, file)
 
-            // 2. Get Public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('payment-proofs')
-                .getPublicUrl(filePath)
+                if (uploadError) throw uploadError
+
+                // 2. Get Public URL
+                const { data: { publicUrl } } = supabase.storage
+                    .from('payment-proofs')
+                    .getPublicUrl(filePath)
+
+                proofUrl = publicUrl;
+            }
 
             // 3. Submit with waiver flags, PAR-Q answers, and medical ack
             const result = await submitPaymentProof(
                 booking.id,
-                publicUrl,
+                proofUrl || '',
                 waiverAgreed,
                 termsAgreed,
                 parqAnswers as Record<string, boolean>,
@@ -733,61 +730,76 @@ export default function PaymentForm({
                 )}
 
                 {/* ── File Upload Section ── */}
-                <div>
-                    <h4 className="font-medium text-charcoal-900 mb-3 text-sm">Upload Payment Proof</h4>
+                {/* ── File Upload Section ── */}
+                {!isZeroPrice ? (
+                    <div>
+                        <h4 className="font-medium text-charcoal-900 mb-3 text-sm">Upload Payment Proof</h4>
 
-                    {error && (
-                        <div className="bg-red-50 text-red-600 p-3 rounded-lg flex items-center gap-2 mb-4 text-sm">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
-                            {error}
-                        </div>
-                    )}
-
-                    <label className={`block w-full border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${!waiverAgreed || !termsAgreed
-                        ? 'border-cream-200 bg-cream-50/50 opacity-60 pointer-events-none'
-                        : 'border-cream-300 hover:border-charcoal-400 bg-cream-50'
-                        }`}>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="hidden"
-                            disabled={!waiverAgreed || !termsAgreed}
-                        />
-                        {file ? (
-                            <div className="space-y-4">
-                                <div className="text-charcoal-900 font-medium flex flex-col items-center">
-                                    <CheckCircle className="w-8 h-8 text-green-500 mb-2" />
-                                    <span className="text-sm truncate max-w-[200px]">{file.name}</span>
-                                    <span className="text-xs text-charcoal-500 mt-1">Click to change</span>
-                                </div>
-
-                                {previewUrl && (
-                                    <div className="relative mx-auto w-48 h-48 rounded-xl overflow-hidden border border-cream-200 bg-white group shadow-sm">
-                                        <img
-                                            src={previewUrl}
-                                            alt="Payment proof preview"
-                                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                        />
-                                        <div className="absolute inset-0 bg-charcoal-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <Eye className="w-6 h-6 text-white" />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="text-charcoal-500 flex flex-col items-center">
-                                <Upload className="w-8 h-8 mb-2 opacity-50" />
-                                <span className="font-medium">
-                                    {!waiverAgreed || !termsAgreed
-                                        ? 'Please agree to the documents above first'
-                                        : 'Click to upload screenshot'}
-                                </span>
-                                <span className="text-xs mt-1">JPG, PNG supported</span>
+                        {error && (
+                            <div className="bg-red-50 text-red-600 p-3 rounded-lg flex items-center gap-2 mb-4 text-sm">
+                                <AlertCircle className="w-4 h-4 shrink-0" />
+                                {error}
                             </div>
                         )}
-                    </label>
-                </div>
+
+                        <label className={`block w-full border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${!waiverAgreed || !termsAgreed
+                            ? 'border-cream-200 bg-cream-50/50 opacity-60 pointer-events-none'
+                            : 'border-cream-300 hover:border-charcoal-400 bg-cream-50'
+                            }`}>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className="hidden"
+                                disabled={!waiverAgreed || !termsAgreed}
+                            />
+                            {file ? (
+                                <div className="space-y-4">
+                                    <div className="text-charcoal-900 font-medium flex flex-col items-center">
+                                        <CheckCircle className="w-8 h-8 text-green-500 mb-2" />
+                                        <span className="text-sm truncate max-w-[200px]">{file.name}</span>
+                                        <span className="text-xs text-charcoal-500 mt-1">Click to change</span>
+                                    </div>
+
+                                    {previewUrl && (
+                                        <div className="relative mx-auto w-48 h-48 rounded-xl overflow-hidden border border-cream-200 bg-white group shadow-sm">
+                                            <img
+                                                src={previewUrl}
+                                                alt="Payment proof preview"
+                                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                            />
+                                            <div className="absolute inset-0 bg-charcoal-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <Eye className="w-6 h-6 text-white" />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="text-charcoal-500 flex flex-col items-center">
+                                    <Upload className="w-8 h-8 mb-2 opacity-50" />
+                                    <span className="font-medium">
+                                        {!waiverAgreed || !termsAgreed
+                                            ? 'Please agree to the documents above first'
+                                            : 'Click to upload screenshot'}
+                                    </span>
+                                    <span className="text-xs mt-1">JPG, PNG supported</span>
+                                </div>
+                            )}
+                        </label>
+                    </div>
+                ) : (
+                    <div className="bg-cream-50 border border-cream-200 rounded-xl p-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+                                <CheckCircle className="w-6 h-6 text-green-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-charcoal-900">Wallet Payment Applied</p>
+                                <p className="text-xs text-charcoal-500 mt-0.5">Proceed to confirm your session without further payment.</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* ── Late-Booking Warning ── */}
                 {isLateBooking && (
@@ -815,6 +827,21 @@ export default function PaymentForm({
                         </div>
                     </div>
                 )}
+
+                {/* Cancellation Policy Summary */}
+                <div className="bg-charcoal-50 border border-charcoal-200 rounded-xl p-4 text-sm">
+                    <p className="font-bold text-charcoal-900 mb-2">Cancellation Policy:</p>
+                    <ul className="space-y-1 text-charcoal-700">
+                        <li className="flex items-start gap-2">
+                            <span className="text-charcoal-400 mt-1 shrink-0">•</span>
+                            <span><strong>24+ hours notice:</strong> Full refund to your StudioVaultPH Wallet.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-charcoal-400 mt-1 shrink-0">•</span>
+                            <span><strong>Less than 24 hours notice:</strong> Non-refundable.</span>
+                        </li>
+                    </ul>
+                </div>
 
                 {/* Policy Agreement Reminder */}
                 <div className="text-center space-y-4">
@@ -849,7 +876,7 @@ export default function PaymentForm({
                                     ? 'Please agree to the required documents above to continue.'
                                     : isLateBooking && !lateBookingAgreed
                                         ? 'Please agree to the late-booking policy above.'
-                                        : !file
+                                        : !file && !isZeroPrice
                                             ? 'Please upload your payment screenshot.'
                                             : ''}
                     </p>

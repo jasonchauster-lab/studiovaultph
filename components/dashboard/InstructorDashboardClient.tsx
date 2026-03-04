@@ -373,6 +373,18 @@ export default function InstructorDashboardClient() {
                                                                 <span className="text-[10px] font-bold">Studio</span>
                                                                 <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.slots.studios.owner_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.slots.studios.owner_id} />
                                                             </button>
+
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    setCancellingBooking(session);
+                                                                }}
+                                                                className="text-[10px] font-bold text-red-600 hover:text-red-700 px-2 py-1.5 rounded-lg border border-red-100 hover:bg-red-50 transition-all flex items-center gap-1 shadow-sm"
+                                                                title="Cancel"
+                                                            >
+                                                                <X className="w-3 h-3" />
+                                                                <span>Cancel</span>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>

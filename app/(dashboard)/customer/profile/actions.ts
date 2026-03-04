@@ -14,6 +14,7 @@ export async function updateProfile(formData: FormData) {
     const contactNumber = formData.get('contactNumber') as string
     const emergencyContact = formData.get('emergencyContact') as string
     const bio = formData.get('bio') as string
+    const birthday = formData.get('birthday') as string
     const avatarFile = formData.get('avatar') as File
     const otherMedicalCondition = formData.get('otherMedicalCondition') as string
 
@@ -28,6 +29,7 @@ export async function updateProfile(formData: FormData) {
         contact_number: contactNumber,
         emergency_contact: emergencyContact,
         bio: bio,
+        date_of_birth: birthday || null,
         teaching_equipment: teachingEquipment, // Save array
         medical_conditions: medicalConditions, // Save medical conditions
         other_medical_condition: otherMedicalCondition, // Save other medical conditions

@@ -795,7 +795,9 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
                 studioName: studio.name,
                 date,
                 time,
-                cancellationReason: reason
+                cancellationReason: reason,
+                equipment: (booking.price_breakdown as any)?.equipment,
+                quantity: (booking.price_breakdown as any)?.quantity
             })
         })
     }

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import PaymentForm from '@/components/customer/PaymentForm'
 import ExpandableImage from '@/components/ui/ExpandableImage'
-import { ArrowLeft, CreditCard, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, CreditCard, AlertTriangle, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function PaymentPage({
@@ -154,31 +154,41 @@ export default async function PaymentPage({
                         </div>
                     </div>
 
-                    {/* QR Codes */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div className="text-center">
-                            <p className="font-medium text-charcoal-900 mb-2">GCash</p>
-                            <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-md hover:shadow-lg transition-shadow inline-block">
-                                <ExpandableImage
-                                    src="/gcash-qr.jpg"
-                                    alt="GCash QR Code"
-                                    className="w-48 h-48"
-                                />
-                                <p className="text-xs text-charcoal-500 mt-2">Scan to pay</p>
+                    {/* QR Codes - Only show if price > 0 */}
+                    {(booking.total_price ?? 0) > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div className="text-center">
+                                <p className="font-medium text-charcoal-900 mb-2">GCash</p>
+                                <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-md hover:shadow-lg transition-shadow inline-block">
+                                    <ExpandableImage
+                                        src="/gcash-qr.jpg"
+                                        alt="GCash QR Code"
+                                        className="w-48 h-48"
+                                    />
+                                    <p className="text-xs text-charcoal-500 mt-2">Scan to pay</p>
+                                </div>
+                            </div>
+                            <div className="text-center mt-4 md:mt-0">
+                                <p className="font-medium text-charcoal-900 mb-2">BPI</p>
+                                <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-md hover:shadow-lg transition-shadow inline-block">
+                                    <ExpandableImage
+                                        src="/bpi-qr.jpg"
+                                        alt="BPI QR Code"
+                                        className="w-48 h-48"
+                                    />
+                                    <p className="text-xs text-charcoal-500 mt-2">Scan to pay</p>
+                                </div>
                             </div>
                         </div>
-                        <div className="text-center mt-4 md:mt-0">
-                            <p className="font-medium text-charcoal-900 mb-2">BPI</p>
-                            <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-md hover:shadow-lg transition-shadow inline-block">
-                                <ExpandableImage
-                                    src="/bpi-qr.jpg"
-                                    alt="BPI QR Code"
-                                    className="w-48 h-48"
-                                />
-                                <p className="text-xs text-charcoal-500 mt-2">Scan to pay</p>
-                            </div>
+                    ) : (
+                        <div className="bg-green-50/50 border border-green-200 rounded-xl p-6 mb-8 text-center animate-in fade-in slide-in-from-bottom-2">
+                            <CheckCircle className="w-10 h-10 text-green-600 mx-auto mb-3" />
+                            <p className="text-green-900 font-medium">Session Fully Covered</p>
+                            <p className="text-sm text-green-700 mt-1">
+                                This booking has been fully paid using your wallet balance. No additional payment is required.
+                            </p>
                         </div>
-                    </div>
+                    )}
 
                     <PaymentForm
                         booking={booking}
