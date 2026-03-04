@@ -821,8 +821,8 @@ export async function bookInstructorSession(
                     instructorName,
                     date: dateStr,
                     time: timeStr,
-                    equipment: (booking.price_breakdown as any)?.equipment,
-                    quantity: (booking.price_breakdown as any)?.quantity
+                    equipment: (enrichedBooking.price_breakdown as any)?.equipment,
+                    quantity: (enrichedBooking.price_breakdown as any)?.quantity
                 })
             });
 
@@ -838,8 +838,8 @@ export async function bookInstructorSession(
                         clientName,
                         date: dateStr,
                         time: timeStr,
-                        equipment: (booking.price_breakdown as any)?.equipment,
-                        quantity: (booking.price_breakdown as any)?.quantity
+                        equipment: (enrichedBooking.price_breakdown as any)?.equipment,
+                        quantity: (enrichedBooking.price_breakdown as any)?.quantity
                     })
                 });
             }
@@ -860,8 +860,8 @@ export async function bookInstructorSession(
                             clientName,
                             date: dateStr,
                             time: timeStr,
-                            equipment: (booking.price_breakdown as any)?.equipment,
-                            quantity: (booking.price_breakdown as any)?.quantity
+                            equipment: (enrichedBooking.price_breakdown as any)?.equipment,
+                            quantity: (enrichedBooking.price_breakdown as any)?.quantity
                         })
                     });
                 }
