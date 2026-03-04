@@ -49,8 +49,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
     // 2. Split filtered bookings into upcoming/past
     const upcomingBookings = baseFilteredBookings.filter(b => {
         const slot = getFirst(b.slots)
-        return (b.status === 'approved' || b.status === 'pending') &&
-            getSlotDateTime(slot.date, slot.start_time) > now
+        return b.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) > now
     })
     const pastBookings = baseFilteredBookings.filter(b => {
         const slot = getFirst(b.slots)
@@ -148,16 +147,12 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                                 booking.status === 'completed'
                                                                     ? (booking.funds_unlocked ? 'bg-green-100/50 text-green-700 border-green-200' : 'bg-amber-100/50 text-amber-700 border-amber-200') :
                                                                     booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
-                                                                        booking.status === 'cancelled' ? 'bg-red-100/50 text-red-700 border-red-200' :
-                                                                            booking.status === 'pending' ? 'bg-amber-100/50 text-amber-700 border-amber-200' :
-                                                                                'bg-charcoal-100/50 text-charcoal-600 border-cream-200'
+                                                                        'bg-red-100/50 text-red-700 border-red-200'
                                                             )}>
                                                                 {booking.status === 'completed'
                                                                     ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)') :
                                                                     booking.status === 'approved' ? 'Approved' :
-                                                                        booking.status === 'cancelled' ? 'Cancelled' :
-                                                                            booking.status === 'pending' ? 'Pending' :
-                                                                                booking.status}
+                                                                        'Cancelled'}
                                                             </span>
                                                         </div>
                                                         <div className="text-right shrink-0">

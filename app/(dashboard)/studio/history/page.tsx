@@ -62,7 +62,7 @@ export default async function StudioHistoryPage() {
                 )
             `)
             .in('slot_id', slotIds)
-            .in('status', ['approved', 'completed', 'pending', 'cancelled'])
+            .in('status', ['approved', 'completed', 'cancelled'])
             .order('created_at', { ascending: false })
 
     return (

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Filter, Calendar as CalendarIcon, X } from 'lucide-react'
 import clsx from 'clsx'
 
-export type FilterStatus = 'all' | 'pending' | 'approved' | 'completed' | 'cancelled'
+export type FilterStatus = 'all' | 'approved' | 'completed' | 'cancelled'
 
 export interface DateRange {
     from: Date | null
@@ -67,7 +67,6 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                     className="bg-cream-50 border border-cream-200 text-charcoal-700 text-sm rounded-lg focus:ring-rose-gold focus:border-rose-gold block w-full py-2 px-3 outline-none transition-colors"
                 >
                     <option value="all">All Statuses</option>
-                    <option value="pending">Pending</option>
                     <option value="approved">Approved/Upcoming</option>
                     <option value="completed">Completed</option>
                     <option value="cancelled">Cancelled</option>
