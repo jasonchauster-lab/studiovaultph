@@ -1,59 +1,55 @@
 const { createClient } = require('@supabase/supabase-js');
-const fs = require('fs');
-const path = require('path');
-
-// Basic env loading since dotenv might not be available
-const envPath = 'c:/Users/jason/Downloads/pilatesBridgeWebsite/.env.local';
-const envContent = fs.readFileSync(envPath, 'utf8');
-const env = {};
-envContent.split('\n').forEach(line => {
-    const [key, ...value] = line.split('=');
-    if (key && value) {
-        env[key.trim()] = value.join('=').trim();
-    }
-});
 
 const supabase = createClient(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
+    'https://wzacmyemiljzpdskyvie.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6YWNteWVtaWxqenBkc2t5dmllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTIxNTI4OCwiZXhwIjoyMDg2NzkxMjg4fQ.cVVEAR4_EM3ytz4LtPKD8g9RJ__XqI0YTPInPNuDZMI'
 );
 
 async function checkRLS() {
-    const tablesToCheck = [
-        'profiles',
-        'studios',
-        'slots',
-        'instructor_availability',
-        'certifications',
-        'bookings',
-        'payout_requests',
-        'wallet_top_ups'
-    ];
+    const { data: policies, error: polError } = await supabase
+        .rpc('get_policies_for_table', { table_name: 'profiles' });
 
-    console.log('--- RLS Status Check ---');
+    if (polError) {
+        // If RPC doesn't exist, try querying pg_policies directly via a raw SQL-like RPC if available, 
+        // or just try to read a profile as a non-owner (testing anonymously)
+        console.log('RPC get_policies_for_table not found, trying fallback check...');
 
-    // Check if we can access tables as anon
-    const anonClient = createClient(
-        env.NEXT_PUBLIC_SUPABASE_URL,
-        env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    );
+        // Fallback: Check if RLS is enabled
+        const { data: rlsStatus, error: rlsError } = await supabase
+            .rpc('check_rls_enabled', { p_table_name: 'profiles' });
 
-    for (const table of tablesToCheck) {
-        try {
-            const { data, error } = await anonClient.from(table).select('*').limit(1);
-            if (!error) {
-                console.log(`[WARNING] Table "${table}" is READABLE by ANON! (RLS potentially disabled or set to public)`);
-            } else if (error.code === '42P01') {
-                console.log(`[INFO] Table "${table}" does not exist.`);
-            } else if (error.message.includes('permission denied')) {
-                console.log(`[OK] Table "${table}" blocked for ANON: ${error.message}`);
-            } else {
-                console.log(`[?] Table "${table}" returned error: ${error.message} (Code: ${error.code})`);
-            }
-        } catch (e) {
-            console.log(`[ERROR] querying ${table}:`, e.message);
+        if (rlsError) {
+            console.log('Could not check RLS via RPC. Running manual test query.');
+            const { data, error } = await supabase.from('profiles').select('id').limit(1);
+            console.log('Anon profile read result:', { data, error });
+        } else {
+            console.log('RLS Status:', rlsStatus);
         }
+        return;
     }
+
+    console.log('Policies for profiles:', policies);
 }
 
-checkRLS();
+// Since I don't know the RPCs, I'll just try to query pg_policies using the service role via a custom RPC if it exists, 
+// or I can't.
+// Let's just try to read ALL profiles (service role should bypass RLS anyway).
+// The issue isn't whether I can read, but whether the AUTH user can read.
+
+async function testAuthRead() {
+    // I can't easily masquerade as a user here without their token.
+    // But I can check the database to see if the policies EXIST in pg_policies.
+
+    const { data, error } = await supabase.rpc('exec_sql', {
+        sql_query: "SELECT tablename, policyname, roles, cmd, qual FROM pg_policies WHERE tablename = 'profiles';"
+    });
+
+    if (error) {
+        console.error('exec_sql failed:', error);
+        return;
+    }
+
+    console.log('Active policies on profiles:', data);
+}
+
+testAuthRead();
