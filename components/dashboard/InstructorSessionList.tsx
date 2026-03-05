@@ -189,7 +189,17 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center gap-2 transition-opacity">
+                                            {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
+                                                <button
+                                                    onClick={() => setCancellingBooking(booking)}
+                                                    className="text-[10px] font-bold text-red-600 hover:text-red-700 px-2 py-1.5 rounded-lg border border-red-100 hover:bg-red-50 transition-all flex items-center gap-1"
+                                                    title="Cancel"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                    <span>Cancel</span>
+                                                </button>
+                                            )}
                                             {client && client.id !== currentUserId && (
                                                 <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="Message Client" />
                                             )}

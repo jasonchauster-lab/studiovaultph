@@ -99,8 +99,14 @@ export default async function StudioDashboard(props: {
             if (statsBookings && statsBookings.length > 0) {
                 // Calc Revenue
                 monthlyRevenue = statsBookings.reduce((sum, b) => {
-                    const fee = b.price_breakdown?.studio_fee || (b.total_price ? Math.max(0, b.total_price - 100) : 0)
-                    return sum + fee
+                    const breakdown = b.price_breakdown as any;
+                    const studioFee = Number(breakdown?.studio_fee || 0);
+
+                    if (studioFee > 0) return sum + studioFee;
+
+                    // Fallback for legacy bookings without breakdown
+                    const fallbackFee = b.total_price ? Math.max(0, b.total_price - 100) : 0;
+                    return sum + fallbackFee;
                 }, 0)
 
                 // Calc Top Instructor

@@ -125,7 +125,7 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                 )}>
                                     {['approved', 'completed'].includes(booking.status?.toLowerCase()) ? 'Confirmed' : 'Pending'}
                                 </span>
-                                <div className="flex gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                <div className="flex gap-1.5 transition-opacity">
                                     <button
                                         onClick={() => setCancellingBooking(booking)}
                                         className="text-[10px] font-bold text-red-600 hover:text-red-700 px-2 py-1.5 rounded-lg border border-red-100 hover:bg-red-50 transition-all flex items-center gap-1"

@@ -15,12 +15,14 @@ export default function InstructorBookingWizard({
     instructorId,
     availability,
     activeBookings = [],
-    instructorRates = {}
+    instructorRates = {},
+    pendingBookings = []
 }: {
     instructorId: string
     availability: any[]
     activeBookings?: any[]
     instructorRates?: Record<string, number>
+    pendingBookings?: any[]
 }) {
     const [step, setStep] = useState<1 | 2 | 3>(1)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -438,6 +440,30 @@ export default function InstructorBookingWizard({
                 </div>
             )}
 
+            {/* Pending Booking Resume Banner — shown when user selects a slot that they have a pending booking for */}
+            {step === 2 && selectedStudioSlot && (() => {
+                const resumeBooking = pendingBookings.find((pb: any) =>
+                    (pb.booked_slot_ids || []).includes(selectedStudioSlot)
+                )
+
+                if (resumeBooking) {
+                    return (
+                        <div className="bg-orange-50 p-6 rounded-xl border border-orange-200 animate-in fade-in slide-in-from-top-2 text-center mb-6">
+                            <h3 className="font-serif text-lg text-orange-900 mb-2">Resume Your Reservation</h3>
+                            <p className="text-orange-700 text-sm mb-6 max-w-md mx-auto">
+                                You already have a pending reservation for this time slot. Please complete your payment to finalize the booking.
+                            </p>
+                            <button
+                                onClick={() => router.push(`/customer/payment/${resumeBooking.id}`)}
+                                className="bg-orange-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors inline-block mx-auto"
+                            >
+                                Continue to Payment
+                            </button>
+                        </div>
+                    )
+                }
+                return null
+            })()}
             {/* Step 2: Select Studio + Equipment + Quantity */}
             {step === 2 && (
                 <div className="space-y-6 animate-in slide-in-from-right-4">

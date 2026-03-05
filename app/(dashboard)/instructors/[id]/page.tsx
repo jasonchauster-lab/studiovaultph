@@ -19,6 +19,10 @@ export default async function InstructorProfilePage(props: {
     const searchParams = await props.searchParams
     const supabase = await createClient()
 
+    // Lazily expire any abandoned bookings to release their slots
+    const { expireAbandonedBookings } = await import('@/lib/wallet')
+    await expireAbandonedBookings().catch(() => { }) // Non-blocking
+
     // 1. Fetch Instructor Profile & Certs
     const { data: instructor } = await supabase
         .from('profiles')
@@ -60,6 +64,14 @@ export default async function InstructorProfilePage(props: {
         .in('status', ['pending', 'approved'])
         .gte('slots.date', startDateStr)
         .lte('slots.date', endDateStr)
+
+    // 2.6 Fetch this user's own pending bookings for resume-booking support
+    const { data: { user } } = await supabase.auth.getUser()
+    const { data: pendingBookings } = user ? await supabase
+        .from('bookings')
+        .select('id, slot_id, status, booked_slot_ids')
+        .eq('client_id', user.id)
+        .eq('status', 'pending') : { data: [] }
 
     // 3. Fetch public reviews for this instructor
     const { reviews, averageRating, totalCount } = await getPublicReviews(id)
@@ -157,6 +169,7 @@ export default async function InstructorProfilePage(props: {
                             availability={availability || []}
                             activeBookings={activeBookings || []}
                             instructorRates={instructor?.rates || {}}
+                            pendingBookings={pendingBookings || []}
                         />
                     </div>
 

@@ -240,7 +240,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center gap-2 transition-opacity">
                                         {booking.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) > now && (
                                             <button
                                                 onClick={() => setCancellingBooking(booking)}

@@ -337,7 +337,7 @@ export default function InstructorDashboardClient() {
                                                             </span>
                                                         </div>
 
-                                                        <div className="flex gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                                        <div className="flex gap-1.5 transition-opacity">
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.preventDefault();

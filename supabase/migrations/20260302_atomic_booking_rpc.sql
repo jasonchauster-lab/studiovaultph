@@ -92,13 +92,18 @@ BEGIN
 
     v_parent_quantity := GREATEST(0, v_parent_quantity - p_quantity);
 
-    -- Update Parent
-    UPDATE slots 
-    SET equipment = v_new_equipment,
-        equipment_inventory = v_new_equipment,
-        quantity = v_parent_quantity,
-        is_available = (v_parent_quantity > 0)
-    WHERE id = p_slot_id;
+    -- FIX: If parent is empty, DELETE it to avoid doubling occupancy counts.
+    -- Otherwise, update it.
+    IF v_parent_quantity <= 0 THEN
+        DELETE FROM slots WHERE id = p_slot_id;
+    ELSE
+        UPDATE slots 
+        SET equipment = v_new_equipment,
+            equipment_inventory = v_new_equipment,
+            quantity = v_parent_quantity,
+            is_available = true
+        WHERE id = p_slot_id;
+    END IF;
 
     -- 3. Create Extracted Slot
     INSERT INTO slots (

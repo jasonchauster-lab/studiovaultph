@@ -112,7 +112,10 @@ b) Any session cancelled less than 24 hours before the scheduled start time is a
 c) Instructor/Studio-initiated late cancellations result in 100% client refunds and penalty deductions from the initiator's wallet.
 d) Negative wallet balances disable "Request Payout" and new bookings until settled.
 
-BY CHECKING THE BOX BELOW, THE CLIENT CONFIRMS THEY HAVE READ, UNDERSTOOD, AND AGREE TO THESE TERMS AND CONDITIONS, INCLUDING THE STRICT 24-HOUR CANCELLATION & WALLET POLICY.`
+12. NON-TRANSFERABILITY
+Sessions booked on the StudioVaultPH platform are strictly non-transferable. Bookings cannot be transferred, sold, or shared with other individuals or accounts.
+
+BY CHECKING THE BOX BELOW, THE CLIENT CONFIRMS THEY HAVE READ, UNDERSTOOD, AND AGREE TO THESE TERMS AND CONDITIONS, INCLUDING THE STRICT 24-HOUR CANCELLATION & WALLET POLICY, AND THE NON-TRANSFERABILITY OF SESSIONS.`
 
 // ─── Instructor Specific Terms ───────────────────────────────────────────────
 const INSTRUCTOR_TERMS_TEXT = `TERMS AND CONDITIONS — INSTRUCTOR PROFESSIONAL BOOKING
@@ -839,6 +842,18 @@ export default function PaymentForm({
                         <li className="flex items-start gap-2">
                             <span className="text-charcoal-400 mt-1 shrink-0">•</span>
                             <span><strong>Less than 24 hours notice:</strong> Non-refundable.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-charcoal-400 mt-1 shrink-0">•</span>
+                            <span><strong>No-Show:</strong> 100% session fee forfeited.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-charcoal-400 mt-1 shrink-0">•</span>
+                            <span><strong>Rebooking:</strong> Not allowed. (Cancellation rules apply).</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-charcoal-400 mt-1 shrink-0">•</span>
+                            <span><strong>Non-Transferable:</strong> Sessions cannot be shared/transferred.</span>
                         </li>
                     </ul>
                 </div>

@@ -127,7 +127,10 @@ export default function BookingNotificationEmail({
                                     <strong>No-Shows:</strong> If you do not arrive for your scheduled session, it will be considered a no-show and the session fee will be forfeited.
                                 </li>
                                 <li style={tncItem}>
-                                    <strong>Rebooking:</strong> Rebooking is treated as a cancellation. Please cancel your existing session (if eligible) and book a new one.
+                                    <strong>Rebooking:</strong> Strictly not allowed. Treated as a cancellation. Please cancel your existing session (if eligible) and book a new one.
+                                </li>
+                                <li style={tncItem}>
+                                    <strong>Non-Transferable:</strong> All bookings are strictly non-transferable to other individuals or accounts.
                                 </li>
                                 <li style={tncItem}>
                                     <strong>Refunds:</strong> All eligible refunds are credited directly back to your StudioVaultPH Wallet and are not refundable to the original payment method.

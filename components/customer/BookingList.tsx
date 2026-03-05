@@ -52,16 +52,14 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
     })
 
     // 2. Split filtered bookings into upcoming/past
-    // Upcoming: Approved bookings in the future
+    // Upcoming: Approved, Pending, or Submitted bookings in the future
     const upcomingBookings = filteredBookings.filter(b =>
-        b.status === 'approved' && getSlotDateTime(b.slots.date, b.slots.start_time) > now
+        ['approved', 'pending', 'submitted'].includes(b.status) && getSlotDateTime(b.slots.date, b.slots.start_time) > now
     )
-    // Past: Completed or Cancelled, or Approved that passed
+    // Past: Completed, Cancelled, Rejected, or Expired, or any that passed
     const pastBookings = filteredBookings.filter(b =>
-        b.status === 'completed' ||
-        b.status === 'cancelled_refunded' ||
-        b.status === 'cancelled_charged' ||
-        (b.status === 'approved' && getSlotDateTime(b.slots.date, b.slots.start_time) <= now)
+        ['completed', 'cancelled_refunded', 'cancelled_charged', 'rejected', 'expired'].includes(b.status) ||
+        (['approved', 'pending', 'submitted', 'cancelled'].includes(b.status) && getSlotDateTime(b.slots.date, b.slots.start_time) <= now)
     )
 
     // Helper to check expiration (12 hours after end time)
@@ -123,8 +121,9 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                             <span className={clsx(
                                                                 "px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border shrink-0",
                                                                 booking.status === 'approved' ? "bg-green-100/50 text-green-700 border-green-200" :
-                                                                    booking.status === 'rejected' || booking.status === 'cancelled' ? "bg-red-100/50 text-red-700 border-red-200" :
-                                                                        "bg-amber-100/50 text-amber-700 border-amber-200"
+                                                                    ['pending', 'submitted'].includes(booking.status) ? "bg-amber-100/50 text-amber-700 border-amber-200" :
+                                                                        ['rejected', 'cancelled', 'cancelled_refunded', 'cancelled_charged', 'expired'].includes(booking.status) ? "bg-red-100/50 text-red-700 border-red-200" :
+                                                                            "bg-charcoal-100/50 text-charcoal-600 border-cream-200"
                                                             )}>
                                                                 {booking.status === 'approved' ? 'Confirmed' : booking.status}
                                                             </span>
@@ -178,7 +177,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center gap-2 transition-opacity">
                                         {booking.status === 'approved' && getSlotDateTime(booking.slots.date, booking.slots.start_time) > now && (
                                             <button
                                                 onClick={() => setCancellingBooking(booking)}
@@ -244,14 +243,16 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     })()}
                                     <span className={clsx(
                                         "text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded border",
-                                        booking.status === 'completed' ? "bg-green-100/50 text-green-700 border-green-200" :
-                                            booking.status === 'approved' ? "bg-blue-100/50 text-blue-700 border-blue-200" :
-                                                ['cancelled', 'cancelled_refunded'].includes(booking.status) ? "bg-red-100/50 text-red-700 border-red-200" :
+                                        booking.status === 'completed' || booking.status === 'approved' ? "bg-green-100/50 text-green-700 border-green-200" :
+                                            ['pending', 'submitted'].includes(booking.status) ? "bg-amber-100/50 text-amber-700 border-amber-200" :
+                                                ['cancelled', 'cancelled_refunded', 'cancelled_charged', 'rejected', 'expired'].includes(booking.status) ? "bg-red-100/50 text-red-700 border-red-200" :
                                                     "bg-charcoal-100/50 text-charcoal-600 border-cream-200"
                                     )}>
                                         {booking.status === 'completed' ? 'Completed' :
                                             booking.status === 'approved' ? 'Completed' :
-                                                'Cancelled'}
+                                                ['pending', 'submitted'].includes(booking.status) ? 'Pending' :
+                                                    ['rejected', 'expired'].includes(booking.status) ? booking.status :
+                                                        'Cancelled'}
                                     </span>
                                 </div>
                             </div>
