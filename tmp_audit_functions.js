@@ -28,8 +28,10 @@ async function auditFunctions() {
         sql_query: `
             SELECT 
                 p.proname as name,
+                r.rolname as owner,
                 pg_get_functiondef(p.oid) as definition
             FROM pg_proc p 
+            JOIN pg_roles r ON p.proowner = r.oid
             JOIN pg_namespace n ON p.pronamespace = n.oid 
             WHERE n.nspname = 'public' 
               AND (p.proname LIKE 'check_%' OR p.proname LIKE 'is_%')
@@ -43,6 +45,7 @@ async function auditFunctions() {
 
     functions.forEach(f => {
         console.log(`\nFunction: ${f.name}`);
+        console.log(`  Owner: ${f.owner}`);
         const isSecurityDefiner = f.definition.includes('SECURITY DEFINER');
         console.log(`  Security Definer: ${isSecurityDefiner}`);
         if (!isSecurityDefiner) {

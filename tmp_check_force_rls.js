@@ -18,21 +18,22 @@ function getEnv() {
 const env = getEnv();
 const supabase = createClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-async function checkFunction() {
+async function checkForceRLS() {
+    console.log('--- CHECKING FORCE RLS ---');
+
     const { data, error } = await supabase.rpc('exec_sql', {
-        sql_query: "SELECT pg_get_functiondef(p.oid) FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid WHERE n.nspname = 'public' AND p.proname = 'check_is_partner_of'"
+        sql_query: "SELECT relname, relforce_row_security FROM pg_class c JOIN pg_namespace n ON c.relnamespace = n.oid WHERE n.nspname = 'public' AND c.relname = 'profiles'"
     });
 
     if (error) {
-        console.error('Error (Maybe exec_sql missing):', error.message);
-        // Fallback: Use a different method to check if the function is recursive
-        // By trying to call it and seeing if it times out
-    } else {
-        console.log('Function Definition:', data[0].pg_get_functiondef);
+        console.error('Error:', error.message);
+        return;
     }
+
+    console.log(data);
 }
 
-checkFunction();
+checkForceRLS();
