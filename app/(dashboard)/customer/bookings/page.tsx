@@ -51,16 +51,46 @@ export default async function CustomerBookingsPage() {
         .in('status', ['approved', 'completed', 'cancelled_refunded', 'cancelled_charged', 'pending', 'submitted', 'rejected', 'expired'])
         .order('created_at', { ascending: false })
 
+    // ── Signed URL Generation ──────────────────────────────────────────
+    const isStoragePath = (url: string) => url && !url.startsWith('http');
+    const storagePaths = (bookings?.map(b => b.payment_proof_url).filter(isStoragePath) || []) as string[]
+
+    let signedUrlMap: Record<string, string> = {}
+    if (storagePaths.length > 0) {
+        const { data } = await supabase.storage
+            .from('payment-proofs')
+            .createSignedUrls(storagePaths, 3600)
+
+        data?.forEach(item => {
+            if (item.signedUrl && item.path) {
+                signedUrlMap[item.path] = item.signedUrl
+            }
+        })
+    }
+
+    const finalBookings = bookings?.map(b => {
+        const proofUrl = b.payment_proof_url;
+        return {
+            ...b,
+            payment_proof_url: isStoragePath(proofUrl)
+                ? (signedUrlMap[proofUrl as string] || proofUrl)
+                : proofUrl
+        }
+    }) || []
+
     // Fetch pending reviews for the customer
     const { bookings: pendingReviews, isInstructor } = await getPendingReviews()
 
     // Helper to combine date and time into a comparable Date object (Manila time)
-    const getSlotDateTime = (date: string, time: string) => {
-        // time is HH:mm:ss, date is YYYY-MM-DD
+    const getSlotDateTime = (date: string | undefined, time: string | undefined) => {
+        if (!date || !time) return new Date(0)
         return new Date(`${date}T${time}+08:00`)
     }
     const now = new Date()
-    const upcomingBookings = bookings?.filter(b => getSlotDateTime(b.slots.date, b.slots.start_time) > now) || []
+    const upcomingBookings = finalBookings.filter(b => getSlotDateTime(b.slots.date, b.slots.start_time) > now)
+
+    // Cache next approved session once instead of calling .find() 5Ã— in JSX
+    const nextSession = upcomingBookings.find(b => b.status === 'approved')
 
     return (
         <div className="min-h-screen bg-cream-50 p-8">
@@ -80,7 +110,7 @@ export default async function CustomerBookingsPage() {
                 </div>
 
                 {/* Digital Entry Pass (For the next confirmed session) */}
-                {upcomingBookings.some(b => b.status === 'approved') && (
+                {nextSession && (
                     <div className="bg-charcoal-900 rounded-2xl p-8 text-cream-50 flex flex-col md:flex-row items-center justify-between shadow-xl">
                         <div>
                             <div className="flex items-center gap-2 mb-2 text-charcoal-300 text-sm uppercase tracking-widest font-medium">
@@ -88,23 +118,17 @@ export default async function CustomerBookingsPage() {
                                 Digital Entry Pass
                             </div>
                             <h2 className="text-3xl font-serif mb-1">
-                                {upcomingBookings.find(b => b.status === 'approved')?.slots.studios.name}
+                                {nextSession.slots.studios.name}
                             </h2>
-                            {upcomingBookings.find(b => b.status === 'approved')?.slots.studios.address && (
+                            {nextSession.slots.studios.address && (
                                 <p className="text-charcoal-400 text-sm mb-1">
-                                    {upcomingBookings.find(b => b.status === 'approved')?.slots.studios.address}
+                                    {nextSession.slots.studios.address}
                                 </p>
                             )}
                             <p className="text-charcoal-300 mb-6">
-                                {getSlotDateTime(
-                                    upcomingBookings.find(b => b.status === 'approved')?.slots.date,
-                                    upcomingBookings.find(b => b.status === 'approved')?.slots.start_time
-                                ).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+                                {getSlotDateTime(nextSession.slots.date, nextSession.slots.start_time).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
                                 {' • '}
-                                {getSlotDateTime(
-                                    upcomingBookings.find(b => b.status === 'approved')?.slots.date,
-                                    upcomingBookings.find(b => b.status === 'approved')?.slots.start_time
-                                ).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                {getSlotDateTime(nextSession.slots.date, nextSession.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
                             </p>
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-charcoal-800 rounded-full flex items-center justify-center text-lg font-bold">
@@ -134,7 +158,7 @@ export default async function CustomerBookingsPage() {
                         My Sessions
                     </h2>
 
-                    <BookingList bookings={bookings || []} userId={user.id} />
+                    <BookingList bookings={finalBookings} userId={user.id} />
                 </section>
             </div>
         </div>

@@ -108,53 +108,27 @@ export async function uploadWaiver(formData: FormData) {
         return { error: 'Upload failed' }
     }
 
-    // 2. Get Public URL (or signed URL if private, but let's assume public for simplicity or we render signed)
-    // Wait, we made the bucket private. So we should use getPublicUrl if we change policy, 
-    // or createSignedUrl for temporary access. 
-    // For now, let's store the path and generate a signed URL on load? 
-    // Or just make it public for "ease" if it's not sensitive data? 
-    // Waivers contain PII, so private is better.
-    // However, for this implementation allow's just store the path and assume the user can read their own object via RLS.
-    // Actually, `getPublicUrl` doesn't work for private buckets.
-    // `createSignedUrl` does.
-
-    // BUT, for the "View" link to work permanently, we might need a public bucket or a proxy.
-    // Let's simple use createSignedUrl in the component? No Component is client.
-    // We'll return a signed URL valid for 1 hour for the immediate preview.
-    // And store the path in DB. 
-
-    // Simplification for MVP:
-    // If we want a persistent link in `profiles.waiver_url`, we usually make the bucket public 
-    // OR we generate a signed URL every time we render the page.
-    // Let's store the PATH in `waiver_url` (or a helper field) and resolving it on render is best practice.
-    // BUT the types say `waiver_url` is TEXT.
-
-    // Let's generate a signed URL valid for 1 year for now (hacky but works for MVP) or just 1 hour and refresh.
-    // To keep it simple: We will just try to get a Signed URL now and save IT. 
-    // (Note: Signed URLs expire).
-
-    // Better Approach: Update `profiles` with the `filePath`.
-    // Then in the Page component, we generate a signed URL to pass to the client.
-
+    // 2. Generate a short-lived signed URL for immediate preview (1 hour)
     const { data: signedData } = await supabase
         .storage
         .from('waivers')
-        .createSignedUrl(filePath, 60 * 60 * 24 * 365) // 1 year
+        .createSignedUrl(filePath, 3600)
 
     if (!signedData) return { error: 'Sign failed' }
 
-    const waiverUrl = signedData.signedUrl
-
-    // 3. Update Profile
+    // 3. Update Profile with the PATH and TIMESTAMP
     const { error: profileError } = await supabase
         .from('profiles')
-        .update({ waiver_url: waiverUrl }) // Storing the signed URL for now
+        .update({
+            waiver_url: filePath,
+            waiver_signed_at: new Date().toISOString()
+        }) // Store the path and the signature timestamp
         .eq('id', user.id)
 
     if (profileError) return { error: 'Profile update failed' }
 
     revalidatePath('/customer/profile')
-    return { success: true, url: waiverUrl }
+    return { success: true, url: signedData.signedUrl, path: filePath }
 }
 
 export async function uploadGalleryImage(formData: FormData) {

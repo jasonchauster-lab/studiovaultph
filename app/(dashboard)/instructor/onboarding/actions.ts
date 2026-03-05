@@ -45,7 +45,15 @@ export async function submitInstructorOnboarding(formData: FormData) {
         return { error: 'All fields are required, including TIN and Gov ID' }
     }
 
-    // 1. Update Profile
+    // 1. Fetch current profile role to prevent role escalation or downgrade
+    const { data: currentProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    const existingRole = currentProfile?.role
+    // Only upgrade 'customer' to 'instructor'. Protect 'admin' and 'studio'.
+    const newRole = (existingRole === 'admin' || existingRole === 'studio' || existingRole === 'instructor')
+        ? existingRole
+        : 'instructor'
+
+    // 2. Update Profile
     const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -56,7 +64,7 @@ export async function submitInstructorOnboarding(formData: FormData) {
             date_of_birth: dateOfBirth,
             tin: tin,
             gov_id_expiry: govIdExpiry,
-            role: 'instructor', // Default to instructor
+            role: newRole,
             updated_at: new Date().toISOString()
         })
         .select() // Returning to help debugging if needed

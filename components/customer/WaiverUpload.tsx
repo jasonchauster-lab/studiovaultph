@@ -5,9 +5,10 @@ import { uploadWaiver } from '@/app/(dashboard)/customer/profile/actions'
 import { Upload, FileText, Check, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
-export default function WaiverUpload({ initialUrl }: { initialUrl?: string }) {
+export default function WaiverUpload({ initialUrl, signedAt }: { initialUrl?: string, signedAt?: string }) {
     const [isUploading, setIsUploading] = useState(false)
     const [fileUrl, setFileUrl] = useState<string | null>(initialUrl || null)
+    const [signedAtDate, setSignedAtDate] = useState<string | null>(signedAt || null)
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || e.target.files.length === 0) return
@@ -22,8 +23,9 @@ export default function WaiverUpload({ initialUrl }: { initialUrl?: string }) {
             const result = await uploadWaiver(formData)
             if (result.success && result.url) {
                 setFileUrl(result.url)
+                setSignedAtDate(new Date().toISOString())
             } else {
-                alert('Upload failed')
+                alert('Upload failed: ' + (result.error || 'Unknown error'))
             }
         } catch (error) {
             console.error(error)
@@ -42,7 +44,12 @@ export default function WaiverUpload({ initialUrl }: { initialUrl?: string }) {
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-charcoal-900 truncate">waiver-document.pdf</p>
-                        <p className="text-xs text-charcoal-500">Uploaded on {new Date().toLocaleDateString()}</p>
+                        <p className="text-xs text-charcoal-500">
+                            {signedAtDate
+                                ? `Signed on ${new Date(signedAtDate).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}`
+                                : 'Uploaded'
+                            }
+                        </p>
                     </div>
                     <Link
                         href={fileUrl}

@@ -297,15 +297,23 @@ export async function createStudio(formData: FormData) {
         }
 
 
-        // Ensure profile exists (to satisfy FK constraint)
-        // NOTE: Profiles table requires email and full_name by default.
+        // 1. Fetch current profile role to prevent role escalation or downgrade
+        const { data: currentProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+        const existingRole = currentProfile?.role
+        // Only upgrade 'customer' to 'studio'. Protect 'admin' and 'instructor'.
+        // If they are an instructor, they should keep the instructor role (since instructors can own studios too)
+        const newRole = (existingRole === 'admin' || existingRole === 'instructor' || existingRole === 'studio')
+            ? existingRole
+            : 'studio'
+
+        // 2. Ensure profile exists (to satisfy FK constraint)
         const { error: profileError } = await supabase
             .from('profiles')
             .upsert({
                 id: user.id, // Ensure id is set for upsert
                 full_name: user.user_metadata?.full_name || 'Studio Owner',
                 email: user.email, // Required by profiles schema
-                role: 'studio', // Ensure they have the studio role
+                role: newRole,
                 contact_number: contactNumber,
                 date_of_birth: dateOfBirth,
                 updated_at: new Date().toISOString()
@@ -661,22 +669,11 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
         return { error: 'Booking is already cancelled or rejected.' }
     }
 
-    // 2. Process 100% Refund to Client
+    // 2. Mark as cancelled atomically to prevent double refunds
     const breakdown = booking.price_breakdown as any;
     const walletDeduction = Number(breakdown?.wallet_deduction || 0);
     const totalPrice = Number(booking.total_price || 0);
     const refundAmount = totalPrice + walletDeduction;
-
-    if (refundAmount > 0) {
-        const { error: refundError } = await supabase.rpc('increment_available_balance', {
-            user_id: booking.client_id,
-            amount: refundAmount
-        })
-        if (refundError) {
-            console.error('Studio cancel refund error:', refundError)
-            return { error: 'Failed to process refund to client.' }
-        }
-    }
 
     const startTimeStr = slotData?.start_time
     const dateStr = slotData?.date
@@ -692,13 +689,52 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
     const approvedAt = approvedAtStr ? new Date(approvedAtStr) : null
     const isWithinGracePeriod = !approvedAt || (now.getTime() - approvedAt.getTime() <= 15 * 60 * 1000)
 
-    // 3. Displacement Fee & Strike logic (Studio Owner -> Instructor)
-    let penaltyProcessed = false
     let penaltyAmount = 0
     let strikeLogged = false
+    let penaltyProcessed = false
 
     if (isLateCancellation && !isWithinGracePeriod) {
         penaltyAmount = Number(breakdown?.studio_fee || 0)
+    }
+
+    const { data: updatedBooking, error: updateError } = await supabase.from('bookings').update({
+        status: 'cancelled_refunded',
+        cancel_reason: reason,
+        cancelled_by: user.id,
+        price_breakdown: {
+            ...breakdown,
+            refunded_amount: refundAmount,
+            penalty_amount: penaltyAmount,
+            refund_initiator: 'studio'
+        }
+    })
+        .eq('id', bookingId)
+        .in('status', ['approved', 'pending', 'submitted'])
+        .select('id')
+
+    if (updateError) {
+        console.error('Studio cancel update error:', updateError)
+        return { error: 'Failed to update booking status.' }
+    }
+
+    if (!updatedBooking || updatedBooking.length === 0) {
+        return { error: 'Booking already cancelled or not eligible for cancellation.' }
+    }
+
+    // 3. Process 100% Refund to Client
+    if (refundAmount > 0) {
+        const { error: refundError } = await supabase.rpc('increment_available_balance', {
+            user_id: booking.client_id,
+            amount: refundAmount
+        })
+        if (refundError) {
+            console.error('Studio cancel refund error:', refundError)
+            return { error: `Cancellation processed, but refund failed: ${refundError.message}` }
+        }
+    }
+
+    // 4. Displacement Fee & Strike logic (Studio Owner -> Instructor)
+    if (isLateCancellation && !isWithinGracePeriod) {
         if (penaltyAmount > 0 && booking.instructor_id) {
             const { error: penaltyError } = await supabase.rpc('transfer_balance', {
                 p_from_id: user.id, // Studio Owner
@@ -707,7 +743,7 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
             })
             if (penaltyError) {
                 console.error('Displacement fee transfer error:', penaltyError)
-                return { error: 'Refund processed, but displacement fee transfer failed.' }
+                return { error: `Refund processed, but displacement fee transfer failed: ${penaltyError.message}` }
             }
             penaltyProcessed = true
         }
@@ -753,11 +789,8 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
         // --- STRIKE SYSTEM END ---
     }
 
-    // 4. Update status and release slots
-    const { error: updateError } = await supabase.from('bookings').update({
-        status: 'cancelled_refunded',
-        cancel_reason: reason,
-        cancelled_by: user.id,
+    // 5. Finalize breakdown fields that might have changed
+    await supabase.from('bookings').update({
         price_breakdown: {
             ...breakdown,
             refunded_amount: refundAmount,
@@ -767,11 +800,6 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
             refund_initiator: 'studio'
         }
     }).eq('id', bookingId)
-
-    if (updateError) {
-        console.error('Studio cancel update error:', updateError)
-        return { error: 'Failed to update booking status.' }
-    }
 
     const allSlotIds = [booking.slot_id, ...(booking.booked_slot_ids || [])].filter(Boolean)
     if (allSlotIds.length > 0) {

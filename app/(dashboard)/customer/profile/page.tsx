@@ -14,6 +14,16 @@ export default async function CustomerProfilePage() {
         .eq('id', user.id)
         .single()
 
+    // Generate Signed URL for waiver if it's a path
+    if (profile?.waiver_url && !profile.waiver_url.startsWith('http')) {
+        const { data: signedData } = await supabase.storage
+            .from('waivers')
+            .createSignedUrl(profile.waiver_url, 3600)
+        if (signedData) {
+            profile.waiver_url = signedData.signedUrl
+        }
+    }
+
     return (
         <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
             <div className="max-w-2xl mx-auto space-y-8">

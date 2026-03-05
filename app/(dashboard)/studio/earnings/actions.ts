@@ -2,7 +2,6 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { getManilaTodayStr } from '@/lib/timezone'
-import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
 import { revalidatePath } from 'next/cache'
 
 export async function getEarningsData(studioId: string, startDate?: string, endDate?: string) {
@@ -10,12 +9,7 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
     const supabase = await createClient()
 
     try {
-        // Run financial jobs lazily
-        console.log('[getEarningsData] Running wallet jobs...')
-        await Promise.allSettled([
-            autoCompleteBookings(),
-            unlockMaturedFunds()
-        ]).catch(e => console.error('[getEarningsData] Wallet jobs error:', e))
+
 
         // 1. Get Studio & Owner details
         console.log('[getEarningsData] Fetching studio info...')

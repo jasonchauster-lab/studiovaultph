@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
-import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
 import { formatManilaDate, formatManilaTime, roundToISOString, formatManilaDateStr, formatTo12Hour, toManilaDateStr, getManilaTodayStr, normalizeTimeTo24h, toManilaTimeString } from '@/lib/timezone'
 
 export async function requestBooking(
@@ -414,6 +413,7 @@ export async function submitPaymentProof(
         })
         .eq('id', bookingId)
         .eq('client_id', user.id) // Ensure ownership
+        .eq('status', 'pending')  // Security Fix: Only pending bookings can be paid
 
     if (error) {
         console.error('Payment proof submission error:', error)
@@ -441,56 +441,44 @@ export async function submitPaymentProof(
         return { error: `Failed to save waiver consent. Please try again. (${consentError.message})` }
     }
 
+    // 3. Sync waiver_signed_at to profile for quick access
+    if (waiverAgreed) {
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ waiver_signed_at: new Date().toISOString() })
+            .eq('id', user.id);
+
+        if (profileError) {
+            console.warn('Failed to sync waiver_signed_at to profile:', profileError);
+        }
+    }
+
     revalidatePath(`/customer/payment/${bookingId}`)
     return { success: true }
 }
 
 export async function submitTopUpPaymentProof(
     topUpId: string,
-    proofUrl: string
+    proofPath: string
 ) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    console.log('[TopUpSubmission] Starting submission for:', { topUpId, userId: user?.id })
+    if (!user) return { error: 'Unauthorized' }
 
-    if (!user) {
-        console.error('[TopUpSubmission] Unauthorized access attempt')
-        return { error: 'Unauthorized' }
-    }
-
-    // 1. Upload proof to Supabase Storage
-    const fileName = `${topUpId}-${Date.now()}.jpg`
-    const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('payment-proofs')
-        .upload(fileName, Buffer.from(proofUrl.split(',')[1], 'base64'), {
-            contentType: 'image/jpeg',
-            cacheControl: '3600',
-            upsert: true
-        })
-
-    if (uploadError) {
-        console.error('[TopUpSubmission] Storage Upload Error:', uploadError)
-        return { error: 'Failed to upload payment proof. Please try again.' }
-    }
-
-    // 2. Get Public URL
-    const { data: { publicUrl } } = supabase.storage
-        .from('payment-proofs')
-        .getPublicUrl(fileName)
-
-    console.log('[TopUpSubmission] Proof uploaded successfully:', publicUrl)
+    console.log('[TopUpSubmission] Received proof path:', proofPath)
 
     // 3. Update the wallet_top_ups record
     const { data: updatedData, error: updateError, count } = await supabase
         .from('wallet_top_ups')
         .update({
-            payment_proof_url: publicUrl,
+            payment_proof_url: proofPath,
             status: 'pending',
             updated_at: new Date().toISOString()
         })
         .eq('id', topUpId)
         .eq('user_id', user.id)
+        .eq('status', 'pending') // Security Fix: Prevent overwriting completed top-ups
         .select()
 
     if (updateError) {
@@ -945,36 +933,13 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
         }
     }
 
-    // 3. Update the database within a simulated transaction
-    if (refundAmount > 0) {
-        const { error: refundError } = await supabase.rpc('increment_available_balance', {
-            user_id: user.id,
-            amount: refundAmount
-        })
-        if (refundError) {
-            console.error('Wallet increment error:', refundError)
-            return { error: `Failed to process refund to wallet: ${refundError.message} (Code: ${refundError.code})` }
-        }
-
-        // Log the refund transaction
-        await supabase.from('wallet_top_ups').insert({
-            user_id: user.id,
-            amount: refundAmount,
-            status: 'approved', // instantly approved
-            type: 'refund',
-            admin_notes: `Refund for cancelled booking`
-        })
-    }
-
-    // Preserve existing breakdown and add refunded_amount
+    // 3. Mark as cancelled atomically to prevent double refunds
+    const newStatus = hoursUntilStart >= 24 ? 'cancelled_refunded' : 'cancelled_charged';
     const currentBreakdown = typeof booking.price_breakdown === 'object' && booking.price_breakdown !== null
         ? booking.price_breakdown
         : {};
 
-    // Mark as cancelled and release the slot(s)
-    const newStatus = hoursUntilStart >= 24 ? 'cancelled_refunded' : 'cancelled_charged';
-
-    const { error: updateError } = await supabase.from('bookings').update({
+    const { data: updatedBooking, error: updateError } = await supabase.from('bookings').update({
         status: newStatus,
         cancel_reason: reason,
         cancelled_by: user.id,
@@ -983,11 +948,39 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
             refunded_amount: refundAmount,
             refund_initiator: 'client'
         }
-    }).eq('id', bookingId);
+    })
+        .eq('id', bookingId)
+        .in('status', ['approved', 'pending', 'submitted'])
+        .select('id')
 
     if (updateError) {
         console.error('Booking cancel update error:', updateError);
         return { error: 'Failed to update booking status during cancellation.' };
+    }
+
+    if (!updatedBooking || updatedBooking.length === 0) {
+        return { error: 'Booking already cancelled or not eligible for cancellation.' }
+    }
+
+    // 4. Process Refund only if the atomic update was successful
+    if (refundAmount > 0) {
+        const { error: refundError } = await supabase.rpc('increment_available_balance', {
+            user_id: user.id,
+            amount: refundAmount
+        })
+        if (refundError) {
+            console.error('Wallet increment error:', refundError)
+            return { error: `Cancellation processed, but refund failed: ${refundError.message}` }
+        }
+
+        // Log the refund transaction
+        await supabase.from('wallet_top_ups').insert({
+            user_id: user.id,
+            amount: refundAmount,
+            status: 'approved',
+            type: 'refund',
+            admin_notes: `Refund for cancelled booking`
+        })
     }
 
     // Release all associated slots
@@ -1063,11 +1056,6 @@ export async function getCustomerWalletDetails() {
 
     if (!user) return { error: 'Unauthorized' }
 
-    // Run financial jobs lazily to ensure accurately unlocked/held balances
-    await Promise.allSettled([
-        autoCompleteBookings(),
-        unlockMaturedFunds()
-    ])
 
     const { data: profile, error: profileError } = await supabase
         .from('profiles')

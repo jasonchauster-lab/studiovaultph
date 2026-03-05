@@ -40,44 +40,29 @@ export async function approvePayout(payoutId: string) {
         return { error: 'Unauthorized: Admin access required.' }
     }
 
-    // 1. Update status to 'paid'
-    const { data: payout, error: fetchError } = await supabase
-        .from('payout_requests')
-        .select('user_id, instructor_id, amount')
-        .eq('id', payoutId)
-        .single()
-
-    if (fetchError || !payout) {
-        return { error: 'Payout request not found.' }
-    }
-
-    // 2. Perform atomic deduction from available_balance
-    const targetId = payout.user_id || payout.instructor_id
-    if (targetId) {
-        const { error: rpcError } = await supabase.rpc('deduct_available_balance', {
-            user_id: targetId,
-            amount: payout.amount
-        })
-        if (rpcError) {
-            console.error('Error in deduct_available_balance RPC:', rpcError)
-            return { error: `Failed to deduct balance: ${rpcError.message}` }
-        }
-    }
-
-    // 3. Mark as paid
-    const { error: updateError } = await supabase.from('payout_requests')
+    // 1. Mark as paid atomically
+    const { data: payoutData, error: updateError } = await supabase.from('payout_requests')
         .update({
             status: 'paid',
             updated_at: new Date().toISOString()
         })
         .eq('id', payoutId)
+        .eq('status', 'pending')
+        .select('user_id, instructor_id, amount')
 
     if (updateError) {
         console.error('Error marking payout as paid:', updateError)
         return { error: 'Failed to update payout status.' }
     }
 
-    // 4. Fetch the profile name+email for better logging
+    if (!payoutData || payoutData.length === 0) {
+        return { error: 'Payout request not found or not in pending state.' }
+    }
+
+    const payout = payoutData[0];
+    const targetId = payout.user_id || payout.instructor_id
+
+    // 2. Fetch the profile name+email for better logging
     const { data: profile } = await supabase.from('profiles').select('full_name, email').eq('id', targetId).single()
     const payeeName = profile?.full_name || 'Unknown'
 
@@ -96,17 +81,15 @@ export async function rejectPayout(payoutId: string) {
         return { error: 'Unauthorized: Admin access required.' }
     }
 
-    // 1. Update status to 'rejected'
-    // This effectively "refunds" the amount to the Available Balance calculation
-    // because available = totalEarned - totalWithdrawn (processed) - pendingPayouts (pending)
-    // Rejected requests are neither processed nor pending, so they are ignored in deduction.
+    // 1. Update status to 'rejected' atomically
     const { data, error } = await supabase.from('payout_requests')
         .update({
             status: 'rejected',
             updated_at: new Date().toISOString()
         })
         .eq('id', payoutId)
-        .select('id')
+        .eq('status', 'pending')
+        .select('*')
 
     if (error) {
         console.error('Error rejecting payout:', error)
@@ -114,16 +97,30 @@ export async function rejectPayout(payoutId: string) {
     }
 
     if (!data || data.length === 0) {
-        return { error: 'Payout request not found or permission denied.' }
+        return { error: 'Payout request not found or not in pending state.' }
+    }
+
+    const payout = data[0];
+    const targetId = payout.user_id || payout.instructor_id
+    const amount = Number(payout.amount || 0)
+
+    // 2. Refund the wallet deduction since it was rejected
+    if (targetId && amount > 0) {
+        const { error: refundError } = await supabase.rpc('increment_available_balance', {
+            user_id: targetId,
+            amount: amount
+        })
+        if (refundError) {
+            console.error('Error refunding rejected payout:', refundError)
+            return { error: `Payout rejected, but failed to refund user's wallet: ${refundError.message}` }
+        }
     }
 
     // Fetch details for better logging
-    const { data: payout } = await supabase.from('payout_requests').select('amount, user_id, instructor_id').eq('id', payoutId).single()
-    const targetId = payout?.user_id || payout?.instructor_id
     const { data: profile } = await supabase.from('profiles').select('full_name, email').eq('id', targetId).single()
     const payeeName = profile?.full_name || 'Unknown'
 
-    await logAdminAction(supabase, 'REJECT_PAYOUT', 'payout_requests', payoutId, `Payout of ₱${payout?.amount || 'Unknown'} rejected for ${payeeName} (${profile?.email || 'no email'})`)
+    await logAdminAction(supabase, 'REJECT_PAYOUT', 'payout_requests', payoutId, `Payout of ₱${amount} rejected for ${payeeName} (${profile?.email || 'no email'})`)
 
     revalidatePath('/admin')
     revalidatePath('/instructor/earnings')
@@ -634,17 +631,23 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
         return { error: `Failed to find booking details: ${fetchError?.message || 'Unknown'}` }
     }
 
-    // 2. Update booking status
-    const { error: updateError } = await supabase.from('bookings')
+    // 2. Update booking status atomically to prevent double-refunds
+    const { data: updatedBooking, error: updateError } = await supabase.from('bookings')
         .update({
             status: 'rejected',
             rejection_reason: reason
         })
         .eq('id', bookingId)
+        .in('status', ['pending', 'submitted', 'approved'])
+        .select('id')
 
     if (updateError) {
         console.error('Error rejecting booking:', updateError)
         return { error: 'Failed to reject booking' }
+    }
+
+    if (!updatedBooking || updatedBooking.length === 0) {
+        return { error: 'Booking already processed or not eligible for rejection.' }
     }
 
     // 3. Release Slots

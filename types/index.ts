@@ -60,6 +60,7 @@ export interface Profile {
     instagram_handle?: string;
     emergency_contact?: string;
     waiver_url?: string;
+    waiver_signed_at?: string;
     teaching_equipment?: string[];
     rates?: Record<string, number>;
     available_balance?: number;

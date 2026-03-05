@@ -45,276 +45,206 @@ export default async function AdminDashboard({
     }
     // --- END DATE FILTER LOGIC ---
 
-    // 1. Fetch Verification Queue (Pending Certifications)
-    const { data: pendingCerts } = await supabase
-        .from('certifications')
-        .select('*, profiles(full_name, contact_number, tin, gov_id_url, gov_id_expiry, bir_url)')
-        .eq('verified', false)
-        .order('created_at', { ascending: false })
-
-    // DEBUG: Fetch current user info
+    // Auth (fast — served from session cache)
     const { data: { user } } = await supabase.auth.getUser()
-    let userRole = 'unknown'
-    let userId = user?.id
-    if (user) {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-        userRole = profile?.role || 'no-profile'
-    }
 
-    // DEBUG: Check for query errors and raw counts
-    const { count: totalBookingsCount, error: totalBookingsError } = await supabase.from('bookings').select('*', { count: 'exact', head: true })
-    const { data: debugBookings, error: debugBookingsError } = await supabase.from('bookings').select('id, status, payment_proof_url').limit(5)
-
-    // DEBUG: Support Messages
-    const { data: debugSupportData, error: debugSupportError } = await supabase
-        .from('support_messages')
-        .select('*')
-        .eq('is_read', false)
-
-    console.log('--- DEBUG SUPPORT MESSAGES ---');
-    if (debugSupportError) {
-        console.error('Error fetching support messages:', debugSupportError);
-    } else {
-        console.log('Total Unread Messages (Raw):', debugSupportData?.length || 0);
-        console.log('Sample Unread Message:', debugSupportData?.[0] ? JSON.stringify(debugSupportData[0]) : 'None');
-        console.log('Current User ID:', user?.id);
-
-        const myUnread = debugSupportData?.filter((m: any) => m.sender_id !== user?.id);
-        console.log('Unread Messages NOT from me (Count):', myUnread?.length || 0);
-    }
-    console.log('------------------------------');
-
-
-    // 1b. Generate signed URLs for proofs
-    const certsWithUrls = await Promise.all(pendingCerts?.map(async (cert: any) => {
-        let signedUrl = null
-        if (cert.proof_url) {
-            const { data } = await supabase.storage
-                .from('certifications')
-                .createSignedUrl(cert.proof_url, 3600) // 1 hour access
-            signedUrl = data?.signedUrl
-        }
-
-        let govIdSignedUrl = null
-        if (cert.profiles?.gov_id_url) {
-            const { data } = await supabase.storage
-                .from('certifications')
-                .createSignedUrl(cert.profiles.gov_id_url, 3600)
-            govIdSignedUrl = data?.signedUrl
-        }
-
-        let birSignedUrl = null
-        if (cert.profiles?.bir_url) {
-            const { data } = await supabase.storage
-                .from('certifications')
-                .createSignedUrl(cert.profiles.bir_url, 3600)
-            birSignedUrl = data?.signedUrl
-        }
-
-        return { ...cert, signedUrl, govIdSignedUrl, birSignedUrl }
-    }) || [])
-
-    // 2. Fetch Pending Studios
-    const { data: pendingStudios } = await supabase
-        .from('studios')
-        .select(`
-            *,
-            profiles(full_name)
-        `)
-        .eq('verified', false)
-        .order('created_at', { ascending: false })
-
-    // 2b. Generate signed URLs for private studio docs
-    const studiosWithUrls = await Promise.all(pendingStudios?.map(async (studio: any) => {
-        let birSignedUrl = null
-        if (studio.bir_certificate_url) {
-            const { data } = await supabase.storage
-                .from('certifications')
-                .createSignedUrl(studio.bir_certificate_url, 3600)
-            birSignedUrl = data?.signedUrl
-        }
-        let govIdSignedUrl = null
-        if (studio.gov_id_url) {
-            const { data } = await supabase.storage
-                .from('certifications')
-                .createSignedUrl(studio.gov_id_url, 3600)
-            govIdSignedUrl = data?.signedUrl
-        }
-        let insuranceSignedUrl = null
-        if (studio.insurance_url) {
-            const { data } = await supabase.storage
-                .from('certifications')
-                .createSignedUrl(studio.insurance_url, 3600)
-            insuranceSignedUrl = data?.signedUrl
-        }
-        return { ...studio, birSignedUrl, govIdSignedUrl, insuranceSignedUrl }
-    }) || [])
-
-    // 2.5 Fetch Pending Studio Payout Approvals
-    const { data: pendingStudioPayouts } = await supabase
-        .from('studios')
-        .select(`
-            id, name, mayors_permit_url, secretary_certificate_url, mayors_permit_expiry, secretary_certificate_expiry,
-            bir_certificate_url, bir_certificate_expiry,
-            insurance_url, insurance_expiry,
-            created_at,
-            profiles(full_name)
-        `)
-        .eq('payout_approval_status', 'pending')
-        .order('created_at', { ascending: false })
-
-    const payoutStudiosWithUrls = await Promise.all(pendingStudioPayouts?.map(async (studio: any) => {
-        let permitSignedUrl = null
-        if (studio.mayors_permit_url) {
-            const { data } = await supabase.storage
-                .from('certifications')
-                .createSignedUrl(studio.mayors_permit_url, 3600)
-            permitSignedUrl = data?.signedUrl
-        }
-        let certSignedUrl = null
-        if (studio.secretary_certificate_url) {
-            const { data } = await supabase.storage
-                .from('certifications')
-                .createSignedUrl(studio.secretary_certificate_url, 3600)
-            certSignedUrl = data?.signedUrl
-        }
-        let insuranceSignedUrl = null
-        if (studio.insurance_url) {
-            const { data } = await supabase.storage
-                .from('certifications')
-                .createSignedUrl(studio.insurance_url, 3600)
-            insuranceSignedUrl = data?.signedUrl
-        }
-        return { ...studio, permitSignedUrl, certSignedUrl, insuranceSignedUrl }
-    }) || [])
-
-    // 3. Fetch Booking Requests (Pending Bookings)
-    const { data: pendingBookings, error: pendingBookingsError } = await supabase
-        .from('bookings')
-        .select(`
-      *,
-      client:profiles!client_id(full_name),
-      instructor:profiles!instructor_id(full_name),
-      slots(
-        date,
-        start_time,
-        end_time,
-        studios(name, location, address)
-      )
-    `)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false })
-
-    // 4. Fetch Pending Instructor Payouts
-    const { data: rawPayoutRequests, error: payoutError } = await supabase
-        .from('payout_requests')
-        .select('*')
-        .eq('status', 'pending')
-        .not('instructor_id', 'is', null)
-        .order('created_at', { ascending: false })
-
-    // 4b. Enrich with instructor names from profiles
-    let payoutRequests: any[] = []
-    if (rawPayoutRequests && rawPayoutRequests.length > 0) {
-        const instructorIds = rawPayoutRequests.map((p: any) => p.instructor_id)
-        const { data: instructorProfiles } = await supabase
-            .from('profiles')
-            .select('id, full_name')
-            .in('id', instructorIds)
-
-        const profileMap: Record<string, string> = {}
-        instructorProfiles?.forEach((p: any) => { profileMap[p.id] = p.full_name })
-
-        payoutRequests = rawPayoutRequests.map((p: any) => ({
-            ...p,
-            instructor_name: profileMap[p.instructor_id] || null
-        }))
-    }
-
-    // 5. Fetch Pending Studio Payouts
-    const { data: rawStudioPayouts } = await supabase
-        .from('payout_requests')
-        .select('*, studios(name, profiles(full_name))')
-        .eq('status', 'pending')
-        .not('studio_id', 'is', null)
-        .order('created_at', { ascending: false })
-
-    const studioPayouts = rawStudioPayouts ?? []
-
-    // 7. Fetch Customer Payout Requests
-    const { data: rawUserPayouts } = await supabase
-        .from('payout_requests')
-        .select('*')
-        .eq('status', 'pending')
-        .not('user_id', 'is', null)
-        .is('instructor_id', null)
-        .is('studio_id', null)
-        .order('created_at', { ascending: false })
-
-    let customerPayouts: any[] = []
-    if (rawUserPayouts && rawUserPayouts.length > 0) {
-        const userIds = rawUserPayouts.map((p: any) => p.user_id)
-        const { data: userProfiles } = await supabase
-            .from('profiles')
-            .select('id, full_name, role')
-            .in('id', userIds)
-
-        const profileMap: Record<string, any> = {}
-        userProfiles?.forEach((p: any) => { profileMap[p.id] = p })
-
-        customerPayouts = rawUserPayouts
-            .map((p: any) => ({ ...p, profile: profileMap[p.user_id] || null }))
-            .filter((p: any) => p.profile?.role === 'customer')
-    }
-
-    // 8. Fetch Pending Wallet Top-Ups (Specifically top_up type)
-    const { data: pendingTopUps } = await supabase
-        .from('wallet_top_ups')
-        .select(`
-            *,
-            profiles:profiles!user_id(full_name, email, role)
-        `)
-        .eq('status', 'pending')
-        .eq('type', 'top_up')
-        .order('created_at', { ascending: false })
-
-    // 9. Fetch Suspended Studios
-    const { data: suspendedStudiosData } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, is_suspended, studios(id, name)')
-        .eq('is_suspended', true)
-
-    const suspendedStudios = suspendedStudiosData ?? []
-
-    // 6. Fetch Analytics
-    const analytics = await getAdminAnalytics(startDate, endDate)
-
-    // 10. Fetch Negative Balance Instructors
-    const { data: negativeBalanceInstructors } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, available_balance')
-        .eq('role', 'instructor')
-        .lt('available_balance', 0)
-        .order('available_balance', { ascending: true })
-
-    // 11. Fetch Admin Activity Logs
-    const { data: activityLogs } = await supabase
-        .from('admin_activity_logs')
-        .select(`
-            id, action_type, entity_type, entity_id, details, created_at,
-            admin:profiles!admin_id(full_name, email)
-        `)
-        .order('created_at', { ascending: false })
-        .limit(500)
-
-    // 12. Fetch All Users (for Customers tab) — use service-role to bypass RLS
+    // ── Run ALL independent queries in parallel ──────────────────────────
     const adminDb = createAdminClient()
-    const { data: allUsers, error: allUsersError } = await adminDb
-        .from('profiles')
-        .select('id, full_name, email, role, created_at, available_balance, is_suspended, contact_number')
-        .order('created_at', { ascending: false })
+    const [
+        pendingCertsResult,
+        pendingStudiosResult,
+        pendingStudioPayoutsResult,
+        pendingBookingsResult,
+        payoutRequestsResult,
+        studioPayoutsResult,
+        rawUserPayoutsResult,
+        pendingTopUpsResult,
+        suspendedStudiosResult,
+        analyticsResult,
+        negativeBalanceResult,
+        activityLogsResult,
+        allUsersResult,
+    ] = await Promise.all([
+        // 1. Certification verification queue
+        supabase.from('certifications')
+            .select('*, profiles(full_name, contact_number, tin, gov_id_url, gov_id_expiry, bir_url)')
+            .eq('verified', false)
+            .order('created_at', { ascending: false }),
 
-    if (allUsersError) console.error('allUsers fetch error:', allUsersError.message)
+        // 2. Studio verification queue
+        supabase.from('studios')
+            .select('*, profiles(full_name)')
+            .eq('verified', false)
+            .order('created_at', { ascending: false }),
+
+        // 3. Studio payout setup queue
+        supabase.from('studios')
+            .select('id, name, mayors_permit_url, secretary_certificate_url, mayors_permit_expiry, secretary_certificate_expiry, bir_certificate_url, bir_certificate_expiry, insurance_url, insurance_expiry, created_at, profiles(full_name)')
+            .eq('payout_approval_status', 'pending')
+            .order('created_at', { ascending: false }),
+
+        // 4. Pending booking requests
+        supabase.from('bookings')
+            .select('*, client:profiles!client_id(full_name), instructor:profiles!instructor_id(full_name), slots(date, start_time, end_time, studios(name, location, address))')
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false }),
+
+        // 5. Instructor payout requests — join instead of 2-query pattern
+        supabase.from('payout_requests')
+            .select('*, instructor:profiles!instructor_id(id, full_name, email)')
+            .eq('status', 'pending')
+            .not('instructor_id', 'is', null)
+            .order('created_at', { ascending: false }),
+
+        // 6. Studio payout requests
+        supabase.from('payout_requests')
+            .select('*, studios(name, profiles(full_name))')
+            .eq('status', 'pending')
+            .not('studio_id', 'is', null)
+            .order('created_at', { ascending: false }),
+
+        // 7. Customer payout requests — join instead of 2-query pattern
+        supabase.from('payout_requests')
+            .select('*, profile:profiles!user_id(id, full_name, role, email)')
+            .eq('status', 'pending')
+            .not('user_id', 'is', null)
+            .is('instructor_id', null)
+            .is('studio_id', null)
+            .order('created_at', { ascending: false }),
+
+        // 8. Pending wallet top-ups
+        supabase.from('wallet_top_ups')
+            .select('*, profiles:profiles!user_id(full_name, email, role)')
+            .eq('status', 'pending')
+            .eq('type', 'top_up')
+            .order('created_at', { ascending: false }),
+
+        // 9. Suspended studios
+        supabase.from('profiles')
+            .select('id, full_name, email, is_suspended, studios(id, name)')
+            .eq('is_suspended', true),
+
+        // 10. Analytics (has its own internal supabase client)
+        getAdminAnalytics(startDate, endDate),
+
+        // 11. Negative balance instructors
+        supabase.from('profiles')
+            .select('id, full_name, email, available_balance')
+            .eq('role', 'instructor')
+            .lt('available_balance', 0)
+            .order('available_balance', { ascending: true }),
+
+        // 12. Admin activity logs
+        supabase.from('admin_activity_logs')
+            .select('id, action_type, entity_type, entity_id, details, created_at, admin:profiles!admin_id(full_name, email)')
+            .order('created_at', { ascending: false })
+            .limit(500),
+
+        // 13. All users — service-role client to bypass RLS
+        adminDb.from('profiles')
+            .select('id, full_name, email, role, created_at, available_balance, is_suspended, contact_number, waiver_url, waiver_signed_at')
+            .order('created_at', { ascending: false }),
+    ])
+
+    // ── Destructure results ──────────────────────────────────────────────
+    const pendingCerts = pendingCertsResult.data ?? []
+    const pendingStudios = pendingStudiosResult.data ?? []
+    const pendingStudioPayouts = pendingStudioPayoutsResult.data ?? []
+    const pendingBookings = pendingBookingsResult.data
+
+    // Instructor payouts: flatten join result to match original shape
+    const payoutRequests = (payoutRequestsResult.data ?? []).map((p: any) => ({
+        ...p,
+        instructor_name: (Array.isArray(p.instructor) ? p.instructor[0] : p.instructor)?.full_name ?? null,
+    }))
+
+    const studioPayouts = studioPayoutsResult.data ?? []
+
+    // Customer payouts: join replaces the separate profiles query; filter role in JS
+    const customerPayouts = (rawUserPayoutsResult.data ?? []).filter((p: any) => {
+        const profile = Array.isArray(p.profile) ? p.profile[0] : p.profile
+        return profile?.role === 'customer'
+    })
+
+    const pendingTopUps = pendingTopUpsResult.data
+    const suspendedStudios = suspendedStudiosResult.data ?? []
+    const analytics = analyticsResult
+    const negativeBalanceInstructors = negativeBalanceResult.data
+    const activityLogs = activityLogsResult.data
+    const allUsers = allUsersResult.data
+    if (allUsersResult.error) console.error('allUsers fetch error:', allUsersResult.error.message)
+
+    // ── Batch signed URL generation ──────────────────────────────────────
+    // Collect all storage paths per bucket group, then make ONE call each
+    const certUrlPaths = pendingCerts.flatMap((cert: any) =>
+        [cert.proof_url, cert.profiles?.gov_id_url, cert.profiles?.bir_url].filter(Boolean)
+    )
+    const studioUrlPaths = pendingStudios.flatMap((s: any) =>
+        [s.bir_certificate_url, s.gov_id_url, s.insurance_url].filter(Boolean)
+    )
+    const payoutUrlPaths = pendingStudioPayouts.flatMap((s: any) =>
+        [s.mayors_permit_url, s.secretary_certificate_url, s.insurance_url].filter(Boolean)
+    )
+    const isStoragePath = (url: string) => url && !url.startsWith('http');
+    const paymentProofPaths = [
+        ...(pendingBookings?.map((b: any) => b.payment_proof_url).filter(isStoragePath) || []),
+        ...(pendingTopUps?.map((t: any) => t.payment_proof_url).filter(isStoragePath) || [])
+    ]
+    const waiverPaths = allUsers?.map((u: any) => u.waiver_url).filter(isStoragePath) || []
+
+    const [certSignedRes, studioSignedRes, payoutSignedRes, paymentSignedRes, waiverSignedRes] = await Promise.all([
+        certUrlPaths.length > 0
+            ? supabase.storage.from('certifications').createSignedUrls(certUrlPaths, 3600)
+            : Promise.resolve({ data: [] as any[] }),
+        studioUrlPaths.length > 0
+            ? supabase.storage.from('certifications').createSignedUrls(studioUrlPaths, 3600)
+            : Promise.resolve({ data: [] as any[] }),
+        payoutUrlPaths.length > 0
+            ? supabase.storage.from('certifications').createSignedUrls(payoutUrlPaths, 3600)
+            : Promise.resolve({ data: [] as any[] }),
+        paymentProofPaths.length > 0
+            ? supabase.storage.from('payment-proofs').createSignedUrls(paymentProofPaths, 3600)
+            : Promise.resolve({ data: [] as any[] }),
+        waiverPaths.length > 0
+            ? supabase.storage.from('waivers').createSignedUrls(waiverPaths, 3600)
+            : Promise.resolve({ data: [] as any[] }),
+    ])
+
+    const mkUrlMap = (res: any): Record<string, string> =>
+        Object.fromEntries((res.data ?? []).filter((r: any) => r.signedUrl).map((r: any) => [r.path, r.signedUrl]))
+    const certUrlMap = mkUrlMap(certSignedRes)
+    const studioUrlMap = mkUrlMap(studioSignedRes)
+    const payoutUrlMap = mkUrlMap(payoutSignedRes)
+    const paymentUrlMap = mkUrlMap(paymentSignedRes)
+    const waiverUrlMap = mkUrlMap(waiverSignedRes)
+
+    // Helper to get display URL (signed or legacy public)
+    const getDisplayUrl = (original: string) => {
+        if (!original) return original
+        if (!isStoragePath(original)) return original
+        return paymentUrlMap[original] || waiverUrlMap[original] || original
+    }
+
+    const certsWithUrls = pendingCerts.map((cert: any) => ({
+        ...cert,
+        signedUrl: cert.proof_url ? (certUrlMap[cert.proof_url] ?? null) : null,
+        govIdSignedUrl: cert.profiles?.gov_id_url ? (certUrlMap[cert.profiles.gov_id_url] ?? null) : null,
+        birSignedUrl: cert.profiles?.bir_url ? (certUrlMap[cert.profiles.bir_url] ?? null) : null,
+    }))
+
+    const studiosWithUrls = pendingStudios.map((studio: any) => ({
+        ...studio,
+        birSignedUrl: studio.bir_certificate_url ? (studioUrlMap[studio.bir_certificate_url] ?? null) : null,
+        govIdSignedUrl: studio.gov_id_url ? (studioUrlMap[studio.gov_id_url] ?? null) : null,
+        insuranceSignedUrl: studio.insurance_url ? (studioUrlMap[studio.insurance_url] ?? null) : null,
+    }))
+
+    const payoutStudiosWithUrls = pendingStudioPayouts.map((studio: any) => ({
+        ...studio,
+        permitSignedUrl: studio.mayors_permit_url ? (payoutUrlMap[studio.mayors_permit_url] ?? null) : null,
+        certSignedUrl: studio.secretary_certificate_url ? (payoutUrlMap[studio.secretary_certificate_url] ?? null) : null,
+        insuranceSignedUrl: studio.insurance_url ? (payoutUrlMap[studio.insurance_url] ?? null) : null,
+    }))
 
     const tabs = [
         { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -644,9 +574,9 @@ export default async function AdminDashboard({
                                                             )}
                                                             {hasPaymentProof && (
                                                                 <div className="mt-1">
-                                                                    <a href={booking.payment_proof_url} target="_blank" rel="noopener noreferrer" className="block relative hover:opacity-90 transition-opacity">
+                                                                    <a href={getDisplayUrl(booking.payment_proof_url)} target="_blank" rel="noopener noreferrer" className="block relative hover:opacity-90 transition-opacity">
                                                                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                                        <img src={booking.payment_proof_url} alt="Payment Proof" className="h-16 w-auto object-cover rounded border border-gray-300" />
+                                                                        <img src={getDisplayUrl(booking.payment_proof_url)} alt="Payment Proof" className="h-16 w-auto object-cover rounded border border-gray-300" />
                                                                         <span className="text-[10px] text-blue-600 underline mt-1 block">View Full Size</span>
                                                                     </a>
                                                                 </div>
@@ -808,9 +738,9 @@ export default async function AdminDashboard({
                                                 <div className="mt-4">
                                                     <p className="text-[10px] font-bold text-charcoal-400 uppercase tracking-widest mb-2">Payment Receipt</p>
                                                     <div className="flex items-start gap-4">
-                                                        <a href={topUp.payment_proof_url} target="_blank" rel="noopener noreferrer" className="inline-block group relative">
+                                                        <a href={getDisplayUrl(topUp.payment_proof_url)} target="_blank" rel="noopener noreferrer" className="inline-block group relative">
                                                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                            <img src={topUp.payment_proof_url} alt="Payment Receipt" className="h-48 w-auto object-cover rounded-xl border border-cream-200 shadow-sm group-hover:shadow-md transition-all" />
+                                                            <img src={getDisplayUrl(topUp.payment_proof_url)} alt="Payment Receipt" className="h-48 w-auto object-cover rounded-xl border border-cream-200 shadow-sm group-hover:shadow-md transition-all" />
                                                             <div className="absolute inset-0 bg-charcoal-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl text-white text-[10px] font-bold">View Full Size</div>
                                                         </a>
                                                         <div className="bg-cream-50 p-3 rounded-lg border border-cream-100 max-w-xs">
@@ -866,6 +796,7 @@ export default async function AdminDashboard({
                                                 <th className="py-3 px-4 font-medium">Phone</th>
                                                 <th className="py-3 px-4 font-medium">Role</th>
                                                 <th className="py-3 px-4 font-medium">Wallet</th>
+                                                <th className="py-3 px-4 font-medium">Waiver</th>
                                                 <th className="py-3 px-4 font-medium">Status</th>
                                                 <th className="py-3 px-4 font-medium whitespace-nowrap">Joined</th>
                                             </tr>
@@ -896,6 +827,22 @@ export default async function AdminDashboard({
                                                             <span className={balance < 0 ? 'text-red-600 font-bold' : ''}>
                                                                 ₱{balance.toLocaleString()}
                                                             </span>
+                                                        </td>
+                                                        <td className="py-3 px-4 text-xs font-medium">
+                                                            {u.waiver_url ? (
+                                                                <div className="space-y-1">
+                                                                    <a href={getDisplayUrl(u.waiver_url)} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800 block">
+                                                                        View Waiver
+                                                                    </a>
+                                                                    {u.waiver_signed_at && (
+                                                                        <span className="text-[10px] text-charcoal-400 block">
+                                                                            Signed: {new Date(u.waiver_signed_at).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-charcoal-400 italic">None</span>
+                                                            )}
                                                         </td>
                                                         <td className="py-3 px-4">
                                                             {u.is_suspended ? (

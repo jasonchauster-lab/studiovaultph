@@ -411,12 +411,8 @@ export default function PaymentForm({
 
                 if (uploadError) throw uploadError
 
-                // 2. Get Public URL
-                const { data: { publicUrl } } = supabase.storage
-                    .from('payment-proofs')
-                    .getPublicUrl(filePath)
-
-                proofUrl = publicUrl;
+                // 2. Clear Public URL usage - we use paths now for security
+                proofUrl = filePath;
             }
 
             // 3. Submit with waiver flags, PAR-Q answers, and medical ack

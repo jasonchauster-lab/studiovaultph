@@ -14,6 +14,7 @@ interface TopUpModalProps {
 
 export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
     const router = useRouter()
+    const supabase = createClient()
     const [step, setStep] = useState(1)
     const [amount, setAmount] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -82,18 +83,19 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
         setError(null)
 
         try {
-            // 1. Convert file to base64
-            const reader = new FileReader()
-            const base64Promise = new Promise<string>((resolve, reject) => {
-                reader.onload = () => resolve(reader.result as string)
-                reader.onerror = reject
-                reader.readAsDataURL(proofFile)
-            })
+            // 1. Upload File to Storage
+            const fileExt = proofFile.name.split('.').pop()
+            const fileName = `topup_${topUpId}_${Date.now()}.${fileExt}`
+            const filePath = `${fileName}`
 
-            const base64String = await base64Promise
+            const { error: uploadError } = await supabase.storage
+                .from('payment-proofs')
+                .upload(filePath, proofFile)
 
-            // 2. Submit Top-up proof via server action (handles storage upload & DB update)
-            const result = await submitTopUpPaymentProof(topUpId!, base64String)
+            if (uploadError) throw uploadError
+
+            // 2. Submit Top-up proof via server action (saves the path to DB)
+            const result = await submitTopUpPaymentProof(topUpId!, filePath)
 
             if (result.error) {
                 setError(result.error)

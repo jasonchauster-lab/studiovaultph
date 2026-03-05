@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 
-import { autoCompleteBookings, unlockMaturedFunds } from '@/lib/wallet'
+
 import { formatManilaDate, formatManilaTime, toManilaDateStr, toManilaTimeString, formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
 
 export async function getInstructorEarnings(startDate?: string, endDate?: string) {
@@ -13,9 +13,7 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Unauthorized' }
 
-    // 0. Auto-process background tasks to ensure balances are fresh
-    await autoCompleteBookings()
-    await unlockMaturedFunds()
+
 
     const { data: profile } = await supabase.from('profiles').select('available_balance, pending_balance').eq('id', user.id).single()
 
@@ -666,12 +664,44 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
     const isStudioRental = booking.client_id === booking.instructor_id
     const studio = (slotData as any)?.studios
 
-    // 2. Process 100% Refund to Client (in Studio Rental case, client IS the instructor)
+    // 2. Mark as cancelled atomically to prevent double refunds
     const breakdown = booking.price_breakdown as any;
     const walletDeduction = Number(breakdown?.wallet_deduction || 0);
     const totalPrice = Number(booking.total_price || 0);
     const refundAmount = totalPrice + walletDeduction;
 
+    let penaltyAmount = 0;
+    let penaltyProcessed = false;
+
+    if (isLateCancellation && !isWithinGracePeriod) {
+        penaltyAmount = Number(breakdown?.studio_fee || 0)
+    }
+
+    const { data: updatedBooking, error: updateError } = await supabase.from('bookings').update({
+        status: 'cancelled_refunded',
+        cancel_reason: reason,
+        cancelled_by: user.id,
+        price_breakdown: {
+            ...breakdown,
+            refunded_amount: refundAmount,
+            penalty_amount: penaltyAmount,
+            refund_initiator: 'instructor'
+        }
+    })
+        .eq('id', bookingId)
+        .in('status', ['approved', 'pending', 'submitted'])
+        .select('id')
+
+    if (updateError) {
+        console.error('Instructor cancel update error:', updateError)
+        return { error: 'Failed to update booking status.' }
+    }
+
+    if (!updatedBooking || updatedBooking.length === 0) {
+        return { error: 'Booking already cancelled or not eligible for cancellation.' }
+    }
+
+    // 3. Process 100% Refund to Client (in Studio Rental case, client IS the instructor)
     if (refundAmount > 0) {
         const { error: refundError } = await supabase.rpc('increment_available_balance', {
             user_id: booking.client_id,
@@ -679,15 +709,12 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
         })
         if (refundError) {
             console.error('Instructor cancel refund error:', refundError)
-            return { error: 'Failed to process refund to client.' }
+            return { error: `Cancellation processed, but refund failed: ${refundError.message}` }
         }
     }
 
-    // 3. Penalty Logic (Apply to ALL cancellations < 24h, EXCEPT during grace period)
-    let penaltyProcessed = false
-    let penaltyAmount = 0
+    // 4. Penalty Logic (Apply to ALL cancellations < 24h, EXCEPT during grace period)
     if (isLateCancellation && !isWithinGracePeriod) {
-        penaltyAmount = Number(breakdown?.studio_fee || 0)
         if (penaltyAmount > 0 && studio?.owner_id) {
             const { error: penaltyError } = await supabase.rpc('transfer_balance', {
                 p_from_id: user.id,
@@ -696,17 +723,14 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
             })
             if (penaltyError) {
                 console.error('Penalty transfer error:', penaltyError)
-                return { error: 'Refund processed, but penalty transfer failed.' }
+                return { error: `Refund processed, but penalty transfer failed: ${penaltyError.message}` }
             }
             penaltyProcessed = true
         }
     }
 
-    // 4. Update status and release slots
-    const { error: updateError } = await supabase.from('bookings').update({
-        status: 'cancelled_refunded',
-        cancel_reason: reason,
-        cancelled_by: user.id,
+    // Finalize breakdown fields that might have changed
+    await supabase.from('bookings').update({
         price_breakdown: {
             ...breakdown,
             refunded_amount: refundAmount,
@@ -715,11 +739,6 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
             refund_initiator: 'instructor'
         }
     }).eq('id', bookingId)
-
-    if (updateError) {
-        console.error('Instructor cancel update error:', updateError)
-        return { error: 'Failed to update booking status.' }
-    }
 
     const allSlotIds = [booking.slot_id, ...(booking.booked_slot_ids || [])].filter(Boolean)
     if (allSlotIds.length > 0) {

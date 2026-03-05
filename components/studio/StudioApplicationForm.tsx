@@ -135,8 +135,7 @@ export default function StudioApplicationForm() {
                 const { error: birErr } = await supabase.storage.from('certifications').upload(path, birFile)
                 if (birErr) throw new Error('Failed to upload BIR Certificate: ' + birErr.message)
 
-                const { data: { publicUrl } } = supabase.storage.from('certifications').getPublicUrl(path)
-                formData.set('birCertificateUrl', publicUrl)
+                formData.set('birCertificateUrl', path)
             }
             formData.delete('birCertificate')
 
@@ -148,8 +147,7 @@ export default function StudioApplicationForm() {
                 const { error: govErr } = await supabase.storage.from('certifications').upload(path, govIdFile)
                 if (govErr) throw new Error('Failed to upload Government ID: ' + govErr.message)
 
-                const { data: { publicUrl } } = supabase.storage.from('certifications').getPublicUrl(path)
-                formData.set('govIdUrl', publicUrl)
+                formData.set('govIdUrl', path)
             }
             formData.delete('govId')
 
@@ -161,8 +159,7 @@ export default function StudioApplicationForm() {
                 const { error: insErr } = await supabase.storage.from('certifications').upload(path, insuranceFile)
                 if (insErr) throw new Error('Failed to upload Insurance/Permit: ' + insErr.message)
 
-                const { data: { publicUrl } } = supabase.storage.from('certifications').getPublicUrl(path)
-                formData.set('insuranceUrl', publicUrl)
+                formData.set('insuranceUrl', path)
             }
             formData.delete('insurance')
 

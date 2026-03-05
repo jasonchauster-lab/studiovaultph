@@ -2,9 +2,10 @@
 
 import { useState, useRef } from 'react'
 import { updateProfile } from '@/app/(dashboard)/customer/profile/actions'
-import { Loader2, Camera, User } from 'lucide-react'
+import { Loader2, Camera, User, FileText } from 'lucide-react'
 import { isValidPhone, isValidEmail, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
+import WaiverUpload from '@/components/customer/WaiverUpload'
 
 export default function ProfileForm({ profile }: { profile: any }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -270,10 +271,22 @@ export default function ProfileForm({ profile }: { profile: any }) {
             )}
 
             {message && (
-                <p className={`text-sm ${message.includes('Success') ? 'text-green-600' : 'text-green-600'}`}>
+                <p className={`text-sm ${message.includes('success') ? 'text-green-600' : 'text-rose-600'}`}>
                     {message}
                 </p>
             )}
+
+            {/* Waiver Section */}
+            <div className="pt-8 border-t border-cream-100">
+                <div className="flex items-center gap-2 mb-4">
+                    <FileText className="w-5 h-5 text-charcoal-900" />
+                    <h3 className="text-lg font-serif text-charcoal-900">Health & Safety Waiver</h3>
+                </div>
+                <p className="text-sm text-charcoal-600 mb-6">
+                    A signed waiver is required for all participants. You can upload a scanned copy or a photo of your signed document here.
+                </p>
+                <WaiverUpload initialUrl={profile?.waiver_url} signedAt={profile?.waiver_signed_at} />
+            </div>
 
             <button
                 type="submit"

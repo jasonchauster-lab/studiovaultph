@@ -66,13 +66,9 @@ export default function TopUpPaymentForm({ topUpId, amount }: TopUpPaymentFormPr
 
             if (uploadError) throw uploadError
 
-            // 2. Get Public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('payment-proofs')
-                .getPublicUrl(filePath)
-
+            // 2. Clear Public URL usage - we use paths now for security
             // 3. Submit Top-up proof
-            const result = await submitTopUpPaymentProof(topUpId, publicUrl)
+            const result = await submitTopUpPaymentProof(topUpId, filePath)
 
             if (result.error) {
                 throw new Error(result.error)
