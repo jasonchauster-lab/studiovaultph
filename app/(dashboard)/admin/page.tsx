@@ -306,12 +306,20 @@ export default async function AdminDashboard({
         .order('created_at', { ascending: false })
         .limit(50)
 
+    // 12. Fetch All Users (for Customers tab)
+    const { data: allUsers } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, role, created_at, available_balance, is_suspended, birthday')
+        .order('created_at', { ascending: false })
+
     const tabs = [
         { id: 'overview', label: 'Overview', icon: BarChart3 },
         { id: 'verifications', label: 'Verifications', icon: CheckCircle },
         { id: 'payouts', label: 'Payouts & Wallet', icon: Wallet },
+        { id: 'customers', label: 'Customers', icon: ShieldAlert },
         { id: 'reports', label: 'Reports', icon: Clock },
     ]
+
 
     return (
         <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
@@ -830,7 +838,82 @@ export default async function AdminDashboard({
                     </div>
                 )} {/* end payouts tab */}
 
+                {/* ==================== CUSTOMERS TAB ==================== */}
+                {activeTab === 'customers' && (
+                    <div className="space-y-8">
+                        <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm">
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-medium text-charcoal-900 flex items-center gap-2">
+                                    <CheckCircle className="w-5 h-5 text-charcoal-500" />
+                                    All Users
+                                    <span className="ml-2 text-xs text-charcoal-400 font-normal">({allUsers?.length ?? 0} total)</span>
+                                </h2>
+                            </div>
+
+                            {!allUsers || allUsers.length === 0 ? (
+                                <p className="text-charcoal-500 text-sm">No users found.</p>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-cream-200 text-xs text-charcoal-500 uppercase tracking-wider">
+                                                <th className="py-3 px-4 font-medium">Name</th>
+                                                <th className="py-3 px-4 font-medium">Email</th>
+                                                <th className="py-3 px-4 font-medium">Role</th>
+                                                <th className="py-3 px-4 font-medium">Wallet</th>
+                                                <th className="py-3 px-4 font-medium">Status</th>
+                                                <th className="py-3 px-4 font-medium whitespace-nowrap">Joined</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="text-sm">
+                                            {allUsers.map((u: any) => {
+                                                const roleColors: Record<string, string> = {
+                                                    client: 'bg-blue-100 text-blue-700',
+                                                    instructor: 'bg-purple-100 text-purple-700',
+                                                    studio_owner: 'bg-amber-100 text-amber-700',
+                                                    admin: 'bg-charcoal-900 text-white',
+                                                }
+                                                const badgeClass = roleColors[u.role] || 'bg-gray-100 text-gray-700'
+                                                const balance = Number(u.available_balance || 0)
+                                                return (
+                                                    <tr key={u.id} className="border-b border-cream-100 hover:bg-cream-50/50 transition-colors">
+                                                        <td className="py-3 px-4 font-medium text-charcoal-900 whitespace-nowrap">
+                                                            {u.full_name || '—'}
+                                                        </td>
+                                                        <td className="py-3 px-4 text-charcoal-600 text-xs">{u.email}</td>
+                                                        <td className="py-3 px-4">
+                                                            <span className={`inline-block text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap capitalize ${badgeClass}`}>
+                                                                {u.role?.replace(/_/g, ' ') || 'Unknown'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-3 px-4 text-charcoal-700 text-xs font-mono">
+                                                            <span className={balance < 0 ? 'text-red-600 font-bold' : ''}>
+                                                                ₱{balance.toLocaleString()}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-3 px-4">
+                                                            {u.is_suspended ? (
+                                                                <span className="inline-block text-[10px] font-bold px-2 py-1 rounded-full bg-red-100 text-red-700">Suspended</span>
+                                                            ) : (
+                                                                <span className="inline-block text-[10px] font-bold px-2 py-1 rounded-full bg-green-100 text-green-700">Active</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="py-3 px-4 text-charcoal-500 text-xs whitespace-nowrap">
+                                                            {new Date(u.created_at).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', year: 'numeric', month: 'short', day: 'numeric' })}
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )} {/* end customers tab */}
+
                 {/* ==================== REPORTS TAB ==================== */}
+
                 {activeTab === 'reports' && (
                     <div className="space-y-8">
                         <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm">

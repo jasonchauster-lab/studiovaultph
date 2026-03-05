@@ -457,7 +457,8 @@ export async function confirmBooking(bookingId: string) {
                 studios(
                     name,
                     address,
-                    owner_id
+                    owner_id,
+                    owner:profiles!owner_id(full_name, email)
                 )
             )
         `)
@@ -486,9 +487,10 @@ export async function confirmBooking(bookingId: string) {
     const client = first(booking.client);
     const instructor = first(booking.instructor);
     const studios = first(slots?.studios);
+    const studioOwner = first((studios as any)?.owner);
     const sessionInfo = slots ? `on ${formatManilaDateStr(slots.date)} at ${formatTo12Hour(slots.start_time)}` : 'Unknown Time';
 
-    await logAdminAction(supabase, 'APPROVE_BOOKING', 'bookings', bookingId, `Approved booking ID ${bookingId} for client ${client?.full_name || 'Unknown'} with instructor ${instructor?.full_name || 'N/A'} ${sessionInfo}`)
+    await logAdminAction(supabase, 'APPROVE_BOOKING', 'bookings', bookingId, `Booking confirmed for client ${client?.full_name || 'Unknown'} (${client?.email || 'no email'}) with instructor ${instructor?.full_name || 'N/A'} (${instructor?.email || 'no email'}) at ${studios?.name || 'Unknown Studio'} (Owner: ${studioOwner?.full_name || 'N/A'}, ${studioOwner?.email || 'no email'}) ${sessionInfo}`)
 
     // 3. Extract Data Safely
     if (!client?.email || !slots?.start_time || !studios?.name) {
@@ -621,7 +623,7 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
             slots(
                 date,
                 start_time,
-                studios(name)
+                studios(name, owner:profiles!owner_id(full_name, email))
             )
         `)
         .eq('id', bookingId)
@@ -660,6 +662,7 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
     const slots = first(booking.slots);
     const instructor = first(booking.instructor);
     const studios = first(slots?.studios);
+    const studioOwner = first((studios as any)?.owner);
     const sessionInfo = slots ? `on ${formatManilaDateStr(slots.date)} at ${formatTo12Hour(slots.start_time)}` : 'Unknown Time';
 
     if (hasRefund && booking.client_id) {
@@ -745,7 +748,7 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
         // Actually, returning success: true but with a message is better.
     }
 
-    await logAdminAction(supabase, 'REJECT_BOOKING', 'bookings', bookingId, `Rejected booking ID ${bookingId} for client ${client?.full_name || 'Unknown'} (Instructor: ${instructor?.full_name || 'N/A'}) ${sessionInfo} - Reason: ${reason || 'No specific reason'} - Refund: ${hasRefund ? 'Yes' : 'No'}`)
+    await logAdminAction(supabase, 'REJECT_BOOKING', 'bookings', bookingId, `Booking rejected for client ${client?.full_name || 'Unknown'} (${client?.email || 'no email'}) — Instructor: ${instructor?.full_name || 'N/A'} (${instructor?.email || 'no email'}) at ${studios?.name || 'Unknown Studio'} (Owner: ${studioOwner?.full_name || 'N/A'}, ${studioOwner?.email || 'no email'}) ${sessionInfo} — Reason: ${reason || 'None'}, Refund: ${hasRefund ? 'Yes' : 'No'}`)
 
     revalidatePath('/admin')
     revalidatePath('/studio')
@@ -1480,7 +1483,7 @@ export async function approveTopUp(id: string) {
     }
 
     const { data: userProfile } = await supabase.from('profiles').select('full_name, email').eq('id', topUp.user_id).single()
-    await logAdminAction(supabase, 'APPROVE_TOP_UP', 'wallet_top_ups', id, `Approved wallet top-up of ₱${topUp.amount} for user ${userProfile?.full_name || topUp.user_id} (ID: ${topUp.user_id})`)
+    await logAdminAction(supabase, 'APPROVE_TOP_UP', 'wallet_top_ups', id, `Wallet top-up of ₱${topUp.amount} approved for ${userProfile?.full_name || 'Unknown User'}`)
 
     // 4. Send Approval Email
     if (userProfile?.email) {
@@ -1523,7 +1526,7 @@ export async function rejectTopUp(id: string, reason?: string) {
     }
 
     const { data: userProfile } = await supabase.from('profiles').select('full_name, email').eq('id', topUp.user_id).single()
-    await logAdminAction(supabase, 'REJECT_TOP_UP', 'wallet_top_ups', id, `Rejected wallet top-up of ₱${topUp.amount} for user ${userProfile?.full_name || topUp.user_id} (ID: ${topUp.user_id}) - Reason: ${reason || 'Receipt unreadable or incorrect amount.'}`)
+    await logAdminAction(supabase, 'REJECT_TOP_UP', 'wallet_top_ups', id, `Wallet top-up of ₱${topUp.amount} rejected for ${userProfile?.full_name || 'Unknown User'} — Reason: ${reason || 'Receipt unreadable or incorrect amount.'}`)
 
     // Send Rejection Email
     if (userProfile?.email) {
