@@ -1,4 +1,4 @@
-﻿import { createClient } from '@/lib/supabase/server'
+﻿import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { CheckCircle, Clock, Building2, MessageCircle, BarChart3, Download, Wallet, ArrowUpRight, ShieldAlert, AlertTriangle } from 'lucide-react'
 import VerifyButton from '@/components/admin/VerifyButton'
 import RejectBookingButton from '@/components/admin/RejectBookingButton'
@@ -10,6 +10,7 @@ import SupportNotificationBadge from '@/components/admin/SupportNotificationBadg
 import AdminExportButtons from '@/components/admin/AdminExportButtons'
 import TriggerFundsUnlockButton from '@/components/admin/TriggerFundsUnlockButton'
 import BalanceAdjustmentTool from '@/components/admin/BalanceAdjustmentTool'
+import ReportsTab from '@/components/admin/ReportsTab'
 
 // Since this is a server component, we fetch data directly
 export default async function AdminDashboard({
@@ -304,13 +305,16 @@ export default async function AdminDashboard({
             admin:profiles!admin_id(full_name, email)
         `)
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limit(500)
 
-    // 12. Fetch All Users (for Customers tab)
-    const { data: allUsers } = await supabase
+    // 12. Fetch All Users (for Customers tab) — use service-role to bypass RLS
+    const adminDb = createAdminClient()
+    const { data: allUsers, error: allUsersError } = await adminDb
         .from('profiles')
-        .select('id, full_name, email, role, created_at, available_balance, is_suspended, birthday')
+        .select('id, full_name, email, role, created_at, available_balance, is_suspended, contact_number')
         .order('created_at', { ascending: false })
+
+    if (allUsersError) console.error('allUsers fetch error:', allUsersError.message)
 
     const tabs = [
         { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -859,6 +863,7 @@ export default async function AdminDashboard({
                                             <tr className="border-b border-cream-200 text-xs text-charcoal-500 uppercase tracking-wider">
                                                 <th className="py-3 px-4 font-medium">Name</th>
                                                 <th className="py-3 px-4 font-medium">Email</th>
+                                                <th className="py-3 px-4 font-medium">Phone</th>
                                                 <th className="py-3 px-4 font-medium">Role</th>
                                                 <th className="py-3 px-4 font-medium">Wallet</th>
                                                 <th className="py-3 px-4 font-medium">Status</th>
@@ -881,6 +886,7 @@ export default async function AdminDashboard({
                                                             {u.full_name || '—'}
                                                         </td>
                                                         <td className="py-3 px-4 text-charcoal-600 text-xs">{u.email}</td>
+                                                        <td className="py-3 px-4 text-charcoal-600 text-xs">{u.contact_number || '—'}</td>
                                                         <td className="py-3 px-4">
                                                             <span className={`inline-block text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap capitalize ${badgeClass}`}>
                                                                 {u.role?.replace(/_/g, ' ') || 'Unknown'}
@@ -913,67 +919,8 @@ export default async function AdminDashboard({
                 )} {/* end customers tab */}
 
                 {/* ==================== REPORTS TAB ==================== */}
-
                 {activeTab === 'reports' && (
-                    <div className="space-y-8">
-                        <div className="bg-white text-charcoal-900 border border-cream-200 rounded-xl p-6 shadow-sm">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-medium text-charcoal-900 flex items-center gap-2">
-                                    <Clock className="w-5 h-5 text-charcoal-500" />
-                                    Admin Activity Log
-                                    <span className="ml-2 text-xs text-charcoal-400 font-normal">(Last 50 Actions)</span>
-                                </h2>
-                                <span className="text-xs text-charcoal-400">{activityLogs?.length ?? 0} entries</span>
-                            </div>
-
-                            {!activityLogs || activityLogs.length === 0 ? (
-                                <p className="text-charcoal-500 text-sm">No recent activity logs.</p>
-                            ) : (
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr className="border-b border-cream-200 text-xs text-charcoal-500 uppercase tracking-wider">
-                                                <th className="py-3 px-4 font-medium whitespace-nowrap">Date &amp; Time</th>
-                                                <th className="py-3 px-4 font-medium">Admin</th>
-                                                <th className="py-3 px-4 font-medium">Action</th>
-                                                <th className="py-3 px-4 font-medium">Details</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="text-sm">
-                                            {activityLogs.map((log: any) => {
-                                                const actionType = log.action_type as string
-                                                const isApproval = actionType.startsWith('APPROVE') || actionType.startsWith('VERIFY') || actionType.startsWith('CONFIRM') || actionType === 'REINSTATE_STUDIO'
-                                                const isRejection = actionType.startsWith('REJECT')
-                                                const badgeClass = isApproval
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : isRejection
-                                                        ? 'bg-red-100 text-red-700'
-                                                        : 'bg-charcoal-100 text-charcoal-700'
-                                                return (
-                                                    <tr key={log.id} className="border-b border-cream-100 hover:bg-cream-50/50 transition-colors">
-                                                        <td className="py-3 px-4 text-charcoal-600 whitespace-nowrap text-xs">
-                                                            {new Date(log.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                                        </td>
-                                                        <td className="py-3 px-4 font-medium text-charcoal-900 whitespace-nowrap">
-                                                            {Array.isArray(log.admin) ? log.admin[0]?.full_name : log.admin?.full_name || 'System'}
-                                                        </td>
-                                                        <td className="py-3 px-4">
-                                                            <span className={`inline-block text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap ${badgeClass}`}>
-                                                                {actionType.replace(/_/g, ' ')}
-                                                            </span>
-                                                        </td>
-                                                        <td className="py-3 px-4 text-charcoal-700 text-xs max-w-md" title={log.details}>
-                                                            {log.details}
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    <ReportsTab logs={(activityLogs ?? []) as any} />
                 )} {/* end reports tab */}
 
             </div>

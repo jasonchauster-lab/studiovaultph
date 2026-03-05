@@ -77,11 +77,11 @@ export async function approvePayout(payoutId: string) {
         return { error: 'Failed to update payout status.' }
     }
 
-    // 4. Fetch the profile name for better logging
-    const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', targetId).single()
-    const payeeName = profile?.full_name || targetId
+    // 4. Fetch the profile name+email for better logging
+    const { data: profile } = await supabase.from('profiles').select('full_name, email').eq('id', targetId).single()
+    const payeeName = profile?.full_name || 'Unknown'
 
-    await logAdminAction(supabase, 'APPROVE_PAYOUT', 'payout_requests', payoutId, `Approved payout request of ₱${payout.amount} for ${payeeName} (ID: ${targetId})`)
+    await logAdminAction(supabase, 'APPROVE_PAYOUT', 'payout_requests', payoutId, `Payout of ₱${payout.amount} approved for ${payeeName} (${profile?.email || 'no email'})`)
 
     revalidatePath('/admin')
     revalidatePath('/instructor/earnings')
@@ -120,10 +120,10 @@ export async function rejectPayout(payoutId: string) {
     // Fetch details for better logging
     const { data: payout } = await supabase.from('payout_requests').select('amount, user_id, instructor_id').eq('id', payoutId).single()
     const targetId = payout?.user_id || payout?.instructor_id
-    const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', targetId).single()
-    const payeeName = profile?.full_name || targetId || 'Unknown'
+    const { data: profile } = await supabase.from('profiles').select('full_name, email').eq('id', targetId).single()
+    const payeeName = profile?.full_name || 'Unknown'
 
-    await logAdminAction(supabase, 'REJECT_PAYOUT', 'payout_requests', payoutId, `Rejected payout request of ₱${payout?.amount || 'Unknown'} for ${payeeName} (ID: ${targetId})`)
+    await logAdminAction(supabase, 'REJECT_PAYOUT', 'payout_requests', payoutId, `Payout of ₱${payout?.amount || 'Unknown'} rejected for ${payeeName} (${profile?.email || 'no email'})`)
 
     revalidatePath('/admin')
     revalidatePath('/instructor/earnings')
@@ -152,7 +152,7 @@ export async function approveCertification(certificationId: string) {
         return { error: 'Failed to approve certification' }
     }
 
-    await logAdminAction(supabase, 'APPROVE_CERTIFICATION', 'certifications', certificationId, `Verified instructor certification "${cert.certification_name}" for ${cert.profiles?.full_name || 'Unknown'}`)
+    await logAdminAction(supabase, 'APPROVE_CERTIFICATION', 'certifications', certificationId, `Certification "${cert.certification_name}" approved for ${cert.profiles?.full_name || 'Unknown'} (${(cert.profiles as any)?.email || 'no email'})`)
 
     // Send notification email
     if (cert.profiles?.email) {
@@ -207,7 +207,7 @@ export async function rejectCertification(certificationId: string, customReason?
         return { error: 'Permission denied or item not found. Are you an admin?' }
     }
 
-    await logAdminAction(supabase, 'REJECT_CERTIFICATION', 'certifications', certificationId, `Rejected instructor certification "${cert?.certification_name || 'Unknown'}" for ${cert?.profiles?.full_name || 'Unknown'} - Reason: ${customReason || 'Standard'}`)
+    await logAdminAction(supabase, 'REJECT_CERTIFICATION', 'certifications', certificationId, `Certification "${cert?.certification_name || 'Unknown'}" rejected for ${cert?.profiles?.full_name || 'Unknown'} (${(cert?.profiles as any)?.email || 'no email'}) — Reason: ${customReason || 'Standard'}`)
 
     // Send rejection email
     if (cert?.profiles?.email) {
@@ -253,7 +253,7 @@ export async function verifyStudio(studioId: string) {
         return { error: 'Failed to verify studio' }
     }
 
-    await logAdminAction(supabase, 'VERIFY_STUDIO', 'studios', studioId, `Verified studio application for "${studio.name}" (Owner: ${studio.profiles?.full_name || 'Unknown'})`)
+    await logAdminAction(supabase, 'VERIFY_STUDIO', 'studios', studioId, `Studio "${studio.name}" approved — Owner: ${studio.profiles?.full_name || 'Unknown'} (${(studio.profiles as any)?.email || 'no email'})`)
 
     // Send notification email
     if (studio.profiles?.email) {
@@ -308,7 +308,7 @@ export async function rejectStudio(studioId: string, customReason?: string) {
         return { error: 'Permission denied or item not found. Are you an admin?' }
     }
 
-    await logAdminAction(supabase, 'REJECT_STUDIO', 'studios', studioId, `Rejected studio application for "${studio?.name || 'Unknown'}" (Owner: ${studio?.profiles?.full_name || 'Unknown'}) - Reason: ${customReason || 'Standard'}`)
+    await logAdminAction(supabase, 'REJECT_STUDIO', 'studios', studioId, `Studio "${studio?.name || 'Unknown'}" application rejected — Owner: ${studio?.profiles?.full_name || 'Unknown'} (${(studio?.profiles as any)?.email || 'no email'}) — Reason: ${customReason || 'Standard'}`)
 
     // Send rejection email
     if (studio?.profiles?.email) {
@@ -1427,8 +1427,8 @@ export async function reinstateStudio(profileId: string) {
         return { error: 'Failed to reset suspension.' }
     }
 
-    const { data: ownerProfile } = await supabase.from('profiles').select('full_name').eq('id', profileId).single()
-    await logAdminAction(supabase, 'REINSTATE_STUDIO', 'profiles', profileId, `Reinstated suspended studio owner "${ownerProfile?.full_name || 'Unknown'}" (ID: ${profileId}) and cleared strikes for studio "${studio.name}" (ID: ${studio.id})`)
+    const { data: ownerProfile } = await supabase.from('profiles').select('full_name, email').eq('id', profileId).single()
+    await logAdminAction(supabase, 'REINSTATE_STUDIO', 'profiles', profileId, `Suspended studio owner ${ownerProfile?.full_name || 'Unknown'} (${ownerProfile?.email || 'no email'}) reinstated — strikes cleared for studio "${studio.name}"`)
 
     // 3. Send Reactivation Email
     const { data: profile } = await supabase
@@ -1579,7 +1579,7 @@ export async function adjustUserBalance(userId: string, amount: number, reason: 
     }
 
     const { data: userProfile } = await supabase.from('profiles').select('full_name, email').eq('id', userId).single()
-    await logAdminAction(supabase, 'MANUAL_BALANCE_ADJUSTMENT', 'profiles', userId, `Admin adjusted balance by ₱${amount} for user ${userProfile?.full_name || userId} (ID: ${userId}) - Reason: ${reason}`)
+    await logAdminAction(supabase, 'MANUAL_BALANCE_ADJUSTMENT', 'profiles', userId, `Balance adjusted by ₱${amount} for ${userProfile?.full_name || 'Unknown'} (${userProfile?.email || 'no email'}) — Reason: ${reason}`)
 
     // 4. Send Notification Email
     if (userProfile?.email) {
@@ -1634,7 +1634,7 @@ export async function settleInstructorDebt(profileId: string) {
         return { error: `Failed to settle balance: ${rpcError.message}` }
     }
 
-    await logAdminAction(supabase, 'SETTLE_INSTRUCTOR_DEBT', 'profiles', profileId, `Settled instructor debt of ₱${settlementAmount} for ${profile.full_name} (ID: ${profileId})`)
+    await logAdminAction(supabase, 'SETTLE_INSTRUCTOR_DEBT', 'profiles', profileId, `Instructor debt of ₱${settlementAmount} settled for ${profile.full_name} (${profile.email || 'no email'}) — balance was ₱${currentBalance.toLocaleString()}`)
 
     // 4. Send Confirmation Email
     if (profile.email) {
