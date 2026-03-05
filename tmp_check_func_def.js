@@ -23,7 +23,7 @@ const supabase = createClient(
 
 async function checkFunction() {
     const { data, error } = await supabase.rpc('exec_sql', {
-        sql_query: "SELECT pg_get_functiondef(p.oid) FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid WHERE n.nspname = 'public' AND p.proname = 'check_is_admin'"
+        sql_query: "SELECT pg_get_functiondef(p.oid) FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid WHERE n.nspname = 'public' AND p.proname = 'is_admin'"
     });
 
     if (error) {
