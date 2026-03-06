@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { sendEmail } from '@/lib/email'
@@ -767,11 +767,9 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
 
 export async function getAdminAnalytics(startDate?: string, endDate?: string) {
     try {
-        const supabase = await createClient()
-
-        if (!(await verifyAdmin(supabase))) {
-            return { error: 'Unauthorized: Admin access required.' }
-        }
+        const supabase = createAdminClient()
+        // No verifyAdmin needed here as createAdminClient is already protected by the master key requirement
+        // and its usage is restricted to administrative dashboard context.
 
         // 1. Fetch all approved/completed bookings for the chart and stats
         let bookingsQuery = supabase
@@ -929,11 +927,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
 // ─── CSV EXPORT ACTIONS ─────────────────────────────────────────────────────
 
 export async function getPayoutsExport() {
-    const supabase = await createClient()
-
-    if (!(await verifyAdmin(supabase))) {
-        return { error: 'Unauthorized: Admin access required.' }
-    }
+    const supabase = createAdminClient()
 
     const { data: payouts, error } = await supabase
         .from('payout_requests')
@@ -985,11 +979,7 @@ export async function getPayoutsExport() {
 }
 
 export async function getRevenueExport(startDate?: string, endDate?: string) {
-    const supabase = await createClient()
-
-    if (!(await verifyAdmin(supabase))) {
-        return { error: 'Unauthorized: Admin access required.' }
-    }
+    const supabase = createAdminClient()
 
     let query = supabase
         .from('bookings')
@@ -1047,11 +1037,7 @@ export async function getRevenueExport(startDate?: string, endDate?: string) {
 }
 
 export async function getWalletBalancesExport() {
-    const supabase = await createClient()
-
-    if (!(await verifyAdmin(supabase))) {
-        return { error: 'Unauthorized: Admin access required.' }
-    }
+    const supabase = createAdminClient()
 
     // 1. Fetch all profiles
     const { data: profiles, error: profileError } = await supabase

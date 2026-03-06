@@ -495,32 +495,17 @@ export default async function AdminDashboard({
             </div>
         )
     } catch (err: any) {
-        console.error('GLOBAL DASHBOARD CRASH:', err)
+        console.error('GLOBAL DASHBOARD ERROR:', err)
         return (
-            <div className="min-h-screen p-8 bg-cream-50">
-                <div className="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-2xl border border-red-100">
-                    <div className="flex items-center gap-3 text-red-600 mb-6">
-                        <ShieldAlert className="w-10 h-10" />
-                        <h1 className="text-3xl font-serif font-bold tracking-tight">Admin System Failure</h1>
-                    </div>
-                    <div className="bg-gray-950 p-6 rounded-xl font-mono text-sm border border-gray-800 shadow-inner">
-                        <p className="text-gray-500 uppercase tracking-widest text-[10px] font-bold mb-1">Diagnostic Report</p>
-                        <p className="text-red-400 font-bold text-lg mb-4">{err.name || 'Critical Exception'}</p>
-                        <div className="space-y-4">
-                            <div>
-                                <p className="text-gray-500 uppercase tracking-widest text-[10px] font-bold mb-1">Message</p>
-                                <p className="text-green-400 whitespace-pre-wrap">{err.message}</p>
-                            </div>
-                            {err.stack && (
-                                <div>
-                                    <p className="text-gray-500 uppercase tracking-widest text-[10px] font-bold mb-1">Stack Trace</p>
-                                    <pre className="text-gray-400 text-[11px] leading-relaxed overflow-x-auto scrollbar-hide">{err.stack}</pre>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <div className="mt-8 p-4 bg-red-50 rounded-lg border border-red-100">
-                        <p className="text-red-800 text-sm font-medium">Please screenshot this page and notify the engineering team immediately.</p>
+            <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-cream-50 flex items-center justify-center">
+                <div className="max-w-md w-full text-center">
+                    <ShieldAlert className="mx-auto h-12 w-12 text-red-600" />
+                    <h2 className="mt-4 text-2xl font-serif text-charcoal-900 font-bold">Something went wrong</h2>
+                    <p className="mt-2 text-charcoal-600 font-bold text-red-600">{err.message || 'An unexpected error occurred while loading the dashboard.'}</p>
+                    <div className="mt-8">
+                        <a href="/admin" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-cream-50 bg-charcoal-900 hover:bg-charcoal-800 transition-colors">
+                            Try again
+                        </a>
                     </div>
                 </div>
             </div>

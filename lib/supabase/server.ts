@@ -42,23 +42,11 @@ export function createAdminClient() {
     const key = process.env.DASHBOARD_MASTER_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
 
     if (!url) {
-        const envKeys = Object.keys(process.env).filter(k => k.includes('SUPABASE')).join(', ')
-        throw new Error(`MISSING_ENV: NEXT_PUBLIC_SUPABASE_URL is not defined. Found these keys: [${envKeys || 'None'}]`)
+        throw new Error('MISSING_ENV: NEXT_PUBLIC_SUPABASE_URL is not defined.')
     }
 
     if (!key) {
-        const allKeys = Object.keys(process.env)
-        const supabaseKeys = allKeys.filter(k => k.includes('SUPABASE')).join(', ')
-        const hasResend = allKeys.includes('RESEND_API_KEY')
-        const hasCron = allKeys.includes('CRON_SECRET')
-        const hasMaster = allKeys.includes('DASHBOARD_MASTER_KEY')
-
-        throw new Error(`MISSING_ENV: Service Role Key is missing. 
-            DASHBOARD_MASTER_KEY Found: ${hasMaster ? 'YES' : 'NO'}
-            SUPABASE_SERVICE_ROLE_KEY Found: ${allKeys.includes('SUPABASE_SERVICE_ROLE_KEY') ? 'YES' : 'NO'}
-            Available Supabase Keys: [${supabaseKeys || 'None'}] 
-            RESEND_API_KEY Found: ${hasResend ? 'YES' : 'NO'}
-            CRON_SECRET Found: ${hasCron ? 'YES' : 'NO'}`)
+        throw new Error('MISSING_ENV: DASHBOARD_MASTER_KEY is not defined. Please add this to your Vercel Environment Variables.')
     }
 
     return createSupabaseClient(url, key)
