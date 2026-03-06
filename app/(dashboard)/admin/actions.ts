@@ -1095,6 +1095,10 @@ export async function completeBooking(bookingId: string) {
     const result = await processBookingCompletion(bookingId)
 
     if (result.success) {
+        const supabase = await createClient()
+        const { data: booking } = await supabase.from('bookings').select('client_id, instructor_id').eq('id', bookingId).single()
+        await logAdminAction(supabase, 'COMPLETE_BOOKING', 'bookings', bookingId, `Booking manually completed by Admin. Participant status updated.`)
+
         revalidatePath('/admin')
         revalidatePath('/instructor/sessions')
         revalidatePath('/studio/earnings')
@@ -1113,6 +1117,9 @@ export async function triggerFundsUnlock() {
     const { unlockMaturedFunds, autoCompleteBookings } = await import('@/lib/wallet')
     const completed = await autoCompleteBookings()
     const unlocked = await unlockMaturedFunds()
+
+    await logAdminAction(supabase, 'TRIGGER_FUNDS_UNLOCK', 'system', null, `Bulk matching: ${completed.count || 0} sessions auto-completed, ${unlocked.count || 0} payouts unlocked/matured.`)
+
     revalidatePath('/admin')
     revalidatePath('/instructor/sessions')
     revalidatePath('/studio/earnings')

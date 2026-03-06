@@ -1,5 +1,5 @@
 ﻿import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { CheckCircle, Clock, Building2, MessageCircle, BarChart3, Wallet, ShieldAlert, AlertTriangle } from 'lucide-react'
+import { CheckCircle, Clock, Building2, MessageCircle, BarChart3, Wallet, ShieldAlert, AlertTriangle, Users } from 'lucide-react'
 import VerifyButton from '@/components/admin/VerifyButton'
 import RejectBookingButton from '@/components/admin/RejectBookingButton'
 import { getAdminAnalytics } from './actions'
@@ -227,19 +227,25 @@ export default async function AdminDashboard({
             ...studio,
             permitSignedUrl: studio.mayors_permit_url ? (payoutUrlMap[studio.mayors_permit_url] ?? null) : null,
             certSignedUrl: studio.secretary_certificate_url ? (payoutUrlMap[studio.secretary_certificate_url] ?? null) : null,
+            birSignedUrl: studio.bir_certificate_url ? (payoutUrlMap[studio.bir_certificate_url] ?? null) : null,
             insuranceSignedUrl: studio.insurance_url ? (payoutUrlMap[studio.insurance_url] ?? null) : null,
         }))
 
+        const verificationsCount = certsWithUrls.length + studiosWithUrls.length + payoutStudiosWithUrls.length
+        const payoutsCount = pendingBookings.length + payoutRequests.length + studioPayouts.length + customerPayouts.length + pendingTopUps.length
+        const suspensionsCount = suspendedStudios.length
+
         const tabs = [
             { id: 'overview', label: 'Overview', icon: BarChart3 },
-            { id: 'verifications', label: 'Verifications', icon: CheckCircle },
-            { id: 'payouts', label: 'Payouts & Wallet', icon: Wallet },
-            { id: 'customers', label: 'Customers', icon: ShieldAlert },
+            { id: 'verifications', label: 'Verifications', icon: CheckCircle, count: verificationsCount },
+            { id: 'payouts', label: 'Payouts & Wallet', icon: Wallet, count: payoutsCount },
+            { id: 'suspensions', label: 'Suspensions', icon: AlertTriangle, count: suspensionsCount },
+            { id: 'customers', label: 'Customers', icon: Users },
             { id: 'reports', label: 'Reports', icon: Clock },
         ]
 
         return (
-            <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
+            <div className="min-h-screen bg-cream-50 p-4 sm:p-8 text-charcoal-900">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex justify-between items-center mb-6">
                         <div>
@@ -261,6 +267,8 @@ export default async function AdminDashboard({
                         {tabs.map((t) => {
                             const Icon = t.icon
                             const isActive = activeTab === t.id
+                            const count = (t as any).count || 0
+
                             return (
                                 <a
                                     key={t.id}
@@ -272,6 +280,11 @@ export default async function AdminDashboard({
                                 >
                                     <Icon className="w-4 h-4" />
                                     {t.label}
+                                    {count > 0 && (
+                                        <span className={`ml-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${isActive ? 'bg-rose-gold text-charcoal-900' : 'bg-charcoal-900 text-cream-50'}`}>
+                                            {count > 99 ? '99+' : count}
+                                        </span>
+                                    )}
                                 </a>
                             )
                         })}
@@ -337,8 +350,8 @@ export default async function AdminDashboard({
                                     <div className="space-y-4">
                                         {certsWithUrls.map((cert: any) => (
                                             <div key={cert.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-start">
-                                                <div>
-                                                    <p className="font-medium">{cert.profiles?.full_name}</p>
+                                                <div className="text-charcoal-900">
+                                                    <p className="font-medium text-charcoal-900">{cert.profiles?.full_name}</p>
                                                     <p className="text-sm text-charcoal-600">{cert.certification_name}</p>
                                                     <div className="mt-2 flex gap-4">
                                                         {cert.signedUrl && <a href={cert.signedUrl} target="_blank" className="text-xs text-blue-600 underline">Cert Proof</a>}
@@ -365,8 +378,8 @@ export default async function AdminDashboard({
                                     <div className="space-y-4">
                                         {studiosWithUrls.map((s: any) => (
                                             <div key={s.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-start">
-                                                <div>
-                                                    <p className="font-medium">{s.name}</p>
+                                                <div className="text-charcoal-900">
+                                                    <p className="font-medium text-charcoal-900">{s.name}</p>
                                                     <p className="text-sm text-charcoal-600">{s.profiles?.full_name}</p>
                                                     <div className="mt-2 flex gap-4">
                                                         {s.birSignedUrl && <a href={s.birSignedUrl} target="_blank" className="text-xs text-blue-600 underline">BIR</a>}
@@ -383,22 +396,34 @@ export default async function AdminDashboard({
                                 )}
                             </div>
 
-                            {suspendedStudios.length > 0 && (
-                                <div className="bg-white border border-red-200 rounded-xl p-6 shadow-sm">
-                                    <h2 className="text-xl font-medium text-red-600 mb-4 flex items-center gap-2">
-                                        <AlertTriangle className="w-5 h-5" />
-                                        Suspended Studios
-                                    </h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {suspendedStudios.map((p: any) => (
-                                            <div key={p.id} className="border border-red-100 rounded-lg p-4 bg-red-50/30 flex justify-between items-center">
-                                                <p className="font-bold">{p.studios?.[0]?.name || p.full_name}</p>
-                                                <VerifyButton id={p.id} action="reinstateStudio" label="Reactivate" className="px-4 py-2 bg-charcoal-900 text-cream-50 text-xs rounded-lg font-bold" />
+                            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
+                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
+                                    <Wallet className="w-5 h-5 text-charcoal-500" />
+                                    Studio Payout Setups
+                                    {payoutStudiosWithUrls.length > 0 && <span className="ml-2 bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{payoutStudiosWithUrls.length}</span>}
+                                </h2>
+                                {payoutStudiosWithUrls.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
+                                    <div className="space-y-4">
+                                        {payoutStudiosWithUrls.map((s: any) => (
+                                            <div key={s.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-start">
+                                                <div className="text-charcoal-900">
+                                                    <p className="font-medium text-charcoal-900">{s.name}</p>
+                                                    <p className="text-sm text-charcoal-600">{s.profiles?.full_name}</p>
+                                                    <div className="mt-2 flex gap-4">
+                                                        {s.permitSignedUrl && <a href={s.permitSignedUrl} target="_blank" className="text-xs text-blue-600 underline">Permit</a>}
+                                                        {s.certSignedUrl && <a href={s.certSignedUrl} target="_blank" className="text-xs text-blue-600 underline">Secretary Cert</a>}
+                                                        {s.birSignedUrl && <a href={s.birSignedUrl} target="_blank" className="text-xs text-blue-600 underline">BIR</a>}
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <VerifyButton id={s.id} action="rejectStudioPayout" label="Reject" className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md" />
+                                                    <VerifyButton id={s.id} action="approveStudioPayout" label="Approve" className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md" />
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     )}
 
@@ -414,8 +439,8 @@ export default async function AdminDashboard({
                                     <div className="space-y-4">
                                         {pendingBookings.map((b: any) => (
                                             <div key={b.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-start">
-                                                <div>
-                                                    <p className="font-medium">{b.client?.full_name} → {b.slots?.studios?.name}</p>
+                                                <div className="text-charcoal-900">
+                                                    <p className="font-medium text-charcoal-900">{b.client?.full_name} → {b.slots?.studios?.name}</p>
                                                     <p className="text-xs text-charcoal-500">{new Date(b.slots?.date).toLocaleDateString()} at {b.slots?.start_time}</p>
                                                     {b.payment_proof_url && <a href={getDisplayUrl(b.payment_proof_url)} target="_blank" className="text-[10px] text-blue-600 underline mt-1 block">View Payment</a>}
                                                 </div>
@@ -453,6 +478,79 @@ export default async function AdminDashboard({
                                 )}
                             </div>
 
+                            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
+                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
+                                    <Wallet className="w-5 h-5 text-charcoal-500" />
+                                    Studio Payouts
+                                    {studioPayouts.length > 0 && <span className="ml-2 bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{studioPayouts.length}</span>}
+                                </h2>
+                                {studioPayouts.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
+                                    <div className="space-y-4">
+                                        {studioPayouts.map((r: any) => (
+                                            <div key={r.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-center">
+                                                <div>
+                                                    <p className="font-bold">₱{r.amount.toLocaleString()}</p>
+                                                    <p className="text-xs text-charcoal-600">{r.studios?.name} ({r.studios?.profiles?.full_name})</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <VerifyButton id={r.id} action="rejectPayout" label="Reject" className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md" />
+                                                    <VerifyButton id={r.id} action="approvePayout" label="Approve" className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
+                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
+                                    <Wallet className="w-5 h-5 text-charcoal-500" />
+                                    Customer Wallet Payouts
+                                    {customerPayouts.length > 0 && <span className="ml-2 bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{customerPayouts.length}</span>}
+                                </h2>
+                                {customerPayouts.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
+                                    <div className="space-y-4">
+                                        {customerPayouts.map((r: any) => (
+                                            <div key={r.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-center">
+                                                <div>
+                                                    <p className="font-bold">₱{r.amount.toLocaleString()}</p>
+                                                    <p className="text-xs text-charcoal-600">{r.profile?.full_name} ({r.profile?.email})</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <VerifyButton id={r.id} action="rejectPayout" label="Reject" className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md" />
+                                                    <VerifyButton id={r.id} action="approvePayout" label="Approve" className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
+                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
+                                    <Wallet className="w-5 h-5 text-charcoal-500" />
+                                    Wallet Top-ups
+                                    {pendingTopUps.length > 0 && <span className="ml-2 bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{pendingTopUps.length}</span>}
+                                </h2>
+                                {pendingTopUps.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
+                                    <div className="space-y-4">
+                                        {pendingTopUps.map((t: any) => (
+                                            <div key={t.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-center">
+                                                <div>
+                                                    <p className="font-bold">₱{t.amount.toLocaleString()}</p>
+                                                    <p className="text-xs text-charcoal-600">{t.profiles?.full_name} ({t.profiles?.email})</p>
+                                                    {t.payment_proof_url && <a href={getDisplayUrl(t.payment_proof_url)} target="_blank" className="text-[10px] text-blue-600 underline mt-1 block">View Receipt</a>}
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <VerifyButton id={t.id} action="rejectTopUp" label="Reject" className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md" />
+                                                    <VerifyButton id={t.id} action="approveTopUp" label="Approve" className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
                             <div className="bg-charcoal-900 text-white rounded-xl p-6 shadow-xl">
                                 <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
                                     <ShieldAlert className="w-5 h-5 text-rose-gold" />
@@ -463,15 +561,43 @@ export default async function AdminDashboard({
                         </div>
                     )}
 
+                    {activeTab === 'suspensions' && (
+                        <div className="space-y-8">
+                            <div className="bg-white border border-red-200 rounded-xl p-6 shadow-sm">
+                                <h2 className="text-xl font-medium text-red-600 mb-4 flex items-center gap-2">
+                                    <AlertTriangle className="w-5 h-5" />
+                                    Suspended Studios & Partners
+                                    {suspendedStudios.length > 0 && <span className="ml-2 bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">{suspendedStudios.length}</span>}
+                                </h2>
+                                {suspendedStudios.length === 0 ? <p className="text-charcoal-500 text-sm">No accounts are currently suspended.</p> : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {suspendedStudios.map((p: any) => (
+                                            <div key={p.id} className="border border-red-100 rounded-lg p-4 bg-red-50/30 flex justify-between items-center">
+                                                <div>
+                                                    <p className="font-bold text-charcoal-900">{p.studios?.[0]?.name || p.full_name}</p>
+                                                    <p className="text-[10px] text-charcoal-500 uppercase font-bold">{p.studios?.[0] ? 'Studio Owner' : 'Instructor'}</p>
+                                                </div>
+                                                <VerifyButton id={p.id} action="reinstateStudio" label="Reactivate" className="px-4 py-2 bg-charcoal-900 text-cream-50 text-xs rounded-lg font-bold" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {activeTab === 'customers' && (
                         <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm overflow-x-auto">
-                            <h2 className="text-xl font-medium mb-6">All Users ({allUsers.length})</h2>
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-medium">All Users ({allUsers.length})</h2>
+                            </div>
                             <table className="w-full text-left">
                                 <thead className="text-xs uppercase text-charcoal-400 border-b border-cream-100">
                                     <tr>
                                         <th className="py-3 px-4">User</th>
                                         <th className="py-3 px-4">Role</th>
                                         <th className="py-3 px-4">Balance</th>
+                                        <th className="py-3 px-4">Status</th>
                                         <th className="py-3 px-4">Waiver</th>
                                     </tr>
                                 </thead>
@@ -481,11 +607,31 @@ export default async function AdminDashboard({
                                             <td className="py-3 px-4">
                                                 <p className="font-medium">{u.full_name}</p>
                                                 <p className="text-[10px] text-charcoal-400">{u.email}</p>
+                                                <p className="text-[10px] text-charcoal-400">{u.contact_number}</p>
                                             </td>
-                                            <td className="py-3 px-4 capitalize text-[10px] font-bold">{u.role}</td>
+                                            <td className="py-3 px-4">
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                                                    u.role === 'instructor' ? 'bg-blue-100 text-blue-700' :
+                                                        u.role === 'studio' ? 'bg-orange-100 text-orange-700' :
+                                                            'bg-gray-100 text-gray-700'
+                                                    }`}>
+                                                    {u.role}
+                                                </span>
+                                            </td>
                                             <td className="py-3 px-4 font-mono text-xs">₱{(u.available_balance || 0).toLocaleString()}</td>
                                             <td className="py-3 px-4">
-                                                {u.waiver_url ? <a href={getDisplayUrl(u.waiver_url)} target="_blank" className="text-blue-600 underline text-[10px]">View</a> : '—'}
+                                                {u.is_suspended ? (
+                                                    <span className="text-red-600 font-bold text-[10px] uppercase">Suspended</span>
+                                                ) : (
+                                                    <span className="text-green-600 font-bold text-[10px] uppercase">Active</span>
+                                                )}
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                {u.waiver_url ? (
+                                                    <a href={getDisplayUrl(u.waiver_url)} target="_blank" className="text-blue-600 underline text-[10px]">View waiver</a>
+                                                ) : (
+                                                    <span className="text-charcoal-300 text-[10px]">No waiver</span>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}

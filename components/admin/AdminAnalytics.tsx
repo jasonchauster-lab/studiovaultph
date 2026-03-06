@@ -25,7 +25,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
     const pointPadding = 40
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 text-charcoal-900">
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">

@@ -14,29 +14,39 @@ type Log = {
 }
 
 const ACTION_CATEGORIES: Record<string, string> = {
-    APPROVE_BOOKING: 'Booking',
-    REJECT_BOOKING: 'Booking',
-    APPROVE_PAYOUT: 'Payout',
-    REJECT_PAYOUT: 'Payout',
-    APPROVE_STUDIO_PAYOUT_SETUP: 'Payout',
-    REJECT_STUDIO_PAYOUT_SETUP: 'Payout',
+    // Bookings
+    APPROVE_BOOKING: 'Approvals',
+    REJECT_BOOKING: 'Bookings',
+    COMPLETE_BOOKING: 'Bookings',
+
+    // Payouts & Finance
+    APPROVE_PAYOUT: 'Payouts',
+    REJECT_PAYOUT: 'Payouts',
+    APPROVE_STUDIO_PAYOUT_SETUP: 'Approvals',
+    REJECT_STUDIO_PAYOUT_SETUP: 'Payouts',
+    SETTLE_INSTRUCTOR_DEBT: 'Finance',
+    TRIGGER_FUNDS_UNLOCK: 'Finance',
+
+    // Wallet
     APPROVE_TOP_UP: 'Wallet',
     REJECT_TOP_UP: 'Wallet',
     MANUAL_BALANCE_ADJUSTMENT: 'Wallet',
-    APPROVE_CERTIFICATION: 'Certification',
-    REJECT_CERTIFICATION: 'Certification',
-    VERIFY_STUDIO: 'Studio',
-    REJECT_STUDIO: 'Studio',
-    REINSTATE_STUDIO: 'Studio',
-    SETTLE_INSTRUCTOR_DEBT: 'Finance',
+
+    // Verifications & Partners
+    APPROVE_CERTIFICATION: 'Approvals',
+    REJECT_CERTIFICATION: 'Approvals',
+    VERIFY_STUDIO: 'Approvals',
+    REJECT_STUDIO: 'Approvals',
+    REINSTATE_STUDIO: 'Partners',
+    UPDATE_PARTNER_FEES: 'Partners',
 }
 
 const CATEGORY_BADGE: Record<string, string> = {
-    Booking: 'bg-blue-100 text-blue-700',
-    Payout: 'bg-amber-100 text-amber-700',
+    Approvals: 'bg-green-100 text-green-700',
+    Bookings: 'bg-blue-100 text-blue-700',
+    Payouts: 'bg-amber-100 text-amber-700',
     Wallet: 'bg-purple-100 text-purple-700',
-    Certification: 'bg-teal-100 text-teal-700',
-    Studio: 'bg-orange-100 text-orange-700',
+    Partners: 'bg-orange-100 text-orange-700',
     Finance: 'bg-rose-100 text-rose-700',
     Other: 'bg-gray-100 text-gray-600',
 }
@@ -67,7 +77,7 @@ export default function ReportsTab({ logs }: { logs: Log[] }) {
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
     const thisWeek = logs.filter(l => new Date(l.created_at) >= weekAgo)
     const totalApprovals = logs.filter(l =>
-        l.action_type.startsWith('APPROVE') || l.action_type.startsWith('VERIFY') || l.action_type === 'REINSTATE_STUDIO'
+        (ACTION_CATEGORIES[l.action_type] || 'Other') === 'Approvals' || l.action_type.startsWith('APPROVE') || l.action_type.startsWith('VERIFY')
     ).length
     const totalRejections = logs.filter(l => l.action_type.startsWith('REJECT')).length
 
@@ -81,7 +91,7 @@ export default function ReportsTab({ logs }: { logs: Log[] }) {
 
     // ── Unique values for filter dropdowns ───────────────────────────────────
     const actionTypes = useMemo(() => Array.from(new Set(logs.map(l => l.action_type))).sort(), [logs])
-    const categories = useMemo(() => Array.from(new Set(logs.map(l => ACTION_CATEGORIES[l.action_type] || 'Other'))).sort(), [logs])
+    const categories = ['Approvals', 'Bookings', 'Payouts', 'Wallet', 'Partners', 'Finance', 'Other']
 
     // ── Filtered logs ────────────────────────────────────────────────────────
     const filtered = useMemo(() => {
