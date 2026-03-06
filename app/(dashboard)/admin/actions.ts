@@ -788,7 +788,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
                 ),
                 instructor:profiles!instructor_id(full_name)
             `)
-            .in('status', ['approved', 'completed', 'paid', 'cancelled_charged'])
+            .in('status', ['approved', 'completed', 'cancelled_charged'])
 
         if (startDate) bookingsQuery = bookingsQuery.gte('slots.date', startDate.split('T')[0])
         if (endDate) bookingsQuery = bookingsQuery.lte('slots.date', endDate.split('T')[0])

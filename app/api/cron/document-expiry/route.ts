@@ -12,9 +12,10 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const key = process.env.DASHBOARD_MASTER_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
     const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
+        key!
     );
 
     const todayStr = getManilaTodayStr();
