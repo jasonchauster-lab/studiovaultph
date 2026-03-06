@@ -14,6 +14,11 @@ import AccountReactivatedEmail from '@/components/emails/AccountReactivatedEmail
 async function verifyAdmin(supabase: any) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return false
+
+    // Optimization: Check metadata first (non-recursive)
+    if (user.user_metadata?.role === 'admin') return true
+
+    // Fallback: Check profiles table (should now be safe after recursion fix)
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
     return profile?.role === 'admin'
 }

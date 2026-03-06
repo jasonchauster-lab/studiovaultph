@@ -54,14 +54,17 @@ export async function updateSession(request: NextRequest) {
         } else {
             // 2. Enforce Role Locking (User is logged in)
 
-            // Optimization: We could store role in metadata to avoid DB call, but for now we fetch.
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single()
+            // Optimization: Check role in metadata first to avoid DB call/RLS recursion
+            let role = user.user_metadata?.role;
 
-            const role = profile?.role;
+            if (!role) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single()
+                role = profile?.role;
+            }
             const path = request.nextUrl.pathname;
 
             // A. No Role -> Force Welcome/Onboarding
