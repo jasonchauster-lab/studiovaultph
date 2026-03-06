@@ -21,7 +21,7 @@ export default async function AdminDashboard({
     try {
         const { range, tab } = await searchParams
         const activeTab = (tab as string) || 'overview'
-        const supabase = await createClient()
+        const publicSupabase = await createClient()
 
         // --- DATE FILTER LOGIC ---
         let startDate: string | undefined
@@ -46,7 +46,8 @@ export default async function AdminDashboard({
         }
         // --- END DATE FILTER LOGIC ---
 
-        const adminDb = createAdminClient()
+        const supabase = createAdminClient() // This is the admin client, now named 'supabase'
+        console.log('Analytics: Triggering fetch...')
         const results = await Promise.all([
             // 1. Certification verification queue
             supabase.from('certifications')
@@ -124,7 +125,7 @@ export default async function AdminDashboard({
                 .limit(500),
 
             // 13. All users
-            adminDb.from('profiles')
+            supabase.from('profiles')
                 .select('id, full_name, email, role, created_at, available_balance, is_suspended, contact_number, waiver_url, waiver_signed_at')
                 .order('created_at', { ascending: false }),
         ])
@@ -294,7 +295,10 @@ export default async function AdminDashboard({
                                 {!('error' in analytics) ? (
                                     <AdminAnalytics stats={analytics} />
                                 ) : (
-                                    <div className="bg-red-50 text-red-700 p-4 rounded-lg">Failed to load analytics.</div>
+                                    <div className="bg-red-50 text-red-700 p-4 rounded-lg border border-red-100">
+                                        <p className="font-bold">Failed to load analytics</p>
+                                        <p className="text-xs mt-1">{(analytics as any).error}</p>
+                                    </div>
                                 )}
                             </div>
 

@@ -795,9 +795,10 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
 
         const { data: bookings, error: bookingsError } = await bookingsQuery
         if (bookingsError) {
-            console.error('Analytics: Bookings fetch error:', bookingsError)
-            return { error: `Failed to fetch bookings: ${bookingsError.message}` }
+            console.error('Analytics: Bookings fetch error details:', bookingsError)
+            return { error: `Database Error (Bookings): ${bookingsError.message} (${bookingsError.code || 'NO_CODE'})` }
         }
+        console.log(`Analytics: Successfully fetched ${bookings?.length || 0} bookings.`)
 
         // 2. Fetch all completed payouts
         let payoutsQuery = supabase
