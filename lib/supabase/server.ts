@@ -40,8 +40,15 @@ export function createAdminClient() {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-    if (!url) throw new Error('MISSING_ENV: NEXT_PUBLIC_SUPABASE_URL is not defined.')
-    if (!key) throw new Error('MISSING_ENV: SUPABASE_SERVICE_ROLE_KEY is not defined. Please add this to your Environment Variables.')
+    if (!url) {
+        const envKeys = Object.keys(process.env).filter(k => k.includes('SUPABASE')).join(', ')
+        throw new Error(`MISSING_ENV: NEXT_PUBLIC_SUPABASE_URL is not defined. Found these keys: [${envKeys || 'None'}]`)
+    }
+
+    if (!key) {
+        const envKeys = Object.keys(process.env).filter(k => k.includes('SUPABASE')).join(', ')
+        throw new Error(`MISSING_ENV: SUPABASE_SERVICE_ROLE_KEY is not defined. Please add this to your Environment Variables. Found these keys: [${envKeys || 'None'}]`)
+    }
 
     return createSupabaseClient(url, key)
 }
