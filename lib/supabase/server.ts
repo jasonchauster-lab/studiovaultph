@@ -46,8 +46,15 @@ export function createAdminClient() {
     }
 
     if (!key) {
-        const envKeys = Object.keys(process.env).filter(k => k.includes('SUPABASE')).join(', ')
-        throw new Error(`MISSING_ENV: SUPABASE_SERVICE_ROLE_KEY is not defined. Please add this to your Environment Variables. Found these keys: [${envKeys || 'None'}]`)
+        const allKeys = Object.keys(process.env)
+        const supabaseKeys = allKeys.filter(k => k.includes('SUPABASE')).join(', ')
+        const hasResend = allKeys.includes('RESEND_API_KEY')
+        const hasCron = allKeys.includes('CRON_SECRET')
+
+        throw new Error(`MISSING_ENV: SUPABASE_SERVICE_ROLE_KEY is missing. 
+            Available Supabase Keys: [${supabaseKeys || 'None'}] 
+            RESEND_API_KEY Found: ${hasResend ? 'YES' : 'NO'}
+            CRON_SECRET Found: ${hasCron ? 'YES' : 'NO'}`)
     }
 
     return createSupabaseClient(url, key)
