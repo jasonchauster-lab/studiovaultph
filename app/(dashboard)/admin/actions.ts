@@ -761,177 +761,163 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
 
 
 export async function getAdminAnalytics(startDate?: string, endDate?: string) {
-    const supabase = await createClient()
+    try {
+        const supabase = await createClient()
 
-    if (!(await verifyAdmin(supabase))) {
-        return { error: 'Unauthorized: Admin access required.' }
-    }
+        if (!(await verifyAdmin(supabase))) {
+            return { error: 'Unauthorized: Admin access required.' }
+        }
 
-    // 1. Fetch all approved bookings with details for detailed transactions
-    let bookingsQuery = supabase
-        .from('bookings')
-        .select(`
-            id,
-            total_price,
-            created_at,
-            price_breakdown,
-            status,
-            client:profiles!client_id(full_name),
-            slots!inner(
-                date,
-                start_time,
-                studios(name)
-            ),
-            instructor:profiles!instructor_id(full_name)
-        `)
-        .in('status', ['approved', 'completed', 'cancelled_charged'])
-        .order('created_at', { ascending: true })
+        // 1. Fetch all approved/completed bookings for the chart and stats
+        let bookingsQuery = supabase
+            .from('bookings')
+            .select(`
+                id,
+                total_price,
+                created_at,
+                price_breakdown,
+                status,
+                client:profiles!client_id(full_name),
+                slots!inner(
+                    date,
+                    start_time,
+                    studios(name)
+                ),
+                instructor:profiles!instructor_id(full_name)
+            `)
+            .in('status', ['approved', 'completed', 'paid', 'cancelled_charged'])
 
-    // FIX: Extract just the date string to match the 'date' column
-    if (startDate) bookingsQuery = bookingsQuery.gte('slots.date', startDate.split('T')[0])
-    if (endDate) bookingsQuery = bookingsQuery.lte('slots.date', endDate.split('T')[0])
+        if (startDate) bookingsQuery = bookingsQuery.gte('slots.date', startDate.split('T')[0])
+        if (endDate) bookingsQuery = bookingsQuery.lte('slots.date', endDate.split('T')[0])
 
-    const { data: bookings, error: bookingsError } = await bookingsQuery
+        const { data: bookings, error: bookingsError } = await bookingsQuery
+        if (bookingsError) {
+            console.error('Analytics: Bookings fetch error:', bookingsError)
+            return { error: `Failed to fetch bookings: ${bookingsError.message}` }
+        }
 
-    if (bookingsError) {
-        console.error('Error fetching analytics bookings:', bookingsError)
-        return { error: 'Failed to fetch analytics' }
-    }
+        // 2. Fetch all completed payouts
+        let payoutsQuery = supabase
+            .from('payout_requests')
+            .select('amount, created_at, instructor_id, studio_id')
+            .eq('status', 'paid')
 
-    // 2. Fetch all paid payout requests (outflows)
-    let payoutsQuery = supabase
-        .from('payout_requests')
-        .select('amount, created_at, instructor_id, studio_id')
-        .eq('status', 'paid')
+        if (startDate) payoutsQuery = payoutsQuery.gte('created_at', startDate)
+        if (endDate) payoutsQuery = payoutsQuery.lte('created_at', endDate)
 
-    if (startDate) payoutsQuery = payoutsQuery.gte('created_at', startDate)
-    if (endDate) payoutsQuery = payoutsQuery.lte('created_at', endDate)
+        const { data: payouts, error: payoutsError } = await payoutsQuery
+        if (payoutsError) {
+            console.error('Analytics: Payouts fetch error:', payoutsError)
+        }
 
-    const { data: payouts, error: payoutsError } = await payoutsQuery
+        const totalPayouts = (payouts || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
 
-    if (payoutsError) {
-        console.error('Error fetching analytics payouts:', payoutsError)
-    }
+        // Helper to extract first item if array (Supabase relationship safeguard)
+        const getFirst = (val: any) => Array.isArray(val) ? val[0] : val;
 
-    const totalPayouts = payouts?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0
+        // 3. Aggregate statistics and prepare transaction list
+        const stats = (bookings || []).reduce((acc: any, booking: any) => {
+            const slots = getFirst(booking.slots)
+            const studio = getFirst(slots?.studios)
+            const client = getFirst(booking.client)
+            const instructor = getFirst(booking.instructor)
 
-    // Helper to extract first item if array (Supabase relationship safeguard)
-    const getFirst = (val: any) => Array.isArray(val) ? val[0] : val;
+            const sessionDate = slots?.date || (booking.created_at ? booking.created_at.split('T')[0] : new Date().toISOString().split('T')[0])
 
-    // 3. Aggregate statistics and prepare transaction list
-    const stats = (bookings || []).reduce((acc: any, booking: any) => {
-        // FIXED: Safely extract nested relation data to avoid undefined crashes
-        const slots = getFirst(booking.slots)
-        const studio = getFirst(slots?.studios)
-        const client = getFirst(booking.client)
-        const instructor = getFirst(booking.instructor)
-
-        // FIXED: Safe fallback for session date
-        const sessionDate = slots?.date || (booking.created_at ? booking.created_at.split('T')[0] : new Date().toISOString().split('T')[0])
-
-        // BUSINESS LOGIC FIX: Only calculate revenue if booking is actually confirmed/completed/approved
-        const isConfirmed = ['approved', 'completed', 'paid', 'cancelled_charged'].includes(booking.status)
-
-        if (isConfirmed) {
-            // FIXED: Safely cast all JSONB and DB values to Numbers
             const breakdown = booking.price_breakdown || {}
-
-            // Total Revenue should be the SUM of the shares to be mathematically consistent
-            // especially if discounts/credits were applied.
             const platformFee = Number(breakdown.service_fee || 0)
             const instructorFee = Number(breakdown.instructor_fee || 0)
             const studioFee = Number(breakdown.studio_fee || 0)
-
-            // If breakdown is missing/empty, we should attempt to derive from total_price
-            // but the goal is consistency.
             let total = platformFee + instructorFee + studioFee
 
-            // Fallback if breakdown is completely empty
             if (total === 0) {
                 total = Number(booking.total_price || 0)
-                // Default split logic if no breakdown exists
-                // 20% platform, 50% instructor, 30% studio
                 const fallbackPlatform = total * 0.2
                 const fallbackInstructor = total * 0.5
                 const fallbackStudio = total * 0.3
-
                 acc.totalRevenue += total
                 acc.totalPlatformFees += fallbackPlatform
                 acc.totalStudioFees += fallbackStudio
                 acc.totalInstructorFees += fallbackInstructor
+
+                if (!acc.daily[sessionDate]) {
+                    acc.daily[sessionDate] = { date: sessionDate, revenue: 0, platformFees: 0, bookings: 0 }
+                }
+                acc.daily[sessionDate].revenue += total
+                acc.daily[sessionDate].platformFees += fallbackPlatform
+                acc.daily[sessionDate].bookings += 1
             } else {
                 acc.totalRevenue += total
                 acc.totalPlatformFees += platformFee
                 acc.totalStudioFees += studioFee
                 acc.totalInstructorFees += instructorFee
+
+                if (!acc.daily[sessionDate]) {
+                    acc.daily[sessionDate] = { date: sessionDate, revenue: 0, platformFees: 0, bookings: 0 }
+                }
+                acc.daily[sessionDate].revenue += total
+                acc.daily[sessionDate].platformFees += platformFee
+                acc.daily[sessionDate].bookings += 1
             }
 
-            if (!acc.daily[sessionDate]) {
-                acc.daily[sessionDate] = { date: sessionDate, revenue: 0, platformFees: 0, bookings: 0 }
-            }
-            acc.daily[sessionDate].revenue += total
-            acc.daily[sessionDate].platformFees += (total === 0 ? (Number(booking.total_price || 0) * 0.2) : platformFee)
-            acc.daily[sessionDate].bookings += 1
+            acc.bookingCount += 1
+
+            acc.transactions.push({
+                id: booking.id,
+                date: slots ? `${slots.date} ${slots.start_time}` : booking.created_at,
+                type: 'Booking',
+                status: booking.status,
+                client: client?.full_name || '-',
+                studio: studio?.name || '-',
+                instructor: instructor?.full_name || '-',
+                total_amount: total,
+                platform_fee: (total === 0 ? (Number(booking.total_price || 0) * 0.2) : platformFee),
+                studio_fee: (total === 0 ? (Number(booking.total_price || 0) * 0.3) : studioFee),
+                instructor_fee: (total === 0 ? (Number(booking.total_price || 0) * 0.5) : instructorFee)
+            })
+
+            return acc
+        }, {
+            totalRevenue: 0,
+            totalPlatformFees: 0,
+            totalStudioFees: 0,
+            totalInstructorFees: 0,
+            totalPayouts: totalPayouts,
+            bookingCount: 0,
+            daily: {},
+            transactions: []
+        })
+
+        // 4. Add payouts to transactions
+        payouts?.forEach((p: any) => {
+            stats.transactions.push({
+                id: 'payout',
+                date: p.created_at,
+                type: 'Payout',
+                client: '-',
+                studio: p.studio_id ? 'Studio Payout' : '-',
+                instructor: p.instructor_id ? 'Instructor Payout' : '-',
+                total_amount: -Number(p.amount),
+                platform_fee: 0,
+                studio_fee: 0,
+                instructor_fee: 0
+            })
+        })
+
+        // 5. Sort transactions by date descending
+        stats.transactions.sort((a: any, b: any) => {
+            const dateA = new Date(a.date).getTime()
+            const dateB = new Date(b.date).getTime()
+            return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA)
+        })
+
+        return {
+            ...stats,
+            dailyData: Object.values(stats.daily)
         }
-
-        // Always count total bookings requested
-        acc.bookingCount += 1
-
-        // Transaction list for CSV
-        const breakdown = booking.price_breakdown || {}
-        const platformFee = Number(breakdown.service_fee || 0)
-        const instructorFee = Number(breakdown.instructor_fee || 0)
-        const studioFee = Number(breakdown.studio_fee || 0)
-        const calcTotal = platformFee + instructorFee + studioFee
-
-        acc.transactions.push({
-            id: booking.id,
-            date: slots ? `${slots.date} ${slots.start_time}` : booking.created_at,
-            type: 'Booking',
-            status: booking.status,
-            client: client?.full_name || '-',
-            studio: studio?.name || '-',
-            instructor: instructor?.full_name || '-',
-            total_amount: calcTotal || Number(booking.total_price || 0),
-            platform_fee: platformFee || (Number(booking.total_price || 0) * 0.2),
-            studio_fee: studioFee || (Number(booking.total_price || 0) * 0.3),
-            instructor_fee: instructorFee || (Number(booking.total_price || 0) * 0.5)
-        })
-
-        return acc
-    }, {
-        totalRevenue: 0,
-        totalPlatformFees: 0,
-        totalStudioFees: 0,
-        totalInstructorFees: 0,
-        totalPayouts: totalPayouts,
-        bookingCount: 0,
-        daily: {},
-        transactions: []
-    })
-
-    // Add payouts to transactions for CSV
-    payouts?.forEach(p => {
-        stats.transactions.push({
-            id: 'payout',
-            date: p.created_at,
-            type: 'Payout',
-            client: '-',
-            studio: p.studio_id ? 'Studio Payout' : '-',
-            instructor: p.instructor_id ? 'Instructor Payout' : '-',
-            total_amount: -Number(p.amount),
-            platform_fee: 0,
-            studio_fee: 0,
-            instructor_fee: 0
-        })
-    })
-
-    // Sort transactions by date descending
-    stats.transactions.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
-
-    return {
-        ...stats,
-        dailyData: Object.values(stats.daily)
+    } catch (err: any) {
+        console.error('UNHANDLED ANALYTICS ERROR:', err)
+        return { error: `Internal Analytics Error: ${err.message}` }
     }
 }
 

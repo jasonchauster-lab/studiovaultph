@@ -50,6 +50,97 @@ export default async function AdminDashboard({
 
     // ── Run ALL independent queries in parallel ──────────────────────────
     const adminDb = createAdminClient()
+    let results: any[] = []
+    try {
+        results = await Promise.all([
+            // 1. Certification verification queue
+            supabase.from('certifications')
+                .select('*, profiles(full_name, contact_number, tin, gov_id_url, gov_id_expiry, bir_url)')
+                .eq('verified', false)
+                .order('created_at', { ascending: false }),
+
+            // 2. Studio verification queue
+            supabase.from('studios')
+                .select('*, profiles(full_name)')
+                .eq('verified', false)
+                .order('created_at', { ascending: false }),
+
+            // 3. Studio payout setup queue
+            supabase.from('studios')
+                .select('id, name, mayors_permit_url, secretary_certificate_url, mayors_permit_expiry, secretary_certificate_expiry, bir_certificate_url, bir_certificate_expiry, insurance_url, insurance_expiry, created_at, profiles(full_name)')
+                .eq('payout_approval_status', 'pending')
+                .order('created_at', { ascending: false }),
+
+            // 4. Pending booking requests
+            supabase.from('bookings')
+                .select('*, client:profiles!client_id(full_name), instructor:profiles!instructor_id(full_name), slots(date, start_time, end_time, studios(name, location, address))')
+                .eq('status', 'pending')
+                .order('created_at', { ascending: false }),
+
+            // 5. Instructor payout requests
+            supabase.from('payout_requests')
+                .select('*, instructor:profiles!instructor_id(id, full_name, email)')
+                .eq('status', 'pending')
+                .not('instructor_id', 'is', null)
+                .order('created_at', { ascending: false }),
+
+            // 6. Studio payout requests
+            supabase.from('payout_requests')
+                .select('*, studios(name, profiles(full_name))')
+                .eq('status', 'pending')
+                .not('studio_id', 'is', null)
+                .order('created_at', { ascending: false }),
+
+            // 7. Customer payout requests
+            supabase.from('payout_requests')
+                .select('*, profile:profiles!user_id(id, full_name, role, email)')
+                .eq('status', 'pending')
+                .not('user_id', 'is', null)
+                .is('instructor_id', null)
+                .is('studio_id', null)
+                .order('created_at', { ascending: false }),
+
+            // 8. Pending wallet top-ups
+            supabase.from('wallet_top_ups')
+                .select('*, profiles:profiles!user_id(full_name, email, role)')
+                .eq('status', 'pending')
+                .eq('type', 'top_up')
+                .order('created_at', { ascending: false }),
+
+            // 9. Suspended studios
+            supabase.from('profiles')
+                .select('id, full_name, email, is_suspended, studios(id, name)')
+                .eq('is_suspended', true),
+
+            // 10. Analytics
+            getAdminAnalytics(startDate, endDate),
+
+            // 11. Negative balance instructors
+            supabase.from('profiles')
+                .select('id, full_name, email, available_balance')
+                .eq('role', 'instructor')
+                .lt('available_balance', 0)
+                .order('available_balance', { ascending: true }),
+
+            // 12. Admin activity logs
+            supabase.from('admin_activity_logs')
+                .select('id, action_type, entity_type, entity_id, details, created_at, admin:profiles!admin_id(full_name, email)')
+                .order('created_at', { ascending: false })
+                .limit(500),
+
+            // 13. All users
+            adminDb.from('profiles')
+                .select('id, full_name, email, role, created_at, available_balance, is_suspended, contact_number, waiver_url, waiver_signed_at')
+                .order('created_at', { ascending: false }),
+        ])
+    } catch (err: any) {
+        console.error('CRITICAL DASHBOARD FETCH ERROR:', err)
+        return <div className="p-8 text-red-600 font-bold bg-white m-8 rounded-xl border border-red-200">
+            <h1 className="text-xl mb-4">Dashboard Loading Failed (Fetch Stage)</h1>
+            <p className="text-sm font-mono whitespace-pre-wrap">{err.message}</p>
+        </div>
+    }
+
     const [
         pendingCertsResult,
         pendingStudiosResult,
@@ -64,87 +155,7 @@ export default async function AdminDashboard({
         negativeBalanceResult,
         activityLogsResult,
         allUsersResult,
-    ] = await Promise.all([
-        // 1. Certification verification queue
-        supabase.from('certifications')
-            .select('*, profiles(full_name, contact_number, tin, gov_id_url, gov_id_expiry, bir_url)')
-            .eq('verified', false)
-            .order('created_at', { ascending: false }),
-
-        // 2. Studio verification queue
-        supabase.from('studios')
-            .select('*, profiles(full_name)')
-            .eq('verified', false)
-            .order('created_at', { ascending: false }),
-
-        // 3. Studio payout setup queue
-        supabase.from('studios')
-            .select('id, name, mayors_permit_url, secretary_certificate_url, mayors_permit_expiry, secretary_certificate_expiry, bir_certificate_url, bir_certificate_expiry, insurance_url, insurance_expiry, created_at, profiles(full_name)')
-            .eq('payout_approval_status', 'pending')
-            .order('created_at', { ascending: false }),
-
-        // 4. Pending booking requests
-        supabase.from('bookings')
-            .select('*, client:profiles!client_id(full_name), instructor:profiles!instructor_id(full_name), slots(date, start_time, end_time, studios(name, location, address))')
-            .eq('status', 'pending')
-            .order('created_at', { ascending: false }),
-
-        // 5. Instructor payout requests — join instead of 2-query pattern
-        supabase.from('payout_requests')
-            .select('*, instructor:profiles!instructor_id(id, full_name, email)')
-            .eq('status', 'pending')
-            .not('instructor_id', 'is', null)
-            .order('created_at', { ascending: false }),
-
-        // 6. Studio payout requests
-        supabase.from('payout_requests')
-            .select('*, studios(name, profiles(full_name))')
-            .eq('status', 'pending')
-            .not('studio_id', 'is', null)
-            .order('created_at', { ascending: false }),
-
-        // 7. Customer payout requests — join instead of 2-query pattern
-        supabase.from('payout_requests')
-            .select('*, profile:profiles!user_id(id, full_name, role, email)')
-            .eq('status', 'pending')
-            .not('user_id', 'is', null)
-            .is('instructor_id', null)
-            .is('studio_id', null)
-            .order('created_at', { ascending: false }),
-
-        // 8. Pending wallet top-ups
-        supabase.from('wallet_top_ups')
-            .select('*, profiles:profiles!user_id(full_name, email, role)')
-            .eq('status', 'pending')
-            .eq('type', 'top_up')
-            .order('created_at', { ascending: false }),
-
-        // 9. Suspended studios
-        supabase.from('profiles')
-            .select('id, full_name, email, is_suspended, studios(id, name)')
-            .eq('is_suspended', true),
-
-        // 10. Analytics (has its own internal supabase client)
-        getAdminAnalytics(startDate, endDate),
-
-        // 11. Negative balance instructors
-        supabase.from('profiles')
-            .select('id, full_name, email, available_balance')
-            .eq('role', 'instructor')
-            .lt('available_balance', 0)
-            .order('available_balance', { ascending: true }),
-
-        // 12. Admin activity logs
-        supabase.from('admin_activity_logs')
-            .select('id, action_type, entity_type, entity_id, details, created_at, admin:profiles!admin_id(full_name, email)')
-            .order('created_at', { ascending: false })
-            .limit(500),
-
-        // 13. All users — service-role client to bypass RLS
-        adminDb.from('profiles')
-            .select('id, full_name, email, role, created_at, available_balance, is_suspended, contact_number, waiver_url, waiver_signed_at')
-            .order('created_at', { ascending: false }),
-    ])
+    ] = results
 
     // ── Destructure results ──────────────────────────────────────────────
     const pendingCerts = pendingCertsResult.data ?? []
