@@ -3,11 +3,17 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 export async function createClient() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!url) throw new Error('MISSING_ENV: NEXT_PUBLIC_SUPABASE_URL is not defined.')
+    if (!key) throw new Error('MISSING_ENV: NEXT_PUBLIC_SUPABASE_ANON_KEY is not defined.')
+
     const cookieStore = await cookies()
 
     return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        url,
+        key,
         {
             cookies: {
                 getAll() {
@@ -31,8 +37,11 @@ export async function createClient() {
 
 /** Service-role client — bypasses RLS. Use ONLY in trusted server-side admin code. */
 export function createAdminClient() {
-    return createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!url) throw new Error('MISSING_ENV: NEXT_PUBLIC_SUPABASE_URL is not defined.')
+    if (!key) throw new Error('MISSING_ENV: SUPABASE_SERVICE_ROLE_KEY is not defined. Please add this to your Environment Variables.')
+
+    return createSupabaseClient(url, key)
 }
