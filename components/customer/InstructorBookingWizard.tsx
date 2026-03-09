@@ -7,9 +7,36 @@ import { requestBooking } from '@/app/(dashboard)/customer/actions'
 import { getManilaTodayStr, toManilaDate, formatTo12Hour, normalizeTimeTo24h } from '@/lib/timezone'
 import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info, Calendar, ChevronDown } from 'lucide-react'
 import clsx from 'clsx'
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays, isPast, eachDayOfInterval } from 'date-fns'
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays, isPast, eachDayOfInterval, addHours, parse, isAfter } from 'date-fns'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+/**
+ * Splits a list of availability slots into 1-hour blocks.
+ */
+function splitIntoHourlySlots(availability: any[]) {
+    const hourlySlots: any[] = [];
+    availability.forEach(slot => {
+        const start = parse(slot.start_time, 'HH:mm:ss', new Date());
+        const end = parse(slot.end_time, 'HH:mm:ss', new Date());
+
+        let current = start;
+        while (isBefore(current, end)) {
+            const next = addHours(current, 1);
+            if (isAfter(next, end)) break;
+
+            hourlySlots.push({
+                ...slot,
+                start_time: format(current, 'HH:mm:ss'),
+                end_time: format(next, 'HH:mm:ss'),
+                // Keep the original ID as a reference but make the split slot ID unique
+                id: `${slot.id}-${format(current, 'HHmm')}`
+            });
+            current = next;
+        }
+    });
+    return hourlySlots;
+}
 
 export default function InstructorBookingWizard({
     instructorId,
@@ -41,6 +68,11 @@ export default function InstructorBookingWizard({
     const router = useRouter()
     const searchParams = useSearchParams()
     const filterLocation = searchParams.get('location')
+
+    // Split availability into hourly slots
+    const processedAvailability = React.useMemo(() => {
+        return splitIntoHourlySlots(availability || []);
+    }, [availability]);
 
     // Helper: Case-insensitive map to link DB keys to UI labels
     const EQUIPMENT_MAP: Record<string, string> = {
@@ -142,7 +174,7 @@ export default function InstructorBookingWizard({
             const nowManilaPill = nowMinus30Shift.getUTCHours().toString().padStart(2, '0') + ':' +
                 nowMinus30Shift.getUTCMinutes().toString().padStart(2, '0');
 
-            return availability.some(a => {
+            return processedAvailability.some(a => {
                 const dateMatch = a.date ? a.date === d.date : a.day_of_week === d.dayIndex;
                 const aLoc = a.location_area?.trim().toLowerCase();
                 const fLoc = filterLocation?.trim().toLowerCase();
@@ -383,7 +415,7 @@ export default function InstructorBookingWizard({
                                 className="appearance-none bg-white/40 border border-white/60 text-charcoal text-[11px] font-bold uppercase tracking-widest rounded-[14px] pl-10 pr-10 py-3 outline-none focus:ring-1 focus:ring-sage focus:border-transparent w-full sm:w-64 transition-all"
                             >
                                 <option value="">All Teaching Areas</option>
-                                {Array.from(new Set(availability.map(a => a.location_area).filter(Boolean))).sort().map(loc => (
+                                {Array.from(new Set(processedAvailability.map(a => a.location_area).filter(Boolean))).sort().map(loc => (
                                     <option key={loc as string} value={loc as string}>{loc as string}</option>
                                 ))}
                             </select>
@@ -442,7 +474,7 @@ export default function InstructorBookingWizard({
                             const isToday = activeDate === getManilaTodayStr();
                             const isPastDate = activeDate < getManilaTodayStr();
 
-                            const slots = availability.filter(a => {
+                            const slots = processedAvailability.filter(a => {
                                 const dateMatch = a.date ? a.date === activeDate : a.day_of_week === d?.dayIndex;
                                 const aLoc = a.location_area?.trim().toLowerCase();
                                 const fLoc = filterLocation?.trim().toLowerCase();
@@ -521,20 +553,56 @@ export default function InstructorBookingWizard({
                                                     <ChevronDown className={clsx("w-4 h-4 transition-transform shrink-0", isExpanded && "rotate-180")} />
                                                 </button>
 
-                                                {isExpanded && (
-                                                    <div className="absolute top-full left-0 right-0 mt-2 z-10 bg-white/95 backdrop-blur-md rounded-[18px] border border-white/60 shadow-cloud p-2 animate-in fade-in slide-in-from-top-2 space-y-1">
-                                                        {allSlots.map((s: any) => (
-                                                            <button
-                                                                key={s.id}
-                                                                onClick={() => { handleSearchCheck(s, activeDate); setExpandedSlotKey(null); }}
-                                                                className="w-full text-left px-3 py-2.5 rounded-[12px] hover:bg-sage/10 text-[9px] font-bold text-charcoal uppercase tracking-widest transition-colors flex items-center justify-between group"
-                                                            >
-                                                                <span className="truncate">{s.location_area.split(' - ')[1] || s.location_area}</span>
-                                                                <ArrowRight className="w-3.5 h-3.5 text-sage opacity-0 group-hover:opacity-100 transform -translate-x-1 group-hover:translate-x-0 transition-all" />
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                )}
+                                                {isExpanded && (() => {
+                                                    // Categorize slots by main location
+                                                    const categorized = allSlots.reduce((acc, s) => {
+                                                        const locStr = s.location_area || '';
+                                                        let main = 'Other';
+                                                        let sub = locStr;
+
+                                                        if (locStr.includes(' - ')) {
+                                                            const parts = locStr.split(' - ');
+                                                            main = parts[0].trim();
+                                                            sub = parts.slice(1).join(' - ').trim();
+                                                        } else if (locStr.includes('-')) {
+                                                            const parts = locStr.split('-');
+                                                            main = parts[0].trim();
+                                                            sub = parts.slice(1).join('-').trim();
+                                                        }
+
+                                                        // Map abbreviations to full names if needed
+                                                        const mainName = main === 'QC' ? 'Quezon City' : main;
+
+                                                        if (!acc[mainName]) acc[mainName] = [];
+                                                        acc[mainName].push({ ...s, subName: sub });
+                                                        return acc;
+                                                    }, {} as Record<string, any[]>);
+
+                                                    return (
+                                                        <div className="absolute top-full left-0 right-0 mt-2 z-10 bg-white/95 backdrop-blur-xl rounded-[24px] border border-white/60 shadow-cloud p-3 animate-in fade-in slide-in-from-top-2 space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
+                                                            {(Object.entries(categorized) as [string, any[]][]).map(([mainLoc, subs]) => (
+                                                                <div key={mainLoc} className="space-y-1.5">
+                                                                    <div className="px-3 py-1 flex items-center gap-2">
+                                                                        <div className="w-1 h-3 bg-sage/30 rounded-full" />
+                                                                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.15em]">{mainLoc}</span>
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        {subs.map((s: any) => (
+                                                                            <button
+                                                                                key={s.id}
+                                                                                onClick={() => { handleSearchCheck(s, activeDate); setExpandedSlotKey(null); }}
+                                                                                className="w-full text-left px-3 py-2.5 rounded-[14px] hover:bg-sage/10 text-[9px] font-bold text-charcoal uppercase tracking-widest transition-all flex items-center justify-between group active:scale-[0.98]"
+                                                                            >
+                                                                                <span className="truncate pl-3">{s.subName}</span>
+                                                                                <ArrowRight className="w-3.5 h-3.5 text-sage opacity-0 group-hover:opacity-100 transform -translate-x-1 group-hover:translate-x-0 transition-all shrink-0" />
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    );
+                                                })()}
                                             </div>
                                         )}
                                     </div>
@@ -789,7 +857,7 @@ export default function InstructorBookingWizard({
                                                                     <span>₱{studioRate.toLocaleString()}</span>
                                                                 </div>
                                                                 <div className="flex justify-between text-xs font-medium pt-2">
-                                                                    <span className="text-white/60 font-bold uppercase tracking-widest text-[9px]">Platform Curation <span className="text-white/20 italic font-normal ml-2">(20%)</span></span>
+                                                                    <span className="text-white/60 font-bold uppercase tracking-widest text-[9px]">Platform Curation</span>
                                                                     <span className="text-sage">₱{serviceFee.toLocaleString()}</span>
                                                                 </div>
                                                             </div>
