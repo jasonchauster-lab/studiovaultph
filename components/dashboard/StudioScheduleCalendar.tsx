@@ -145,40 +145,44 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-wrap justify-between items-center gap-4 bg-white p-4 rounded-xl border border-cream-200 shadow-sm">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 min-w-0">
-                    <h2 className="text-xl font-serif text-charcoal-900 hidden md:block min-w-[140px]">
-                        {format(currentDate, 'MMMM yyyy')}
-                    </h2>
-                    <div className="flex items-center gap-2">
-                        <div className="flex items-center bg-alabaster border border-cream-200 rounded-full p-1 shadow-sm">
-                            <button onClick={handlePrevWeek} className="p-2 hover:bg-sage/10 rounded-full transition-all text-charcoal/60 hover:text-sage" title="Previous Week">
-                                <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button onClick={handleToday} className="px-4 py-1.5 text-xs font-bold text-charcoal/80 hover:text-charcoal uppercase tracking-widest transition-all" title="Go to Current week">
-                                Today
-                            </button>
-                            <button onClick={handleNextWeek} className="p-2 hover:bg-sage/10 rounded-full transition-all text-charcoal/60 hover:text-sage" title="Next Week">
-                                <ChevronRight className="w-5 h-5" />
-                            </button>
-                        </div>
-                        <div className="relative group">
-                            <input
-                                type="date"
-                                value={format(currentDate, 'yyyy-MM-dd')}
-                                onChange={(e) => {
-                                    if (e.target.value) {
-                                        router.push(`?date=${e.target.value}`)
-                                    }
-                                }}
-                                className="px-4 py-2 bg-white border border-cream-200 rounded-full text-xs font-bold text-charcoal/70 outline-none focus:ring-2 focus:ring-sage/30 cursor-pointer shadow-sm hover:border-sage/50 transition-all uppercase tracking-tighter"
-                                title="Select any specific date"
-                            />
+            <div className="flex flex-col gap-3 bg-white p-4 rounded-xl border border-cream-200 shadow-sm">
+                {/* Row 1: Title + Nav controls */}
+                <div className="flex items-center justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 min-w-0">
+                        <h2 className="text-xl font-serif text-charcoal-900 hidden md:block min-w-[140px]">
+                            {format(currentDate, 'MMMM yyyy')}
+                        </h2>
+                        <div className="flex items-center gap-2">
+                            <div className="flex items-center bg-alabaster border border-cream-200 rounded-full p-1 shadow-sm">
+                                <button onClick={handlePrevWeek} className="p-2 hover:bg-sage/10 rounded-full transition-all text-charcoal/60 hover:text-sage" title="Previous Week">
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+                                <button onClick={handleToday} className="px-4 py-1.5 text-xs font-bold text-charcoal/80 hover:text-charcoal uppercase tracking-widest transition-all" title="Go to Current week">
+                                    Today
+                                </button>
+                                <button onClick={handleNextWeek} className="p-2 hover:bg-sage/10 rounded-full transition-all text-charcoal/60 hover:text-sage" title="Next Week">
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="relative group">
+                                <input
+                                    type="date"
+                                    value={format(currentDate, 'yyyy-MM-dd')}
+                                    onChange={(e) => {
+                                        if (e.target.value) {
+                                            router.push(`?date=${e.target.value}`)
+                                        }
+                                    }}
+                                    className="px-4 py-2 bg-white border border-cream-200 rounded-full text-xs font-bold text-charcoal/70 outline-none focus:ring-2 focus:ring-sage/30 cursor-pointer shadow-sm hover:border-sage/50 transition-all uppercase tracking-tighter"
+                                    title="Select any specific date"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex gap-3 shrink-0">
+                {/* Row 2: Action buttons */}
+                <div className="flex gap-3">
                     <button
                         onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
                         className="btn-rose-gold px-6 py-2.5 text-xs tracking-[0.1em] flex items-center gap-2"
@@ -194,6 +198,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                     </button>
                 </div>
             </div>
+
 
             {/* Calendar Grid */}
             <div className="bg-white rounded-xl border border-cream-200 shadow-sm overflow-hidden">
