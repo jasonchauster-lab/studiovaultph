@@ -123,7 +123,7 @@ body::after {
   }
 
   .status-pill-frosted {
-    @apply px-3 py-1 text-[8px] font-black uppercase rounded-full tracking-[0.2em] shadow-[inset_0_1px_1px_rgba(255, 255, 255, 0.6)] backdrop-blur-md border border-white/40;
+    @apply px-3 py-1 text-[8px] font-black uppercase rounded-full tracking-[0.2em] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)] backdrop-blur-md border border-white/40;
   }
 
   .sticky-header-antigravity {
