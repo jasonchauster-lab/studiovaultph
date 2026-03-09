@@ -524,8 +524,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                 </div>
             </div>
 
-            {/* Add Modal */}
-            {isAddModalOpen && (
+            {/* Single Slot Add Modal */}
+            {isAddModalOpen && addMode === 'single' && (
                 <div
                     className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-charcoal/40 backdrop-blur-xl animate-in fade-in duration-1000"
                     onClick={() => setIsAddModalOpen(false)}
@@ -537,10 +537,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                         <div className="flex justify-between items-center mb-12">
                             <div>
                                 <h3 className="text-3xl font-serif text-charcoal tracking-tighter">
-                                    {addMode === 'bulk' ? 'Recurring Schedule' : 'Add Time Slot'}
+                                    Add Time Slot
                                 </h3>
                                 <p className="text-[10px] text-charcoal/20 font-black uppercase tracking-[0.4em] mt-2">
-                                    {addMode === 'bulk' ? 'SET UP YOUR WEEKLY AVAILABILITY' : 'DEFINE A SINGLE SESSION TIME AND LOCATION'}
+                                    DEFINE A SINGLE SESSION TIME AND LOCATION
                                 </p>
                             </div>
                             <button onClick={() => setIsAddModalOpen(false)} className="p-4 bg-white/40 hover:bg-white rounded-[20px] text-charcoal/20 hover:text-charcoal transition-all border border-white/60 shadow-sm">
@@ -548,109 +548,129 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </button>
                         </div>
 
-                        {addMode === 'bulk' ? (
-                            <InstructorScheduleGenerator initialAvailability={[]} />
-                        ) : (
-                            <form onSubmit={handleCreateSingle} className="space-y-8">
-                                <div className="glass-card p-8 space-y-6">
+                        <form onSubmit={handleCreateSingle} className="space-y-8">
+                            <div className="glass-card p-8 space-y-6">
+                                <div>
+                                    <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Calendar Date</label>
+                                    <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Calendar Date</label>
-                                        <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
+                                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Start Time</label>
+                                        <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Start Time</label>
-                                            <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">End Time</label>
-                                            <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
-                                        </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">End Time</label>
+                                        <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="space-y-6">
-                                    <h4 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Geographic Deployment</h4>
-                                    <div className="space-y-4 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-                                        {Object.entries(GROUPED_AREAS).map(([city, cityLocations]) => {
-                                            const allSelected = cityLocations.every(loc => locations.includes(loc));
-                                            return (
-                                                <div key={city} className="glass-card p-8 space-y-6">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em]">{city}</span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => toggleCityGroup(cityLocations)}
-                                                            className="text-[10px] font-black text-gold hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-gold/20 underline-offset-8"
-                                                        >
-                                                            {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
-                                                        </button>
-                                                    </div>
-                                                    <div className="flex flex-wrap gap-3">
-                                                        {cityLocations.map(area => {
-                                                            const isSelected = locations.includes(area);
-                                                            const displayName = area.split(' - ')[1] || area;
-                                                            return (
-                                                                <button
-                                                                    key={area}
-                                                                    type="button"
-                                                                    onClick={() => toggleLocation(area)}
-                                                                    className={clsx(
-                                                                        "px-5 py-2.5 rounded-[20px] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 border",
-                                                                        isSelected
-                                                                            ? "bg-gold text-white border-gold shadow-cloud"
-                                                                            : "bg-white/40 text-charcoal/20 border-white/60 hover:border-gold/30 hover:text-charcoal shadow-sm"
-                                                                    )}
-                                                                >
-                                                                    {displayName}
-                                                                </button>
-                                                            )
-                                                        })}
-                                                    </div>
+                            <div className="space-y-6">
+                                <h4 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Geographic Deployment</h4>
+                                <div className="space-y-4 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {Object.entries(GROUPED_AREAS).map(([city, cityLocations]) => {
+                                        const allSelected = cityLocations.every(loc => locations.includes(loc));
+                                        return (
+                                            <div key={city} className="glass-card p-8 space-y-6">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em]">{city}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => toggleCityGroup(cityLocations)}
+                                                        className="text-[10px] font-black text-gold hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-gold/20 underline-offset-8"
+                                                    >
+                                                        {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
+                                                    </button>
                                                 </div>
-                                            )
-                                        })}
-                                    </div>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {cityLocations.map(area => {
+                                                        const isSelected = locations.includes(area);
+                                                        const displayName = area.split(' - ')[1] || area;
+                                                        return (
+                                                            <button
+                                                                key={area}
+                                                                type="button"
+                                                                onClick={() => toggleLocation(area)}
+                                                                className={clsx(
+                                                                    "px-5 py-2.5 rounded-[20px] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 border",
+                                                                    isSelected
+                                                                        ? "bg-gold text-white border-gold shadow-cloud"
+                                                                        : "bg-white/40 text-charcoal/20 border-white/60 hover:border-gold/30 hover:text-charcoal shadow-sm"
+                                                                )}
+                                                            >
+                                                                {displayName}
+                                                            </button>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
                                 </div>
+                            </div>
 
-                                <div className="space-y-4">
-                                    <h4 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Equipment</h4>
-                                    <div className="flex flex-wrap gap-3 p-6 bg-alabaster/50 rounded-[2rem] border border-cream-100">
-                                        {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
-                                            const isSelected = equipment.includes(eq);
-                                            return (
-                                                <button
-                                                    key={eq}
-                                                    type="button"
-                                                    onClick={() => toggleEquipment(eq)}
-                                                    className={clsx(
-                                                        "px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 border",
-                                                        isSelected
-                                                            ? "bg-sage text-white border-sage shadow-lg shadow-sage/20"
-                                                            : "bg-white text-charcoal/40 border-cream-100 hover:border-sage/30 hover:text-charcoal"
-                                                    )}
-                                                >
-                                                    {eq}
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
+                            <div className="space-y-4">
+                                <h4 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Equipment</h4>
+                                <div className="flex flex-wrap gap-3 p-6 bg-alabaster/50 rounded-[2rem] border border-cream-100">
+                                    {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
+                                        const isSelected = equipment.includes(eq);
+                                        return (
+                                            <button
+                                                key={eq}
+                                                type="button"
+                                                onClick={() => toggleEquipment(eq)}
+                                                className={clsx(
+                                                    "px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 border",
+                                                    isSelected
+                                                        ? "bg-sage text-white border-sage shadow-lg shadow-sage/20"
+                                                        : "bg-white text-charcoal/40 border-cream-100 hover:border-sage/30 hover:text-charcoal"
+                                                )}
+                                            >
+                                                {eq}
+                                            </button>
+                                        )
+                                    })}
                                 </div>
+                            </div>
 
-                                <div className="flex gap-6 pt-10">
-                                    <button
-                                        type="submit"
-                                        disabled={isSubmitting}
-                                        className="flex-1 bg-charcoal text-white py-5 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50"
-                                    >
-                                        {isSubmitting ? 'PROCESSING...' : 'CONFIRM SLOT'}
-                                    </button>
-                                    <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-12 py-5 rounded-[20px] text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] hover:text-charcoal hover:bg-white/40 transition-all border border-transparent hover:border-white/60">
-                                        CANCEL
-                                    </button>
-                                </div>
-                            </form>
-                        )}
+                            <div className="flex gap-6 pt-10">
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="flex-1 bg-charcoal text-white py-5 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50"
+                                >
+                                    {isSubmitting ? 'PROCESSING...' : 'CONFIRM SLOT'}
+                                </button>
+                                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-12 py-5 rounded-[20px] text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] hover:text-charcoal hover:bg-white/40 transition-all border border-transparent hover:border-white/60">
+                                    CANCEL
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Bulk Generate Modal - rendered separately to avoid backdrop-filter stacking context issues */}
+            {isAddModalOpen && addMode === 'bulk' && (
+                <div
+                    className="fixed inset-0 z-[200] flex items-start justify-center p-6 bg-charcoal/30 overflow-y-auto"
+                    onClick={() => setIsAddModalOpen(false)}
+                >
+                    <div
+                        className="bg-white/95 rounded-[2.5rem] p-10 max-w-3xl w-full shadow-2xl border border-white/80 animate-in zoom-in-95 duration-500 my-8"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex justify-between items-center mb-10">
+                            <div>
+                                <h3 className="text-3xl font-serif text-charcoal tracking-tighter">Recurring Schedule</h3>
+                                <p className="text-[10px] text-charcoal/30 font-black uppercase tracking-[0.4em] mt-2">SET UP YOUR WEEKLY AVAILABILITY</p>
+                            </div>
+                            <button onClick={() => setIsAddModalOpen(false)} className="p-4 bg-white hover:bg-cream-50 rounded-[20px] text-charcoal/30 hover:text-charcoal transition-all border border-cream-200 shadow-sm">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <InstructorScheduleGenerator initialAvailability={[]} />
                     </div>
                 </div>
             )}

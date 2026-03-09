@@ -123,7 +123,8 @@ body::after {
   }
 
   .status-pill-frosted {
-    @apply px-3 py-1 text-[8px] font-black uppercase rounded-full tracking-[0.2em] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)] backdrop-blur-md border border-white/40;
+    @apply px-3 py-1 text-[8px] font-black uppercase rounded-full tracking-[0.2em] backdrop-blur-md border border-white/40;
+    box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.6);
   }
 
   .sticky-header-antigravity {
@@ -131,13 +132,13 @@ body::after {
   }
 
   .glass-navbar {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid #F1F1F1;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.04), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
     z-index: 50;
-    transition: all 0.5s ease-in-out;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
   }
 
   .btn-antigravity {

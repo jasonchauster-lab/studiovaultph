@@ -63,7 +63,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                 <th className="px-6 py-4 text-right">Amount</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-cream-100">
+                        <tbody>
                             {currentData.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-8 text-center text-gray-600">
@@ -80,7 +80,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                     const isTopUp = tx.type === 'Wallet Top-Up'
 
                                     return (
-                                        <tr key={idx} className="hover:bg-cream-50/50">
+                                        <tr key={idx} className="transition-colors hover:bg-[rgba(180,195,178,0.04)] rounded-lg">
                                             <td className="px-6 py-4">
                                                 {txDate.toLocaleDateString()}
                                                 <span className="block text-[10px] text-charcoal-400">
@@ -148,7 +148,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                 <th className="px-6 py-4 text-right">Amount</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-cream-100">
+                        <tbody>
                             {payoutTransactions.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-8 text-center text-gray-600">
@@ -157,7 +157,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                 </tr>
                             ) : (
                                 payoutTransactions.map((tx, idx) => (
-                                    <tr key={idx} className="hover:bg-cream-50/50">
+                                    <tr key={idx} className="transition-colors hover:bg-[rgba(180,195,178,0.04)]">
                                         <td className="px-6 py-4">
                                             {new Date(tx.date).toLocaleDateString()}
                                         </td>
@@ -167,10 +167,10 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${tx.status === 'paid' ? 'bg-green-100 text-green-700' :
-                                                tx.status === 'pending' ? 'bg-orange-100 text-orange-700' :
-                                                    tx.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                        'bg-gray-100 text-gray-700'
+                                            <span className={`status-pill-frosted inline-flex items-center gap-1.5 ${tx.status === 'paid' ? 'bg-sage/10 text-sage' :
+                                                    tx.status === 'pending' ? 'bg-gold/10 text-gold-deep' :
+                                                        tx.status === 'rejected' ? 'bg-rose-gold/10 text-rose-gold-deep' :
+                                                            'bg-gray-100 text-gray-500'
                                                 }`}>
                                                 {tx.status === 'paid' && <CheckCircle className="w-3 h-3" />}
                                                 {tx.status === 'pending' && <Clock className="w-3 h-3" />}
