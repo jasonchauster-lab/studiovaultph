@@ -86,24 +86,24 @@ export default function PartnerFeeClient({
     const Card = ({ p }: { p: PartnerProps }) => {
         const trueIdx = partners.findIndex(x => x.id === p.id && x.type === p.type)
         return (
-            <div className="glass-card p-8 group hover:border-rose-gold/30 hover:shadow-2xl hover:shadow-rose-gold/5 transition-all duration-500 relative overflow-hidden">
-                {/* Decorative element */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:bg-gold/10 transition-colors duration-500 pointer-events-none" />
+            <div className="glass-card p-10 group hover:border-white transition-all duration-700 relative overflow-hidden">
+                {/* Decorative bloom */}
+                <div className="absolute top-0 right-0 w-40 h-40 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-gold/10 transition-colors duration-700 pointer-events-none" />
 
                 {/* Top: Name + badge */}
                 <div className="flex items-start justify-between gap-4 mb-6 relative z-10">
                     <div className="min-w-0">
-                        <p className="text-xl font-serif text-charcoal truncate group-hover:translate-x-1 transition-transform duration-500">
-                            {p.name || <span className="text-charcoal/30 italic">Unnamed Node</span>}
+                        <p className="text-2xl font-serif text-charcoal truncate group-hover:translate-x-1 transition-transform duration-700 tracking-tighter">
+                            {p.name || <span className="text-charcoal/20 italic">Unnamed Node</span>}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
-                            <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest">
+                        <div className="flex items-center gap-3 mt-2">
+                            <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">
                                 {p.type === 'studio' ? 'Spatial Node' : 'Ethereal Entity'}
                             </p>
                             {p.location && (
                                 <>
-                                    <span className="w-1 h-1 bg-charcoal/20 rounded-full" />
-                                    <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest truncate">{p.location}</p>
+                                    <span className="w-1 h-1 bg-charcoal/10 rounded-full" />
+                                    <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] truncate">{p.location}</p>
                                 </>
                             )}
                         </div>
@@ -128,14 +128,14 @@ export default function PartnerFeeClient({
                         {(p.email || p.phone) && (
                             <div className="space-y-1.5">
                                 {p.email && (
-                                    <span className="flex items-center gap-2 text-[10px] font-black text-charcoal/40 uppercase tracking-widest hover:text-charcoal transition-colors">
-                                        <Mail className="w-3.5 h-3.5 opacity-50" />
+                                    <span className="flex items-center gap-3 text-[10px] font-black text-charcoal/30 uppercase tracking-[0.2em] hover:text-charcoal transition-colors">
+                                        <Mail className="w-4 h-4 opacity-30" />
                                         {p.email}
                                     </span>
                                 )}
                                 {p.phone && (
-                                    <span className="flex items-center gap-2 text-[10px] font-black text-charcoal/40 uppercase tracking-widest hover:text-charcoal transition-colors">
-                                        <Phone className="w-3.5 h-3.5 opacity-50" />
+                                    <span className="flex items-center gap-3 text-[10px] font-black text-charcoal/30 uppercase tracking-[0.2em] hover:text-charcoal transition-colors">
+                                        <Phone className="w-4 h-4 opacity-30" />
                                         {p.phone}
                                     </span>
                                 )}
@@ -156,9 +156,9 @@ export default function PartnerFeeClient({
                 <div className="bg-alabaster/30 p-5 rounded-2xl border border-cream-100 relative z-10">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-1">Platform Retainment</p>
+                            <p className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.3em] mb-1">Platform Retainment</p>
                             {!p.is_founding_partner && (
-                                <p className="text-[8px] font-black text-rose-gold/60 uppercase tracking-widest italic leading-none">
+                                <p className="text-[8px] font-black text-rose/60 uppercase tracking-widest italic leading-none">
                                     Spectral bypass locked
                                 </p>
                             )}
@@ -238,11 +238,11 @@ export default function PartnerFeeClient({
     }
 
     const Section = ({ title, list }: { title: string; list: PartnerProps[] }) => (
-        <div className="animate-in fade-in duration-700">
-            <div className="flex items-center gap-4 mb-8">
-                <h3 className="text-2xl font-serif text-charcoal tracking-tight">{title}</h3>
-                <div className="h-[1px] flex-1 bg-gradient-to-r from-cream-200 to-transparent" />
-                <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">{list.length} Records</span>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <div className="flex items-center gap-6 mb-12">
+                <h3 className="text-3xl font-serif text-charcoal tracking-tighter">{title}</h3>
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-charcoal/5 to-transparent" />
+                <span className="text-[10px] font-black text-charcoal/10 uppercase tracking-[0.4em]">{list.length} Records</span>
             </div>
             {list.length === 0 ? (
                 <div className="py-20 text-center glass-card border-dashed">

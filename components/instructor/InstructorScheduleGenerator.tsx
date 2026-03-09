@@ -121,23 +121,23 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
 
     return (
         <div className="space-y-10">
-            <div className="glass-card p-10 relative overflow-hidden">
-                {/* Decorative Elements */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+            <div className="glass-card p-12 relative overflow-hidden">
+                {/* Decorative Bloom */}
+                <div className="absolute top-0 right-0 w-80 h-80 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] pointer-events-none" />
 
                 <div className="relative z-10">
-                    <div className="flex items-center gap-4 mb-3">
-                        <div className="p-3 bg-charcoal/5 rounded-2xl">
-                            <Repeat className="w-6 h-6 text-charcoal/60" />
+                    <div className="flex items-center gap-6 mb-4">
+                        <div className="p-4 bg-white/40 rounded-[20px] border border-white/60 shadow-sm">
+                            <Repeat className="w-7 h-7 text-gold" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-serif text-charcoal tracking-tight">Temporal Grid Generator</h2>
-                            <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mt-0.5">Automated Recursive Availability Matrix</p>
+                            <h2 className="text-3xl font-serif text-charcoal tracking-tighter">Temporal Grid Generator</h2>
+                            <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mt-1.5">Automated Recursive Availability Matrix</p>
                         </div>
                     </div>
 
-                    <p className="text-xs text-charcoal/60 leading-relaxed mb-10 max-w-lg italic">
-                        Define high-frequency availability sequences. The system will propagate these constraints across the specified temporal boundaries.
+                    <p className="text-sm text-charcoal/40 leading-relaxed mb-12 max-w-xl italic">
+                        Define high-frequency availability sequences. The system will propagate these constraints across the specified temporal boundaries with ethereal precision.
                     </p>
 
                     {message && (
@@ -153,48 +153,48 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                     <div className="space-y-10">
                         {/* Temporal Boundaries */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="glass-card p-8 space-y-6">
-                                <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-2 px-2">Temporal Window</h3>
-                                <div className="grid grid-cols-1 gap-6">
+                            <div className="glass-card p-10 space-y-8">
+                                <h3 className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-2 px-2">Temporal Window</h3>
+                                <div className="grid grid-cols-1 gap-8">
                                     <div className="relative">
-                                        <label className="block text-[9px] font-black text-charcoal/30 uppercase tracking-widest mb-2 ml-4">Sequence Start</label>
+                                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.2em] mb-3 ml-6">Sequence Start</label>
                                         <div className="relative">
-                                            <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/20" />
+                                            <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/20" />
                                             <input
                                                 type="date"
                                                 value={startDate}
                                                 onChange={(e) => setStartDate(e.target.value)}
-                                                className="w-full pl-12 pr-6 py-4 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-[0.15em] cursor-pointer"
+                                                className="w-full pl-14 pr-8 py-5 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer"
                                             />
                                         </div>
                                     </div>
                                     <div className="relative">
-                                        <label className="block text-[9px] font-black text-charcoal/30 uppercase tracking-widest mb-2 ml-4">Sequence Termination</label>
+                                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.2em] mb-3 ml-6">Sequence Termination</label>
                                         <div className="relative">
-                                            <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/20" />
+                                            <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/20" />
                                             <input
                                                 type="date"
                                                 value={endDate}
                                                 onChange={(e) => setEndDate(e.target.value)}
-                                                className="w-full pl-12 pr-6 py-4 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-[0.15em] cursor-pointer"
+                                                className="w-full pl-14 pr-8 py-5 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer"
                                             />
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="glass-card p-8 space-y-6">
-                                <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-2 px-2">Cyclical Recurrence</h3>
-                                <div className="flex flex-wrap gap-3">
+                            <div className="glass-card p-10 space-y-8">
+                                <h3 className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-2 px-2">Cyclical Recurrence</h3>
+                                <div className="flex flex-wrap gap-4">
                                     {daysOfWeek.map(day => (
                                         <button
                                             key={day.id}
                                             onClick={() => toggleDay(day.id)}
                                             className={clsx(
-                                                "w-12 h-12 rounded-2xl text-[9px] font-black transition-all duration-300 border flex items-center justify-center tracking-widest",
+                                                "w-14 h-14 rounded-[20px] text-[10px] font-black transition-all duration-700 border flex items-center justify-center tracking-[0.2em]",
                                                 selectedDays.includes(day.id)
-                                                    ? "bg-charcoal text-white border-charcoal shadow-lg shadow-charcoal/20 active:scale-95"
-                                                    : "bg-white/60 text-charcoal/30 border-cream-100 hover:border-charcoal/30 hover:text-charcoal"
+                                                    ? "bg-charcoal text-white border-charcoal shadow-cloud active:scale-95"
+                                                    : "bg-white/40 text-charcoal/20 border-white/60 hover:border-gold/30 hover:text-charcoal"
                                             )}
                                         >
                                             {day.label}
@@ -211,14 +211,14 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="glass-card p-8 space-y-8">
                                 <div>
-                                    <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-6 px-2">Temporal Shift</h3>
-                                    <div className="grid grid-cols-2 gap-6">
+                                    <h3 className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-8 px-2">Temporal Shift</h3>
+                                    <div className="grid grid-cols-2 gap-8">
                                         <div>
-                                            <label className="block text-[9px] font-black text-charcoal/30 uppercase tracking-widest mb-2 ml-4">Evolution Start</label>
+                                            <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.2em] mb-3 ml-6">Evolution Start</label>
                                             <select
                                                 value={startTime}
                                                 onChange={(e) => setStartTime(e.target.value)}
-                                                className="w-full px-6 py-4 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-[0.15em] cursor-pointer appearance-none shadow-sm"
+                                                className="w-full px-8 py-5 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer appearance-none shadow-sm"
                                             >
                                                 {Array.from({ length: 24 }, (_, i) => i).map(hour => (
                                                     <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
@@ -228,11 +228,11 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-[9px] font-black text-charcoal/30 uppercase tracking-widest mb-2 ml-4">Evolution End</label>
+                                            <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.2em] mb-3 ml-6">Evolution End</label>
                                             <select
                                                 value={endTime}
                                                 onChange={(e) => setEndTime(e.target.value)}
-                                                className="w-full px-6 py-4 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-[0.15em] cursor-pointer appearance-none shadow-sm"
+                                                className="w-full px-8 py-5 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer appearance-none shadow-sm"
                                             >
                                                 {Array.from({ length: 24 }, (_, i) => i).map(hour => (
                                                     <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
@@ -245,8 +245,8 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                 </div>
 
                                 <div>
-                                    <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-6 px-2">Apparatus Matrix</h3>
-                                    <div className="flex flex-wrap gap-2 p-5 bg-alabaster/50 rounded-2xl border border-cream-100">
+                                    <h3 className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-8 px-2">Apparatus Matrix</h3>
+                                    <div className="flex flex-wrap gap-3 p-6 bg-white/40 rounded-[2.5rem] border border-white/60 shadow-sm">
                                         {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
                                             const isSelected = equipment.includes(eq);
                                             return (
@@ -255,10 +255,10 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                                     type="button"
                                                     onClick={() => toggleEquipment(eq)}
                                                     className={clsx(
-                                                        "px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 border",
+                                                        "px-6 py-3 rounded-[20px] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 border",
                                                         isSelected
-                                                            ? "bg-sage text-white border-sage shadow-md shadow-sage/10 active:scale-95"
-                                                            : "bg-white text-charcoal/40 border-cream-100 hover:border-sage/30 hover:text-charcoal"
+                                                            ? "bg-sage text-charcoal border-sage shadow-cloud active:scale-95"
+                                                            : "bg-white/40 text-charcoal/20 border-white/60 hover:border-sage/30 hover:text-charcoal"
                                                     )}
                                                 >
                                                     {eq}
@@ -275,13 +275,13 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                     {Object.entries(GROUPED_LOCATIONS).map(([city, cityLocations]) => {
                                         const allSelected = cityLocations.every(loc => locations.includes(loc));
                                         return (
-                                            <div key={city} className="p-5 bg-white/60 rounded-2xl border border-cream-100 space-y-4">
+                                            <div key={city} className="p-6 bg-white/40 rounded-[2rem] border border-white/60 shadow-sm space-y-6">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-[10px] font-black text-charcoal uppercase tracking-[0.15em]">{city}</span>
+                                                    <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em]">{city}</span>
                                                     <button
                                                         type="button"
                                                         onClick={() => toggleCityGroup(cityLocations)}
-                                                        className="text-[9px] font-black text-rose-gold hover:text-charcoal transition-colors uppercase tracking-widest underline decoration-rose-gold/20 underline-offset-4"
+                                                        className="text-[10px] font-black text-gold hover:text-charcoal transition-colors uppercase tracking-[0.22em] underline decoration-gold/20 underline-offset-8"
                                                     >
                                                         {allSelected ? 'DEACTIVATE' : 'MANIFEST ALL'}
                                                     </button>
@@ -296,10 +296,10 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                                                 type="button"
                                                                 onClick={() => toggleLocation(l)}
                                                                 className={clsx(
-                                                                    "px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all duration-300 border",
+                                                                    "px-4 py-2 rounded-[20px] text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-700 border",
                                                                     isSelected
-                                                                        ? "bg-rose-gold text-white border-rose-gold shadow-md shadow-rose-gold/10"
-                                                                        : "bg-white text-charcoal/40 border-cream-100 hover:border-rose-gold/30 hover:text-charcoal"
+                                                                        ? "bg-gold text-white border-gold shadow-cloud"
+                                                                        : "bg-white/40 text-charcoal/20 border-white/60 hover:border-gold/30 hover:text-charcoal"
                                                                 )}
                                                             >
                                                                 {displayName}
@@ -314,11 +314,11 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                             </div>
                         </div>
 
-                        <div className="pt-10 border-t border-cream-100">
+                        <div className="pt-12 border-t border-white/60">
                             <button
                                 onClick={handleGenerate}
                                 disabled={isSubmitting}
-                                className="w-full py-5 bg-charcoal text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-2xl shadow-charcoal/20 active:scale-[0.99] flex items-center justify-center gap-4 disabled:opacity-50"
+                                className="w-full py-6 bg-charcoal text-white rounded-[2.5rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-[0.98] flex items-center justify-center gap-6 disabled:opacity-50"
                             >
                                 {isSubmitting ? (
                                     <>

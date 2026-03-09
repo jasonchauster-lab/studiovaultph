@@ -28,8 +28,8 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
 
     return (
         <header className={clsx(
-            "glass-navbar px-4 sm:px-6 fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out",
-            isScrolled ? "h-16 shadow-md" : "h-24 sm:h-28"
+            "glass-navbar px-6 sm:px-12 fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border-b border-white/60",
+            isScrolled ? "h-20 shadow-cloud" : "h-28 sm:h-32"
         )}>
             <div className="max-w-7xl mx-auto h-full flex items-center justify-between gap-4">
                 <div className="flex items-center gap-8 h-full">
@@ -41,14 +41,14 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                                 width={120}
                                 height={120}
                                 className={clsx(
-                                    "object-contain transition-all duration-500 ease-in-out",
-                                    isScrolled ? "w-16 h-16" : "w-24 h-24"
+                                    "object-contain transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]",
+                                    isScrolled ? "w-16 h-16" : "w-28 h-28"
                                 )}
                             />
                         </div>
                         <span className={clsx(
-                            "font-serif font-bold text-charcoal tracking-tight -ml-6 whitespace-nowrap hidden lg:block transition-all duration-500 ease-in-out shrink-0",
-                            isScrolled ? "opacity-90 scale-95" : "opacity-100 scale-100"
+                            "font-serif font-black text-charcoal tracking-tighter -ml-8 whitespace-nowrap hidden lg:block transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] shrink-0 uppercase text-lg",
+                            isScrolled ? "opacity-90 scale-90 translate-x-2" : "opacity-100 scale-100"
                         )}>
                             StudioVaultPH
                         </span>

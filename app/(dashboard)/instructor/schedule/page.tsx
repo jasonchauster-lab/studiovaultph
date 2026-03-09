@@ -28,21 +28,21 @@ export default async function InstructorSchedulePage(props: {
         .order('start_time', { ascending: true })
 
     return (
-        <div className="min-h-screen bg-cream-50 p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
+        <div className="min-h-screen p-8 lg:p-12">
+            <div className="max-w-7xl mx-auto space-y-12">
                 <div>
                     <Link
                         href="/instructor"
-                        className="inline-flex items-center gap-1.5 text-sm text-charcoal-500 hover:text-charcoal-900 transition-colors mb-4"
+                        className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/20 hover:text-gold uppercase tracking-[0.3em] transition-all mb-8 group"
                     >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Dashboard
+                        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                        BACK TO DASHBOARD
                     </Link>
-                    <h1 className="text-3xl font-serif text-charcoal-900 mb-2">My Schedule</h1>
-                    <p className="text-charcoal-600">Set your weekly availability so customers can book you.</p>
+                    <h1 className="text-5xl font-serif text-charcoal tracking-tighter mb-4">My Schedule</h1>
+                    <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Set your weekly availability so customers can book you.</p>
                 </div>
 
-                <div className="bg-white overflow-hidden">
+                <div className="overflow-hidden rounded-[2.5rem] shadow-cloud border border-white/60">
                     <InstructorScheduleCalendar availability={availability || []} currentDate={currentDate} />
                 </div>
             </div>

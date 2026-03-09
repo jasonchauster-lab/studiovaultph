@@ -7,6 +7,7 @@ import { isValidPhone, isValidEmail, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
 import WaiverUpload from '@/components/customer/WaiverUpload'
 import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
+import { clsx } from 'clsx'
 
 export default function ProfileForm({ profile }: { profile: any }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -67,28 +68,30 @@ export default function ProfileForm({ profile }: { profile: any }) {
     }
 
     return (
-        <form action={handleSubmit} className="space-y-6">
+        <form action={handleSubmit} className="space-y-12">
 
             {/* Avatar Upload */}
-            {/* Profile Header: Avatar and Name */}
-            <div className="flex flex-col items-center sm:flex-row gap-8 pb-8 border-b border-cream-100">
+            <div className="flex flex-col items-center sm:flex-row gap-10 pb-12 border-b border-white/60">
                 <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                    <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md bg-cream-100 flex items-center justify-center">
+                    <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-cloud bg-white/40 flex items-center justify-center relative z-10">
                         {previewUrl ? (
                             <Image
                                 src={previewUrl}
                                 alt="Profile"
                                 width={128}
                                 height={128}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                             />
                         ) : (
-                            <User className="w-12 h-12 text-charcoal-300" />
+                            <User className="w-12 h-12 text-charcoal/10" />
                         )}
-                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">
+                        <div className="absolute inset-0 bg-charcoal/20 opacity-0 group-hover:opacity-100 transition-all duration-700 backdrop-blur-[2px] flex items-center justify-center">
                             <Camera className="w-8 h-8 text-white" />
                         </div>
                     </div>
+                    {/* Decorative Ring */}
+                    <div className="absolute inset-0 rounded-full border border-gold/20 scale-110 opacity-0 group-hover:opacity-100 transition-all duration-700 group-hover:scale-125 pointer-events-none" />
+
                     <input
                         type="file"
                         name="avatar"
@@ -99,97 +102,94 @@ export default function ProfileForm({ profile }: { profile: any }) {
                     />
                 </div>
 
-                <div className="text-center sm:text-left space-y-2">
-                    <h3 className="text-xl font-serif text-charcoal-900">Profile Picture</h3>
-                    <p className="text-sm text-charcoal-500 max-w-xs">
-                        Upload a clear photo of yourself. This helps students and studios recognize you.
+                <div className="text-center sm:text-left">
+                    <h3 className="text-2xl font-serif text-charcoal tracking-tighter mb-2">Profile Picture</h3>
+                    <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] max-w-xs leading-relaxed">
+                        Visual Identity Acquisition. This helps students and studios recognize your presence.
                     </p>
                 </div>
             </div>
 
             {/* Form Fields Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                <div className="space-y-8">
                     <div>
-                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Full Name</label>
+                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Full Identity Name</label>
                         <input
                             type="text"
                             name="fullName"
                             defaultValue={profile?.full_name || ''}
                             required
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage transition-all"
+                            className="w-full px-8 py-5 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Instagram Handle</label>
+                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Instagram Transmission</label>
                         <div className="relative">
-                            <span className="absolute left-4 top-3.5 text-charcoal-400">@</span>
+                            <span className="absolute left-8 top-1/2 -translate-y-1/2 text-gold font-black text-[10px]">@</span>
                             <input
                                 type="text"
                                 name="instagram"
                                 defaultValue={profile?.instagram_handle || ''}
-                                className="w-full pl-10 pr-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage transition-all"
-                                placeholder="username"
+                                className="w-full pl-14 pr-8 py-5 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm"
+                                placeholder="USERNAME"
                             />
                         </div>
                     </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-8">
                     <div>
-                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Contact Number</label>
+                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Communication Number</label>
                         <input
                             type="tel"
                             name="contactNumber"
                             defaultValue={profile?.contact_number || ''}
-                            placeholder="e.g. 09171234567"
+                            placeholder="09XXXXXXXXX"
                             maxLength={13}
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage transition-all"
+                            className="w-full px-8 py-5 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm"
                         />
-                        <p className="text-[11px] text-charcoal-400 mt-1">Format: 09XXXXXXXXX or +639XXXXXXXXX (11 digits)</p>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Emergency Contact</label>
+                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Emergency Node</label>
                         <input
                             type="text"
                             name="emergencyContact"
                             defaultValue={profile?.emergency_contact || ''}
-                            placeholder="Name and Phone Number"
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage transition-all"
+                            placeholder="NAME AND POWER"
+                            className="w-full px-8 py-5 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm"
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Date of Birth</label>
-                        <input
-                            type="date"
-                            name="birthday"
-                            defaultValue={profile?.date_of_birth || ''}
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage transition-all"
-                        />
-                    </div>
-                    <p className="text-xs text-charcoal-400 mt-2 italic">
-                        Highly recommended for safety during in-studio sessions.
-                    </p>
                 </div>
 
                 <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Bio</label>
+                    <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Temporal Birth / Manifestation</label>
+                    <input
+                        type="date"
+                        name="birthday"
+                        defaultValue={profile?.date_of_birth || ''}
+                        className="w-64 px-8 py-5 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm cursor-pointer"
+                    />
+                </div>
+
+                <div className="md:col-span-2">
+                    <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Manifesto / Personal Bio</label>
                     <textarea
                         name="bio"
                         defaultValue={profile?.bio || ''}
-                        rows={5}
-                        placeholder="Tell others about yourself, your fitness journey, or your teaching style..."
-                        className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage resize-none transition-all"
+                        rows={6}
+                        placeholder="Tell others about your movement journey, your teaching frequency, or your aesthetic philosophy..."
+                        className="w-full px-8 py-6 bg-white/40 border border-white/60 rounded-[2rem] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 resize-none transition-all uppercase tracking-[0.2em] leading-relaxed shadow-sm"
                     />
                 </div>
             </div>
 
             {/* Medical Conditions */}
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-2">Medical Conditions / Disabilities</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="space-y-6">
+                <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Biological Status / Constraints</label>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {['Scoliosis', 'Obesity', 'Herniated Disc', 'Post-partum', 'Chronic Back Pain', 'Hypertension', 'Diabetes', 'Asthma', 'Osteoporosis', 'Others'].map((condition) => (
-                        <label key={condition} className="flex items-center gap-2 p-3 border border-cream-200 rounded-lg hover:bg-cream-50 cursor-pointer transition-colors">
+                        <label key={condition} className="group flex items-center gap-4 p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-gold/30 cursor-pointer transition-all duration-500 shadow-sm relative overflow-hidden">
                             <input
                                 type="checkbox"
                                 name="medical_conditions"
@@ -202,34 +202,33 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                         setSelectedMedicalConditions(selectedMedicalConditions.filter((item) => item !== condition))
                                     }
                                 }}
-                                className="w-4 h-4 text-sage rounded border-cream-300 focus:ring-sage/50"
+                                className="w-5 h-5 text-gold border-white/60 bg-white/20 rounded-lg focus:ring-gold/20 focus:ring-offset-0 transition-all cursor-pointer"
                             />
-                            <span className="text-sm text-charcoal-700">{condition}</span>
+                            <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] group-hover:text-charcoal transition-colors">{condition}</span>
                         </label>
                     ))}
                 </div>
                 {selectedMedicalConditions.includes('Others') && (
-                    <div className="mt-3">
-                        <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Please Specify</label>
+                    <div className="mt-6 animate-in slide-in-from-top-4">
+                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Specific Biological Definition</label>
                         <input
                             type="text"
                             name="otherMedicalCondition"
                             defaultValue={profile?.other_medical_condition || ''}
-                            placeholder="e.g. Recent knee surgery, Pregnancy complications..."
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage transition-all"
+                            placeholder="e.g. RECENT NEURAL MESH STABILIZATION..."
+                            className="w-full px-8 py-5 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm"
                         />
                     </div>
                 )}
-                <p className="text-xs text-charcoal-500 mt-2 italic">Select any conditions you have. This helps your instructor tailor sessions to your needs.</p>
             </div>
 
             {/* Teaching Equipment (Instructors Only) */}
             {profile?.role === 'instructor' && (
-                <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Teaching Equipment</label>
-                    <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-6">
+                    <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Proprietary Equipment Proficiency</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                         {['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
-                            <label key={eq} className="flex items-center gap-2 p-3 border border-cream-200 rounded-lg hover:bg-cream-50 cursor-pointer transition-colors">
+                            <label key={eq} className="group flex items-center gap-4 p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-gold/30 cursor-pointer transition-all duration-500 shadow-sm">
                                 <input
                                     type="checkbox"
                                     name="teaching_equipment"
@@ -242,37 +241,35 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                             setSelectedEquipment(selectedEquipment.filter((item) => item !== eq))
                                         }
                                     }}
-                                    className="w-4 h-4 text-sage rounded border-cream-300 focus:ring-sage/50"
+                                    className="w-5 h-5 text-gold border-white/60 bg-white/20 rounded-lg focus:ring-gold/20 transition-all cursor-pointer"
                                 />
-                                <span className="text-sm text-charcoal-700">{eq}</span>
+                                <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] group-hover:text-charcoal transition-colors">{eq}</span>
                             </label>
                         ))}
                     </div>
-                    <p className="text-xs text-charcoal-500 mt-1">Select the equipment you are certified to teach.</p>
                 </div>
             )}
 
             {/* Teaching Rates (Instructors Only) */}
             {profile?.role === 'instructor' && (
-                <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Teaching Rates (PHP/hr)</label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="space-y-6">
+                    <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Financial Valorization per Session (PHP)</label>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                         {['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
                             const isSelected = selectedEquipment.includes(eq);
                             return isSelected ? (
-                                <div key={eq} className={`transition-all duration-300 ${!isSelected ? 'opacity-40 grayscale' : ''}`}>
-                                    <label className="block text-xs font-medium text-charcoal-600 mb-1">{eq}</label>
+                                <div key={eq} className="animate-in zoom-in-95 duration-500">
+                                    <label className="block text-[8px] font-black text-gold uppercase tracking-[0.3em] mb-2">{eq}</label>
                                     <div className="relative">
-                                        <span className={`absolute left-3 top-2 text-sm transition-colors ${isSelected ? 'text-charcoal-400' : 'text-charcoal-300'}`}>₱</span>
+                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-charcoal/20">₱</span>
                                         <input
                                             type="number"
                                             name={`rate_${eq}`}
                                             defaultValue={profile?.rates?.[eq] || ''}
-                                            placeholder="0.00"
+                                            placeholder="0"
                                             min="0"
                                             step="0.01"
-                                            disabled={!isSelected}
-                                            className="w-full pl-7 pr-3 py-2 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage text-sm disabled:bg-cream-50/50 disabled:cursor-not-allowed transition-all"
+                                            className="w-full pl-10 pr-6 py-4 bg-white/40 border border-white/60 rounded-xl text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm"
                                         />
                                     </div>
                                 </div>
@@ -283,19 +280,22 @@ export default function ProfileForm({ profile }: { profile: any }) {
             )}
 
             {message && (
-                <p className={`text-sm ${message.includes('success') ? 'text-green-600' : 'text-rose-600'}`}>
+                <div className={clsx(
+                    "p-5 rounded-[20px] text-[10px] font-black uppercase tracking-widest animate-in slide-in-from-top-2",
+                    message.includes('success') ? 'bg-sage/10 text-sage border border-sage/20' : 'bg-red-50/20 text-red-600 border border-red-100'
+                )}>
                     {message}
-                </p>
+                </div>
             )}
 
-            <div className="pt-6">
+            <div className="pt-10">
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="bg-sage text-white px-10 py-3 rounded-xl font-bold hover:bg-sage/90 transition-all disabled:opacity-50 flex items-center gap-2 shadow-sm uppercase tracking-widest text-[11px]"
+                    className="w-full sm:w-auto px-16 py-6 bg-charcoal text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
                 >
-                    {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                    Save Changes
+                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-gold" /> : <Camera className="w-5 h-5 text-gold stroke-[3px]" />}
+                    {isLoading ? 'SYNCHRONIZING...' : 'COMMIT PROFILE CHANGES'}
                 </button>
             </div>
         </form>

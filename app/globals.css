@@ -2,28 +2,25 @@
 
 :root {
   /* Antigravity Design System - Ethereal Minimalism */
-  --alabaster: #FAFAFA;
-  --sage: #AFC1B2;
-  --sage-light: #C5D3C1;
-  --gold: #E5D1B8;
-  --gold-deep: #D4AF37;
+  --alabaster: #FDFDFD;
+  --sage: #C5D3C1;
+  --gold: #D4AF37;
+  --linen: #F5E8DE;
+  --rose: #EBD3CF;
   --charcoal: #333333;
 
   --background: var(--alabaster);
   --foreground: var(--charcoal);
 
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --glass-blur: blur(12px);
+  /* Refined Glassmorphism: High-blur, luminous white borders */
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-blur: blur(20px);
 
   --radius: 20px;
 
-  /* Rose Gold Palette */
-  --rose-gold: #EBD3CF;
-  --rose-gold-deep: #D4B2AC;
-
-  /* Cloud Shadow: Diffuse, low opacity */
-  --shadow-cloud: 0 20px 40px -10px rgba(0, 0, 0, 0.05), 0 10px 20px -5px rgba(0, 0, 0, 0.03);
+  /* Cloud Shadow: Diffuse, weightless */
+  --shadow-cloud: 0 30px 60px -15px rgba(0, 0, 0, 0.05), 0 15px 30px -10px rgba(0, 0, 0, 0.03);
 }
 
 @theme inline {
@@ -33,18 +30,16 @@
   /* Brand Palette */
   --color-alabaster: var(--alabaster);
   --color-sage: var(--sage);
-  --color-sage-light: var(--sage-light);
   --color-gold: var(--gold);
-  --color-gold-deep: var(--gold-deep);
-  --color-rose-gold: var(--rose-gold);
-  --color-rose-gold-deep: var(--rose-gold-deep);
+  --color-linen: var(--linen);
+  --color-rose: var(--rose);
   --color-charcoal: var(--charcoal);
 
-  /* Shadcn-like standardizing with new colors */
+  /* System Mappings */
   --color-primary: var(--sage);
-  --color-primary-foreground: white;
+  --color-primary-foreground: var(--charcoal);
   --color-secondary: var(--gold);
-  --color-secondary-foreground: var(--charcoal);
+  --color-secondary-foreground: white;
 
   --radius-xl: var(--radius);
   --radius-2xl: calc(var(--radius) + 4px);
@@ -130,39 +125,39 @@ body::after {
 
   .btn-antigravity {
     @apply rounded-[20px] font-bold transition-all duration-300 shadow-md;
-    background: linear-gradient(135deg, var(--sage) 0%, var(--sage-light) 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--sage) 0%, #D8E2D6 100%);
+    color: var(--charcoal);
   }
 
   .btn-antigravity:hover {
-    @apply -translate-y-1 shadow-lg brightness-110;
+    @apply -translate-y-1 shadow-lg brightness-105;
   }
 
   .btn-gold {
     @apply rounded-[20px] font-bold transition-all duration-300 shadow-md;
-    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
-    color: var(--charcoal);
+    background: linear-gradient(135deg, var(--gold) 0%, #B8962D 100%);
+    color: white;
   }
 
   .btn-gold:hover {
     @apply -translate-y-1 shadow-lg brightness-110;
   }
 
-  .btn-rose-gold {
+  .btn-rose {
     @apply rounded-[20px] font-bold transition-all duration-300 shadow-md;
-    background: linear-gradient(135deg, var(--rose-gold) 0%, var(--rose-gold-deep) 100%);
+    background: linear-gradient(135deg, var(--rose) 0%, #D4B2AC 100%);
     color: var(--charcoal);
   }
 
-  .btn-rose-gold:hover {
+  .btn-rose:hover {
     @apply -translate-y-1 shadow-lg brightness-110;
   }
 
-  .btn-rose-gold:active {
+  .btn-rose:active {
     @apply translate-y-0 shadow-md scale-[0.98];
   }
 
-  .btn-rose-gold:disabled {
+  .btn-rose:disabled {
     @apply opacity-40 cursor-not-allowed transform-none shadow-none;
   }
 

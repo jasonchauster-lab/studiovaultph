@@ -4,7 +4,7 @@ import ProfileForm from '@/components/customer/ProfileForm'
 import InstructorGallerySection from '@/components/instructor/InstructorGallerySection'
 import InstructorCertificationsSection from '@/components/instructor/InstructorCertificationsSection'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, User } from 'lucide-react'
 
 export default async function InstructorProfilePage() {
     const supabase = await createClient()
@@ -25,25 +25,32 @@ export default async function InstructorProfilePage() {
         .order('created_at', { ascending: false })
 
     return (
-        <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
-            <div className="max-w-3xl mx-auto space-y-8">
-                <div className="border-b border-cream-200 pb-4">
+        <div className="min-h-screen p-8 lg:p-12">
+            <div className="max-w-4xl mx-auto space-y-16">
+                <div>
                     <Link
                         href="/instructor"
-                        className="inline-flex items-center gap-1.5 text-sm text-charcoal-500 hover:text-charcoal-900 transition-colors mb-4"
+                        className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/20 hover:text-gold uppercase tracking-[0.3em] transition-all mb-8 group"
                     >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Dashboard
+                        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                        BACK TO DASHBOARD
                     </Link>
-                    <h1 className="text-3xl font-serif text-charcoal-900 mb-2">My Profile</h1>
-                    <p className="text-charcoal-600 font-medium">Manage your public instructor profile, gallery, and credentials.</p>
+                    <h1 className="text-5xl font-serif text-charcoal tracking-tighter mb-4">My Profile</h1>
+                    <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Manage your public instructor profile, gallery, and credentials.</p>
                 </div>
 
-
                 {/* Contact Info & Bio Section */}
-                <div className="bg-white p-8 rounded-2xl border border-cream-200 shadow-sm">
-                    <h2 className="text-xl font-serif text-charcoal-900 mb-6 border-b border-cream-100 pb-2">Profile Details</h2>
-                    <ProfileForm profile={profile} />
+                <div className="glass-card p-12 relative overflow-hidden">
+                    {/* Soft Bloom */}
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] pointer-events-none" />
+
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-4 mb-10 border-b border-white/60 pb-8">
+                            <User className="w-6 h-6 text-gold" />
+                            <h2 className="text-3xl font-serif text-charcoal tracking-tighter">Profile Details</h2>
+                        </div>
+                        <ProfileForm profile={profile} />
+                    </div>
                 </div>
 
                 {/* Photo Gallery Section */}

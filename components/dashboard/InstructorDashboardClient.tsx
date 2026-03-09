@@ -198,21 +198,21 @@ export default function InstructorDashboardClient() {
     };
 
     return (
-        <div className="space-y-12 pb-20">
+        <div className="space-y-16 pb-20">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8">
                 <div>
-                    <h1 className="text-4xl font-serif font-bold text-charcoal tracking-tight mb-2">Instructor Dashboard</h1>
-                    <p className="text-charcoal/50 font-medium tracking-wide">Manage your professional schedule and earnings in style.</p>
+                    <h1 className="text-5xl font-serif text-charcoal tracking-tighter mb-3">Instructor Dashboard</h1>
+                    <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Manage your professional schedule and earnings with ethereal precision.</p>
                 </div>
 
                 <div className="flex gap-4">
                     <Link
                         href="/instructor/profile"
-                        className="btn-antigravity flex items-center justify-center gap-2 px-8 py-3 text-[11px] uppercase tracking-widest"
+                        className="h-14 bg-charcoal text-white px-10 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-[1.2] transition-all shadow-cloud active:scale-95"
                     >
-                        <User className="w-4 h-4" />
-                        Professional Profile
+                        <User className="w-5 h-5 text-gold stroke-[3px]" />
+                        PROFESSIONAL PROFILE
                     </Link>
                 </div>
             </div>
@@ -239,14 +239,14 @@ export default function InstructorDashboardClient() {
                 </div>
 
                 {/* Upcoming Bookings Sidebar */}
-                <div className="space-y-8">
+                <div className="space-y-10">
                     <div className="glass-card overflow-hidden">
-                        <div className="bg-sage p-5 flex items-center justify-between">
-                            <h2 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] flex items-center gap-2">
-                                <Calendar className="w-4 h-4" />
+                        <div className="bg-white/40 backdrop-blur-xl p-6 border-b border-white/60 flex items-center justify-between">
+                            <h2 className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] flex items-center gap-3">
+                                <Calendar className="w-4 h-4 text-gold" />
                                 Upcoming Bookings
                             </h2>
-                            <span className="text-[9px] font-bold text-white/60 border border-white/20 px-3 py-1 rounded-full uppercase tracking-tighter">Next 5 Sessions</span>
+                            <span className="text-[8px] font-black text-gold/60 border border-gold/20 px-3 py-1 rounded-full uppercase tracking-[0.2em]">Next 5 Sessions</span>
                         </div>
                         <div className="p-6">
                             {(() => {
@@ -260,22 +260,22 @@ export default function InstructorDashboardClient() {
 
                                 if (upcomingBookings.length === 0) {
                                     return (
-                                        <div className="py-12 text-center bg-alabaster/50 rounded-2xl border border-dashed border-sage/20 flex flex-col items-center justify-center">
-                                            <Calendar className="w-10 h-10 text-sage/20 mx-auto mb-4" />
-                                            <h3 className="text-sm font-bold text-charcoal mb-1">Quiet Week</h3>
-                                            <p className="text-xs text-charcoal/40 max-w-[200px] mx-auto">Your upcoming scheduled sessions will appear here.</p>
+                                        <div className="py-24 text-center bg-white/20 rounded-[2.5rem] border-2 border-dashed border-white/60 flex flex-col items-center justify-center">
+                                            <Calendar className="w-12 h-12 text-charcoal/5 mx-auto mb-6" />
+                                            <h3 className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-1">Quiet Week</h3>
+                                            <p className="text-[9px] text-charcoal/10 font-black uppercase tracking-[0.2em] max-w-[200px] mx-auto">Your upcoming scheduled sessions will appear here.</p>
                                         </div>
                                     );
                                 }
 
                                 return (
-                                    <div className="space-y-4">
+                                    <div className="space-y-6">
                                         {upcomingBookings.map(session => (
-                                            <div key={session.id} className="p-4 border border-white/40 bg-white/30 rounded-2xl hover:bg-white/60 transition-all shadow-sm group">
-                                                <div className="flex justify-between items-start mb-4">
+                                            <div key={session.id} className="p-6 border border-white/60 bg-white/40 rounded-[2rem] hover:bg-white transition-all duration-700 shadow-sm group">
+                                                <div className="flex justify-between items-start mb-6">
                                                     <div className="flex flex-col gap-1 w-full">
-                                                        <div className="flex items-center gap-3">
-                                                            <Link href={`/studios/${session.slots.studios.id}`} className="w-10 h-10 rounded-full overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform">
+                                                        <div className="flex items-center gap-4">
+                                                            <Link href={`/studios/${session.slots.studios.id}`} className="w-12 h-12 rounded-[15px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700">
                                                                 <img
                                                                     src={session.slots.studios.logo_url || "/logo.png"}
                                                                     alt={session.slots.studios.name}
@@ -283,16 +283,16 @@ export default function InstructorDashboardClient() {
                                                                 />
                                                             </Link>
                                                             <div className="flex-1 min-w-0">
-                                                                <div className="flex items-start justify-between gap-1">
-                                                                    <Link href={`/studios/${session.slots.studios.id}`} className="text-sm font-bold text-charcoal truncate hover:text-sage transition-colors">
+                                                                <div className="flex items-start justify-between gap-2">
+                                                                    <Link href={`/studios/${session.slots.studios.id}`} className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] truncate hover:text-gold transition-colors">
                                                                         {session.slots.studios.name}
                                                                     </Link>
-                                                                    <span className="px-2 py-0.5 bg-sage/10 text-sage text-[8px] font-bold uppercase rounded-md tracking-widest border border-sage/20 shrink-0">
-                                                                        Confirmed
+                                                                    <span className="px-3 py-1 bg-sage/10 text-sage text-[8px] font-black uppercase rounded-md tracking-[0.2em] border border-sage/20 shrink-0 shadow-sm">
+                                                                        CONFIRMED
                                                                     </span>
                                                                 </div>
-                                                                <div className="flex items-center gap-1.5 text-[10px] text-charcoal/50 font-bold uppercase tracking-tighter mt-1">
-                                                                    <Calendar className="w-3 h-3 text-sage" />
+                                                                <div className="flex items-center gap-2 text-[10px] text-charcoal/20 font-black uppercase tracking-[0.1em] mt-1.5">
+                                                                    <Calendar className="w-3.5 h-3.5 text-gold/40" />
                                                                     <span>{formatManilaDateStr(session.slots.date)} • {formatTo12Hour(session.slots.start_time)}</span>
                                                                 </div>
                                                             </div>
@@ -300,23 +300,23 @@ export default function InstructorDashboardClient() {
                                                     </div>
                                                 </div>
 
-                                                <div className="pt-4 border-t border-white/40 space-y-3">
+                                                <div className="pt-6 border-t border-white/60 space-y-4">
                                                     <div
-                                                        className="flex items-center gap-2 cursor-pointer group/client"
+                                                        className="flex items-center gap-3 cursor-pointer group/client"
                                                         onClick={() => setSelectedClient(session.client)}
                                                     >
-                                                        <div className="w-7 h-7 rounded-full overflow-hidden bg-white shrink-0 border border-white shadow-sm group-hover/client:scale-110 transition-transform">
+                                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-white shrink-0 border border-white shadow-sm group-hover/client:scale-110 transition-transform duration-700">
                                                             <img src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                                         </div>
-                                                        <div className="text-[11px] text-charcoal/60 truncate flex-1 group-hover/client:text-sage transition-colors tracking-wide">
-                                                            Client: <span className="font-bold text-charcoal">{session.client?.full_name}</span>
+                                                        <div className="text-[10px] text-charcoal/20 uppercase tracking-[0.2em] truncate flex-1 group-hover/client:text-gold transition-colors">
+                                                            CLIENT: <span className="font-black text-charcoal">{session.client?.full_name}</span>
                                                         </div>
                                                     </div>
 
                                                     <div className="flex items-center justify-between text-[10px] pt-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <Box className="w-3.5 h-3.5 text-sage" />
-                                                            <span className="font-bold text-charcoal/80 truncate max-w-[100px] uppercase tracking-tighter">
+                                                        <div className="flex items-center gap-3">
+                                                            <Box className="w-4 h-4 text-gold/40" />
+                                                            <span className="font-black text-charcoal/40 truncate max-w-[120px] uppercase tracking-[0.2em]">
                                                                 {Array.isArray(session.slots?.equipment) && session.slots.equipment.length > 0
                                                                     ? `${session.slots.equipment[0]}`
                                                                     : (`${session.price_breakdown?.equipment || 'Standard'}`)
@@ -324,7 +324,7 @@ export default function InstructorDashboardClient() {
                                                             </span>
                                                         </div>
 
-                                                        <div className="flex gap-2">
+                                                        <div className="flex gap-3">
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.preventDefault();
@@ -335,10 +335,10 @@ export default function InstructorDashboardClient() {
                                                                         isExpired: isChatExpired(session)
                                                                     })
                                                                 }}
-                                                                className="w-7 h-7 bg-white/50 text-sage border border-white/40 rounded-full hover:bg-sage hover:text-white transition-all flex items-center justify-center shadow-sm relative group/btn"
+                                                                className="w-9 h-9 bg-white/40 text-sage border border-white/60 rounded-full hover:bg-sage hover:text-white transition-all duration-500 flex items-center justify-center shadow-sm relative group/btn"
                                                                 title="Message Client"
                                                             >
-                                                                <MessageSquare className="w-3 h-3" />
+                                                                <MessageSquare className="w-3.5 h-3.5" />
                                                                 <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.client_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.client_id} />
                                                             </button>
 
@@ -352,10 +352,10 @@ export default function InstructorDashboardClient() {
                                                                         isExpired: isChatExpired(session)
                                                                     })
                                                                 }}
-                                                                className="w-7 h-7 bg-white/50 text-charcoal/60 border border-white/40 rounded-full hover:bg-gold hover:text-charcoal transition-all flex items-center justify-center shadow-sm relative group/btn2"
+                                                                className="w-9 h-9 bg-white/40 text-charcoal/20 border border-white/60 rounded-full hover:bg-gold hover:text-white transition-all duration-500 flex items-center justify-center shadow-sm relative group/btn2"
                                                                 title="Message Studio"
                                                             >
-                                                                <MessageSquare className="w-3 h-3" />
+                                                                <MessageSquare className="w-3.5 h-3.5" />
                                                                 <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.slots.studios.owner_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.slots.studios.owner_id} />
                                                             </button>
 
@@ -364,10 +364,10 @@ export default function InstructorDashboardClient() {
                                                                     e.preventDefault();
                                                                     setCancellingBooking(session);
                                                                 }}
-                                                                className="w-7 h-7 bg-white/50 text-red-400 border border-white/40 rounded-full hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
+                                                                className="w-9 h-9 bg-white/40 text-red-300 border border-white/60 rounded-full hover:bg-red-500 hover:text-white transition-all duration-500 flex items-center justify-center shadow-sm"
                                                                 title="Cancel"
                                                             >
-                                                                <X className="w-3 h-3" />
+                                                                <X className="w-3.5 h-3.5" />
                                                             </button>
                                                         </div>
                                                     </div>
@@ -406,28 +406,42 @@ export default function InstructorDashboardClient() {
             )}
 
             {selectedClient && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/20 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
-                    <div className="glass-card w-full max-w-sm overflow-hidden p-8 relative animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setSelectedClient(null)} className="absolute top-6 right-6 text-charcoal/20 hover:text-charcoal transition-colors"><X className="w-5 h-5" /></button>
-                        <div className="flex flex-col items-center mt-4 mb-8 text-center">
-                            <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-white shadow-cloud scale-110">
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/20 backdrop-blur-xl animate-in fade-in duration-700" onClick={() => setSelectedClient(null)}>
+                    <div className="glass-card w-full max-w-sm overflow-hidden p-10 relative animate-in zoom-in-95 duration-700 shadow-cloud rounded-[3rem]" onClick={e => e.stopPropagation()}>
+                        {/* Decorative Bloom */}
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+
+                        <button onClick={() => setSelectedClient(null)} className="absolute top-8 right-8 text-charcoal/10 hover:text-charcoal transition-colors p-2 bg-white/40 rounded-xl border border-white/60"><X className="w-5 h-5" /></button>
+
+                        <div className="flex flex-col items-center mt-6 mb-10 text-center relative z-10">
+                            <div className="w-28 h-28 rounded-full overflow-hidden mb-6 border-4 border-white shadow-cloud scale-110 relative">
                                 <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                             </div>
-                            <h3 className="text-2xl font-serif font-bold text-charcoal tracking-tight">{selectedClient.full_name}</h3>
-                            <p className="text-xs text-charcoal/40 font-bold uppercase tracking-widest mt-1">{selectedClient.email}</p>
+                            <h3 className="text-3xl font-serif text-charcoal tracking-tighter">{selectedClient.full_name}</h3>
+                            <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mt-2">{selectedClient.email}</p>
                         </div>
+
                         {selectedClient.medical_conditions ? (
-                            <div className="bg-red-50/50 p-5 rounded-3xl border border-red-100/50">
-                                <h4 className="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-2 flex items-center gap-2"><AlertCircle className="w-4 h-4" /> Medical Conditions</h4>
-                                <p className="text-xs text-red-700/80 leading-relaxed font-medium">{selectedClient.medical_conditions}</p>
+                            <div className="bg-red-50/20 p-8 rounded-[2rem] border border-red-100/50 relative z-10">
+                                <h4 className="text-[10px] font-black text-red-800 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
+                                    <AlertCircle className="w-4 h-4" />
+                                    Medical Conditions
+                                </h4>
+                                <p className="text-xs text-red-700/60 leading-relaxed font-medium italic">{selectedClient.medical_conditions}</p>
                             </div>
                         ) : (
-                            <div className="bg-sage/5 p-5 rounded-3xl border border-white/40">
-                                <h4 className="text-[10px] font-bold text-sage uppercase tracking-widest mb-1">Health Status</h4>
-                                <p className="text-xs text-charcoal/40 font-medium">Clear / No conditions reported.</p>
+                            <div className="bg-white/40 p-8 rounded-[2rem] border border-white/60 relative z-10">
+                                <h4 className="text-[10px] font-black text-gold uppercase tracking-[0.3em] mb-2">Health Status</h4>
+                                <p className="text-[11px] text-charcoal/40 font-black uppercase tracking-[0.1em]">Clear / No conditions reported.</p>
                             </div>
                         )}
-                        <button onClick={() => setSelectedClient(null)} className="w-full mt-8 py-3.5 bg-white text-charcoal border border-white/40 rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:bg-alabaster transition-all shadow-sm">Close</button>
+
+                        <button
+                            onClick={() => setSelectedClient(null)}
+                            className="w-full mt-10 py-5 bg-charcoal text-white rounded-[20px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 z-10 relative"
+                        >
+                            CLOSE RECORD
+                        </button>
                     </div>
                 </div>
             )}

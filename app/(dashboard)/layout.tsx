@@ -41,7 +41,10 @@ export default async function DashboardLayout({
         : (profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.full_name || user?.email || 'Partner'}`);
 
     return (
-        <div className="min-h-screen bg-alabaster flex flex-col">
+        <div className="min-h-screen bg-alabaster flex flex-col relative overflow-hidden">
+            {/* Background Warmth Bloom */}
+            <div className="fixed inset-0 bg-[radial-gradient(circle_at_70%_80%,var(--linen)_0%,transparent_50%)] opacity-30 pointer-events-none z-0" />
+
             {/* Shared Header - Antigravity Glassmorphism */}
             <DashboardHeader
                 profile={profile}
@@ -50,8 +53,8 @@ export default async function DashboardLayout({
             />
 
             {/* Main Content with top padding for fixed header */}
-            <main className="flex-1 pt-28">
-                <div className="max-w-[1600px] mx-auto px-4 sm:px-8">
+            <main className="flex-1 pt-32 sm:pt-40 relative z-10">
+                <div className="max-w-[1600px] mx-auto px-6 sm:px-12 lg:px-16">
                     {children}
                 </div>
             </main>
