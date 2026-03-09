@@ -960,7 +960,7 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
         }
     })
         .eq('id', bookingId)
-        .in('status', ['approved', 'pending', 'submitted'])
+        .in('status', ['approved', 'pending'])
         .select('id')
 
     if (updateError) {

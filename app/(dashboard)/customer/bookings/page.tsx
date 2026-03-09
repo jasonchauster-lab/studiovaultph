@@ -48,7 +48,7 @@ export default async function CustomerBookingsPage() {
             )
         `)
         .eq('client_id', user.id)
-        .in('status', ['approved', 'completed', 'cancelled_refunded', 'cancelled_charged', 'pending', 'submitted', 'rejected', 'expired'])
+        .in('status', ['approved', 'completed', 'cancelled_refunded', 'cancelled_charged', 'pending', 'rejected', 'expired'])
         .order('created_at', { ascending: false })
 
     // ── Signed URL Generation ──────────────────────────────────────────

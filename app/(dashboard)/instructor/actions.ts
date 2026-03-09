@@ -689,7 +689,7 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
         }
     })
         .eq('id', bookingId)
-        .in('status', ['approved', 'pending', 'submitted'])
+        .in('status', ['approved', 'pending'])
         .select('id')
 
     if (updateError) {

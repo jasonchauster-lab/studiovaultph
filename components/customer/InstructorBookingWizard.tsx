@@ -290,7 +290,32 @@ export default function InstructorBookingWizard({
             {step === 1 && (
                 <div className="space-y-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <h3 className="font-medium text-charcoal-900 text-lg font-serif">1. Select a Date & Time</h3>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full sm:w-auto">
+                            <h3 className="font-medium text-charcoal-900 text-lg font-serif">1. Select a Date & Time</h3>
+                            <div className="relative">
+                                <select
+                                    value={filterLocation || ''}
+                                    onChange={(e) => {
+                                        const params = new URLSearchParams(searchParams.toString())
+                                        if (e.target.value) {
+                                            params.set('location', e.target.value)
+                                        } else {
+                                            params.delete('location')
+                                        }
+                                        router.push(`?${params.toString()}`, { scroll: false })
+                                    }}
+                                    className="appearance-none bg-white border border-cream-200 text-charcoal-700 text-sm rounded-lg pl-3 pr-8 py-2 outline-none focus:border-charcoal-400 focus:ring-1 focus:ring-charcoal-400 w-full sm:w-56"
+                                >
+                                    <option value="">All Areas</option>
+                                    {Array.from(new Set(availability.map(a => a.location_area).filter(Boolean))).sort().map(loc => (
+                                        <option key={loc as string} value={loc as string}>{loc as string}</option>
+                                    ))}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-charcoal-500">
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+                        </div>
 
                         {/* Month Selector */}
                         <div className="flex items-center gap-2 bg-cream-50 p-1 rounded-xl border border-cream-200">
@@ -414,24 +439,52 @@ export default function InstructorBookingWizard({
                                 <div className="space-y-3">
                                     <p className="text-xs font-bold text-charcoal-400 uppercase tracking-widest mb-4">Available Times</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {slots.map(slot => (
-                                            <button
-                                                key={slot.id}
-                                                onClick={() => handleSearchCheck(slot, activeDate)}
-                                                className="w-full text-left bg-white p-4 rounded-xl border border-[#ebd3cf] hover:border-[#ebd3cf] hover:shadow-md transition-all flex justify-between items-center group"
-                                            >
-                                                <div>
-                                                    <div className="font-serif text-lg text-charcoal-900">
-                                                        {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
-                                                    </div>
-                                                    <div className="text-xs text-charcoal-500 flex items-center gap-1.5 mt-1 font-medium">
-                                                        <MapPin className="w-3.5 h-3.5 text-charcoal-300" />
-                                                        {slot.location_area}
-                                                    </div>
-                                                </div>
-                                                <ArrowRight className="w-5 h-5 text-charcoal-200 group-hover:text-charcoal-900 transform group-hover:translate-x-1 transition-all" />
-                                            </button>
-                                        ))}
+                                        {(() => {
+                                            // Group slots by exact start and end times to prevent massive overlap
+                                            const groupedSlots = slots.reduce((acc, slot) => {
+                                                const key = `${slot.start_time}-${slot.end_time}`
+                                                if (!acc[key]) {
+                                                    acc[key] = {
+                                                        primarySlot: slot,
+                                                        locations: [slot.location_area]
+                                                    }
+                                                } else {
+                                                    if (!acc[key].locations.includes(slot.location_area)) {
+                                                        acc[key].locations.push(slot.location_area)
+                                                    }
+                                                }
+                                                return acc
+                                            }, {} as Record<string, { primarySlot: any, locations: string[] }>)
+
+                                            return (Object.values(groupedSlots) as { primarySlot: any, locations: string[] }[]).map(({ primarySlot: slot, locations }) => {
+                                                const extraLocCount = locations.length - 1;
+                                                return (
+                                                    <button
+                                                        key={slot.id}
+                                                        onClick={() => handleSearchCheck(slot, activeDate)}
+                                                        className="w-full text-left bg-white p-4 rounded-xl border border-[#ebd3cf] hover:border-[#ebd3cf] hover:shadow-md transition-all flex justify-between items-center group"
+                                                    >
+                                                        <div>
+                                                            <div className="font-serif text-lg text-charcoal-900">
+                                                                {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
+                                                            </div>
+                                                            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                                                <div className="text-[11px] text-charcoal-600 flex items-center gap-1 font-medium bg-cream-50 px-2 py-0.5 rounded border border-cream-100 max-w-full">
+                                                                    <MapPin className="w-3 h-3 text-charcoal-400 shrink-0" />
+                                                                    <span className="truncate">{locations[0].split(' - ')[1] || locations[0]}</span>
+                                                                </div>
+                                                                {extraLocCount > 0 && (
+                                                                    <div className="text-[10px] font-bold text-charcoal-700 bg-cream-100 px-1.5 py-0.5 rounded border border-cream-200 shrink-0">
+                                                                        +{extraLocCount} Area{extraLocCount !== 1 ? 's' : ''}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <ArrowRight className="w-5 h-5 text-charcoal-200 group-hover:text-charcoal-900 transform group-hover:translate-x-1 transition-all" />
+                                                    </button>
+                                                )
+                                            })
+                                        })()}
                                     </div>
                                 </div>
                             );

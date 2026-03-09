@@ -643,7 +643,7 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
             rejection_reason: reason
         })
         .eq('id', bookingId)
-        .in('status', ['pending', 'submitted', 'approved'])
+        .in('status', ['pending', 'approved'])
         .select('id')
 
     if (updateError) {

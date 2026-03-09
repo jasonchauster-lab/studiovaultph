@@ -709,7 +709,7 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
         }
     })
         .eq('id', bookingId)
-        .in('status', ['approved', 'pending', 'submitted'])
+        .in('status', ['approved', 'pending'])
         .select('id')
 
     if (updateError) {
