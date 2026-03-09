@@ -55,8 +55,8 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
 
     return (
         <div className="space-y-4">
-            {bookings.map((booking: any) => {
-                const slotData = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots
+            {(bookings || []).map((booking: any) => {
+                const slotData = Array.isArray(booking.slots) ? booking.slots[0] : (booking.slots || {})
                 const payout = booking.price_breakdown?.studio_fee || (booking.total_price ? Math.max(0, booking.total_price - 100) : 0)
                 const equipment = booking.price_breakdown?.equipment || booking.equipment || 'Session'
                 const qty = booking.price_breakdown?.quantity || 1

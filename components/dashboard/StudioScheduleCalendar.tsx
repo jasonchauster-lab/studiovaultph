@@ -215,7 +215,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                                     {days.map((day: Date) => {
                                         const dayStr = toManilaDateStr(day)
-                                        const cellSlots = slots.filter(s => {
+                                        const cellSlots = (slots || []).filter(s => {
                                             const startHour = parseInt(s.start_time.split(':')[0], 10);
                                             return s.date === dayStr && startHour === hour
                                         })
