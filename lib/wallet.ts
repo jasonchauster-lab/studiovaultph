@@ -53,9 +53,28 @@ export async function unlockMaturedFunds() {
     return { count }
 }
 
+export async function processInstantPayout(bookingId: string) {
+    const supabase = await createClient()
+
+    const { data: success, error: rpcError } = await supabase.rpc('process_instant_payout_atomic', {
+        target_booking_id: bookingId
+    })
+
+    if (rpcError) {
+        console.error('RPC Error processing instant payout:', rpcError)
+        return { error: 'Failed to process instant payout atomically.' }
+    }
+
+    if (!success) {
+        return { error: 'Booking not eligible for instant payout.' }
+    }
+
+    return { success: true }
+}
+
 /**
- * Scans for approved bookings where the associated slot ended > 1 hour ago.
- * Automatically processes their completion to start the 24h security hold.
+ * Scans for approved/cancelled bookings where the associated slot ended > 1 hour ago.
+ * Approved bookings go to security hold. Cancelled bookings are instantly paid out.
  */
 export async function autoCompleteBookings() {
     const supabase = await createClient()
@@ -71,6 +90,7 @@ export async function autoCompleteBookings() {
         .from('bookings')
         .select(`
             id,
+            status,
             slots!inner(date, end_time)
         `)
         .or('status.eq.approved,status.eq.cancelled_charged')
@@ -102,9 +122,16 @@ export async function autoCompleteBookings() {
 
     let completedCount = 0
     for (const b of toComplete) {
-        const result = await processBookingCompletion(b.id)
-        if (result.success) {
-            completedCount++
+        if (b.status === 'cancelled_charged') {
+            const result = await processInstantPayout(b.id)
+            if (result.success) {
+                completedCount++
+            }
+        } else {
+            const result = await processBookingCompletion(b.id)
+            if (result.success) {
+                completedCount++
+            }
         }
     }
 

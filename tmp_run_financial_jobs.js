@@ -45,11 +45,20 @@ async function run() {
 
     let completedCount = 0;
     for (const b of toComplete) {
-        const { data: success, error: rpcError } = await supabase.rpc('process_booking_completion_atomic', {
-            target_booking_id: b.id
-        });
-        if (success) completedCount++;
-        else console.error(`Failed to complete booking ${b.id}:`, rpcError);
+        if (b.status === 'cancelled_charged') {
+            console.log(`Processing instant payout for cancelled_charged booking ${b.id}...`);
+            const { data: success, error: rpcError } = await supabase.rpc('process_instant_payout_atomic', {
+                target_booking_id: b.id
+            });
+            if (success) completedCount++;
+            else console.error(`Failed to instant payout booking ${b.id}:`, rpcError);
+        } else {
+            const { data: success, error: rpcError } = await supabase.rpc('process_booking_completion_atomic', {
+                target_booking_id: b.id
+            });
+            if (success) completedCount++;
+            else console.error(`Failed to complete booking ${b.id}:`, rpcError);
+        }
     }
     console.log(`Successfully completed ${completedCount} bookings.`);
 
