@@ -18,9 +18,17 @@
   --glass-blur: blur(20px);
 
   --radius: 20px;
+  --radius-floating: 12px;
+
+  /* Airy Border: Faint, weightless grid */
+  --airy-border: rgba(0, 0, 0, 0.03);
+  --sage-desaturated: #B4C3B2;
 
   /* Cloud Shadow: Diffuse, weightless */
   --shadow-cloud: 0 30px 60px -15px rgba(0, 0, 0, 0.05), 0 15px 30px -10px rgba(0, 0, 0, 0.03);
+
+  /* Floating Card Shadow: Subtle depth */
+  --shadow-floating: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 @theme inline {
@@ -105,12 +113,21 @@ body::after {
 
 @layer utilities {
   .glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-cloud);
-    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: var(--shadow-floating);
+    border-radius: var(--radius-floating);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .status-pill-frosted {
+    @apply px-3 py-1 text-[8px] font-black uppercase rounded-full tracking-[0.2em] shadow-[inset_0_1px_1px_rgba(255, 255, 255, 0.6)] backdrop-blur-md border border-white/40;
+  }
+
+  .sticky-header-antigravity {
+    @apply sticky top-0 z-[60] py-6 px-8 lg:px-12 backdrop-blur-[15px] bg-white/70 border-b border-[var(--airy-border)] transition-all duration-500;
   }
 
   .glass-navbar {

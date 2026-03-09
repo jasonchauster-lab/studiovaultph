@@ -226,13 +226,13 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                 <div className="flex gap-4 relative z-10">
                     <button
                         onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
-                        className="bg-sage text-charcoal px-8 py-3 rounded-[20px] text-[10px] font-black uppercase tracking-[0.25em] hover:brightness-105 transition-all flex items-center gap-3 shadow-cloud active:scale-95"
+                        className="bg-[#B4C3B2] text-white px-8 py-3 rounded-[12px] text-[10px] font-black uppercase tracking-[0.25em] hover:brightness-105 transition-all flex items-center gap-3 shadow-md active:scale-95"
                     >
                         <Plus className="w-4 h-4 stroke-[3px]" /> ADD SLOT
                     </button>
                     <button
                         onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
-                        className="bg-white/40 backdrop-blur-md border border-white/60 text-charcoal px-8 py-3 rounded-[20px] text-[10px] font-black uppercase tracking-[0.25em] hover:bg-white/60 transition-all flex items-center gap-3 shadow-sm active:scale-95"
+                        className="bg-white/40 backdrop-blur-md border border-[var(--airy-border)] text-charcoal px-8 py-3 rounded-[12px] text-[10px] font-black uppercase tracking-[0.25em] hover:bg-white/60 transition-all flex items-center gap-3 shadow-sm active:scale-95"
                     >
                         <CalendarIcon className="w-4 h-4" /> BULK GENERATE
                     </button>
@@ -240,14 +240,14 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             </div>
 
             {/* Calendar Grid */}
-            <div className="glass-card overflow-hidden !border-[rgba(0,0,0,0.05)]">
+            <div className="glass-card overflow-hidden !border-[rgba(0,0,0,0.05)] rounded-[12px]">
                 <div className="min-w-[900px]">
-                    <div className="grid grid-cols-8 border-b border-[rgba(0,0,0,0.05)] bg-alabaster/30">
+                    <div className="grid grid-cols-8 border-b border-[rgba(0,0,0,0.05)] bg-white/20">
                         <div className="p-6 text-[10px] font-black text-charcoal/20 border-r border-[rgba(0,0,0,0.05)] sticky left-0 bg-white/60 backdrop-blur-xl z-20 w-28 text-center uppercase tracking-[0.3em] flex items-center justify-center">EPOCH</div>
                         {days.map(day => (
-                            <div key={day.toString()} className={clsx("p-6 text-center border-r border-[rgba(0,0,0,0.05)] last:border-r-0 min-w-[120px] transition-all duration-1000", isSameDay(day, new Date()) ? "bg-sage/5" : "")}>
+                            <div key={day.toString()} className={clsx("p-6 text-center border-r border-[rgba(0,0,0,0.05)] last:border-r-0 min-w-[120px] transition-all duration-1000", isSameDay(day, new Date()) ? "bg-[#B4C3B2]/5" : "")}>
                                 <div className="text-[10px] text-charcoal/20 font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
-                                <div className={clsx("text-3xl font-serif tracking-tighter", isSameDay(day, new Date()) ? "text-sage" : "text-charcoal")}>{format(day, 'd')}</div>
+                                <div className={clsx("text-3xl font-serif tracking-tighter", isSameDay(day, new Date()) ? "text-[#B4C3B2]" : "text-charcoal")}>{format(day, 'd')}</div>
                             </div>
                         ))}
                     </div>
@@ -261,8 +261,6 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                                 {days.map(day => {
                                     const dayStr = toManilaDateStr(day)
-                                    const startTotalCell = hour * 60
-
                                     const startingSlots = availability.filter(a => {
                                         if (a.date) {
                                             if (a.date !== dayStr) return false
@@ -285,9 +283,9 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     const isPastCell = isPast(setMinutes(setHours(day, hour + 1), 0))
 
                                     return (
-                                        <div key={day.toString() + hour} className={clsx("border-r border-[rgba(0,0,0,0.05)] last:border-r-0 relative group p-0", isPastCell && "bg-alabaster/10")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
+                                        <div key={day.toString() + hour} className={clsx("border-r border-[rgba(0,0,0,0.05)] last:border-r-0 relative group p-0", isPastCell && "bg-alabaster/5")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
                                             <div
-                                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 bg-sage/5 cursor-pointer z-0"
+                                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 bg-[#B4C3B2]/5 cursor-pointer z-0"
                                                 onClick={() => {
                                                     setSingleDate(format(day, 'yyyy-MM-dd'))
                                                     setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
@@ -367,10 +365,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         <div
                                                             key={slot.id}
                                                             className={clsx(
-                                                                "absolute rounded-[20px] text-[10px] hover:shadow-cloud hover:scale-[1.02] transition-all duration-700 cursor-pointer overflow-hidden backdrop-blur-xl border-white/60 shadow-sm border z-10 p-4 group/slot flex flex-col gap-3",
+                                                                "absolute rounded-[12px] text-[10px] hover:shadow-cloud hover:scale-[1.02] transition-all duration-700 cursor-pointer overflow-hidden backdrop-blur-md border-white border z-10 p-4 group/slot flex flex-col gap-3 shadow-[0_10px_20px_rgba(0,0,0,0.03)]",
                                                                 isPastCell
                                                                     ? "bg-white/20 text-charcoal/20 opacity-40"
-                                                                    : "bg-white/60 text-charcoal",
+                                                                    : "bg-white/80 text-charcoal",
                                                                 duration < 45 && "py-2 px-4 justify-center"
                                                             )}
                                                             style={{
@@ -386,24 +384,24 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         >
                                                             <div className={clsx("flex items-center gap-2", duration < 45 ? "flex-row" : "flex-col items-start")}>
                                                                 <div className="flex items-center gap-2 font-black text-[10px] text-charcoal uppercase tracking-[0.2em] shrink-0">
-                                                                    <Clock className={clsx(duration < 45 ? "w-3 h-3" : "w-4 h-4", isPastCell ? "text-charcoal/10" : "text-gold")} />
+                                                                    <Clock className={clsx(duration < 45 ? "w-3 h-3" : "w-4 h-4", isPastCell ? "text-charcoal/10" : "text-[#B4C3B2]")} />
                                                                     <span>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                                 </div>
 
                                                                 <div className="flex flex-wrap items-center gap-2">
-                                                                    <div className="text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 bg-white/40 px-3 py-1 rounded-full border border-white/60">
+                                                                    <div className="text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 bg-black/5 px-3 py-1 rounded-full border border-white/60">
                                                                         <MapPin className="w-3 h-3 text-charcoal/20" />
                                                                         <span className="truncate max-w-[100px]">{locations[0].split(' - ')[1] || locations[0]}</span>
                                                                     </div>
                                                                     {extraLocCount > 0 && duration >= 45 && (
-                                                                        <div className="text-[9px] font-black text-sage bg-sage/10 px-3 py-1 rounded-full border border-sage/20">+{extraLocCount} AREAS</div>
+                                                                        <div className="text-[9px] font-black text-[#B4C3B2] bg-[#B4C3B2]/10 px-3 py-1 rounded-full border border-[#B4C3B2]/20">+{extraLocCount} AREAS</div>
                                                                     )}
                                                                 </div>
 
                                                                 {primaryEq && duration >= 45 && (
                                                                     <div className="flex flex-wrap items-center gap-2 mt-auto">
-                                                                        <div className="text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 bg-sage/20 text-charcoal px-3 py-1 rounded-full border border-sage/30">
-                                                                            <Box className="w-3 h-3 text-sage" />
+                                                                        <div className="text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 bg-[#B4C3B2]/20 text-charcoal px-3 py-1 rounded-full border border-[#B4C3B2]/30">
+                                                                            <Box className="w-3 h-3 text-[#B4C3B2]" />
                                                                             <span>{primaryEq}</span>
                                                                         </div>
                                                                         {extraEqCount > 0 && (
@@ -466,11 +464,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     <div
                                                         key={booking.id}
                                                         className={clsx(
-                                                            "absolute rounded-[20px] text-[10px] backdrop-blur-xl border-white/60 shadow-cloud border z-20 p-5 overflow-hidden transition-all duration-700 hover:scale-[1.03] cursor-pointer group/booking flex flex-col",
+                                                            "absolute rounded-[12px] text-[10px] backdrop-blur-md border-white border z-20 p-5 overflow-hidden transition-all duration-700 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-[0_10px_20px_rgba(0,0,0,0.03)]",
                                                             isPastCell
                                                                 ? "bg-white/20 text-charcoal/20 opacity-60"
                                                                 : booking.status === 'approved'
-                                                                    ? "bg-sage/40 text-charcoal"
+                                                                    ? "bg-[#B4C3B2]/40 text-charcoal"
                                                                     : "bg-gold/40 text-charcoal",
                                                             duration < 45 && "flex-row items-center gap-4 py-2 px-4"
                                                         )}
@@ -484,17 +482,17 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     >
                                                         {duration < 45 ? (
                                                             <div className="flex flex-col justify-center">
-                                                                <div className="text-[8px] font-black uppercase tracking-widest text-charcoal/40">{booking.status === 'approved' ? 'RESERVED' : 'VERIFICATION'}</div>
+                                                                <div className="text-[8px] font-black uppercase tracking-widest text-charcoal/40">{booking.status === 'approved' ? 'BOOKED' : 'VERIFICATION'}</div>
                                                                 <div className="text-[9px] font-bold text-charcoal truncate">{studioName}</div>
                                                             </div>
                                                         ) : (
                                                             <>
                                                                 <div className="flex items-center justify-between mb-3">
                                                                     <div className={clsx(
-                                                                        "text-[9px] font-black uppercase tracking-[0.3em] px-3 py-1 rounded-full border",
-                                                                        booking.status === 'approved' ? "bg-white/40 border-sage/40 text-sage" : "bg-white/40 border-gold/40 text-gold"
+                                                                        "status-pill-frosted inline-flex items-center",
+                                                                        booking.status === 'approved' ? "bg-white/40 border-[#B4C3B2]/40 text-[#B4C3B2]" : "bg-white/40 border-gold/40 text-gold"
                                                                     )}>
-                                                                        {booking.status === 'approved' ? 'RESERVED' : 'VERIFICATION'}
+                                                                        {booking.status === 'approved' ? 'BOOKED' : 'VERIFICATION'}
                                                                     </div>
                                                                     <ArrowUpRight className="w-4 h-4 text-charcoal/20 group-hover/booking:text-charcoal transition-all" />
                                                                 </div>

@@ -210,12 +210,12 @@ export default function InstructorBookingWizard({
                         }
                     }}
                     className={clsx(
-                        "h-12 flex flex-col items-center justify-center rounded-[18px] text-[11px] transition-all focus:outline-none",
+                        "h-12 flex flex-col items-center justify-center rounded-[12px] text-[11px] transition-all focus:outline-none",
                         !isSameMonth(cloneDay, monthStart) ? "text-charcoal/10 pointer-events-none" : "",
                         isSameMonth(cloneDay, monthStart) && !hasSlots && !isPastDay && !isSelected ? "text-charcoal/40" : "",
                         isPastDay ? "text-charcoal/10 pointer-events-none opacity-40" : "",
                         hasSlots && !isSelected ? "bg-white/40 text-charcoal font-bold hover:bg-white/60 cursor-pointer border border-white/80" : "",
-                        isSelected ? "bg-[#B4C3B2] text-white font-bold shadow-cloud transform scale-105" : ""
+                        isSelected ? "bg-[#B4C3B2] text-white font-bold shadow-md transform scale-105" : ""
                     )}
                     disabled={!hasSlots || isPastDay}
                 >
@@ -519,7 +519,7 @@ export default function InstructorBookingWizard({
                                 return (
                                     <div
                                         key={key}
-                                        className="p-6 rounded-[24px] border border-white/80 bg-white/40 backdrop-blur-[8px] text-left transition-all relative shadow-[0_10px_20px_rgba(0,0,0,0.03)] hover:shadow-cloud hover:bg-white/50"
+                                        className="p-6 rounded-[12px] border border-white/80 bg-white/40 backdrop-blur-[8px] text-left transition-all relative shadow-[0_10px_20px_rgba(0,0,0,0.03)] hover:shadow-cloud hover:bg-white/50"
                                     >
                                         <div className="font-serif text-[18px] sm:text-[20px] font-bold text-charcoal mb-4 flex flex-wrap items-baseline gap-2">
                                             <span className="whitespace-nowrap">{formatTo12Hour(slot.start_time)}</span>
@@ -532,7 +532,7 @@ export default function InstructorBookingWizard({
                                                 onClick={() => handleSearchCheck(slot, activeDate)}
                                                 className="w-full flex items-center justify-between group"
                                             >
-                                                <div className="text-[9px] font-bold text-[#B4C3B2] uppercase tracking-widest flex items-center gap-2 bg-[#B4C3B2]/5 px-3 py-2 rounded-[12px] border border-[#B4C3B2]/10 group-hover:bg-[#B4C3B2]/10 transition-colors max-w-[90%]">
+                                                <div className="text-[9px] font-bold text-[#B4C3B2] uppercase tracking-widest flex items-center gap-2 bg-[#B4C3B2]/5 px-3 py-2 rounded-full border border-[#B4C3B2]/10 group-hover:bg-[#B4C3B2]/10 transition-colors max-w-[90%]">
                                                     <MapPin className="w-3 h-3 shrink-0" />
                                                     <span className="truncate">{locations[0].split(' - ')[1] || locations[0]}</span>
                                                 </div>

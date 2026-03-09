@@ -50,74 +50,74 @@ export default function CancelBookingModal({
     }
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-charcoal/20 backdrop-blur-md animate-in fade-in duration-500">
             <div
-                className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+                className="glass-card w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-500 rounded-[12px] bg-white/95"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-cream-100 flex justify-between items-center bg-cream-50/50">
-                    <h3 className="text-xl font-serif font-bold text-charcoal-900">{title}</h3>
+                <div className="px-8 py-6 border-b border-[var(--airy-border)] flex justify-between items-center bg-white/40">
+                    <h3 className="text-xl font-serif text-charcoal tracking-tighter">{title}</h3>
                     <button
                         onClick={onClose}
-                        className="p-1 hover:bg-cream-100 rounded-full transition-colors text-charcoal-400"
+                        className="p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal"
                     >
-                        <X className="w-5 h-5 text-charcoal-800" />
+                        <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="p-6 space-y-4">
-                    <p className="text-sm text-gray-600 leading-relaxed">
+                <div className="p-8 space-y-6">
+                    <p className="text-[11px] text-charcoal/60 leading-relaxed uppercase tracking-wider">
                         {description}
                     </p>
 
                     {penaltyNotice && (
-                        <div className="flex gap-3 p-3 bg-red-50 border border-red-100 rounded-xl text-red-800 text-xs">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
-                            <p className="font-medium">{penaltyNotice}</p>
+                        <div className="flex gap-4 p-4 bg-red-50/30 border border-red-100/50 rounded-[12px] text-red-500 text-[10px] items-start">
+                            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                            <p className="font-black uppercase tracking-[0.1em]">{penaltyNotice}</p>
                         </div>
                     )}
 
-                    <div className="space-y-2">
-                        <label className="block text-xs font-bold text-charcoal-800 uppercase tracking-wider">
-                            Cancellation Reason <span className="text-red-500">*</span>
+                    <div className="space-y-3">
+                        <label className="block text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em]">
+                            Cancellation Reason <span className="text-red-300">*</span>
                         </label>
                         <textarea
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            placeholder="e.g. Schedule conflict, Studio maintenance, etc."
-                            className="w-full min-h-[100px] p-3 text-sm bg-cream-50 border border-cream-200 rounded-xl focus:ring-2 focus:ring-rose-gold outline-none transition-all placeholder:text-charcoal-500 text-charcoal-900"
+                            placeholder="State your reason for record keeping..."
+                            className="w-full min-h-[120px] p-4 text-[11px] bg-white/40 border border-[var(--airy-border)] rounded-[12px] focus:ring-0 focus:border-gold/40 outline-none transition-all placeholder:text-charcoal/10 text-charcoal uppercase tracking-wider"
                             autoFocus
                         />
                         {error && (
-                            <p className="text-xs text-red-600 font-medium flex items-center gap-1">
-                                <AlertCircle className="w-3 h-3" /> {error}
+                            <p className="text-[9px] text-red-400 font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                                <AlertCircle className="w-3.5 h-3.5" /> {error}
                             </p>
                         )}
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 bg-cream-50/50 border-t border-cream-100 flex gap-3">
+                <div className="px-8 py-6 bg-white/40 border-t border-[var(--airy-border)] flex gap-4">
                     <button
                         onClick={onClose}
-                        className="flex-1 px-4 py-2.5 bg-white border border-cream-200 text-charcoal-800 rounded-xl text-sm font-bold hover:bg-cream-100 transition-colors"
+                        className="flex-1 px-6 py-4 bg-white border border-[var(--airy-border)] text-charcoal/40 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] hover:bg-charcoal/5 transition-all"
                     >
-                        Keep Booking
+                        Retain Slot
                     </button>
                     <button
                         onClick={handleConfirm}
                         disabled={isSubmitting || !reason.trim()}
-                        className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700 transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
+                        className="flex-1 px-6 py-4 bg-red-500 text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] hover:bg-red-600 transition-all shadow-md active:scale-95 disabled:opacity-30 disabled:scale-100 flex items-center justify-center gap-3"
                     >
                         {isSubmitting ? (
                             <>
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                Cancelling...
+                                Processing...
                             </>
                         ) : (
-                            'Confirm Cancellation'
+                            'Confirm Termination'
                         )}
                     </button>
                 </div>

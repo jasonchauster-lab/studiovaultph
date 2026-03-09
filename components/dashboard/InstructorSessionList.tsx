@@ -120,7 +120,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                 <div key={booking.id} className="glass-card p-8 border border-white/60 bg-white/40 hover:bg-white transition-all duration-700 shadow-sm group">
                                     <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
                                         <div className="flex items-center gap-6 flex-1 min-w-0">
-                                            <Link href={`/studios/${studio?.id}`} className="w-16 h-16 rounded-[20px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700">
+                                            <Link href={`/studios/${studio?.id}`} className="w-16 h-16 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700">
                                                 <img
                                                     src={studio?.logo_url || "/logo.png"}
                                                     alt={studio?.name || "Studio"}
@@ -133,11 +133,11 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                         {studio?.name || "Studio"}
                                                     </Link>
                                                     <span className={clsx(
-                                                        "px-3 py-1 text-[8px] font-black uppercase rounded-md tracking-[0.2em] border shrink-0 shadow-sm",
+                                                        "status-pill-frosted shrink-0",
                                                         booking.status === 'approved' ? "bg-sage/10 text-sage border-sage/20" :
                                                             "bg-red-50/50 text-red-500 border-red-100"
                                                     )}>
-                                                        {booking.status === 'approved' ? 'CONFIRMED' : 'CANCELLED'}
+                                                        {booking.status === 'approved' ? 'BOOKED' : 'CANCELLED'}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             </div>
                                         </div>
 
-                                        <div className="text-right shrink-0 bg-white/40 p-6 rounded-[2rem] border border-white/60 min-w-[180px] shadow-sm group-hover:bg-white transition-all duration-700">
+                                        <div className="text-right shrink-0 bg-white/40 p-6 rounded-[12px] border border-[var(--airy-border)] min-w-[180px] shadow-sm group-hover:bg-white transition-all duration-700">
                                             <p className="text-xl font-serif text-charcoal tracking-tighter leading-tight">
                                                 {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                                             </p>
@@ -253,16 +253,16 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                         {studio?.name || "Studio"}
                                                     </Link>
                                                     <span className={clsx(
-                                                        'px-3 py-1 text-[8px] font-black uppercase rounded-md tracking-[0.2em] border shrink-0',
+                                                        'status-pill-frosted shrink-0',
                                                         booking.status === 'completed'
-                                                            ? (booking.funds_unlocked ? 'bg-sage/10 text-sage border-sage/20 shadow-sm' : 'bg-gold/10 text-gold border-gold/20 shadow-sm') :
+                                                            ? (booking.funds_unlocked ? 'bg-sage/10 text-sage border-sage/20' : 'bg-gold/10 text-gold border-gold/20') :
                                                             booking.status === 'approved' ? 'bg-white/40 text-charcoal/40 border-white/60' :
                                                                 'bg-charcoal/5 text-charcoal/20 border-white/60'
                                                     )}>
                                                         {['completed', 'approved'].includes(booking.status)
                                                             ? (booking.status === 'completed'
-                                                                ? (booking.funds_unlocked ? 'TOTAL LIQUIDITY UNLOCKED' : 'VALUATION PENALTY HOLD')
-                                                                : 'APPROVED')
+                                                                ? 'COMPLETED'
+                                                                : 'BOOKED')
                                                             : 'CANCELLED'}
                                                     </span>
                                                 </div>
@@ -275,7 +275,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             </div>
                                         </div>
 
-                                        <div className="text-right shrink-0 bg-white/20 p-6 rounded-[2rem] border border-white/60 min-w-[180px]">
+                                        <div className="text-right shrink-0 bg-white/20 p-6 rounded-[12px] border border-[var(--airy-border)] min-w-[180px]">
                                             <p className="text-xl font-serif text-charcoal/40 tracking-tighter leading-tight">
                                                 {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                                             </p>
@@ -414,7 +414,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
                         <button
                             onClick={() => setSelectedClient(null)}
-                            className="w-full py-6 bg-charcoal text-white rounded-[20px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95"
+                            className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95"
                         >
                             CLOSE MANIFEST
                         </button>

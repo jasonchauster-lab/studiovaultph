@@ -110,7 +110,7 @@ export default function EarningsPage({
             {/* Info Modal */}
             {showInfoModal && (
                 <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/20 backdrop-blur-xl animate-in fade-in duration-700" onClick={() => setShowInfoModal(false)}>
-                    <div className="glass-card w-full max-w-lg overflow-hidden p-10 relative animate-in zoom-in-95 duration-700 shadow-cloud rounded-[3rem]" onClick={e => e.stopPropagation()}>
+                    <div className="glass-card w-full max-w-lg overflow-hidden p-10 relative animate-in zoom-in-95 duration-700 rounded-[12px]" onClick={e => e.stopPropagation()}>
                         <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
                         <div className="flex justify-between items-start mb-10 border-b border-white/60 pb-8">
@@ -143,7 +143,7 @@ export default function EarningsPage({
 
                         <button
                             onClick={() => setShowInfoModal(false)}
-                            className="w-full py-6 bg-charcoal text-white rounded-[20px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95"
+                            className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95"
                         >
                             ACKNOWLEDGE PROTOCOL
                         </button>
@@ -167,7 +167,7 @@ export default function EarningsPage({
                     {recentTransactions && <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />}
                     <button
                         onClick={() => setShowTopUpModal(true)}
-                        className="h-14 bg-white/40 text-charcoal px-8 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 border border-white/60 hover:bg-white transition-all shadow-sm active:scale-95"
+                        className="h-14 bg-white/40 text-charcoal px-8 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 border border-white/60 hover:bg-white transition-all shadow-sm active:scale-95"
                     >
                         <ArrowUpRight className="w-4 h-4 text-gold stroke-[3px]" />
                         TOP-UP VAULT
@@ -175,7 +175,7 @@ export default function EarningsPage({
                     {availableBalance < 0 ? (
                         <button
                             disabled
-                            className="h-14 bg-charcoal/10 text-charcoal/20 px-10 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 cursor-not-allowed opacity-50"
+                            className="h-14 bg-charcoal/10 text-charcoal/20 px-10 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 cursor-not-allowed opacity-50"
                             title="Payouts are restricted while equilibrium is negative."
                         >
                             <Wallet className="w-4 h-4" />
@@ -184,7 +184,7 @@ export default function EarningsPage({
                     ) : (
                         <Link
                             href="/instructor/payout"
-                            className="h-14 bg-charcoal text-white px-10 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-[1.2] transition-all shadow-cloud active:scale-95"
+                            className="h-14 bg-charcoal text-white px-10 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-[1.2] transition-all shadow-md active:scale-95"
                         >
                             <Wallet className="w-4 h-4 text-gold stroke-[3px]" />
                             INITIATE EXTRACTION
@@ -200,12 +200,12 @@ export default function EarningsPage({
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {/* Available Balance */}
-                <div className="glass-card p-10 relative overflow-hidden bg-sage border-sage/20 shadow-cloud hover:-translate-y-2 transition-all duration-700 col-span-1 sm:col-span-2">
+                <div className="glass-card p-10 relative overflow-hidden bg-sage border-sage/20 hover:-translate-y-2 transition-all duration-700 col-span-1 sm:col-span-2">
                     <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
                     <div className="relative z-10">
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-4">
-                                <div className="p-4 bg-white/20 rounded-[20px] border border-white/40 shadow-sm">
+                                <div className="p-4 bg-white/20 rounded-[12px] border border-white/40 shadow-sm">
                                     <Wallet className="w-6 h-6 text-white" />
                                 </div>
                                 <span className="text-[10px] font-black text-white/80 uppercase tracking-[0.4em]">Available for Extraction</span>
@@ -227,7 +227,7 @@ export default function EarningsPage({
                 {/* Gross Earnings */}
                 <div className="glass-card p-10 hover:-translate-y-2 transition-all duration-700 bg-white/40">
                     <div className="flex items-center gap-4 mb-8">
-                        <div className="p-4 bg-sage/10 rounded-[20px] border border-white/60 shadow-sm">
+                        <div className="p-4 bg-sage/10 rounded-[12px] border border-white/60 shadow-sm">
                             <TrendingUp className="w-6 h-6 text-sage" />
                         </div>
                         <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Gross Acquisition</span>
@@ -240,7 +240,7 @@ export default function EarningsPage({
                 <div className="glass-card p-10 hover:-translate-y-2 transition-all duration-700 bg-charcoal text-white">
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center gap-4">
-                            <div className="p-4 bg-white/10 rounded-[20px] border border-white/20 shadow-sm">
+                            <div className="p-4 bg-white/10 rounded-[12px] border border-white/20 shadow-sm">
                                 <DollarSign className="w-6 h-6 text-gold" />
                             </div>
                             <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Net Equilibrium</span>
@@ -253,7 +253,7 @@ export default function EarningsPage({
                 {/* Compensation */}
                 <div className="glass-card p-10 hover:-translate-y-2 transition-all duration-700 bg-white/40 border-l-gold border-l-4">
                     <div className="flex items-center gap-4 mb-8">
-                        <div className="p-4 bg-gold/5 rounded-[20px] border border-white/60 shadow-sm">
+                        <div className="p-4 bg-gold/5 rounded-[12px] border border-white/60 shadow-sm">
                             <ShieldCheck className="w-6 h-6 text-gold" />
                         </div>
                         <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Compensation</span>
@@ -265,7 +265,7 @@ export default function EarningsPage({
                 {/* Penalty */}
                 <div className="glass-card p-10 hover:-translate-y-2 transition-all duration-700 bg-white/40 border-l-red-400 border-l-4">
                     <div className="flex items-center gap-4 mb-8">
-                        <div className="p-4 bg-red-50/50 rounded-[20px] border border-white/60 shadow-sm">
+                        <div className="p-4 bg-red-50/50 rounded-[12px] border border-white/60 shadow-sm">
                             <TrendingUp className="w-6 h-6 text-red-400 transform rotate-180" />
                         </div>
                         <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Penalties</span>
@@ -277,7 +277,7 @@ export default function EarningsPage({
                 {/* Security Hold */}
                 <div className="glass-card p-10 hover:-translate-y-2 transition-all duration-700 bg-white/40 border-l-sage border-l-4">
                     <div className="flex items-center gap-4 mb-8">
-                        <div className="p-4 bg-sage/5 rounded-[20px] border border-white/60 shadow-sm">
+                        <div className="p-4 bg-sage/5 rounded-[12px] border border-white/60 shadow-sm">
                             <Clock className="w-6 h-6 text-sage" />
                         </div>
                         <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Security Hold</span>
@@ -289,7 +289,7 @@ export default function EarningsPage({
                 {/* Pending Payouts */}
                 <div className="glass-card p-10 hover:-translate-y-2 transition-all duration-700 bg-white/40">
                     <div className="flex items-center gap-4 mb-8">
-                        <div className="p-4 bg-white rounded-[20px] border border-white/60 shadow-sm">
+                        <div className="p-4 bg-white rounded-[12px] border border-white/60 shadow-sm">
                             <Clock className="w-6 h-6 text-charcoal/20" />
                         </div>
                         <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Extraction Queue</span>
@@ -301,7 +301,7 @@ export default function EarningsPage({
                 {/* Total Withdrawn */}
                 <div className="glass-card p-10 hover:-translate-y-2 transition-all duration-700 bg-white/40">
                     <div className="flex items-center gap-4 mb-8">
-                        <div className="p-4 bg-white rounded-[20px] border border-white/60 shadow-sm">
+                        <div className="p-4 bg-white rounded-[12px] border border-white/60 shadow-sm">
                             <ArrowUpRight className="w-6 h-6 text-charcoal/20" />
                         </div>
                         <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Successful Extraction</span>
@@ -354,12 +354,12 @@ export default function EarningsPage({
                                             </div>
                                         </td>
                                         <td className="px-10 py-8">
-                                            <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-[0.3em] border
+                                            <span className={`status-pill-frosted inline-flex items-center
                                                 ${tx.status === 'approved' || tx.status === 'processed'
-                                                    ? 'bg-sage/10 text-sage border-sage/20 shadow-sm'
+                                                    ? 'bg-sage/10 text-sage border-sage/20'
                                                     : tx.status === 'pending'
-                                                        ? 'bg-gold/10 text-gold border-gold/20 shadow-sm'
-                                                        : 'bg-charcoal/5 text-charcoal/20 border-white/60 shadow-sm'
+                                                        ? 'bg-gold/10 text-gold border-gold/20'
+                                                        : 'bg-charcoal/5 text-charcoal/20 border-white/60'
                                                 }
                                             `}>
                                                 {tx.status}

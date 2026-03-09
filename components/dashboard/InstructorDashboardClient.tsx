@@ -199,21 +199,23 @@ export default function InstructorDashboardClient() {
 
     return (
         <div className="space-y-16 pb-20">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8">
-                <div>
-                    <h1 className="text-5xl font-serif text-charcoal tracking-tighter mb-3">Instructor Dashboard</h1>
-                    <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Manage your professional schedule and earnings with ethereal precision.</p>
-                </div>
+            {/* Sticky Header */}
+            <div className="sticky-header-antigravity -mx-8 lg:-mx-12 mb-12">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8">
+                    <div>
+                        <h1 className="text-5xl font-serif text-charcoal tracking-tighter mb-3">Instructor Dashboard</h1>
+                        <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Manage your professional schedule and earnings with ethereal precision.</p>
+                    </div>
 
-                <div className="flex gap-4">
-                    <Link
-                        href="/instructor/profile"
-                        className="h-14 bg-charcoal text-white px-10 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-[1.2] transition-all shadow-cloud active:scale-95"
-                    >
-                        <User className="w-5 h-5 text-gold stroke-[3px]" />
-                        PROFESSIONAL PROFILE
-                    </Link>
+                    <div className="flex gap-4">
+                        <Link
+                            href="/instructor/profile"
+                            className="h-14 bg-charcoal text-white px-10 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-[1.2] transition-all shadow-md active:scale-95"
+                        >
+                            <User className="w-5 h-5 text-gold stroke-[3px]" />
+                            PROFESSIONAL PROFILE
+                        </Link>
+                    </div>
                 </div>
             </div>
 
@@ -271,11 +273,11 @@ export default function InstructorDashboardClient() {
                                 return (
                                     <div className="space-y-6">
                                         {upcomingBookings.map(session => (
-                                            <div key={session.id} className="p-6 border border-white/60 bg-white/40 rounded-[2rem] hover:bg-white transition-all duration-700 shadow-sm group">
+                                            <div key={session.id} className="p-6 border border-[var(--airy-border)] bg-white/40 rounded-[12px] hover:bg-white transition-all duration-700 shadow-sm group glass-card">
                                                 <div className="flex justify-between items-start mb-6">
                                                     <div className="flex flex-col gap-1 w-full">
                                                         <div className="flex items-center gap-4">
-                                                            <Link href={`/studios/${session.slots.studios.id}`} className="w-12 h-12 rounded-[15px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700">
+                                                            <Link href={`/studios/${session.slots.studios.id}`} className="w-12 h-12 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700">
                                                                 <img
                                                                     src={session.slots.studios.logo_url || "/logo.png"}
                                                                     alt={session.slots.studios.name}
@@ -287,8 +289,8 @@ export default function InstructorDashboardClient() {
                                                                     <Link href={`/studios/${session.slots.studios.id}`} className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] truncate hover:text-gold transition-colors">
                                                                         {session.slots.studios.name}
                                                                     </Link>
-                                                                    <span className="px-3 py-1 bg-sage/10 text-sage text-[8px] font-black uppercase rounded-md tracking-[0.2em] border border-sage/20 shrink-0 shadow-sm">
-                                                                        CONFIRMED
+                                                                    <span className="status-pill-frosted bg-sage/10 text-sage border-sage/20 shrink-0">
+                                                                        BOOKED
                                                                     </span>
                                                                 </div>
                                                                 <div className="flex items-center gap-2 text-[10px] text-charcoal/20 font-black uppercase tracking-[0.1em] mt-1.5">
@@ -305,7 +307,7 @@ export default function InstructorDashboardClient() {
                                                         className="flex items-center gap-3 cursor-pointer group/client"
                                                         onClick={() => setSelectedClient(session.client)}
                                                     >
-                                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-white shrink-0 border border-white shadow-sm group-hover/client:scale-110 transition-transform duration-700">
+                                                        <div className="w-8 h-8 rounded-[8px] overflow-hidden bg-white shrink-0 border border-white shadow-sm group-hover/client:scale-110 transition-transform duration-700">
                                                             <img src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                                         </div>
                                                         <div className="text-[10px] text-charcoal/20 uppercase tracking-[0.2em] truncate flex-1 group-hover/client:text-gold transition-colors">
