@@ -1,5 +1,6 @@
 ﻿import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { CheckCircle, Clock, Building2, MessageCircle, BarChart3, Wallet, ShieldAlert, AlertTriangle, Users } from 'lucide-react'
+import clsx from 'clsx'
 import VerifyButton from '@/components/admin/VerifyButton'
 import RejectBookingButton from '@/components/admin/RejectBookingButton'
 import { getAdminAnalytics } from './actions'
@@ -251,34 +252,35 @@ export default async function AdminDashboard({
         const suspensionsCount = suspendedStudios.length
 
         const tabs = [
-            { id: 'overview', label: 'Overview', icon: BarChart3 },
-            { id: 'verifications', label: 'Verifications', icon: CheckCircle, count: verificationsCount },
-            { id: 'payouts', label: 'Payouts & Wallet', icon: Wallet, count: payoutsCount },
-            { id: 'suspensions', label: 'Suspensions', icon: AlertTriangle, count: suspensionsCount },
-            { id: 'customers', label: 'Customers', icon: Users },
-            { id: 'reports', label: 'Reports', icon: Clock },
+            { id: 'overview', label: 'OVERVIEW', icon: BarChart3 },
+            { id: 'verifications', label: 'VERIFICATIONS', icon: CheckCircle, count: verificationsCount },
+            { id: 'payouts', label: 'PAYOUTS', icon: Wallet, count: payoutsCount },
+            { id: 'suspensions', label: 'SUSPENSIONS', icon: AlertTriangle, count: suspensionsCount },
+            { id: 'customers', label: 'CUSTOMERS', icon: Users },
+            { id: 'reports', label: 'REPORTS', icon: Clock },
         ]
 
         return (
-            <div className="min-h-screen bg-cream-50 p-4 sm:p-8 text-charcoal-900">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                            <h1 className="text-3xl font-serif text-charcoal-900 mb-1">Admin Dashboard</h1>
-                            <p className="text-charcoal-600 text-sm">Manage verifications, payouts, and system activity.</p>
+            <div className="min-h-screen bg-background p-6 sm:p-12 text-charcoal">
+                <div className="max-w-7xl mx-auto space-y-12">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                        <div className="space-y-2">
+                            <span className="text-[10px] font-black tracking-[0.3em] text-sage uppercase">System Core</span>
+                            <h1 className="text-5xl font-serif text-charcoal tracking-tight">Admin Console</h1>
+                            <p className="text-charcoal/50 text-sm font-medium">Monitoring studio verifications, financial flows, and user activity.</p>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-4">
                             <TriggerFundsUnlockButton />
-                            <a href="/admin/support" className="px-4 py-2 bg-charcoal-900 text-cream-50 rounded-lg text-sm font-medium hover:bg-charcoal-800 transition-colors flex items-center gap-2">
+                            <a href="/admin/support" className="btn-antigravity px-6 py-3 text-xs tracking-[0.1em] flex items-center gap-2">
                                 <MessageCircle className="w-4 h-4" />
-                                Support Center
+                                SUPPORT CENTER
                                 <SupportNotificationBadge />
                             </a>
                         </div>
                     </div>
 
                     {/* Tab Navigation */}
-                    <div className="flex gap-1 mb-8 bg-white border border-cream-200 rounded-xl p-1 shadow-sm w-fit">
+                    <div className="flex flex-wrap gap-2 p-1.5 bg-white/40 backdrop-blur-md border border-white/50 rounded-2xl shadow-cloud w-fit">
                         {tabs.map((t) => {
                             const Icon = t.icon
                             const isActive = activeTab === t.id
@@ -288,15 +290,17 @@ export default async function AdminDashboard({
                                 <a
                                     key={t.id}
                                     href={`/admin?tab=${t.id}`}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${isActive
-                                        ? 'bg-charcoal-900 text-cream-50 shadow-sm'
-                                        : 'text-charcoal-600 hover:bg-cream-50 hover:text-charcoal-900'
+                                    className={`relative flex items-center gap-2.5 px-6 py-3 rounded-xl text-[10px] font-black tracking-[0.15em] transition-all duration-500 overflow-hidden group ${isActive
+                                        ? 'bg-charcoal text-white shadow-lg shadow-charcoal/20 scale-[1.02]'
+                                        : 'text-charcoal/40 hover:text-charcoal hover:bg-white/50'
                                         }`}
                                 >
-                                    <Icon className="w-4 h-4" />
+                                    <Icon className={clsx("w-3.5 h-3.5 transition-transform duration-500", isActive ? "scale-110" : "group-hover:scale-110")} />
                                     {t.label}
                                     {count > 0 && (
-                                        <span className="ml-1 flex items-center justify-center min-w-[20px] h-[20px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold">
+                                        <span className={clsx("ml-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[8px] font-black shadow-sm",
+                                            isActive ? "bg-white text-charcoal" : "bg-charcoal text-white"
+                                        )}>
                                             {count > 99 ? '99+' : count}
                                         </span>
                                     )}
@@ -307,17 +311,19 @@ export default async function AdminDashboard({
 
                     {/* --- Content Tabs --- */}
                     {activeTab === 'overview' && (
-                        <div className="space-y-8">
-                            <div>
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-2xl font-medium text-charcoal-900 flex items-center gap-2">
-                                        <BarChart3 className="w-6 h-6 text-charcoal-500" />
-                                        Revenue & Performance
+                        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="space-y-6">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <h2 className="text-sm font-black tracking-[0.2em] text-charcoal/30 uppercase flex items-center gap-3">
+                                        <div className="w-8 h-px bg-charcoal/20" />
+                                        Analytics Engine
                                     </h2>
-                                    {!('error' in analytics) && <ExportCsvButton data={analytics.transactions} />}
+                                    <div className="flex items-center gap-3">
+                                        {!('error' in analytics) && <ExportCsvButton data={analytics.transactions} />}
+                                        <DateRangeFilters />
+                                    </div>
                                 </div>
-                                <DateRangeFilters />
-                                <div className="mt-4">
+                                <div className="glass-card p-8">
                                     <AdminExportButtons startDate={startDate} endDate={endDate} />
                                 </div>
                                 {!('error' in analytics) ? (
@@ -354,28 +360,40 @@ export default async function AdminDashboard({
                     )}
 
                     {activeTab === 'verifications' && (
-                        <div className="space-y-8">
-                            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
-                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
-                                    <CheckCircle className="w-5 h-5 text-charcoal-500" />
-                                    Instructor Verifications
-                                    {certsWithUrls.length > 0 && <span className="ml-2 bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{certsWithUrls.length}</span>}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="glass-card p-8 space-y-6">
+                                <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
+                                    <CheckCircle className="w-4 h-4 text-sage" />
+                                    INSTRUCTOR VERIFICATIONS
+                                    {certsWithUrls.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{certsWithUrls.length}</span>}
                                 </h2>
-                                {certsWithUrls.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
+                                {certsWithUrls.length === 0 ? <p className="text-charcoal/40 text-xs italic">All instructor certifications are up to date.</p> : (
                                     <div className="space-y-4">
                                         {certsWithUrls.map((cert: any) => (
-                                            <div key={cert.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-start">
-                                                <div className="text-charcoal-900">
-                                                    <p className="font-medium text-charcoal-900">{cert.profiles?.full_name}</p>
-                                                    <p className="text-sm text-charcoal-600">{cert.certification_name}</p>
-                                                    <div className="mt-2 flex gap-4">
-                                                        {cert.signedUrl && <a href={cert.signedUrl} target="_blank" className="text-xs text-blue-600 underline">Cert Proof</a>}
-                                                        {cert.govIdSignedUrl && <a href={cert.govIdSignedUrl} target="_blank" className="text-xs text-blue-600 underline">Gov ID</a>}
+                                            <div key={cert.id} className="group p-5 bg-alabaster/50 border border-cream-100 rounded-2xl hover:bg-white hover:shadow-cloud transition-all duration-300">
+                                                <div className="flex justify-between items-start gap-4">
+                                                    <div className="space-y-1">
+                                                        <p className="font-bold text-charcoal text-sm">{cert.profiles?.full_name}</p>
+                                                        <p className="text-[10px] text-charcoal/50 font-black uppercase tracking-wider">{cert.certification_name}</p>
+                                                        <div className="pt-2 flex gap-3">
+                                                            {cert.signedUrl && (
+                                                                <a href={cert.signedUrl} target="_blank" className="text-[10px] font-black text-sage hover:text-sage-light uppercase tracking-widest flex items-center gap-1.5 transition-colors">
+                                                                    <div className="w-1 h-1 rounded-full bg-sage" />
+                                                                    CERT PROOF
+                                                                </a>
+                                                            )}
+                                                            {cert.govIdSignedUrl && (
+                                                                <a href={cert.govIdSignedUrl} target="_blank" className="text-[10px] font-black text-sage hover:text-sage-light uppercase tracking-widest flex items-center gap-1.5 transition-colors">
+                                                                    <div className="w-1 h-1 rounded-full bg-sage" />
+                                                                    GOV ID
+                                                                </a>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <VerifyButton id={cert.id} action="rejectCert" label="Reject" className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md" />
-                                                    <VerifyButton id={cert.id} action="approveCert" label="Approve" className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md" />
+                                                    <div className="flex gap-2">
+                                                        <VerifyButton id={cert.id} action="rejectCert" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl hover:bg-red-100 transition-colors tracking-widest" />
+                                                        <VerifyButton id={cert.id} action="approveCert" label="APPROVE" className="px-4 py-2 bg-charcoal text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest shadow-md" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -383,27 +401,29 @@ export default async function AdminDashboard({
                                 )}
                             </div>
 
-                            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
-                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
-                                    <Building2 className="w-5 h-5 text-charcoal-500" />
-                                    Studio Verifications
-                                    {studiosWithUrls.length > 0 && <span className="ml-2 bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{studiosWithUrls.length}</span>}
+                            <div className="glass-card p-8 space-y-6">
+                                <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
+                                    <Building2 className="w-4 h-4 text-sage" />
+                                    STUDIO VERIFICATIONS
+                                    {studiosWithUrls.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{studiosWithUrls.length}</span>}
                                 </h2>
-                                {studiosWithUrls.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
+                                {studiosWithUrls.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending studio verifications.</p> : (
                                     <div className="space-y-4">
                                         {studiosWithUrls.map((s: any) => (
-                                            <div key={s.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-start">
-                                                <div className="text-charcoal-900">
-                                                    <p className="font-medium text-charcoal-900">{s.name}</p>
-                                                    <p className="text-sm text-charcoal-600">{s.profiles?.full_name}</p>
-                                                    <div className="mt-2 flex gap-4">
-                                                        {s.birSignedUrl && <a href={s.birSignedUrl} target="_blank" className="text-xs text-blue-600 underline">BIR</a>}
-                                                        {s.govIdSignedUrl && <a href={s.govIdSignedUrl} target="_blank" className="text-xs text-blue-600 underline">Gov ID</a>}
+                                            <div key={s.id} className="group p-5 bg-alabaster/50 border border-cream-100 rounded-2xl hover:bg-white hover:shadow-cloud transition-all duration-300">
+                                                <div className="flex justify-between items-start gap-4">
+                                                    <div className="space-y-1">
+                                                        <p className="font-bold text-charcoal text-sm">{s.name}</p>
+                                                        <p className="text-[10px] text-charcoal/50 font-black uppercase tracking-wider">Owner: {s.profiles?.full_name}</p>
+                                                        <div className="pt-2 flex gap-3">
+                                                            {s.birSignedUrl && <a href={s.birSignedUrl} target="_blank" className="text-[10px] font-black text-sage uppercase tracking-widest">BIR</a>}
+                                                            {s.govIdSignedUrl && <a href={s.govIdSignedUrl} target="_blank" className="text-[10px] font-black text-sage uppercase tracking-widest">GOV ID</a>}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <VerifyButton id={s.id} action="rejectStudio" label="Reject" className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md" />
-                                                    <VerifyButton id={s.id} action="verifyStudio" label="Approve" className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md" />
+                                                    <div className="flex gap-2">
+                                                        <VerifyButton id={s.id} action="rejectStudio" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
+                                                        <VerifyButton id={s.id} action="verifyStudio" label="APPROVE" className="px-4 py-2 bg-charcoal text-white text-[10px] font-black rounded-xl" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -411,28 +431,29 @@ export default async function AdminDashboard({
                                 )}
                             </div>
 
-                            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
-                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
-                                    <Wallet className="w-5 h-5 text-charcoal-500" />
-                                    Studio Payout Setups
-                                    {payoutStudiosWithUrls.length > 0 && <span className="ml-2 bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{payoutStudiosWithUrls.length}</span>}
+                            <div className="glass-card p-8 space-y-6 lg:col-span-2">
+                                <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
+                                    <Wallet className="w-4 h-4 text-sage" />
+                                    STUDIO PAYOUT SETUPS
+                                    {payoutStudiosWithUrls.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{payoutStudiosWithUrls.length}</span>}
                                 </h2>
-                                {payoutStudiosWithUrls.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
-                                    <div className="space-y-4">
+                                {payoutStudiosWithUrls.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending payout setups.</p> : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {payoutStudiosWithUrls.map((s: any) => (
-                                            <div key={s.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-start">
-                                                <div className="text-charcoal-900">
-                                                    <p className="font-medium text-charcoal-900">{s.name}</p>
-                                                    <p className="text-sm text-charcoal-600">{s.profiles?.full_name}</p>
-                                                    <div className="mt-2 flex gap-4">
-                                                        {s.permitSignedUrl && <a href={s.permitSignedUrl} target="_blank" className="text-xs text-blue-600 underline">Permit</a>}
-                                                        {s.certSignedUrl && <a href={s.certSignedUrl} target="_blank" className="text-xs text-blue-600 underline">Secretary Cert</a>}
-                                                        {s.birSignedUrl && <a href={s.birSignedUrl} target="_blank" className="text-xs text-blue-600 underline">BIR</a>}
+                                            <div key={s.id} className="group p-5 bg-alabaster/50 border border-cream-100 rounded-2xl hover:bg-white hover:shadow-cloud transition-all duration-300">
+                                                <div className="flex justify-between items-start gap-4">
+                                                    <div className="space-y-1">
+                                                        <p className="font-bold text-charcoal text-sm">{s.name}</p>
+                                                        <p className="text-[10px] text-charcoal/50 font-black uppercase tracking-wider">{s.profiles?.full_name}</p>
+                                                        <div className="pt-2 flex gap-3">
+                                                            {s.permitSignedUrl && <a href={s.permitSignedUrl} target="_blank" className="text-[10px] font-black text-sage uppercase tracking-widest">PERMIT</a>}
+                                                            {s.certSignedUrl && <a href={s.certSignedUrl} target="_blank" className="text-[10px] font-black text-sage uppercase tracking-widest">SEC CERT</a>}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <VerifyButton id={s.id} action="rejectStudioPayout" label="Reject" className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md" />
-                                                    <VerifyButton id={s.id} action="approveStudioPayout" label="Approve" className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md" />
+                                                    <div className="flex gap-2">
+                                                        <VerifyButton id={s.id} action="rejectStudioPayout" label="REJECT" className="px-3 py-1 bg-red-50 text-red-700 text-[10px] font-black rounded-lg" />
+                                                        <VerifyButton id={s.id} action="approveStudioPayout" label="APPROVE" className="px-3 py-1 bg-charcoal text-white text-[10px] font-black rounded-lg" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -443,15 +464,15 @@ export default async function AdminDashboard({
                     )}
 
                     {activeTab === 'payouts' && (
-                        <div className="space-y-8">
-                            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
-                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
-                                    <Clock className="w-5 h-5 text-charcoal-500" />
-                                    Booking Requests
-                                    {pendingBookings.length > 0 && <span className="ml-2 bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{pendingBookings.length}</span>}
+                        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="glass-card p-8 space-y-6">
+                                <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
+                                    <Clock className="w-4 h-4 text-sage" />
+                                    BOOKING REQUESTS
+                                    {pendingBookings.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{pendingBookings.length}</span>}
                                 </h2>
-                                {pendingBookings.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
-                                    <div className="space-y-4">
+                                {pendingBookings.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending booking approvals.</p> : (
+                                    <div className="space-y-6">
                                         {pendingBookings.map((b: any) => {
                                             const breakdown = b.price_breakdown || {}
                                             const instructor = b.instructor
@@ -459,76 +480,76 @@ export default async function AdminDashboard({
                                             const studioOwner = Array.isArray(studio?.profiles) ? studio.profiles[0] : studio?.profiles
 
                                             return (
-                                                <div key={b.id} className="border border-cream-100 rounded-lg p-5 bg-cream-50/50 flex flex-col md:flex-row justify-between items-start gap-4">
-                                                    <div className="flex-1 space-y-3">
-                                                        <div>
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <p className="font-bold text-charcoal-900 text-lg">
-                                                                    {instructor?.full_name || 'Instructor'} → {studio?.name || 'Studio'}
+                                                <div key={b.id} className="group p-6 bg-alabaster/30 border border-cream-100 rounded-2xl hover:bg-white hover:shadow-cloud transition-all duration-300 flex flex-col lg:flex-row justify-between items-start gap-8">
+                                                    <div className="flex-1 space-y-4">
+                                                        <div className="space-y-1">
+                                                            <div className="flex items-center gap-3">
+                                                                <p className="font-serif text-2xl text-charcoal">
+                                                                    {instructor?.full_name || 'Instructor'} <span className="text-charcoal/20 font-sans text-lg mx-1">→</span> {studio?.name || 'Studio'}
                                                                 </p>
-                                                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded uppercase">
+                                                                <span className="px-2.5 py-1 bg-sage/10 text-sage text-[8px] font-black rounded-lg uppercase tracking-widest border border-sage/20">
                                                                     {breakdown.equipment || 'Session'}
                                                                 </span>
                                                             </div>
-                                                            <p className="text-sm text-charcoal-600 font-medium">
-                                                                Client: {b.client?.full_name} ({b.client?.email})
-                                                            </p>
-                                                            <p className="text-xs text-charcoal-500 mt-1">
-                                                                {new Date(b.slots?.date).toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} at {b.slots?.start_time}
+                                                            <div className="flex items-center gap-2 text-xs text-charcoal/50 font-medium">
+                                                                <span className="font-bold text-charcoal/80">Client: {b.client?.full_name}</span>
+                                                                <span className="opacity-40">•</span>
+                                                                <span>{b.client?.email}</span>
+                                                            </div>
+                                                            <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-wider mt-1">
+                                                                {new Date(b.slots?.date).toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} @ {b.slots?.start_time}
                                                             </p>
                                                         </div>
 
-                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-cream-100">
-                                                            <div className="space-y-1">
-                                                                <p className="text-[10px] uppercase tracking-wider font-bold text-charcoal-400">Instructor Contact</p>
-                                                                <p className="text-xs font-semibold">{instructor?.full_name}</p>
-                                                                <p className="text-xs text-charcoal-500">{instructor?.email}</p>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-cream-100/50">
+                                                            <div className="space-y-1.5">
+                                                                <p className="text-[8px] uppercase tracking-widest font-black text-charcoal/30">Instructor Contact</p>
+                                                                <p className="text-xs font-bold text-charcoal/70">{instructor?.email}</p>
                                                             </div>
-                                                            <div className="space-y-1">
-                                                                <p className="text-[10px] uppercase tracking-wider font-bold text-charcoal-400">Studio Contact</p>
-                                                                <p className="text-xs font-semibold">{studio?.name}</p>
-                                                                <p className="text-xs text-charcoal-500">{studioOwner?.email || 'No email'}</p>
+                                                            <div className="space-y-1.5">
+                                                                <p className="text-[8px] uppercase tracking-widest font-black text-charcoal/30">Studio Contact</p>
+                                                                <p className="text-xs font-bold text-charcoal/70">{studioOwner?.email || 'N/A'}</p>
                                                             </div>
                                                         </div>
 
-                                                        <div className="bg-white/50 rounded-lg p-3 border border-cream-200">
-                                                            <div className="flex justify-between items-center mb-2">
-                                                                <p className="text-xs font-bold text-charcoal-900">Price Breakdown</p>
-                                                                <p className="text-sm font-bold text-charcoal-900">Total: ₱{(b.total_price || 0).toLocaleString()}</p>
+                                                        <div className="bg-white/40 border border-white/60 p-5 rounded-2xl shadow-sm space-y-4">
+                                                            <div className="flex justify-between items-end">
+                                                                <p className="text-[10px] font-black text-charcoal/30 tracking-widest uppercase">Financial Breakdown</p>
+                                                                <p className="text-xl font-serif text-charcoal">₱{(b.total_price || 0).toLocaleString()}</p>
                                                             </div>
-                                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
-                                                                <div>
-                                                                    <p className="text-charcoal-400 uppercase font-bold">Studio</p>
-                                                                    <p className="font-semibold">₱{(breakdown.studio_fee || 0).toLocaleString()}</p>
+                                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                                                <div className="space-y-0.5">
+                                                                    <p className="text-[8px] text-charcoal/30 uppercase font-black tracking-widest leading-none">Studio</p>
+                                                                    <p className="text-sm font-bold text-charcoal/80 leading-none">₱{(breakdown.studio_fee || 0).toLocaleString()}</p>
                                                                 </div>
-                                                                <div>
-                                                                    <p className="text-charcoal-400 uppercase font-bold">Instructor</p>
-                                                                    <p className="font-semibold">₱{(breakdown.instructor_fee || 0).toLocaleString()}</p>
+                                                                <div className="space-y-0.5">
+                                                                    <p className="text-[8px] text-charcoal/30 uppercase font-black tracking-widest leading-none">Instructor</p>
+                                                                    <p className="text-sm font-bold text-charcoal/80 leading-none">₱{(breakdown.instructor_fee || 0).toLocaleString()}</p>
                                                                 </div>
-                                                                <div>
-                                                                    <p className="text-charcoal-400 uppercase font-bold">Service</p>
-                                                                    <p className="font-semibold">₱{(breakdown.service_fee || 0).toLocaleString()}</p>
+                                                                <div className="space-y-0.5">
+                                                                    <p className="text-[8px] text-charcoal/30 uppercase font-black tracking-widest leading-none">Service</p>
+                                                                    <p className="text-sm font-bold text-charcoal/80 leading-none">₱{(breakdown.service_fee || 0).toLocaleString()}</p>
                                                                 </div>
                                                                 {breakdown.wallet_deduction > 0 && (
-                                                                    <div>
-                                                                        <p className="text-charcoal-400 uppercase font-bold">Wallet Used</p>
-                                                                        <p className="font-semibold text-green-600">-₱{(breakdown.wallet_deduction || 0).toLocaleString()}</p>
+                                                                    <div className="space-y-0.5">
+                                                                        <p className="text-[8px] text-sage uppercase font-black tracking-widest leading-none">Wallet</p>
+                                                                        <p className="text-sm font-bold text-sage leading-none">-₱{(breakdown.wallet_deduction || 0).toLocaleString()}</p>
                                                                     </div>
                                                                 )}
                                                             </div>
                                                         </div>
 
                                                         {b.payment_proof_url && (
-                                                            <a href={getDisplayUrl(b.payment_proof_url)} target="_blank" className="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 hover:text-blue-700 transition-colors uppercase tracking-wider mt-1">
-                                                                <MessageCircle className="w-3 h-3" />
-                                                                View Payment Proof
+                                                            <a href={getDisplayUrl(b.payment_proof_url)} target="_blank" className="inline-flex items-center gap-2 text-[10px] font-black text-sage hover:text-charcoal transition-colors uppercase tracking-[0.2em]">
+                                                                <MessageCircle className="w-4 h-4" />
+                                                                VIEW PAYMENT PROOF
                                                             </a>
                                                         )}
                                                     </div>
 
-                                                    <div className="flex md:flex-col gap-2 w-full md:w-auto">
-                                                        <VerifyButton id={b.id} action="confirmBooking" label="Approve Booking" className="flex-1 md:w-32 px-4 py-2 bg-charcoal-900 text-cream-50 text-xs rounded-lg font-bold hover:bg-charcoal-800 transition-colors" />
-                                                        <RejectBookingButton id={b.id} className="flex-1 md:w-32 px-4 py-2 bg-red-50 text-red-600 text-xs rounded-lg font-bold border border-red-100 hover:bg-red-100 transition-colors shadow-sm" />
+                                                    <div className="flex lg:flex-col gap-3 w-full lg:w-40 h-full justify-end lg:pt-2">
+                                                        <VerifyButton id={b.id} action="confirmBooking" label="APPROVE" className="flex-1 py-3 bg-charcoal text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest shadow-md" />
+                                                        <RejectBookingButton id={b.id} className="flex-1 py-3 bg-red-50 text-red-600 text-[10px] font-black rounded-xl border border-red-100 hover:bg-red-100 transition-colors tracking-widest uppercase shadow-sm" />
                                                     </div>
                                                 </div>
                                             )
@@ -537,130 +558,152 @@ export default async function AdminDashboard({
                                 )}
                             </div>
 
-                            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
-                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
-                                    <Wallet className="w-5 h-5 text-charcoal-500" />
-                                    Instructor Payouts
-                                    {payoutRequests.length > 0 && <span className="ml-2 bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{payoutRequests.length}</span>}
-                                </h2>
-                                {payoutRequests.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
-                                    <div className="space-y-4">
-                                        {payoutRequests.map((r: any) => (
-                                            <div key={r.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-center">
-                                                <div>
-                                                    <p className="font-bold">₱{r.amount.toLocaleString()}</p>
-                                                    <p className="text-xs text-charcoal-600">{r.instructor_name}</p>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <div className="glass-card p-8 space-y-6">
+                                    <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
+                                        <Wallet className="w-4 h-4 text-sage" />
+                                        INSTRUCTOR PAYOUTS
+                                        {payoutRequests.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{payoutRequests.length}</span>}
+                                    </h2>
+                                    {payoutRequests.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending requests.</p> : (
+                                        <div className="space-y-4">
+                                            {payoutRequests.map((r: any) => (
+                                                <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center transition-all hover:bg-white hover:shadow-cloud group">
+                                                    <div className="space-y-1">
+                                                        <p className="text-lg font-serif text-charcoal">₱{r.amount.toLocaleString()}</p>
+                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest">{r.instructor_name}</p>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
+                                                        <VerifyButton id={r.id} action="approvePayout" label="APPROVE" className="px-4 py-2 bg-charcoal text-white text-[10px] font-black rounded-xl shadow-sm" />
+                                                    </div>
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    <VerifyButton id={r.id} action="rejectPayout" label="Reject" className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md" />
-                                                    <VerifyButton id={r.id} action="approvePayout" label="Approve" className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md" />
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
 
-                            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
-                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
-                                    <Wallet className="w-5 h-5 text-charcoal-500" />
-                                    Studio Payouts
-                                    {studioPayouts.length > 0 && <span className="ml-2 bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{studioPayouts.length}</span>}
-                                </h2>
-                                {studioPayouts.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
-                                    <div className="space-y-4">
-                                        {studioPayouts.map((r: any) => (
-                                            <div key={r.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-center">
-                                                <div>
-                                                    <p className="font-bold">₱{r.amount.toLocaleString()}</p>
-                                                    <p className="text-xs text-charcoal-600">{r.studios?.name} ({r.studios?.profiles?.full_name})</p>
+                                <div className="glass-card p-8 space-y-6">
+                                    <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
+                                        <Wallet className="w-4 h-4 text-sage" />
+                                        STUDIO PAYOUTS
+                                        {studioPayouts.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{studioPayouts.length}</span>}
+                                    </h2>
+                                    {studioPayouts.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending payouts.</p> : (
+                                        <div className="space-y-4">
+                                            {studioPayouts.map((r: any) => (
+                                                <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center transition-all hover:bg-white hover:shadow-cloud group">
+                                                    <div className="space-y-1">
+                                                        <p className="text-lg font-serif text-charcoal">₱{r.amount.toLocaleString()}</p>
+                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest">{r.studios?.name} ({r.studios?.profiles?.full_name})</p>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
+                                                        <VerifyButton id={r.id} action="approvePayout" label="APPROVE" className="px-4 py-2 bg-charcoal text-white text-[10px] font-black rounded-xl shadow-sm" />
+                                                    </div>
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    <VerifyButton id={r.id} action="rejectPayout" label="Reject" className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md" />
-                                                    <VerifyButton id={r.id} action="approvePayout" label="Approve" className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md" />
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
 
-                            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
-                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
-                                    <Wallet className="w-5 h-5 text-charcoal-500" />
-                                    Customer Wallet Payouts
-                                    {customerPayouts.length > 0 && <span className="ml-2 bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{customerPayouts.length}</span>}
-                                </h2>
-                                {customerPayouts.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
-                                    <div className="space-y-4">
-                                        {customerPayouts.map((r: any) => (
-                                            <div key={r.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-center">
-                                                <div>
-                                                    <p className="font-bold">₱{r.amount.toLocaleString()}</p>
-                                                    <p className="text-xs text-charcoal-600">{r.profile?.full_name} ({r.profile?.email})</p>
+                                <div className="glass-card p-8 space-y-6">
+                                    <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
+                                        <Wallet className="w-4 h-4 text-sage" />
+                                        CUSTOMER PAYOUTS
+                                        {customerPayouts.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{customerPayouts.length}</span>}
+                                    </h2>
+                                    {customerPayouts.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending customer breakouts.</p> : (
+                                        <div className="space-y-4">
+                                            {customerPayouts.map((r: any) => (
+                                                <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center transition-all hover:bg-white hover:shadow-cloud group">
+                                                    <div className="space-y-1">
+                                                        <p className="text-lg font-serif text-charcoal">₱{r.amount.toLocaleString()}</p>
+                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest">{r.profile?.full_name}</p>
+                                                        <p className="text-[9px] text-charcoal/30 font-bold uppercase">{r.profile?.email}</p>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
+                                                        <VerifyButton id={r.id} action="approvePayout" label="APPROVE" className="px-4 py-2 bg-charcoal text-white text-[10px] font-black rounded-xl shadow-sm" />
+                                                    </div>
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    <VerifyButton id={r.id} action="rejectPayout" label="Reject" className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md" />
-                                                    <VerifyButton id={r.id} action="approvePayout" label="Approve" className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md" />
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
 
-                            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
-                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
-                                    <Wallet className="w-5 h-5 text-charcoal-500" />
-                                    Wallet Top-ups
-                                    {pendingTopUps.length > 0 && <span className="ml-2 bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{pendingTopUps.length}</span>}
-                                </h2>
-                                {pendingTopUps.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
-                                    <div className="space-y-4">
-                                        {pendingTopUps.map((t: any) => (
-                                            <div key={t.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-center">
-                                                <div>
-                                                    <p className="font-bold">₱{t.amount.toLocaleString()}</p>
-                                                    <p className="text-xs text-charcoal-600">{t.profiles?.full_name} ({t.profiles?.email})</p>
-                                                    {t.payment_proof_url && <a href={getDisplayUrl(t.payment_proof_url)} target="_blank" className="text-[10px] text-blue-600 underline mt-1 block">View Receipt</a>}
+                                <div className="glass-card p-8 space-y-6">
+                                    <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
+                                        <Wallet className="w-4 h-4 text-sage" />
+                                        WALLET TOP-UPS
+                                        {pendingTopUps.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{pendingTopUps.length}</span>}
+                                    </h2>
+                                    {pendingTopUps.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending top-ups.</p> : (
+                                        <div className="space-y-4">
+                                            {pendingTopUps.map((t: any) => (
+                                                <div key={t.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center transition-all hover:bg-white hover:shadow-cloud group">
+                                                    <div className="space-y-1">
+                                                        <p className="text-lg font-serif text-charcoal">₱{t.amount.toLocaleString()}</p>
+                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest">{t.profiles?.full_name}</p>
+                                                        {t.payment_proof_url && (
+                                                            <a href={getDisplayUrl(t.payment_proof_url)} target="_blank" className="text-[9px] font-black text-blue-500 hover:text-blue-600 uppercase tracking-widest pt-1 block">
+                                                                View Receipt
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <VerifyButton id={t.id} action="rejectTopUp" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
+                                                        <VerifyButton id={t.id} action="approveTopUp" label="APPROVE" className="px-4 py-2 bg-charcoal text-white text-[10px] font-black rounded-xl shadow-sm" />
+                                                    </div>
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    <VerifyButton id={t.id} action="rejectTopUp" label="Reject" className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md" />
-                                                    <VerifyButton id={t.id} action="approveTopUp" label="Approve" className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md" />
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
 
-                            <div className="bg-charcoal-900 text-white rounded-xl p-6 shadow-xl">
-                                <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
-                                    <ShieldAlert className="w-5 h-5 text-rose-gold" />
-                                    Manual Adjustment
-                                </h2>
-                                <BalanceAdjustmentTool />
+                                <div className="glass-card p-8 bg-charcoal text-white border-0 shadow-2xl lg:col-span-2">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="p-3 bg-white/10 rounded-2xl">
+                                            <ShieldAlert className="w-6 h-6 text-rose-gold" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-sm font-black tracking-[0.2em] uppercase">Manual Financial Adjustment</h2>
+                                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">Direct wallet balance manipulation</p>
+                                        </div>
+                                    </div>
+                                    <BalanceAdjustmentTool />
+                                </div>
                             </div>
                         </div>
                     )}
 
                     {activeTab === 'suspensions' && (
-                        <div className="space-y-8">
-                            <div className="bg-white border border-red-200 rounded-xl p-6 shadow-sm">
-                                <h2 className="text-xl font-medium text-red-600 mb-4 flex items-center gap-2">
-                                    <AlertTriangle className="w-5 h-5" />
-                                    Suspended Studios & Partners
-                                    {suspendedStudios.length > 0 && <span className="ml-2 bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">{suspendedStudios.length}</span>}
+                        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="glass-card p-12 border-red-100/30">
+                                <h2 className="text-sm font-black tracking-[0.2em] text-red-500 mb-8 flex items-center gap-3">
+                                    <AlertTriangle className="w-4 h-4" />
+                                    QUARANTINED ACCOUNTS
+                                    {suspendedStudios.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-500 text-white text-[10px] font-black">{suspendedStudios.length}</span>}
                                 </h2>
-                                {suspendedStudios.length === 0 ? <p className="text-charcoal-500 text-sm">No accounts are currently suspended.</p> : (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {suspendedStudios.length === 0 ? (
+                                    <div className="text-center py-12 space-y-4">
+                                        <div className="w-16 h-16 bg-sage/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <CheckCircle className="w-8 h-8 text-sage" />
+                                        </div>
+                                        <p className="text-charcoal font-serif text-xl">System accounts are healthy.</p>
+                                        <p className="text-charcoal/40 text-sm">No accounts are currently under suspension.</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {suspendedStudios.map((p: any) => (
-                                            <div key={p.id} className="border border-red-100 rounded-lg p-4 bg-red-50/30 flex justify-between items-center">
-                                                <div>
-                                                    <p className="font-bold text-charcoal-900">{p.studios?.[0]?.name || p.full_name}</p>
-                                                    <p className="text-[10px] text-charcoal-500 uppercase font-bold">{p.studios?.[0] ? 'Studio Owner' : 'Instructor'}</p>
+                                            <div key={p.id} className="group p-6 bg-red-50/30 border border-red-100/50 rounded-2xl hover:bg-white hover:shadow-cloud transition-all duration-300">
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <p className="font-bold text-charcoal text-sm">{p.studios?.[0]?.name || p.full_name}</p>
+                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest mt-1">{p.studios?.[0] ? 'Studio Owner' : 'Instructor'}</p>
+                                                    </div>
+                                                    <VerifyButton id={p.id} action="reinstateStudio" label="REINSTATE ACCESS" className="w-full py-3 bg-charcoal text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest" />
                                                 </div>
-                                                <VerifyButton id={p.id} action="reinstateStudio" label="Reactivate" className="px-4 py-2 bg-charcoal-900 text-cream-50 text-xs rounded-lg font-bold" />
                                             </div>
                                         ))}
                                     </div>
@@ -670,56 +713,86 @@ export default async function AdminDashboard({
                     )}
 
                     {activeTab === 'customers' && (
-                        <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm overflow-x-auto">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-medium">All Users ({allUsers.length})</h2>
+                        <div className="glass-card overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="p-8 border-b border-cream-100 flex justify-between items-end">
+                                <div className="space-y-1">
+                                    <h2 className="text-sm font-black tracking-[0.2em] text-charcoal uppercase">USER ARCHIVE</h2>
+                                    <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest">{allUsers.length} TOTAL REGISTRATIONS</p>
+                                </div>
                             </div>
-                            <table className="w-full text-left">
-                                <thead className="text-xs uppercase text-charcoal-400 border-b border-cream-100">
-                                    <tr>
-                                        <th className="py-3 px-4">User</th>
-                                        <th className="py-3 px-4">Role</th>
-                                        <th className="py-3 px-4">Balance</th>
-                                        <th className="py-3 px-4">Status</th>
-                                        <th className="py-3 px-4">Waiver</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="text-sm">
-                                    {allUsers.map((u: any) => (
-                                        <tr key={u.id} className="border-b border-cream-50 hover:bg-cream-50/30">
-                                            <td className="py-3 px-4">
-                                                <p className="font-medium">{u.full_name}</p>
-                                                <p className="text-[10px] text-charcoal-400">{u.email}</p>
-                                                <p className="text-[10px] text-charcoal-400">{u.contact_number}</p>
-                                            </td>
-                                            <td className="py-3 px-4">
-                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-                                                    u.role === 'instructor' ? 'bg-blue-100 text-blue-700' :
-                                                        u.role === 'studio' ? 'bg-orange-100 text-orange-700' :
-                                                            'bg-gray-100 text-gray-700'
-                                                    }`}>
-                                                    {u.role}
-                                                </span>
-                                            </td>
-                                            <td className="py-3 px-4 font-mono text-xs">₱{(u.available_balance || 0).toLocaleString()}</td>
-                                            <td className="py-3 px-4">
-                                                {u.is_suspended ? (
-                                                    <span className="text-red-600 font-bold text-[10px] uppercase">Suspended</span>
-                                                ) : (
-                                                    <span className="text-green-600 font-bold text-[10px] uppercase">Active</span>
-                                                )}
-                                            </td>
-                                            <td className="py-3 px-4">
-                                                {u.waiver_url ? (
-                                                    <a href={getDisplayUrl(u.waiver_url)} target="_blank" className="text-blue-600 underline text-[10px]">View waiver</a>
-                                                ) : (
-                                                    <span className="text-charcoal-300 text-[10px]">No waiver</span>
-                                                )}
-                                            </td>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead className="bg-alabaster/50 border-b border-cream-100">
+                                        <tr>
+                                            <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">IDENTIFIER</th>
+                                            <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">ACCESS LEVEL</th>
+                                            <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">CREDITS</th>
+                                            <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">STATUS</th>
+                                            <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">DOCUMENTS</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-cream-50">
+                                        {allUsers.map((u: any) => (
+                                            <tr key={u.id} className="hover:bg-sage/5 transition-colors group">
+                                                <td className="px-8 py-6">
+                                                    <p className="font-bold text-charcoal text-sm">{u.full_name}</p>
+                                                    <p className="text-[10px] text-charcoal/40 font-medium">{u.email}</p>
+                                                    <p className="text-[10px] text-charcoal/30 mt-0.5">{u.contact_number}</p>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <span className={clsx(
+                                                        "inline-flex px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border",
+                                                        u.role === 'admin' ? "bg-charcoal text-white border-charcoal" :
+                                                            u.role === 'instructor' ? "bg-sage/10 text-sage border-sage/20" :
+                                                                u.role === 'studio' ? "bg-rose-gold/10 text-rose-gold border-rose-gold/20" :
+                                                                    "bg-alabaster text-charcoal/40 border-cream-100"
+                                                    )}>
+                                                        {u.role}
+                                                    </span>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <p className="font-serif text-charcoal text-sm">₱{(u.available_balance || 0).toLocaleString()}</p>
+                                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2">
+                                                        <BalanceAdjustmentTool initialProfile={u} variant="minimal" />
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className={clsx("w-1.5 h-1.5 rounded-full", u.is_suspended ? "bg-red-500" : "bg-green-500")} />
+                                                        <span className={clsx(
+                                                            "text-[9px] font-black uppercase tracking-widest",
+                                                            u.is_suspended ? "text-red-500" : "text-green-500"
+                                                        )}>
+                                                            {u.is_suspended ? "Suspended" : "Active"}
+                                                        </span>
+                                                    </div>
+                                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2">
+                                                        <VerifyButton
+                                                            id={u.id}
+                                                            action={u.is_suspended ? "reinstateStudio" : "suspendUser"}
+                                                            label={u.is_suspended ? "REINSTATE" : "SUSPEND"}
+                                                            className={clsx(
+                                                                "px-3 py-1.5 text-[8px] font-black rounded-lg transition-all",
+                                                                u.is_suspended ? "bg-charcoal text-white" : "bg-red-50 text-red-600 hover:bg-red-100"
+                                                            )}
+                                                        />
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    {u.waiver_url ? (
+                                                        <a href={getDisplayUrl(u.waiver_url)} target="_blank" className="text-[9px] font-black text-sage hover:text-charcoal uppercase tracking-widest flex items-center gap-1.5">
+                                                            <div className="w-1 h-1 rounded-full bg-sage" />
+                                                            VIEW WAIVER
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-[9px] font-black text-charcoal/20 uppercase tracking-widest">NONE</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     )}
 
@@ -735,14 +808,19 @@ export default async function AdminDashboard({
     } catch (err: any) {
         console.error('GLOBAL DASHBOARD ERROR:', err)
         return (
-            <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-cream-50 flex items-center justify-center">
-                <div className="max-w-md w-full text-center">
-                    <ShieldAlert className="mx-auto h-12 w-12 text-red-600" />
-                    <h2 className="mt-4 text-2xl font-serif text-charcoal-900 font-bold">Something went wrong</h2>
-                    <p className="mt-2 text-charcoal-600 font-bold text-red-600">{err.message || 'An unexpected error occurred while loading the dashboard.'}</p>
-                    <div className="mt-8">
-                        <a href="/admin" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-cream-50 bg-charcoal-900 hover:bg-charcoal-800 transition-colors">
-                            Try again
+            <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-alabaster flex items-center justify-center">
+                <div className="max-w-md w-full glass-card p-12 text-center space-y-6">
+                    <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto">
+                        <ShieldAlert className="h-10 w-10 text-red-600" />
+                    </div>
+                    <div className="space-y-2">
+                        <h2 className="text-2xl font-serif text-charcoal">System Interruption</h2>
+                        <p className="text-xs text-charcoal/40 font-bold uppercase tracking-widest">Reference: Dashboard Failure</p>
+                    </div>
+                    <p className="text-charcoal/60 text-sm italic">"{err.message || 'An unexpected error occurred while loading the dashboard.'}"</p>
+                    <div className="pt-4">
+                        <a href="/admin" className="inline-block w-full py-4 bg-charcoal text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-[0.2em] shadow-xl">
+                            RESTART DASHBOARD
                         </a>
                     </div>
                 </div>

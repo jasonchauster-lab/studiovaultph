@@ -5,6 +5,8 @@ import { Upload, CheckCircle, Loader2, AlertCircle, X, FileText, ShieldAlert, He
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { submitPaymentProof } from '@/app/(dashboard)/customer/actions'
+import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
+import Image from 'next/image'
 
 // ─── Health Waiver Text ───────────────────────────────────────────────────────
 const HEALTH_WAIVER_TEXT = `HEALTH AND FITNESS PARTICIPATION WAIVER AND RELEASE OF LIABILITY
@@ -371,11 +373,26 @@ export default function PaymentForm({
         setTermsAgreed(false)
     }
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            const selectedFile = e.target.files[0]
-            setFile(selectedFile)
+            let selectedFile = e.target.files[0]
             setError(null)
+
+            // Auto-convert HEIC/HEIF
+            if (isHeicFile(selectedFile)) {
+                setIsUploading(true) // Show loader during conversion
+                try {
+                    selectedFile = await ensureJpegFile(selectedFile)
+                } catch (err) {
+                    setError('Failed to process iPhone photo. Please try a different format.')
+                    setIsUploading(false)
+                    return
+                } finally {
+                    setIsUploading(false)
+                }
+            }
+
+            setFile(selectedFile)
 
             // Create preview URL for images
             if (selectedFile.type.startsWith('image/')) {
@@ -747,7 +764,7 @@ export default function PaymentForm({
                             }`}>
                             <input
                                 type="file"
-                                accept="image/*"
+                                accept="image/*,.heic,.heif"
                                 onChange={handleFileChange}
                                 className="hidden"
                                 disabled={!waiverAgreed || !termsAgreed}
@@ -781,7 +798,7 @@ export default function PaymentForm({
                                             ? 'Please agree to the documents above first'
                                             : 'Click to upload screenshot'}
                                     </span>
-                                    <span className="text-xs mt-1">JPG, PNG supported</span>
+                                    <span className="text-xs mt-1">JPG, PNG, and iPhone (HEIC) supported</span>
                                 </div>
                             )}
                         </label>

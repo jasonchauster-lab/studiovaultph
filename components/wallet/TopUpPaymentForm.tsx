@@ -5,6 +5,7 @@ import { Upload, CheckCircle, AlertCircle, Eye, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { submitTopUpPaymentProof } from '@/app/(dashboard)/customer/actions'
+import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
 
 interface TopUpPaymentFormProps {
     topUpId: string
@@ -29,11 +30,26 @@ export default function TopUpPaymentForm({ topUpId, amount }: TopUpPaymentFormPr
         }
     }, [previewUrl])
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            const selectedFile = e.target.files[0]
-            setFile(selectedFile)
+            let selectedFile = e.target.files[0]
             setError(null)
+
+            // Auto-convert HEIC/HEIF
+            if (isHeicFile(selectedFile)) {
+                setIsUploading(true)
+                try {
+                    selectedFile = await ensureJpegFile(selectedFile)
+                } catch (err) {
+                    setError('Failed to process iPhone photo. Please try a different format.')
+                    setIsUploading(false)
+                    return
+                } finally {
+                    setIsUploading(false)
+                }
+            }
+
+            setFile(selectedFile)
 
             if (selectedFile.type.startsWith('image/')) {
                 const url = URL.createObjectURL(selectedFile)
@@ -119,7 +135,7 @@ export default function TopUpPaymentForm({ topUpId, amount }: TopUpPaymentFormPr
                 <label className="block w-full border-2 border-dashed border-cream-300 rounded-xl p-8 text-center transition-all cursor-pointer hover:border-rose-gold hover:bg-rose-gold/5 group">
                     <input
                         type="file"
-                        accept="image/*"
+                        accept="image/*,.heic,.heif"
                         onChange={handleFileChange}
                         className="hidden"
                     />
@@ -150,7 +166,7 @@ export default function TopUpPaymentForm({ topUpId, amount }: TopUpPaymentFormPr
                                 <Upload className="w-6 h-6 text-rose-gold" />
                             </div>
                             <span className="font-medium text-charcoal-900">Click to upload screenshot</span>
-                            <span className="text-xs mt-1">JPG, PNG supported</span>
+                            <span className="text-xs mt-1">JPG, PNG, and iPhone (HEIC) supported</span>
                         </div>
                     )}
                 </label>

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Search, Loader2, CheckCircle, AlertCircle, User, CreditCard, MinusCircle, PlusCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { adjustUserBalance } from '@/app/(dashboard)/admin/actions'
+import clsx from 'clsx'
 
 interface UserSearchResult {
     id: string
@@ -14,11 +15,16 @@ interface UserSearchResult {
     available_balance: number
 }
 
-export default function BalanceAdjustmentTool() {
+interface BalanceAdjustmentToolProps {
+    initialProfile?: any
+    variant?: 'default' | 'minimal'
+}
+
+export default function BalanceAdjustmentTool({ initialProfile, variant = 'default' }: BalanceAdjustmentToolProps) {
     const [searchQuery, setSearchQuery] = useState('')
     const [isSearching, setIsSearching] = useState(false)
     const [searchResults, setSearchResults] = useState<UserSearchResult[]>([])
-    const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(null)
+    const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(initialProfile || null)
 
     const [amount, setAmount] = useState('')
     const [type, setType] = useState<'credit' | 'debit'>('credit')
@@ -138,88 +144,128 @@ export default function BalanceAdjustmentTool() {
                     )}
                 </div>
             ) : (
-                <div className="space-y-6 animate-in zoom-in-95 duration-300">
-                    {/* Selected User Header */}
-                    <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-rose-gold flex items-center justify-center">
-                                <User className="w-6 h-6 text-white" />
+                <div className={clsx(
+                    "animate-in zoom-in-95 duration-300",
+                    variant === 'minimal' ? "space-y-3" : "space-y-6"
+                )}>
+                    {/* Selected User Header - Hide in minimal if we have initialProfile */}
+                    {!(variant === 'minimal' && initialProfile) && (
+                        <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-rose-gold flex items-center justify-center">
+                                    <User className="w-6 h-6 text-white" />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-white">{selectedUser.full_name}</p>
+                                    <p className="text-xs text-white/50">Current Available: ₱{(selectedUser.available_balance || 0).toLocaleString()}</p>
+                                    <p className="text-[10px] text-white/30">Wallet (Legacy): ₱{(selectedUser.wallet_balance || 0).toLocaleString()}</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="font-bold text-white">{selectedUser.full_name}</p>
-                                <p className="text-xs text-white/50">Current Available: ₱{(selectedUser.available_balance || 0).toLocaleString()}</p>
-                                <p className="text-[10px] text-white/30">Wallet (Legacy): ₱{(selectedUser.wallet_balance || 0).toLocaleString()}</p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={() => { setSelectedUser(null); setSearchResults([]) }}
-                            className="text-[10px] text-white/40 hover:text-white underline uppercase tracking-widest font-bold"
-                        >
-                            Change User
-                        </button>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="col-span-2 sm:col-span-1">
-                            <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Adjustment Type</label>
-                            <div className="grid grid-cols-2 gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
+                            {!initialProfile && (
                                 <button
-                                    onClick={() => setType('credit')}
-                                    className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${type === 'credit' ? 'bg-green-600 text-white shadow-lg' : 'text-white/40 hover:bg-white/5'}`}
+                                    onClick={() => { setSelectedUser(null); setSearchResults([]) }}
+                                    className="text-[10px] text-white/40 hover:text-white underline uppercase tracking-widest font-bold"
                                 >
-                                    <PlusCircle className="w-4 h-4" />
-                                    Credit
+                                    Change User
                                 </button>
-                                <button
-                                    onClick={() => setType('debit')}
-                                    className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${type === 'debit' ? 'bg-red-600 text-white shadow-lg' : 'text-white/40 hover:bg-white/5'}`}
-                                >
-                                    <MinusCircle className="w-4 h-4" />
-                                    Debit
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="col-span-2 sm:col-span-1">
-                            <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Amount (₱)</label>
-                            <div className="relative">
-                                <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                                <input
-                                    type="number"
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                    placeholder="0.00"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white font-mono focus:outline-none focus:ring-2 focus:ring-rose-gold/50 transition-all"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="col-span-2">
-                            <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Reason (Publicly visible to user)</label>
-                            <input
-                                type="text"
-                                value={reason}
-                                onChange={(e) => setReason(e.target.value)}
-                                placeholder="e.g. Offline Viber Settlement, Promo Credit, etc."
-                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-gold/50 transition-all"
-                            />
-                        </div>
-                    </div>
-
-                    {message && (
-                        <div className={`p-4 rounded-xl flex items-center gap-3 text-sm animate-in fade-in ${message.type === 'success' ? 'bg-green-600/20 text-green-400 border border-green-600/30' : 'bg-red-600/20 text-red-400 border border-red-600/30'}`}>
-                            {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                            {message.text}
+                            )}
                         </div>
                     )}
 
-                    <button
-                        onClick={handleAdjust}
-                        disabled={isSubmitting || !amount || !reason}
-                        className={`w-full py-4 rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-2 ${type === 'credit' ? 'bg-green-600 hover:bg-green-500 shadow-green-900/40' : 'bg-red-600 hover:bg-red-500 shadow-red-900/40'} disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                        {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : `Execute ${type === 'credit' ? 'Credit' : 'Debit'}`}
-                    </button>
+                    <div className={clsx(
+                        "grid gap-3",
+                        variant === 'minimal' ? "grid-cols-4" : "grid-cols-2"
+                    )}>
+                        <div className={clsx(variant === 'minimal' ? "col-span-1" : "col-span-2 sm:col-span-1")}>
+                            {variant !== 'minimal' && <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Type</label>}
+                            <div className={clsx("flex bg-charcoal/50 p-1 rounded-xl border border-white/10", variant === 'minimal' && "h-10")}>
+                                <button
+                                    onClick={() => setType('credit')}
+                                    className={clsx(
+                                        "flex-1 flex items-center justify-center rounded-lg transition-all",
+                                        type === 'credit' ? "bg-green-600 text-white shadow-sm" : "text-white/40 hover:bg-white/5"
+                                    )}
+                                    title="Credit"
+                                >
+                                    <PlusCircle className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                    onClick={() => setType('debit')}
+                                    className={clsx(
+                                        "flex-1 flex items-center justify-center rounded-lg transition-all",
+                                        type === 'debit' ? "bg-red-600 text-white shadow-sm" : "text-white/40 hover:bg-white/5"
+                                    )}
+                                    title="Debit"
+                                >
+                                    <MinusCircle className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className={clsx(variant === 'minimal' ? "col-span-1" : "col-span-2 sm:col-span-1")}>
+                            {variant !== 'minimal' && <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Amount</label>}
+                            <input
+                                type="number"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                placeholder="₱0"
+                                className={clsx(
+                                    "w-full bg-charcoal/50 border border-white/10 rounded-xl px-3 text-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-rose-gold/50 transition-all text-center",
+                                    variant === 'minimal' ? "h-10" : "py-3"
+                                )}
+                            />
+                        </div>
+
+                        <div className={clsx(variant === 'minimal' ? "col-span-2" : "col-span-2")}>
+                            {variant !== 'minimal' && <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Reason</label>}
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={reason}
+                                    onChange={(e) => setReason(e.target.value)}
+                                    placeholder="Note..."
+                                    className={clsx(
+                                        "w-full bg-charcoal/50 border border-white/10 rounded-xl px-4 text-white text-[10px] focus:outline-none focus:ring-1 focus:ring-rose-gold/50 transition-all",
+                                        variant === 'minimal' ? "h-10 pr-10" : "py-3"
+                                    )}
+                                />
+                                {variant === 'minimal' && (
+                                    <button
+                                        onClick={handleAdjust}
+                                        disabled={isSubmitting || !amount || !reason}
+                                        className="absolute right-1 top-1 w-8 h-8 flex items-center justify-center bg-rose-gold text-white rounded-lg disabled:opacity-30 disabled:grayscale transition-all hover:brightness-110 shadow-sm"
+                                    >
+                                        {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {variant !== 'minimal' && (
+                        <>
+                            {message && (
+                                <div className={clsx(
+                                    "p-4 rounded-xl flex items-center gap-3 text-sm animate-in fade-in border",
+                                    message.type === 'success' ? "bg-green-600/20 text-green-400 border-green-600/30" : "bg-red-600/20 text-red-400 border-red-600/30"
+                                )}>
+                                    {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                                    {message.text}
+                                </div>
+                            )}
+
+                            <button
+                                onClick={handleAdjust}
+                                disabled={isSubmitting || !amount || !reason}
+                                className={clsx(
+                                    "w-full py-4 rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-2 text-white disabled:opacity-50 disabled:cursor-not-allowed",
+                                    type === 'credit' ? "bg-green-600 hover:bg-green-500 shadow-green-900/40" : "bg-red-600 hover:bg-red-500 shadow-red-900/40"
+                                )}
+                            >
+                                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : `Execute ${type === 'credit' ? 'Credit' : 'Debit'}`}
+                            </button>
+                        </>
+                    )}
                 </div>
             )}
         </div>

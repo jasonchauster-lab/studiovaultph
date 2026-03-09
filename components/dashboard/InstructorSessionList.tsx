@@ -5,7 +5,7 @@ import { Calendar, MapPin, Box, X, AlertCircle, Clock } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
-import InstructorLeaveReviewButton from '@/components/reviews/InstructorLeaveReviewButton'
+import ReviewModal from '@/components/reviews/ReviewModal'
 import BookingFilter, { FilterState } from '@/components/dashboard/BookingFilter'
 import CancelBookingModal from './CancelBookingModal'
 import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions'
@@ -22,6 +22,11 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     })
     const [selectedClient, setSelectedClient] = useState<any>(null)
     const [cancellingBooking, setCancellingBooking] = useState<any>(null)
+    const [reviewTarget, setReviewTarget] = useState<{
+        booking: any,
+        revieweeId: string,
+        revieweeName: string
+    } | null>(null)
 
     const handleCancelConfirm = async (reason: string) => {
         if (!cancellingBooking) return { error: 'No booking selected' }
@@ -329,15 +334,22 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                 <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={studio.owner_id} partnerName={studio.name || 'Studio'} label="Message Studio" />
                                             )}
                                             {booking.status === 'completed' && (
-                                                <InstructorLeaveReviewButton
-                                                    booking={booking}
-                                                    currentUserId={currentUserId}
-                                                    studioOwnerId={studio?.owner_id ?? null}
-                                                    studioName={studio?.name ?? 'Studio'}
-                                                    clientId={client?.id ?? null}
-                                                    clientName={client?.full_name ?? 'Client'}
-                                                    hideClientReview={client?.id === currentUserId}
-                                                />
+                                                <div className="flex items-center gap-2">
+                                                    {!booking.instructor_reviewed_studio ? (
+                                                        <button
+                                                            onClick={() => setReviewTarget({
+                                                                booking,
+                                                                revieweeId: studio?.owner_id || '',
+                                                                revieweeName: studio?.name || 'Studio'
+                                                            })}
+                                                            className="px-3 py-1 bg-cream-100 text-charcoal-900 text-xs font-bold rounded-full border border-cream-200 hover:bg-charcoal-900 hover:text-white transition-all shadow-sm"
+                                                        >
+                                                            Review Studio
+                                                        </button>
+                                                    ) : (
+                                                        <span className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full border border-green-100">Studio ✓</span>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -430,6 +442,23 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         </button>
                     </div>
                 </div>
+            )}
+
+            {/* Review Modal */}
+            {reviewTarget && (
+                <ReviewModal
+                    booking={reviewTarget.booking}
+                    currentUserId={currentUserId}
+                    isInstructor={true}
+                    revieweeId={reviewTarget.revieweeId}
+                    revieweeName={reviewTarget.revieweeName}
+                    reviewContext="Studio"
+                    onClose={() => setReviewTarget(null)}
+                    onSuccess={() => {
+                        setReviewTarget(null)
+                        window.location.reload()
+                    }}
+                />
             )}
         </div>
     )

@@ -3,8 +3,6 @@ import { redirect } from 'next/navigation'
 import { QrCode, Calendar } from 'lucide-react'
 import clsx from 'clsx'
 import BookingList from '@/components/customer/BookingList'
-import ReviewTrigger from '@/components/reviews/ReviewTrigger'
-import { getPendingReviews } from '@/app/(dashboard)/reviews/actions'
 
 export default async function CustomerBookingsPage() {
     const supabase = await createClient()
@@ -78,8 +76,6 @@ export default async function CustomerBookingsPage() {
         }
     }) || []
 
-    // Fetch pending reviews for the customer
-    const { bookings: pendingReviews, isInstructor } = await getPendingReviews()
 
     const getSlotDateTime = (date: string | undefined, time: string | undefined) => {
         if (!date || !time) return new Date(0)
@@ -93,14 +89,6 @@ export default async function CustomerBookingsPage() {
 
     return (
         <div className="min-h-screen bg-cream-50 p-8">
-            {/* Review Trigger: shows modal for pending reviews */}
-            {pendingReviews && pendingReviews.length > 0 && (
-                <ReviewTrigger
-                    pendingBookings={pendingReviews as any}
-                    currentUserId={user.id}
-                    isInstructor={isInstructor ?? false}
-                />
-            )}
             <div className="max-w-4xl mx-auto space-y-12">
 
                 <div>

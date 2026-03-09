@@ -1415,6 +1415,38 @@ export async function getPartnerBookings(id: string, type: 'profile' | 'studio')
     return { active, past };
 }
 
+export async function suspendUser(userId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // 1. Verify Admin
+    if (!user) return { error: 'Unauthorized' }
+    const { data: adminProfile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if (adminProfile?.role !== 'admin') return { error: 'Unauthorized' }
+
+    // 2. Suspend
+    const { error } = await supabase
+        .from('profiles')
+        .update({ is_suspended: true })
+        .eq('id', userId)
+
+    if (error) {
+        console.error('Error suspending user:', error)
+        return { error: 'Failed to suspend user.' }
+    }
+
+    const { data: targetProfile } = await supabase.from('profiles').select('full_name, email').eq('id', userId).single()
+    await logAdminAction(supabase, 'SUSPEND_USER', 'profiles', userId, `User ${targetProfile?.full_name || 'Unknown'} (${targetProfile?.email || 'no email'}) suspended manually via admin dashboard`)
+
+    revalidatePath('/admin')
+    return { success: true }
+}
+
 export async function reinstateStudio(profileId: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()

@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
+import clsx from 'clsx'
 import {
     Clock,
     Search,
@@ -232,92 +233,103 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
             {/* ── Stats Cards ───────────────────────────────────────────── */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white border border-cream-200 rounded-xl p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-1">
-                        <Activity className="w-4 h-4 text-charcoal-400" />
-                        <span className="text-xs text-charcoal-500 uppercase tracking-wide font-medium">This Week</span>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="glass-card p-8 group hover:scale-[1.02] transition-all duration-500">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2.5 bg-sage/10 rounded-xl group-hover:bg-sage/20 transition-colors">
+                            <Activity className="w-5 h-5 text-sage" />
+                        </div>
+                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Velocity</span>
                     </div>
-                    <p className="text-2xl font-bold text-charcoal-900">{thisWeek.length}</p>
-                    <p className="text-xs text-charcoal-400 mt-0.5">actions in last 7 days</p>
+                    <p className="font-serif text-4xl text-charcoal">{thisWeek.length}</p>
+                    <p className="text-[10px] text-charcoal/30 font-bold uppercase tracking-widest mt-2">ACTIONS THIS WEEK</p>
                 </div>
-                <div className="bg-white border border-cream-200 rounded-xl p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-1">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                        <span className="text-xs text-charcoal-500 uppercase tracking-wide font-medium">Approvals</span>
+
+                <div className="glass-card p-8 group hover:scale-[1.02] transition-all duration-500">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2.5 bg-green-50 rounded-xl group-hover:bg-green-100 transition-colors">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                        </div>
+                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Success Rate</span>
                     </div>
-                    <p className="text-2xl font-bold text-green-600">{totalApprovals}</p>
-                    <p className="text-xs text-charcoal-400 mt-0.5">total approvals / verifications</p>
+                    <p className="font-serif text-4xl text-green-600">{totalApprovals}</p>
+                    <p className="text-[10px] text-charcoal/30 font-bold uppercase tracking-widest mt-2">TOTAL APPROVALS</p>
                 </div>
-                <div className="bg-white border border-cream-200 rounded-xl p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-1">
-                        <XCircle className="w-4 h-4 text-red-500" />
-                        <span className="text-xs text-charcoal-500 uppercase tracking-wide font-medium">Rejections</span>
+
+                <div className="glass-card p-8 group hover:scale-[1.02] transition-all duration-500">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2.5 bg-red-50 rounded-xl group-hover:bg-red-100 transition-colors">
+                            <XCircle className="w-5 h-5 text-red-600" />
+                        </div>
+                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Intercepts</span>
                     </div>
-                    <p className="text-2xl font-bold text-red-600">{totalRejections}</p>
-                    <p className="text-xs text-charcoal-400 mt-0.5">total rejections</p>
+                    <p className="font-serif text-4xl text-red-600">{totalRejections}</p>
+                    <p className="text-[10px] text-charcoal/30 font-bold uppercase tracking-widest mt-2">TOTAL REJECTIONS</p>
                 </div>
-                <div className="bg-white border border-cream-200 rounded-xl p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-1">
-                        <TrendingUp className="w-4 h-4 text-charcoal-400" />
-                        <span className="text-xs text-charcoal-500 uppercase tracking-wide font-medium">Top Admin</span>
+
+                <div className="glass-card p-8 group hover:scale-[1.02] transition-all duration-500">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2.5 bg-gold/10 rounded-xl group-hover:bg-gold/20 transition-colors">
+                            <TrendingUp className="w-5 h-5 text-gold" />
+                        </div>
+                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Lead Admin</span>
                     </div>
-                    <p className="text-sm font-bold text-charcoal-900 truncate">{topAdmin?.[0] ?? '—'}</p>
-                    <p className="text-xs text-charcoal-400 mt-0.5">{topAdmin?.[1] ?? 0} actions</p>
+                    <p className="text-xl font-serif text-charcoal truncate">{topAdmin?.[0] ?? '—'}</p>
+                    <p className="text-[10px] text-charcoal/30 font-bold uppercase tracking-widest mt-2">{topAdmin?.[1] ?? 0} OPERATIONS COMPLETED</p>
                 </div>
             </div>
 
             {/* ── Sub-tab Toggle ────────────────────────────────────────── */}
-            <div className="flex border-b border-cream-200 gap-6">
+            <div className="flex gap-4 bg-white/40 backdrop-blur-md p-1.5 rounded-2xl border border-white/50 w-fit">
                 <button
                     onClick={() => { setActiveSubtab('activity'); resetPage() }}
-                    className={`pb-3 text-sm font-medium transition-colors relative ${activeSubtab === 'activity' ? 'text-charcoal-900' : 'text-charcoal-400 hover:text-charcoal-600'}`}
+                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all duration-500 uppercase ${activeSubtab === 'activity' ? 'bg-charcoal text-white shadow-lg' : 'text-charcoal/40 hover:text-charcoal hover:bg-white/50'}`}
                 >
-                    Admin Activity Log
-                    {activeSubtab === 'activity' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-charcoal-900"></div>}
+                    Administrative Logs
                 </button>
                 <button
                     onClick={() => { setActiveSubtab('transactions'); resetPage() }}
-                    className={`pb-3 text-sm font-medium transition-colors relative ${activeSubtab === 'transactions' ? 'text-charcoal-900' : 'text-charcoal-400 hover:text-charcoal-600'}`}
+                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all duration-500 uppercase ${activeSubtab === 'transactions' ? 'bg-charcoal text-white shadow-lg' : 'text-charcoal/40 hover:text-charcoal hover:bg-white/50'}`}
                 >
-                    Financial Transactions
-                    {activeSubtab === 'transactions' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-charcoal-900"></div>}
+                    Financial Archives
                 </button>
             </div>
 
             {/* ── Filters + Content ───────────────────────────────────── */}
-            <div className="bg-white border border-cream-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="glass-card overflow-hidden">
 
                 {/* Header */}
-                <div className="flex flex-wrap items-center justify-between gap-3 p-5 border-b border-cream-100">
-                    <h2 className="text-lg font-medium text-charcoal-900 flex items-center gap-2">
-                        {activeSubtab === 'activity' ? <Clock className="w-5 h-5 text-charcoal-400" /> : <TrendingUp className="w-5 h-5 text-charcoal-400" />}
-                        {activeSubtab === 'activity' ? 'Activity Log' : 'Financial Transactions'}
-                        <span className="text-xs text-charcoal-400 font-normal ml-1">({currentDisplayData.length} total)</span>
-                    </h2>
+                <div className="flex flex-wrap items-center justify-between gap-6 p-8 border-b border-cream-100">
+                    <div>
+                        <h2 className="text-sm font-black tracking-[0.2em] text-charcoal uppercase flex items-center gap-3">
+                            {activeSubtab === 'activity' ? <Clock className="w-4 h-4 text-sage" /> : <TrendingUp className="w-4 h-4 text-sage" />}
+                            {activeSubtab === 'activity' ? 'SYSTEM ACTIVITY LOG' : 'FINANCIAL TRANSACTION LEDGER'}
+                        </h2>
+                        <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-1">{currentDisplayData.length} CRYPTOGRAPHICALLY LOGGED ENTRIES</p>
+                    </div>
                     <button
                         onClick={activeSubtab === 'activity' ? exportActivityCSV : exportFinancialCSV}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-charcoal-900 text-cream-50 text-xs rounded-lg hover:bg-charcoal-700 transition-colors font-medium"
+                        className="flex items-center gap-2.5 px-6 py-3 bg-charcoal text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest shadow-md"
                     >
                         <Download className="w-3.5 h-3.5" />
-                        Export CSV
+                        EXPORT DATASET
                     </button>
                 </div>
 
                 {/* Filters row */}
-                <div className="flex flex-wrap gap-3 p-4 border-b border-cream-100 bg-cream-50/50">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-8 bg-alabaster/30 border-b border-cream-100">
                     {/* Search */}
-                    <div className="relative flex-1 min-w-[180px]">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-charcoal-400" />
+                    <div className="relative group lg:col-span-1">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30 group-focus-within:text-sage transition-colors" />
                         <input
                             type="text"
-                            placeholder="Search…"
+                            placeholder="Universal search…"
                             value={search}
                             onChange={e => { setSearch(e.target.value); resetPage() }}
-                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-cream-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-charcoal-200"
+                            className="w-full pl-11 pr-4 py-3 text-[10px] font-bold border border-cream-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sage/20 transition-all tracking-widest uppercase"
                         />
                     </div>
 
@@ -326,17 +338,17 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                             <select
                                 value={categoryFilter}
                                 onChange={e => { setCategoryFilter(e.target.value); resetPage() }}
-                                className="text-xs border border-cream-200 rounded-lg px-2.5 py-1.5 bg-white text-charcoal-700 focus:outline-none"
+                                className="text-[10px] font-black border border-cream-100 rounded-xl px-4 py-3 bg-white/60 text-charcoal focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer"
                             >
-                                <option value="all">All Categories</option>
-                                {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                                <option value="all">ALL CATEGORIES</option>
+                                {categories.map(c => <option key={c} value={c}>{c.toUpperCase()}</option>)}
                             </select>
                             <select
                                 value={actionFilter}
                                 onChange={e => { setActionFilter(e.target.value); resetPage() }}
-                                className="text-xs border border-cream-200 rounded-lg px-2.5 py-1.5 bg-white text-charcoal-700 focus:outline-none"
+                                className="text-[10px] font-black border border-cream-100 rounded-xl px-4 py-3 bg-white/60 text-charcoal focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer"
                             >
-                                <option value="all">All Actions</option>
+                                <option value="all">ALL ACTIONS</option>
                                 {actionTypes.map(a => <option key={a} value={a}>{a.replace(/_/g, ' ')}</option>)}
                             </select>
                         </>
@@ -344,77 +356,83 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                         <select
                             value={txTypeFilter}
                             onChange={e => { setTxTypeFilter(e.target.value); resetPage() }}
-                            className="text-xs border border-cream-200 rounded-lg px-2.5 py-1.5 bg-white text-charcoal-700 focus:outline-none"
+                            className="text-[10px] font-black border border-cream-100 rounded-xl px-4 py-3 bg-white/60 text-charcoal focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer lg:col-span-2"
                         >
-                            <option value="all">All Transactions</option>
-                            <option value="Booking">Bookings</option>
-                            <option value="Top-up">Top-ups</option>
-                            <option value="Payout">Payouts</option>
-                            <option value="Platform Fees">Platform Fees Only</option>
-                            <option value="Studio Share">Studio Share Only</option>
-                            <option value="Instructor Share">Instructor Share Only</option>
+                            <option value="all">ALL TRANSACTION TYPES</option>
+                            <option value="Booking">SESSIONS & RENTALS</option>
+                            <option value="Top-up">WALLET TOP-UPS</option>
+                            <option value="Payout">PARTNER PAYOUTS</option>
+                            <option value="Platform Fees">PLATFORM REVENUE ONLY</option>
+                            <option value="Studio Share">STUDIO DISBURSEMENTS</option>
+                            <option value="Instructor Share">INSTRUCTOR DISBURSEMENTS</option>
                         </select>
                     )}
 
                     {/* Date range */}
-                    <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-charcoal-500">From</span>
-                        <input
-                            type="date"
-                            value={dateFrom}
-                            onChange={e => { setDateFrom(e.target.value); resetPage() }}
-                            className="text-xs border border-cream-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
-                        />
-                        <span className="text-xs text-charcoal-500">To</span>
-                        <input
-                            type="date"
-                            value={dateTo}
-                            onChange={e => { setDateTo(e.target.value); resetPage() }}
-                            className="text-xs border border-cream-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
-                        />
+                    <div className="flex items-center gap-2 lg:col-span-1">
+                        <div className="flex-1 relative group">
+                            <input
+                                type="date"
+                                value={dateFrom}
+                                onChange={e => { setDateFrom(e.target.value); resetPage() }}
+                                className="w-full px-4 py-3 text-[10px] font-black border border-cream-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer"
+                            />
+                        </div>
+                        <span className="text-charcoal/20 font-black">/</span>
+                        <div className="flex-1 relative group">
+                            <input
+                                type="date"
+                                value={dateTo}
+                                onChange={e => { setDateTo(e.target.value); resetPage() }}
+                                className="w-full px-4 py-3 text-[10px] font-black border border-cream-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer"
+                            />
+                        </div>
                     </div>
 
                     {(search || actionFilter !== 'all' || categoryFilter !== 'all' || txTypeFilter !== 'all' || dateFrom || dateTo) && (
                         <button
                             onClick={() => { setSearch(''); setActionFilter('all'); setCategoryFilter('all'); setTxTypeFilter('all'); setDateFrom(''); setDateTo(''); resetPage() }}
-                            className="text-xs text-charcoal-400 hover:text-charcoal-700 underline"
+                            className="text-[9px] font-black text-red-500 hover:text-red-600 underline uppercase tracking-widest text-right lg:col-span-4"
                         >
-                            Clear filters
+                            Reset filters
                         </button>
                     )}
                 </div>
 
                 {/* Table Content */}
                 {paginated.length === 0 ? (
-                    <p className="text-charcoal-500 text-sm p-6">No records match your filters.</p>
+                    <div className="text-center py-24 space-y-4">
+                        <div className="w-16 h-16 bg-alabaster rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Search className="w-8 h-8 text-charcoal/20" />
+                        </div>
+                        <p className="text-charcoal font-serif text-xl">No matching records found.</p>
+                        <p className="text-charcoal/40 text-sm italic">Try adjusting your filters or search keywords.</p>
+                    </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse text-sm">
+                        <table className="w-full text-left border-collapse">
                             <thead>
                                 {activeSubtab === 'activity' ? (
-                                    <tr className="border-b border-cream-200 text-xs text-charcoal-500 uppercase tracking-wider">
-                                        <th className="py-3 px-4 font-medium whitespace-nowrap">Date & Time</th>
-                                        <th className="py-3 px-4 font-medium">Admin</th>
-                                        <th className="py-3 px-4 font-medium">Category</th>
-                                        <th className="py-3 px-4 font-medium">Action</th>
-                                        <th className="py-3 px-4 font-medium">Amount</th>
-                                        <th className="py-3 px-4 font-medium">Details</th>
+                                    <tr className="bg-alabaster/50 border-b border-cream-100">
+                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">TIMESTAMP</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">OPERATOR</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">CLASSIFICATION</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">AMOUNT</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">OPERATIONAL DETAILS</th>
                                     </tr>
                                 ) : (
-                                    <tr className="border-b border-cream-200 text-xs text-charcoal-500 uppercase tracking-wider">
-                                        <th className="py-3 px-4 font-medium whitespace-nowrap">Date & Time</th>
-                                        <th className="py-3 px-4 font-medium">Type</th>
-                                        <th className="py-3 px-4 font-medium">List</th>
-                                        <th className="py-3 px-4 font-medium">Studio Email</th>
-                                        <th className="py-3 px-4 font-medium">Instructor Email</th>
-                                        <th className="py-3 px-4 font-medium">Total</th>
-                                        <th className="py-3 px-4 font-medium text-blue-600">Fee</th>
-                                        <th className="py-3 px-4 font-medium text-purple-600">Studio Fee</th>
-                                        <th className="py-3 px-4 font-medium text-indigo-600">Instructor Fee</th>
+                                    <tr className="bg-alabaster/50 border-b border-cream-100">
+                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">TIMESTAMP</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">TYPE</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">PARTICIPANTS</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">TOTAL</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">REVENUE FEE</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">STUDIO</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">INSTRUCTOR</th>
                                     </tr>
                                 )}
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-cream-50">
                                 {activeSubtab === 'activity' ? (
                                     (paginated as Log[]).map(log => {
                                         const { name, email } = getAdmin(log)
@@ -422,33 +440,51 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                         const isApproval = log.action_type.startsWith('APPROVE') || log.action_type.startsWith('VERIFY') || log.action_type === 'REINSTATE_STUDIO'
                                         const isRejection = log.action_type.startsWith('REJECT')
                                         return (
-                                            <tr key={log.id} className="border-b border-cream-100 hover:bg-cream-50/40 transition-colors">
-                                                <td className="py-3 px-4 text-charcoal-600 whitespace-nowrap text-xs">
-                                                    {new Date(log.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            <tr key={log.id} className="hover:bg-sage/5 transition-colors group">
+                                                <td className="px-8 py-6 text-[10px] font-bold text-charcoal/60 whitespace-nowrap">
+                                                    {new Date(log.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).toUpperCase()}
                                                 </td>
-                                                <td className="py-3 px-4">
-                                                    <p className="font-medium text-charcoal-900 whitespace-nowrap text-xs">{name}</p>
-                                                    {email && <p className="text-charcoal-400 text-[10px]">{email}</p>}
+                                                <td className="px-8 py-6">
+                                                    <p className="text-xs font-black text-charcoal uppercase tracking-widest">{name}</p>
+                                                    {email && <p className="text-[9px] text-charcoal/30 font-bold uppercase mt-0.5">{email}</p>}
                                                 </td>
-                                                <td className="py-3 px-4">
-                                                    <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${CATEGORY_BADGE[category]}`}>
+                                                <td className="px-8 py-6 space-y-2">
+                                                    <span className={clsx(
+                                                        "inline-flex px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-[0.15em] border whitespace-nowrap",
+                                                        CATEGORY_BADGE[category]?.replace('bg-', 'bg-').replace('text-', 'text-').includes('green') ? "bg-green-50 text-green-700 border-green-100" :
+                                                            CATEGORY_BADGE[category]?.includes('blue') ? "bg-blue-50 text-blue-700 border-blue-100" :
+                                                                CATEGORY_BADGE[category]?.includes('amber') ? "bg-amber-50 text-amber-700 border-amber-100" :
+                                                                    CATEGORY_BADGE[category]?.includes('purple') ? "bg-purple-50 text-purple-700 border-purple-100" :
+                                                                        CATEGORY_BADGE[category]?.includes('orange') ? "bg-orange-50 text-orange-700 border-orange-100" :
+                                                                            CATEGORY_BADGE[category]?.includes('rose') ? "bg-rose-50 text-rose-700 border-rose-100" :
+                                                                                "bg-alabaster text-charcoal/40 border-cream-100"
+                                                    )}>
                                                         {category}
                                                     </span>
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${isApproval ? 'bg-green-100 text-green-700' : isRejection ? 'bg-red-100 text-red-700' : 'bg-charcoal-100 text-charcoal-700'}`}>
+                                                    <div className={clsx(
+                                                        "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border w-fit",
+                                                        isApproval ? "bg-green-50 text-green-700 border-green-100" : isRejection ? "bg-red-50 text-red-700 border-red-100" : "bg-alabaster text-charcoal-700 border-cream-200"
+                                                    )}>
                                                         {log.action_type.replace(/_/g, ' ')}
-                                                    </span>
+                                                    </div>
                                                 </td>
-                                                <td className="py-3 px-4 text-xs font-mono text-charcoal-700">
-                                                    {extractAmount(log.details || '') ?? '—'}
+                                                <td className="px-8 py-6">
+                                                    <p className="font-serif text-sm text-charcoal">{extractAmount(log.details || '') ?? '—'}</p>
                                                 </td>
-                                                <td className="py-3 px-4 text-xs text-charcoal-700 max-w-sm">
-                                                    <div className="relative group">
-                                                        <span className={expandedId === log.id ? "break-words" : "line-clamp-2"}>{log.details ?? '—'}</span>
+                                                <td className="px-8 py-6 max-w-sm">
+                                                    <div className="relative">
+                                                        <p className={clsx(
+                                                            "text-xs text-charcoal/60 leading-relaxed font-medium italic",
+                                                            expandedId === log.id ? "" : "line-clamp-2"
+                                                        )}>
+                                                            {log.details ?? '—'}
+                                                        </p>
                                                         {log.details && log.details.length > 80 && (
-                                                            <button onClick={() => setExpandedId(expandedId === log.id ? null : log.id)} className="text-blue-600 hover:text-blue-800 font-medium ml-1 inline-flex items-center gap-0.5">
-                                                                {expandedId === log.id ? 'Less' : 'More'}
+                                                            <button
+                                                                onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
+                                                                className="text-[9px] font-black text-sage hover:text-charcoal uppercase tracking-widest mt-2 block"
+                                                            >
+                                                                {expandedId === log.id ? 'CLOSE DETAILS' : 'VIEW FULL TRACE'}
                                                             </button>
                                                         )}
                                                     </div>
@@ -458,40 +494,41 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                     })
                                 ) : (
                                     (paginated as Transaction[]).map(tx => (
-                                        <tr key={tx.id} className="border-b border-cream-100 hover:bg-sage/5 transition-colors">
-                                            <td className="py-3 px-4 text-charcoal-600 whitespace-nowrap text-xs">
-                                                {new Date(tx.date).toLocaleString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        <tr key={tx.id} className="hover:bg-sage/5 transition-colors group">
+                                            <td className="px-8 py-6 text-[10px] font-bold text-charcoal/60 whitespace-nowrap">
+                                                {new Date(tx.date).toLocaleString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).toUpperCase()}
                                             </td>
-                                            <td className="py-3 px-4">
-                                                <span className={`inline-block text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap tracking-wider uppercase ${tx.type === 'Booking' ? 'bg-sage-light/20 text-charcoal' :
-                                                    tx.type === 'Payout' ? 'bg-gold/20 text-charcoal' :
-                                                        'bg-purple-100/50 text-purple-900'
-                                                    }`}>
+                                            <td className="px-8 py-6">
+                                                <span className={clsx(
+                                                    "inline-flex px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border",
+                                                    tx.type === 'Booking' ? "bg-sage/10 text-sage border-sage/20" :
+                                                        tx.type === 'Payout' ? "bg-gold/10 text-gold border-gold/20" :
+                                                            "bg-purple-50 text-purple-700 border-purple-100"
+                                                )}>
                                                     {tx.type}
                                                 </span>
                                             </td>
-                                            <td className="py-3 px-4">
-                                                <p className="font-medium text-charcoal-900 text-xs">
+                                            <td className="px-8 py-6">
+                                                <p className="text-xs font-black text-charcoal uppercase tracking-widest">
                                                     {tx.type === 'Booking' ? `${tx.client} @ ${tx.studio}` : tx.type === 'Payout' ? (tx.studio !== '-' ? tx.studio : tx.instructor) : tx.client}
                                                 </p>
+                                                <p className="text-[9px] text-charcoal/30 font-bold uppercase mt-0.5">
+                                                    {tx.type === 'Booking' ? tx.studio_email : (tx.type === 'Payout' && tx.studio !== '-' ? tx.instructor_email : (tx.client_email || '-'))}
+                                                </p>
                                             </td>
-                                            <td className="py-3 px-4 text-xs text-charcoal-600">
-                                                {tx.type === 'Booking' ? tx.studio_email : (tx.type === 'Payout' && tx.studio !== '-' ? tx.instructor_email : '-')}
+                                            <td className="px-8 py-6">
+                                                <p className={clsx("font-serif text-sm", tx.total_amount < 0 ? "text-red-500" : "text-charcoal")}>
+                                                    ₱{tx.total_amount.toLocaleString()}
+                                                </p>
                                             </td>
-                                            <td className="py-3 px-4 text-xs text-charcoal-600">
-                                                {tx.type === 'Booking' ? tx.instructor_email : (tx.type === 'Payout' && tx.studio === '-' ? tx.instructor_email : '-')}
+                                            <td className="px-8 py-6 font-serif text-sm text-blue-600">
+                                                {tx.platform_fee > 0 ? `₱${tx.platform_fee.toLocaleString()}` : <span className="text-charcoal/20">—</span>}
                                             </td>
-                                            <td className={`py-3 px-4 font-mono text-xs font-bold ${tx.total_amount < 0 ? 'text-red-500' : 'text-charcoal-900'}`}>
-                                                ₱{tx.total_amount.toLocaleString()}
+                                            <td className="px-8 py-6 font-serif text-sm text-purple-600">
+                                                {tx.studio_fee > 0 ? `₱${tx.studio_fee.toLocaleString()}` : <span className="text-charcoal/20">—</span>}
                                             </td>
-                                            <td className="py-3 px-4 font-mono text-xs text-blue-600">
-                                                {tx.platform_fee > 0 ? `₱${tx.platform_fee.toLocaleString()}` : <span className="text-charcoal-300">—</span>}
-                                            </td>
-                                            <td className="py-3 px-4 font-mono text-xs text-purple-600">
-                                                {tx.studio_fee > 0 ? `₱${tx.studio_fee.toLocaleString()}` : <span className="text-charcoal-300">—</span>}
-                                            </td>
-                                            <td className="py-3 px-4 font-mono text-xs text-indigo-600">
-                                                {tx.instructor_fee > 0 ? `₱${tx.instructor_fee.toLocaleString()}` : <span className="text-charcoal-300">—</span>}
+                                            <td className="px-8 py-6 font-serif text-sm text-indigo-600">
+                                                {tx.instructor_fee > 0 ? `₱${tx.instructor_fee.toLocaleString()}` : <span className="text-charcoal/20">—</span>}
                                             </td>
                                         </tr>
                                     ))
@@ -503,16 +540,24 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-5 py-3 border-t border-cream-100 bg-cream-50/30">
-                        <p className="text-xs text-charcoal-500">
-                            Page {page} of {totalPages} &nbsp;·&nbsp; {currentDisplayData.length} results
+                    <div className="flex items-center justify-between px-8 py-6 bg-alabaster/30 border-t border-cream-100">
+                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest">
+                            INDEX {page} OF {totalPages} &nbsp;•&nbsp; {currentDisplayData.length} GLOBAL RECORDS
                         </p>
-                        <div className="flex items-center gap-2">
-                            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg border border-cream-200 disabled:opacity-40 hover:bg-cream-100 transition-colors">
-                                <ChevronLeft className="w-4 h-4" />
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                                disabled={page === 1}
+                                className="p-2 rounded-xl border border-cream-100 bg-white/60 disabled:opacity-30 hover:bg-white hover:shadow-cloud transition-all"
+                            >
+                                <ChevronLeft className="w-4 h-4 text-charcoal" />
                             </button>
-                            <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg border border-cream-200 disabled:opacity-40 hover:bg-cream-100 transition-colors">
-                                <ChevronRight className="w-4 h-4" />
+                            <button
+                                onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                                disabled={page === totalPages}
+                                className="p-2 rounded-xl border border-cream-100 bg-white/60 disabled:opacity-30 hover:bg-white hover:shadow-cloud transition-all"
+                            >
+                                <ChevronRight className="w-4 h-4 text-charcoal" />
                             </button>
                         </div>
                     </div>

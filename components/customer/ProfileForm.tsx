@@ -6,6 +6,7 @@ import { Loader2, Camera, User, FileText } from 'lucide-react'
 import { isValidPhone, isValidEmail, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
 import WaiverUpload from '@/components/customer/WaiverUpload'
+import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
 
 export default function ProfileForm({ profile }: { profile: any }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -46,11 +47,22 @@ export default function ProfileForm({ profile }: { profile: any }) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(profile?.avatar_url || null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        let file = e.target.files?.[0]
         if (file) {
-            const url = URL.createObjectURL(file)
-            setPreviewUrl(url)
+            setIsLoading(true)
+            try {
+                if (isHeicFile(file)) {
+                    file = await ensureJpegFile(file)
+                }
+                const url = URL.createObjectURL(file)
+                setPreviewUrl(url)
+            } catch (err) {
+                console.error('Avatar processing failed', err)
+                setMessage('Failed to process image format.')
+            } finally {
+                setIsLoading(false)
+            }
         }
     }
 
@@ -80,7 +92,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                     <input
                         type="file"
                         name="avatar"
-                        accept="image/*"
+                        accept="image/*,.heic,.heif"
                         ref={fileInputRef}
                         className="hidden"
                         onChange={handleAvatarChange}

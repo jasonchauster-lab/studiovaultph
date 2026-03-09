@@ -72,7 +72,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
 
     const handleGenerate = async () => {
         if (!startDate || !endDate || selectedDays.length === 0 || locations.length === 0 || equipment.length === 0) {
-            setMessage({ type: 'error', text: 'Please fill in all fields (Start/End Date, Days, allowed Equipment, and at least one Location).' });
+            setMessage({ type: 'error', text: 'All spectral parameters must be defined before commit.' });
             return;
         }
 
@@ -91,26 +91,18 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
             });
 
             if (result.success) {
-                setMessage({ type: 'success', text: `Successfully generated ${result.count} slots!` });
+                setMessage({ type: 'success', text: `Successfully manifested ${result.count} temporal slots.` });
                 router.refresh();
             } else {
-                setMessage({ type: 'error', text: result.error || 'Failed.' });
+                setMessage({ type: 'error', text: result.error || 'Sequence generation failed.' });
             }
         } catch (err) {
             console.error(err);
-            setMessage({ type: 'error', text: 'An error occurred.' });
+            setMessage({ type: 'error', text: 'An anomaly occurred during generation.' });
         } finally {
             setIsSubmitting(false);
         }
     };
-
-    const handleDelete = async (id: string) => {
-        if (!confirm('Remove this availability?')) return
-        const result = await deleteAvailability(id)
-        if (result.success) {
-            router.refresh()
-        }
-    }
 
     const toggleDay = (d: number) => {
         if (selectedDays.includes(d)) setSelectedDays(selectedDays.filter(x => x !== d));
@@ -118,115 +110,143 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
     }
 
     const daysOfWeek = [
-        { id: 1, label: 'Mon' },
-        { id: 2, label: 'Tue' },
-        { id: 3, label: 'Wed' },
-        { id: 4, label: 'Thu' },
-        { id: 5, label: 'Fri' },
-        { id: 6, label: 'Sat' },
-        { id: 0, label: 'Sun' },
+        { id: 1, label: 'MON' },
+        { id: 2, label: 'TUE' },
+        { id: 3, label: 'WED' },
+        { id: 4, label: 'THU' },
+        { id: 5, label: 'FRI' },
+        { id: 6, label: 'SAT' },
+        { id: 0, label: 'SUN' },
     ];
 
     return (
-        <div className="space-y-8">
-            {/* Recurring Generator - Matching Studio Style */}
-            <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
-                <h2 className="text-xl font-medium text-charcoal-900 mb-4 flex items-center gap-2">
-                    <Repeat className="w-5 h-5 text-charcoal-500" />
-                    Recurring Availability Generator
-                </h2>
+        <div className="space-y-10">
+            <div className="glass-card p-10 relative overflow-hidden">
+                {/* Decorative Elements */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
-                <p className="text-sm text-charcoal-600 mb-6">
-                    Bulk create availability for your schedule. Select a date range, days of the week, and location.
-                </p>
-
-                {message && (
-                    <div className={`p-4 rounded-lg mb-6 flex items-center gap-2 text-sm ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                        {message.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-                        {message.text}
-                    </div>
-                )}
-
-                <div className="space-y-6">
-                    {/* Date Range */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-1">Start Date</label>
-                            <input
-                                type="date"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 outline-none"
-                            />
+                <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-3">
+                        <div className="p-3 bg-charcoal/5 rounded-2xl">
+                            <Repeat className="w-6 h-6 text-charcoal/60" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-1">End Date</label>
-                            <input
-                                type="date"
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                                className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 outline-none"
-                            />
+                            <h2 className="text-2xl font-serif text-charcoal tracking-tight">Temporal Grid Generator</h2>
+                            <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mt-0.5">Automated Recursive Availability Matrix</p>
                         </div>
                     </div>
 
-                    {/* Days of Week */}
-                    <div>
-                        <label className="block text-sm font-medium text-charcoal-700 mb-2">Days of Week</label>
-                        <div className="flex flex-wrap gap-2">
-                            {daysOfWeek.map(day => (
-                                <button
-                                    key={day.id}
-                                    onClick={() => toggleDay(day.id)}
-                                    className={`w-10 h-10 rounded-full text-sm font-medium transition-colors border ${selectedDays.includes(day.id)
-                                        ? 'bg-charcoal-900 text-cream-50 border-charcoal-900'
-                                        : 'bg-white text-charcoal-600 border-cream-300 hover:border-charcoal-500'
-                                        }`}
-                                >
-                                    {day.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                    <p className="text-xs text-charcoal/60 leading-relaxed mb-10 max-w-lg italic">
+                        Define high-frequency availability sequences. The system will propagate these constraints across the specified temporal boundaries.
+                    </p>
 
-                    {/* Time, Locations & Equipment */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Start Time</label>
-                                    <select
-                                        value={startTime}
-                                        onChange={(e) => setStartTime(e.target.value)}
-                                        className="w-full px-4 py-2 border border-cream-300 rounded-xl text-charcoal-900 outline-none bg-white focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
-                                    >
-                                        {Array.from({ length: 24 }, (_, i) => i).map(hour => (
-                                            <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
-                                                {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 ${hour === 12 ? 'PM' : 'AM'}`}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-charcoal-700 mb-2">End Time</label>
-                                    <select
-                                        value={endTime}
-                                        onChange={(e) => setEndTime(e.target.value)}
-                                        className="w-full px-4 py-2 border border-cream-300 rounded-xl text-charcoal-900 outline-none bg-white focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
-                                    >
-                                        {Array.from({ length: 24 }, (_, i) => i).map(hour => (
-                                            <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
-                                                {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 ${hour === 12 ? 'PM' : 'AM'}`}
-                                            </option>
-                                        ))}
-                                    </select>
+                    {message && (
+                        <div className={clsx(
+                            "p-5 rounded-[2rem] mb-10 border flex items-center gap-4 animate-in slide-in-from-top-4 duration-500",
+                            message.type === 'success' ? "bg-sage/5 border-sage/20 text-sage" : "bg-red-50/50 border-red-100 text-red-600"
+                        )}>
+                            {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                            <span className="text-[10px] font-black uppercase tracking-widest leading-normal">{message.text}</span>
+                        </div>
+                    )}
+
+                    <div className="space-y-10">
+                        {/* Temporal Boundaries */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="glass-card p-8 space-y-6">
+                                <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-2 px-2">Temporal Window</h3>
+                                <div className="grid grid-cols-1 gap-6">
+                                    <div className="relative">
+                                        <label className="block text-[9px] font-black text-charcoal/30 uppercase tracking-widest mb-2 ml-4">Sequence Start</label>
+                                        <div className="relative">
+                                            <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/20" />
+                                            <input
+                                                type="date"
+                                                value={startDate}
+                                                onChange={(e) => setStartDate(e.target.value)}
+                                                className="w-full pl-12 pr-6 py-4 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-[0.15em] cursor-pointer"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="relative">
+                                        <label className="block text-[9px] font-black text-charcoal/30 uppercase tracking-widest mb-2 ml-4">Sequence Termination</label>
+                                        <div className="relative">
+                                            <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/20" />
+                                            <input
+                                                type="date"
+                                                value={endDate}
+                                                onChange={(e) => setEndDate(e.target.value)}
+                                                className="w-full pl-12 pr-6 py-4 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-[0.15em] cursor-pointer"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-3">Equipment (Multi-Select)</label>
-                                <div className="space-y-2 border border-cream-200 p-3 rounded-xl bg-cream-50/50">
-                                    <div className="flex flex-wrap gap-2">
+                            <div className="glass-card p-8 space-y-6">
+                                <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-2 px-2">Cyclical Recurrence</h3>
+                                <div className="flex flex-wrap gap-3">
+                                    {daysOfWeek.map(day => (
+                                        <button
+                                            key={day.id}
+                                            onClick={() => toggleDay(day.id)}
+                                            className={clsx(
+                                                "w-12 h-12 rounded-2xl text-[9px] font-black transition-all duration-300 border flex items-center justify-center tracking-widest",
+                                                selectedDays.includes(day.id)
+                                                    ? "bg-charcoal text-white border-charcoal shadow-lg shadow-charcoal/20 active:scale-95"
+                                                    : "bg-white/60 text-charcoal/30 border-cream-100 hover:border-charcoal/30 hover:text-charcoal"
+                                            )}
+                                        >
+                                            {day.label}
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="text-[9px] text-charcoal/30 uppercase tracking-widest italic leading-relaxed px-2">
+                                    Select days to manifest recurrence across windows.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Operational Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="glass-card p-8 space-y-8">
+                                <div>
+                                    <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-6 px-2">Temporal Shift</h3>
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-[9px] font-black text-charcoal/30 uppercase tracking-widest mb-2 ml-4">Evolution Start</label>
+                                            <select
+                                                value={startTime}
+                                                onChange={(e) => setStartTime(e.target.value)}
+                                                className="w-full px-6 py-4 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-[0.15em] cursor-pointer appearance-none shadow-sm"
+                                            >
+                                                {Array.from({ length: 24 }, (_, i) => i).map(hour => (
+                                                    <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
+                                                        {hour.toString().padStart(2, '0')}:00 {hour >= 12 ? 'PM' : 'AM'}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[9px] font-black text-charcoal/30 uppercase tracking-widest mb-2 ml-4">Evolution End</label>
+                                            <select
+                                                value={endTime}
+                                                onChange={(e) => setEndTime(e.target.value)}
+                                                className="w-full px-6 py-4 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-[0.15em] cursor-pointer appearance-none shadow-sm"
+                                            >
+                                                {Array.from({ length: 24 }, (_, i) => i).map(hour => (
+                                                    <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
+                                                        {hour.toString().padStart(2, '0')}:00 {hour >= 12 ? 'PM' : 'AM'}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-6 px-2">Apparatus Matrix</h3>
+                                    <div className="flex flex-wrap gap-2 p-5 bg-alabaster/50 rounded-2xl border border-cream-100">
                                         {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
                                             const isSelected = equipment.includes(eq);
                                             return (
@@ -235,10 +255,10 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                                     type="button"
                                                     onClick={() => toggleEquipment(eq)}
                                                     className={clsx(
-                                                        "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                                                        "px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 border",
                                                         isSelected
-                                                            ? "bg-rose-gold text-white border-rose-gold shadow-sm"
-                                                            : "bg-white text-charcoal-600 border-cream-200 hover:border-rose-gold"
+                                                            ? "bg-sage text-white border-sage shadow-md shadow-sage/10 active:scale-95"
+                                                            : "bg-white text-charcoal/40 border-cream-100 hover:border-sage/30 hover:text-charcoal"
                                                     )}
                                                 >
                                                     {eq}
@@ -247,87 +267,76 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                         })}
                                     </div>
                                 </div>
-                                <p className="text-[11px] text-charcoal-500 mt-2 italic">
-                                    Select all equipment types you are qualified/available to teach during these slots.
-                                </p>
                             </div>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-charcoal-700 mb-3">Locations (Multi-Select)</label>
-                            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {Object.entries(GROUPED_LOCATIONS).map(([city, cityLocations]) => {
-                                    const allSelected = cityLocations.every(loc => locations.includes(loc));
-                                    return (
-                                        <div key={city} className="space-y-2 border border-cream-200 p-3 rounded-xl bg-cream-50/50">
-                                            <div className="flex items-center justify-between">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => toggleCityGroup(cityLocations)}
-                                                    className="font-bold text-sm text-charcoal-900 hover:text-rose-gold transition-colors text-left flex items-center gap-2"
-                                                >
-                                                    {city}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => toggleCityGroup(cityLocations)}
-                                                    className="text-[10px] font-medium text-charcoal-500 hover:text-rose-gold transition-colors bg-white px-2 py-1 rounded-full border border-cream-200 shadow-sm"
-                                                >
-                                                    {allSelected ? 'Deselect All' : 'Select All'}
-                                                </button>
-                                            </div>
-                                            <div className="flex flex-wrap gap-2">
-                                                {cityLocations.map(l => {
-                                                    const isSelected = locations.includes(l);
-                                                    const displayName = l.split(' - ')[1] || l;
-                                                    return (
-                                                        <button
-                                                            key={l}
-                                                            type="button"
-                                                            onClick={() => toggleLocation(l)}
-                                                            className={clsx(
-                                                                "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
-                                                                isSelected
-                                                                    ? "bg-rose-gold text-white border-rose-gold shadow-sm"
-                                                                    : "bg-white text-charcoal-600 border-cream-200 hover:border-rose-gold"
-                                                            )}
-                                                        >
-                                                            {displayName}
-                                                        </button>
-                                                    )
-                                                })}
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                            <p className="text-[11px] text-charcoal-500 mt-4 italic">
-                                Note: Availability will be removed across all selected locations once a booking is confirmed.
-                            </p>
-                        </div>
-                    </div>
 
-                    <div className="pt-6 border-t border-cream-100">
-                        <button
-                            onClick={handleGenerate}
-                            disabled={isSubmitting}
-                            className="w-full py-3 bg-rose-gold text-white rounded-xl font-bold hover:brightness-110 transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    Generating...
-                                </>
-                            ) : (
-                                <>
-                                    <Repeat className="w-5 h-5" />
-                                    Generate Availability
-                                </>
-                            )}
-                        </button>
+                            <div className="glass-card p-8 flex flex-col">
+                                <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-6 px-2">Geographic Nodes</h3>
+                                <div className="space-y-4 max-h-[350px] overflow-y-auto pr-3 custom-scrollbar flex-1">
+                                    {Object.entries(GROUPED_LOCATIONS).map(([city, cityLocations]) => {
+                                        const allSelected = cityLocations.every(loc => locations.includes(loc));
+                                        return (
+                                            <div key={city} className="p-5 bg-white/60 rounded-2xl border border-cream-100 space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[10px] font-black text-charcoal uppercase tracking-[0.15em]">{city}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => toggleCityGroup(cityLocations)}
+                                                        className="text-[9px] font-black text-rose-gold hover:text-charcoal transition-colors uppercase tracking-widest underline decoration-rose-gold/20 underline-offset-4"
+                                                    >
+                                                        {allSelected ? 'DEACTIVATE' : 'MANIFEST ALL'}
+                                                    </button>
+                                                </div>
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {cityLocations.map(l => {
+                                                        const isSelected = locations.includes(l);
+                                                        const displayName = l.split(' - ')[1] || l;
+                                                        return (
+                                                            <button
+                                                                key={l}
+                                                                type="button"
+                                                                onClick={() => toggleLocation(l)}
+                                                                className={clsx(
+                                                                    "px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all duration-300 border",
+                                                                    isSelected
+                                                                        ? "bg-rose-gold text-white border-rose-gold shadow-md shadow-rose-gold/10"
+                                                                        : "bg-white text-charcoal/40 border-cream-100 hover:border-rose-gold/30 hover:text-charcoal"
+                                                                )}
+                                                            >
+                                                                {displayName}
+                                                            </button>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-10 border-t border-cream-100">
+                            <button
+                                onClick={handleGenerate}
+                                disabled={isSubmitting}
+                                className="w-full py-5 bg-charcoal text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-2xl shadow-charcoal/20 active:scale-[0.99] flex items-center justify-center gap-4 disabled:opacity-50"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin text-gold" />
+                                        SYNCHRONIZING SEQUENCE...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Repeat className="w-5 h-5 text-gold" />
+                                        COMMIT TEMPORAL MATRIX
+                                    </>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-
         </div>
     )
 }
+

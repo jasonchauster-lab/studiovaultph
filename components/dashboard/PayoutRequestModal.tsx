@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { requestPayout, submitPayoutApplication } from '@/app/(dashboard)/studio/earnings/actions'
 import { X, Loader2, Clock } from 'lucide-react'
+import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
 
 interface PayoutRequestModalProps {
     studioId: string
@@ -30,6 +31,17 @@ export default function PayoutRequestModal({ studioId, availableBalance, payoutA
             if (payoutApprovalStatus === 'approved') {
                 result = await requestPayout(null, formData)
             } else {
+                // Ensure files are processed if they are HEIC
+                const mayorsPermit = formData.get('mayorsPermit') as File;
+                const secretaryCert = formData.get('secretaryCertificate') as File;
+
+                if (mayorsPermit && isHeicFile(mayorsPermit)) {
+                    formData.set('mayorsPermit', await ensureJpegFile(mayorsPermit));
+                }
+                if (secretaryCert && isHeicFile(secretaryCert)) {
+                    formData.set('secretaryCertificate', await ensureJpegFile(secretaryCert));
+                }
+
                 result = await submitPayoutApplication(null, formData)
             }
 
@@ -113,7 +125,7 @@ export default function PayoutRequestModal({ studioId, availableBalance, payoutA
                                             <input
                                                 name="mayorsPermit"
                                                 type="file"
-                                                accept="image/*,.pdf"
+                                                accept="image/*,.pdf,.heic,.heif"
                                                 required
                                                 className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900 text-sm bg-white"
                                             />

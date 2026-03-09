@@ -7,6 +7,7 @@ import Link from 'next/link'
 import clsx from 'clsx'
 import { createClient } from '@/lib/supabase/client'
 import { STUDIO_AMENITIES } from '@/types'
+import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
 
 function FileUploadBox({ name, label, required, fileName, previewUrl, accept, setFileState }: any) {
     return (
@@ -14,10 +15,13 @@ function FileUploadBox({ name, label, required, fileName, previewUrl, accept, se
             <label className="block text-sm font-medium text-charcoal-700 mb-1">{label} {required && <span className="text-rose-gold font-bold">*</span>}</label>
             <div className="border-2 border-dashed border-cream-300 rounded-lg p-2 flex flex-col items-center justify-center bg-cream-50/50 hover:bg-cream-100/50 transition-colors relative cursor-pointer group h-[120px]">
                 <input type="file" name={name} accept={accept} required={required}
-                    onChange={(e) => {
-                        const file = e.target.files?.[0]
+                    onChange={async (e) => {
+                        let file = e.target.files?.[0]
+                        if (file && isHeicFile(file)) {
+                            file = await ensureJpegFile(file)
+                        }
                         const url = file && file.type.startsWith('image/') ? URL.createObjectURL(file) : null
-                        setFileState(file ? file.name : null, url)
+                        setFileState(file ? file.name : null, url, file)
                     }}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
@@ -65,6 +69,10 @@ export default function StudioApplicationForm() {
     const [insuranceFileName, setInsuranceFileName] = useState<string | null>(null)
     const [insurancePreviewUrl, setInsurancePreviewUrl] = useState<string | null>(null)
 
+    const [birFile, setBirFile] = useState<File | null>(null)
+    const [govIdFile, setGovIdFile] = useState<File | null>(null)
+    const [insuranceFile, setInsuranceFile] = useState<File | null>(null)
+
     const [spacePhotos, setSpacePhotos] = useState<File[]>([])
     const spacePhotosInputRef = useRef<HTMLInputElement>(null)
     const [selectedEquipment, setSelectedEquipment] = useState<Record<string, boolean>>({})
@@ -73,11 +81,26 @@ export default function StudioApplicationForm() {
         setSelectedEquipment(prev => ({ ...prev, [id]: checked }))
     }
 
-    const handleSpacePhotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSpacePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || [])
-        const imageFiles = files.filter(f => f.type.startsWith('image/'))
-        if (imageFiles.length > 0) {
-            setSpacePhotos(prev => [...prev, ...imageFiles])
+        const processedFiles: File[] = []
+
+        for (const file of files) {
+            if (isHeicFile(file)) {
+                try {
+                    const jpeg = await ensureJpegFile(file)
+                    processedFiles.push(jpeg)
+                } catch (err) {
+                    console.error('HEIC conversion failed for space photo', err)
+                    processedFiles.push(file)
+                }
+            } else if (file.type.startsWith('image/')) {
+                processedFiles.push(file)
+            }
+        }
+
+        if (processedFiles.length > 0) {
+            setSpacePhotos(prev => [...prev, ...processedFiles])
         }
         if (spacePhotosInputRef.current) {
             spacePhotosInputRef.current.value = ''
@@ -128,7 +151,6 @@ export default function StudioApplicationForm() {
             const timestamp = Date.now()
 
             // Upload BIR
-            const birFile = formData.get('birCertificate') as File
             if (birFile && birFile.size > 0) {
                 const ext = birFile.name.split('.').pop()
                 const path = `studios/${user.id}/bir_${timestamp}.${ext}`
@@ -140,7 +162,6 @@ export default function StudioApplicationForm() {
             formData.delete('birCertificate')
 
             // Upload Gov ID
-            const govIdFile = formData.get('govId') as File
             if (govIdFile && govIdFile.size > 0) {
                 const ext = govIdFile.name.split('.').pop()
                 const path = `studios/${user.id}/govid_${timestamp}.${ext}`
@@ -152,7 +173,6 @@ export default function StudioApplicationForm() {
             formData.delete('govId')
 
             // Upload Insurance
-            const insuranceFile = formData.get('insurance') as File
             if (insuranceFile && insuranceFile.size > 0) {
                 const ext = insuranceFile.name.split('.').pop()
                 const path = `studios/${user.id}/insurance_${timestamp}.${ext}`
@@ -289,8 +309,8 @@ export default function StudioApplicationForm() {
                         required={true}
                         fileName={birFileName}
                         previewUrl={birPreviewUrl}
-                        accept=".jpg,.jpeg,.png,.pdf"
-                        setFileState={(name: string | null, url: string | null) => { setBirFileName(name); setBirPreviewUrl(url); }}
+                        accept=".jpg,.jpeg,.png,.pdf,.heic,.heif"
+                        setFileState={(name: string | null, url: string | null, file: File | null) => { setBirFileName(name); setBirPreviewUrl(url); setBirFile(file); }}
                     />
                     <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
                         <ShieldCheck className="w-3 h-3 text-rose-gold" />
@@ -307,8 +327,8 @@ export default function StudioApplicationForm() {
                         required={true}
                         fileName={govIdFileName}
                         previewUrl={govIdPreviewUrl}
-                        accept=".jpg,.jpeg,.png,.pdf"
-                        setFileState={(name: string | null, url: string | null) => { setGovIdFileName(name); setGovIdPreviewUrl(url); }}
+                        accept=".jpg,.jpeg,.png,.pdf,.heic,.heif"
+                        setFileState={(name: string | null, url: string | null, file: File | null) => { setGovIdFileName(name); setGovIdPreviewUrl(url); setGovIdFile(file); }}
                     />
                     <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
                         <ShieldCheck className="w-3 h-3 text-rose-gold" />
@@ -328,8 +348,8 @@ export default function StudioApplicationForm() {
                     required={false}
                     fileName={insuranceFileName}
                     previewUrl={insurancePreviewUrl}
-                    accept=".jpg,.jpeg,.png,.pdf"
-                    setFileState={(name: string | null, url: string | null) => { setInsuranceFileName(name); setInsurancePreviewUrl(url); }}
+                    accept=".jpg,.jpeg,.png,.pdf,.heic,.heif"
+                    setFileState={(name: string | null, url: string | null, file: File | null) => { setInsuranceFileName(name); setInsurancePreviewUrl(url); setInsuranceFile(file); }}
                 />
                 <div>
                     <label className="block text-sm font-medium text-charcoal-700 mb-0.5">Insurance Expiration Date</label>
@@ -369,7 +389,7 @@ export default function StudioApplicationForm() {
                         <Upload className="w-6 h-6 text-charcoal-400 mb-2" />
                         <p className="text-sm font-medium text-charcoal-700">Click to add photos</p>
                         <p className="text-[10px] text-charcoal-500 mt-1 italic text-center">Images only. Show the studio layout, equipment, and amenities.</p>
-                        <input type="file" accept="image/*" multiple onChange={handleSpacePhotosChange} ref={spacePhotosInputRef} className="hidden" />
+                        <input type="file" accept="image/*,.heic,.heif" multiple onChange={handleSpacePhotosChange} ref={spacePhotosInputRef} className="hidden" />
                     </div>
                 </div>
             </div>

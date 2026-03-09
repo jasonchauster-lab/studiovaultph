@@ -184,81 +184,82 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     }, {} as Record<string, string[]>);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-xl border border-cream-200 shadow-sm">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <h2 className="text-xl font-serif text-charcoal-900 hidden md:block min-w-[140px]">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white/40 backdrop-blur-md p-6 rounded-3xl border border-white/50 shadow-xl shadow-charcoal/5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                    <h2 className="text-3xl font-serif text-charcoal hidden md:block min-w-[200px] tracking-tight">
                         {format(currentDate, 'MMMM yyyy')}
                     </h2>
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="date"
-                            value={format(currentDate, 'yyyy-MM-dd')}
-                            onChange={(e) => {
-                                if (e.target.value) {
-                                    router.push(`?date=${e.target.value}`)
-                                }
-                            }}
-                            className="px-3 py-1 border border-cream-200 rounded-lg text-sm bg-white text-charcoal-700 outline-none focus:ring-2 focus:ring-charcoal-500 cursor-pointer"
-                            title="Select any specific date"
-                        />
-                        <div className="flex items-center bg-cream-100 rounded-lg p-1">
-                            <button onClick={handlePrevWeek} className="flex items-center gap-1 px-2 py-1 hover:bg-white rounded-md transition-all text-charcoal-600 text-xs font-medium" title="Previous Week">
-                                <ChevronLeft className="w-4 h-4" /> Prev Week
+                    <div className="flex items-center gap-3">
+                        <div className="relative group">
+                            <CalendarIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30 group-focus-within:text-rose-gold transition-colors" />
+                            <input
+                                type="date"
+                                value={format(currentDate, 'yyyy-MM-dd')}
+                                onChange={(e) => {
+                                    if (e.target.value) {
+                                        router.push(`?date=${e.target.value}`)
+                                    }
+                                }}
+                                className="pl-10 pr-4 py-2 border border-cream-200 rounded-xl text-xs font-black bg-white/60 text-charcoal outline-none focus:ring-2 focus:ring-rose-gold/20 focus:bg-white transition-all cursor-pointer uppercase tracking-widest"
+                                title="Select any specific date"
+                            />
+                        </div>
+                        <div className="flex items-center bg-alabaster/50 backdrop-blur-sm rounded-xl p-1 border border-cream-100">
+                            <button onClick={handlePrevWeek} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white rounded-lg transition-all text-charcoal/60 hover:text-charcoal text-[10px] font-black uppercase tracking-widest" title="Previous Week">
+                                <ChevronLeft className="w-3.5 h-3.5" /> PREV
                             </button>
-                            <button onClick={handleToday} className="px-3 py-1 text-xs font-medium text-charcoal-700 hover:bg-white rounded-md transition-all border-x border-cream-200/50" title="Go to Current week">
-                                Today
+                            <button onClick={handleToday} className="px-5 py-1.5 text-[10px] font-black text-charcoal uppercase tracking-widest hover:bg-white rounded-lg transition-all border-x border-cream-100 mx-1" title="Go to Current week">
+                                TODAY
                             </button>
-                            <button onClick={handleNextWeek} className="flex items-center gap-1 px-2 py-1 hover:bg-white rounded-md transition-all text-charcoal-600 text-xs font-medium" title="Next Week">
-                                Next Week <ChevronRight className="w-4 h-4" />
+                            <button onClick={handleNextWeek} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white rounded-lg transition-all text-charcoal/60 hover:text-charcoal text-[10px] font-black uppercase tracking-widest" title="Next Week">
+                                NEXT <ChevronRight className="w-3.5 h-3.5" />
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                     <button
                         onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
-                        className="bg-rose-gold text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+                        className="bg-rose-gold text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] hover:brightness-110 transition-all flex items-center gap-2.5 shadow-md shadow-rose-gold/20"
                     >
-                        <Plus className="w-4 h-4" /> Add Slot
+                        <Plus className="w-3.5 h-3.5 stroke-[3px]" /> ADD SLOT
                     </button>
                     <button
                         onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
-                        className="bg-white border border-cream-300 text-charcoal-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-cream-50 transition-colors flex items-center gap-2"
+                        className="bg-white/80 border border-cream-200 text-charcoal px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] hover:bg-white transition-all flex items-center gap-2.5 shadow-sm"
                     >
-                        <CalendarIcon className="w-4 h-4" /> Bulk Generate
+                        <CalendarIcon className="w-3.5 h-3.5" /> BULK GENERATE
                     </button>
                 </div>
             </div>
 
             {/* Calendar Grid */}
-            <div className="bg-white rounded-xl border border-cream-200 shadow-sm overflow-hidden overflow-x-auto">
-                <div className="min-w-[800px]">
-                    <div className="grid grid-cols-8 border-b border-cream-200 bg-cream-50">
-                        <div className="p-4 text-xs font-medium text-charcoal-600 border-r border-cream-200 sticky left-0 bg-cream-50 z-20 w-20 text-center uppercase">TIME</div>
+            <div className="glass-card overflow-hidden">
+                <div className="min-w-[900px]">
+                    <div className="grid grid-cols-8 border-b border-cream-100 bg-alabaster/50">
+                        <div className="p-5 text-[10px] font-black text-charcoal/40 border-r border-cream-100 sticky left-0 bg-alabaster/80 backdrop-blur-md z-20 w-24 text-center uppercase tracking-[0.2em]">EPOCH</div>
                         {days.map(day => (
-                            <div key={day.toString()} className={clsx("p-3 text-center border-r border-cream-200 last:border-r-0 min-w-[100px]", isSameDay(day, new Date()) ? "bg-rose-gold/5" : "")}>
-                                <div className="text-xs text-charcoal-500 uppercase mb-1">{format(day, 'EEE')}</div>
-                                <div className={clsx("text-lg font-serif", isSameDay(day, new Date()) ? "text-rose-gold font-bold underline decoration-rose-gold/30 underline-offset-4" : "text-charcoal-900")}>{format(day, 'd')}</div>
+                            <div key={day.toString()} className={clsx("p-5 text-center border-r border-cream-100 last:border-r-0 min-w-[110px] transition-colors duration-500", isSameDay(day, new Date()) ? "bg-rose-gold/5" : "")}>
+                                <div className="text-[10px] text-charcoal/40 font-black uppercase tracking-[0.2em] mb-2">{format(day, 'EEE')}</div>
+                                <div className={clsx("text-2xl font-serif", isSameDay(day, new Date()) ? "text-rose-gold" : "text-charcoal")}>{format(day, 'd')}</div>
                             </div>
                         ))}
                     </div>
 
-                    <div className="divide-y divide-cream-100 relative">
+                    <div className="divide-y divide-cream-50 relative">
                         {hours.map(hour => (
                             <div key={hour} className="grid grid-cols-8" style={{ minHeight: `${ROW_HEIGHT}px` }}>
-                                <div className="p-2 text-xs text-charcoal-900 font-medium border-r border-cream-200 text-center sticky left-0 bg-white z-20 w-20 flex items-center justify-center">
+                                <div className="p-4 text-[10px] text-charcoal/30 font-black border-r border-cream-100 text-center sticky left-0 bg-white/80 backdrop-blur-md z-20 w-24 flex items-center justify-center tracking-widest">
                                     {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                 </div>
 
                                 {days.map(day => {
                                     const dayStr = toManilaDateStr(day)
-                                    // Start of hour for this cell
-                                    const cellStartTime = setMinutes(setHours(day, hour), 0)
+                                    const startTotalCell = hour * 60
 
-                                    // Filter availability that STARTS in this hour
                                     const startingSlots = availability.filter(a => {
                                         if (a.date) {
                                             if (a.date !== dayStr) return false
@@ -269,14 +270,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                         return startH === hour
                                     })
 
-                                    // Filter bookings that START in this hour
                                     const startingBookings = bookings.filter(b => {
                                         const slot = b.slots;
                                         if (!slot?.date || !slot?.start_time) return false;
                                         if (slot.date !== dayStr) return false;
-                                        // ONLY show active/pending/charged bookings. Hide refunded/cancelled ones.
                                         if (['cancelled_refunded', 'rejected', 'expired'].includes(b.status)) return false;
-
                                         const startH = parseInt(slot.start_time.split(':')[0]);
                                         return startH === hour;
                                     })
@@ -284,9 +282,9 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     const isPastCell = isPast(setMinutes(setHours(day, hour + 1), 0))
 
                                     return (
-                                        <div key={day.toString() + hour} className={clsx("border-r border-cream-100 last:border-r-0 relative group p-0", isPastCell && "bg-gray-50/30")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
+                                        <div key={day.toString() + hour} className={clsx("border-r border-cream-50 last:border-r-0 relative group p-0", isPastCell && "bg-alabaster/20")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
                                             <div
-                                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-charcoal-900/5 cursor-pointer z-0"
+                                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-sage/5 cursor-pointer z-0"
                                                 onClick={() => {
                                                     setSingleDate(format(day, 'yyyy-MM-dd'))
                                                     setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
@@ -296,7 +294,6 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                 }}
                                             />
                                             {(() => {
-                                                // Group slots by exact start and end times to prevent massive overlap
                                                 const groupedSlots = startingSlots.reduce((acc, slot) => {
                                                     const key = `${slot.start_time}-${slot.end_time}`
                                                     if (!acc[key]) {
@@ -313,9 +310,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         }
                                                         if (slot.equipment) {
                                                             slot.equipment.forEach(eq => {
-                                                                if (!acc[key].equipment.includes(eq)) {
-                                                                    acc[key].equipment.push(eq)
-                                                                }
+                                                                if (!acc[key].equipment.includes(eq)) acc[key].equipment.push(eq)
                                                             })
                                                         }
                                                     }
@@ -325,41 +320,33 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                 return Object.values(groupedSlots).map(({ primarySlot: slot, allSlots, locations, equipment }) => {
                                                     const startMin = parseInt(slot.start_time.split(':')[1])
                                                     const [endH, endM] = slot.end_time.split(':').map(Number)
-
                                                     const startTotal = hour * 60 + startMin
                                                     const endTotal = endH * 60 + endM
                                                     const duration = endTotal - startTotal
-
                                                     const topOffset = (startMin / 60) * ROW_HEIGHT
                                                     const heightPx = (duration / 60) * ROW_HEIGHT
 
-                                                    // Check for ANY overlapping approved/pending booking
                                                     const isBooked = bookings.some(b => {
                                                         const bSlot = b.slots;
                                                         if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time) return false;
                                                         if (bSlot.date !== dayStr) return false;
                                                         if (['pending', 'approved'].includes(b.status)) {
-                                                            const bStartH = parseInt(bSlot.start_time.split(':')[0]);
-                                                            const bStartM = parseInt(bSlot.start_time.split(':')[1]);
-                                                            const bEndH = parseInt(bSlot.end_time.split(':')[0]);
-                                                            const bEndM = parseInt(bSlot.end_time.split(':')[1]);
-
-                                                            const bStartTotal = bStartH * 60 + bStartM;
-                                                            const bEndTotal = bEndH * 60 + bEndM;
-
+                                                            const [bsh, bsm] = bSlot.start_time.split(':').map(Number);
+                                                            const [beh, bem] = bSlot.end_time.split(':').map(Number);
+                                                            const bStartTotal = bsh * 60 + bsm;
+                                                            const bEndTotal = beh * 60 + bem;
                                                             return (startTotal < bEndTotal && endTotal > bStartTotal);
                                                         }
                                                         return false;
                                                     });
 
-                                                    if (isBooked) return null; // Booking shown instead
+                                                    if (isBooked) return null;
 
-                                                    // Improved Overlap Logic for Width/Left Pos using grouped objects
                                                     const siblings = [
                                                         ...Object.values(groupedSlots).map(g => g.primarySlot),
                                                         ...startingBookings.map(sb => sb.slots)
                                                     ].filter(s => {
-                                                        if (!s && !s?.start_time) return false;
+                                                        if (!s || !s.start_time) return false;
                                                         const [sh, sm] = s.start_time.split(':').map(Number);
                                                         const [eh, em] = s.end_time.split(':').map(Number);
                                                         const sStart = sh * 60 + sm;
@@ -370,7 +357,6 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     const totalItems = siblings.length;
                                                     const myIdx = siblings.findIndex(s => s.id === slot.id);
                                                     const extraLocCount = locations.length - 1;
-
                                                     const primaryEq = equipment.length > 0 ? equipment[0] : null;
                                                     const extraEqCount = equipment.length > 1 ? equipment.length - 1 : 0;
 
@@ -378,11 +364,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         <div
                                                             key={slot.id}
                                                             className={clsx(
-                                                                "absolute rounded-lg text-xs hover:shadow-xl transition-all cursor-pointer overflow-hidden border z-10 p-2 group/slot flex flex-col gap-1.5",
+                                                                "absolute rounded-xl text-[10px] hover:shadow-xl hover:scale-[1.02] transition-all duration-500 cursor-pointer overflow-hidden border z-10 p-3 group/slot flex flex-col gap-2",
                                                                 isPastCell
-                                                                    ? "bg-[#fdf9f4] border-transparent text-gray-400 opacity-60"
-                                                                    : "bg-white border-[#ebd3cf] text-[#333333] shadow-sm",
-                                                                duration < 45 && "py-1 px-2 justify-center"
+                                                                    ? "bg-alabaster/40 border-cream-100 text-charcoal/20 opacity-50"
+                                                                    : "bg-white border-rose-gold/20 text-charcoal shadow-sm",
+                                                                duration < 45 && "py-1.5 px-3 justify-center"
                                                             )}
                                                             style={{
                                                                 top: `${topOffset}px`,
@@ -392,47 +378,33 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                             }}
                                                             onClick={(e) => {
                                                                 e.stopPropagation()
-                                                                // Open edit modal with ALL locations selected from this group
-                                                                setEditingSlot(slot)
-                                                                setSingleDate(slot.date || format(day, 'yyyy-MM-dd'))
-                                                                setSingleTime(slot.start_time)
-                                                                setSingleEndTime(slot.end_time)
-                                                                setLocations(locations)
-                                                                setEquipment(equipment.length > 0 ? equipment : ['Reformer'])
-                                                                setIsEditModalOpen(true)
+                                                                setEditingSlot(slot); setSingleDate(slot.date || format(day, 'yyyy-MM-dd')); setSingleTime(slot.start_time); setSingleEndTime(slot.end_time); setLocations(locations); setEquipment(equipment.length > 0 ? equipment : ['Reformer']); setIsEditModalOpen(true);
                                                             }}
-                                                            title="Click to edit group"
                                                         >
                                                             <div className={clsx("flex items-center gap-2", duration < 45 ? "flex-row" : "flex-col items-start")}>
-                                                                <div className="flex items-center gap-1 font-bold text-[10px] text-charcoal-900 shrink-0">
-                                                                    <Clock className={clsx(duration < 45 ? "w-2.5 h-2.5" : "w-3.5 h-3.5 flex-shrink-0", isPastCell ? "text-gray-300" : "text-rose-gold")} />
-                                                                    <span className={duration < 45 ? "text-[9px]" : "truncate"}>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
+                                                                <div className="flex items-center gap-2 font-black text-[9px] text-charcoal uppercase tracking-widest shrink-0">
+                                                                    <Clock className={clsx(duration < 45 ? "w-3 h-3" : "w-3.5 h-3.5", isPastCell ? "text-charcoal/10" : "text-rose-gold")} />
+                                                                    <span>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                                 </div>
 
-                                                                {/* Location Tags */}
-                                                                <div className="flex flex-wrap items-center gap-1 overflow-hidden">
-                                                                    <div className="text-[9px] flex items-center gap-0.5 font-medium text-charcoal-600 bg-cream-50 px-1 py-0.5 rounded border border-cream-100 max-w-full">
-                                                                        <MapPin className="w-2.5 h-2.5 shrink-0 text-charcoal-400" />
-                                                                        <span className="truncate">{locations[0].split(' - ')[1] || locations[0]}</span>
+                                                                <div className="flex flex-wrap items-center gap-1.5">
+                                                                    <div className="text-[8px] font-black uppercase tracking-widest flex items-center gap-1 bg-alabaster px-2 py-0.5 rounded-lg border border-cream-100">
+                                                                        <MapPin className="w-2.5 h-2.5 text-charcoal/30" />
+                                                                        <span className="truncate max-w-[80px]">{locations[0].split(' - ')[1] || locations[0]}</span>
                                                                     </div>
                                                                     {extraLocCount > 0 && duration >= 45 && (
-                                                                        <div className="text-[8px] font-bold text-charcoal-700 bg-cream-100 px-1 py-0.5 rounded border border-cream-200 shrink-0">
-                                                                            +{extraLocCount} Loc
-                                                                        </div>
+                                                                        <div className="text-[8px] font-black text-rose-gold bg-rose-gold/5 px-2 py-0.5 rounded-lg border border-rose-gold/20">+{extraLocCount} AREAS</div>
                                                                     )}
                                                                 </div>
 
-                                                                {/* Equipment Tags */}
-                                                                {primaryEq && (
-                                                                    <div className="flex flex-wrap items-center gap-1 overflow-hidden">
-                                                                        <div className="text-[9px] flex items-center gap-0.5 font-medium text-charcoal-600 bg-cream-50 px-1 py-0.5 rounded border border-cream-100 max-w-full">
-                                                                            <Box className="w-2.5 h-2.5 shrink-0 text-rose-gold" />
-                                                                            <span className="truncate">{primaryEq}</span>
+                                                                {primaryEq && duration >= 45 && (
+                                                                    <div className="flex flex-wrap items-center gap-1.5 mt-auto">
+                                                                        <div className="text-[8px] font-black uppercase tracking-widest flex items-center gap-1 bg-sage/5 text-sage px-2 py-0.5 rounded-lg border border-sage/10">
+                                                                            <Box className="w-2.5 h-2.5" />
+                                                                            <span>{primaryEq}</span>
                                                                         </div>
-                                                                        {extraEqCount > 0 && duration >= 45 && (
-                                                                            <div className="text-[8px] font-bold text-charcoal-700 bg-cream-100 px-1 py-0.5 rounded border border-cream-200 shrink-0">
-                                                                                +{extraEqCount} Eq
-                                                                            </div>
+                                                                        {extraEqCount > 0 && (
+                                                                            <div className="text-[8px] font-black text-charcoal/40">+{extraEqCount} NEXT</div>
                                                                         )}
                                                                     </div>
                                                                 )}
@@ -446,21 +418,17 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                 const slotData = booking.slots;
                                                 const [s_startH, s_startM] = slotData.start_time.split(':').map(Number);
                                                 const [s_endH, s_endM] = slotData.end_time.split(':').map(Number);
-
                                                 const startTotal = s_startH * 60 + s_startM;
                                                 const endTotal = s_endH * 60 + s_endM;
                                                 const duration = endTotal - startTotal;
-
                                                 const topOffset = (s_startM / 60) * ROW_HEIGHT;
                                                 const heightPx = (duration / 60) * ROW_HEIGHT;
 
                                                 const studioName = slotData.studios?.name || 'Partner Studio';
-                                                const clientName = booking.client?.full_name || 'A Client';
+                                                const clientName = booking.client?.full_name || 'Anonymous Client';
 
-                                                // Improved Overlap Logic for Width/Left Pos
                                                 const siblings = [
                                                     ...startingSlots.filter(s => {
-                                                        // filter out slots that are replaced by bookings
                                                         const isBooked = bookings.some(b => {
                                                             const bSlot = b.slots;
                                                             if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time) return false;
@@ -468,12 +436,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                             if (['pending', 'approved'].includes(b.status)) {
                                                                 const [bsh, bsm] = bSlot.start_time.split(':').map(Number);
                                                                 const [beh, bem] = bSlot.end_time.split(':').map(Number);
-                                                                const bStart = bsh * 60 + bsm;
-                                                                const bEnd = beh * 60 + bem;
+                                                                const bStart = bsh * 60 + bsm; const bEnd = beh * 60 + bem;
                                                                 const [ssh, ssm] = s.start_time.split(':').map(Number);
                                                                 const [seh, sem] = s.end_time.split(':').map(Number);
-                                                                const sStart = ssh * 60 + ssm;
-                                                                const sEnd = seh * 60 + sem;
+                                                                const sStart = ssh * 60 + ssm; const sEnd = seh * 60 + sem;
                                                                 return (sStart < bEnd && sEnd > bStart);
                                                             }
                                                             return false;
@@ -482,7 +448,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     }),
                                                     ...startingBookings.map(sb => sb.slots)
                                                 ].filter(s => {
-                                                    if (!s && !s?.start_time) return false;
+                                                    if (!s || !s.start_time) return false;
                                                     const [sh, sm] = s.start_time.split(':').map(Number);
                                                     const [eh, em] = s.end_time.split(':').map(Number);
                                                     const sStart = sh * 60 + sm;
@@ -497,13 +463,13 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     <div
                                                         key={booking.id}
                                                         className={clsx(
-                                                            "absolute rounded-lg text-[10px] shadow-md border z-20 p-2.5 overflow-hidden transition-all hover:scale-[1.02] cursor-pointer group/booking",
+                                                            "absolute rounded-xl text-[10px] shadow-lg border z-20 p-4 overflow-hidden transition-all duration-500 hover:scale-[1.03] cursor-pointer group/booking flex flex-col",
                                                             isPastCell
-                                                                ? "bg-[#fdf9f4] border-transparent text-gray-400 opacity-80"
+                                                                ? "bg-alabaster/60 border-cream-100 text-charcoal/20 opacity-80"
                                                                 : booking.status === 'approved'
-                                                                    ? "bg-[#ebd3cf] border-[#ebd3cf] text-[#333333]"
-                                                                    : "bg-[#f5e8de] border-[#f5e8de] text-[#333333]",
-                                                            duration < 45 ? "flex flex-row items-center gap-2 py-1 px-2" : "flex flex-col"
+                                                                    ? "bg-sage/10 border-sage/30 text-charcoal"
+                                                                    : "bg-gold/10 border-gold/30 text-charcoal",
+                                                            duration < 45 && "flex-row items-center gap-3 py-1.5 px-3"
                                                         )}
                                                         style={{
                                                             top: `${topOffset}px`,
@@ -511,33 +477,30 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                             width: totalItems > 1 ? `${(100 / totalItems) - 2}%` : '96%',
                                                             left: totalItems > 1 ? `${(myIdx * 100) / totalItems + 1}%` : '2%'
                                                         }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setSelectedBooking(booking);
-                                                        }}
+                                                        onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); }}
                                                     >
                                                         {duration < 45 ? (
-                                                            <div className="flex flex-col h-full justify-center">
-                                                                <div className="flex items-center gap-1 font-bold text-[9px] white-space-nowrap">
-                                                                    <span className="truncate">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</span>
-                                                                </div>
-                                                                <div className="flex items-center gap-1 text-[8px] opacity-90 truncate mt-0.5">
-                                                                    <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
-                                                                    <span className="truncate">{studioName}</span>
-                                                                </div>
+                                                            <div className="flex flex-col justify-center">
+                                                                <div className="text-[8px] font-black uppercase tracking-widest text-charcoal/40">{booking.status === 'approved' ? 'RESERVED' : 'VERIFICATION'}</div>
+                                                                <div className="text-[9px] font-bold text-charcoal truncate">{studioName}</div>
                                                             </div>
                                                         ) : (
                                                             <>
-                                                                <div className="font-bold flex items-center justify-between mb-1.5">
-                                                                    <span className="truncate tracking-wider text-[11px]">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</span>
-                                                                    <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover/booking:opacity-100 transition-opacity" />
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <div className={clsx(
+                                                                        "text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-lg border",
+                                                                        booking.status === 'approved' ? "bg-sage/20 border-sage/30 text-sage" : "bg-gold/20 border-gold/30 text-gold"
+                                                                    )}>
+                                                                        {booking.status === 'approved' ? 'RESERVED' : 'VERIFICATION'}
+                                                                    </div>
+                                                                    <ArrowUpRight className="w-3.5 h-3.5 text-charcoal/20 group-hover/booking:text-charcoal transition-colors" />
                                                                 </div>
-                                                                <div className="flex items-center gap-1.5 font-semibold mb-1.5 text-[10px]">
-                                                                    <MapPin className="w-3.5 h-3.5 shrink-0" />
-                                                                    <span className="break-words line-clamp-2">{studioName}</span>
+                                                                <div className="text-[10px] font-black uppercase tracking-widest text-charcoal mb-1 flex items-center gap-2">
+                                                                    <MapPin className="w-3 h-3 text-charcoal/20" />
+                                                                    <span className="truncate">{studioName}</span>
                                                                 </div>
-                                                                <div className="flex items-center gap-1.5 opacity-90 font-medium italic text-[10px]">
-                                                                    <User className="w-3.5 h-3.5 shrink-0" />
+                                                                <div className="text-[10px] font-medium text-charcoal/60 italic flex items-center gap-2 mt-auto">
+                                                                    <User className="w-3 h-3 text-charcoal/20" />
                                                                     <span className="truncate">{clientName}</span>
                                                                 </div>
                                                             </>
@@ -557,18 +520,23 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Add Modal */}
             {isAddModalOpen && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-900/50 backdrop-blur-sm"
+                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 backdrop-blur-xl animate-in fade-in duration-500"
                     onClick={() => setIsAddModalOpen(false)}
                 >
                     <div
-                        className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-2xl animate-in fade-in zoom-in duration-200 overflow-y-auto max-h-[90vh]"
+                        className="bg-white/80 backdrop-blur-2xl rounded-[2.5rem] p-10 max-w-2xl w-full shadow-2xl border border-white/50 animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh]"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-xl font-serif text-charcoal-900">
-                                {addMode === 'bulk' ? 'Recurring Schedule Generator' : 'Add Availability Slot'}
-                            </h3>
-                            <button onClick={() => setIsAddModalOpen(false)} className="text-charcoal-400 hover:text-charcoal-900">
+                        <div className="flex justify-between items-center mb-10">
+                            <div>
+                                <h3 className="text-2xl font-serif text-charcoal">
+                                    {addMode === 'bulk' ? 'Recursive Sequence' : 'Temporal Alignment'}
+                                </h3>
+                                <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-[0.2em] mt-1">
+                                    {addMode === 'bulk' ? 'GENERATING RECURRING SCHEDULE BLOX' : 'DEFINING A SINGLE OPERATIONAL SLOT'}
+                                </p>
+                            </div>
+                            <button onClick={() => setIsAddModalOpen(false)} className="p-3 bg-alabaster rounded-2xl text-charcoal/40 hover:text-charcoal hover:bg-cream-100 transition-all">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -576,42 +544,39 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                         {addMode === 'bulk' ? (
                             <InstructorScheduleGenerator initialAvailability={[]} />
                         ) : (
-                            <form onSubmit={handleCreateSingle} className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Date</label>
-                                    <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-4 py-2 border border-cream-300 rounded-xl bg-white text-charcoal-900 outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all" />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
+                            <form onSubmit={handleCreateSingle} className="space-y-8">
+                                <div className="glass-card p-8 space-y-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-charcoal-700 mb-2">Start Time</label>
-                                        <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-4 py-2 border border-cream-300 rounded-xl bg-white text-charcoal-900 outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all" />
+                                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Calendar Date</label>
+                                        <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-charcoal-700 mb-2">End Time</label>
-                                        <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-4 py-2 border border-cream-300 rounded-xl bg-white text-charcoal-900 outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all" />
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Initiation</label>
+                                            <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Termination</label>
+                                            <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
+                                        </div>
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-charcoal-700 mb-3">Locations (Multi-Select)</label>
-                                    <div className="space-y-4 max-h-[150px] overflow-y-auto pr-2 custom-scrollbar">
+
+                                <div className="space-y-6">
+                                    <h4 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Geographic Deployment</h4>
+                                    <div className="space-y-4 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
                                         {Object.entries(GROUPED_AREAS).map(([city, cityLocations]) => {
                                             const allSelected = cityLocations.every(loc => locations.includes(loc));
                                             return (
-                                                <div key={city} className="space-y-2 border border-cream-200 p-3 rounded-xl bg-cream-50/50">
+                                                <div key={city} className="glass-card p-6 space-y-4">
                                                     <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-black text-charcoal uppercase tracking-[0.15em]">{city}</span>
                                                         <button
                                                             type="button"
                                                             onClick={() => toggleCityGroup(cityLocations)}
-                                                            className="font-bold text-sm text-charcoal-900 hover:text-rose-gold transition-colors text-left flex items-center gap-2"
+                                                            className="text-[9px] font-black text-rose-gold hover:text-charcoal transition-colors uppercase tracking-widest underline decoration-rose-gold/20 underline-offset-4"
                                                         >
-                                                            {city}
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => toggleCityGroup(cityLocations)}
-                                                            className="text-[10px] font-medium text-charcoal-500 hover:text-rose-gold transition-colors bg-white px-2 py-1 rounded-full border border-cream-200 shadow-sm"
-                                                        >
-                                                            {allSelected ? 'Deselect All' : 'Select All'}
+                                                            {allSelected ? 'DESELECT SEQUENCE' : 'ACTIVATE ALL'}
                                                         </button>
                                                     </div>
                                                     <div className="flex flex-wrap gap-2">
@@ -624,10 +589,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                     type="button"
                                                                     onClick={() => toggleLocation(area)}
                                                                     className={clsx(
-                                                                        "px-4 py-1.5 rounded-full text-xs font-medium transition-all border",
+                                                                        "px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 border",
                                                                         isSelected
-                                                                            ? "bg-rose-gold text-white border-rose-gold shadow-sm"
-                                                                            : "bg-white text-charcoal-600 border-cream-200 hover:border-rose-gold"
+                                                                            ? "bg-rose-gold text-white border-rose-gold shadow-lg shadow-rose-gold/20"
+                                                                            : "bg-white/60 text-charcoal/40 border-cream-100 hover:border-rose-gold/30 hover:text-charcoal"
                                                                     )}
                                                                 >
                                                                     {displayName}
@@ -639,14 +604,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                             )
                                         })}
                                     </div>
-                                    <p className="text-[11px] text-charcoal-500 mt-2 italic">
-                                        Note: Availability will be removed across all selected locations once a booking is confirmed.
-                                    </p>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Equipment (Multi-Select)</label>
-                                    <div className="flex flex-wrap gap-2 border border-cream-200 p-3 rounded-xl bg-cream-50/50">
+                                <div className="space-y-4">
+                                    <h4 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Equipment Matrix</h4>
+                                    <div className="flex flex-wrap gap-3 p-6 bg-alabaster/50 rounded-[2rem] border border-cream-100">
                                         {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
                                             const isSelected = equipment.includes(eq);
                                             return (
@@ -655,10 +617,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     type="button"
                                                     onClick={() => toggleEquipment(eq)}
                                                     className={clsx(
-                                                        "px-4 py-1.5 rounded-full text-xs font-medium transition-all border",
+                                                        "px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 border",
                                                         isSelected
-                                                            ? "bg-rose-gold text-white border-rose-gold shadow-sm"
-                                                            : "bg-white text-charcoal-600 border-cream-200 hover:border-rose-gold"
+                                                            ? "bg-sage text-white border-sage shadow-lg shadow-sage/20"
+                                                            : "bg-white text-charcoal/40 border-cream-100 hover:border-sage/30 hover:text-charcoal"
                                                     )}
                                                 >
                                                     {eq}
@@ -666,21 +628,18 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                             )
                                         })}
                                     </div>
-                                    <p className="text-[11px] text-charcoal-500 mt-2 italic">
-                                        Select all equipment types you are qualified/available to teach.
-                                    </p>
                                 </div>
 
-                                <div className="flex gap-4 pt-4">
+                                <div className="flex gap-4 pt-6">
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="flex-1 bg-rose-gold text-white py-3 rounded-xl font-bold hover:brightness-110 transition-all shadow-md active:scale-[0.98] disabled:opacity-50"
+                                        className="flex-1 bg-charcoal text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-xl shadow-charcoal/10 active:scale-[0.98] disabled:opacity-50"
                                     >
-                                        {isSubmitting ? 'Creating...' : 'Create Slot'}
+                                        {isSubmitting ? 'PROCESSING...' : 'COMMIT SLOT'}
                                     </button>
-                                    <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 py-3 rounded-xl font-medium text-charcoal-500 hover:text-charcoal-900 transition-colors border border-transparent hover:bg-cream-50">
-                                        Cancel
+                                    <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-10 py-4 rounded-2xl text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] hover:text-charcoal hover:bg-alabaster transition-all">
+                                        ABORT
                                     </button>
                                 </div>
                             </form>
@@ -692,53 +651,56 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Edit Modal */}
             {isEditModalOpen && editingSlot && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-900/50 backdrop-blur-sm"
+                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 backdrop-blur-xl animate-in fade-in duration-500"
                     onClick={() => setIsEditModalOpen(false)}
                 >
                     <div
-                        className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-2xl animate-in fade-in zoom-in duration-200 overflow-y-auto max-h-[90vh]"
+                        className="bg-white/80 backdrop-blur-2xl rounded-[2.5rem] p-10 max-w-2xl w-full shadow-2xl border border-white/50 animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh]"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-xl font-serif text-charcoal-900">
-                                Edit Availability
-                            </h3>
-                            <button onClick={() => setIsEditModalOpen(false)} className="text-charcoal-400 hover:text-charcoal-900">
+                        <div className="flex justify-between items-center mb-10">
+                            <div>
+                                <h3 className="text-2xl font-serif text-charcoal">Edit Constraints</h3>
+                                <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-[0.2em] mt-1">MODIFYING DEPLOYED OPERATIONAL BLOC</p>
+                            </div>
+                            <button onClick={() => setIsEditModalOpen(false)} className="p-3 bg-alabaster rounded-2xl text-charcoal/40 hover:text-charcoal hover:bg-cream-100 transition-all">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleUpdate} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-1">Date</label>
-                                <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-3 py-2 border border-cream-300 rounded-lg bg-white text-charcoal-900 outline-none" />
-                                <p className="text-xs text-charcoal-500 mt-1">Change date to move this slot (will update day of week automatically).</p>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+                        <form onSubmit={handleUpdate} className="space-y-8">
+                            <div className="glass-card p-8 space-y-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-charcoal-700 mb-1">Start Time</label>
-                                    <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-3 py-2 border border-cream-300 rounded-lg bg-white text-charcoal-900 outline-none" />
+                                    <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Re-entry Date</label>
+                                    <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-charcoal-700 mb-1">End Time</label>
-                                    <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-3 py-2 border border-cream-300 rounded-lg bg-white text-charcoal-900 outline-none" />
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Modified Start</label>
+                                        <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Modified End</label>
+                                        <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-2">Location</label>
+
+                            <div className="space-y-4">
+                                <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] ml-4">Deployment Area</label>
                                 <select
                                     value={locations[0] || 'BGC'}
                                     onChange={(e) => setLocations([e.target.value])}
-                                    className="w-full px-4 py-2 border border-cream-300 rounded-xl text-charcoal-900 outline-none bg-white focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                                    className="w-full px-6 py-4 border border-cream-100 rounded-[2rem] bg-white text-[10px] font-black text-charcoal outline-none focus:ring-4 focus:ring-rose-gold/10 focus:border-rose-gold/30 transition-all uppercase tracking-[0.15em] cursor-pointer appearance-none shadow-sm"
                                     name="location"
                                 >
-                                    {AREAS.map(l => <option key={l} value={l}>{l}</option>)}
+                                    {AREAS.map(l => <option key={l} value={l}>{l.toUpperCase()}</option>)}
                                 </select>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-2">Equipment</label>
-                                <div className="flex flex-wrap gap-2 border border-cream-200 p-3 rounded-xl bg-cream-50/50">
+                            <div className="space-y-4">
+                                <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] ml-4">Equipment Apparatus</label>
+                                <div className="flex flex-wrap gap-3 p-6 bg-alabaster/50 rounded-[2rem] border border-cream-100">
                                     {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
                                         const isSelected = equipment.includes(eq);
                                         return (
@@ -747,10 +709,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                 type="button"
                                                 onClick={() => toggleEquipment(eq)}
                                                 className={clsx(
-                                                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                                                    "px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 border",
                                                     isSelected
-                                                        ? "bg-rose-gold text-white border-rose-gold shadow-sm"
-                                                        : "bg-white text-charcoal-600 border-cream-200 hover:border-rose-gold"
+                                                        ? "bg-sage text-white border-sage shadow-lg shadow-sage/20"
+                                                        : "bg-white text-charcoal/40 border-cream-100 hover:border-sage/30 hover:text-charcoal"
                                                 )}
                                             >
                                                 {eq}
@@ -760,9 +722,9 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 </div>
                             </div>
 
-                            <div className="flex gap-4 pt-6 border-t border-cream-100 mt-6">
-                                <button type="submit" disabled={isSubmitting} className="flex-1 bg-rose-gold text-white py-3 rounded-xl font-bold hover:brightness-110 transition-all shadow-md active:scale-[0.98] disabled:opacity-50">
-                                    {isSubmitting ? 'Saving...' : 'Save Changes'}
+                            <div className="flex gap-4 pt-10 border-t border-cream-100">
+                                <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-xl shadow-charcoal/10 active:scale-[0.98] disabled:opacity-50">
+                                    {isSubmitting ? 'SYNCHRONIZING...' : 'UPDATE ARCHIVE'}
                                 </button>
                                 <button
                                     type="button"
@@ -771,142 +733,160 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                         handleDelete(editingSlot.id)
                                     }}
                                     disabled={isSubmitting}
-                                    className="flex-1 bg-white text-charcoal-600 border border-cream-200 py-2.5 rounded-lg font-medium hover:bg-cream-50 transition-colors flex items-center justify-center gap-2"
+                                    className="px-8 py-4 bg-red-50 text-red-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-red-100 transition-all flex items-center justify-center gap-2"
                                 >
-                                    <Trash2 className="w-4 h-4" /> Delete Availability
+                                    <Trash2 className="w-4 h-4" /> PURGE
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
+
             {/* Booking Detail Modal */}
             {selectedBooking && (
                 <div
-                    className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-md animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-charcoal/60 backdrop-blur-2xl animate-in fade-in duration-500"
                     onClick={() => setSelectedBooking(null)}
                 >
                     <div
-                        className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+                        className="bg-white/90 backdrop-blur-3xl rounded-[3rem] w-full max-w-2xl shadow-3xl overflow-hidden animate-in zoom-in-95 duration-500 border border-white/50"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Modal Header */}
                         <div className={clsx(
-                            "px-8 py-6 flex justify-between items-center text-white relative overflow-hidden",
-                            selectedBooking.status === 'approved' ? "bg-green-600" : "bg-amber-500"
+                            "px-10 py-10 flex justify-between items-center text-white relative",
+                            selectedBooking.status === 'approved' ? "bg-sage" : "bg-gold"
                         )}>
                             <div className="relative z-10">
-                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mb-1 block">
-                                    {selectedBooking.status === 'approved' ? 'Confirmed Session' : 'Pending Verification'}
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-2 block">
+                                    {selectedBooking.status === 'approved' ? 'RESERVATION CONFIRMED' : 'RESERVATION PENDING'}
                                 </span>
-                                <h3 className="text-2xl font-serif">Session Details</h3>
+                                <h3 className="text-3xl font-serif tracking-tight">
+                                    {selectedBooking.status === 'approved' ? 'Session Locked' : 'Verification Required'}
+                                </h3>
                             </div>
-                            <button
-                                onClick={() => setSelectedBooking(null)}
-                                className="relative z-10 p-2 hover:bg-white/10 rounded-full transition-colors"
-                            >
+                            <button onClick={() => setSelectedBooking(null)} className="p-4 bg-white/20 hover:bg-white/30 rounded-2xl transition-all relative z-10">
                                 <X className="w-6 h-6" />
                             </button>
                             {/* Decorative background circle */}
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
                         </div>
 
-                        <div className="p-8 space-y-8">
-                            {/* Time & Location */}
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-1.5">
-                                    <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-wider block">Date & Time</span>
-                                    <div className="flex items-center gap-2 text-charcoal-900 font-bold">
-                                        <Clock className="w-4 h-4 text-rose-gold" />
-                                        <span>{format(parseISO(selectedBooking.slots.date), 'EEE, MMM d')}</span>
+                        <div className="p-10 space-y-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
+                            {/* Session Metadata */}
+                            <div className="glass-card p-8">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="p-3 bg-sage/10 rounded-2xl">
+                                        <Clock className="w-6 h-6 text-sage" />
                                     </div>
-                                    <p className="text-sm text-charcoal-500 ml-6">
-                                        {selectedBooking.slots.start_time.slice(0, 5)} - {selectedBooking.slots.end_time.slice(0, 5)}
-                                    </p>
-                                </div>
-                                <div className="space-y-1.5 text-right">
-                                    <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-wider block">Location</span>
-                                    <div className="flex items-center justify-end gap-2 text-charcoal-900 font-bold">
-                                        <MapPin className="w-4 h-4 text-rose-gold" />
-                                        <span className="truncate max-w-[150px]">{selectedBooking.slots.studios.name}</span>
-                                    </div>
-                                    <p className="text-xs text-charcoal-500 italic">
-                                        {selectedBooking.slots.studios.location}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <hr className="border-cream-100" />
-
-                            {/* Client Info */}
-                            <div className="flex items-center gap-6">
-                                <div className="w-16 h-16 rounded-2xl bg-cream-100 overflow-hidden border-2 border-cream-200 flex-shrink-0">
-                                    <img
-                                        src={selectedBooking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <div className="flex-1">
-                                    <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-wider block mb-1">Client 정보</span>
-                                    <h4 className="text-lg font-bold text-charcoal-900">{selectedBooking.client?.full_name}</h4>
-                                    <p className="text-sm text-charcoal-500">{selectedBooking.client?.email}</p>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button className="p-3 bg-cream-50 text-charcoal-600 rounded-xl hover:bg-rose-gold hover:text-white transition-all shadow-sm border border-cream-200">
-                                        <MessageSquare className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Medical Conditions Alert if exists */}
-                            {selectedBooking.client?.medical_conditions && (
-                                <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 mt-4">
-                                    <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />
                                     <div>
-                                        <h4 className="text-sm font-bold text-red-800 mb-1">Medical Conditions</h4>
-                                        <p className="text-sm text-red-700 leading-relaxed break-words whitespace-pre-wrap">
-                                            {selectedBooking.client.medical_conditions}
+                                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Temporal Coordinate</p>
+                                        <p className="text-lg font-serif mt-0.5 text-charcoal">
+                                            {format(new Date(selectedBooking.slots.date), 'PPPP')}
+                                        </p>
+                                        <p className="text-xs font-black text-charcoal/60 uppercase tracking-widest mt-1">
+                                            <span className="font-serif italic text-sm">{selectedBooking.slots.start_time.slice(0, 5)}</span> — <span className="font-serif italic text-sm">{selectedBooking.slots.end_time.slice(0, 5)}</span>
                                         </p>
                                     </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Studio Environment */}
+                                <div className="glass-card p-8 group">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="p-3 bg-rose-gold/10 rounded-xl group-hover:bg-rose-gold/20 transition-colors">
+                                            <MapPin className="w-5 h-5 text-rose-gold" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-widest">Environment</p>
+                                            <h4 className="font-serif text-charcoal text-lg truncate w-[160px]">{selectedBooking.slots.studios?.name}</h4>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2 mt-4">
+                                        <p className="text-[10px] text-charcoal/60 leading-relaxed italic">{selectedBooking.slots.studios?.location || 'Location details within secure perimeter'}</p>
+                                        <p className="text-[9px] font-black text-charcoal/30 uppercase tracking-widest">{selectedBooking.slots.studios?.email}</p>
+                                    </div>
+                                </div>
+
+                                {/* Client Information */}
+                                <div className="glass-card p-8 group">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="w-12 h-12 rounded-xl bg-cream-100 overflow-hidden border border-cream-200 flex-shrink-0">
+                                            <img
+                                                src={selectedBooking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-widest">Subscriber</p>
+                                            <h4 className="font-serif text-charcoal text-lg truncate w-[160px]">{selectedBooking.client?.full_name}</h4>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2 mt-4">
+                                        <div className="flex items-center gap-2 text-[10px] font-black text-charcoal/60 uppercase tracking-widest">
+                                            <MessageSquare className="w-3.5 h-3.5 text-charcoal/20" />
+                                            {selectedBooking.client?.phone || 'ANONYMIZED LINE'}
+                                        </div>
+                                        <p className="text-[9px] font-black text-charcoal/30 uppercase tracking-widest">{selectedBooking.client?.email}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Medical / Status */}
+                            {selectedBooking.client?.medical_conditions && (
+                                <div className="p-8 bg-red-50/50 rounded-[2rem] border border-red-100">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <AlertTriangle className="w-5 h-5 text-red-500" />
+                                        <h4 className="text-[10px] font-black text-red-700 uppercase tracking-[0.2em]">PHYSICAL CONTRAINDICATIONS</h4>
+                                    </div>
+                                    <p className="text-[11px] text-red-600/80 italic leading-relaxed">{selectedBooking.client.medical_conditions}</p>
                                 </div>
                             )}
 
                             {/* Booking Specifics */}
-                            <div className="bg-cream-50/50 rounded-2xl p-6 border border-cream-100 space-y-4">
+                            <div className="glass-card p-8 space-y-6">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center border border-cream-200 shadow-sm">
-                                            <Box className="w-4 h-4 text-rose-gold" />
+                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-cream-200 shadow-sm">
+                                            <Box className="w-5 h-5 text-rose-gold" />
                                         </div>
                                         <div>
-                                            <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-wider block">Equipment</span>
+                                            <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-wider block">Equipment</span>
                                             <span className="text-sm font-bold text-charcoal-900">
                                                 {selectedBooking.price_breakdown?.equipment || 'Standard Set'}
                                             </span>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-wider block">Earnings</span>
-                                        <span className="text-lg font-bold text-green-600">₱{(selectedBooking.price_breakdown?.instructor_fee || 0).toLocaleString()}</span>
+                                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-wider block">Earnings</span>
+                                        <span className="text-xl font-serif text-sage">₱{(selectedBooking.price_breakdown?.instructor_fee || 0).toLocaleString()}</span>
                                     </div>
                                 </div>
 
                                 {selectedBooking.notes && (
-                                    <div className="pt-4 border-t border-cream-200/50">
-                                        <span className="text-[10px] font-bold text-charcoal-400 uppercase tracking-wider block mb-1">Session Notes</span>
-                                        <p className="text-sm text-charcoal-600 italic">"{selectedBooking.notes}"</p>
+                                    <div className="pt-6 border-t border-cream-100">
+                                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-wider block mb-2">Session Notes</span>
+                                        <p className="text-sm text-charcoal-600 italic leading-relaxed">"{selectedBooking.notes}"</p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="px-8 py-6 bg-cream-50 border-t border-cream-200 flex gap-4">
+                        <div className="px-10 py-8 bg-cream-50/50 border-t border-cream-100 flex gap-4">
+                            <button
+                                onClick={() => router.push(`/instructor/messages?userId=${selectedBooking.client_id}`)}
+                                className="flex-1 bg-charcoal text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-charcoal/10 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                            >
+                                <MessageSquare className="w-4 h-4" /> INITIATE COMMS
+                            </button>
                             <button
                                 onClick={() => setSelectedBooking(null)}
-                                className="flex-1 py-3 bg-charcoal-900 text-white rounded-xl font-bold hover:bg-charcoal-800 transition-colors shadow-lg shadow-charcoal-900/10"
+                                className="px-10 py-4 bg-alabaster text-charcoal/40 hover:text-charcoal rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all"
                             >
-                                Close Details
+                                CLOSE
                             </button>
                         </div>
                     </div>

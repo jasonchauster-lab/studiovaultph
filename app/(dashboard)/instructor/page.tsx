@@ -1,8 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import InstructorDashboardClient from '@/components/dashboard/InstructorDashboardClient'
-import ReviewTrigger from '@/components/reviews/ReviewTrigger'
-import { getPendingReviews } from '@/app/(dashboard)/reviews/actions'
 
 export default async function InstructorDashboardPage() {
     const supabase = await createClient()
@@ -26,20 +24,8 @@ export default async function InstructorDashboardPage() {
         redirect('/instructor/onboarding')
     }
 
-    // Fetch pending reviews for the instructor
-    const { bookings: pendingReviews, isInstructor } = await getPendingReviews()
-
     return (
-        <>
-            {pendingReviews && pendingReviews.length > 0 && (
-                <ReviewTrigger
-                    pendingBookings={pendingReviews as any}
-                    currentUserId={user.id}
-                    isInstructor={isInstructor ?? true}
-                />
-            )}
-            <InstructorDashboardClient />
-        </>
+        <InstructorDashboardClient />
     )
 }
 
