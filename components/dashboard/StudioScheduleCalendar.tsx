@@ -145,8 +145,8 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-xl border border-cream-200 shadow-sm">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex flex-wrap justify-between items-center gap-4 bg-white p-4 rounded-xl border border-cream-200 shadow-sm">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 min-w-0">
                     <h2 className="text-xl font-serif text-charcoal-900 hidden md:block min-w-[140px]">
                         {format(currentDate, 'MMMM yyyy')}
                     </h2>
@@ -178,7 +178,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                     </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 shrink-0">
                     <button
                         onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
                         className="btn-rose-gold px-6 py-2.5 text-xs tracking-[0.1em] flex items-center gap-2"
@@ -188,7 +188,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                     </button>
                     <button
                         onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
-                        className="btn-antigravity px-6 py-2.5 text-xs tracking-[0.1em] flex items-center gap-2"
+                        className="px-6 py-2.5 text-xs tracking-[0.1em] flex items-center gap-2 rounded-[20px] font-bold border-2 border-charcoal text-charcoal bg-white hover:bg-charcoal hover:text-white transition-all duration-300 shadow-sm active:scale-95"
                     >
                         <CalendarIcon className="w-4 h-4" /> BULK GENERATE
                     </button>
