@@ -132,10 +132,10 @@ export default function EarningsPage({
                                 </p>
                             </div>
                         </div>
-                        <div className="px-6 py-4 bg-cream-50 border-t border-cream-200">
+                        <div className="px-6 py-4 bg-alabaster border-t border-charcoal/5">
                             <button
                                 onClick={() => setShowInfoModal(false)}
-                                className="w-full py-2 bg-charcoal-900 text-white rounded-lg font-bold hover:bg-charcoal-800 transition-colors"
+                                className="w-full py-2 bg-charcoal text-white rounded-lg font-bold hover:opacity-90 transition-colors"
                             >
                                 Got it
                             </button>
@@ -159,15 +159,15 @@ export default function EarningsPage({
                     {recentTransactions && <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />}
                     <button
                         onClick={() => setShowTopUpModal(true)}
-                        className="bg-white text-charcoal-900 border border-cream-200 px-6 py-3 rounded-lg font-bold hover:bg-cream-50 shadow-sm transition-all flex items-center gap-2"
+                        className="bg-white text-charcoal border border-charcoal/10 px-6 py-3 rounded-lg font-bold hover:bg-alabaster shadow-sm transition-all flex items-center gap-2"
                     >
-                        <ArrowUpRight className="w-4 h-4" />
+                        <ArrowUpRight className="w-4 h-4 text-sage" />
                         Top-Up Wallet
                     </button>
                     {availableBalance < 0 ? (
                         <button
                             disabled
-                            className="bg-charcoal-400 text-cream-100 px-6 py-3 rounded-lg font-bold shadow-md transition-all flex items-center gap-2 cursor-not-allowed"
+                            className="bg-charcoal/20 text-white px-6 py-3 rounded-lg font-bold shadow-md transition-all flex items-center gap-2 cursor-not-allowed"
                             title="Payouts are restricted while your balance is negative."
                         >
                             <Wallet className="w-4 h-4" />
@@ -176,9 +176,9 @@ export default function EarningsPage({
                     ) : (
                         <Link
                             href="/instructor/payout"
-                            className="bg-rose-gold text-white px-6 py-3 rounded-lg font-bold hover:brightness-110 shadow-md transition-all flex items-center gap-2"
+                            className="bg-charcoal text-white px-6 py-3 rounded-lg font-bold hover:opacity-90 shadow-md transition-all flex items-center gap-2"
                         >
-                            <Wallet className="w-4 h-4" />
+                            <Wallet className="w-4 h-4 text-sage" />
                             Request Payout
                         </Link>
                     )}
@@ -190,43 +190,43 @@ export default function EarningsPage({
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Gross Earnings */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
+                <div className="bg-white p-6 rounded-xl border border-charcoal/5 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <TrendingUp className="w-5 h-5 text-rose-gold" />
-                        <span className="text-sm font-medium text-charcoal-500 uppercase tracking-wider">Gross Earnings</span>
+                        <TrendingUp className="w-5 h-5 text-sage" />
+                        <span className="text-sm font-medium text-charcoal/50 uppercase tracking-wider">Gross Earnings</span>
                     </div>
-                    <p className="text-3xl font-bold text-charcoal-900">₱{(data.totalEarned || 0).toLocaleString()}</p>
-                    <p className="text-xs mt-2 text-charcoal-400">Lifetime gross income</p>
+                    <p className="text-3xl font-bold text-charcoal">₱{(data.totalEarned || 0).toLocaleString()}</p>
+                    <p className="text-xs mt-2 text-charcoal/40">Lifetime gross income</p>
                 </div>
 
                 {/* Compensation (Studio late cancellation) */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
+                <div className="bg-white p-6 rounded-xl border border-charcoal/5 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <TrendingUp className="w-5 h-5 text-green-600" />
-                        <span className="text-sm font-medium text-charcoal-500 uppercase tracking-wider">Compensation</span>
+                        <span className="text-sm font-medium text-charcoal/50 uppercase tracking-wider">Compensation</span>
                     </div>
                     <p className="text-3xl font-bold text-green-600">₱{(data.totalCompensation || 0).toLocaleString()}</p>
-                    <p className="text-xs mt-2 text-charcoal-400">From studio late cancels</p>
+                    <p className="text-xs mt-2 text-charcoal/40">From studio late cancels</p>
                 </div>
 
                 {/* Penalty (Instructor late cancellation) */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
+                <div className="bg-white p-6 rounded-xl border border-charcoal/5 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <TrendingUp className="w-5 h-5 text-red-600" transform="rotate(180)" />
-                        <span className="text-sm font-medium text-charcoal-500 uppercase tracking-wider">Penalties</span>
+                        <span className="text-sm font-medium text-charcoal/50 uppercase tracking-wider">Penalties</span>
                     </div>
                     <p className="text-3xl font-bold text-red-600">- ₱{(data.totalPenalty || 0).toLocaleString()}</p>
-                    <p className="text-xs mt-2 text-charcoal-400">From your late cancels</p>
+                    <p className="text-xs mt-2 text-charcoal/40">From your late cancels</p>
                 </div>
 
                 {/* Net Earnings */}
-                <div className="bg-charcoal-900 text-cream-50 p-6 rounded-xl shadow-lg border border-rose-gold/20">
+                <div className="bg-charcoal text-white p-6 rounded-xl shadow-lg border border-white/10">
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
-                            <TrendingUp className="w-5 h-5 text-rose-gold" />
+                            <TrendingUp className="w-5 h-5 text-sage" />
                             <span className="text-sm font-medium opacity-80 uppercase tracking-wider">Net Earnings</span>
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-tighter text-rose-gold px-2 py-1 rounded bg-rose-gold/10">
+                        <span className="text-[10px] font-bold uppercase tracking-tighter text-sage px-2 py-1 rounded bg-sage/10">
                             Calculation: Gross + Comp - Penalty
                         </span>
                     </div>
@@ -235,7 +235,7 @@ export default function EarningsPage({
                 </div>
 
                 {/* Available Balance */}
-                <div className="p-6 rounded-xl shadow-sm text-white" style={{ background: '#BC926E' }}>
+                <div className="p-6 rounded-xl shadow-lg text-white bg-sage">
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
                             <Wallet className="w-5 h-5 text-white" />
@@ -254,33 +254,33 @@ export default function EarningsPage({
                 </div>
 
                 {/* Total Withdrawn */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
+                <div className="bg-white p-6 rounded-xl border border-charcoal/5 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <ArrowUpRight className="w-5 h-5 text-rose-gold" />
-                        <span className="text-sm font-medium text-charcoal-500 uppercase tracking-wider">Total Withdrawn</span>
+                        <ArrowUpRight className="w-5 h-5 text-sage" />
+                        <span className="text-sm font-medium text-charcoal/50 uppercase tracking-wider">Total Withdrawn</span>
                     </div>
-                    <p className="text-3xl font-bold text-charcoal-900">₱{(totalWithdrawn || 0).toLocaleString()}</p>
-                    <p className="text-xs mt-2 text-charcoal-400">Successfully transferred</p>
+                    <p className="text-3xl font-bold text-charcoal">₱{(totalWithdrawn || 0).toLocaleString()}</p>
+                    <p className="text-xs mt-2 text-charcoal/40">Successfully transferred</p>
                 </div>
 
                 {/* Pending Payouts */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
+                <div className="bg-white p-6 rounded-xl border border-charcoal/5 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <Clock className="w-5 h-5 text-rose-gold" />
-                        <span className="text-sm font-medium text-charcoal-500 uppercase tracking-wider">Pending Payouts</span>
+                        <Clock className="w-5 h-5 text-sage" />
+                        <span className="text-sm font-medium text-charcoal/50 uppercase tracking-wider">Pending Payouts</span>
                     </div>
-                    <p className="text-3xl font-bold text-charcoal-900">₱{(pendingPayouts || 0).toLocaleString()}</p>
-                    <p className="text-xs mt-2 text-charcoal-400">In extraction queue</p>
+                    <p className="text-3xl font-bold text-charcoal">₱{(pendingPayouts || 0).toLocaleString()}</p>
+                    <p className="text-xs mt-2 text-charcoal/40">In extraction queue</p>
                 </div>
 
                 {/* Security Hold */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm border-l-4 border-l-rose-gold">
+                <div className="bg-white p-6 rounded-xl border border-charcoal/5 shadow-sm border-l-4 border-l-sage">
                     <div className="flex items-center gap-3 mb-2">
-                        <Clock className="w-5 h-5 text-rose-gold" />
-                        <span className="text-sm font-bold text-rose-gold uppercase tracking-wider">Security Hold</span>
+                        <Clock className="w-5 h-5 text-sage" />
+                        <span className="text-sm font-bold text-sage uppercase tracking-wider">Security Hold</span>
                     </div>
-                    <p className="text-3xl font-bold text-charcoal-900">₱{(pendingBalance || 0).toLocaleString()}</p>
-                    <p className="text-xs mt-2 text-charcoal-400">Unlocking within 24 hours</p>
+                    <p className="text-3xl font-bold text-charcoal">₱{(pendingBalance || 0).toLocaleString()}</p>
+                    <p className="text-xs mt-2 text-charcoal/40">Unlocking within 24 hours</p>
                 </div>
             </div>
 
@@ -292,7 +292,7 @@ export default function EarningsPage({
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-cream-50 text-charcoal-500 text-xs uppercase tracking-wider">
+                        <thead className="bg-alabaster text-charcoal/50 text-xs uppercase tracking-wider">
                             <tr>
                                 <th className="px-6 py-4 font-medium">Date</th>
                                 <th className="px-6 py-4 font-medium">Type</th>
@@ -300,20 +300,20 @@ export default function EarningsPage({
                                 <th className="px-6 py-4 font-medium text-right">Amount</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-cream-100">
+                        <tbody className="divide-y divide-charcoal/5">
                             {recentTransactions && recentTransactions.length > 0 ? (
                                 recentTransactions.map((tx: any, i: number) => (
-                                    <tr key={i} className="hover:bg-cream-50/50 transition-colors">
-                                        <td className="px-6 py-4 text-sm text-charcoal-600">
+                                    <tr key={i} className="hover:bg-alabaster transition-colors">
+                                        <td className="px-6 py-4 text-sm text-charcoal/70">
                                             {new Date(tx.date).toLocaleDateString()}
-                                            <span className="block text-xs text-charcoal-400">
+                                            <span className="block text-xs text-charcoal/40">
                                                 {new Date(tx.date).toLocaleTimeString()}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-sm font-medium text-charcoal-900">
+                                        <td className="px-6 py-4 text-sm font-medium text-charcoal">
                                             {tx.type}
                                             {tx.details && (
-                                                <span className="block text-xs text-charcoal-400 font-normal">
+                                                <span className="block text-xs text-charcoal/50 font-normal">
                                                     {tx.details}
                                                 </span>
                                             )}
@@ -330,8 +330,8 @@ export default function EarningsPage({
                                                 {tx.status}
                                             </span>
                                         </td>
-                                        <td className={`px-6 py-4 text-sm font-bold text-right ${tx.total_amount > 0 ? 'text-green-600' : 'text-charcoal-900'}`}>
-                                            {tx.total_amount > 0 ? '+' : ''}₱{Math.abs(tx.total_amount).toLocaleString()}
+                                        <td className={`px-6 py-4 text-sm font-bold text-right ${tx.total_amount > 0 ? 'text-green-600' : tx.total_amount < 0 ? 'text-red-600' : 'text-charcoal-900'}`}>
+                                            {tx.total_amount > 0 ? '+' : tx.total_amount < 0 ? '-' : ''}₱{Math.abs(tx.total_amount).toLocaleString()}
                                         </td>
                                     </tr>
                                 ))
@@ -339,11 +339,11 @@ export default function EarningsPage({
                                 <tr>
                                     <td colSpan={4} className="px-6 py-16 text-center">
                                         <div className="flex flex-col items-center justify-center">
-                                            <div className="w-16 h-16 bg-cream-100 rounded-full flex items-center justify-center mb-4">
-                                                <Wallet className="w-8 h-8 text-rose-gold" />
+                                            <div className="w-16 h-16 bg-alabaster rounded-full flex items-center justify-center mb-4">
+                                                <Wallet className="w-8 h-8 text-sage" />
                                             </div>
-                                            <p className="text-charcoal-900 font-serif text-lg mb-1">Elite Vault</p>
-                                            <p className="text-charcoal-500 text-sm max-w-xs mx-auto">
+                                            <p className="text-charcoal font-serif text-lg mb-1">Elite Vault</p>
+                                            <p className="text-charcoal/50 text-sm max-w-xs mx-auto">
                                                 Your earnings history will appear here once your first session is completed.
                                             </p>
                                         </div>

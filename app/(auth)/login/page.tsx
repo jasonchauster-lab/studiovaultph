@@ -147,30 +147,48 @@ function LoginContent() {
             <div className="fixed inset-0 bg-white/50 animate-mesh -z-10 pointer-events-none" />
 
             {/* Left Side: Brand Narrative - Hidden on mobile, full height on desktop */}
-            <div className="hidden md:flex md:w-[45%] relative flex-col justify-center items-center p-20 overflow-hidden bg-white/20">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-sage/5 rounded-full blur-[120px] animate-pulse" />
+            <div className="hidden md:flex md:w-[45%] relative flex-col justify-center items-center p-20 overflow-hidden group">
+                <Image
+                    src={isSignUp ? "/images/auth/auth-left-2.png" : "/images/auth/auth-left-1.png"}
+                    alt="Pilates Sanctuary"
+                    fill
+                    className="object-cover transition-transform duration-[20s] group-hover:scale-110"
+                    priority
+                />
+                <div className="absolute inset-0 bg-charcoal/30 backdrop-blur-[2px]" />
+                <div className="absolute inset-0 bg-gradient-to-b from-charcoal/20 via-transparent to-charcoal/60" />
 
-                <div className="relative z-10 w-full max-w-sm space-y-12">
-                    <div className="space-y-6">
-                        <Link href="/" className="flex items-center gap-0 group">
-                            <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-16 h-16 object-contain" />
-                            <span className="text-2xl font-serif font-bold text-charcoal tracking-tight -ml-2">StudioVaultPH</span>
-                        </Link>
-                        <h2 className="text-5xl lg:text-6xl font-serif font-bold text-charcoal leading-[1.1] tracking-tight">
-                            The Sanctuary <br />
-                            <span className="text-sage italic">of Movement.</span>
-                        </h2>
-                    </div>
+                <div className="relative z-10 w-full max-w-md space-y-12 animate-in fade-in slide-in-from-left-8 duration-1000">
+                    <div className="glass-card p-12 border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl">
+                        <div className="space-y-8">
+                            <div className="space-y-6">
+                                <Link href="/" className="flex items-center gap-0 group/logo">
+                                    <div className="bg-white/90 p-2 rounded-2xl shadow-lg group-hover/logo:rotate-6 transition-transform">
+                                        <Image src="/logo.png" alt="StudioVault Logo" width={60} height={60} className="w-12 h-12 object-contain" />
+                                    </div>
+                                    <span className="text-2xl font-serif font-bold text-white tracking-tight ml-2 drop-shadow-md">StudioVaultPH</span>
+                                </Link>
+                                <h2 className="text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.1] tracking-tight drop-shadow-xl">
+                                    The Sanctuary <br />
+                                    <span className="text-sage-light italic">of Movement.</span>
+                                </h2>
+                            </div>
 
-                    <p className="text-lg text-charcoal/40 font-medium leading-relaxed italic">
-                        &ldquo;Experience a platform designed with the precision and grace of Pilates itself.&rdquo;
-                    </p>
+                            <p className="text-lg text-white/80 font-medium leading-relaxed italic drop-shadow-md">
+                                &ldquo;Experience a platform designed with the precision and grace of Pilates itself.&rdquo;
+                            </p>
 
-                    <div className="flex items-center gap-4 text-[10px] font-bold text-sage uppercase tracking-widest border-t border-sage/10 pt-8 mt-12">
-                        <Award className="w-4 h-4" />
-                        A Foundation Built for Professionals
+                            <div className="flex items-center gap-4 text-[10px] font-bold text-sage-light uppercase tracking-widest border-t border-white/10 pt-8 mt-12">
+                                <Award className="w-5 h-5" />
+                                A Foundation Built for Professionals
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                {/* Decorative floating elements */}
+                <div className="absolute bottom-12 right-12 w-32 h-32 bg-sage/20 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute top-12 left-12 w-24 h-24 bg-gold/10 rounded-full blur-2xl animate-pulse delay-700" />
             </div>
 
             {/* Right Side: Form Content */}

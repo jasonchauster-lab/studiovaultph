@@ -105,7 +105,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                             name="fullName"
                             defaultValue={profile?.full_name || ''}
                             required
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage transition-all"
                         />
                     </div>
                     <div>
@@ -116,7 +116,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 type="text"
                                 name="instagram"
                                 defaultValue={profile?.instagram_handle || ''}
-                                className="w-full pl-10 pr-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                                className="w-full pl-10 pr-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage transition-all"
                                 placeholder="username"
                             />
                         </div>
@@ -132,7 +132,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                             defaultValue={profile?.contact_number || ''}
                             placeholder="e.g. 09171234567"
                             maxLength={13}
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage transition-all"
                         />
                         <p className="text-[11px] text-charcoal-400 mt-1">Format: 09XXXXXXXXX or +639XXXXXXXXX (11 digits)</p>
                     </div>
@@ -143,7 +143,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                             name="emergencyContact"
                             defaultValue={profile?.emergency_contact || ''}
                             placeholder="Name and Phone Number"
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage transition-all"
                         />
                     </div>
                     <div>
@@ -152,7 +152,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                             type="date"
                             name="birthday"
                             defaultValue={profile?.date_of_birth || ''}
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage transition-all"
                         />
                     </div>
                     <p className="text-xs text-charcoal-400 mt-2 italic">
@@ -167,7 +167,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                         defaultValue={profile?.bio || ''}
                         rows={5}
                         placeholder="Tell others about yourself, your fitness journey, or your teaching style..."
-                        className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold resize-none transition-all"
+                        className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage resize-none transition-all"
                     />
                 </div>
             </div>
@@ -190,7 +190,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                         setSelectedMedicalConditions(selectedMedicalConditions.filter((item) => item !== condition))
                                     }
                                 }}
-                                className="w-4 h-4 text-rose-gold rounded border-cream-300 focus:ring-rose-gold/50"
+                                className="w-4 h-4 text-sage rounded border-cream-300 focus:ring-sage/50"
                             />
                             <span className="text-sm text-charcoal-700">{condition}</span>
                         </label>
@@ -204,7 +204,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                             name="otherMedicalCondition"
                             defaultValue={profile?.other_medical_condition || ''}
                             placeholder="e.g. Recent knee surgery, Pregnancy complications..."
-                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                            className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage transition-all"
                         />
                     </div>
                 )}
@@ -230,7 +230,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                             setSelectedEquipment(selectedEquipment.filter((item) => item !== eq))
                                         }
                                     }}
-                                    className="w-4 h-4 text-rose-gold rounded border-cream-300 focus:ring-rose-gold/50"
+                                    className="w-4 h-4 text-sage rounded border-cream-300 focus:ring-sage/50"
                                 />
                                 <span className="text-sm text-charcoal-700">{eq}</span>
                             </label>
@@ -260,7 +260,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                             min="0"
                                             step="0.01"
                                             disabled={!isSelected}
-                                            className="w-full pl-7 pr-3 py-2 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold text-sm disabled:bg-cream-50/50 disabled:cursor-not-allowed transition-all"
+                                            className="w-full pl-7 pr-3 py-2 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage text-sm disabled:bg-cream-50/50 disabled:cursor-not-allowed transition-all"
                                         />
                                     </div>
                                 </div>
@@ -276,26 +276,16 @@ export default function ProfileForm({ profile }: { profile: any }) {
                 </p>
             )}
 
-            {/* Waiver Section */}
-            <div className="pt-8 border-t border-cream-100">
-                <div className="flex items-center gap-2 mb-4">
-                    <FileText className="w-5 h-5 text-charcoal-900" />
-                    <h3 className="text-lg font-serif text-charcoal-900">Health & Safety Waiver</h3>
-                </div>
-                <p className="text-sm text-charcoal-600 mb-6">
-                    A signed waiver is required for all participants. You can upload a scanned copy or a photo of your signed document here.
-                </p>
-                <WaiverUpload initialUrl={profile?.waiver_url} signedAt={profile?.waiver_signed_at} />
+            <div className="pt-6">
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="bg-sage text-white px-10 py-3 rounded-xl font-bold hover:bg-sage/90 transition-all disabled:opacity-50 flex items-center gap-2 shadow-sm uppercase tracking-widest text-[11px]"
+                >
+                    {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Save Changes
+                </button>
             </div>
-
-            <button
-                type="submit"
-                disabled={isLoading}
-                className="bg-rose-gold text-white px-8 py-2 rounded-lg font-bold hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2 shadow-sm"
-            >
-                {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                Save Changes
-            </button>
         </form>
     )
 }
