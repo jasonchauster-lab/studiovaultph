@@ -128,8 +128,9 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             if (isRealized) {
                 grossEarnings += studioFee
 
-                // BUSINESS LOGIC: If it's not yet completed, it's "Upcoming" (not yet in profile.pending_balance)
-                if (b.status !== 'completed') {
+                // BUSINESS LOGIC: If it's not yet completed and funds aren't unlocked, 
+                // it's "Upcoming" (not yet in profile.pending_balance)
+                if (b.status !== 'completed' && !b.funds_unlocked) {
                     upcomingEarnings += studioFee
                 }
             }
