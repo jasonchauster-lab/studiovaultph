@@ -189,12 +189,12 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header */}
-            <div className="flex flex-row justify-between items-center gap-6 bg-white/40 backdrop-blur-[20px] p-8 rounded-[2rem] border border-white/60 shadow-cloud relative">
+            <div className="flex flex-col gap-4 bg-white/40 backdrop-blur-[20px] p-8 rounded-[2rem] border border-white/60 shadow-cloud relative">
                 {/* Background Bloom */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-sage/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
-                {/* Left: Title + Date Navigation */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 relative z-10">
+                {/* Row 1: Title + Date Navigation */}
+                <div className="flex flex-wrap items-center gap-4 relative z-10">
                     <h2 className="text-4xl font-serif text-charcoal hidden md:block min-w-[240px] tracking-tighter">
                         {format(currentDate, 'MMMM yyyy')}
                     </h2>
@@ -204,11 +204,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             <input
                                 type="date"
                                 value={format(currentDate, 'yyyy-MM-dd')}
-                                onChange={(e) => {
-                                    if (e.target.value) {
-                                        router.push(`?date=${e.target.value}`)
-                                    }
-                                }}
+                                onChange={(e) => { if (e.target.value) router.push(`?date=${e.target.value}`) }}
                                 className="pl-12 pr-6 py-3 border border-white/60 rounded-[20px] text-[10px] font-black bg-white/40 text-charcoal outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white transition-all cursor-pointer uppercase tracking-[0.2em]"
                                 title="Select any specific date"
                             />
@@ -227,22 +223,23 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                     </div>
                 </div>
 
-                {/* Right: Action Buttons */}
-                <div className="flex items-center gap-3 relative z-10 shrink-0">
+                {/* Row 2: Action Buttons — centered */}
+                <div className="flex justify-center items-center gap-3 relative z-10">
                     <button
                         onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
-                        className="bg-[#B4C3B2] text-white px-8 py-3 rounded-[12px] text-[10px] font-black uppercase tracking-[0.25em] hover:brightness-105 transition-all flex items-center gap-3 shadow-md active:scale-95"
+                        className="bg-[#B4C3B2] text-white px-6 py-2.5 rounded-[12px] text-[10px] font-black uppercase tracking-[0.25em] hover:brightness-105 transition-all flex items-center gap-2 shadow-md active:scale-95"
                     >
-                        <Plus className="w-4 h-4 stroke-[3px]" /> ADD SLOT
+                        <Plus className="w-3.5 h-3.5 stroke-[3px]" /> ADD SLOT
                     </button>
                     <button
                         onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
-                        className="border-2 border-charcoal text-charcoal bg-white px-8 py-3 rounded-[12px] text-[10px] font-black uppercase tracking-[0.25em] hover:bg-charcoal hover:text-white transition-all flex items-center gap-3 shadow-sm active:scale-95"
+                        className="border-2 border-charcoal text-charcoal bg-white px-6 py-2.5 rounded-[12px] text-[10px] font-black uppercase tracking-[0.25em] hover:bg-charcoal hover:text-white transition-all flex items-center gap-2 shadow-sm active:scale-95"
                     >
-                        <CalendarIcon className="w-4 h-4" /> RECURRING SCHEDULE
+                        <CalendarIcon className="w-3.5 h-3.5" /> RECURRING SCHEDULE
                     </button>
                 </div>
             </div>
+
 
 
             {/* Calendar Grid */}
