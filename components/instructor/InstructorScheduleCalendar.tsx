@@ -189,7 +189,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header */}
-            <div className="flex flex-col gap-4 bg-white/40 backdrop-blur-[20px] p-8 rounded-[2rem] border border-white/60 shadow-cloud relative overflow-hidden">
+            <div className="flex flex-row justify-between items-center gap-6 bg-white/40 backdrop-blur-[20px] p-8 rounded-[2rem] border border-white/60 shadow-cloud relative">
                 {/* Background Bloom */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-sage/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
@@ -227,8 +227,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                     </div>
                 </div>
 
-                {/* Row 2: Action Buttons */}
-                <div className="flex items-center gap-3 relative z-10">
+                {/* Right: Action Buttons */}
+                <div className="flex items-center gap-3 relative z-10 shrink-0">
                     <button
                         onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
                         className="bg-[#B4C3B2] text-white px-8 py-3 rounded-[12px] text-[10px] font-black uppercase tracking-[0.25em] hover:brightness-105 transition-all flex items-center gap-3 shadow-md active:scale-95"
