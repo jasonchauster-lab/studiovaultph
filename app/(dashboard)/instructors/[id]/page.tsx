@@ -77,122 +77,141 @@ export default async function InstructorProfilePage(props: {
     const { reviews, averageRating, totalCount } = await getPublicReviews(id)
 
     return (
-        <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
-            <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="min-h-screen bg-alabaster relative selection:bg-sage/20">
+            <div className="fixed inset-0 bg-white/50 animate-mesh -z-10 pointer-events-none" />
 
-                {/* Sidebar: Profile Info */}
-                <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-white p-6 rounded-2xl border border-cream-200 shadow-sm text-center">
-                        <div className="w-24 h-24 bg-cream-100 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden border border-cream-200">
-                            {instructor.avatar_url ? (
-                                <img
-                                    src={instructor.avatar_url}
-                                    alt={instructor.full_name}
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <User className="w-12 h-12 text-charcoal-400" />
+            <div className="p-4 sm:p-8 md:p-12">
+                <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                    {/* Sidebar: Profile Info */}
+                    <div className="lg:col-span-1 space-y-6">
+                        <div className="glass-card p-8 rounded-[32px] text-center sticky top-24">
+                            <div className="w-32 h-32 bg-white/40 rounded-full flex items-center justify-center mx-auto mb-6 overflow-hidden border-2 border-white/80 shadow-cloud">
+                                {instructor.avatar_url ? (
+                                    <img
+                                        src={instructor.avatar_url}
+                                        alt={instructor.full_name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <User className="w-16 h-16 text-charcoal/20" />
+                                )}
+                            </div>
+                            <h1 className="text-3xl font-serif font-bold text-charcoal mb-2 tracking-tight">{instructor.full_name}</h1>
+                            {instructor.instagram_handle && (
+                                <a
+                                    href={`https://instagram.com/${instructor.instagram_handle}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center gap-2 text-[10px] font-bold text-sage uppercase tracking-widest hover:text-charcoal transition-colors group"
+                                >
+                                    <Instagram className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                    @{instructor.instagram_handle}
+                                </a>
+                            )}
+
+                            {/* Average Rating */}
+                            <div className="mt-6 flex justify-center">
+                                <a href="#reviews" className="hover:opacity-80 transition-opacity">
+                                    <StarRating rating={averageRating} count={totalCount} size="sm" />
+                                </a>
+                            </div>
+
+                            {instructor.bio && (
+                                <div className="mt-6 text-[13px] font-medium text-charcoal/60 leading-relaxed italic px-4">
+                                    &ldquo;{instructor.bio}&rdquo;
+                                </div>
+                            )}
+
+                            <div className="mt-8 flex flex-wrap justify-center gap-2">
+                                {instructor.certifications?.map((c: any, i: number) => (
+                                    <span
+                                        key={i}
+                                        className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-1.5 border ${c.verified
+                                            ? "bg-sage/10 text-sage border-sage/20"
+                                            : "bg-white/40 text-charcoal/40 border-white/60"
+                                            }`}
+                                        title={c.verified ? 'Verified Certification' : 'Pending Verification'}
+                                    >
+                                        <Award className="w-3 h-3" />
+                                        {c.certification_body}
+                                        {!c.verified && <span className="opacity-50">(Pending)</span>}
+                                    </span>
+                                ))}
+                            </div>
+
+
+                            {/* Teaching Equipment */}
+                            {instructor.teaching_equipment && instructor.teaching_equipment.length > 0 && (
+                                <div className="mt-8 pt-8 border-t border-charcoal/5">
+                                    <h3 className="text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.2em] mb-4">
+                                        Certified Equipment
+                                    </h3>
+                                    <div className="flex flex-wrap justify-center gap-2">
+                                        {instructor.teaching_equipment.map((eq: string) => (
+                                            <span key={eq} className="bg-white/60 text-charcoal text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-[12px] border border-white">
+                                                {eq}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
                             )}
                         </div>
-                        <h1 className="text-2xl font-serif text-charcoal-900 mb-2">{instructor.full_name}</h1>
-                        {instructor.instagram_handle && (
-                            <a
-                                href={`https://instagram.com/${instructor.instagram_handle}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-1 text-sm text-charcoal-500 hover:text-charcoal-800"
-                            >
-                                <Instagram className="w-4 h-4" />
-                                @{instructor.instagram_handle}
-                            </a>
-                        )}
+                    </div>
 
-                        {/* Average Rating */}
-                        <div className="mt-4 flex justify-center">
-                            <a href="#reviews" className="hover:opacity-80 transition-opacity">
-                                <StarRating rating={averageRating} count={totalCount} size="sm" />
-                            </a>
+                    {/* Main Content Area */}
+                    <div className="lg:col-span-2 space-y-8">
+                        {/* Booking Wizard Section */}
+                        <div className="glass-card p-8 rounded-[32px]">
+                            <h2 className="text-2xl font-serif font-bold text-charcoal mb-8 flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-2xl bg-sage/10 flex items-center justify-center">
+                                    <Calendar className="w-5 h-5 text-sage" />
+                                </div>
+                                Book a Session
+                            </h2>
+
+                            <InstructorBookingWizard
+                                instructorId={instructor.id}
+                                availability={availability || []}
+                                activeBookings={activeBookings || []}
+                                instructorRates={instructor?.rates || {}}
+                                pendingBookings={pendingBookings || []}
+                            />
                         </div>
 
-                        {instructor.bio && (
-                            <div className="mt-4 text-sm text-charcoal-600 leading-relaxed italic">
-                                "{instructor.bio}"
+                        {/* Photo Gallery Section */}
+                        {instructor.gallery_images && instructor.gallery_images.length > 0 && (
+                            <div className="glass-card p-8 rounded-[32px]">
+                                <h2 className="text-2xl font-serif font-bold text-charcoal mb-8 flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
+                                        <ImageIcon className="w-5 h-5 text-gold" />
+                                    </div>
+                                    The Practice in Action
+                                </h2>
+                                <PublicInstructorGallery images={instructor.gallery_images} />
                             </div>
                         )}
 
-                        <div className="mt-4 flex flex-wrap justify-center gap-2">
-                            {instructor.certifications?.map((c: any, i: number) => (
-                                <span
-                                    key={i}
-                                    className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${c.verified
-                                        ? "bg-green-100 text-green-800"
-                                        : "bg-yellow-50 text-yellow-700 border border-yellow-100"
-                                        }`}
-                                    title={c.verified ? 'Verified Certification' : 'Pending Verification'}
-                                >
-                                    <Award className="w-3 h-3" />
-                                    {c.certification_body}
-                                    {!c.verified && <span className="text-[8px] uppercase ml-1 opacity-70">(Pending)</span>}
-                                </span>
-                            ))}
-                        </div>
 
+                        {/* Reviews Section */}
 
-                        {/* Teaching Equipment */}
-                        {instructor.teaching_equipment && instructor.teaching_equipment.length > 0 && (
-                            <div className="mt-6 pt-6 border-t border-cream-100">
-                                <h3 className="text-xs font-bold text-charcoal-400 uppercase tracking-wider mb-3">
-                                    Certified Equipment
-                                </h3>
-                                <div className="flex flex-wrap justify-center gap-2">
-                                    {instructor.teaching_equipment.map((eq: string) => (
-                                        <span key={eq} className="bg-charcoal-100 text-charcoal-700 text-xs px-2.5 py-1 rounded-md border border-charcoal-200">
-                                            {eq}
-                                        </span>
-                                    ))}
+                        <div id="reviews" className="glass-card p-8 rounded-[32px] scroll-mt-24">
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-2xl font-serif font-bold text-charcoal flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
+                                        <Star className="w-5 h-5 text-gold" />
+                                    </div>
+                                    Client Reviews
+                                </h2>
+                                <div className="bg-white/40 px-4 py-2 rounded-2xl border border-white/60">
+                                    <StarRating rating={averageRating} count={totalCount} size="sm" />
                                 </div>
                             </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Main: Booking Wizard */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white p-8 rounded-2xl border border-cream-200 shadow-sm">
-                        <h2 className="text-xl font-serif text-charcoal-900 mb-6 flex items-center gap-2">
-                            <Calendar className="w-5 h-5 text-charcoal-500" />
-                            Book a Session
-                        </h2>
-
-                        <InstructorBookingWizard
-                            instructorId={instructor.id}
-                            availability={availability || []}
-                            activeBookings={activeBookings || []}
-                            instructorRates={instructor?.rates || {}}
-                            pendingBookings={pendingBookings || []}
-                        />
-                    </div>
-
-                    {/* Photo Gallery Section */}
-                    {instructor.gallery_images && instructor.gallery_images.length > 0 && (
-                        <PublicInstructorGallery images={instructor.gallery_images} />
-                    )}
-
-
-                    {/* Reviews Section */}
-
-                    <div id="reviews" className="bg-white p-8 rounded-2xl border border-cream-200 shadow-sm scroll-mt-24">
-                        <h2 className="text-xl font-serif text-charcoal-900 mb-2 flex items-center gap-2">
-                            <Star className="w-5 h-5 text-charcoal-500" />
-                            Client Reviews
-                        </h2>
-                        <div className="mb-6">
-                            <StarRating rating={averageRating} count={totalCount} size="md" />
+                            <ReviewList reviews={reviews} />
                         </div>
-                        <ReviewList reviews={reviews} />
                     </div>
-                </div>
 
+                </div>
             </div>
         </div>
     )
