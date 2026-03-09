@@ -72,7 +72,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
 
     const handleGenerate = async () => {
         if (!startDate || !endDate || selectedDays.length === 0 || locations.length === 0 || equipment.length === 0) {
-            setMessage({ type: 'error', text: 'All spectral parameters must be defined before commit.' });
+            setMessage({ type: 'error', text: 'Please fill in all fields before saving.' });
             return;
         }
 
@@ -91,14 +91,14 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
             });
 
             if (result.success) {
-                setMessage({ type: 'success', text: `Successfully manifested ${result.count} temporal slots.` });
+                setMessage({ type: 'success', text: `Successfully created ${result.count} availability slots.` });
                 router.refresh();
             } else {
-                setMessage({ type: 'error', text: result.error || 'Sequence generation failed.' });
+                setMessage({ type: 'error', text: result.error || 'Failed to generate schedule.' });
             }
         } catch (err) {
             console.error(err);
-            setMessage({ type: 'error', text: 'An anomaly occurred during generation.' });
+            setMessage({ type: 'error', text: 'Something went wrong. Please try again.' });
         } finally {
             setIsSubmitting(false);
         }
@@ -131,13 +131,13 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                             <Repeat className="w-7 h-7 text-gold" />
                         </div>
                         <div>
-                            <h2 className="text-3xl font-serif text-charcoal tracking-tighter">Temporal Grid Generator</h2>
-                            <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mt-1.5">Automated Recursive Availability Matrix</p>
+                            <h2 className="text-3xl font-serif text-charcoal tracking-tighter">Weekly Schedule Generator</h2>
+                            <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.4em] mt-1.5">Set up your recurring availability</p>
                         </div>
                     </div>
 
                     <p className="text-sm text-charcoal/40 leading-relaxed mb-12 max-w-xl italic">
-                        Define high-frequency availability sequences. The system will propagate these constraints across the specified temporal boundaries with ethereal precision.
+                        Set your available hours for multiple days at once. Choose a date range, pick the days you're free, and we'll add all the slots for you automatically.
                     </p>
 
                     {message && (
@@ -154,10 +154,10 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                         {/* Temporal Boundaries */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="glass-card p-10 space-y-8">
-                                <h3 className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-2 px-2">Temporal Window</h3>
+                                <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-2 px-2">Date Range</h3>
                                 <div className="grid grid-cols-1 gap-8">
                                     <div className="relative">
-                                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.2em] mb-3 ml-6">Sequence Start</label>
+                                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3 ml-6">Start Date</label>
                                         <div className="relative">
                                             <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/20" />
                                             <input
@@ -169,7 +169,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                         </div>
                                     </div>
                                     <div className="relative">
-                                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.2em] mb-3 ml-6">Sequence Termination</label>
+                                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3 ml-6">End Date</label>
                                         <div className="relative">
                                             <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/20" />
                                             <input
@@ -184,7 +184,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                             </div>
 
                             <div className="glass-card p-10 space-y-8">
-                                <h3 className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-2 px-2">Cyclical Recurrence</h3>
+                                <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-2 px-2">Repeat on Days</h3>
                                 <div className="flex flex-wrap gap-4">
                                     {daysOfWeek.map(day => (
                                         <button
@@ -202,7 +202,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                     ))}
                                 </div>
                                 <p className="text-[9px] text-charcoal/30 uppercase tracking-widest italic leading-relaxed px-2">
-                                    Select days to manifest recurrence across windows.
+                                    Select which days to repeat your availability.
                                 </p>
                             </div>
                         </div>
@@ -211,10 +211,10 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="glass-card p-8 space-y-8">
                                 <div>
-                                    <h3 className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-8 px-2">Temporal Shift</h3>
+                                    <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-8 px-2">Session Hours</h3>
                                     <div className="grid grid-cols-2 gap-8">
                                         <div>
-                                            <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.2em] mb-3 ml-6">Evolution Start</label>
+                                            <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3 ml-6">Start Time</label>
                                             <select
                                                 value={startTime}
                                                 onChange={(e) => setStartTime(e.target.value)}
@@ -228,7 +228,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.2em] mb-3 ml-6">Evolution End</label>
+                                            <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3 ml-6">End Time</label>
                                             <select
                                                 value={endTime}
                                                 onChange={(e) => setEndTime(e.target.value)}
@@ -245,7 +245,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                 </div>
 
                                 <div>
-                                    <h3 className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-8 px-2">Apparatus Matrix</h3>
+                                    <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-8 px-2">Equipment</h3>
                                     <div className="flex flex-wrap gap-3 p-6 bg-white/40 rounded-[2.5rem] border border-white/60 shadow-sm">
                                         {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
                                             const isSelected = equipment.includes(eq);
@@ -270,7 +270,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                             </div>
 
                             <div className="glass-card p-8 flex flex-col">
-                                <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-6 px-2">Geographic Nodes</h3>
+                                <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-6 px-2">Location</h3>
                                 <div className="space-y-4 max-h-[350px] overflow-y-auto pr-3 custom-scrollbar flex-1">
                                     {Object.entries(GROUPED_LOCATIONS).map(([city, cityLocations]) => {
                                         const allSelected = cityLocations.every(loc => locations.includes(loc));
@@ -283,7 +283,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                                         onClick={() => toggleCityGroup(cityLocations)}
                                                         className="text-[10px] font-black text-gold hover:text-charcoal transition-colors uppercase tracking-[0.22em] underline decoration-gold/20 underline-offset-8"
                                                     >
-                                                        {allSelected ? 'DEACTIVATE' : 'MANIFEST ALL'}
+                                                        {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
                                                     </button>
                                                 </div>
                                                 <div className="flex flex-wrap gap-1.5">
@@ -323,12 +323,12 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                 {isSubmitting ? (
                                     <>
                                         <Loader2 className="w-5 h-5 animate-spin text-gold" />
-                                        SYNCHRONIZING SEQUENCE...
+                                        SAVING SCHEDULE...
                                     </>
                                 ) : (
                                     <>
                                         <Repeat className="w-5 h-5 text-gold" />
-                                        COMMIT TEMPORAL MATRIX
+                                        SAVE RECURRING SCHEDULE
                                     </>
                                 )}
                             </button>
