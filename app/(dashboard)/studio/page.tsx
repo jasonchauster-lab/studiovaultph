@@ -47,7 +47,10 @@ export default async function StudioDashboard(props: {
 
     const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' })
     const dateParam = typeof searchParams.date === 'string' ? searchParams.date : todayStr
-    const currentDate = new Date(dateParam + "T00:00:00+08:00")
+
+    // Create local Date object for reliable calendar math without UTC offset shifting the day
+    const [year, month, day] = dateParam.split('-').map(Number)
+    const currentDate = new Date(year, month - 1, day)
 
     if (myStudio) {
         // STEP 1: Fetch slot IDs for this studio (reliable, same approach as admin's getPartnerBookings)
@@ -67,7 +70,7 @@ export default async function StudioDashboard(props: {
                     *,
                     client:profiles!client_id(full_name, avatar_url),
                     instructor:profiles!instructor_id(full_name, avatar_url),
-                    slots(*)
+                    slots!inner(*)
                 `)
                 .eq('studio_id', myStudio.id)
                 .in('status', ['approved'])
@@ -122,11 +125,11 @@ export default async function StudioDashboard(props: {
         // STEP 2c: Fetch Weekly Slots for the calendar (always, regardless of bookings)
         const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
 
-        // Generate the 7 day strings for this week in Manila time
+        // Generate the 7 day strings for this week locally
         for (let i = 0; i < 7; i++) {
             const d = new Date(weekStart)
             d.setDate(d.getDate() + i)
-            dayStrings.push(toManilaDateStr(d))
+            dayStrings.push(format(d, 'yyyy-MM-dd'))
         }
 
         const { data: slots } = await supabase

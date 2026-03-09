@@ -55,7 +55,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
     const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 })
 
     // Use server-provided day strings if available, otherwise fallback to potentially shifted client dates
-    const days = dayStrings ? dayStrings.map((s: string) => new Date(s + "T00:00:00+08:00")) : eachDayOfInterval({ start: weekStart, end: weekEnd })
+    const days = dayStrings ? dayStrings.map((s: string) => parseISO(s)) : eachDayOfInterval({ start: weekStart, end: weekEnd })
     const hours = Array.from({ length: 16 }, (_, i) => i + 6) // 6 AM to 9 PM
 
     const handlePrevWeek = () => {

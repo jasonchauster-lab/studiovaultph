@@ -62,15 +62,19 @@ export async function autoCompleteBookings() {
     const cutoffTime = new Date()
     cutoffTime.setHours(cutoffTime.getHours() - 1)
 
-    // Find bookings that are 'approved' or 'cancelled_charged' and the slot end_time is past the cutoff
+    // Fetch bookings that are 'approved' or 'cancelled_charged' where the slot date is today or earlier 
+    // We add 1 day to the date filter just to be safe with timezone boundaries
+    const dateLimit = new Date();
+    dateLimit.setDate(dateLimit.getDate() + 1);
+
     const { data: pastBookings, error } = await supabase
         .from('bookings')
         .select(`
             id,
-            slots!inner(end_time)
+            slots!inner(date, end_time)
         `)
         .or('status.eq.approved,status.eq.cancelled_charged')
-        .lte('slots.end_time', cutoffTime.toISOString())
+        .lte('slots.date', dateLimit.toISOString().split('T')[0])
 
     if (error) {
         console.error('Error fetching bookings to auto-complete:', error)
@@ -81,8 +85,23 @@ export async function autoCompleteBookings() {
         return { count: 0 }
     }
 
+    // Filter explicitly in JS using combined Manila time
+    const toComplete = pastBookings.filter(b => {
+        if (!b.slots) return false;
+        const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+        if (!slot.date || !slot.end_time) return false;
+
+        // Construct standard ISO string assuming PH timezone
+        const slotDate = new Date(`${slot.date}T${slot.end_time}+08:00`);
+        return slotDate <= cutoffTime;
+    });
+
+    if (toComplete.length === 0) {
+        return { count: 0 }
+    }
+
     let completedCount = 0
-    for (const b of pastBookings) {
+    for (const b of toComplete) {
         const result = await processBookingCompletion(b.id)
         if (result.success) {
             completedCount++
