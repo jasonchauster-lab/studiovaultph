@@ -40,12 +40,21 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('17:00');
     const [locations, setLocations] = useState<string[]>(['BGC - High Street']);
+    const [equipment, setEquipment] = useState<string[]>(['Reformer']);
 
     const toggleLocation = (loc: string) => {
         setLocations(prev =>
             prev.includes(loc)
                 ? prev.filter(l => l !== loc)
                 : [...prev, loc]
+        );
+    }
+
+    const toggleEquipment = (eq: string) => {
+        setEquipment(prev =>
+            prev.includes(eq)
+                ? prev.filter(e => e !== eq)
+                : [...prev, eq]
         );
     }
 
@@ -62,8 +71,8 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
     }
 
     const handleGenerate = async () => {
-        if (!startDate || !endDate || selectedDays.length === 0 || locations.length === 0) {
-            setMessage({ type: 'error', text: 'Please fill in all fields (Start/End Date, Days, and at least one Location).' });
+        if (!startDate || !endDate || selectedDays.length === 0 || locations.length === 0 || equipment.length === 0) {
+            setMessage({ type: 'error', text: 'Please fill in all fields (Start/End Date, Days, allowed Equipment, and at least one Location).' });
             return;
         }
 
@@ -77,7 +86,8 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                 days: selectedDays,
                 startTime,
                 endTime,
-                locations: locations
+                locations: locations,
+                equipment: equipment
             });
 
             if (result.success) {
@@ -179,36 +189,67 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                         </div>
                     </div>
 
-                    {/* Time & Locations */}
+                    {/* Time, Locations & Equipment */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-2">Start Time</label>
-                                <select
-                                    value={startTime}
-                                    onChange={(e) => setStartTime(e.target.value)}
-                                    className="w-full px-4 py-2 border border-cream-300 rounded-xl text-charcoal-900 outline-none bg-white focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
-                                >
-                                    {Array.from({ length: 24 }, (_, i) => i).map(hour => (
-                                        <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
-                                            {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 ${hour === 12 ? 'PM' : 'AM'}`}
-                                        </option>
-                                    ))}
-                                </select>
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Start Time</label>
+                                    <select
+                                        value={startTime}
+                                        onChange={(e) => setStartTime(e.target.value)}
+                                        className="w-full px-4 py-2 border border-cream-300 rounded-xl text-charcoal-900 outline-none bg-white focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                                    >
+                                        {Array.from({ length: 24 }, (_, i) => i).map(hour => (
+                                            <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
+                                                {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 ${hour === 12 ? 'PM' : 'AM'}`}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-charcoal-700 mb-2">End Time</label>
+                                    <select
+                                        value={endTime}
+                                        onChange={(e) => setEndTime(e.target.value)}
+                                        className="w-full px-4 py-2 border border-cream-300 rounded-xl text-charcoal-900 outline-none bg-white focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
+                                    >
+                                        {Array.from({ length: 24 }, (_, i) => i).map(hour => (
+                                            <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
+                                                {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 ${hour === 12 ? 'PM' : 'AM'}`}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
+
                             <div>
-                                <label className="block text-sm font-medium text-charcoal-700 mb-2">End Time</label>
-                                <select
-                                    value={endTime}
-                                    onChange={(e) => setEndTime(e.target.value)}
-                                    className="w-full px-4 py-2 border border-cream-300 rounded-xl text-charcoal-900 outline-none bg-white focus:ring-2 focus:ring-rose-gold/20 focus:border-rose-gold transition-all"
-                                >
-                                    {Array.from({ length: 24 }, (_, i) => i).map(hour => (
-                                        <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
-                                            {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 ${hour === 12 ? 'PM' : 'AM'}`}
-                                        </option>
-                                    ))}
-                                </select>
+                                <label className="block text-sm font-medium text-charcoal-700 mb-3">Equipment (Multi-Select)</label>
+                                <div className="space-y-2 border border-cream-200 p-3 rounded-xl bg-cream-50/50">
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
+                                            const isSelected = equipment.includes(eq);
+                                            return (
+                                                <button
+                                                    key={eq}
+                                                    type="button"
+                                                    onClick={() => toggleEquipment(eq)}
+                                                    className={clsx(
+                                                        "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                                                        isSelected
+                                                            ? "bg-rose-gold text-white border-rose-gold shadow-sm"
+                                                            : "bg-white text-charcoal-600 border-cream-200 hover:border-rose-gold"
+                                                    )}
+                                                >
+                                                    {eq}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                                <p className="text-[11px] text-charcoal-500 mt-2 italic">
+                                    Select all equipment types you are qualified/available to teach during these slots.
+                                </p>
                             </div>
                         </div>
                         <div>

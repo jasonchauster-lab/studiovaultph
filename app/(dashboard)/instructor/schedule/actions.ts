@@ -14,6 +14,8 @@ export async function addAvailability(formData: FormData) {
     const startTime = formData.get('startTime') as string
     const endTime = formData.get('endTime') as string
     const location = formData.get('location') as string
+    const equipmentJson = formData.get('equipment') as string
+    const equipment = equipmentJson ? JSON.parse(equipmentJson) : []
 
     // Validate
     if (startTime >= endTime) {
@@ -27,7 +29,8 @@ export async function addAvailability(formData: FormData) {
             day_of_week: day,
             start_time: startTime,
             end_time: endTime,
-            location_area: location
+            location_area: location,
+            equipment: equipment
         })
 
     if (error) {
@@ -70,6 +73,8 @@ export async function updateAvailability(id: string, formData: FormData) {
     const endTime = formData.get('endTime') as string
     const location = formData.get('location') as string
     const date = formData.get('date') as string
+    const equipmentJson = formData.get('equipment') as string
+    const equipment = equipmentJson ? JSON.parse(equipmentJson) : []
 
     // Validate
     if (startTime >= endTime) {
@@ -79,7 +84,8 @@ export async function updateAvailability(id: string, formData: FormData) {
     const updateData: any = {
         start_time: startTime,
         end_time: endTime,
-        location_area: location
+        location_area: location,
+        equipment: equipment
     }
 
     // Only update date if it's provided (for specific date slots)
@@ -112,6 +118,7 @@ interface GenerateAvailabilityParams {
     startTime: string;
     endTime: string;
     locations: string[];
+    equipment: string[];
 }
 
 export async function generateRecurringAvailability(params: GenerateAvailabilityParams) {
@@ -153,6 +160,7 @@ export async function generateRecurringAvailability(params: GenerateAvailability
                     start_time: params.startTime,
                     end_time: params.endTime,
                     location_area: loc,
+                    equipment: params.equipment,
                     group_id: groupId
                 });
             }

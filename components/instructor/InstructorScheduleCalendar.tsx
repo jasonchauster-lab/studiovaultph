@@ -17,6 +17,7 @@ interface Availability {
     start_time: string
     end_time: string
     location_area: string
+    equipment?: string[]
     group_id?: string
 }
 
@@ -38,12 +39,21 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     const [singleTime, setSingleTime] = useState('09:00')
     const [singleEndTime, setSingleEndTime] = useState('10:00')
     const [locations, setLocations] = useState<string[]>(['BGC - High Street'])
+    const [equipment, setEquipment] = useState<string[]>(['Reformer'])
 
     const toggleLocation = (loc: string) => {
         setLocations(prev =>
             prev.includes(loc)
                 ? prev.filter(l => l !== loc)
                 : [...prev, loc]
+        )
+    }
+
+    const toggleEquipment = (eq: string) => {
+        setEquipment(prev =>
+            prev.includes(eq)
+                ? prev.filter(e => e !== eq)
+                : [...prev, eq]
         )
     }
 
@@ -94,6 +104,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             alert('Please select at least one location');
             return;
         }
+        if (equipment.length === 0) {
+            alert('Please select at least one equipment type');
+            return;
+        }
 
         setIsSubmitting(true)
         const { generateRecurringAvailability } = await import('@/app/(dashboard)/instructor/schedule/actions');
@@ -104,7 +118,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             days: [new Date(singleDate).getDay()],
             startTime: singleTime,
             endTime: singleEndTime,
-            locations: locations // Pass array
+            locations: locations,
+            equipment: equipment
         })
 
         setIsSubmitting(false)
@@ -119,9 +134,14 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     const [editingSlot, setEditingSlot] = useState<Availability | null>(null)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
-    const handleUpdate = async (formData: FormData) => {
-        if (!editingSlot) return
-        setIsSubmitting(true)
+    const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!editingSlot) return;
+        setIsSubmitting(true);
+
+        const formData = new FormData(e.currentTarget);
+        // Append the equipment array as custom JSON to the form data
+        formData.append('equipment', JSON.stringify(equipment));
 
         const { updateAvailability } = await import('@/app/(dashboard)/instructor/schedule/actions')
         const result = await updateAvailability(editingSlot.id, formData)
@@ -142,6 +162,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
         setSingleTime(slot.start_time)
         setSingleEndTime(slot.end_time)
         setLocations([slot.location_area])
+        setEquipment(slot.equipment || ['Reformer'])
         setIsEditModalOpen(true)
     }
 
@@ -274,104 +295,152 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     setIsAddModalOpen(true)
                                                 }}
                                             />
-                                            {startingSlots.map((slot) => {
-                                                const startMin = parseInt(slot.start_time.split(':')[1])
-                                                const [endH, endM] = slot.end_time.split(':').map(Number)
-
-                                                const startTotal = hour * 60 + startMin
-                                                const endTotal = endH * 60 + endM
-                                                const duration = endTotal - startTotal
-
-                                                const topOffset = (startMin / 60) * ROW_HEIGHT
-                                                const heightPx = (duration / 60) * ROW_HEIGHT
-
-                                                // Check for ANY overlapping approved/pending booking
-                                                const isBooked = bookings.some(b => {
-                                                    const bSlot = b.slots;
-                                                    if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time) return false;
-                                                    if (bSlot.date !== dayStr) return false;
-                                                    if (['pending', 'approved'].includes(b.status)) {
-                                                        const bStartH = parseInt(bSlot.start_time.split(':')[0]);
-                                                        const bStartM = parseInt(bSlot.start_time.split(':')[1]);
-                                                        const bEndH = parseInt(bSlot.end_time.split(':')[0]);
-                                                        const bEndM = parseInt(bSlot.end_time.split(':')[1]);
-
-                                                        const bStartTotal = bStartH * 60 + bStartM;
-                                                        const bEndTotal = bEndH * 60 + bEndM;
-
-                                                        // Check for overlap between slot [startTotal, endTotal] and booking [bStartTotal, bEndTotal]
-                                                        return (startTotal < bEndTotal && endTotal > bStartTotal);
+                                            {(() => {
+                                                // Group slots by exact start and end times to prevent massive overlap
+                                                const groupedSlots = startingSlots.reduce((acc, slot) => {
+                                                    const key = `${slot.start_time}-${slot.end_time}`
+                                                    if (!acc[key]) {
+                                                        acc[key] = {
+                                                            primarySlot: slot,
+                                                            allSlots: [slot],
+                                                            locations: [slot.location_area],
+                                                            equipment: [...(slot.equipment || [])]
+                                                        }
+                                                    } else {
+                                                        acc[key].allSlots.push(slot)
+                                                        if (!acc[key].locations.includes(slot.location_area)) {
+                                                            acc[key].locations.push(slot.location_area)
+                                                        }
+                                                        if (slot.equipment) {
+                                                            slot.equipment.forEach(eq => {
+                                                                if (!acc[key].equipment.includes(eq)) {
+                                                                    acc[key].equipment.push(eq)
+                                                                }
+                                                            })
+                                                        }
                                                     }
-                                                    return false;
-                                                });
+                                                    return acc
+                                                }, {} as Record<string, { primarySlot: Availability, allSlots: Availability[], locations: string[], equipment: string[] }>)
 
-                                                if (isBooked) return null; // Don't show availability if it's booked (booking will be shown instead)
+                                                return Object.values(groupedSlots).map(({ primarySlot: slot, allSlots, locations, equipment }) => {
+                                                    const startMin = parseInt(slot.start_time.split(':')[1])
+                                                    const [endH, endM] = slot.end_time.split(':').map(Number)
 
-                                                // Improved Overlap Logic for Width/Left Pos
-                                                // Find all items (slots and bookings) that actually overlap in TIME with this specific slot
-                                                const siblings = [
-                                                    ...startingSlots,
-                                                    ...startingBookings.map(sb => sb.slots)
-                                                ].filter(s => {
-                                                    if (!s && !s?.start_time) return false;
-                                                    const [sh, sm] = s.start_time.split(':').map(Number);
-                                                    const [eh, em] = s.end_time.split(':').map(Number);
-                                                    const sStart = sh * 60 + sm;
-                                                    const sEnd = eh * 60 + em;
-                                                    return (startTotal < sEnd && endTotal > sStart);
-                                                });
+                                                    const startTotal = hour * 60 + startMin
+                                                    const endTotal = endH * 60 + endM
+                                                    const duration = endTotal - startTotal
 
-                                                const totalItems = siblings.length;
-                                                const myIdx = siblings.findIndex(s => s.id === slot.id);
+                                                    const topOffset = (startMin / 60) * ROW_HEIGHT
+                                                    const heightPx = (duration / 60) * ROW_HEIGHT
 
-                                                return (
-                                                    <div
-                                                        key={slot.id}
-                                                        className={clsx(
-                                                            "absolute rounded-lg text-xs hover:shadow-xl transition-all cursor-pointer overflow-hidden border z-10 p-2.5 group/slot",
-                                                            isPastCell
-                                                                ? "bg-[#fdf9f4] border-transparent text-gray-400 opacity-60"
-                                                                : "bg-white border-[#ebd3cf] text-[#333333] shadow-sm",
-                                                            duration < 45 ? "flex flex-row items-center gap-2 py-1 px-2" : "flex flex-col"
-                                                        )}
-                                                        style={{
-                                                            top: `${topOffset}px`,
-                                                            height: `${heightPx}px`,
-                                                            width: totalItems > 1 ? `${(100 / totalItems) - 2}%` : '96%',
-                                                            left: totalItems > 1 ? `${(myIdx * 100) / totalItems + 1}%` : '2%'
-                                                        }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            openEditModal(slot)
-                                                        }}
-                                                        title="Click to edit"
-                                                    >
-                                                        {duration < 45 ? (
-                                                            <div className="flex flex-col h-full justify-center">
-                                                                <div className="flex items-center gap-1 font-bold text-[9px] text-charcoal-900 leading-tight">
-                                                                    <Clock className={clsx("w-2.5 h-2.5 flex-shrink-0", isPastCell ? "text-gray-300" : "text-rose-gold")} />
-                                                                    <span className="truncate">{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
+                                                    // Check for ANY overlapping approved/pending booking
+                                                    const isBooked = bookings.some(b => {
+                                                        const bSlot = b.slots;
+                                                        if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time) return false;
+                                                        if (bSlot.date !== dayStr) return false;
+                                                        if (['pending', 'approved'].includes(b.status)) {
+                                                            const bStartH = parseInt(bSlot.start_time.split(':')[0]);
+                                                            const bStartM = parseInt(bSlot.start_time.split(':')[1]);
+                                                            const bEndH = parseInt(bSlot.end_time.split(':')[0]);
+                                                            const bEndM = parseInt(bSlot.end_time.split(':')[1]);
+
+                                                            const bStartTotal = bStartH * 60 + bStartM;
+                                                            const bEndTotal = bEndH * 60 + bEndM;
+
+                                                            return (startTotal < bEndTotal && endTotal > bStartTotal);
+                                                        }
+                                                        return false;
+                                                    });
+
+                                                    if (isBooked) return null; // Booking shown instead
+
+                                                    // Improved Overlap Logic for Width/Left Pos using grouped objects
+                                                    const siblings = [
+                                                        ...Object.values(groupedSlots).map(g => g.primarySlot),
+                                                        ...startingBookings.map(sb => sb.slots)
+                                                    ].filter(s => {
+                                                        if (!s && !s?.start_time) return false;
+                                                        const [sh, sm] = s.start_time.split(':').map(Number);
+                                                        const [eh, em] = s.end_time.split(':').map(Number);
+                                                        const sStart = sh * 60 + sm;
+                                                        const sEnd = eh * 60 + em;
+                                                        return (startTotal < sEnd && endTotal > sStart);
+                                                    });
+
+                                                    const totalItems = siblings.length;
+                                                    const myIdx = siblings.findIndex(s => s.id === slot.id);
+                                                    const extraLocCount = locations.length - 1;
+
+                                                    const primaryEq = equipment.length > 0 ? equipment[0] : null;
+                                                    const extraEqCount = equipment.length > 1 ? equipment.length - 1 : 0;
+
+                                                    return (
+                                                        <div
+                                                            key={slot.id}
+                                                            className={clsx(
+                                                                "absolute rounded-lg text-xs hover:shadow-xl transition-all cursor-pointer overflow-hidden border z-10 p-2 group/slot flex flex-col gap-1.5",
+                                                                isPastCell
+                                                                    ? "bg-[#fdf9f4] border-transparent text-gray-400 opacity-60"
+                                                                    : "bg-white border-[#ebd3cf] text-[#333333] shadow-sm",
+                                                                duration < 45 && "py-1 px-2 justify-center"
+                                                            )}
+                                                            style={{
+                                                                top: `${topOffset}px`,
+                                                                height: `${heightPx}px`,
+                                                                width: totalItems > 1 ? `${(100 / totalItems) - 2}%` : '96%',
+                                                                left: totalItems > 1 ? `${(myIdx * 100) / totalItems + 1}%` : '2%'
+                                                            }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                // Open edit modal with ALL locations selected from this group
+                                                                setEditingSlot(slot)
+                                                                setSingleDate(slot.date || format(day, 'yyyy-MM-dd'))
+                                                                setSingleTime(slot.start_time)
+                                                                setSingleEndTime(slot.end_time)
+                                                                setLocations(locations)
+                                                                setEquipment(equipment.length > 0 ? equipment : ['Reformer'])
+                                                                setIsEditModalOpen(true)
+                                                            }}
+                                                            title="Click to edit group"
+                                                        >
+                                                            <div className={clsx("flex items-center gap-2", duration < 45 ? "flex-row" : "flex-col items-start")}>
+                                                                <div className="flex items-center gap-1 font-bold text-[10px] text-charcoal-900 shrink-0">
+                                                                    <Clock className={clsx(duration < 45 ? "w-2.5 h-2.5" : "w-3.5 h-3.5 flex-shrink-0", isPastCell ? "text-gray-300" : "text-rose-gold")} />
+                                                                    <span className={duration < 45 ? "text-[9px]" : "truncate"}>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                                 </div>
-                                                                <div className="flex items-center gap-1 text-[8px] text-charcoal-500 truncate mt-0.5">
-                                                                    <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
-                                                                    <span className="truncate">{slot.location_area.split(' - ')[1] || slot.location_area}</span>
+
+                                                                {/* Location Tags */}
+                                                                <div className="flex flex-wrap items-center gap-1 overflow-hidden">
+                                                                    <div className="text-[9px] flex items-center gap-0.5 font-medium text-charcoal-600 bg-cream-50 px-1 py-0.5 rounded border border-cream-100 max-w-full">
+                                                                        <MapPin className="w-2.5 h-2.5 shrink-0 text-charcoal-400" />
+                                                                        <span className="truncate">{locations[0].split(' - ')[1] || locations[0]}</span>
+                                                                    </div>
+                                                                    {extraLocCount > 0 && duration >= 45 && (
+                                                                        <div className="text-[8px] font-bold text-charcoal-700 bg-cream-100 px-1 py-0.5 rounded border border-cream-200 shrink-0">
+                                                                            +{extraLocCount} Loc
+                                                                        </div>
+                                                                    )}
                                                                 </div>
+
+                                                                {/* Equipment Tags */}
+                                                                {primaryEq && (
+                                                                    <div className="flex flex-wrap items-center gap-1 overflow-hidden">
+                                                                        <div className="text-[9px] flex items-center gap-0.5 font-medium text-charcoal-600 bg-cream-50 px-1 py-0.5 rounded border border-cream-100 max-w-full">
+                                                                            <Box className="w-2.5 h-2.5 shrink-0 text-rose-gold" />
+                                                                            <span className="truncate">{primaryEq}</span>
+                                                                        </div>
+                                                                        {extraEqCount > 0 && duration >= 45 && (
+                                                                            <div className="text-[8px] font-bold text-charcoal-700 bg-cream-100 px-1 py-0.5 rounded border border-cream-200 shrink-0">
+                                                                                +{extraEqCount} Eq
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                        ) : (
-                                                            <>
-                                                                <div className="text-[10px] flex items-center gap-1.5 font-bold text-charcoal-900 mb-1.5">
-                                                                    <Clock className={clsx("w-3.5 h-3.5 flex-shrink-0", isPastCell ? "text-gray-300" : "text-rose-gold")} />
-                                                                    <span className="truncate">{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
-                                                                </div>
-                                                                <div className="text-[10px] flex items-center gap-1.5 font-medium text-charcoal-600 leading-snug">
-                                                                    <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-charcoal-400" />
-                                                                    <span className="break-words line-clamp-2">{slot.location_area}</span>
-                                                                </div>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                )
-                                            })}
+                                                        </div>
+                                                    )
+                                                })
+                                            })()}
 
                                             {startingBookings.map((booking) => {
                                                 const slotData = booking.slots;
@@ -524,7 +593,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-charcoal-700 mb-3">Locations (Multi-Select)</label>
-                                    <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="space-y-4 max-h-[150px] overflow-y-auto pr-2 custom-scrollbar">
                                         {Object.entries(GROUPED_AREAS).map(([city, cityLocations]) => {
                                             const allSelected = cityLocations.every(loc => locations.includes(loc));
                                             return (
@@ -570,8 +639,35 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                             )
                                         })}
                                     </div>
-                                    <p className="text-[11px] text-charcoal-500 mt-4 italic">
+                                    <p className="text-[11px] text-charcoal-500 mt-2 italic">
                                         Note: Availability will be removed across all selected locations once a booking is confirmed.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Equipment (Multi-Select)</label>
+                                    <div className="flex flex-wrap gap-2 border border-cream-200 p-3 rounded-xl bg-cream-50/50">
+                                        {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
+                                            const isSelected = equipment.includes(eq);
+                                            return (
+                                                <button
+                                                    key={eq}
+                                                    type="button"
+                                                    onClick={() => toggleEquipment(eq)}
+                                                    className={clsx(
+                                                        "px-4 py-1.5 rounded-full text-xs font-medium transition-all border",
+                                                        isSelected
+                                                            ? "bg-rose-gold text-white border-rose-gold shadow-sm"
+                                                            : "bg-white text-charcoal-600 border-cream-200 hover:border-rose-gold"
+                                                    )}
+                                                >
+                                                    {eq}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                    <p className="text-[11px] text-charcoal-500 mt-2 italic">
+                                        Select all equipment types you are qualified/available to teach.
                                     </p>
                                 </div>
 
@@ -612,7 +708,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </button>
                         </div>
 
-                        <form action={handleUpdate} className="space-y-4">
+                        <form onSubmit={handleUpdate} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-charcoal-700 mb-1">Date</label>
                                 <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-3 py-2 border border-cream-300 rounded-lg bg-white text-charcoal-900 outline-none" />
@@ -638,6 +734,30 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 >
                                     {AREAS.map(l => <option key={l} value={l}>{l}</option>)}
                                 </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-charcoal-700 mb-2">Equipment</label>
+                                <div className="flex flex-wrap gap-2 border border-cream-200 p-3 rounded-xl bg-cream-50/50">
+                                    {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
+                                        const isSelected = equipment.includes(eq);
+                                        return (
+                                            <button
+                                                key={eq}
+                                                type="button"
+                                                onClick={() => toggleEquipment(eq)}
+                                                className={clsx(
+                                                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                                                    isSelected
+                                                        ? "bg-rose-gold text-white border-rose-gold shadow-sm"
+                                                        : "bg-white text-charcoal-600 border-cream-200 hover:border-rose-gold"
+                                                )}
+                                            >
+                                                {eq}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
                             </div>
 
                             <div className="flex gap-4 pt-6 border-t border-cream-100 mt-6">

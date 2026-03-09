@@ -543,7 +543,7 @@ export async function bookInstructorSession(
     // Query A: date-specific availability
     const { data: availByDate } = await supabase
         .from('instructor_availability')
-        .select('id, group_id, location_area') // Changed select to fetch location
+        .select('id, group_id, location_area, equipment') // Changed select to fetch location and equipment
         .eq('instructor_id', instructorId)
         .eq('date', manilaDateStr)
         .lte('start_time', timeStr)
@@ -552,7 +552,7 @@ export async function bookInstructorSession(
     // Query B: weekly recurring availability
     const { data: availByDay } = await supabase
         .from('instructor_availability')
-        .select('id, group_id, location_area') // Changed select to fetch location
+        .select('id, group_id, location_area, equipment') // Changed select to fetch location and equipment
         .eq('instructor_id', instructorId)
         .eq('day_of_week', manilaDayOfWeek)
         .is('date', null)
@@ -561,17 +561,27 @@ export async function bookInstructorSession(
 
     const matchingTimeBlocks = [...(availByDate || []), ...(availByDay || [])];
 
-    let isValidLocation = false;
+    let isValidLocationAndEq = false;
 
     if (matchingTimeBlocks.length > 0) {
         const studioLocLower = (trimmedLocation || '').toLowerCase();
-        isValidLocation = matchingTimeBlocks.some(block => {
+        const requestedEqLower = (equipment || '').toLowerCase();
+
+        isValidLocationAndEq = matchingTimeBlocks.some(block => {
             const blockLocLower = (block.location_area || '').toLowerCase();
-            return !blockLocLower || studioLocLower.includes(blockLocLower) || blockLocLower.includes(studioLocLower);
+            const locationMatch = !blockLocLower || studioLocLower.includes(blockLocLower) || blockLocLower.includes(studioLocLower);
+
+            // Equipment check (allow through if instructor hasn't specified equipment = old behavior)
+            let equipmentMatch = true;
+            if (block.equipment && Array.isArray(block.equipment) && block.equipment.length > 0) {
+                equipmentMatch = block.equipment.some((eq: string) => eq.toLowerCase() === requestedEqLower);
+            }
+
+            return locationMatch && equipmentMatch;
         });
 
-        if (!isValidLocation) {
-            return { error: `Instructor is not available at "${trimmedLocation}" during this time.` }
+        if (!isValidLocationAndEq) {
+            return { error: `Instructor is not available at "${trimmedLocation}" for "${equipment}" during this time.` }
         }
     } else {
         // If there are no matching time blocks, check if they have ANY blocks globally
