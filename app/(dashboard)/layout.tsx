@@ -68,7 +68,16 @@ export default async function DashboardLayout({
                                             profile?.role || 'User'}
                                 </p>
                             </div>
-                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-cloud transition-transform hover:scale-110">
+                            <Link
+                                href={
+                                    profile?.role === 'customer' ? '/customer/profile' :
+                                        profile?.role === 'instructor' ? '/instructor/profile' :
+                                            profile?.role === 'studio' ? '/studio/settings' :
+                                                profile?.role === 'admin' ? '/admin' :
+                                                    '#'
+                                }
+                                className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-cloud transition-transform hover:scale-110 block"
+                            >
                                 <Image
                                     src={avatarUrl}
                                     alt="User Profile"
@@ -76,7 +85,7 @@ export default async function DashboardLayout({
                                     height={40}
                                     className="object-cover w-full h-full"
                                 />
-                            </div>
+                            </Link>
                             <form action={signOut} className="hidden sm:block">
                                 <button className="p-2 text-sage hover:text-red-500 transition-colors" title="Log Out">
                                     <LogOut className="w-5 h-5" />

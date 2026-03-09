@@ -43,6 +43,11 @@ export default function Navigation({ role }: NavigationProps) {
                         Wallet
                         {pathname?.startsWith('/customer/wallet') && <span className="absolute -bottom-2 left-0 w-full h-0.5 bg-sage rounded-full" />}
                     </Link>
+                    <Link href="/customer/profile" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/customer/profile')}>
+                        <User className="w-3.5 h-3.5" />
+                        My Profile
+                        {pathname === '/customer/profile' && <span className="absolute -bottom-2 left-0 w-full h-0.5 bg-sage rounded-full" />}
+                    </Link>
 
                     {role && role !== 'customer' && (
                         <div className="h-px w-full md:h-4 md:w-px bg-white/20 my-1 md:my-0 md:mx-2" />

@@ -56,6 +56,7 @@ export default function InstructorBookingWizard({
     const [selectedDate, setSelectedDate] = useState<string>('') // YYYY-MM-DD
     const [selectedSlot, setSelectedSlot] = useState<any>(null) // Availability Object
     const [expandedSlotKey, setExpandedSlotKey] = useState<string | null>(null)
+    const [activeCity, setActiveCity] = useState<string | null>(null)
     const [matchingStudios, setMatchingStudios] = useState<any[]>([])
     const [selectedStudioSlot, setSelectedStudioSlot] = useState<string | null>(null) // Real Studio Slot ID
     const [selectedEquipment, setSelectedEquipment] = useState<string>('')
@@ -570,36 +571,74 @@ export default function InstructorBookingWizard({
                                                             sub = parts.slice(1).join('-').trim();
                                                         }
 
-                                                        // Map abbreviations to full names if needed
                                                         const mainName = main === 'QC' ? 'Quezon City' : main;
-
                                                         if (!acc[mainName]) acc[mainName] = [];
                                                         acc[mainName].push({ ...s, subName: sub });
                                                         return acc;
                                                     }, {} as Record<string, any[]>);
 
+                                                    const cities = Object.keys(categorized);
+                                                    const displayCity = activeCity || cities[0];
+                                                    const activeSubSlots = categorized[displayCity] || [];
+
                                                     return (
-                                                        <div className="absolute top-full left-0 right-0 mt-2 z-10 bg-white/95 backdrop-blur-xl rounded-[24px] border border-white/60 shadow-cloud p-3 animate-in fade-in slide-in-from-top-2 space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
-                                                            {(Object.entries(categorized) as [string, any[]][]).map(([mainLoc, subs]) => (
-                                                                <div key={mainLoc} className="space-y-1.5">
-                                                                    <div className="px-3 py-1 flex items-center gap-2">
-                                                                        <div className="w-1 h-3 bg-sage/30 rounded-full" />
-                                                                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.15em]">{mainLoc}</span>
+                                                        <div
+                                                            className="absolute top-full left-0 mt-2 z-50 bg-white/95 backdrop-blur-xl rounded-[24px] border border-white/60 shadow-cloud flex overflow-hidden animate-in fade-in slide-in-from-top-2"
+                                                            style={{ minWidth: cities.length > 1 ? '450px' : '280px' }}
+                                                            onMouseLeave={() => setActiveCity(null)}
+                                                        >
+                                                            {/* Left Panel: Cities */}
+                                                            <div className={clsx(
+                                                                "flex flex-col py-3 border-r border-charcoal/5",
+                                                                cities.length > 1 ? "w-1/2" : "w-full"
+                                                            )}>
+                                                                <div className="px-4 py-1.5 flex items-center gap-2 mb-2">
+                                                                    <div className="w-1 h-3 bg-sage/30 rounded-full" />
+                                                                    <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.15em]">Main Location</span>
+                                                                </div>
+                                                                <div className="px-2 space-y-1">
+                                                                    {cities.map(city => (
+                                                                        <div
+                                                                            key={city}
+                                                                            onMouseEnter={() => setActiveCity(city)}
+                                                                            className={clsx(
+                                                                                "px-4 py-3 rounded-[16px] text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-between group cursor-pointer",
+                                                                                displayCity === city
+                                                                                    ? "bg-sage/10 text-sage"
+                                                                                    : "text-charcoal/60 hover:bg-sage/5 hover:text-charcoal"
+                                                                            )}
+                                                                        >
+                                                                            {city}
+                                                                            <ChevronRight className={clsx(
+                                                                                "w-3.5 h-3.5 transition-all",
+                                                                                displayCity === city ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
+                                                                            )} />
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Right Panel: Sub-Locations */}
+                                                            {cities.length > 1 && (
+                                                                <div className="w-1/2 flex flex-col py-3 bg-white/40">
+                                                                    <div className="px-4 py-1.5 flex items-center gap-2 mb-2">
+                                                                        <div className="w-1 h-3 bg-gold/30 rounded-full" />
+                                                                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.15em]">Select Area</span>
                                                                     </div>
-                                                                    <div className="space-y-1">
-                                                                        {subs.map((s: any) => (
+                                                                    <div className="px-2 space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar">
+                                                                        {activeSubSlots.map((s: any) => (
                                                                             <button
                                                                                 key={s.id}
                                                                                 onClick={() => { handleSearchCheck(s, activeDate); setExpandedSlotKey(null); }}
-                                                                                className="w-full text-left px-3 py-2.5 rounded-[14px] hover:bg-sage/10 text-[9px] font-bold text-charcoal uppercase tracking-widest transition-all flex items-center justify-between group active:scale-[0.98]"
+                                                                                className="w-full text-left px-4 py-3 rounded-[16px] hover:bg-sage/10 text-[9px] font-bold text-charcoal uppercase tracking-widest transition-all flex items-center justify-between group active:scale-[0.98]"
                                                                             >
-                                                                                <span className="truncate pl-3">{s.subName}</span>
+                                                                                <span className="truncate">{s.subName}</span>
                                                                                 <ArrowRight className="w-3.5 h-3.5 text-sage opacity-0 group-hover:opacity-100 transform -translate-x-1 group-hover:translate-x-0 transition-all shrink-0" />
                                                                             </button>
                                                                         ))}
                                                                     </div>
                                                                 </div>
-                                                            ))}
+                                                            )}
                                                         </div>
                                                     );
                                                 })()}
