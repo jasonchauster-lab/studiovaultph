@@ -43,7 +43,12 @@ export default async function InstructorSchedulePage(props: {
                 </div>
 
                 <div className="overflow-hidden rounded-[2.5rem] shadow-cloud border border-white/60">
-                    <InstructorScheduleCalendar availability={availability || []} currentDate={currentDate} />
+                    <InstructorScheduleCalendar
+                        availability={availability || []}
+                        bookings={[]} // Bookings will be fetched/passed if needed, but for now we need the ID for chat
+                        currentUserId={user.id}
+                        currentDate={currentDate}
+                    />
                 </div>
             </div>
         </div>

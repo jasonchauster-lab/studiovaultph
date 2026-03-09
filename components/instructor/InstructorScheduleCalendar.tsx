@@ -8,6 +8,7 @@ import clsx from 'clsx'
 import { toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
 import InstructorScheduleGenerator from './InstructorScheduleGenerator'
+import ChatWindow from '@/components/dashboard/ChatWindow'
 
 interface Availability {
     id: string
@@ -24,15 +25,17 @@ interface Availability {
 interface InstructorScheduleCalendarProps {
     availability: Availability[]
     bookings?: any[]
+    currentUserId: string
     currentDate?: Date // Made optional with default
 }
 
-export default function InstructorScheduleCalendar({ availability, bookings = [], currentDate = new Date() }: InstructorScheduleCalendarProps) {
+export default function InstructorScheduleCalendar({ availability, bookings = [], currentUserId, currentDate = new Date() }: InstructorScheduleCalendarProps) {
     const router = useRouter()
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [addMode, setAddMode] = useState<'single' | 'bulk'>('single')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [selectedBooking, setSelectedBooking] = useState<any>(null)
+    const [activeChat, setActiveChat] = useState<{ id: string, recipientId: string, name: string } | null>(null)
 
     // Single Add Form State
     const [singleDate, setSingleDate] = useState(format(new Date(), 'yyyy-MM-dd'))
@@ -531,10 +534,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                         <div className="flex justify-between items-center mb-12">
                             <div>
                                 <h3 className="text-3xl font-serif text-charcoal tracking-tighter">
-                                    {addMode === 'bulk' ? 'Recursive Sequence' : 'Temporal Alignment'}
+                                    {addMode === 'bulk' ? 'Recurring Schedule' : 'Add Time Slot'}
                                 </h3>
                                 <p className="text-[10px] text-charcoal/20 font-black uppercase tracking-[0.4em] mt-2">
-                                    {addMode === 'bulk' ? 'GENERATING RECURRING SCHEDULE BLOX' : 'DEFINING A SINGLE OPERATIONAL SLOT'}
+                                    {addMode === 'bulk' ? 'SET UP YOUR WEEKLY AVAILABILITY' : 'DEFINE A SINGLE SESSION TIME AND LOCATION'}
                                 </p>
                             </div>
                             <button onClick={() => setIsAddModalOpen(false)} className="p-4 bg-white/40 hover:bg-white rounded-[20px] text-charcoal/20 hover:text-charcoal transition-all border border-white/60 shadow-sm">
@@ -553,11 +556,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     </div>
                                     <div className="grid grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Initiation</label>
+                                            <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Start Time</label>
                                             <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Termination</label>
+                                            <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">End Time</label>
                                             <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
                                         </div>
                                     </div>
@@ -577,7 +580,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                             onClick={() => toggleCityGroup(cityLocations)}
                                                             className="text-[10px] font-black text-gold hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-gold/20 underline-offset-8"
                                                         >
-                                                            {allSelected ? 'DESELECT SEQUENCE' : 'ACTIVATE ALL'}
+                                                            {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
                                                         </button>
                                                     </div>
                                                     <div className="flex flex-wrap gap-3">
@@ -608,7 +611,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 </div>
 
                                 <div className="space-y-4">
-                                    <h4 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Equipment Matrix</h4>
+                                    <h4 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Equipment</h4>
                                     <div className="flex flex-wrap gap-3 p-6 bg-alabaster/50 rounded-[2rem] border border-cream-100">
                                         {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
                                             const isSelected = equipment.includes(eq);
@@ -637,10 +640,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                         disabled={isSubmitting}
                                         className="flex-1 bg-charcoal text-white py-5 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50"
                                     >
-                                        {isSubmitting ? 'PROCESSING...' : 'COMMIT SLOT'}
+                                        {isSubmitting ? 'PROCESSING...' : 'CONFIRM SLOT'}
                                     </button>
                                     <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-12 py-5 rounded-[20px] text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] hover:text-charcoal hover:bg-white/40 transition-all border border-transparent hover:border-white/60">
-                                        ABORT
+                                        CANCEL
                                     </button>
                                 </div>
                             </form>
@@ -661,8 +664,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                     >
                         <div className="flex justify-between items-center mb-12">
                             <div>
-                                <h3 className="text-3xl font-serif text-charcoal tracking-tighter">Edit Constraints</h3>
-                                <p className="text-[10px] text-charcoal/20 font-black uppercase tracking-[0.4em] mt-2">MODIFYING DEPLOYED OPERATIONAL BLOC</p>
+                                <h3 className="text-3xl font-serif text-charcoal tracking-tighter">Edit Slot</h3>
+                                <p className="text-[10px] text-charcoal/20 font-black uppercase tracking-[0.4em] mt-2">UPDATE SESSION TIME OR LOCATION</p>
                             </div>
                             <button onClick={() => setIsEditModalOpen(false)} className="p-4 bg-white/40 hover:bg-white rounded-[20px] text-charcoal/20 hover:text-charcoal transition-all border border-white/60 shadow-sm">
                                 <X className="w-6 h-6" />
@@ -672,23 +675,23 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                         <form onSubmit={handleUpdate} className="space-y-8">
                             <div className="glass-card p-8 space-y-8">
                                 <div>
-                                    <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-4">Re-entry Date</label>
+                                    <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-4">Date</label>
                                     <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-6 py-4 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer" />
                                 </div>
                                 <div className="grid grid-cols-2 gap-8">
                                     <div>
-                                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-4">Modified Start</label>
+                                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-4">Start Time</label>
                                         <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-6 py-4 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer" />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-4">Modified End</label>
+                                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-4">End Time</label>
                                         <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-6 py-4 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer" />
                                     </div>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
-                                <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] ml-6">Deployment Area</label>
+                                <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] ml-6">Location</label>
                                 <select
                                     value={locations[0] || 'BGC'}
                                     onChange={(e) => setLocations([e.target.value])}
@@ -700,7 +703,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </div>
 
                             <div className="space-y-4">
-                                <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] ml-4">Equipment Apparatus</label>
+                                <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] ml-4">Equipment</label>
                                 <div className="flex flex-wrap gap-3 p-6 bg-alabaster/50 rounded-[2rem] border border-cream-100">
                                     {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
                                         const isSelected = equipment.includes(eq);
@@ -725,7 +728,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                             <div className="flex gap-6 pt-12 border-t border-white/60">
                                 <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal text-white py-5 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50">
-                                    {isSubmitting ? 'SYNCHRONIZING...' : 'UPDATE ARCHIVE'}
+                                    {isSubmitting ? 'SAVING...' : 'UPDATE SLOT'}
                                 </button>
                                 <button
                                     type="button"
@@ -736,7 +739,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     disabled={isSubmitting}
                                     className="px-10 py-5 bg-red-50/50 text-red-600 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:bg-red-50 transition-all flex items-center justify-center gap-3 border border-transparent hover:border-red-100"
                                 >
-                                    <Trash2 className="w-5 h-5" /> PURGE
+                                    <Trash2 className="w-5 h-5" /> DELETE
                                 </button>
                             </div>
                         </form>
@@ -782,7 +785,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                         <Clock className="w-6 h-6 text-sage" />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Temporal Coordinate</p>
+                                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Session Schedule</p>
                                         <p className="text-lg font-serif mt-0.5 text-charcoal">
                                             {format(new Date(selectedBooking.slots.date), 'PPPP')}
                                         </p>
@@ -801,7 +804,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                             <MapPin className="w-6 h-6 text-gold" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">Environment</p>
+                                            <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">Studio</p>
                                             <h4 className="font-serif text-charcoal text-xl tracking-tighter truncate w-[200px]">{selectedBooking.slots.studios?.name}</h4>
                                         </div>
                                     </div>
@@ -821,15 +824,17 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                             />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">Subscriber</p>
+                                            <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">Client</p>
                                             <h4 className="font-serif text-charcoal text-xl tracking-tighter truncate w-[200px]">{selectedBooking.client?.full_name}</h4>
                                         </div>
                                     </div>
                                     <div className="space-y-3 mt-4">
-                                        <div className="flex items-center gap-3 text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em]">
-                                            <MessageSquare className="w-4 h-4 text-charcoal/10" />
-                                            {selectedBooking.client?.phone || 'ANONYMIZED LINE'}
-                                        </div>
+                                        {selectedBooking.client?.phone && (
+                                            <div className="flex items-center gap-3 text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em]">
+                                                <MessageSquare className="w-4 h-4 text-charcoal/10" />
+                                                {selectedBooking.client.phone}
+                                            </div>
+                                        )}
                                         <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">{selectedBooking.client?.email}</p>
                                     </div>
                                 </div>
@@ -840,9 +845,13 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 <div className="p-8 bg-red-50/50 rounded-[2rem] border border-red-100">
                                     <div className="flex items-center gap-3 mb-4">
                                         <AlertTriangle className="w-5 h-5 text-red-500" />
-                                        <h4 className="text-[10px] font-black text-red-700 uppercase tracking-[0.2em]">PHYSICAL CONTRAINDICATIONS</h4>
+                                        <h4 className="text-[10px] font-black text-red-700 uppercase tracking-[0.2em]">PHYSICAL CONDITIONS</h4>
                                     </div>
-                                    <p className="text-[11px] text-red-600/80 italic leading-relaxed">{selectedBooking.client.medical_conditions}</p>
+                                    <p className="text-[11px] text-red-600/80 italic leading-relaxed">
+                                        {Array.isArray(selectedBooking.client.medical_conditions)
+                                            ? selectedBooking.client.medical_conditions.join(', ')
+                                            : selectedBooking.client.medical_conditions.split(',').join(', ')}
+                                    </p>
                                 </div>
                             )}
 
@@ -878,10 +887,14 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                         {/* Modal Footer */}
                         <div className="px-12 py-10 bg-white/20 border-t border-white/60 flex gap-6">
                             <button
-                                onClick={() => router.push(`/instructor/messages?userId=${selectedBooking.client_id}`)}
+                                onClick={() => setActiveChat({
+                                    id: selectedBooking.id,
+                                    recipientId: selectedBooking.client_id,
+                                    name: selectedBooking.client?.full_name || 'Client'
+                                })}
                                 className="flex-1 bg-charcoal text-white py-5 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] shadow-cloud hover:brightness-[1.2] active:scale-95 transition-all flex items-center justify-center gap-4"
                             >
-                                <MessageSquare className="w-5 h-5" /> INITIATE COMMS
+                                <MessageSquare className="w-5 h-5" /> MESSAGE CLIENT
                             </button>
                             <button
                                 onClick={() => setSelectedBooking(null)}
@@ -892,6 +905,18 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                         </div>
                     </div>
                 </div>
+            )}
+
+            {activeChat && (
+                <ChatWindow
+                    bookingId={activeChat.id}
+                    recipientId={activeChat.recipientId}
+                    recipientName={activeChat.name}
+                    onClose={() => setActiveChat(null)}
+                    currentUserId={currentUserId}
+                    isExpired={false}
+                    isOpen={true}
+                />
             )}
         </div>
     )

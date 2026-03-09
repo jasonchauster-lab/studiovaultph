@@ -102,12 +102,12 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         <Calendar className="w-6 h-6 text-gold" />
                         <h2 className="text-3xl font-serif text-charcoal tracking-tighter">Upcoming Sessions</h2>
                     </div>
-                    <div className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em]">{upcomingBookings.length} SESSIONS DETECTED</div>
+                    <div className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em]">{upcomingBookings.length} SESSIONS FOUND</div>
                 </div>
 
                 {upcomingBookings.length === 0 ? (
                     <div className="py-24 text-center glass-card border-dashed bg-white/20">
-                        <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">No upcoming sessions in the matrix.</p>
+                        <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">No upcoming sessions found.</p>
                     </div>
                 ) : (
                     <div className="space-y-6">
@@ -170,13 +170,13 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
                                                 </div>
                                                 <div className="flex flex-col items-start">
-                                                    <span className="text-[9px] text-charcoal/20 font-black uppercase tracking-[0.3em] mb-0.5">Primary Participant</span>
+                                                    <span className="text-[9px] text-charcoal/20 font-black uppercase tracking-[0.3em] mb-0.5">Client</span>
                                                     <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] group-hover/student:text-gold transition-colors">{client.full_name || 'N/A'}</span>
                                                 </div>
                                                 {client.medical_conditions && (
                                                     <span className="ml-4 px-3 py-1 bg-red-50/50 text-red-500 text-[8px] font-black uppercase rounded-full border border-red-100 animate-pulse flex items-center gap-1.5 tracking-widest shadow-sm">
                                                         <AlertCircle className="w-3 h-3" />
-                                                        CRITICAL MEDICAL STATUS
+                                                        MEDICAL CONDITIONS
                                                     </span>
                                                 )}
                                             </button>
@@ -226,7 +226,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                     <div className="flex items-center justify-between mb-10">
                         <div className="flex items-center gap-4">
                             <Clock className="w-6 h-6 text-charcoal/20" />
-                            <h2 className="text-3xl font-serif text-charcoal/60 tracking-tighter">Temporal History</h2>
+                            <h2 className="text-3xl font-serif text-charcoal/60 tracking-tighter">Session History</h2>
                         </div>
                     </div>
 
@@ -378,7 +378,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
                         {selectedClient.bio && (
                             <div className="bg-white/40 p-6 rounded-[2rem] border border-white/60 mb-6 relative z-10">
-                                <h4 className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">MANIFESTO</h4>
+                                <h4 className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">BIO</h4>
                                 <p className="text-[11px] text-charcoal/60 leading-relaxed italic uppercase tracking-wider">"{selectedClient.bio}"</p>
                             </div>
                         )}
@@ -399,14 +399,14 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                 return displayConditions ? (
                                     <div className="bg-red-50/20 p-8 rounded-[2rem] border border-red-100/50 relative z-10">
                                         <h4 className="text-[10px] font-black text-red-800 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
-                                            <AlertCircle className="w-4 h-4" /> BIOLOGICAL CONSTRAINTS
+                                            <AlertCircle className="w-4 h-4" /> PHYSICAL CONDITIONS
                                         </h4>
                                         <p className="text-[11px] text-red-700/80 font-black uppercase tracking-[0.2em] leading-relaxed">{displayConditions}</p>
                                     </div>
                                 ) : (
                                     <div className="bg-white/40 p-8 rounded-[2rem] border border-white/60 relative z-10">
                                         <h4 className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-2">HEALTH STATUS</h4>
-                                        <p className="text-[10px] text-charcoal/40 uppercase tracking-[0.2em] italic">No reported anomalies.</p>
+                                        <p className="text-[10px] text-charcoal/40 uppercase tracking-[0.2em] italic">No reported conditions.</p>
                                     </div>
                                 );
                             })()}
@@ -416,7 +416,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             onClick={() => setSelectedClient(null)}
                             className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95"
                         >
-                            CLOSE MANIFEST
+                            CLOSE
                         </button>
                     </div>
                 </div>

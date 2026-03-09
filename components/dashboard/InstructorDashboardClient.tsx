@@ -236,6 +236,7 @@ export default function InstructorDashboardClient() {
                     <InstructorScheduleCalendar
                         availability={availability}
                         bookings={calendarBookings}
+                        currentUserId={userId || ''}
                         currentDate={new Date(searchParams.get('date') || getManilaTodayStr())}
                     />
                 </div>
