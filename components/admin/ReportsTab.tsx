@@ -458,12 +458,15 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                     })
                                 ) : (
                                     (paginated as Transaction[]).map(tx => (
-                                        <tr key={tx.id} className="border-b border-cream-100 hover:bg-cream-50/40 transition-colors">
+                                        <tr key={tx.id} className="border-b border-cream-100 hover:bg-sage/5 transition-colors">
                                             <td className="py-3 px-4 text-charcoal-600 whitespace-nowrap text-xs">
                                                 {new Date(tx.date).toLocaleString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                             </td>
                                             <td className="py-3 px-4">
-                                                <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${tx.type === 'Booking' ? 'bg-blue-100 text-blue-700' : tx.type === 'Payout' ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700'}`}>
+                                                <span className={`inline-block text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap tracking-wider uppercase ${tx.type === 'Booking' ? 'bg-sage-light/20 text-charcoal' :
+                                                    tx.type === 'Payout' ? 'bg-gold/20 text-charcoal' :
+                                                        'bg-purple-100/50 text-purple-900'
+                                                    }`}>
                                                     {tx.type}
                                                 </span>
                                             </td>
