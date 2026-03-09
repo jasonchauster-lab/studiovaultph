@@ -34,92 +34,88 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
     }
 
     return (
-        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 bg-white p-4 rounded-xl border border-cream-200 shadow-sm">
-            <div className="flex items-center gap-2 text-charcoal-500 mr-1">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 bg-white/40 backdrop-blur-md p-5 rounded-[24px] border border-white/60 shadow-cloud">
+            <div className="flex items-center gap-2.5 text-charcoal/40 mr-2">
                 <Filter className="w-4 h-4" />
-                <span className="text-sm font-medium">Filter by:</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest">Filters</span>
             </div>
 
-            {/* Type Filter */}
-            <select
-                onChange={(e) => handleFilter('type', e.target.value)}
-                value={searchParams.get('type') || 'all'}
-                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-            >
-                <option value="all">All Types</option>
-                <option value="instructor">Instructors</option>
-                <option value="studio">Studios</option>
-                <option value="slot">Browse Slots</option>
-            </select>
+            <div className="flex flex-wrap gap-3">
+                {/* Type Filter */}
+                <select
+                    onChange={(e) => handleFilter('type', e.target.value)}
+                    value={searchParams.get('type') || 'all'}
+                    className="w-full sm:w-auto px-4 py-2 bg-white/50 border border-white/60 rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all appearance-none cursor-pointer"
+                >
+                    <option value="all">All Modes</option>
+                    <option value="instructor">Instructors</option>
+                    <option value="studio">Studios</option>
+                    <option value="slot">Browse Slots</option>
+                </select>
 
-            {/* Location Filter — smart, searchable, grouped */}
-            <LocationFilterDropdown
-                value={searchParams.get('location') || 'all'}
-                onChange={(val) => handleFilter('location', val)}
-                availableLocations={availableLocations}
-            />
+                <LocationFilterDropdown
+                    value={searchParams.get('location') || 'all'}
+                    onChange={(val) => handleFilter('location', val)}
+                    availableLocations={availableLocations}
+                />
 
-            {/* Equipment Filter */}
-            <select
-                onChange={(e) => handleFilter('equipment', e.target.value)}
-                value={searchParams.get('equipment') || 'all'}
-                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-            >
-                <option value="all">All Equipment</option>
-                <option value="Reformer">Reformer</option>
-                <option value="Cadillac">Cadillac</option>
-                <option value="Chair">Chair</option>
-                <option value="Ladder Barrel">Barrel</option>
-                <option value="Mat">Mat</option>
-            </select>
+                <select
+                    onChange={(e) => handleFilter('equipment', e.target.value)}
+                    value={searchParams.get('equipment') || 'all'}
+                    className="w-full sm:w-auto px-4 py-2 bg-white/50 border border-white/60 rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all appearance-none cursor-pointer"
+                >
+                    <option value="all">Equipment</option>
+                    <option value="Reformer">Reformer</option>
+                    <option value="Cadillac">Cadillac</option>
+                    <option value="Chair">Chair</option>
+                    <option value="Ladder Barrel">Barrel</option>
+                    <option value="Mat">Mat</option>
+                </select>
 
-            {/* Certification Filter */}
-            <select
-                onChange={(e) => handleFilter('certification', e.target.value)}
-                value={searchParams.get('certification') || 'all'}
-                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-            >
-                <option value="all">All Certifications</option>
-                <option value="STOTT">STOTT Pilates</option>
-                <option value="BASI">BASI</option>
-                <option value="Balanced Body">Balanced Body</option>
-                <option value="Polestar">Polestar</option>
-                <option value="Classical">Classical</option>
-            </select>
+                <select
+                    onChange={(e) => handleFilter('certification', e.target.value)}
+                    value={searchParams.get('certification') || 'all'}
+                    className="w-full sm:w-auto px-4 py-2 bg-white/50 border border-white/60 rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all appearance-none cursor-pointer"
+                >
+                    <option value="all">Certification</option>
+                    <option value="STOTT">STOTT Pilates</option>
+                    <option value="BASI">BASI</option>
+                    <option value="Balanced Body">Balanced Body</option>
+                    <option value="Polestar">Polestar</option>
+                    <option value="Classical">Classical</option>
+                </select>
 
-            {/* Amenities Filter */}
-            <select
-                onChange={(e) => handleFilter('amenity', e.target.value)}
-                value={searchParams.get('amenity') || 'all'}
-                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-            >
-                <option value="all">All Amenities</option>
-                {STUDIO_AMENITIES.map(amenity => (
-                    <option key={amenity} value={amenity}>{amenity}</option>
-                ))}
-            </select>
+                <select
+                    onChange={(e) => handleFilter('amenity', e.target.value)}
+                    value={searchParams.get('amenity') || 'all'}
+                    className="w-full sm:w-auto px-4 py-2 bg-white/50 border border-white/60 rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all appearance-none cursor-pointer"
+                >
+                    <option value="all">Amenities</option>
+                    {STUDIO_AMENITIES.map(amenity => (
+                        <option key={amenity} value={amenity}>{amenity}</option>
+                    ))}
+                </select>
 
-            {/* Date Filter */}
-            <input
-                type="date"
-                min={getManilaTodayStr()}
-                onChange={(e) => handleFilter('date', e.target.value)}
-                value={searchParams.get('date') || ''}
-                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-            />
+                <input
+                    type="date"
+                    min={getManilaTodayStr()}
+                    onChange={(e) => handleFilter('date', e.target.value)}
+                    value={searchParams.get('date') || ''}
+                    className="w-full sm:w-auto px-4 py-2 bg-white/50 border border-white/60 rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all cursor-pointer"
+                />
 
-            {/* Time Filter */}
-            <input
-                type="time"
-                min={
-                    searchParams.get('date') === getManilaTodayStr()
-                        ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-                        : undefined
-                }
-                onChange={(e) => handleFilter('time', e.target.value)}
-                value={searchParams.get('time') || ''}
-                className="w-full sm:w-auto px-3 py-2 bg-cream-50 border border-cream-200 rounded-lg text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
-            />
+                <input
+                    type="time"
+                    min={
+                        searchParams.get('date') === getManilaTodayStr()
+                            ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+                            : undefined
+                    }
+                    onChange={(e) => handleFilter('time', e.target.value)}
+                    value={searchParams.get('time') || ''}
+                    className="w-full sm:w-auto px-4 py-2 bg-white/50 border border-white/60 rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all cursor-pointer"
+                />
+            </div>
         </div>
     )
 }

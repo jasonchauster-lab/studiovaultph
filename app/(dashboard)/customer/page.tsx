@@ -231,100 +231,108 @@ export default async function CustomerDashboard({
     }) || []
 
     return (
-        <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
-            <div className="max-w-7xl mx-auto space-y-12">
+        <div className="space-y-16 pb-20">
+            <div className="max-w-[1600px] mx-auto space-y-16">
 
                 {/* Header & Filters */}
-                <div>
-                    <h1 className="text-4xl font-serif text-charcoal-900 mb-4">Find your flow.</h1>
-                    <p className="text-charcoal-600 mb-8 text-lg">Discover top studios and verified instructors in Metro Manila.</p>
+                <div className="space-y-10">
+                    <div className="max-w-2xl">
+                        <h1 className="text-5xl font-serif font-bold text-charcoal tracking-tight mb-4">Find your flow.</h1>
+                        <p className="text-charcoal/60 text-lg font-medium leading-relaxed">Discover top studios and verified instructors in Metro Manila with ease.</p>
+                    </div>
 
                     <DiscoveryFilters availableLocations={availableLocations} />
                 </div>
 
                 {/* Vertical Sections */}
-                <div className="space-y-16">
+                <div className="space-y-24">
 
                     {/* Instructors Section */}
                     {(!params.type || params.type === 'instructor') && (
                         <section>
-                            <div className="flex items-center gap-3 mb-6">
-                                <h2 className="text-2xl font-serif text-charcoal-900">Verified Instructors</h2>
-                                <span className="bg-charcoal-900 text-cream-50 text-xs px-2 py-1 rounded-full">
-                                    {instructors.length}
-                                </span>
+                            <div className="flex items-center justify-between mb-10">
+                                <div className="flex items-center gap-4">
+                                    <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">Verified Instructors</h2>
+                                    <span className="bg-sage/10 text-sage text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-sage/20">
+                                        {instructors.length} Available
+                                    </span>
+                                </div>
                             </div>
 
                             {instructors.length === 0 ? (
-                                <div className="text-center py-12 bg-white rounded-xl border border-cream-200">
-                                    <div className="w-16 h-16 bg-cream-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-cream-100">
-                                        <User className="w-8 h-8 text-charcoal-300" />
+                                <div className="glass-card py-20 text-center flex flex-col items-center justify-center">
+                                    <div className="w-20 h-20 bg-sage/5 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                                        <User className="w-10 h-10 text-sage/30" />
                                     </div>
-                                    <h3 className="text-lg font-medium text-charcoal-900">No instructors available for this equipment at this time</h3>
-                                    <p className="text-charcoal-500 max-w-sm mx-auto mt-1">Try adjusting your filters, location, or checking a different date.</p>
+                                    <h3 className="text-xl font-serif font-bold text-charcoal tracking-tight mb-2">No results for this search</h3>
+                                    <p className="text-charcoal/40 max-w-sm mx-auto text-sm font-medium">Try adjusting your filters, location, or checking a different date.</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                                     {instructors.map(inst => (
-                                        <div key={inst.id} className="bg-white p-6 rounded-2xl border border-cream-200 shadow-sm hover:shadow-md transition-all">
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="flex items-center gap-4">
-                                                    <Link href={`/instructors/${inst.id}`} className="shrink-0 w-12 h-12 rounded-full overflow-hidden bg-cream-100 flex items-center justify-center border border-cream-200 hover:opacity-80 transition-opacity">
-                                                        {inst.avatar_url ? (
-                                                            <Image
-                                                                src={inst.avatar_url}
-                                                                alt={inst.full_name}
-                                                                width={48}
-                                                                height={48}
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                        ) : (
-                                                            <User className="w-6 h-6 text-charcoal-400" />
-                                                        )}
-                                                    </Link>
-                                                    <div>
-                                                        <h3 className="font-medium text-charcoal-900">{inst.full_name}</h3>
-                                                        {inst.instagram_handle && (
-                                                            <p className="text-xs text-charcoal-500 mb-1">@{inst.instagram_handle}</p>
-                                                        )}
-                                                        <StarRating rating={ratingsMap[inst.id]?.average || null} count={ratingsMap[inst.id]?.count} size="sm" />
+                                        <div key={inst.id} className="glass-card hover:translate-y-[-4px] transition-all duration-300 group">
+                                            <div className="p-8">
+                                                <div className="flex justify-between items-start mb-6">
+                                                    <div className="flex items-center gap-5">
+                                                        <Link href={`/instructors/${inst.id}`} className="shrink-0 w-16 h-16 rounded-2xl overflow-hidden bg-white border border-white shadow-cloud group-hover:scale-105 transition-transform">
+                                                            {inst.avatar_url ? (
+                                                                <Image
+                                                                    src={inst.avatar_url}
+                                                                    alt={inst.full_name}
+                                                                    width={64}
+                                                                    height={64}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center bg-alabaster">
+                                                                    <User className="w-8 h-8 text-charcoal/20" />
+                                                                </div>
+                                                            )}
+                                                        </Link>
+                                                        <div>
+                                                            <h3 className="text-lg font-bold text-charcoal tracking-tight mb-1">{inst.full_name}</h3>
+                                                            <div className="flex items-center gap-3">
+                                                                {inst.instagram_handle && (
+                                                                    <p className="text-[10px] font-bold text-sage uppercase tracking-widest">@{inst.instagram_handle}</p>
+                                                                )}
+                                                                <StarRating rating={ratingsMap[inst.id]?.average || null} count={ratingsMap[inst.id]?.count} size="xs" />
+                                                            </div>
+                                                        </div>
                                                     </div>
+                                                    {inst.certifications?.some((c: any) => c.verified) && (
+                                                        <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center border border-gold/20">
+                                                            <Award className="w-4 h-4 text-gold" />
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                {inst.certifications?.some((c: any) => c.verified) && (
-                                                    <div className="text-green-600">
-                                                        <Award className="w-5 h-5" />
-                                                    </div>
-                                                )}
-                                            </div>
 
-                                            <div className="space-y-2 mb-6">
-                                                <div className="flex flex-wrap gap-2">
+                                                <div className="flex flex-wrap gap-2 mb-8 min-h-[40px]">
                                                     {(inst.certifications || []).filter((c: any) => c.verified).map((c: any) => (
-                                                        <span key={c.id} className="text-[10px] uppercase tracking-wider bg-cream-100 text-charcoal-600 px-2 py-1 rounded-md">
+                                                        <span key={c.id} className="text-[9px] font-bold uppercase tracking-widest bg-sage/5 text-sage px-3 py-1 rounded-full border border-sage/10">
                                                             {c.certification_body}
                                                         </span>
                                                     ))}
                                                 </div>
+
+                                                <div className="space-y-3">
+                                                    <Link href={`/instructors/${inst.id}`} className="block w-full text-center py-4 rounded-[20px] bg-white text-charcoal text-[11px] font-bold uppercase tracking-widest border border-white/60 hover:bg-alabaster transition-all shadow-sm">
+                                                        View Profile
+                                                    </Link>
+
+                                                    {/* Book Button (Only if filters active) */}
+                                                    {
+                                                        params.date && params.time && params.location && params.location !== 'all' && params.equipment && params.equipment !== 'all' && (
+                                                            <BookSessionButton
+                                                                instructorId={inst.id}
+                                                                date={params.date}
+                                                                time={params.time}
+                                                                location={params.location}
+                                                                equipment={params.equipment}
+                                                            />
+                                                        )
+                                                    }
+                                                </div>
                                             </div>
-
-                                            <Link href={`/instructors/${inst.id}`} className="block w-full text-center py-2 mt-4 rounded-lg border border-charcoal-200 text-charcoal-900 hover:bg-charcoal-50 transition-colors">
-                                                View Profile
-                                            </Link>
-
-                                            {/* Book Button (Only if filters active) */}
-                                            {
-                                                params.date && params.time && params.location && params.location !== 'all' && params.equipment && params.equipment !== 'all' && (
-                                                    <div className="mt-2">
-                                                        <BookSessionButton
-                                                            instructorId={inst.id}
-                                                            date={params.date}
-                                                            time={params.time}
-                                                            location={params.location} // Validated as string above
-                                                            equipment={params.equipment}
-                                                        />
-                                                    </div>
-                                                )
-                                            }
                                         </div>
                                     ))}
                                 </div>
@@ -335,52 +343,57 @@ export default async function CustomerDashboard({
                     {/* Studios Section */}
                     {(!params.type || params.type === 'studio') && (
                         <section>
-                            <div className="flex items-center gap-3 mb-6">
-                                <h2 className="text-2xl font-serif text-charcoal-900">Partner Studios</h2>
-                                <span className="bg-charcoal-900 text-cream-50 text-xs px-2 py-1 rounded-full">
-                                    {studios?.length || 0}
-                                </span>
+                            <div className="flex items-center justify-between mb-10">
+                                <div className="flex items-center gap-4">
+                                    <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">Partner Studios</h2>
+                                    <span className="bg-gold/10 text-gold text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-gold/20">
+                                        {studios?.length || 0} Registered
+                                    </span>
+                                </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                                 {studios?.map(studio => (
-                                    <div key={studio.id} className="bg-white rounded-2xl border border-cream-200 shadow-sm overflow-hidden hover:shadow-md transition-all group">
-                                        <Link href={`/studios/${studio.id}`} className="block h-40 bg-charcoal-50 relative items-center justify-center overflow-hidden border-b border-cream-100 cursor-pointer">
+                                    <div key={studio.id} className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 group">
+                                        <Link href={`/studios/${studio.id}`} className="block h-52 relative overflow-hidden">
                                             {studio.logo_url ? (
                                                 <Image
                                                     src={studio.logo_url}
                                                     alt={studio.name}
                                                     fill
-                                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                                    className="object-cover group-hover:scale-110 transition-transform duration-700"
                                                 />
                                             ) : (
-                                                <span className="text-charcoal-300 font-serif italic text-4xl group-hover:scale-110 transition-transform duration-500 flex h-full items-center justify-center">
-                                                    {studio.name.slice(0, 1)}
-                                                </span>
-                                            )}
-                                        </Link>
-                                        <div className="p-6">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div>
-                                                    <h3 className="font-serif text-xl text-charcoal-900 mb-1">{studio.name}</h3>
-                                                    <StarRating rating={ratingsMap[studio.owner_id]?.average || null} count={ratingsMap[studio.owner_id]?.count} size="sm" />
+                                                <div className="w-full h-full flex items-center justify-center bg-sage/5">
+                                                    <span className="text-charcoal/20 font-serif italic text-6xl">
+                                                        {studio.name.slice(0, 1)}
+                                                    </span>
                                                 </div>
-                                                <span className="flex items-center gap-1 text-xs font-medium bg-cream-100 px-2 py-1 rounded-full text-charcoal-700 mt-1">
-                                                    <MapPin className="w-3 h-3" />
+                                            )}
+                                            <div className="absolute top-4 right-4">
+                                                <div className="flex items-center gap-1.5 text-[9px] font-bold bg-white/40 backdrop-blur-md px-3 py-1.5 rounded-full text-charcoal border border-white/40 uppercase tracking-widest">
+                                                    <MapPin className="w-3 h-3 text-sage" />
                                                     {studio.location}
-                                                </span>
+                                                </div>
                                             </div>
-                                            <p className="text-sm text-charcoal-500 mb-6 line-clamp-2">
-                                                {studio.description || 'A premiere pilates studio.'}
+                                        </Link>
+                                        <div className="p-8">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <h3 className="text-2xl font-serif font-bold text-charcoal tracking-tight">{studio.name}</h3>
+                                                <StarRating rating={ratingsMap[studio.owner_id]?.average || null} count={ratingsMap[studio.owner_id]?.count} size="xs" />
+                                            </div>
+
+                                            <p className="text-sm text-charcoal/40 font-medium mb-8 line-clamp-2 leading-relaxed">
+                                                {studio.description || 'A premiere pilates studio dedicated to your well-being.'}
                                             </p>
 
-                                            <div className="flex justify-between items-center text-sm">
-                                                <span className="text-charcoal-600">
-                                                    <strong>{studio.reformers_count}</strong> Reformers
+                                            <div className="flex justify-between items-center bg-alabaster/40 p-4 rounded-2xl border border-white/40">
+                                                <span className="text-[10px] font-bold text-sage uppercase tracking-[0.2em]">
+                                                    {studio.reformers_count} Reformers
                                                 </span>
                                                 <Link
                                                     href={`/studios/${studio.id}`}
-                                                    className="font-medium text-charcoal-900 hover:underline decoration-1 underline-offset-4"
+                                                    className="text-[10px] font-bold text-charcoal uppercase tracking-widest hover:text-sage transition-colors"
                                                 >
                                                     View Details &rarr;
                                                 </Link>
@@ -395,21 +408,25 @@ export default async function CustomerDashboard({
                     {/* Slots Section (Browse Slots) */}
                     {(params.type === 'slot' || (!params.type && (params.date || params.time))) && (
                         <section>
-                            <div className="flex items-center gap-3 mb-6">
-                                <h2 className="text-2xl font-serif text-charcoal-900">Available Sessions</h2>
-                                <span className="bg-charcoal-900 text-cream-50 text-xs px-2 py-1 rounded-full">
-                                    {slots.length}
-                                </span>
+                            <div className="flex items-center justify-between mb-10">
+                                <div className="flex items-center gap-4">
+                                    <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">Available Sessions</h2>
+                                    <span className="bg-sage/10 text-sage text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-sage/20">
+                                        {slots.length} Ready
+                                    </span>
+                                </div>
                             </div>
 
                             {slots.length === 0 ? (
-                                <div className="text-center py-12 bg-white rounded-xl border border-cream-200">
-                                    <Clock className="w-12 h-12 text-charcoal-300 mx-auto mb-4" />
-                                    <h3 className="text-lg font-medium text-charcoal-900">No slots found</h3>
-                                    <p className="text-charcoal-500">Try adjusting your filters or checking a different date.</p>
+                                <div className="glass-card py-20 text-center flex flex-col items-center justify-center">
+                                    <div className="w-20 h-20 bg-gold/5 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                                        <Clock className="w-10 h-10 text-gold/30" />
+                                    </div>
+                                    <h3 className="text-xl font-serif font-bold text-charcoal tracking-tight mb-2">No slots available</h3>
+                                    <p className="text-charcoal/40 max-w-sm mx-auto text-sm font-medium">Try adjusting your filters or checking a different date.</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                                     {slots.map(slot => (
                                         <div key={slot.id} className="h-full">
                                             <SlotCard slot={slot} />

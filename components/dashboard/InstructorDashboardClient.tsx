@@ -14,6 +14,7 @@ import CancelBookingModal from './CancelBookingModal';
 import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions';
 import InstructorScheduleCalendar from '@/components/instructor/InstructorScheduleCalendar';
 import { startOfWeek, endOfWeek, format } from 'date-fns';
+import InstructorStatCards from './InstructorStatCards';
 
 export default function InstructorDashboardClient() {
     const searchParams = useSearchParams();
@@ -26,6 +27,10 @@ export default function InstructorDashboardClient() {
     const [availableBalance, setAvailableBalance] = useState<number | null>(null);
     const [hasPendingPayout, setHasPendingPayout] = useState(false);
     const [availability, setAvailability] = useState<any[]>([]);
+
+    // Analytics states
+    const [totalSessionsTaught, setTotalSessionsTaught] = useState(0);
+    const [pendingEarnings, setPendingEarnings] = useState(0);
 
     const [activeChat, setActiveChat] = useState<{ id: string, recipientId: string, name: string, isExpired: boolean } | null>(null);
     const [cancellingBooking, setCancellingBooking] = useState<any>(null);
@@ -144,6 +149,28 @@ export default function InstructorDashboardClient() {
                     .order('start_time', { ascending: true });
 
                 if (availabilityData) setAvailability(availabilityData);
+
+                // 7. Fetch Total Sessions Taught (Historical)
+                const { count: sessionCount } = await supabase
+                    .from('bookings')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('instructor_id', user.id)
+                    .in('status', ['approved', 'completed']);
+                setTotalSessionsTaught(sessionCount || 0);
+
+                // 8. Fetch Pending Earnings (Total upcoming approved)
+                const { data: upcomingApproved } = await supabase
+                    .from('bookings')
+                    .select('price_breakdown')
+                    .eq('instructor_id', user.id)
+                    .eq('status', 'approved')
+                    .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' });
+
+                const pending = upcomingApproved?.reduce((sum, b) => {
+                    const fee = (b.price_breakdown as any)?.instructor_fee || 0;
+                    return sum + fee;
+                }, 0) || 0;
+                setPendingEarnings(pending);
             }
 
             setIsLoading(false);
@@ -171,173 +198,133 @@ export default function InstructorDashboardClient() {
     };
 
     return (
-        <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
-            <div className="max-w-[1600px] mx-auto space-y-8">
-
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h1 className="text-3xl font-serif text-charcoal-900 mb-1">Instructor Dashboard</h1>
-                        <p className="text-charcoal-600 font-medium">Manage your professional schedule and earnings.</p>
-                    </div>
-
-                    <div className="flex gap-2">
-                        <Link
-                            href="/instructor/profile"
-                            className="flex items-center gap-2 px-4 py-2 bg-rose-gold text-white rounded-lg hover:brightness-110 transition-all shadow-sm font-bold"
-                        >
-                            <User className="w-4 h-4" />
-                            <span className="hidden sm:inline">My Professional Profile</span>
-                        </Link>
-                    </div>
+        <div className="space-y-12 pb-20">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                <div>
+                    <h1 className="text-4xl font-serif font-bold text-charcoal tracking-tight mb-2">Instructor Dashboard</h1>
+                    <p className="text-charcoal/50 font-medium tracking-wide">Manage your professional schedule and earnings in style.</p>
                 </div>
 
-                {/* Earnings Bar */}
-                <div className="bg-charcoal-900 text-white p-6 rounded-2xl border border-charcoal-800 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-rose-gold/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-rose-gold/10 transition-colors" />
+                <div className="flex gap-4">
+                    <Link
+                        href="/instructor/profile"
+                        className="btn-antigravity flex items-center justify-center gap-2 px-8 py-3 text-[11px] uppercase tracking-widest"
+                    >
+                        <User className="w-4 h-4" />
+                        Professional Profile
+                    </Link>
+                </div>
+            </div>
 
-                    <div className="flex items-center gap-5 relative z-10">
-                        <div className="w-14 h-14 bg-white/5 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 shadow-inner">
-                            <Wallet className="w-7 h-7 text-rose-gold" />
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-1">Available Balance</p>
-                            <div className="flex items-center gap-4">
-                                <p className="text-4xl font-bold tracking-tight">
-                                    {availableBalance !== null ? `₱${availableBalance.toLocaleString()}` : '₱0'}
-                                </p>
-                                {availableBalance === null ? (
-                                    <div className="px-2.5 py-1 bg-white/10 text-white/60 text-[10px] font-bold uppercase rounded border border-white/10 animate-pulse">
-                                        Syncing...
-                                    </div>
-                                ) : hasPendingPayout ? (
-                                    <div className="px-2.5 py-1 bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase rounded border border-amber-500/20">
-                                        Payout Pending
-                                    </div>
-                                ) : (
-                                    <div className="px-2.5 py-1 bg-rose-gold/20 text-rose-gold text-[10px] font-bold uppercase rounded border border-rose-gold/20">
-                                        Verified
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
+            {/* Analytics Cards */}
+            <InstructorStatCards
+                stats={{
+                    balance: availableBalance || 0,
+                    upcomingSessions: calendarBookings.filter(b => b.status === 'approved').length,
+                    totalHours: totalSessionsTaught,
+                    pendingEarnings: pendingEarnings
+                }}
+                hasPendingPayout={hasPendingPayout}
+            />
 
-                    <div className="flex items-center gap-4 w-full md:w-auto relative z-10">
-                        <Link
-                            href="/instructor/earnings"
-                            className="flex-1 md:flex-none text-center px-4 py-2.5 text-sm font-bold text-white/60 hover:text-white transition-colors"
-                        >
-                            History
-                        </Link>
-                        <Link
-                            href="/instructor/payout"
-                            className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-8 py-3 bg-rose-gold text-white rounded-xl font-bold hover:brightness-110 transition-all shadow-lg shadow-rose-gold/20"
-                        >
-                            <ArrowUpRight className="w-4 h-4" />
-                            Request Payout
-                        </Link>
-                    </div>
+            {/* Dashboard Grid Container */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
+                <div className="xl:col-span-2">
+                    <InstructorScheduleCalendar
+                        availability={availability}
+                        bookings={calendarBookings}
+                        currentDate={new Date(searchParams.get('date') || getManilaTodayStr())}
+                    />
                 </div>
 
-                {/* Dashboard Grid Container */}
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                    <div className="xl:col-span-2">
-                        <InstructorScheduleCalendar
-                            availability={availability}
-                            bookings={calendarBookings}
-                            currentDate={new Date(searchParams.get('date') || getManilaTodayStr())}
-                        />
-                    </div>
-
-                    {/* Upcoming Bookings Sidebar */}
-                    <div className="space-y-6">
-                        <div className="bg-white border border-cream-200 rounded-2xl shadow-sm overflow-hidden">
-                            <div className="bg-charcoal-900 p-4 flex items-center justify-between">
-                                <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
-                                    <Calendar className="w-4 h-4 text-rose-gold" />
-                                    Upcoming Bookings
-                                </h2>
-                                <span className="text-[10px] font-bold text-white/40 border border-white/10 px-2 py-0.5 rounded-full uppercase">Next 5 Sessions</span>
-                            </div>
-                            <div className="p-6">
-                                {(() => {
-                                    if (isLoading) {
-                                        return (
-                                            <div className="py-12 flex justify-center">
-                                                <Loader2 className="w-6 h-6 text-rose-gold animate-spin" />
-                                            </div>
-                                        );
-                                    }
-
-                                    if (upcomingBookings.length === 0) {
-                                        return (
-                                            <div className="py-8 text-center bg-cream-50/50 rounded-xl border border-dashed border-cream-200 flex flex-col items-center justify-center">
-                                                <Calendar className="w-8 h-8 text-charcoal-200 mx-auto mb-3" />
-                                                <h3 className="text-sm font-bold text-charcoal-900 mb-1">No upcoming sessions</h3>
-                                                <p className="text-xs text-charcoal-500 max-w-[200px] mx-auto">Your next 5 scheduled sessions will appear here.</p>
-                                            </div>
-                                        );
-                                    }
-
+                {/* Upcoming Bookings Sidebar */}
+                <div className="space-y-8">
+                    <div className="glass-card overflow-hidden">
+                        <div className="bg-sage p-5 flex items-center justify-between">
+                            <h2 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                                <Calendar className="w-4 h-4" />
+                                Upcoming Bookings
+                            </h2>
+                            <span className="text-[9px] font-bold text-white/60 border border-white/20 px-3 py-1 rounded-full uppercase tracking-tighter">Next 5 Sessions</span>
+                        </div>
+                        <div className="p-6">
+                            {(() => {
+                                if (isLoading) {
                                     return (
-                                        <div className="space-y-4">
-                                            {upcomingBookings.map(session => (
-                                                <div key={session.id} className="p-4 border border-cream-200 bg-cream-50/50 rounded-xl hover:border-rose-gold/30 hover:bg-white transition-all shadow-sm group">
-                                                    <div className="flex justify-between items-start mb-3">
-                                                        <div className="flex flex-col gap-1 w-full">
-                                                            <div className="flex items-center gap-3">
-                                                                <Link href={`/studios/${session.slots.studios.id}`} className="w-10 h-10 rounded-full overflow-hidden border border-cream-200 bg-white shadow-sm shrink-0 hover:opacity-80 transition-opacity">
-                                                                    <img
-                                                                        src={session.slots.studios.logo_url || "/logo.png"}
-                                                                        alt={session.slots.studios.name}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
-                                                                </Link>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className="flex items-start justify-between gap-2">
-                                                                        <Link href={`/studios/${session.slots.studios.id}`} className="text-sm font-bold text-charcoal-900 truncate hover:text-rose-gold transition-colors">
-                                                                            {session.slots.studios.name}
-                                                                        </Link>
-                                                                        <span className="px-2 py-0.5 bg-green-100/50 text-green-700 text-[9px] font-bold uppercase rounded-md tracking-wider border border-green-200 shrink-0">
-                                                                            Confirmed
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="flex items-center gap-1.5 text-[10px] text-charcoal-500 font-medium mt-0.5">
-                                                                        <Calendar className="w-3 h-3 text-rose-gold" />
-                                                                        <span>{formatManilaDateStr(session.slots.date)} at {formatTo12Hour(session.slots.start_time)}</span>
-                                                                    </div>
+                                        <div className="py-12 flex justify-center">
+                                            <Loader2 className="w-6 h-6 text-sage animate-spin" />
+                                        </div>
+                                    );
+                                }
+
+                                if (upcomingBookings.length === 0) {
+                                    return (
+                                        <div className="py-12 text-center bg-alabaster/50 rounded-2xl border border-dashed border-sage/20 flex flex-col items-center justify-center">
+                                            <Calendar className="w-10 h-10 text-sage/20 mx-auto mb-4" />
+                                            <h3 className="text-sm font-bold text-charcoal mb-1">Quiet Week</h3>
+                                            <p className="text-xs text-charcoal/40 max-w-[200px] mx-auto">Your upcoming scheduled sessions will appear here.</p>
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <div className="space-y-4">
+                                        {upcomingBookings.map(session => (
+                                            <div key={session.id} className="p-4 border border-white/40 bg-white/30 rounded-2xl hover:bg-white/60 transition-all shadow-sm group">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className="flex flex-col gap-1 w-full">
+                                                        <div className="flex items-center gap-3">
+                                                            <Link href={`/studios/${session.slots.studios.id}`} className="w-10 h-10 rounded-full overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform">
+                                                                <img
+                                                                    src={session.slots.studios.logo_url || "/logo.png"}
+                                                                    alt={session.slots.studios.name}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            </Link>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-start justify-between gap-1">
+                                                                    <Link href={`/studios/${session.slots.studios.id}`} className="text-sm font-bold text-charcoal truncate hover:text-sage transition-colors">
+                                                                        {session.slots.studios.name}
+                                                                    </Link>
+                                                                    <span className="px-2 py-0.5 bg-sage/10 text-sage text-[8px] font-bold uppercase rounded-md tracking-widest border border-sage/20 shrink-0">
+                                                                        Confirmed
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 text-[10px] text-charcoal/50 font-bold uppercase tracking-tighter mt-1">
+                                                                    <Calendar className="w-3 h-3 text-sage" />
+                                                                    <span>{formatManilaDateStr(session.slots.date)} • {formatTo12Hour(session.slots.start_time)}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
+                                                </div>
 
-                                                    <div className="pt-3 border-t border-cream-200/50 space-y-2">
-                                                        <div
-                                                            className="flex items-center gap-2 cursor-pointer group"
-                                                            onClick={() => setSelectedClient(session.client)}
-                                                        >
-                                                            <div className="w-6 h-6 rounded-full overflow-hidden bg-cream-200 shrink-0 border border-cream-200 group-hover:border-rose-gold transition-colors">
-                                                                <img src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
-                                                            </div>
-                                                            <div className="text-xs text-charcoal-600 truncate flex-1 group-hover:text-charcoal-900 transition-colors">
-                                                                Client: <span className="font-semibold text-charcoal-900 group-hover:text-rose-gold transition-colors">{session.client?.full_name}</span>
-                                                            </div>
+                                                <div className="pt-4 border-t border-white/40 space-y-3">
+                                                    <div
+                                                        className="flex items-center gap-2 cursor-pointer group/client"
+                                                        onClick={() => setSelectedClient(session.client)}
+                                                    >
+                                                        <div className="w-7 h-7 rounded-full overflow-hidden bg-white shrink-0 border border-white shadow-sm group-hover/client:scale-110 transition-transform">
+                                                            <img src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+                                                        </div>
+                                                        <div className="text-[11px] text-charcoal/60 truncate flex-1 group-hover/client:text-sage transition-colors tracking-wide">
+                                                            Client: <span className="font-bold text-charcoal">{session.client?.full_name}</span>
                                                         </div>
                                                     </div>
 
-                                                    <div className="flex items-center justify-between text-xs mt-3 pt-3 border-t border-cream-200/50">
+                                                    <div className="flex items-center justify-between text-[10px] pt-1">
                                                         <div className="flex items-center gap-2">
-                                                            <Box className="w-3.5 h-3.5 text-charcoal-400" />
-                                                            <span className="font-semibold text-charcoal-700 truncate max-w-[120px]">
+                                                            <Box className="w-3.5 h-3.5 text-sage" />
+                                                            <span className="font-bold text-charcoal/80 truncate max-w-[100px] uppercase tracking-tighter">
                                                                 {Array.isArray(session.slots?.equipment) && session.slots.equipment.length > 0
-                                                                    ? `${session.slots.equipment[0]} (${session.quantity || 1})`
-                                                                    : (`${session.price_breakdown?.equipment || 'Standard'} (${session.quantity || 1})`)
-                                                                }
+                                                                    ? `${session.slots.equipment[0]}`
+                                                                    : (`${session.price_breakdown?.equipment || 'Standard'}`)
+                                                                } ({session.quantity || 1})
                                                             </span>
                                                         </div>
 
-                                                        <div className="flex gap-1.5 transition-opacity">
+                                                        <div className="flex gap-2">
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.preventDefault();
@@ -348,11 +335,10 @@ export default function InstructorDashboardClient() {
                                                                         isExpired: isChatExpired(session)
                                                                     })
                                                                 }}
-                                                                className="px-2 py-1.5 bg-white text-charcoal-600 border border-cream-200 rounded-lg hover:bg-rose-gold hover:text-white hover:border-rose-gold transition-all flex items-center gap-1 shadow-sm relative group/btn"
+                                                                className="w-7 h-7 bg-white/50 text-sage border border-white/40 rounded-full hover:bg-sage hover:text-white transition-all flex items-center justify-center shadow-sm relative group/btn"
                                                                 title="Message Client"
                                                             >
                                                                 <MessageSquare className="w-3 h-3" />
-                                                                <span className="text-[10px] font-bold">Client</span>
                                                                 <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.client_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.client_id} />
                                                             </button>
 
@@ -366,11 +352,10 @@ export default function InstructorDashboardClient() {
                                                                         isExpired: isChatExpired(session)
                                                                     })
                                                                 }}
-                                                                className="px-2 py-1.5 bg-white text-charcoal-600 border border-cream-200 rounded-lg hover:bg-charcoal-900 hover:text-white hover:border-charcoal-900 transition-all flex items-center gap-1 shadow-sm relative group/btn2"
+                                                                className="w-7 h-7 bg-white/50 text-charcoal/60 border border-white/40 rounded-full hover:bg-gold hover:text-charcoal transition-all flex items-center justify-center shadow-sm relative group/btn2"
                                                                 title="Message Studio"
                                                             >
                                                                 <MessageSquare className="w-3 h-3" />
-                                                                <span className="text-[10px] font-bold">Studio</span>
                                                                 <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.slots.studios.owner_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.slots.studios.owner_id} />
                                                             </button>
 
@@ -379,20 +364,19 @@ export default function InstructorDashboardClient() {
                                                                     e.preventDefault();
                                                                     setCancellingBooking(session);
                                                                 }}
-                                                                className="text-[10px] font-bold text-red-600 hover:text-red-700 px-2 py-1.5 rounded-lg border border-red-100 hover:bg-red-50 transition-all flex items-center gap-1 shadow-sm"
+                                                                className="w-7 h-7 bg-white/50 text-red-400 border border-white/40 rounded-full hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
                                                                 title="Cancel"
                                                             >
                                                                 <X className="w-3 h-3" />
-                                                                <span>Cancel</span>
                                                             </button>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    );
-                                })()}
-                            </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     </div>
                 </div>
@@ -422,28 +406,28 @@ export default function InstructorDashboardClient() {
             )}
 
             {selectedClient && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
-                    <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden p-6 relative" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setSelectedClient(null)} className="absolute top-4 right-4 text-charcoal-400 hover:text-charcoal-900"><X className="w-5 h-5" /></button>
-                        <div className="flex flex-col items-center mt-2 mb-6 text-center">
-                            <div className="w-20 h-20 rounded-full overflow-hidden mb-3 border border-cream-200">
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/20 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
+                    <div className="glass-card w-full max-w-sm overflow-hidden p-8 relative animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedClient(null)} className="absolute top-6 right-6 text-charcoal/20 hover:text-charcoal transition-colors"><X className="w-5 h-5" /></button>
+                        <div className="flex flex-col items-center mt-4 mb-8 text-center">
+                            <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-white shadow-cloud scale-110">
                                 <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                             </div>
-                            <h3 className="text-xl font-bold text-charcoal-900">{selectedClient.full_name}</h3>
-                            <p className="text-sm text-charcoal-500">{selectedClient.email}</p>
+                            <h3 className="text-2xl font-serif font-bold text-charcoal tracking-tight">{selectedClient.full_name}</h3>
+                            <p className="text-xs text-charcoal/40 font-bold uppercase tracking-widest mt-1">{selectedClient.email}</p>
                         </div>
                         {selectedClient.medical_conditions ? (
-                            <div className="bg-red-50 p-4 rounded-xl border border-red-100">
-                                <h4 className="text-sm font-bold text-red-800 mb-1 flex items-center gap-1.5"><AlertCircle className="w-4 h-4" /> Medical Conditions</h4>
-                                <p className="text-sm text-red-700 whitespace-pre-wrap">{selectedClient.medical_conditions}</p>
+                            <div className="bg-red-50/50 p-5 rounded-3xl border border-red-100/50">
+                                <h4 className="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-2 flex items-center gap-2"><AlertCircle className="w-4 h-4" /> Medical Conditions</h4>
+                                <p className="text-xs text-red-700/80 leading-relaxed font-medium">{selectedClient.medical_conditions}</p>
                             </div>
                         ) : (
-                            <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50">
-                                <h4 className="text-sm font-bold text-charcoal-700 mb-1">Medical Conditions</h4>
-                                <p className="text-sm text-charcoal-500">None reported.</p>
+                            <div className="bg-sage/5 p-5 rounded-3xl border border-white/40">
+                                <h4 className="text-[10px] font-bold text-sage uppercase tracking-widest mb-1">Health Status</h4>
+                                <p className="text-xs text-charcoal/40 font-medium">Clear / No conditions reported.</p>
                             </div>
                         )}
-                        <button onClick={() => setSelectedClient(null)} className="w-full mt-6 py-2.5 bg-cream-100 text-charcoal-900 rounded-xl font-bold hover:bg-cream-200 transition-colors">Close</button>
+                        <button onClick={() => setSelectedClient(null)} className="w-full mt-8 py-3.5 bg-white text-charcoal border border-white/40 rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:bg-alabaster transition-all shadow-sm">Close</button>
                     </div>
                 </div>
             )}

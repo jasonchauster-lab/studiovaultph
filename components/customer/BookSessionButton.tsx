@@ -56,7 +56,7 @@ export default function BookSessionButton({
 
     if (status === 'success') {
         return (
-            <div className="w-full py-2 bg-green-50 text-green-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 border border-green-200">
+            <div className="w-full py-4 px-6 bg-sage/10 text-sage rounded-[20px] text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 border border-sage/20 shadow-sm animate-in fade-in zoom-in duration-500">
                 <Check className="w-4 h-4" />
                 {message}
             </div>
@@ -64,24 +64,24 @@ export default function BookSessionButton({
     }
 
     return (
-        <div className="w-full space-y-2">
+        <div className="w-full space-y-3">
             <button
                 onClick={handleBook}
                 disabled={isLoading}
-                className="w-full py-2 bg-charcoal-900 text-cream-50 rounded-lg text-sm font-medium hover:bg-charcoal-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full py-4 px-6 bg-charcoal text-white rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-cloud"
             >
                 {isLoading ? (
                     <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        Booking...
+                        Processing
                     </>
                 ) : (
                     'Book Session'
                 )}
             </button>
             {status === 'error' && (
-                <div className="text-xs text-red-600 flex items-center gap-1 justify-center">
-                    <AlertCircle className="w-3 h-3" />
+                <div className="text-[10px] font-bold text-red-400 flex items-center gap-1.5 justify-center animate-in fade-in slide-in-from-top-1">
+                    <AlertCircle className="w-3.5 h-3.5" />
                     {message}
                 </div>
             )}

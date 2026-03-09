@@ -40,16 +40,15 @@ export default async function DashboardLayout({
         : (profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.full_name || user?.email || 'Partner'}`);
 
     return (
-        <div className="min-h-screen bg-cream-50 flex flex-col">
-            {/* Shared Header */}
-            <header className="bg-white border-b border-cream-200 px-4 py-2 sm:px-6 sticky top-0 z-50">
+        <div className="min-h-screen bg-alabaster flex flex-col">
+            {/* Shared Header - Antigravity Glassmorphism */}
+            <header className="glass-navbar px-4 py-3 sm:px-6 fixed top-0 left-0 right-0 z-50">
                 <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
                     <div className="flex items-center gap-8">
                         <Link href="/welcome" className="flex items-center gap-0 group">
-                            <Image src="/logo.png" alt="StudioVault Logo" width={144} height={144} className="w-36 h-36 object-contain" />
-                            <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight -ml-10 whitespace-nowrap hidden lg:block">StudioVaultPH</span>
+                            <Image src="/logo.png" alt="StudioVault Logo" width={100} height={100} className="w-24 h-24 object-contain" />
+                            <span className="text-2xl font-serif font-bold text-charcoal tracking-tight -ml-6 whitespace-nowrap hidden lg:block">StudioVaultPH</span>
                         </Link>
-
                         <nav className="hidden md:block">
                             <Navigation role={profile?.role} />
                         </nav>
@@ -60,16 +59,16 @@ export default async function DashboardLayout({
                             <Navigation role={profile?.role} />
                         </div>
 
-                        <div className="flex items-center gap-3 pl-4 border-l border-cream-100">
+                        <div className="flex items-center gap-3 pl-4 border-l border-white/20">
                             <div className="hidden sm:block text-right">
-                                <p className="text-xs font-bold text-charcoal-900 leading-none mb-1">{profile?.role === 'studio' ? (studioData?.name || profile?.full_name || 'Studio') : (profile?.full_name || 'Partner')}</p>
-                                <p className="text-[10px] text-charcoal-500 uppercase font-bold tracking-tighter text-rose-gold">
+                                <p className="text-xs font-bold text-charcoal leading-none mb-1">{profile?.role === 'studio' ? (studioData?.name || profile?.full_name || 'Studio') : (profile?.full_name || 'Partner')}</p>
+                                <p className="text-[10px] text-sage font-bold uppercase tracking-widest">
                                     {profile?.role === 'instructor' ? 'Instructor' :
                                         profile?.role === 'studio' ? 'Studio' :
                                             profile?.role || 'User'}
                                 </p>
                             </div>
-                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-cream-100 shadow-sm transition-transform hover:scale-105">
+                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-cloud transition-transform hover:scale-110">
                                 <Image
                                     src={avatarUrl}
                                     alt="User Profile"
@@ -79,7 +78,7 @@ export default async function DashboardLayout({
                                 />
                             </div>
                             <form action={signOut} className="hidden sm:block">
-                                <button className="p-2 text-rose-gold hover:text-red-600 transition-colors" title="Log Out">
+                                <button className="p-2 text-sage hover:text-red-500 transition-colors" title="Log Out">
                                     <LogOut className="w-5 h-5" />
                                 </button>
                             </form>
@@ -88,18 +87,20 @@ export default async function DashboardLayout({
                 </div>
             </header>
 
-            {/* Main Content */}
-            <main className="flex-1">
-                {children}
+            {/* Main Content with top padding for fixed header */}
+            <main className="flex-1 pt-28">
+                <div className="max-w-[1600px] mx-auto px-4 sm:px-8">
+                    {children}
+                </div>
             </main>
 
-            <footer className="bg-white border-t border-cream-200 py-6 px-4">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-charcoal-500">
+            <footer className="glass-card m-4 sm:m-8 p-6">
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-charcoal/60">
                     <p>© 2026 Studio Vault PH. All rights reserved.</p>
                     <div className="flex gap-6">
-                        <Link href="/terms-of-service" className="hover:text-rose-gold transition-colors">Terms of Service</Link>
-                        <Link href="/privacy" className="hover:text-rose-gold transition-colors">Privacy Policy</Link>
-                        <Link href="/support" className="hover:text-rose-gold transition-colors">Support</Link>
+                        <Link href="/terms-of-service" className="hover:text-sage transition-colors font-medium">Terms of Service</Link>
+                        <Link href="/privacy" className="hover:text-sage transition-colors font-medium">Privacy Policy</Link>
+                        <Link href="/support" className="hover:text-sage transition-colors font-medium">Support</Link>
                     </div>
                 </div>
             </footer>

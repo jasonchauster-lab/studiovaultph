@@ -143,71 +143,59 @@ function LoginContent() {
 
 
     return (
-        <div className="min-h-screen bg-white flex flex-col md:flex-row">
-            {/* Left Side: Image - Hidden on mobile, full height on desktop */}
-            <div className="hidden md:flex md:w-1/2 relative flex-col justify-end">
-                <Image
-                    src="/auth-bg.png"
-                    alt="Pilates Studio"
-                    fill
-                    className="object-cover"
-                    priority
-                />
-                {/* Subtle overlay for better text readability and premium feel */}
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 via-transparent to-transparent" />
+        <div className="min-h-screen bg-alabaster flex flex-col md:flex-row relative selection:bg-sage/20">
+            <div className="fixed inset-0 bg-white/50 animate-mesh -z-10 pointer-events-none" />
 
-                <div className="relative p-16 text-white z-10">
-                    <h2 className="text-4xl lg:text-5xl font-serif mb-6 leading-tight">Elevate Your Studio Management</h2>
-                    <p className="text-lg text-white/90 font-light max-w-sm leading-relaxed">
-                        Experience the art of seamless booking and client care with StudioVault's premium platform.
+            {/* Left Side: Brand Narrative - Hidden on mobile, full height on desktop */}
+            <div className="hidden md:flex md:w-[45%] relative flex-col justify-center items-center p-20 overflow-hidden bg-white/20">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-sage/5 rounded-full blur-[120px] animate-pulse" />
+
+                <div className="relative z-10 w-full max-w-sm space-y-12">
+                    <div className="space-y-6">
+                        <Link href="/" className="flex items-center gap-0 group">
+                            <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-16 h-16 object-contain" />
+                            <span className="text-2xl font-serif font-bold text-charcoal tracking-tight -ml-2">StudioVaultPH</span>
+                        </Link>
+                        <h2 className="text-5xl lg:text-6xl font-serif font-bold text-charcoal leading-[1.1] tracking-tight">
+                            The Sanctuary <br />
+                            <span className="text-sage italic">of Movement.</span>
+                        </h2>
+                    </div>
+
+                    <p className="text-lg text-charcoal/40 font-medium leading-relaxed italic">
+                        &ldquo;Experience a platform designed with the precision and grace of Pilates itself.&rdquo;
                     </p>
+
+                    <div className="flex items-center gap-4 text-[10px] font-bold text-sage uppercase tracking-widest border-t border-sage/10 pt-8 mt-12">
+                        <Award className="w-4 h-4" />
+                        A Foundation Built for Professionals
+                    </div>
                 </div>
             </div>
 
             {/* Right Side: Form Content */}
-            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-20 bg-white overflow-y-auto relative">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-24 overflow-y-auto relative bg-white/40 backdrop-blur-sm">
                 {/* Back Button */}
                 <Link
                     href="/"
-                    className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-2 text-charcoal-600 hover:text-charcoal-900 transition-colors group"
+                    className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-3 text-charcoal/40 hover:text-sage transition-all group"
                 >
-                    <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform border border-cream-200 rounded-lg p-1" />
-                    <span className="text-sm font-bold">Back to Home</span>
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Return Home</span>
                 </Link>
 
-                <div className="w-full max-w-lg">
-                    <div className="flex flex-col items-center mb-12">
-                        <Link href="/" className="flex items-center justify-center gap-0 group">
-                            <Image src="/logo.png" alt="StudioVault Logo" width={144} height={144} className="w-36 h-36 object-contain" />
-                            <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight -ml-3 whitespace-nowrap">StudioVaultPH</span>
-                        </Link>
-
-                        <div className="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 border border-amber-100 rounded-full mb-6">
-                            <Award className="w-4 h-4 text-amber-600" />
-                            <span className="text-[10px] font-bold text-amber-700 uppercase tracking-widest">Founding Partner Access</span>
-                        </div>
-
-                        <div className="text-center">
-                            <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Welcome to the Vault</h2>
-                            <h1 className="text-4xl font-serif text-charcoal-900 mb-4">
-                                {isSignUp
-                                    ? (role === 'studio' ? 'List Your Studio' : role === 'instructor' ? 'Join as Instructor' : 'Create an Account')
-                                    : 'Welcome Back'}
-                            </h1>
-                            <p className="text-charcoal-600 text-base max-w-sm mx-auto">
-                                {isSignUp
-                                    ? (role === 'studio'
-                                        ? 'Start monetizing your empty reformers today.'
-                                        : role === 'instructor'
-                                            ? 'Access premium studio spaces and grow your practice.'
-                                            : 'Premium Pilates. Affordable Rates.')
-                                    : 'Please enter your credentials to access your secure dashboard.'}
-                            </p>
-                        </div>
+                <div className="w-full max-w-md">
+                    <div className="text-center mb-12 space-y-3">
+                        <h1 className="text-4xl font-serif font-bold text-charcoal tracking-tight">
+                            {isSignUp ? 'Begin Your Journey' : 'Secure Access'}
+                        </h1>
+                        <p className="text-[11px] font-bold text-charcoal/30 uppercase tracking-[0.3em]">
+                            {isSignUp ? 'Establish your digital legacy' : 'Return to your dashboard'}
+                        </p>
                     </div>
 
                     {isSignUp && (
-                        <div className="mb-10 p-1 bg-cream-50 rounded-2xl flex gap-1 border border-cream-100/50">
+                        <div className="mb-10 p-1.5 bg-white/60 backdrop-blur-md rounded-[24px] flex gap-2 border border-white/80 shadow-cloud">
                             {[
                                 { id: 'customer', label: 'Client' },
                                 { id: 'instructor', label: 'Instructor' },
@@ -217,9 +205,9 @@ function LoginContent() {
                                     key={opt.id}
                                     type="button"
                                     onClick={() => setRole(opt.id)}
-                                    className={`flex-1 py-3 px-2 rounded-xl text-sm font-bold transition-all duration-200 ${role === opt.id
-                                        ? 'bg-white text-charcoal-900 shadow-sm border border-cream-200'
-                                        : 'text-charcoal-800 hover:text-charcoal-900'
+                                    className={`flex-1 py-3.5 px-2 rounded-[20px] text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${role === opt.id
+                                        ? 'bg-sage text-white shadow-sm'
+                                        : 'text-charcoal/40 hover:text-charcoal hover:bg-white/40'
                                         }`}
                                 >
                                     {opt.label}
@@ -228,51 +216,52 @@ function LoginContent() {
                         </div>
                     )}
 
-                    <form onSubmit={handleAuth} className="grid grid-cols-1 gap-6">
+                    <form onSubmit={handleAuth} className="space-y-6">
                         {isSignUp && (
-                            <div>
-                                <label className="block text-sm font-semibold text-charcoal-800 mb-2">Full Name</label>
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-bold text-charcoal/40 uppercase tracking-widest px-1">Full Name</label>
                                 <input
                                     type="text"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
                                     required={isSignUp}
-                                    placeholder="e.g. Jane Doe"
-                                    className="w-full px-5 py-3.5 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-300"
+                                    placeholder="Jane Doe"
+                                    className="w-full px-6 py-4 border border-white/60 bg-white/40 rounded-[20px] text-[13px] font-bold text-charcoal focus:ring-1 focus:ring-sage outline-none transition-all placeholder:text-charcoal/20"
                                 />
                             </div>
                         )}
 
                         {isSignUp && (
-                            <div>
-                                <label className="block text-sm font-semibold text-charcoal-800 mb-2">Date of Birth</label>
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-bold text-charcoal/40 uppercase tracking-widest px-1">Date of Birth</label>
                                 <input
                                     type="date"
                                     value={birthday}
                                     onChange={(e) => setBirthday(e.target.value)}
                                     required={isSignUp}
-                                    className="w-full px-5 py-3.5 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all"
+                                    className="w-full px-6 py-4 border border-white/60 bg-white/40 rounded-[20px] text-[13px] font-bold text-charcoal focus:ring-1 focus:ring-sage outline-none transition-all"
                                 />
                             </div>
                         )}
 
-                        <div>
-                            <label className="block text-sm font-semibold text-charcoal-800 mb-2">Email Address</label>
+                        <div className="space-y-2">
+                            <label className="block text-[10px] font-bold text-charcoal/40 uppercase tracking-widest px-1">Email Address</label>
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                placeholder="jane@example.com"
-                                className="w-full px-5 py-3.5 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-300"
+                                placeholder="jane@studio-vault.ph"
+                                className="w-full px-6 py-4 border border-white/60 bg-white/40 rounded-[20px] text-[13px] font-bold text-charcoal focus:ring-1 focus:ring-sage outline-none transition-all placeholder:text-charcoal/20"
                             />
                         </div>
-                        <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm font-semibold text-charcoal-800">Password</label>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between px-1">
+                                <label className="block text-[10px] font-bold text-charcoal/40 uppercase tracking-widest">Password</label>
                                 {!isSignUp && (
-                                    <Link href="/forgot-password" gap-2 className="text-xs text-charcoal-600 hover:text-charcoal-900 transition-colors font-bold">
-                                        Forgot password?
+                                    <Link href="/forgot-password" gap-2 className="text-[9px] text-charcoal/30 hover:text-sage transition-all font-bold uppercase tracking-widest">
+                                        Recover Key
                                     </Link>
                                 )}
                             </div>
@@ -282,12 +271,12 @@ function LoginContent() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 placeholder="••••••••"
-                                className="w-full px-5 py-3.5 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-300"
+                                className="w-full px-6 py-4 border border-white/60 bg-white/40 rounded-[20px] text-[13px] font-bold text-charcoal focus:ring-1 focus:ring-sage outline-none transition-all placeholder:text-charcoal/20"
                             />
                         </div>
 
                         {message && (
-                            <div className={`text-sm p-4 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 ${message.type === 'error' ? 'bg-red-50 text-red-700 border border-red-100' : 'bg-green-50 text-green-700 border border-green-100'}`}>
+                            <div className={`text-[10px] font-bold uppercase tracking-widest p-5 rounded-[20px] flex items-center justify-center animate-in fade-in slide-in-from-top-2 shadow-sm ${message.type === 'error' ? 'bg-red-50 text-red-500 border border-red-100' : 'bg-sage/10 text-sage border border-sage/20'}`}>
                                 {message.text}
                             </div>
                         )}
@@ -295,21 +284,12 @@ function LoginContent() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-charcoal-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-charcoal-800 active:scale-[0.99] transition-all flex justify-center shadow-lg hover:shadow-xl disabled:opacity-70"
+                            className="w-full bg-charcoal text-white py-5 rounded-[24px] text-[11px] font-bold uppercase tracking-widest hover:opacity-90 active:scale-[0.99] transition-all flex justify-center shadow-cloud shadow-charcoal/10 disabled:opacity-50"
                         >
-                            {loading ? <Loader2 className="animate-spin w-6 h-6" /> : (isSignUp ? 'Join the Vault' : 'Sign In')}
+                            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (isSignUp ? 'Initiate Account' : 'Authenticate')}
                         </button>
 
-                        <div className="relative my-4">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-cream-200"></div>
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase tracking-widest font-bold">
-                                <span className="px-6 bg-white text-charcoal-300">Or</span>
-                            </div>
-                        </div>
-
-                        <div className="text-center">
+                        <div className="text-center pt-6">
                             <button
                                 type="button"
                                 onClick={() => {
@@ -319,20 +299,20 @@ function LoginContent() {
                                     setEmail('')
                                     setPassword('')
                                 }}
-                                className="text-charcoal-500 hover:text-charcoal-900 font-medium text-sm transition-colors group"
+                                className="text-charcoal/30 hover:text-charcoal text-[10px] font-bold uppercase tracking-[0.2em] transition-all group"
                             >
                                 {isSignUp ? (
-                                    <>Already have an account? <span className="text-charcoal-900 underline underline-offset-8 decoration-2 decoration-cream-300 group-hover:decoration-charcoal-900 font-bold transition-all">Sign In</span></>
+                                    <>Account exists? <span className="text-sage border-b border-sage/20 group-hover:border-sage transition-all pb-0.5">Authenticate</span></>
                                 ) : (
-                                    <>Don't have an account? <span className="text-charcoal-900 underline underline-offset-8 decoration-2 decoration-cream-300 group-hover:decoration-charcoal-900 font-bold transition-all">Join the Vault</span></>
+                                    <>No account? <span className="text-sage border-b border-sage/20 group-hover:border-sage transition-all pb-0.5">Begin Journey</span></>
                                 )}
                             </button>
                         </div>
                     </form>
 
-                    <div className="mt-16 pt-12 border-t border-cream-100 text-center">
-                        <p className="text-xs text-charcoal-400 leading-relaxed max-w-xs mx-auto">
-                            By continuing, you agree to our <Link href="/terms" className="underline hover:text-charcoal-900">Terms of Service</Link> and <Link href="/privacy" className="underline hover:text-charcoal-900">Privacy Policy</Link>.
+                    <div className="mt-20 pt-10 border-t border-charcoal/5 text-center">
+                        <p className="text-[9px] font-bold text-charcoal/20 uppercase tracking-[0.3em] leading-relaxed max-w-xs mx-auto">
+                            By proceeding, you adhere to our <Link href="/terms" className="text-charcoal/40 hover:text-sage">Terms</Link> and <Link href="/privacy" className="text-charcoal/40 hover:text-sage">Privacy Policy</Link>.
                         </p>
                     </div>
                 </div>
@@ -344,8 +324,8 @@ function LoginContent() {
 export default function LoginPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-cream-50 flex items-center justify-center p-4">
-                <Loader2 className="animate-spin w-8 h-8 text-charcoal-400" />
+            <div className="min-h-screen bg-alabaster flex items-center justify-center p-4">
+                <Loader2 className="animate-spin w-8 h-8 text-sage/40" />
             </div>
         }>
             <LoginContent />

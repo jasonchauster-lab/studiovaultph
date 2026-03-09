@@ -71,7 +71,7 @@ export default function BookSlotButton({ slotId, availableEquipment }: { slotId:
 
     if (status === 'success') {
         return (
-            <button disabled className="w-full mt-2 py-2 px-4 bg-green-100 text-green-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 cursor-default">
+            <button disabled className="w-full mt-2 py-4 px-6 bg-sage/10 text-sage rounded-[20px] text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 border border-sage/20 cursor-default shadow-sm">
                 <Check className="w-4 h-4" />
                 Request Sent
             </button>
@@ -80,32 +80,32 @@ export default function BookSlotButton({ slotId, availableEquipment }: { slotId:
 
     if (status === 'selecting') {
         return (
-            <div className="w-full mt-2 space-y-2 animate-in fade-in zoom-in duration-200">
-                <div className="bg-cream-50 p-2 rounded-lg border border-cream-200">
-                    <p className="text-xs font-medium text-charcoal-600 mb-1.5 px-0.5">Select Equipment:</p>
+            <div className="w-full mt-4 space-y-4 animate-in fade-in zoom-in duration-300">
+                <div className="bg-white/40 backdrop-blur-md p-4 rounded-[20px] border border-white/60 shadow-cloud">
+                    <p className="text-[10px] font-bold text-charcoal/40 mb-3 uppercase tracking-widest px-1">Select Equipment</p>
                     <select
                         value={selectedEquipment}
                         onChange={(e) => setSelectedEquipment(e.target.value)}
-                        className="w-full text-sm p-1.5 rounded border border-cream-300 bg-white text-charcoal-900 focus:ring-1 focus:ring-charcoal-500 outline-none"
+                        className="w-full text-[11px] font-bold p-3 rounded-xl border border-white/60 bg-white/50 text-charcoal focus:ring-1 focus:ring-sage focus:border-sage outline-none transition-all appearance-none cursor-pointer"
                     >
                         {availableEquipment.map(eq => (
                             <option key={eq} value={eq}>{eq}</option>
                         ))}
                     </select>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                     <button
                         onClick={() => setStatus('idle')}
-                        className="flex-1 py-1.5 px-2 bg-white border border-cream-300 text-charcoal-600 rounded text-xs font-medium hover:bg-cream-50"
+                        className="flex-1 py-4 px-4 bg-white/50 border border-white/60 text-charcoal/60 rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:bg-white/80 transition-all"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleBook}
                         disabled={loading}
-                        className="flex-1 py-1.5 px-2 bg-charcoal-900 text-cream-50 rounded text-xs font-medium hover:bg-charcoal-800 disabled:opacity-50"
+                        className="flex-1 py-4 px-4 bg-sage text-white rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:bg-sage/90 disabled:opacity-50 transition-all shadow-cloud shadow-sage/20"
                     >
-                        {loading ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Confirm'}
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Confirm'}
                     </button>
                 </div>
             </div>
@@ -113,19 +113,19 @@ export default function BookSlotButton({ slotId, availableEquipment }: { slotId:
     }
 
     return (
-        <div className="w-full mt-2">
+        <div className="w-full mt-4">
             <button
                 onClick={handleInitialClick}
                 disabled={loading}
-                className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-charcoal-900/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center ${status === 'error'
-                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                    : 'bg-charcoal-900 text-cream-50 hover:bg-charcoal-800'
+                className={`w-full py-4 px-6 rounded-[20px] text-[11px] font-bold uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center shadow-cloud ${status === 'error'
+                        ? 'bg-red-50 text-red-400 border border-red-100'
+                        : 'bg-charcoal text-white hover:opacity-90'
                     }`}
             >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (status === 'error' ? 'Retry' : 'Request to Book')}
             </button>
             {status === 'error' && errorMessage && (
-                <p className="text-xs text-red-600 mt-1 text-center animate-in fade-in slide-in-from-top-1">
+                <p className="text-[10px] font-bold text-red-400 mt-2 text-center animate-in fade-in slide-in-from-top-1">
                     {errorMessage}
                 </p>
             )}

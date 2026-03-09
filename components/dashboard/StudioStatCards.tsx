@@ -16,54 +16,56 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             value: `₱${stats.revenue.toLocaleString()}`,
             icon: TrendingUp,
             trend: 'Last 30 Days',
-            trendColor: 'text-rose-gold',
-            bgIcon: 'bg-rose-gold/10',
-            iconColor: 'text-rose-gold'
+            trendColor: 'text-sage',
+            bgIcon: 'bg-sage/10',
+            iconColor: 'text-sage'
         },
         {
             label: 'Active Listings',
             value: `${stats.activeListings} slots`,
             icon: Calendar,
             trend: 'This week',
-            trendColor: 'text-rose-gold',
-            bgIcon: 'bg-rose-gold/10',
-            iconColor: 'text-rose-gold'
+            trendColor: 'text-gold-deep',
+            bgIcon: 'bg-gold/10',
+            iconColor: 'text-gold-deep'
         },
         {
             label: 'Average Occupancy',
             value: `${stats.occupancy}%`,
             icon: Zap,
             trend: 'Current Week',
-            trendColor: 'text-blue-600',
-            bgIcon: 'bg-blue-50',
-            iconColor: 'text-blue-600'
+            trendColor: 'text-sage',
+            bgIcon: 'bg-sage/10',
+            iconColor: 'text-sage'
         },
         {
             label: 'Top Instructor',
             value: stats.topInstructor,
             icon: Star,
             trend: 'Most Bookings',
-            trendColor: 'text-rose-gold',
-            bgIcon: 'bg-rose-gold/10',
-            iconColor: 'text-rose-gold'
+            trendColor: 'text-gold-deep',
+            bgIcon: 'bg-gold/10',
+            iconColor: 'text-gold-deep'
         }
     ]
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {cardData.map((card, index) => (
-                <div key={index} className="bg-white p-6 rounded-2xl border border-cream-200 shadow-sm hover:shadow-md transition-shadow group">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className={`p-3 ${card.bgIcon} rounded-xl group-hover:scale-110 transition-transform`}>
+                <div key={index} className="glass-card p-6 group transition-all duration-500 hover:-translate-y-2 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-sage/5 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-sage/10 transition-colors" />
+
+                    <div className="flex justify-between items-start mb-6">
+                        <div className={`p-3.5 ${card.bgIcon} rounded-2xl group-hover:scale-110 transition-transform duration-500 shadow-sm border border-white/40`}>
                             <card.icon className={`w-5 h-5 ${card.iconColor}`} />
                         </div>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${card.bgIcon} ${card.iconColor}`}>
+                        <span className={`text-[10px] font-bold uppercase tracking-[0.15em] px-3 py-1.5 rounded-full border border-white/40 ${card.bgIcon} ${card.iconColor} shadow-sm backdrop-blur-md`}>
                             {card.trend}
                         </span>
                     </div>
                     <div>
-                        <p className="text-xs font-medium text-charcoal-500 uppercase tracking-widest mb-1">{card.label}</p>
-                        <h3 className="text-2xl font-serif text-charcoal-900">{card.value}</h3>
+                        <p className="text-[10px] font-bold text-charcoal/40 uppercase tracking-[0.2em] mb-2">{card.label}</p>
+                        <h3 className="text-3xl font-serif font-bold text-charcoal tracking-tight">{card.value}</h3>
                     </div>
                 </div>
             ))}

@@ -119,26 +119,26 @@ export default function LocationFilterDropdown({ value, onChange, availableLocat
                 type="button"
                 onClick={() => setOpen(o => !o)}
                 className={clsx(
-                    'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all whitespace-nowrap',
+                    'flex items-center gap-3 px-4 py-2 rounded-xl border text-[11px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-sm',
                     isActive
-                        ? 'bg-rose-gold text-white border-rose-gold shadow-sm'
-                        : 'bg-cream-50 text-charcoal-900 border-cream-200 hover:border-charcoal-400'
+                        ? 'bg-sage text-white border-sage'
+                        : 'bg-white/50 text-charcoal border-white/60 hover:border-sage/40'
                 )}
             >
                 <MapPin className="w-3.5 h-3.5 shrink-0" />
                 <span className="max-w-[160px] truncate">{displayLabel(value)}</span>
                 {isActive
-                    ? <X className="w-3.5 h-3.5 shrink-0 opacity-70 hover:opacity-100" onClick={e => { e.stopPropagation(); onChange('all'); setOpen(false) }} />
-                    : <ChevronDown className={clsx('w-3.5 h-3.5 shrink-0 transition-transform', open && 'rotate-180')} />
+                    ? <X className="w-2.5 h-2.5 shrink-0 opacity-70 hover:opacity-100" onClick={e => { e.stopPropagation(); onChange('all'); setOpen(false) }} />
+                    : <ChevronDown className={clsx('w-3 h-3 shrink-0 transition-transform', open && 'rotate-180')} />
                 }
             </button>
 
             {/* Panel */}
             {open && (
-                <div className="absolute z-50 top-full mt-2 left-0 w-80 bg-white rounded-xl border border-cream-200 shadow-xl overflow-hidden">
+                <div className="absolute z-50 top-full mt-3 left-0 w-80 bg-white/60 backdrop-blur-xl rounded-[24px] border border-white/60 shadow-cloud overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
 
                     {/* City pills */}
-                    <div className="p-3 border-b border-cream-100 flex flex-wrap gap-1.5">
+                    <div className="p-4 border-b border-white/40 flex flex-wrap gap-2">
                         {FILTER_CITIES.map(city => {
                             const isCityActive = activePrefix === city.prefix
                             return (
@@ -147,10 +147,10 @@ export default function LocationFilterDropdown({ value, onChange, availableLocat
                                     type="button"
                                     onClick={() => handleCityPill(city.prefix)}
                                     className={clsx(
-                                        'px-3 py-1 rounded-full text-xs font-bold border transition-all',
+                                        'px-3.5 py-1.5 rounded-full text-[10px] font-bold border uppercase tracking-widest transition-all',
                                         isCityActive
-                                            ? 'bg-rose-gold text-white border-rose-gold shadow-sm'
-                                            : 'bg-cream-100 text-charcoal-600 border-transparent hover:border-charcoal-300 hover:bg-cream-200'
+                                            ? 'bg-sage text-white border-sage shadow-sm'
+                                            : 'bg-white/40 text-charcoal/60 border-transparent hover:border-sage/40 hover:bg-white/60'
                                     )}
                                 >
                                     {city.label}
@@ -160,32 +160,34 @@ export default function LocationFilterDropdown({ value, onChange, availableLocat
                     </div>
 
                     {/* Search */}
-                    <div className="p-3 border-b border-cream-100">
-                        <div className="flex items-center gap-2 border border-charcoal-300/50 hover:border-charcoal-500 focus-within:border-charcoal-700 rounded-lg px-3 py-1.5 transition-colors bg-white">
-                            <Search className="w-3.5 h-3.5 text-charcoal-400 shrink-0" />
+                    <div className="p-4 border-b border-white/40">
+                        <div className="flex items-center gap-3 border border-white/60 focus-within:border-sage rounded-xl px-4 py-2.5 transition-all bg-white/40 shadow-inner">
+                            <Search className="w-3.5 h-3.5 text-charcoal/30 shrink-0" />
                             <input
                                 autoFocus
                                 type="text"
-                                placeholder="e.g. Fairview, High Street, Uptown…"
+                                placeholder="Search areas…"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                className="flex-1 bg-transparent text-sm text-charcoal-900 placeholder-charcoal-400 outline-none"
+                                className="flex-1 bg-transparent text-[11px] font-bold text-charcoal placeholder-charcoal/20 outline-none"
                             />
-                            {search && <button onClick={() => setSearch('')} className="text-charcoal-400 hover:text-charcoal-700"><X className="w-3 h-3" /></button>}
+                            {search && <button onClick={() => setSearch('')} className="text-charcoal/30 hover:text-charcoal"><X className="w-3 h-3" /></button>}
                         </div>
                     </div>
 
                     {/* Sub-location list */}
-                    <div className="max-h-64 overflow-y-auto py-2">
+                    <div className="max-h-72 overflow-y-auto py-3 custom-scrollbar">
                         {visibleGroups.length === 0 && (
-                            <p className="px-4 py-6 text-sm text-charcoal-500 text-center font-medium">We haven't unlocked that area yet.</p>
+                            <div className="px-6 py-10 text-center">
+                                <p className="text-[11px] font-bold text-charcoal/30 uppercase tracking-widest">No matching areas found</p>
+                            </div>
                         )}
                         {visibleGroups.map(group => (
-                            <div key={group.city}>
-                                <div className="px-4 pt-2 pb-1">
-                                    <span className="text-[9px] font-bold uppercase tracking-widest text-charcoal-400">{group.city}</span>
+                            <div key={group.city} className="mb-4 last:mb-0">
+                                <div className="px-5 pt-2 pb-2">
+                                    <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-sage/60">{group.city}</span>
                                 </div>
-                                <div className="flex flex-wrap gap-1.5 px-3 pb-2">
+                                <div className="flex flex-wrap gap-2 px-4 pb-2">
                                     {group.locations.map(loc => {
                                         const isSel = value === loc
                                         return (
@@ -194,10 +196,10 @@ export default function LocationFilterDropdown({ value, onChange, availableLocat
                                                 type="button"
                                                 onClick={() => { onChange(loc); setOpen(false); setSearch('') }}
                                                 className={clsx(
-                                                    'px-2.5 py-1 rounded-full text-xs font-medium border transition-all',
+                                                    'px-3 py-1.5 rounded-full text-[10px] font-bold border transition-all uppercase tracking-widest',
                                                     isSel
-                                                        ? 'bg-rose-gold text-white border-rose-gold shadow-sm'
-                                                        : 'bg-white text-charcoal-700 border-cream-200 hover:bg-rose-gold/10 hover:border-rose-gold hover:text-rose-gold'
+                                                        ? 'bg-gold text-white border-gold shadow-sm'
+                                                        : 'bg-white/80 text-charcoal/60 border-white/60 hover:bg-sage/10 hover:border-sage/40 hover:text-sage'
                                                 )}
                                             >
                                                 {highlightMatch(shortLabel(loc), search)}
