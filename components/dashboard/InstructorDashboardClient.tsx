@@ -207,15 +207,7 @@ export default function InstructorDashboardClient() {
                         <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Manage your professional schedule and earnings with ethereal precision.</p>
                     </div>
 
-                    <div className="flex gap-4">
-                        <Link
-                            href="/instructor/profile"
-                            className="h-14 bg-charcoal text-white px-10 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-[1.2] transition-all shadow-md active:scale-95"
-                        >
-                            <User className="w-5 h-5 text-gold stroke-[3px]" />
-                            PROFESSIONAL PROFILE
-                        </Link>
-                    </div>
+
                 </div>
             </div>
 

@@ -181,13 +181,13 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
                                 return (
                                     <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                         <div
-                                            className={`max-w-[75%] px-4 py-2 rounded-lg text-sm ${isMe
-                                                ? 'bg-charcoal-800 text-white rounded-tr-none'
+                                            className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${isMe
+                                                ? 'bg-[#2C3230] text-white rounded-tr-none'
                                                 : 'bg-white border border-gray-200 text-gray-900 rounded-tl-none shadow-sm'
                                                 }`}
                                         >
-                                            <p>{msg.content}</p>
-                                            <p className={`text-[10px] mt-1 ${isMe ? 'text-gray-300' : 'text-gray-400'}`}>
+                                            <p className={isMe ? 'text-white' : 'text-gray-900'}>{msg.content}</p>
+                                            <p className={`text-[10px] mt-1 ${isMe ? 'text-gray-400' : 'text-gray-400'}`}>
                                                 {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>

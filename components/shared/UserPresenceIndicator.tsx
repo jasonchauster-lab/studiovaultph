@@ -21,6 +21,14 @@ function formatTimeAgo(dateString: string): string {
     return date.toLocaleDateString()
 }
 
+// Consider a user offline if their last_seen_at is more than 5 minutes old,
+// even if is_online is still true in the DB (handles missed logout events).
+function isRecentlyActive(lastSeenAt: string | null): boolean {
+    if (!lastSeenAt) return false
+    const diffMs = Date.now() - new Date(lastSeenAt).getTime()
+    return diffMs < 5 * 60 * 1000 // 5 minutes
+}
+
 interface UserPresenceIndicatorProps {
     userId: string
     initialIsOnline?: boolean
@@ -50,7 +58,10 @@ export default function UserPresenceIndicator({
                 .single()
 
             if (data && !error) {
-                setIsOnline(data.is_online || false)
+                // Only mark online if the DB flag is true AND last_seen_at is recent
+                const dbOnline = data.is_online || false
+                const recentlyActive = isRecentlyActive(data.last_seen_at)
+                setIsOnline(dbOnline && recentlyActive)
                 setLastSeenAt(data.last_seen_at)
             }
         }
@@ -73,7 +84,9 @@ export default function UserPresenceIndicator({
                 (payload) => {
                     const newProfile = payload.new
                     if (newProfile.is_online !== undefined) {
-                        setIsOnline(newProfile.is_online)
+                        // Apply staleness check on realtime updates too
+                        const recentlyActive = isRecentlyActive(newProfile.last_seen_at || null)
+                        setIsOnline(newProfile.is_online && recentlyActive)
                     }
                     if (newProfile.last_seen_at !== undefined) {
                         setLastSeenAt(newProfile.last_seen_at)
