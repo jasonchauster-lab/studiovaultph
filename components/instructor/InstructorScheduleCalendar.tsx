@@ -189,11 +189,12 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-white/40 backdrop-blur-[20px] p-8 rounded-[2rem] border border-white/60 shadow-cloud relative overflow-hidden">
+            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white/40 backdrop-blur-[20px] p-8 rounded-[2rem] border border-white/60 shadow-cloud relative overflow-hidden">
                 {/* Background Bloom */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-sage/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8 relative z-10">
+                {/* Left: Title + Date Navigation */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 relative z-10">
                     <h2 className="text-4xl font-serif text-charcoal hidden md:block min-w-[240px] tracking-tighter">
                         {format(currentDate, 'MMMM yyyy')}
                     </h2>
@@ -226,7 +227,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                     </div>
                 </div>
 
-                <div className="flex gap-4 relative z-10">
+                {/* Right: Action Buttons */}
+                <div className="flex items-center gap-3 relative z-10 shrink-0">
                     <button
                         onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
                         className="bg-[#B4C3B2] text-white px-8 py-3 rounded-[12px] text-[10px] font-black uppercase tracking-[0.25em] hover:brightness-105 transition-all flex items-center gap-3 shadow-md active:scale-95"
@@ -235,12 +237,13 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                     </button>
                     <button
                         onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
-                        className="bg-white/40 backdrop-blur-md border border-[var(--airy-border)] text-charcoal px-8 py-3 rounded-[12px] text-[10px] font-black uppercase tracking-[0.25em] hover:bg-white/60 transition-all flex items-center gap-3 shadow-sm active:scale-95"
+                        className="bg-white/60 border border-white/80 text-charcoal px-8 py-3 rounded-[12px] text-[10px] font-black uppercase tracking-[0.25em] hover:bg-white transition-all flex items-center gap-3 shadow-sm active:scale-95"
                     >
-                        <CalendarIcon className="w-4 h-4" /> BULK GENERATE
+                        <CalendarIcon className="w-4 h-4" /> RECURRING
                     </button>
                 </div>
             </div>
+
 
             {/* Calendar Grid */}
             <div className="glass-card overflow-hidden !border-[rgba(0,0,0,0.05)] rounded-[12px]">
@@ -524,7 +527,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Add Modal */}
             {isAddModalOpen && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 backdrop-blur-xl animate-in fade-in duration-1000"
+                    className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-charcoal/40 backdrop-blur-xl animate-in fade-in duration-1000"
                     onClick={() => setIsAddModalOpen(false)}
                 >
                     <div
@@ -655,7 +658,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Edit Modal */}
             {isEditModalOpen && editingSlot && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 backdrop-blur-xl animate-in fade-in duration-500"
+                    className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-charcoal/40 backdrop-blur-xl animate-in fade-in duration-500"
                     onClick={() => setIsEditModalOpen(false)}
                 >
                     <div
