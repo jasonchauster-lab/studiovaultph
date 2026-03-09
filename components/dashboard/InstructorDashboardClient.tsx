@@ -161,7 +161,7 @@ export default function InstructorDashboardClient() {
                 // 8. Fetch Pending Earnings (Total upcoming approved)
                 const { data: upcomingApproved } = await supabase
                     .from('bookings')
-                    .select('price_breakdown')
+                    .select('price_breakdown, slots!inner(id)')
                     .eq('instructor_id', user.id)
                     .eq('status', 'approved')
                     .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' });

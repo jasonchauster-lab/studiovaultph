@@ -124,10 +124,10 @@ export default function EarningsPage({
                             <div className="space-y-4">
                                 <div className="flex items-center gap-3 text-red-400 font-black text-[10px] uppercase tracking-[0.3em]">
                                     <AlertCircle className="w-5 h-5" />
-                                    NEGATIVE EQUILIBRIUM
+                                    NEGATIVE BALANCE
                                 </div>
-                                <p className="text-[11px] text-charcoal/40 font-black uppercase tracking-[0.2em] leading-relaxed">
-                                    Should penalty deductions cause your vault to drop below zero, the extraction mechanism will be temporarily suspended until equilibrium is restored.
+                                <p className="text-[11px] text-charcoal/60 font-black uppercase tracking-[0.2em] leading-relaxed">
+                                    Should penalty deductions cause your balance to drop below zero, payouts will be temporarily suspended until the balance is restored.
                                 </p>
                             </div>
                             <div className="space-y-4">
@@ -135,8 +135,8 @@ export default function EarningsPage({
                                     <ShieldCheck className="w-5 h-5" />
                                     AUTO-RECOVERY SYSTEM
                                 </div>
-                                <p className="text-[11px] text-charcoal/40 font-black uppercase tracking-[0.2em] leading-relaxed">
-                                    Future acquisitions will be automatically allocated to settle outstanding obligations. Manual reconciliation via Administrative channels remains available.
+                                <p className="text-[11px] text-charcoal/60 font-black uppercase tracking-[0.2em] leading-relaxed">
+                                    Future earnings will be automatically allocated to settle outstanding obligations. Manual reconciliation via Administrative channels remains available.
                                 </p>
                             </div>
                         </div>
@@ -160,8 +160,8 @@ export default function EarningsPage({
                         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                         BACK TO DASHBOARD
                     </Link>
-                    <h1 className="text-5xl font-serif text-charcoal tracking-tighter mb-4">Earnings & Vault</h1>
-                    <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Proprietary Financial Matrix and Extraction Control.</p>
+                    <h1 className="text-5xl font-serif text-charcoal tracking-tighter mb-4">Earnings & Payouts</h1>
+                    <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Manage your earnings, payouts, and financial history.</p>
                 </div>
                 <div className="flex flex-wrap gap-4">
                     {recentTransactions && <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />}
@@ -170,16 +170,16 @@ export default function EarningsPage({
                         className="h-14 bg-white/40 text-charcoal px-8 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 border border-white/60 hover:bg-white transition-all shadow-sm active:scale-95"
                     >
                         <ArrowUpRight className="w-4 h-4 text-gold stroke-[3px]" />
-                        TOP-UP VAULT
+                        ADD FUNDS
                     </button>
                     {availableBalance < 0 ? (
                         <button
                             disabled
-                            className="h-14 bg-charcoal/10 text-charcoal/20 px-10 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 cursor-not-allowed opacity-50"
-                            title="Payouts are restricted while equilibrium is negative."
+                            className="h-14 bg-charcoal/10 text-charcoal/40 px-10 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 cursor-not-allowed opacity-50"
+                            title="Payouts are restricted while balance is negative."
                         >
                             <Wallet className="w-4 h-4" />
-                            VAULT LOCKED
+                            PAYOUTS RESTRICTED
                         </button>
                     ) : (
                         <Link
@@ -187,7 +187,7 @@ export default function EarningsPage({
                             className="h-14 bg-charcoal text-white px-10 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-[1.2] transition-all shadow-md active:scale-95"
                         >
                             <Wallet className="w-4 h-4 text-gold stroke-[3px]" />
-                            INITIATE EXTRACTION
+                            CASH OUT
                         </Link>
                     )}
                 </div>
@@ -208,7 +208,7 @@ export default function EarningsPage({
                                 <div className="p-4 bg-white/20 rounded-[12px] border border-white/40 shadow-sm">
                                     <Wallet className="w-6 h-6 text-white" />
                                 </div>
-                                <span className="text-[10px] font-black text-white/80 uppercase tracking-[0.4em]">Available for Extraction</span>
+                                <span className="text-[10px] font-black text-white/90 uppercase tracking-[0.4em]">Available to Cash Out</span>
                             </div>
                             <button
                                 onClick={() => setShowInfoModal(true)}
@@ -230,10 +230,10 @@ export default function EarningsPage({
                         <div className="p-4 bg-sage/10 rounded-[12px] border border-white/60 shadow-sm">
                             <TrendingUp className="w-6 h-6 text-sage" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Gross Acquisition</span>
+                        <span className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Total Earnings</span>
                     </div>
                     <h3 className="text-4xl font-serif text-charcoal tracking-tighter mb-3">₱{(data.totalEarned || 0).toLocaleString()}</h3>
-                    <p className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.2em]">LIFETIME ACQUISITION MATRIX</p>
+                    <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">LIFETIME EARNINGS</p>
                 </div>
 
                 {/* Net Earnings */}
@@ -243,11 +243,11 @@ export default function EarningsPage({
                             <div className="p-4 bg-white/10 rounded-[12px] border border-white/20 shadow-sm">
                                 <DollarSign className="w-6 h-6 text-gold" />
                             </div>
-                            <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Net Equilibrium</span>
+                            <span className="text-[10px] font-black text-white/90 uppercase tracking-[0.4em]">Current Balance</span>
                         </div>
                     </div>
                     <h3 className="text-4xl font-serif text-white tracking-tighter mb-3">₱{(data.netEarnings || 0).toLocaleString()}</h3>
-                    <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">POST-DEDUCTION VALUATION</p>
+                    <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.2em]">POST-DEDUCTION BALANCE</p>
                 </div>
 
                 {/* Compensation */}
@@ -256,10 +256,10 @@ export default function EarningsPage({
                         <div className="p-4 bg-gold/5 rounded-[12px] border border-white/60 shadow-sm">
                             <ShieldCheck className="w-6 h-6 text-gold" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Compensation</span>
+                        <span className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Adjustments</span>
                     </div>
                     <h3 className="text-4xl font-serif text-charcoal tracking-tighter mb-3">₱{(data.totalCompensation || 0).toLocaleString()}</h3>
-                    <p className="text-[9px] font-black text-gold/40 uppercase tracking-[0.2em]">EXTERNAL RECONCILATION</p>
+                    <p className="text-[9px] font-black text-gold uppercase tracking-[0.2em]">MANUAL CREDITS</p>
                 </div>
 
                 {/* Penalty */}
@@ -268,10 +268,10 @@ export default function EarningsPage({
                         <div className="p-4 bg-red-50/50 rounded-[12px] border border-white/60 shadow-sm">
                             <TrendingUp className="w-6 h-6 text-red-400 transform rotate-180" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Penalties</span>
+                        <span className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Penalties</span>
                     </div>
                     <h3 className="text-4xl font-serif text-red-500 tracking-tighter mb-3">- ₱{(data.totalPenalty || 0).toLocaleString()}</h3>
-                    <p className="text-[9px] font-black text-red-400/40 uppercase tracking-[0.2em]">INTERNAL RECTIFICATION</p>
+                    <p className="text-[9px] font-black text-red-500 uppercase tracking-[0.2em]">LATE CANCELLATIONS</p>
                 </div>
 
                 {/* Security Hold */}
@@ -280,34 +280,34 @@ export default function EarningsPage({
                         <div className="p-4 bg-sage/5 rounded-[12px] border border-white/60 shadow-sm">
                             <Clock className="w-6 h-6 text-sage" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Security Hold</span>
+                        <span className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Pending Funds</span>
                     </div>
                     <h3 className="text-4xl font-serif text-charcoal tracking-tighter mb-3">₱{(pendingBalance || 0).toLocaleString()}</h3>
-                    <p className="text-[9px] font-black text-sage uppercase tracking-[0.2em]">MATURING IN 24H</p>
+                    <p className="text-[9px] font-black text-sage font-bold uppercase tracking-[0.2em]">AVAILABLE IN 24H</p>
                 </div>
 
                 {/* Pending Payouts */}
                 <div className="glass-card p-10 hover:-translate-y-2 transition-all duration-700 bg-white/40">
                     <div className="flex items-center gap-4 mb-8">
                         <div className="p-4 bg-white rounded-[12px] border border-white/60 shadow-sm">
-                            <Clock className="w-6 h-6 text-charcoal/20" />
+                            <Clock className="w-6 h-6 text-charcoal/40" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Extraction Queue</span>
+                        <span className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">In Process</span>
                     </div>
                     <h3 className="text-4xl font-serif text-charcoal tracking-tighter mb-3">₱{(pendingPayouts || 0).toLocaleString()}</h3>
-                    <p className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.2em]">PENDING DISBURSEMENT</p>
+                    <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">PENDING PAYOUTS</p>
                 </div>
 
                 {/* Total Withdrawn */}
                 <div className="glass-card p-10 hover:-translate-y-2 transition-all duration-700 bg-white/40">
                     <div className="flex items-center gap-4 mb-8">
                         <div className="p-4 bg-white rounded-[12px] border border-white/60 shadow-sm">
-                            <ArrowUpRight className="w-6 h-6 text-charcoal/20" />
+                            <ArrowUpRight className="w-6 h-6 text-charcoal/40" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Successful Extraction</span>
+                        <span className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Total Paid Out</span>
                     </div>
                     <h3 className="text-4xl font-serif text-charcoal tracking-tighter mb-3">₱{(totalWithdrawn || 0).toLocaleString()}</h3>
-                    <p className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.2em]">TOTAL LIQUIDATED ASSETS</p>
+                    <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">TOTAL WITHDRAWALS</p>
                 </div>
             </div>
 
@@ -316,19 +316,19 @@ export default function EarningsPage({
                 <div className="p-10 border-b border-white/60 flex items-center justify-between bg-white/40">
                     <div className="flex items-center gap-4">
                         <Clock className="w-6 h-6 text-gold" />
-                        <h3 className="text-3xl font-serif text-charcoal tracking-tighter">Temporal Ledger</h3>
+                        <h3 className="text-3xl font-serif text-charcoal tracking-tighter">Transaction History</h3>
                     </div>
-                    <div className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Historical Transaction Feed</div>
+                    <div className="text-[9px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Recent Activity</div>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="bg-white/40 text-charcoal/20 text-[10px] font-black uppercase tracking-[0.4em]">
+                            <tr className="bg-white/40 text-charcoal/50 text-[10px] font-black uppercase tracking-[0.4em]">
                                 <th className="px-10 py-6 font-black">Date / Time</th>
-                                <th className="px-10 py-6 font-black">Operation Type</th>
-                                <th className="px-10 py-6 font-black">Verification Status</th>
-                                <th className="px-10 py-6 font-black text-right">Valuation</th>
+                                <th className="px-10 py-6 font-black">Type</th>
+                                <th className="px-10 py-6 font-black">Status</th>
+                                <th className="px-10 py-6 font-black text-right">Amount</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/60 bg-white/20">
