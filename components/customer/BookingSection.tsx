@@ -15,6 +15,7 @@ interface Slot {
     end_time: string;
     equipment?: Record<string, number>;
     equipment_type?: string;
+    quantity?: number;
 }
 
 interface Instructor {
@@ -447,6 +448,13 @@ export default function BookingSection({
                         return fallback ? [fallback] : ['Unknown'];
                     }));
 
+                    // Sum quantities for "Spaces left"
+                    const totalSpaceLeft = group.reduce((sum, s) => sum + (s.quantity || 1), 0);
+
+                    // Calculate inventory for this specific group
+                    const groupInventory = getEquipmentInventory(group);
+                    const inventoryEntries = Object.entries(groupInventory);
+
                     return (
                         <button
                             key={key}
@@ -455,8 +463,7 @@ export default function BookingSection({
                                 setQuantity(1);
 
                                 // Default to first equipment type found in this new group
-                                const newGroup = groupedSlots[key];
-                                const inventory = getEquipmentInventory(newGroup || []);
+                                const inventory = getEquipmentInventory(group || []);
                                 const firstEq = Object.keys(inventory)[0] || '';
                                 setSelectedEquipment(firstEq);
 
@@ -481,20 +488,25 @@ export default function BookingSection({
                                 {endTimeDisp}
                             </div>
                             <div className="flex flex-wrap gap-1.5">
-                                <span className={clsx(
-                                    "text-xs px-2.5 py-1 rounded-lg inline-block font-medium",
-                                    isSelected ? "bg-white/20 text-white" : "bg-cream-100 text-charcoal-600"
-                                )}>
-                                    {count} {count !== 1 ? 'Spaces' : 'Space'} left
-                                </span>
-                                {Array.from(eqOverview).map(eq => (
-                                    <span key={eq} className={clsx(
-                                        "text-[10px] uppercase tracking-widest px-2 py-1 rounded-lg inline-block border font-bold",
-                                        isSelected ? "border-white/30 text-white/80" : "border-cream-200 text-charcoal-500"
+                                {inventoryEntries.length > 0 ? (
+                                    inventoryEntries.map(([eq, qty]) => (
+                                        <span key={eq} className={clsx(
+                                            "text-xs px-2.5 py-1 rounded-lg inline-block font-medium border",
+                                            isSelected
+                                                ? "bg-white/20 text-white border-white/30"
+                                                : "bg-cream-50 text-charcoal-700 border-[#ebd3cf]"
+                                        )}>
+                                            {qty} {eq}{qty !== 1 ? 's' : ''} available
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className={clsx(
+                                        "text-xs px-2.5 py-1 rounded-lg inline-block font-medium",
+                                        isSelected ? "bg-white/20 text-white" : "bg-cream-100 text-charcoal-600"
                                     )}>
-                                        {eq !== 'Unknown' ? eq : 'Equipment'}
+                                        {totalSpaceLeft} {totalSpaceLeft !== 1 ? 'Spaces' : 'Space'} left
                                     </span>
-                                ))}
+                                )}
                             </div>
                         </button>
                     );

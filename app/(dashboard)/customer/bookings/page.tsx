@@ -116,9 +116,13 @@ export default async function CustomerBookingsPage() {
                                 <QrCode className="w-4 h-4" />
                                 Digital Entry Pass
                             </div>
-                            <h2 className="text-3xl font-serif mb-1">
+                            <h2 className="text-3xl font-serif mb-0.5">
                                 {nextSession.studios?.name || nextSession.slots?.studios?.name || 'Studio'}
                             </h2>
+                            <p className="text-rose-gold font-medium mb-1.5 flex items-center gap-1.5">
+                                <span className="text-charcoal-400 text-xs font-bold uppercase tracking-wider">Instructor:</span>
+                                {nextSession.instructor?.full_name || 'N/A'}
+                            </p>
                             {(nextSession.studios?.address || nextSession.slots?.studios?.address) && (
                                 <p className="text-charcoal-400 text-sm mb-1">
                                     {nextSession.studios?.address || nextSession.slots?.studios?.address}

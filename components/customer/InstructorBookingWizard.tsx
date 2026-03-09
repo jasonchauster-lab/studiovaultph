@@ -7,7 +7,7 @@ import { requestBooking } from '@/app/(dashboard)/customer/actions'
 import { getManilaTodayStr, toManilaDate, formatTo12Hour, normalizeTimeTo24h } from '@/lib/timezone'
 import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info, Calendar } from 'lucide-react'
 import clsx from 'clsx'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isToday as isTodayFns, isPast, isSameMonth } from 'date-fns'
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays, isPast, eachDayOfInterval } from 'date-fns'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -104,11 +104,86 @@ export default function InstructorBookingWizard({
     })
 
     const handleMonthChange = (offset: number) => {
-        const current = new Date(viewedMonth + '-01')
-        const next = offset > 0 ? addMonths(current, 1) : subMonths(current, 1)
+        const next = offset > 0 ? addMonths(monthStart, 1) : subMonths(monthStart, 1)
         const params = new URLSearchParams(searchParams)
         params.set('month', format(next, 'yyyy-MM'))
         router.push(`?${params.toString()}`, { scroll: false })
+    }
+
+    // Calendar logic (Standardized with BookingSection)
+    const monthEnd = endOfMonth(monthStart)
+    const startDate = startOfWeek(monthStart)
+    const endDate = endOfWeek(monthEnd)
+    const today = startOfDay(new Date())
+
+    const calendarRows = []
+    let days = []
+    let day = startDate
+
+    // Pre-calculate available dates for the calendar dots
+    const availableDatesWithSlots = new Set(
+        nextDays.filter(d => {
+            const todayManilaStr = getManilaTodayStr();
+            const isToday = d.date === todayManilaStr;
+            const isPastPill = d.date < todayManilaStr;
+
+            const nowInstance = toManilaDate(new Date());
+            const nowMinus30Shift = new Date(nowInstance.getTime() - 30 * 60 * 1000);
+            const nowManilaPill = nowMinus30Shift.getUTCHours().toString().padStart(2, '0') + ':' +
+                nowMinus30Shift.getUTCMinutes().toString().padStart(2, '0');
+
+            return availability.some(a => {
+                const dateMatch = a.date ? a.date === d.date : a.day_of_week === d.dayIndex;
+                const aLoc = a.location_area?.trim().toLowerCase();
+                const fLoc = filterLocation?.trim().toLowerCase();
+                const locationMatch = fLoc ? (aLoc === fLoc || aLoc.startsWith(fLoc + ' - ')) : true;
+                const notExpired = isPastPill ? false : (isToday ? a.end_time.slice(0, 5) > nowManilaPill : true);
+                const notBooked = !bookedSlotsSet.has(`${d.date}|${normalizeTimeTo24h(a.start_time)}`);
+                return dateMatch && locationMatch && notExpired && notBooked;
+            });
+        }).map(d => d.date)
+    );
+
+    while (day <= endDate) {
+        for (let i = 0; i < 7; i++) {
+            const cloneDay = day
+            const dateStr = format(cloneDay, 'yyyy-MM-dd')
+            const hasSlots = availableDatesWithSlots.has(dateStr)
+            const isSelected = selectedDate === dateStr
+            const isPastDay = isBefore(cloneDay, today)
+            const formattedDate = format(day, "d")
+
+            days.push(
+                <button
+                    key={day.toString()}
+                    type="button"
+                    onClick={() => {
+                        if (hasSlots) {
+                            setSelectedDate(dateStr)
+                        }
+                    }}
+                    className={clsx(
+                        "h-12 flex flex-col items-center justify-center rounded-xl text-sm transition-all focus:outline-none",
+                        !isSameMonth(day, monthStart) ? "text-cream-300 pointer-events-none" : "",
+                        isSameMonth(day, monthStart) && !hasSlots && !isPastDay && !isSelected ? "text-charcoal-500 opacity-60" : "",
+                        isPastDay ? "text-cream-400 pointer-events-none opacity-40" : "",
+                        hasSlots && !isSelected ? "bg-white text-[#333333] font-medium hover:bg-cream-50 cursor-pointer border border-[#ebd3cf]" : "",
+                        isSelected ? "bg-[#ebd3cf] text-[#333333] font-bold shadow-md transform scale-105 border border-[#ebd3cf]" : ""
+                    )}
+                    disabled={!hasSlots || isPastDay}
+                >
+                    <span className="leading-none">{formattedDate}</span>
+                    {hasSlots && !isSelected && <span className="w-1 h-1 bg-charcoal-500 rounded-full mt-1"></span>}
+                </button>
+            )
+            day = addDays(day, 1)
+        }
+        calendarRows.push(
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-1 sm:mb-2" key={day.toString()}>
+                {days}
+            </div>
+        )
+        days = []
     }
 
     // Pre-process active bookings into a set of 'YYYY-MM-DD|HH:mm:ss' strings in Manila time
@@ -288,129 +363,81 @@ export default function InstructorBookingWizard({
         <div className="space-y-8">
             {/* Step 1: Select Date & Time */}
             {step === 1 && (
-                <div className="space-y-6">
+                <div className="space-y-8">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full sm:w-auto">
-                            <h3 className="font-medium text-charcoal-900 text-lg font-serif">1. Select a Date & Time</h3>
-                            <div className="relative">
-                                <select
-                                    value={filterLocation || ''}
-                                    onChange={(e) => {
-                                        const params = new URLSearchParams(searchParams.toString())
-                                        if (e.target.value) {
-                                            params.set('location', e.target.value)
-                                        } else {
-                                            params.delete('location')
-                                        }
-                                        router.push(`?${params.toString()}`, { scroll: false })
-                                    }}
-                                    className="appearance-none bg-white border border-cream-200 text-charcoal-700 text-sm rounded-lg pl-3 pr-8 py-2 outline-none focus:border-charcoal-400 focus:ring-1 focus:ring-charcoal-400 w-full sm:w-56"
-                                >
-                                    <option value="">All Areas</option>
-                                    {Array.from(new Set(availability.map(a => a.location_area).filter(Boolean))).sort().map(loc => (
-                                        <option key={loc as string} value={loc as string}>{loc as string}</option>
-                                    ))}
-                                </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-charcoal-500">
-                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                                </div>
+                        <h3 className="font-medium text-charcoal-900 text-lg font-serif">1. Select a Date & Time</h3>
+                        <div className="relative">
+                            <select
+                                value={filterLocation || ''}
+                                onChange={(e) => {
+                                    const params = new URLSearchParams(searchParams.toString())
+                                    if (e.target.value) {
+                                        params.set('location', e.target.value)
+                                    } else {
+                                        params.delete('location')
+                                    }
+                                    router.push(`?${params.toString()}`, { scroll: false })
+                                }}
+                                className="appearance-none bg-white border border-cream-200 text-charcoal-700 text-sm rounded-lg pl-3 pr-8 py-2 outline-none focus:border-charcoal-400 focus:ring-1 focus:ring-charcoal-400 w-full sm:w-56"
+                            >
+                                <option value="">All Areas</option>
+                                {Array.from(new Set(availability.map(a => a.location_area).filter(Boolean))).sort().map(loc => (
+                                    <option key={loc as string} value={loc as string}>{loc as string}</option>
+                                ))}
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-charcoal-500">
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Month Selector */}
-                        <div className="flex items-center gap-2 bg-cream-50 p-1 rounded-xl border border-cream-200">
+                    {/* Monthly Calendar View */}
+                    <div className="bg-white border border-cream-200 rounded-2xl p-4 sm:p-6 shadow-sm max-w-md mx-auto">
+                        <div className="flex items-center justify-between mb-4">
                             <button
                                 onClick={() => handleMonthChange(-1)}
-                                className="p-2 hover:bg-white rounded-lg transition-all text-charcoal-400 hover:text-charcoal-900 disabled:opacity-30"
-                                disabled={isPast(subMonths(new Date(viewedMonth + '-01'), 0)) && !isSameMonth(new Date(viewedMonth + '-01'), new Date())}
+                                className="p-2 hover:bg-cream-50 rounded-full transition-colors text-charcoal-500 hover:text-charcoal-900 disabled:opacity-30"
+                                disabled={isPast(subMonths(monthStart, 0)) && !isSameMonth(monthStart, new Date())}
                             >
-                                <ChevronLeft className="w-4 h-4" />
+                                <ChevronLeft className="w-5 h-5" />
                             </button>
-                            <div className="px-4 text-xs font-bold text-charcoal-900 uppercase tracking-widest flex items-center gap-2">
-                                <Calendar className="w-3.5 h-3.5 text-rose-gold" />
+                            <h3 className="font-serif text-lg text-charcoal-900 text-center">
                                 {format(monthStart, 'MMMM yyyy')}
-                            </div>
-                            <button
-                                onClick={() => handleMonthChange(1)}
-                                className="p-2 hover:bg-white rounded-lg transition-all text-charcoal-400 hover:text-charcoal-900"
-                            >
-                                <ChevronRight className="w-4 h-4" />
+                            </h3>
+                            <button onClick={() => handleMonthChange(1)} className="p-2 hover:bg-cream-50 rounded-full transition-colors text-charcoal-500 hover:text-charcoal-900">
+                                <ChevronRight className="w-5 h-5" />
                             </button>
                         </div>
-                    </div>
 
-                    <div className="relative group">
-                        <button
-                            onClick={scrollLeft}
-                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 md:w-10 md:h-10 bg-white border border-cream-200 shadow-md rounded-full flex items-center justify-center text-charcoal-500 hover:text-charcoal-900 transition-all opacity-0 group-hover:opacity-100 -ml-4 md:-ml-5"
-                        >
-                            <ChevronLeft className="w-5 h-5" />
-                        </button>
-
-                        <div
-                            ref={scrollContainerRef}
-                            className="flex overflow-x-auto pb-4 gap-3 px-1 no-scrollbar snap-x snap-mandatory scroll-smooth"
-                        >
-                            {nextDays.map((d) => {
-                                const todayManilaStr = getManilaTodayStr();
-                                const isTodayPill = d.date === todayManilaStr;
-                                const isPastPill = d.date < todayManilaStr;
-
-                                // Relaxed expiration: allow slots that ended up to 30 minutes ago
-                                const nowInstance = toManilaDate(new Date());
-                                const nowMinus30Shift = new Date(nowInstance.getTime() - 30 * 60 * 1000);
-                                const nowManilaPill = nowMinus30Shift.getUTCHours().toString().padStart(2, '0') + ':' +
-                                    nowMinus30Shift.getUTCMinutes().toString().padStart(2, '0');
-
-                                const hasSlots = availability.some(a => {
-                                    const dateMatch = a.date ? a.date === d.date : a.day_of_week === d.dayIndex;
-                                    const aLoc = a.location_area?.trim().toLowerCase();
-                                    const fLoc = filterLocation?.trim().toLowerCase();
-                                    const locationMatch = fLoc ? (aLoc === fLoc || aLoc.startsWith(fLoc + ' - ')) : true;
-                                    const notExpired = isPastPill ? false : (isTodayPill ? a.end_time.slice(0, 5) > nowManilaPill : true);
-                                    const notBooked = !bookedSlotsSet.has(`${d.date}|${normalizeTimeTo24h(a.start_time)}`);
-                                    return dateMatch && locationMatch && notExpired && notBooked;
-                                });
-
-                                if (!hasSlots) return null;
-
-                                const isSelected = selectedDate === d.date;
-
-                                return (
-                                    <button
-                                        key={d.date}
-                                        onClick={() => setSelectedDate(d.date)}
-                                        className={clsx(
-                                            "flex flex-col items-center min-w-[72px] py-3 rounded-2xl border transition-all snap-start flex-shrink-0",
-                                            isSelected
-                                                ? "bg-[#ebd3cf] border-[#ebd3cf] text-[#333333] shadow-md"
-                                                : "bg-white border-[#ebd3cf] text-[#333333] hover:border-[#ebd3cf] hover:shadow-sm"
-                                        )}
-                                    >
-                                        <span className="text-[10px] uppercase tracking-widest font-bold opacity-60 mb-0.5">{isTodayPill ? 'Today' : d.label.split(' ')[0]}</span>
-                                        <span className="text-xl font-serif leading-tight">{d.label.split(' ').pop()}</span>
-                                        <span className="text-[10px] uppercase font-medium">{d.label.split(' ')[1]}</span>
-                                    </button>
-                                );
-                            })}
+                        <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
+                            {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
+                                <div key={d} className="text-center text-[10px] sm:text-xs font-semibold text-charcoal-400 uppercase tracking-wider py-1">
+                                    {d}
+                                </div>
+                            ))}
                         </div>
 
-                        <button
-                            onClick={scrollRight}
-                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 md:w-10 md:h-10 bg-white border border-cream-200 shadow-md rounded-full flex items-center justify-center text-charcoal-500 hover:text-charcoal-900 transition-all opacity-0 group-hover:opacity-100 -mr-4 md:-mr-5"
-                        >
-                            <ChevronRight className="w-5 h-5" />
-                        </button>
+                        <div>{calendarRows}</div>
                     </div>
 
-                    <div className="bg-cream-50 rounded-2xl p-6 border border-cream-200">
+                    {/* Selected Date Header */}
+                    {selectedDate && (
+                        <div className="text-center mb-4 pb-2 border-b border-cream-200 max-w-2xl mx-auto">
+                            <h3 className="text-xl font-serif text-charcoal-900">
+                                {format(new Date(selectedDate), 'EEEE, MMMM do')}
+                            </h3>
+                            <p className="text-sm text-charcoal-500 mt-1">Select a time slot below to continue</p>
+                        </div>
+                    )}
+
+                    {/* Time Slots for Selected Date */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {(() => {
-                            const activeDate = selectedDate || nextDays.find(d => availability.some(a => a.date === d.date || (!a.date && a.day_of_week === d.dayIndex)))?.date;
-                            if (!activeDate) return <p className="text-charcoal-500 text-center italic">No availability found.</p>;
+                            const activeDate = selectedDate || (availableDatesWithSlots.size > 0 ? Array.from(availableDatesWithSlots).sort()[0] : null);
+                            if (!activeDate) return <div className="col-span-full text-center py-12 text-charcoal-500 italic">No available dates found for this month.</div>;
 
                             const d = nextDays.find(nd => nd.date === activeDate);
                             const nowInstance = toManilaDate(new Date());
-                            // Relaxed expiration for display
                             const nowMinus30Shift = new Date(nowInstance.getTime() - 30 * 60 * 1000);
                             const nowManilaTime = nowMinus30Shift.getUTCHours().toString().padStart(2, '0') + ':' + nowMinus30Shift.getUTCMinutes().toString().padStart(2, '0');
                             const isToday = activeDate === getManilaTodayStr();
@@ -428,66 +455,58 @@ export default function InstructorBookingWizard({
 
                             if (slots.length === 0) {
                                 return (
-                                    <div className="text-center py-6">
-                                        <Info className="w-8 h-8 text-charcoal-300 mx-auto mb-2" />
-                                        <p className="text-charcoal-500 italic">No sessions available on this day.</p>
+                                    <div className="col-span-full text-center py-12 text-charcoal-400 italic">
+                                        No slots available for this day.
                                     </div>
                                 );
                             }
 
-                            return (
-                                <div className="space-y-3">
-                                    <p className="text-xs font-bold text-charcoal-400 uppercase tracking-widest mb-4">Available Times</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {(() => {
-                                            // Group slots by exact start and end times to prevent massive overlap
-                                            const groupedSlots = slots.reduce((acc, slot) => {
-                                                const key = `${slot.start_time}-${slot.end_time}`
-                                                if (!acc[key]) {
-                                                    acc[key] = {
-                                                        primarySlot: slot,
-                                                        locations: [slot.location_area]
-                                                    }
-                                                } else {
-                                                    if (!acc[key].locations.includes(slot.location_area)) {
-                                                        acc[key].locations.push(slot.location_area)
-                                                    }
-                                                }
-                                                return acc
-                                            }, {} as Record<string, { primarySlot: any, locations: string[] }>)
+                            // Group slots by exact start and end times
+                            const groupedSlots = slots.reduce((acc, slot) => {
+                                const key = `${slot.start_time}-${slot.end_time}`
+                                if (!acc[key]) {
+                                    acc[key] = {
+                                        primarySlot: slot,
+                                        locations: [slot.location_area]
+                                    }
+                                } else {
+                                    if (!acc[key].locations.includes(slot.location_area)) {
+                                        acc[key].locations.push(slot.location_area)
+                                    }
+                                }
+                                return acc
+                            }, {} as Record<string, { primarySlot: any, locations: string[] }>)
 
-                                            return (Object.values(groupedSlots) as { primarySlot: any, locations: string[] }[]).map(({ primarySlot: slot, locations }) => {
-                                                const extraLocCount = locations.length - 1;
-                                                return (
-                                                    <button
-                                                        key={slot.id}
-                                                        onClick={() => handleSearchCheck(slot, activeDate)}
-                                                        className="w-full text-left bg-white p-4 rounded-xl border border-[#ebd3cf] hover:border-[#ebd3cf] hover:shadow-md transition-all flex justify-between items-center group"
-                                                    >
-                                                        <div>
-                                                            <div className="font-serif text-lg text-charcoal-900">
-                                                                {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
-                                                            </div>
-                                                            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                                                                <div className="text-[11px] text-charcoal-600 flex items-center gap-1 font-medium bg-cream-50 px-2 py-0.5 rounded border border-cream-100 max-w-full">
-                                                                    <MapPin className="w-3 h-3 text-charcoal-400 shrink-0" />
-                                                                    <span className="truncate">{locations[0].split(' - ')[1] || locations[0]}</span>
-                                                                </div>
-                                                                {extraLocCount > 0 && (
-                                                                    <div className="text-[10px] font-bold text-charcoal-700 bg-cream-100 px-1.5 py-0.5 rounded border border-cream-200 shrink-0">
-                                                                        +{extraLocCount} Area{extraLocCount !== 1 ? 's' : ''}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <ArrowRight className="w-5 h-5 text-charcoal-200 group-hover:text-charcoal-900 transform group-hover:translate-x-1 transition-all" />
-                                                    </button>
-                                                )
-                                            })
-                                        })()}
-                                    </div>
-                                </div>
-                            );
+                            return (Object.values(groupedSlots) as { primarySlot: any, locations: string[] }[]).map(({ primarySlot: slot, locations }) => {
+                                const extraLocCount = locations.length - 1;
+                                return (
+                                    <button
+                                        key={slot.id}
+                                        onClick={() => handleSearchCheck(slot, activeDate)}
+                                        className="p-5 rounded-2xl border text-left transition-all relative overflow-hidden bg-white border-[#ebd3cf] hover:shadow-md text-[#333333] group"
+                                    >
+                                        <div className="font-serif text-xl mb-2">
+                                            {formatTo12Hour(slot.start_time)}
+                                            <span className="text-sm opacity-50 mx-2">to</span>
+                                            {formatTo12Hour(slot.end_time)}
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                            <div className="text-[11px] text-charcoal-600 flex items-center gap-1 font-medium bg-cream-50 px-2 py-0.5 rounded border border-cream-100 max-w-full">
+                                                <MapPin className="w-3 h-3 text-charcoal-400 shrink-0" />
+                                                <span className="truncate">{locations[0].split(' - ')[1] || locations[0]}</span>
+                                            </div>
+                                            {extraLocCount > 0 && (
+                                                <div className="text-[10px] font-bold text-charcoal-700 bg-cream-100 px-1.5 py-0.5 rounded border border-cream-200 shrink-0">
+                                                    +{extraLocCount} Area{extraLocCount !== 1 ? 's' : ''}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1">
+                                            <ArrowRight className="w-5 h-5 text-charcoal-400" />
+                                        </div>
+                                    </button>
+                                )
+                            })
                         })()}
                     </div>
                 </div>
@@ -527,8 +546,11 @@ export default function InstructorBookingWizard({
                         </button>
                     </div>
 
-                    <div className="bg-charcoal-900 text-cream-50 p-4 rounded-xl text-sm">
-                        Searching studios in <strong>{selectedSlot?.location_area}</strong> on <strong>{selectedDate}</strong> at <strong>{formatTo12Hour(selectedSlot?.start_time)}</strong>
+                    <div className="bg-charcoal-900/5 border border-charcoal-900/10 p-4 rounded-2xl text-charcoal-900 flex items-start gap-3">
+                        <Info className="w-5 h-5 text-charcoal-400 shrink-0 mt-0.5" />
+                        <div className="text-sm">
+                            Searching studios in <span className="font-bold underline decoration-charcoal-200">{selectedSlot?.location_area}</span> on <span className="font-bold underline decoration-charcoal-200">{selectedDate}</span> at <span className="font-bold underline decoration-charcoal-200">{formatTo12Hour(selectedSlot?.start_time)}</span>
+                        </div>
                     </div>
 
                     {isSearching ? (
@@ -639,19 +661,19 @@ export default function InstructorBookingWizard({
                                                                             type="button"
                                                                             onClick={() => handleEquipmentChange(eq as string)}
                                                                             className={clsx(
-                                                                                "px-4 py-2.5 rounded-xl border text-sm font-medium transition-all flex items-center gap-2",
+                                                                                "px-4 py-3 rounded-xl border text-sm font-medium transition-all flex items-center justify-between min-w-[140px]",
                                                                                 isSelected
-                                                                                    ? "bg-charcoal-900 border-charcoal-900 text-cream-50 shadow-md ring-2 ring-charcoal-900/10"
+                                                                                    ? "bg-charcoal-900 border-charcoal-900 text-cream-50 shadow-md transform scale-[1.02]"
                                                                                     : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
                                                                             )}
                                                                         >
-                                                                            <span>{eq as string}</span>
-                                                                            <span className={clsx(
-                                                                                "text-[10px] px-1.5 py-0.5 rounded-full",
-                                                                                isSelected ? "bg-charcoal-800 text-cream-200" : "bg-cream-100 text-charcoal-500"
-                                                                            )}>
-                                                                                {count} {count === 1 ? 'available' : 'available'}
-                                                                            </span>
+                                                                            <div className="text-left">
+                                                                                <div className="uppercase tracking-widest text-[10px] opacity-70 mb-0.5">{eq as string}</div>
+                                                                                <div className={clsx("text-xs", isSelected ? "text-cream-200" : "text-charcoal-400")}>
+                                                                                    {count} available
+                                                                                </div>
+                                                                            </div>
+                                                                            {isSelected && <CheckCircle className="w-4 h-4 text-cream-50 shrink-0" />}
                                                                         </button>
                                                                     );
                                                                 })
@@ -738,10 +760,16 @@ export default function InstructorBookingWizard({
                                                 <button
                                                     onClick={handleBooking}
                                                     disabled={isBooking || !selectedEquipment}
-                                                    className="w-full bg-charcoal-900 text-cream-50 py-4 rounded-xl font-bold hover:bg-charcoal-800 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                                                    className="w-full bg-charcoal-900 text-cream-50 py-4 rounded-xl font-bold hover:bg-charcoal-800 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 mt-6"
                                                 >
-                                                    {isBooking && <Loader2 className="w-5 h-5 animate-spin" />}
-                                                    Request Booking
+                                                    {isBooking ? (
+                                                        <>
+                                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                                            Processing...
+                                                        </>
+                                                    ) : (
+                                                        'Request Booking (' + quantity + ')'
+                                                    )}
                                                 </button>
                                             </div>
                                         );

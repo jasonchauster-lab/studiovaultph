@@ -220,7 +220,13 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     <div className="text-charcoal-500 text-sm shrink-0 font-medium">
                                         {getSlotDateTime(booking.slots?.date, booking.slots?.start_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </div>
-                                    <div className="font-bold text-charcoal-800">{booking.studios?.name || booking.slots?.studios?.name || "Studio"}</div>
+                                    <div className="font-bold text-charcoal-800">
+                                        {booking.studios?.name || booking.slots?.studios?.name || "Studio"}
+                                        <span className="mx-2 text-charcoal-300 font-normal">•</span>
+                                        <span className="text-charcoal-600 font-medium">
+                                            {booking.instructor?.full_name || booking.profiles?.full_name || 'N/A'}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div className="flex items-center justify-end w-full sm:w-auto gap-3">
                                     {/* Show Leave Review button only for completed sessions or passed approved sessions */}

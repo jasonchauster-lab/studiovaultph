@@ -155,7 +155,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                         <div className="flex flex-col gap-1 items-start min-w-0">
                                                             <div className="flex items-center gap-2">
                                                                 <Link href={`/instructors/${instructor?.id}`} className="text-sm font-bold text-charcoal-900 truncate hover:text-rose-gold transition-colors">
-                                                                    {instructor?.full_name || "Instructor"}
+                                                                    Instructor: {instructor?.full_name || "Instructor"}
                                                                 </Link>
                                                                 <div className="flex items-center gap-2 ml-2 pl-3 border-l border-cream-200">
                                                                     <button

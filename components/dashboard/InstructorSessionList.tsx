@@ -129,6 +129,9 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                 )}>
                                                                     {booking.status === 'approved' ? 'Confirmed' : 'Cancelled'}
                                                                 </span>
+                                                                <span className="text-[11px] text-charcoal-500 font-medium ml-2">
+                                                                    Instructor: {booking.instructor?.full_name || 'N/A'}
+                                                                </span>
                                                             </div>
                                                             <div className="text-right shrink-0 bg-cream-100/30 p-3 rounded-xl border border-cream-200/50 min-w-[140px]">
                                                                 <p className="text-lg font-black text-charcoal-900 leading-tight">
@@ -256,6 +259,9 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                             ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)')
                                                                             : 'Approved')
                                                                         : 'Cancelled'}
+                                                                </span>
+                                                                <span className="text-[11px] text-charcoal-500 font-medium ml-2">
+                                                                    Instructor: {booking.instructor?.full_name || 'N/A'}
                                                                 </span>
                                                             </div>
                                                             <div className="text-right shrink-0 bg-cream-100/30 p-3 rounded-xl border border-cream-200/50 min-w-[140px]">
