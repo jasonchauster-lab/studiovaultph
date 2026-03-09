@@ -299,7 +299,7 @@ export default async function CustomerDashboard({
 
                                             <div className="space-y-2 mb-6">
                                                 <div className="flex flex-wrap gap-2">
-                                                    {inst.certifications?.filter((c: any) => c.verified).map((c: any) => (
+                                                    {(inst.certifications || []).filter((c: any) => c.verified).map((c: any) => (
                                                         <span key={c.id} className="text-[10px] uppercase tracking-wider bg-cream-100 text-charcoal-600 px-2 py-1 rounded-md">
                                                             {c.certification_body}
                                                         </span>

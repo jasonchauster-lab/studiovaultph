@@ -53,7 +53,7 @@ export default async function CustomerBookingsPage() {
 
     // ── Signed URL Generation ──────────────────────────────────────────
     const isStoragePath = (url: string) => url && !url.startsWith('http');
-    const storagePaths = (bookings?.map(b => b.payment_proof_url).filter(isStoragePath) || []) as string[]
+    const storagePaths = ((bookings || []).map(b => b.payment_proof_url).filter(isStoragePath)) as string[]
 
     let signedUrlMap: Record<string, string> = {}
     if (storagePaths.length > 0) {

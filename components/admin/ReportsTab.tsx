@@ -32,6 +32,7 @@ type Transaction = {
     client: string
     client_email: string
     studio: string
+    studio_email: string
     instructor: string
     instructor_email: string
     total_amount: number
@@ -208,12 +209,13 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
     }
 
     function exportFinancialCSV() {
-        const header = 'Date & Time,Type,Entity,Email,Amount,Platform Fee,Studio Share,Instructor Share,Status'
+        const header = 'Date & Time,Type,List,Studio Email,Instructor Email,Amount,Platform Fee,Studio Share,Instructor Share,Status'
         const rows = filteredTransactions.map(t => {
             const date = new Date(t.date).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })
-            const entity = t.type === 'Booking' ? `${t.client} @ ${t.studio}` : (t.type === 'Payout' ? (t.studio !== '-' ? t.studio : t.instructor) : t.client)
-            const email = t.type === 'Booking' ? t.client_email : (t.type === 'Payout' ? t.instructor_email : t.client_email)
-            return `"${date}","${t.type}","${entity}","${email}","${t.total_amount}","${t.platform_fee}","${t.studio_fee}","${t.instructor_fee}","${t.status || '-'}"`
+            const list = t.type === 'Booking' ? `${t.client} @ ${t.studio}` : (t.type === 'Payout' ? (t.studio !== '-' ? t.studio : t.instructor) : t.client)
+            const studioEmail = t.type === 'Booking' ? t.studio_email : (t.type === 'Payout' && t.studio !== '-' ? t.instructor_email : '-')
+            const instructorEmail = t.type === 'Booking' ? t.instructor_email : (t.type === 'Payout' && t.studio === '-' ? t.instructor_email : '-')
+            return `"${date}","${t.type}","${list}","${studioEmail}","${instructorEmail}","${t.total_amount}","${t.platform_fee}","${t.studio_fee}","${t.instructor_fee}","${t.status || '-'}"`
         })
         const csv = [header, ...rows].join('\n')
         downloadCSV(csv, 'financial-transactions')
@@ -402,11 +404,13 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                     <tr className="border-b border-cream-200 text-xs text-charcoal-500 uppercase tracking-wider">
                                         <th className="py-3 px-4 font-medium whitespace-nowrap">Date & Time</th>
                                         <th className="py-3 px-4 font-medium">Type</th>
-                                        <th className="py-3 px-4 font-medium">Entity / Details</th>
+                                        <th className="py-3 px-4 font-medium">List</th>
+                                        <th className="py-3 px-4 font-medium">Studio Email</th>
+                                        <th className="py-3 px-4 font-medium">Instructor Email</th>
                                         <th className="py-3 px-4 font-medium">Total</th>
                                         <th className="py-3 px-4 font-medium text-blue-600">Fee</th>
-                                        <th className="py-3 px-4 font-medium text-purple-600">Studio</th>
-                                        <th className="py-3 px-4 font-medium text-indigo-600">Instructor</th>
+                                        <th className="py-3 px-4 font-medium text-purple-600">Studio Fee</th>
+                                        <th className="py-3 px-4 font-medium text-indigo-600">Instructor Fee</th>
                                     </tr>
                                 )}
                             </thead>
@@ -467,9 +471,12 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                                 <p className="font-medium text-charcoal-900 text-xs">
                                                     {tx.type === 'Booking' ? `${tx.client} @ ${tx.studio}` : tx.type === 'Payout' ? (tx.studio !== '-' ? tx.studio : tx.instructor) : tx.client}
                                                 </p>
-                                                <p className="text-charcoal-400 text-[10px]">
-                                                    {tx.type === 'Booking' ? tx.client_email : tx.type === 'Payout' ? (tx.instructor !== '-' ? tx.instructor_email : '') : tx.client_email}
-                                                </p>
+                                            </td>
+                                            <td className="py-3 px-4 text-xs text-charcoal-600">
+                                                {tx.type === 'Booking' ? tx.studio_email : (tx.type === 'Payout' && tx.studio !== '-' ? tx.instructor_email : '-')}
+                                            </td>
+                                            <td className="py-3 px-4 text-xs text-charcoal-600">
+                                                {tx.type === 'Booking' ? tx.instructor_email : (tx.type === 'Payout' && tx.studio === '-' ? tx.instructor_email : '-')}
                                             </td>
                                             <td className={`py-3 px-4 font-mono text-xs font-bold ${tx.total_amount < 0 ? 'text-red-500' : 'text-charcoal-900'}`}>
                                                 ₱{tx.total_amount.toLocaleString()}

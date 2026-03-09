@@ -784,7 +784,10 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
                 slots!inner(
                     date,
                     start_time,
-                    studios(name)
+                    studios(
+                        name,
+                        owner:profiles!owner_id(email)
+                    )
                 ),
                 instructor:profiles!instructor_id(full_name, email)
             `)
@@ -889,6 +892,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
                 client: client?.full_name || '-',
                 client_email: client?.email || '-',
                 studio: studio?.name || '-',
+                studio_email: getFirst(studio?.owner)?.email || '-',
                 instructor: instructor?.full_name || '-',
                 instructor_email: instructor?.email || '-',
                 total_amount: total,
@@ -918,6 +922,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
                 client: '-',
                 client_email: '-',
                 studio: p.studio_id ? 'Studio Payout' : '-',
+                studio_email: '-',
                 instructor: p.instructor_id ? 'Instructor Payout' : '-',
                 instructor_email: '-',
                 total_amount: -Number(p.amount),
@@ -937,6 +942,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
                 client: profile?.full_name || '-',
                 client_email: profile?.email || '-',
                 studio: '-',
+                studio_email: '-',
                 instructor: '-',
                 instructor_email: '-',
                 total_amount: Number(t.amount),
