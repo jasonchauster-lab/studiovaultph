@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { findMatchingStudios } from '@/app/(dashboard)/instructors/actions'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
 import { getManilaTodayStr, toManilaDate, formatTo12Hour, normalizeTimeTo24h } from '@/lib/timezone'
-import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info, Calendar } from 'lucide-react'
+import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info, Calendar, ChevronDown } from 'lucide-react'
 import clsx from 'clsx'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays, isPast, eachDayOfInterval } from 'date-fns'
 
@@ -28,6 +28,7 @@ export default function InstructorBookingWizard({
     const scrollContainerRef = useRef<HTMLDivElement>(null)
     const [selectedDate, setSelectedDate] = useState<string>('') // YYYY-MM-DD
     const [selectedSlot, setSelectedSlot] = useState<any>(null) // Availability Object
+    const [expandedSlotKey, setExpandedSlotKey] = useState<string | null>(null)
     const [matchingStudios, setMatchingStudios] = useState<any[]>([])
     const [selectedStudioSlot, setSelectedStudioSlot] = useState<string | null>(null) // Real Studio Slot ID
     const [selectedEquipment, setSelectedEquipment] = useState<string>('')
@@ -466,45 +467,77 @@ export default function InstructorBookingWizard({
                                 const key = `${slot.start_time}-${slot.end_time}`
                                 if (!acc[key]) {
                                     acc[key] = {
+                                        key,
                                         primarySlot: slot,
-                                        locations: [slot.location_area]
+                                        locations: [slot.location_area],
+                                        allSlots: [slot]
                                     }
                                 } else {
                                     if (!acc[key].locations.includes(slot.location_area)) {
                                         acc[key].locations.push(slot.location_area)
+                                        acc[key].allSlots.push(slot)
                                     }
                                 }
                                 return acc
-                            }, {} as Record<string, { primarySlot: any, locations: string[] }>)
+                            }, {} as Record<string, { key: string, primarySlot: any, locations: string[], allSlots: any[] }>)
 
-                            return (Object.values(groupedSlots) as { primarySlot: any, locations: string[] }[]).map(({ primarySlot: slot, locations }) => {
-                                const extraLocCount = locations.length - 1;
+                            return (Object.values(groupedSlots) as { key: string, primarySlot: any, locations: string[], allSlots: any[] }[]).map(({ key, primarySlot: slot, locations, allSlots }) => {
+                                const isExpanded = expandedSlotKey === key;
                                 return (
-                                    <button
-                                        key={slot.id}
-                                        onClick={() => handleSearchCheck(slot, activeDate)}
-                                        className="p-6 rounded-[24px] border border-white/80 bg-white/40 text-left transition-all relative overflow-hidden group hover:bg-white/60 hover:shadow-cloud hover:scale-[1.02]"
+                                    <div
+                                        key={key}
+                                        className="p-6 rounded-[24px] border border-white/80 bg-white/40 text-left transition-all relative shadow-sm hover:shadow-cloud hover:bg-white/50"
                                     >
-                                        <div className="font-serif text-2xl font-bold text-charcoal mb-4">
-                                            {formatTo12Hour(slot.start_time)}
-                                            <span className="text-[10px] text-charcoal/30 mx-3 font-sans uppercase tracking-[0.2em] font-bold">to</span>
-                                            {formatTo12Hour(slot.end_time)}
+                                        <div className="font-serif text-[18px] sm:text-[20px] font-bold text-charcoal mb-4 flex flex-wrap items-baseline gap-2">
+                                            <span className="whitespace-nowrap">{formatTo12Hour(slot.start_time)}</span>
+                                            <span className="text-[9px] text-charcoal/30 font-sans uppercase tracking-[0.2em] font-bold">to</span>
+                                            <span className="whitespace-nowrap">{formatTo12Hour(slot.end_time)}</span>
                                         </div>
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <div className="text-[9px] font-bold text-sage uppercase tracking-widest flex items-center gap-2 bg-sage/5 px-3 py-1.5 rounded-[12px] max-w-full">
-                                                <MapPin className="w-3 h-3 shrink-0" />
-                                                <span className="truncate">{locations[0].split(' - ')[1] || locations[0]}</span>
-                                            </div>
-                                            {extraLocCount > 0 && (
-                                                <div className="text-[9px] font-bold text-gold uppercase tracking-widest bg-gold/10 px-2 py-1.5 rounded-[10px] shrink-0">
-                                                    +{extraLocCount} Area{extraLocCount !== 1 ? 's' : ''}
+
+                                        {locations.length === 1 ? (
+                                            <button
+                                                onClick={() => handleSearchCheck(slot, activeDate)}
+                                                className="w-full flex items-center justify-between group"
+                                            >
+                                                <div className="text-[9px] font-bold text-sage uppercase tracking-widest flex items-center gap-2 bg-sage/5 px-3 py-2 rounded-[12px] border border-sage/10 group-hover:bg-sage/10 transition-colors max-w-[90%]">
+                                                    <MapPin className="w-3 h-3 shrink-0" />
+                                                    <span className="truncate">{locations[0].split(' - ')[1] || locations[0]}</span>
                                                 </div>
-                                            )}
-                                        </div>
-                                        <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0">
-                                            <ArrowRight className="w-6 h-6 text-sage" />
-                                        </div>
-                                    </button>
+                                                <ArrowRight className="w-5 h-5 text-sage opacity-0 group-hover:opacity-100 transform translate-x-1 group-hover:translate-x-0 transition-all shrink-0" />
+                                            </button>
+                                        ) : (
+                                            <div className="relative">
+                                                <button
+                                                    onClick={() => setExpandedSlotKey(isExpanded ? null : key)}
+                                                    className={clsx(
+                                                        "w-full flex items-center justify-between text-[9px] font-bold uppercase tracking-widest px-3 py-2.5 rounded-[12px] border transition-all",
+                                                        isExpanded ? "bg-charcoal text-white border-charcoal" : "bg-gold/5 text-gold border-gold/20 hover:bg-gold/10"
+                                                    )}
+                                                >
+                                                    <div className="flex items-center gap-2 truncate pr-2">
+                                                        <MapPin className="w-3 h-3 shrink-0" />
+                                                        <span>Select Area ({locations.length})</span>
+                                                    </div>
+                                                    <ChevronDown className={clsx("w-4 h-4 transition-transform shrink-0", isExpanded && "rotate-180")} />
+                                                </button>
+
+                                                {isExpanded && (
+                                                    <div className="absolute top-full left-0 right-0 mt-2 z-10 bg-white/95 backdrop-blur-md rounded-[18px] border border-white/60 shadow-cloud p-2 animate-in fade-in slide-in-from-top-2 space-y-1">
+                                                        {allSlots.map((s: any) => (
+                                                            <button
+                                                                key={s.id}
+                                                                onClick={() => { handleSearchCheck(s, activeDate); setExpandedSlotKey(null); }}
+                                                                className="w-full text-left px-3 py-2.5 rounded-[12px] hover:bg-sage/10 text-[9px] font-bold text-charcoal uppercase tracking-widest transition-colors flex items-center justify-between group"
+                                                            >
+                                                                <span className="truncate">{s.location_area.split(' - ')[1] || s.location_area}</span>
+                                                                <ArrowRight className="w-3.5 h-3.5 text-sage opacity-0 group-hover:opacity-100 transform -translate-x-1 group-hover:translate-x-0 transition-all" />
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
                                 )
                             })
                         })()}
