@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Upload, CheckCircle, Loader2, AlertCircle, X, FileText, ShieldAlert, HeartPulse, RefreshCw, Eye, Clock } from 'lucide-react'
+import { Upload, CheckCircle, Loader2, AlertCircle, X, FileText, ShieldAlert, HeartPulse, RefreshCw, Eye, Clock, CreditCard } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { submitPaymentProof } from '@/app/(dashboard)/customer/actions'
@@ -869,12 +869,19 @@ export default function PaymentForm({
                     <button
                         type="submit"
                         disabled={!canSubmit}
-                        className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${file && canSubmit
-                            ? 'bg-rose-gold text-white hover:bg-rose-gold/90 shadow-md'
-                            : 'bg-charcoal-900 text-cream-50 hover:bg-charcoal-800 disabled:opacity-40 disabled:cursor-not-allowed'
-                            }`}
+                        className={`w-full py-4 btn-rose-gold flex items-center justify-center gap-3 text-lg ${!canSubmit ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
                     >
-                        {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm Booking'}
+                        {isUploading ? (
+                            <>
+                                <Loader2 className="w-6 h-6 animate-spin" />
+                                <span>Uploading...</span>
+                            </>
+                        ) : (
+                            <>
+                                <CreditCard className="w-6 h-6" />
+                                <span>Confirm Booking</span>
+                            </>
+                        )}
                     </button>
                 </div>
                 {!canSubmit && !isUploading && (

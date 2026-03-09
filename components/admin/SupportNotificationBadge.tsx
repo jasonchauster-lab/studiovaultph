@@ -62,7 +62,7 @@ export default function SupportNotificationBadge({ showIcon = false, className }
         <div className={clsx("inline-flex items-center gap-1", className)}>
             {showIcon && <MessageCircle className="w-4 h-4" />}
             {unreadCount > 0 && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white animate-pulse">
+                <span className="flex min-w-[20px] h-[20px] items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white px-1">
                     {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
             )}

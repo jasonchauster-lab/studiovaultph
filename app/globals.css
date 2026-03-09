@@ -18,6 +18,10 @@
 
   --radius: 20px;
 
+  /* Rose Gold Palette */
+  --rose-gold: #EBD3CF;
+  --rose-gold-deep: #D4B2AC;
+
   /* Cloud Shadow: Diffuse, low opacity */
   --shadow-cloud: 0 20px 40px -10px rgba(0, 0, 0, 0.05), 0 10px 20px -5px rgba(0, 0, 0, 0.03);
 }
@@ -32,6 +36,8 @@
   --color-sage-light: var(--sage-light);
   --color-gold: var(--gold);
   --color-gold-deep: var(--gold-deep);
+  --color-rose-gold: var(--rose-gold);
+  --color-rose-gold-deep: var(--rose-gold-deep);
   --color-charcoal: var(--charcoal);
 
   /* Shadcn-like standardizing with new colors */
@@ -118,9 +124,8 @@ body::after {
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid #F1F1F1;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
-    position: sticky;
-    top: 0;
     z-index: 50;
+    transition: all 0.5s ease-in-out;
   }
 
   .btn-antigravity {
@@ -142,6 +147,25 @@ body::after {
   .btn-gold:hover {
     @apply -translate-y-1 shadow-lg brightness-110;
   }
+
+  .btn-rose-gold {
+    @apply rounded-[20px] font-bold transition-all duration-300 shadow-md;
+    background: linear-gradient(135deg, var(--rose-gold) 0%, var(--rose-gold-deep) 100%);
+    color: var(--charcoal);
+  }
+
+  .btn-rose-gold:hover {
+    @apply -translate-y-1 shadow-lg brightness-110;
+  }
+
+  .btn-rose-gold:active {
+    @apply translate-y-0 shadow-md scale-[0.98];
+  }
+
+  .btn-rose-gold:disabled {
+    @apply opacity-40 cursor-not-allowed transform-none shadow-none;
+  }
+
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;

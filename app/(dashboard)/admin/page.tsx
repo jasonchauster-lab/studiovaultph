@@ -69,7 +69,22 @@ export default async function AdminDashboard({
 
             // 4. Pending booking requests
             supabase.from('bookings')
-                .select('*, client:profiles!client_id(full_name), instructor:profiles!instructor_id(full_name), slots(date, start_time, end_time, studios(name, location, address))')
+                .select(`
+                    *,
+                    client:profiles!client_id(full_name, email),
+                    instructor:profiles!instructor_id(full_name, email),
+                    slots(
+                        date,
+                        start_time,
+                        end_time,
+                        studios(
+                            name,
+                            location,
+                            address,
+                            profiles!owner_id(full_name, email)
+                        )
+                    )
+                `)
                 .eq('status', 'pending')
                 .order('created_at', { ascending: false }),
 
@@ -281,7 +296,7 @@ export default async function AdminDashboard({
                                     <Icon className="w-4 h-4" />
                                     {t.label}
                                     {count > 0 && (
-                                        <span className={`ml-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${isActive ? 'bg-rose-gold text-charcoal-900' : 'bg-charcoal-900 text-cream-50'}`}>
+                                        <span className="ml-1 flex items-center justify-center min-w-[20px] h-[20px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold">
                                             {count > 99 ? '99+' : count}
                                         </span>
                                     )}
@@ -437,19 +452,87 @@ export default async function AdminDashboard({
                                 </h2>
                                 {pendingBookings.length === 0 ? <p className="text-charcoal-500 text-sm">None pending.</p> : (
                                     <div className="space-y-4">
-                                        {pendingBookings.map((b: any) => (
-                                            <div key={b.id} className="border border-cream-100 rounded-lg p-4 bg-cream-50/50 flex justify-between items-start">
-                                                <div className="text-charcoal-900">
-                                                    <p className="font-medium text-charcoal-900">{b.client?.full_name} → {b.slots?.studios?.name}</p>
-                                                    <p className="text-xs text-charcoal-500">{new Date(b.slots?.date).toLocaleDateString()} at {b.slots?.start_time}</p>
-                                                    {b.payment_proof_url && <a href={getDisplayUrl(b.payment_proof_url)} target="_blank" className="text-[10px] text-blue-600 underline mt-1 block">View Payment</a>}
+                                        {pendingBookings.map((b: any) => {
+                                            const breakdown = b.price_breakdown || {}
+                                            const instructor = b.instructor
+                                            const studio = b.slots?.studios
+                                            const studioOwner = Array.isArray(studio?.profiles) ? studio.profiles[0] : studio?.profiles
+
+                                            return (
+                                                <div key={b.id} className="border border-cream-100 rounded-lg p-5 bg-cream-50/50 flex flex-col md:flex-row justify-between items-start gap-4">
+                                                    <div className="flex-1 space-y-3">
+                                                        <div>
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <p className="font-bold text-charcoal-900 text-lg">
+                                                                    {instructor?.full_name || 'Instructor'} → {studio?.name || 'Studio'}
+                                                                </p>
+                                                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded uppercase">
+                                                                    {breakdown.equipment || 'Session'}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-sm text-charcoal-600 font-medium">
+                                                                Client: {b.client?.full_name} ({b.client?.email})
+                                                            </p>
+                                                            <p className="text-xs text-charcoal-500 mt-1">
+                                                                {new Date(b.slots?.date).toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} at {b.slots?.start_time}
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-cream-100">
+                                                            <div className="space-y-1">
+                                                                <p className="text-[10px] uppercase tracking-wider font-bold text-charcoal-400">Instructor Contact</p>
+                                                                <p className="text-xs font-semibold">{instructor?.full_name}</p>
+                                                                <p className="text-xs text-charcoal-500">{instructor?.email}</p>
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <p className="text-[10px] uppercase tracking-wider font-bold text-charcoal-400">Studio Contact</p>
+                                                                <p className="text-xs font-semibold">{studio?.name}</p>
+                                                                <p className="text-xs text-charcoal-500">{studioOwner?.email || 'No email'}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="bg-white/50 rounded-lg p-3 border border-cream-200">
+                                                            <div className="flex justify-between items-center mb-2">
+                                                                <p className="text-xs font-bold text-charcoal-900">Price Breakdown</p>
+                                                                <p className="text-sm font-bold text-charcoal-900">Total: ₱{(b.total_price || 0).toLocaleString()}</p>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
+                                                                <div>
+                                                                    <p className="text-charcoal-400 uppercase font-bold">Studio</p>
+                                                                    <p className="font-semibold">₱{(breakdown.studio_fee || 0).toLocaleString()}</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-charcoal-400 uppercase font-bold">Instructor</p>
+                                                                    <p className="font-semibold">₱{(breakdown.instructor_fee || 0).toLocaleString()}</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-charcoal-400 uppercase font-bold">Service</p>
+                                                                    <p className="font-semibold">₱{(breakdown.service_fee || 0).toLocaleString()}</p>
+                                                                </div>
+                                                                {breakdown.wallet_deduction > 0 && (
+                                                                    <div>
+                                                                        <p className="text-charcoal-400 uppercase font-bold">Wallet Used</p>
+                                                                        <p className="font-semibold text-green-600">-₱{(breakdown.wallet_deduction || 0).toLocaleString()}</p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {b.payment_proof_url && (
+                                                            <a href={getDisplayUrl(b.payment_proof_url)} target="_blank" className="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 hover:text-blue-700 transition-colors uppercase tracking-wider mt-1">
+                                                                <MessageCircle className="w-3 h-3" />
+                                                                View Payment Proof
+                                                            </a>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex md:flex-col gap-2 w-full md:w-auto">
+                                                        <VerifyButton id={b.id} action="confirmBooking" label="Approve Booking" className="flex-1 md:w-32 px-4 py-2 bg-charcoal-900 text-cream-50 text-xs rounded-lg font-bold hover:bg-charcoal-800 transition-colors" />
+                                                        <RejectBookingButton id={b.id} className="flex-1 md:w-32 px-4 py-2 bg-red-50 text-red-600 text-xs rounded-lg font-bold border border-red-100 hover:bg-red-100 transition-colors shadow-sm" />
+                                                    </div>
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    <RejectBookingButton id={b.id} className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-md" />
-                                                    <VerifyButton id={b.id} action="confirmBooking" label="Confirm" className="px-3 py-1 bg-charcoal-900 text-cream-50 text-xs rounded-md" />
-                                                </div>
-                                            </div>
-                                        ))}
+                                            )
+                                        })}
                                     </div>
                                 )}
                             </div>
