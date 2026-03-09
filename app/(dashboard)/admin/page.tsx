@@ -640,7 +640,12 @@ export default async function AdminDashboard({
                         </div>
                     )}
 
-                    {activeTab === 'reports' && <ReportsTab logs={activityLogs as any} />}
+                    {activeTab === 'reports' && (
+                        <ReportsTab
+                            logs={activityLogs as any}
+                            transactions={!('error' in analytics) ? analytics.transactions : []}
+                        />
+                    )}
                 </div>
             </div>
         )

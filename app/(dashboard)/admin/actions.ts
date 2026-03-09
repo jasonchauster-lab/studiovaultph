@@ -780,13 +780,13 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
                 created_at,
                 price_breakdown,
                 status,
-                client:profiles!client_id(full_name),
+                client:profiles!client_id(full_name, email),
                 slots!inner(
                     date,
                     start_time,
                     studios(name)
                 ),
-                instructor:profiles!instructor_id(full_name)
+                instructor:profiles!instructor_id(full_name, email)
             `)
             .in('status', ['approved', 'completed', 'cancelled_charged'])
 
@@ -815,6 +815,21 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         }
 
         const totalPayouts = (payouts || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
+        console.log(`Analytics: Successfully fetched ${payouts?.length || 0} payouts.`)
+
+        // 2.5 Fetch successful wallet top-ups
+        const { data: topUps, error: topUpsError } = await supabase
+            .from('wallet_top_ups')
+            .select('amount, created_at, profiles:profiles!user_id(full_name, email)')
+            .eq('status', 'completed')
+            .eq('type', 'top_up')
+            .gte('created_at', startDate || '1970-01-01')
+            .lte('created_at', endDate || new Date().toISOString())
+
+        if (topUpsError) {
+            console.error('Analytics: Top-ups fetch error:', topUpsError)
+        }
+        console.log(`Analytics: Successfully fetched ${topUps?.length || 0} top-ups.`)
 
         // Helper to extract first item if array (Supabase relationship safeguard)
         const getFirst = (val: any) => Array.isArray(val) ? val[0] : val;
@@ -872,8 +887,10 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
                 type: 'Booking',
                 status: booking.status,
                 client: client?.full_name || '-',
+                client_email: client?.email || '-',
                 studio: studio?.name || '-',
                 instructor: instructor?.full_name || '-',
+                instructor_email: instructor?.email || '-',
                 total_amount: total,
                 platform_fee: (total === 0 ? (Number(booking.total_price || 0) * 0.2) : platformFee),
                 studio_fee: (total === 0 ? (Number(booking.total_price || 0) * 0.3) : studioFee),
@@ -895,17 +912,40 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         // 4. Add payouts to transactions
         payouts?.forEach((p: any) => {
             stats.transactions.push({
-                id: 'payout',
+                id: `payout-${p.id}`,
                 date: p.created_at,
                 type: 'Payout',
                 client: '-',
+                client_email: '-',
                 studio: p.studio_id ? 'Studio Payout' : '-',
                 instructor: p.instructor_id ? 'Instructor Payout' : '-',
+                instructor_email: '-',
                 total_amount: -Number(p.amount),
                 platform_fee: 0,
                 studio_fee: 0,
                 instructor_fee: 0
             })
+        })
+
+        // 4.5 Add top-ups to transactions
+        topUps?.forEach((t: any) => {
+            const profile = getFirst(t.profiles)
+            stats.transactions.push({
+                id: `topup-${t.id}`,
+                date: t.created_at,
+                type: 'Top-up',
+                client: profile?.full_name || '-',
+                client_email: profile?.email || '-',
+                studio: '-',
+                instructor: '-',
+                instructor_email: '-',
+                total_amount: Number(t.amount),
+                platform_fee: 0,
+                studio_fee: 0,
+                instructor_fee: 0
+            })
+            // Optionally add top-ups to revenue if the user considers them revenue
+            // stats.totalRevenue += Number(t.amount) 
         })
 
         // 5. Sort transactions by date descending
@@ -917,7 +957,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
 
         return {
             ...stats,
-            dailyData: Object.values(stats.daily)
+            dailyData: Object.values(stats.daily).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
         }
     } catch (err: any) {
         console.error('UNHANDLED ANALYTICS ERROR:', err)

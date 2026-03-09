@@ -59,7 +59,7 @@ export default async function StudioDashboard(props: {
         const studioSlotIds = studioSlots?.map((s: any) => s.id) ?? []
 
         if (studioSlotIds.length > 0) {
-            // STEP 2a: Fetch Upcoming Bookings using slot IDs
+            // STEP 2a: Fetch Upcoming Bookings using studio ID
             const nowTimeStr = toManilaTimeString(new Date());
             const { data: studioBookings } = await supabase
                 .from('bookings')
@@ -67,9 +67,9 @@ export default async function StudioDashboard(props: {
                     *,
                     client:profiles!client_id(full_name, avatar_url),
                     instructor:profiles!instructor_id(full_name, avatar_url),
-                    slots!inner(*)
+                    slots(*)
                 `)
-                .in('slot_id', studioSlotIds)
+                .eq('studio_id', myStudio.id)
                 .in('status', ['approved'])
                 .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' })
                 .order('date', { foreignTable: 'slots', ascending: true })
@@ -90,9 +90,9 @@ export default async function StudioDashboard(props: {
                 .select(`
                     *,
                     instructor:profiles!instructor_id(full_name, avatar_url),
-                    slots!inner(*)
+                    slots(*)
                 `)
-                .in('slot_id', studioSlotIds)
+                .eq('studio_id', myStudio.id)
                 .in('status', ['approved', 'completed', 'cancelled_charged'])
                 .gte('slots.date', thirtyDaysAgoStr)
 

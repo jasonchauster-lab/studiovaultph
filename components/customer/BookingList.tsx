@@ -23,7 +23,8 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
         dateRange: { from: null, to: null }
     })
 
-    const getSlotDateTime = (date: string, time: string) => {
+    const getSlotDateTime = (date: string | undefined, time: string | undefined) => {
+        if (!date || !time) return new Date(0)
         return new Date(`${date}T${time}+08:00`)
     }
 
@@ -31,8 +32,8 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
 
     // 1. Filter ALL bookings first
     const filteredBookings = bookings.filter((b) => {
-        const slotDateStr = b.slots.date // YYYY-MM-DD
-        const slotTimeStr = b.slots.start_time
+        const slotDateStr = b.slots?.date // YYYY-MM-DD
+        const slotTimeStr = b.slots?.start_time
 
         // Status Filter
         if (filters.status !== 'all') {
@@ -54,17 +55,17 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
     // 2. Split filtered bookings into upcoming/past
     // Upcoming: Approved, Pending, or Submitted bookings in the future
     const upcomingBookings = filteredBookings.filter(b =>
-        ['approved', 'pending', 'submitted'].includes(b.status) && getSlotDateTime(b.slots.date, b.slots.start_time) > now
+        ['approved', 'pending', 'submitted'].includes(b.status) && getSlotDateTime(b.slots?.date, b.slots?.start_time) > now
     )
     // Past: Completed, Cancelled, Rejected, or Expired, or any that passed
     const pastBookings = filteredBookings.filter(b =>
         ['completed', 'cancelled_refunded', 'cancelled_charged', 'rejected', 'expired'].includes(b.status) ||
-        (['approved', 'pending', 'submitted', 'cancelled'].includes(b.status) && getSlotDateTime(b.slots.date, b.slots.start_time) <= now)
+        (['approved', 'pending', 'submitted', 'cancelled'].includes(b.status) && getSlotDateTime(b.slots?.date, b.slots?.start_time) <= now)
     )
 
     // Helper to check expiration (12 hours after end time)
     const isChatExpired = (booking: any) => {
-        const endTime = getSlotDateTime(booking.slots.date, booking.slots.end_time)
+        const endTime = getSlotDateTime(booking.slots?.date, booking.slots?.end_time)
         const expirationTime = new Date(endTime.getTime() + 12 * 60 * 60 * 1000)
         return now > expirationTime
     }
@@ -105,18 +106,18 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     <div className="flex flex-col gap-1 w-full">
                                         <div className="flex items-center justify-between w-full">
                                             <div className="flex items-center gap-3 w-full">
-                                                <Link href={`/studios/${booking.slots.studios?.id}`} className="w-10 h-10 rounded-full overflow-hidden border border-cream-200 bg-white shadow-sm shrink-0 hover:opacity-80 transition-opacity">
+                                                <Link href={`/studios/${booking.studios?.id || booking.slots?.studios?.id}`} className="w-10 h-10 rounded-full overflow-hidden border border-cream-200 bg-white shadow-sm shrink-0 hover:opacity-80 transition-opacity">
                                                     <img
-                                                        src={booking.slots.studios?.logo_url || "/logo.png"}
-                                                        alt={booking.slots.studios?.name || "Studio"}
+                                                        src={booking.studios?.logo_url || booking.slots?.studios?.logo_url || "/logo.png"}
+                                                        alt={booking.studios?.name || booking.slots?.studios?.name || "Studio"}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 </Link>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-start justify-between gap-2">
                                                         <div className="flex flex-col gap-1 items-start min-w-0">
-                                                            <Link href={`/studios/${booking.slots.studios?.id}`} className="text-sm font-bold text-charcoal-900 truncate w-full hover:text-rose-gold transition-colors">
-                                                                {booking.slots.studios?.name || "Studio"}
+                                                            <Link href={`/studios/${booking.studios?.id || booking.slots?.studios?.id}`} className="text-sm font-bold text-charcoal-900 truncate w-full hover:text-rose-gold transition-colors">
+                                                                {booking.studios?.name || booking.slots?.studios?.name || "Studio"}
                                                             </Link>
                                                             <span className={clsx(
                                                                 "px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border shrink-0",
@@ -130,10 +131,10 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                         </div>
                                                         <div className="text-right shrink-0">
                                                             <p className="text-[13px] font-bold text-charcoal-900 leading-none">
-                                                                {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                {getSlotDateTime(booking.slots?.date, booking.slots?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                                                             </p>
                                                             <p className="text-[11px] text-charcoal-500 font-medium mt-1">
-                                                                {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                                {getSlotDateTime(booking.slots?.date, booking.slots?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -164,7 +165,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                         <div className="flex items-start gap-2">
                                             <MapPin className="w-3.5 h-3.5 text-charcoal-400 shrink-0 mt-0.5" />
                                             <span className="font-semibold text-charcoal-700 leading-tight">
-                                                {booking.slots.studios?.location || "N/A"}
+                                                {booking.studios?.location || booking.slots?.studios?.location || "N/A"}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-2">
@@ -178,7 +179,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     </div>
 
                                     <div className="flex items-center gap-2 transition-opacity">
-                                        {booking.status === 'approved' && getSlotDateTime(booking.slots.date, booking.slots.start_time) > now && (
+                                        {booking.status === 'approved' && getSlotDateTime(booking.slots?.date, booking.slots?.start_time) > now && (
                                             <button
                                                 onClick={() => setCancellingBooking(booking)}
                                                 disabled={cancellingId === booking.id}
@@ -217,9 +218,9 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                             <div key={booking.id} className="bg-white p-4 rounded-xl border border-cream-200 flex justify-between items-center sm:flex-row flex-col gap-4">
                                 <div className="flex items-center gap-4 w-full sm:w-auto">
                                     <div className="text-charcoal-500 text-sm shrink-0 font-medium">
-                                        {getSlotDateTime(booking.slots.date, booking.slots.start_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        {getSlotDateTime(booking.slots?.date, booking.slots?.start_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </div>
-                                    <div className="font-bold text-charcoal-800">{booking.slots.studios.name}</div>
+                                    <div className="font-bold text-charcoal-800">{booking.studios?.name || booking.slots?.studios?.name || "Studio"}</div>
                                 </div>
                                 <div className="flex items-center justify-end w-full sm:w-auto gap-3">
                                     {/* Show Leave Review button only for completed sessions or passed approved sessions */}
@@ -281,7 +282,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                 title="Cancel Booking"
                 description={(() => {
                     if (!cancellingBooking) return ""
-                    const startTime = getSlotDateTime(cancellingBooking.slots.date, cancellingBooking.slots.start_time).getTime()
+                    const startTime = getSlotDateTime(cancellingBooking.slots?.date, cancellingBooking.slots?.start_time).getTime()
                     const hoursUntilStart = (startTime - now.getTime()) / (1000 * 60 * 60)
                     return hoursUntilStart >= 24
                         ? "Are you sure you want to cancel? Your refund will be credited to your Wallet Balance."

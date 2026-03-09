@@ -28,9 +28,12 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
         <div className="space-y-6 text-charcoal-900">
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
+                <button
+                    onClick={() => window.location.href = '/admin?tab=reports&subtab=transactions&filter=all'}
+                    className="text-left bg-white p-6 rounded-xl border border-cream-200 shadow-sm hover:border-charcoal-400 transition-all group"
+                >
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-green-50 text-green-600 rounded-lg">
+                        <div className="p-3 bg-green-50 text-green-600 rounded-lg group-hover:bg-green-100 transition-colors border border-transparent">
                             <DollarSign className="w-6 h-6" />
                         </div>
                         <div>
@@ -38,11 +41,14 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                             <p className="text-2xl font-bold text-charcoal-900">₱{stats.totalRevenue.toLocaleString()}</p>
                         </div>
                     </div>
-                </div>
+                </button>
 
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
+                <button
+                    onClick={() => window.location.href = '/admin?tab=reports&subtab=transactions&filter=Platform Fees'}
+                    className="text-left bg-white p-6 rounded-xl border border-cream-200 shadow-sm hover:border-charcoal-400 transition-all group"
+                >
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                        <div className="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100 transition-colors border border-transparent">
                             <Percent className="w-6 h-6" />
                         </div>
                         <div>
@@ -50,11 +56,14 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                             <p className="text-2xl font-bold text-charcoal-900">₱{stats.totalPlatformFees.toLocaleString()}</p>
                         </div>
                     </div>
-                </div>
+                </button>
 
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
+                <button
+                    onClick={() => window.location.href = '/admin?tab=reports&subtab=transactions&filter=Studio Share'}
+                    className="text-left bg-white p-6 rounded-xl border border-cream-200 shadow-sm hover:border-charcoal-400 transition-all group"
+                >
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-purple-50 text-purple-600 rounded-lg">
+                        <div className="p-3 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-100 transition-colors border border-transparent">
                             <TrendingUp className="w-6 h-6" />
                         </div>
                         <div>
@@ -62,11 +71,14 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                             <p className="text-2xl font-bold text-charcoal-900">₱{stats.totalStudioFees.toLocaleString()}</p>
                         </div>
                     </div>
-                </div>
+                </button>
 
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
+                <button
+                    onClick={() => window.location.href = '/admin?tab=reports&subtab=transactions&filter=Instructor Share'}
+                    className="text-left bg-white p-6 rounded-xl border border-cream-200 shadow-sm hover:border-charcoal-400 transition-all group"
+                >
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg">
+                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg group-hover:bg-indigo-100 transition-colors border border-transparent">
                             <Users className="w-6 h-6" />
                         </div>
                         <div>
@@ -74,11 +86,14 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                             <p className="text-2xl font-bold text-charcoal-900">₱{stats.totalInstructorFees.toLocaleString()}</p>
                         </div>
                     </div>
-                </div>
+                </button>
 
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
+                <button
+                    onClick={() => window.location.href = '/admin?tab=reports&subtab=transactions&filter=Payouts'}
+                    className="text-left bg-white p-6 rounded-xl border border-cream-200 shadow-sm hover:border-charcoal-400 transition-all group"
+                >
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-red-50 text-red-600 rounded-lg">
+                        <div className="p-3 bg-red-50 text-red-600 rounded-lg group-hover:bg-red-100 transition-colors border border-transparent">
                             <DollarSign className="w-6 h-6" />
                         </div>
                         <div>
@@ -86,11 +101,14 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                             <p className="text-2xl font-bold text-charcoal-900">₱{stats.totalPayouts.toLocaleString()}</p>
                         </div>
                     </div>
-                </div>
+                </button>
 
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
+                <button
+                    onClick={() => window.location.href = '/admin?tab=reports&subtab=transactions&filter=Booking'}
+                    className="text-left bg-white p-6 rounded-xl border border-cream-200 shadow-sm hover:border-charcoal-400 transition-all group"
+                >
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-orange-50 text-orange-600 rounded-lg">
+                        <div className="p-3 bg-orange-50 text-orange-600 rounded-lg group-hover:bg-orange-100 transition-colors border border-transparent">
                             <Users className="w-6 h-6" />
                         </div>
                         <div>
@@ -98,7 +116,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                             <p className="text-2xl font-bold text-charcoal-900">{stats.bookingCount}</p>
                         </div>
                     </div>
-                </div>
+                </button>
             </div>
 
             {/* SVG Revenue Chart */}
@@ -186,12 +204,29 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                             <span>Platform Fees</span>
                         </div>
                     </div>
-                    {/* X-Axis Labels */}
-                    <div className="flex gap-4 text-[10px] text-charcoal-600 overflow-hidden">
-                        {stats.dailyData.filter((_, i) => i % Math.max(1, Math.floor(stats.dailyData.length / 5)) === 0).map((d, i) => (
-                            <span key={i}>{new Date(d.date).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' })}</span>
-                        ))}
-                    </div>
+                </div>
+
+                {/* X-Axis Labels aligned with the chart points */}
+                <div className="relative mt-2 h-6 w-full">
+                    {stats.dailyData.length > 1 && (
+                        <div className="absolute top-0 left-0 w-full flex text-[10px] text-charcoal-500">
+                            {stats.dailyData.map((d, i) => {
+                                const leftOffset = (i * pointPadding)
+                                const showLabel = i === 0 || i === stats.dailyData.length - 1 || stats.dailyData.length <= 7 || i % Math.ceil(stats.dailyData.length / 5) === 0
+                                if (!showLabel) return null
+
+                                return (
+                                    <span
+                                        key={i}
+                                        className="absolute text-center -translate-x-1/2 whitespace-nowrap"
+                                        style={{ left: `${(leftOffset / ((stats.dailyData.length - 1) * pointPadding)) * 100}%` }}
+                                    >
+                                        {new Date(d.date).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' })}
+                                    </span>
+                                )
+                            })}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

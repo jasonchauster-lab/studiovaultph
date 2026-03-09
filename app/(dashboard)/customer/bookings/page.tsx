@@ -25,15 +25,15 @@ export default async function CustomerBookingsPage() {
                 date,
                 start_time,
                 end_time,
-                equipment,
-                studios (
-                    id,
-                    name,
-                    location,
-                    address,
-                    owner_id,
-                    logo_url
-                )
+                equipment
+            ),
+            studios:studio_id (
+                id,
+                name,
+                location,
+                address,
+                owner_id,
+                logo_url
             ),
             instructor:profiles!instructor_id (
                 id,
@@ -81,13 +81,12 @@ export default async function CustomerBookingsPage() {
     // Fetch pending reviews for the customer
     const { bookings: pendingReviews, isInstructor } = await getPendingReviews()
 
-    // Helper to combine date and time into a comparable Date object (Manila time)
     const getSlotDateTime = (date: string | undefined, time: string | undefined) => {
         if (!date || !time) return new Date(0)
         return new Date(`${date}T${time}+08:00`)
     }
     const now = new Date()
-    const upcomingBookings = finalBookings.filter(b => getSlotDateTime(b.slots.date, b.slots.start_time) > now)
+    const upcomingBookings = finalBookings.filter(b => getSlotDateTime(b.slots?.date, b.slots?.start_time) > now)
 
     // Cache next approved session once instead of calling .find() 5Ã— in JSX
     const nextSession = upcomingBookings.find(b => b.status === 'approved')
@@ -118,17 +117,17 @@ export default async function CustomerBookingsPage() {
                                 Digital Entry Pass
                             </div>
                             <h2 className="text-3xl font-serif mb-1">
-                                {nextSession.slots.studios.name}
+                                {nextSession.studios?.name || nextSession.slots?.studios?.name || 'Studio'}
                             </h2>
-                            {nextSession.slots.studios.address && (
+                            {(nextSession.studios?.address || nextSession.slots?.studios?.address) && (
                                 <p className="text-charcoal-400 text-sm mb-1">
-                                    {nextSession.slots.studios.address}
+                                    {nextSession.studios?.address || nextSession.slots?.studios?.address}
                                 </p>
                             )}
                             <p className="text-charcoal-300 mb-6">
-                                {getSlotDateTime(nextSession.slots.date, nextSession.slots.start_time).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+                                {getSlotDateTime(nextSession.slots?.date, nextSession.slots?.start_time).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
                                 {' • '}
-                                {getSlotDateTime(nextSession.slots.date, nextSession.slots.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                {getSlotDateTime(nextSession.slots?.date, nextSession.slots?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
                             </p>
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-charcoal-800 rounded-full flex items-center justify-center text-lg font-bold">

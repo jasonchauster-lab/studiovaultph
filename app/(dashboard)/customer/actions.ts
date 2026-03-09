@@ -1088,10 +1088,10 @@ export async function getCustomerWalletDetails() {
             price_breakdown,
             slots (
                 date,
-                start_time,
-                studios (
-                    name
-                )
+                start_time
+            ),
+            studios:studio_id (
+                name
             )
         `)
         .eq('client_id', user.id)
@@ -1122,7 +1122,8 @@ export async function getCustomerWalletDetails() {
 
         if (deduction > 0) {
             const slot = getFirst(b.slots);
-            const studioName = slot?.studios?.name || 'Studio';
+            const studio = getFirst(b.studios);
+            const studioName = studio?.name || slot?.studios?.name || 'Studio';
 
             // Correct mapping for cancellation/rejection
             let displayStatus = b.status === 'pending' || b.status === 'submitted' ? 'pending'

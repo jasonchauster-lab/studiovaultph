@@ -1,7 +1,11 @@
--- Migration for Atomic Booking RPC
--- This script provides an atomic, transactional PostgreSQL function to safely create bookings
--- and extract equipment from slots without race conditions or fragmented failures.
+const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
+const env = fs.readFileSync('.env.local', 'utf8');
+const url = env.match(/NEXT_PUBLIC_SUPABASE_URL=(.*)/)[1].trim();
+const key = env.match(/SUPABASE_SERVICE_ROLE_KEY=(.*)/)[1].trim();
+const supabase = createClient(url, key);
 
+const sql = `
 CREATE OR REPLACE FUNCTION book_slot_atomic(
     p_slot_id UUID,
     p_instructor_id UUID,
@@ -44,7 +48,6 @@ BEGIN
     END IF;
 
     -- 1.1 Prevents Instructor Double-Booking Race Condition
-    -- Check if instructor is already booked for this time range (across ANY slot)
     IF EXISTS (
         SELECT 1 
         FROM bookings b
@@ -69,7 +72,6 @@ BEGIN
     v_parent_equipment := v_parent_slot.equipment;
     v_parent_quantity := COALESCE(v_parent_slot.quantity, 0);
     
-    -- Extract available quantity using the exact key
     v_available_qty := COALESCE(CAST(v_parent_equipment->>p_equipment_key AS INT), 0);
     
     IF v_available_qty < p_quantity THEN
@@ -77,7 +79,6 @@ BEGIN
             p_equipment_key, p_quantity, v_available_qty;
     END IF;
 
-    -- Decrement equipment inventory
     v_new_equipment := v_parent_equipment;
     v_new_equipment := jsonb_set(
         v_new_equipment, 
@@ -85,15 +86,8 @@ BEGIN
         to_jsonb(v_available_qty - p_quantity)
     );
 
-    -- Clean up key if it hits 0 (We will NO LONGER clean it up, as this causes the UI to render the slot as 'Open Space' when NO equipment keys exist.)
-    -- IF (v_available_qty - p_quantity) <= 0 THEN
-    --     v_new_equipment := v_new_equipment - p_equipment_key;
-    -- END IF;
-
     v_parent_quantity := GREATEST(0, v_parent_quantity - p_quantity);
 
-    -- FIX: If parent is empty, DELETE it to avoid doubling occupancy counts.
-    -- Otherwise, update it.
     IF v_parent_quantity <= 0 THEN
         DELETE FROM slots WHERE id = p_slot_id;
     ELSE
@@ -107,41 +101,19 @@ BEGIN
 
     -- 3. Create Extracted Slot
     INSERT INTO slots (
-        studio_id,
-        date,
-        start_time,
-        end_time,
-        is_available,
-        equipment,
-        equipment_inventory,
-        quantity
+        studio_id, date, start_time, end_time, is_available, equipment, equipment_inventory, quantity
     ) VALUES (
-        v_parent_slot.studio_id,
-        v_parent_slot.date,
-        v_parent_slot.start_time,
-        v_parent_slot.end_time,
-        false, -- Locked immediately for this booking
-        jsonb_build_object(p_equipment_key, p_quantity),
-        jsonb_build_object(p_equipment_key, p_quantity),
-        p_quantity
+        v_parent_slot.studio_id, v_parent_slot.date, v_parent_slot.start_time, v_parent_slot.end_time,
+        false, jsonb_build_object(p_equipment_key, p_quantity), jsonb_build_object(p_equipment_key, p_quantity), p_quantity
     ) RETURNING id INTO v_extracted_slot_id;
 
     v_final_slot_id := v_extracted_slot_id;
 
-    -- 4. Handle Time-Splitting (if requested times differ from parent boundaries)
+    -- 4. Handle Time-Splitting
     IF p_req_start_time IS NOT NULL AND p_req_end_time IS NOT NULL THEN
         IF p_req_start_time > v_parent_slot.start_time OR p_req_end_time < v_parent_slot.end_time THEN
-            -- We are booking a partial segment
+            UPDATE slots SET start_time = p_req_start_time, end_time = p_req_end_time WHERE id = v_extracted_slot_id;
             
-            -- Update the extracted slot to represent JUST the specifically booked segment
-            UPDATE slots 
-            SET start_time = p_req_start_time, 
-                end_time = p_req_end_time
-            WHERE id = v_extracted_slot_id;
-            
-            -- v_final_slot_id is already v_extracted_slot_id, no change needed
-
-            -- Only create the 'before' slot if there is an actual time gap
             IF v_parent_slot.start_time < p_req_start_time THEN
                 INSERT INTO slots (
                     studio_id, date, start_time, end_time, is_available, equipment, equipment_inventory, quantity
@@ -151,7 +123,6 @@ BEGIN
                 );
             END IF;
 
-            -- Only create the 'after' slot if there is an actual time gap
             IF p_req_end_time < v_parent_slot.end_time THEN
                 INSERT INTO slots (
                     studio_id, date, start_time, end_time, is_available, equipment, equipment_inventory, quantity
@@ -163,15 +134,12 @@ BEGIN
         END IF;
     END IF;
 
-    -- 5. Wallet Deduction
+    -- 5. Wallet
     IF p_wallet_deduction > 0 THEN
-        -- Safely use the existing deduct_available_balance RPC
-        -- Note: If it fails, the whole transaction rolls back
         PERFORM deduct_available_balance(p_client_id, p_wallet_deduction);
     END IF;
 
     -- 6. Insert Booking Record
-    -- Set expiry 15 minutes from now for unpaid bookings
     v_expires_at := CURRENT_TIMESTAMP + interval '15 minutes';
 
     INSERT INTO bookings (
@@ -200,19 +168,25 @@ BEGIN
         v_expires_at
     ) RETURNING id INTO v_booking_id;
 
-    -- Return success payload
     RETURN jsonb_build_object(
         'success', true,
         'booking_id', v_booking_id,
         'final_slot_id', v_final_slot_id,
         'parent_slot_id', p_slot_id
     );
-
-EXCEPTION
-    WHEN OTHERS THEN
-        -- Postgres automatically rolls back all changes in this block
-        RAISE NOTICE 'Atomic booking failed: % %', SQLERRM, SQLSTATE;
-        -- Re-raise to let the client know it failed
-        RAISE;
 END;
 $$;
+`;
+
+async function run() {
+    try {
+        console.log('Deploying updated book_slot_atomic...');
+        const { error } = await supabase.rpc('exec_sql', { sql_query: sql });
+        if (error) throw error;
+        console.log('De-deployment success.');
+    } catch (e) {
+        console.error('Deployment Failed:', e);
+    }
+}
+
+run();

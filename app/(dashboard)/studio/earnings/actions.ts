@@ -69,16 +69,16 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
         }
 
         // 3. Get all relevant bookings (active + late cancelled with potential charges)
-        console.log(`[getEarningsData] Fetching bookings for ${slotIds.length} slots...`)
+        console.log(`[getEarningsData] Fetching bookings for studio ${studioId}...`)
         let bookingsQuery = supabase
             .from('bookings')
             .select(`
                 *,
                 client:profiles!client_id(full_name),
                 instructor:profiles!instructor_id(full_name),
-                slots!inner(date, start_time, end_time, studios(name))
+                slots(date, start_time, end_time, studios(name))
             `)
-            .in('slot_id', slotIds)
+            .eq('studio_id', studioId)
             .or('status.in.(approved,completed,cancelled_charged,cancelled_refunded),payment_status.eq.submitted')
             .order('created_at', { ascending: false })
 
