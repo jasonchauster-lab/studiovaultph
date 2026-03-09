@@ -215,12 +215,12 @@ export default function InstructorBookingWizard({
                         isSameMonth(cloneDay, monthStart) && !hasSlots && !isPastDay && !isSelected ? "text-charcoal/40" : "",
                         isPastDay ? "text-charcoal/10 pointer-events-none opacity-40" : "",
                         hasSlots && !isSelected ? "bg-white/40 text-charcoal font-bold hover:bg-white/60 cursor-pointer border border-white/80" : "",
-                        isSelected ? "bg-sage text-white font-bold shadow-cloud transform scale-105" : ""
+                        isSelected ? "bg-[#B4C3B2] text-white font-bold shadow-cloud transform scale-105" : ""
                     )}
                     disabled={!hasSlots || isPastDay}
                 >
                     <span className="leading-none">{formattedDate}</span>
-                    {hasSlots && !isSelected && <span className="w-1 h-1 bg-sage/40 rounded-full mt-1.5"></span>}
+                    {hasSlots && !isSelected && <span className="w-1 h-1 bg-[#B4C3B2]/40 rounded-full mt-1.5"></span>}
                 </button>
             )
             day = addDays(day, 1)
@@ -458,7 +458,7 @@ export default function InstructorBookingWizard({
                             <h3 className="text-2xl font-serif font-bold text-charcoal">
                                 {format(new Date(selectedDate), 'EEEE, MMMM do')}
                             </h3>
-                            <p className="text-[10px] font-bold text-sage uppercase tracking-[0.3em] mt-2">Available Sessions</p>
+                            <p className="text-[10px] font-bold text-[#B4C3B2] uppercase tracking-[0.3em] mt-2">Available Sessions</p>
                         </div>
                     )}
 
@@ -519,7 +519,7 @@ export default function InstructorBookingWizard({
                                 return (
                                     <div
                                         key={key}
-                                        className="p-6 rounded-[24px] border border-white/80 bg-white/40 text-left transition-all relative shadow-sm hover:shadow-cloud hover:bg-white/50"
+                                        className="p-6 rounded-[24px] border border-white/80 bg-white/40 backdrop-blur-[8px] text-left transition-all relative shadow-[0_10px_20px_rgba(0,0,0,0.03)] hover:shadow-cloud hover:bg-white/50"
                                     >
                                         <div className="font-serif text-[18px] sm:text-[20px] font-bold text-charcoal mb-4 flex flex-wrap items-baseline gap-2">
                                             <span className="whitespace-nowrap">{formatTo12Hour(slot.start_time)}</span>
@@ -532,11 +532,11 @@ export default function InstructorBookingWizard({
                                                 onClick={() => handleSearchCheck(slot, activeDate)}
                                                 className="w-full flex items-center justify-between group"
                                             >
-                                                <div className="text-[9px] font-bold text-sage uppercase tracking-widest flex items-center gap-2 bg-sage/5 px-3 py-2 rounded-[12px] border border-sage/10 group-hover:bg-sage/10 transition-colors max-w-[90%]">
+                                                <div className="text-[9px] font-bold text-[#B4C3B2] uppercase tracking-widest flex items-center gap-2 bg-[#B4C3B2]/5 px-3 py-2 rounded-[12px] border border-[#B4C3B2]/10 group-hover:bg-[#B4C3B2]/10 transition-colors max-w-[90%]">
                                                     <MapPin className="w-3 h-3 shrink-0" />
                                                     <span className="truncate">{locations[0].split(' - ')[1] || locations[0]}</span>
                                                 </div>
-                                                <ArrowRight className="w-5 h-5 text-sage opacity-0 group-hover:opacity-100 transform translate-x-1 group-hover:translate-x-0 transition-all shrink-0" />
+                                                <ArrowRight className="w-5 h-5 text-[#B4C3B2] opacity-0 group-hover:opacity-100 transform translate-x-1 group-hover:translate-x-0 transition-all shrink-0" />
                                             </button>
                                         ) : (
                                             <div className="relative">
