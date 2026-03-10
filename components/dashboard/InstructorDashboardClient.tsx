@@ -1,183 +1,53 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { Slot } from '@/types';
-import { Loader2, User, Calendar, Wallet, ArrowUpRight, MessageSquare, ChevronRight, MapPin, Box, X, AlertCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Loader2, Calendar, Box, X, AlertCircle, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
-import clsx from 'clsx';
 import ChatWindow from '@/components/dashboard/ChatWindow';
 import MessageCountBadge from '@/components/dashboard/MessageCountBadge';
-import { formatManilaDateStr, formatTo12Hour, getManilaTodayStr, toManilaDateStr } from '@/lib/timezone';
-import { useSearchParams } from 'next/navigation';
+import { formatManilaDateStr, formatTo12Hour, getManilaTodayStr } from '@/lib/timezone';
 import CancelBookingModal from './CancelBookingModal';
 import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions';
 import InstructorScheduleCalendar from '@/components/instructor/InstructorScheduleCalendar';
-import { startOfWeek, endOfWeek, format } from 'date-fns';
 import InstructorStatCards from './InstructorStatCards';
 
-export default function InstructorDashboardClient() {
-    const searchParams = useSearchParams();
-    const supabase = createClient();
+interface InstructorDashboardClientProps {
+    userId: string;
+    initialCalendarBookings: any[];
+    initialUpcomingBookings: any[];
+    availableBalance: number;
+    hasPendingPayout: boolean;
+    availability: any[];
+    totalSessionsTaught: number;
+    pendingEarnings: number;
+    currentDateStr: string;
+}
 
-    const [calendarBookings, setCalendarBookings] = useState<any[]>([]);
-    const [upcomingBookings, setUpcomingBookings] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [userId, setUserId] = useState<string | null>(null);
-    const [availableBalance, setAvailableBalance] = useState<number | null>(null);
-    const [hasPendingPayout, setHasPendingPayout] = useState(false);
-    const [availability, setAvailability] = useState<any[]>([]);
+export default function InstructorDashboardClient({
+    userId,
+    initialCalendarBookings,
+    initialUpcomingBookings,
+    availableBalance,
+    hasPendingPayout,
+    availability,
+    totalSessionsTaught,
+    pendingEarnings,
+    currentDateStr
+}: InstructorDashboardClientProps) {
+    const [calendarBookings, setCalendarBookings] = useState<any[]>(initialCalendarBookings);
+    const [upcomingBookings, setUpcomingBookings] = useState<any[]>(initialUpcomingBookings);
+    const [isLoading, setIsLoading] = useState(false); // No longer loading initially
 
-    // Analytics states
-    const [totalSessionsTaught, setTotalSessionsTaught] = useState(0);
-    const [pendingEarnings, setPendingEarnings] = useState(0);
+    // Sync state when props change (e.g., when user navigates to a new week)
+    useEffect(() => {
+        setCalendarBookings(initialCalendarBookings);
+        setUpcomingBookings(initialUpcomingBookings);
+    }, [initialCalendarBookings, initialUpcomingBookings]);
 
     const [activeChat, setActiveChat] = useState<{ id: string, recipientId: string, name: string, isExpired: boolean } | null>(null);
     const [cancellingBooking, setCancellingBooking] = useState<any>(null);
     const [selectedClient, setSelectedClient] = useState<any>(null);
 
-    useEffect(() => {
-        async function fetchData() {
-            setIsLoading(true);
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) setUserId(user.id);
-
-            if (user) {
-                // 1. Fetch Sidebar "Upcoming" (Global)
-                const todayStr = getManilaTodayStr();
-                const nowTimeStr = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-
-                const { data: sidebarData } = await supabase
-                    .from('bookings')
-                    .select(`
-                        *,
-                        price_breakdown,
-                        slots!inner (
-                            date,
-                            start_time,
-                            end_time,
-                            equipment,
-                            studios (
-                                id,
-                                name,
-                                location,
-                                logo_url,
-                                owner_id
-                            )
-                        ),
-                        client:profiles!client_id (
-                            full_name,
-                            email,
-                            avatar_url,
-                            medical_conditions
-                        )
-                    `)
-                    .eq('instructor_id', user.id)
-                    .eq('status', 'approved')
-                    .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' })
-                    .order('slots(date)', { ascending: true })
-                    .order('slots(start_time)', { ascending: true })
-                    .limit(5);
-
-                if (sidebarData) setUpcomingBookings(sidebarData);
-
-                // 2. Determine visible week for dynamic calendar fetching
-                const dateParam = searchParams.get('date') || todayStr;
-                const currentDate = new Date(dateParam + "T00:00:00+08:00");
-                const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-                const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
-                const startDateStr = format(weekStart, 'yyyy-MM-dd');
-                const endDateStr = format(weekEnd, 'yyyy-MM-dd');
-
-                // 3. Fetch Calendar Bookings (Range bound)
-                const { data: calendarData } = await supabase
-                    .from('bookings')
-                    .select(`
-                        *,
-                        price_breakdown,
-                        slots!inner (
-                            id,
-                            date,
-                            start_time,
-                            end_time,
-                            equipment,
-                            studios (
-                                id,
-                                name,
-                                location,
-                                logo_url,
-                                owner_id
-                            )
-                        ),
-                        client:profiles!client_id (
-                            full_name,
-                            email,
-                            avatar_url,
-                            medical_conditions
-                        )
-                    `)
-                    .eq('instructor_id', user.id)
-                    .gte('slots.date', startDateStr)
-                    .lte('slots.date', endDateStr);
-
-                if (calendarData) setCalendarBookings(calendarData);
-
-                // 4. Fetch Available Balance (Static)
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('available_balance')
-                    .eq('id', user.id)
-                    .single();
-                if (profile) setAvailableBalance(profile.available_balance || 0);
-
-                // 5. Check for Pending Payouts (Static)
-                const { data: pendingPayouts } = await supabase
-                    .from('payout_requests')
-                    .select('id')
-                    .eq('user_id', user.id)
-                    .eq('status', 'pending')
-                    .limit(1);
-                setHasPendingPayout(!!(pendingPayouts && pendingPayouts.length > 0));
-
-                // 6. Fetch Existing Availability for this week (Specific or Recurring)
-                const { data: availabilityData } = await supabase
-                    .from('instructor_availability')
-                    .select('*')
-                    .eq('instructor_id', user.id)
-                    .or(`date.is.null,and(date.gte.${startDateStr},date.lte.${endDateStr})`)
-                    .order('day_of_week', { ascending: true })
-                    .order('start_time', { ascending: true });
-
-                if (availabilityData) setAvailability(availabilityData);
-
-                // 7. Fetch Total Sessions Taught (Historical)
-                const { count: sessionCount } = await supabase
-                    .from('bookings')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('instructor_id', user.id)
-                    .in('status', ['approved', 'completed']);
-                setTotalSessionsTaught(sessionCount || 0);
-
-                // 8. Fetch Pending Earnings (Total upcoming approved)
-                const { data: upcomingApproved } = await supabase
-                    .from('bookings')
-                    .select('price_breakdown, slots!inner(id)')
-                    .eq('instructor_id', user.id)
-                    .eq('status', 'approved')
-                    .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' });
-
-                const pending = upcomingApproved?.reduce((sum, b) => {
-                    const fee = (b.price_breakdown as any)?.instructor_fee || 0;
-                    return sum + fee;
-                }, 0) || 0;
-                setPendingEarnings(pending);
-            }
-
-            setIsLoading(false);
-        }
-
-        fetchData();
-    }, [searchParams.get('date')]);
 
     const isChatExpired = (booking: any) => {
         const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
@@ -229,7 +99,7 @@ export default function InstructorDashboardClient() {
                         availability={availability}
                         bookings={calendarBookings}
                         currentUserId={userId || ''}
-                        currentDate={new Date(searchParams.get('date') || getManilaTodayStr())}
+                        currentDate={new Date(currentDateStr || getManilaTodayStr())}
                     />
                 </div>
 
