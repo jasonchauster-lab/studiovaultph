@@ -186,30 +186,36 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
     }
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
+        <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end pointer-events-none">
             {/* Chat Window */}
             {isOpen && (
-                <div className="mb-4 w-80 sm:w-96 h-[500px] bg-white rounded-2xl shadow-xl border border-cream-200 flex flex-col pointer-events-auto overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-300">
+                <div className="mb-6 w-80 sm:w-96 h-[500px] bg-white rounded-xl shadow-2xl border border-border-grey flex flex-col pointer-events-auto overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-300">
                     {/* Header */}
-                    <div className="bg-charcoal-900 p-4 flex justify-between items-center">
-                        <div>
-                            <h3 className="text-cream-50 font-medium">Support Chat</h3>
-                            <p className="text-xs text-charcoal-300">We usually reply within a few hours.</p>
+                    <div className="bg-charcoal p-6 flex justify-between items-center border-b border-white/10">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-forest rounded-lg flex items-center justify-center shadow-tight">
+                                <MessageCircle className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <h3 className="text-white text-sm font-bold uppercase tracking-widest">Support Portal</h3>
+                                <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em]">Verified Response Team</p>
+                            </div>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="text-charcoal-300 hover:text-white transition-colors">
+                        <button onClick={() => setIsOpen(false)} className="p-2 text-white/40 hover:text-white transition-colors rounded-lg hover:bg-white/5">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
 
                     {/* Messages Area */}
-                    <div className="flex-1 overflow-y-auto p-4 bg-cream-50 space-y-4">
+                    <div className="flex-1 overflow-y-auto p-6 bg-off-white space-y-6">
                         {isLoading ? (
-                            <div className="flex justify-center py-10">
-                                <Loader2 className="w-6 h-6 text-charcoal-400 animate-spin" />
+                            <div className="flex justify-center py-20">
+                                <Loader2 className="w-8 h-8 text-forest/20 animate-spin" />
                             </div>
                         ) : messages.length === 0 ? (
-                            <div className="text-center text-charcoal-400 text-sm mt-10">
-                                <p>How can we help you today?</p>
+                            <div className="text-center py-10 space-y-3">
+                                <p className="text-charcoal font-serif italic text-lg opacity-40">&ldquo;How can we assist your practice today?&rdquo;</p>
+                                <div className="w-8 h-1 bg-forest/20 mx-auto rounded-full" />
                             </div>
                         ) : (
                             messages.map((msg) => {
@@ -217,8 +223,10 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
                                 return (
                                     <div key={msg.id} className={clsx("flex", isMe ? "justify-end" : "justify-start")}>
                                         <div className={clsx(
-                                            "max-w-[80%] p-3 rounded-2xl text-sm",
-                                            isMe ? "bg-charcoal-900 text-cream-50 rounded-br-none" : "bg-white border border-cream-200 text-charcoal-800 rounded-bl-none shadow-sm"
+                                            "max-w-[85%] px-5 py-3 rounded-lg text-[13px] font-medium leading-relaxed shadow-tight",
+                                            isMe
+                                                ? "bg-forest text-white rounded-br-none"
+                                                : "bg-white border border-border-grey text-charcoal rounded-bl-none"
                                         )}>
                                             {msg.message}
                                         </div>
@@ -230,27 +238,27 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
                     </div>
 
                     {/* Input Area */}
-                    <div className="p-3 bg-white border-t border-cream-200">
+                    <div className="p-4 bg-white border-t border-border-grey">
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault()
                                 handleSend()
                             }}
-                            className="flex gap-2"
+                            className="flex gap-3"
                         >
                             <input
                                 type="text"
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
-                                placeholder="Type a message..."
-                                className="flex-1 px-4 py-2 bg-cream-50 border border-cream-300 rounded-full text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900 text-sm"
+                                placeholder="Concise message..."
+                                className="flex-1 px-5 py-3 bg-off-white border border-border-grey rounded-lg text-charcoal focus:outline-none focus:ring-1 focus:ring-forest text-[13px] font-medium placeholder:text-slate/30 transition-all"
                             />
                             <button
                                 type="submit"
                                 disabled={!inputValue.trim() || isSending}
-                                className="w-10 h-10 bg-charcoal-900 text-cream-50 rounded-full flex items-center justify-center hover:bg-charcoal-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="w-12 h-12 bg-charcoal text-white rounded-lg flex items-center justify-center hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-tight"
                             >
-                                {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                             </button>
                         </form>
                     </div>
@@ -260,11 +268,11 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
             {/* Floating Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-14 h-14 bg-rose-gold text-white rounded-full shadow-lg hover:brightness-110 transition-all hover:scale-105 active:scale-95 flex items-center justify-center pointer-events-auto relative"
+                className="w-16 h-16 bg-forest text-white rounded-lg shadow-card hover:brightness-110 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center pointer-events-auto relative border border-white/10"
             >
-                {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+                {isOpen ? <X className="w-7 h-7" /> : <MessageCircle className="w-7 h-7" />}
                 {!isOpen && unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white animate-pulse shadow-sm">
+                    <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-lg bg-charcoal border-2 border-white text-[10px] font-bold text-white shadow-tight">
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}

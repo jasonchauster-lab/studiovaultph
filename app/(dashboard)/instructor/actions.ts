@@ -362,7 +362,7 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
     // slot.studios might be an array if it's a multi-join, but single means it's an object
     // @ts-ignore - Supabase type inference might complain without regenerating types
     const studioData = slot.studios as any;
-    if (studioData?.is_founding_partner && studioData?.custom_fee_percentage !== undefined) {
+    if (studioData?.custom_fee_percentage !== undefined) {
         feePercentage = studioData.custom_fee_percentage;
     }
 

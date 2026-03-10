@@ -75,9 +75,11 @@ export default function PartnerFeeClient({
         const p = partners[index]
         const newFee = parseInt(val) || 20
         const newPartners = [...partners]
-        newPartners[index] = { ...newPartners[index], custom_fee_percentage: newFee }
+        // We set is_founding_partner to true to ensure the backend logic recognizes the custom fee,
+        // but we hide this status from the UI as requested.
+        newPartners[index] = { ...newPartners[index], custom_fee_percentage: newFee, is_founding_partner: true }
         setPartners(newPartners)
-        await updatePartnerFeeSettings(p.id, p.type, p.is_founding_partner, newFee)
+        await updatePartnerFeeSettings(p.id, p.type, true, newFee)
     }
 
     const iList = partners.filter(p => p.type === 'profile')
@@ -94,11 +96,11 @@ export default function PartnerFeeClient({
                 <div className="flex items-start justify-between gap-4 mb-6 relative z-10">
                     <div className="min-w-0">
                         <p className="text-2xl font-serif text-charcoal truncate group-hover:translate-x-1 transition-transform duration-700 tracking-tighter">
-                            {p.name || <span className="text-charcoal/20 italic">Unnamed Node</span>}
+                            {p.name || <span className="text-charcoal/20 italic">Unnamed</span>}
                         </p>
                         <div className="flex items-center gap-3 mt-2">
                             <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">
-                                {p.type === 'studio' ? 'Spatial Node' : 'Ethereal Entity'}
+                                {p.type === 'studio' ? 'Studio' : 'Instructor'}
                             </p>
                             {p.location && (
                                 <>
@@ -108,18 +110,10 @@ export default function PartnerFeeClient({
                             )}
                         </div>
                     </div>
-                    <button
-                        onClick={() => handleToggle(trueIdx)}
-                        className={clsx(
-                            "shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all duration-500",
-                            p.is_founding_partner
-                                ? "bg-gold text-white border-gold shadow-lg shadow-gold/20"
-                                : "bg-alabaster/50 text-charcoal/30 border-cream-100 hover:border-gold/30 hover:text-gold"
-                        )}
-                    >
-                        <Star className={clsx("w-3 h-3", p.is_founding_partner ? "fill-white" : "fill-charcoal/10")} />
-                        {p.is_founding_partner ? "Founding" : "Standard"}
-                    </button>
+                    <div className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border bg-alabaster/50 text-charcoal/30 border-cream-100">
+                        <Star className="w-3 h-3 fill-charcoal/10" />
+                        Partner
+                    </div>
                 </div>
 
                 {/* Contact Info */}
@@ -147,7 +141,7 @@ export default function PartnerFeeClient({
                             className="bg-charcoal text-white px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:brightness-110 transition-all flex items-center gap-2 shadow-xl shadow-charcoal/10 group/btn"
                         >
                             <Calendar className="w-3.5 h-3.5 text-gold group-hover/btn:scale-110 transition-transform" />
-                            Temporal Grid
+                            View Bookings
                         </button>
                     </div>
                 </div>
@@ -156,24 +150,13 @@ export default function PartnerFeeClient({
                 <div className="bg-alabaster/30 p-5 rounded-2xl border border-cream-100 relative z-10">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.3em] mb-1">Platform Retainment</p>
-                            {!p.is_founding_partner && (
-                                <p className="text-[8px] font-black text-rose/60 uppercase tracking-widest italic leading-none">
-                                    Spectral bypass locked
-                                </p>
-                            )}
+                            <p className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.3em] mb-1">Commission Fee</p>
                         </div>
                         <div className="relative">
                             <select
-                                disabled={!p.is_founding_partner}
                                 value={p.custom_fee_percentage}
                                 onChange={e => handleSaveFee(trueIdx, e.target.value)}
-                                className={clsx(
-                                    "px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none transition-all duration-300 border appearance-none pr-10 min-w-[80px] text-center",
-                                    !p.is_founding_partner
-                                        ? "bg-cream-100/50 border-cream-200 text-charcoal/20 cursor-not-allowed"
-                                        : "bg-white border-cream-100 text-charcoal shadow-sm focus:ring-4 focus:ring-gold/10 focus:border-gold/30"
-                                )}
+                                className="px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none transition-all duration-300 border appearance-none pr-10 min-w-[80px] text-center bg-white border-cream-100 text-charcoal shadow-sm focus:ring-4 focus:ring-gold/10 focus:border-gold/30"
                             >
                                 <option value="5">5%</option>
                                 <option value="10">10%</option>
@@ -190,7 +173,7 @@ export default function PartnerFeeClient({
                 {/* Studio Documents section */}
                 {p.type === 'studio' && p.documents && (
                     <div className="mt-8 pt-8 border-t border-cream-100 relative z-10">
-                        <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-4 ml-1">Validation Matrix</p>
+                        <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-4 ml-1">Studio Documents</p>
                         <div className="grid grid-cols-2 gap-2 mb-4">
                             {[
                                 { link: p.documents.bir, label: 'BIR 2303' },
@@ -258,8 +241,8 @@ export default function PartnerFeeClient({
 
     return (
         <div className="space-y-20 pb-20">
-            <Section title="Spatial Nodes" list={sList} />
-            <Section title="Ethereal Entities" list={iList} />
+            <Section title="Studios" list={sList} />
+            <Section title="Instructors" list={iList} />
         </div>
     )
 }

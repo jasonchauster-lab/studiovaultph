@@ -192,9 +192,9 @@ export async function requestBooking(
 
     // Determine the fee percentage
     let feePercentage = 20;
-    if (studio?.is_founding_partner && studio?.custom_fee_percentage !== undefined) {
+    if (studio?.custom_fee_percentage !== undefined) {
         feePercentage = studio.custom_fee_percentage;
-    } else if (instructor?.is_founding_partner && instructor?.custom_fee_percentage !== undefined) {
+    } else if (instructor?.custom_fee_percentage !== undefined) {
         feePercentage = instructor.custom_fee_percentage;
     }
 
@@ -711,9 +711,9 @@ export async function bookInstructorSession(
     const baseFee = studioFee + instructorFee;
     let feePercentage = 20;
 
-    if (selectedSlot.studios?.is_founding_partner && selectedSlot.studios?.custom_fee_percentage !== undefined) {
+    if (selectedSlot.studios?.custom_fee_percentage !== undefined) {
         feePercentage = selectedSlot.studios.custom_fee_percentage;
-    } else if (instructorProfile?.is_founding_partner && instructorProfile?.custom_fee_percentage !== undefined) {
+    } else if (instructorProfile?.custom_fee_percentage !== undefined) {
         feePercentage = instructorProfile.custom_fee_percentage;
     }
 

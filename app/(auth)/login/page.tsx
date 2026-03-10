@@ -153,31 +153,31 @@ function LoginContent() {
                     className="object-cover transition-transform duration-[20s] group-hover:scale-105"
                     priority
                 />
-                <div className="absolute inset-0 bg-charcoal/40" />
-                <div className="absolute inset-0 bg-gradient-to-b from-charcoal/20 via-transparent to-charcoal/60" />
+                <div className="absolute inset-0 bg-charcoal/30" />
+                <div className="absolute inset-0 bg-gradient-to-b from-charcoal/10 via-transparent to-charcoal/40" />
 
                 <div className="relative z-10 w-full max-w-md animate-in fade-in slide-in-from-left-8 duration-1000">
-                    <div className="earth-card p-12 border-white/10 bg-white/5 backdrop-blur-md shadow-2xl">
-                        <div className="space-y-10">
-                            <div className="space-y-6">
+                    <div className="earth-card p-12 border-border-grey/50 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
+                        <div className="space-y-12">
+                            <div className="space-y-8">
                                 <Link href="/" className="flex items-center gap-0 group/logo">
-                                    <div className="bg-white p-3 rounded-xl shadow-tight group-hover/logo:rotate-3 transition-transform">
+                                    <div className="bg-white p-3 rounded-xl shadow-tight group-hover/logo:rotate-3 transition-transform border border-border-grey/50">
                                         <Image src="/logo.png" alt="StudioVault Logo" width={60} height={60} className="w-12 h-12 object-contain" />
                                     </div>
-                                    <span className="text-2xl font-serif font-bold text-white tracking-tight ml-3 drop-shadow-md">StudioVaultPH</span>
+                                    <span className="text-2xl font-serif font-bold text-charcoal tracking-tight ml-4">StudioVaultPH</span>
                                 </Link>
-                                <h2 className="text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.1] tracking-tight drop-shadow-lg">
+                                <h2 className="text-5xl lg:text-6xl font-serif font-bold text-charcoal leading-[1.1] tracking-tight">
                                     The Sanctuary <br />
-                                    <span className="text-white/80 italic">of Movement.</span>
+                                    <span className="text-forest italic">of Movement.</span>
                                 </h2>
                             </div>
 
-                            <p className="text-lg text-white/90 font-medium leading-relaxed italic drop-shadow-md">
+                            <p className="text-xl text-slate font-medium leading-relaxed italic border-l-4 border-forest/20 pl-6">
                                 &ldquo;Experience a platform designed with the precision and grace of Pilates itself.&rdquo;
                             </p>
 
-                            <div className="flex items-center gap-4 text-[10px] font-bold text-white/60 uppercase tracking-[0.3em] border-t border-white/10 pt-10 mt-12">
-                                <Award className="w-5 h-5" />
+                            <div className="flex items-center gap-4 text-[10px] font-bold text-slate uppercase tracking-[0.4em] border-t border-border-grey pt-10 mt-12">
+                                <Award className="w-5 h-5 text-forest" />
                                 A Foundation Built for Professionals
                             </div>
                         </div>
@@ -193,7 +193,7 @@ function LoginContent() {
                     className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-3 text-slate hover:text-charcoal transition-all group"
                 >
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Return Home</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.4em]">Return Home</span>
                 </Link>
 
                 <div className="w-full max-w-md">
@@ -296,7 +296,7 @@ function LoginContent() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="btn-forest w-full py-5 rounded-lg text-[11px] font-bold uppercase tracking-[0.2em] shadow-tight disabled:opacity-50"
+                            className="btn-forest w-full py-5 rounded-lg text-[11px] font-bold uppercase tracking-[0.3em] shadow-tight disabled:opacity-50"
                         >
                             {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (isSignUp ? 'Initiate Account' : 'Authenticate')}
                         </button>

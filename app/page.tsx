@@ -11,7 +11,7 @@ export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-off-white selection:bg-forest/10 selection:text-charcoal relative">
+    <div className="min-h-screen bg-white selection:bg-forest/10 selection:text-charcoal relative">
       <RoleSelectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* Navigation */}
@@ -26,6 +26,7 @@ export default function LandingPage() {
               Log In
             </Link>
             <button
+              type="button"
               onClick={() => setIsModalOpen(true)}
               className="bg-charcoal text-white px-8 py-3.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight"
             >
@@ -36,7 +37,7 @@ export default function LandingPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative px-6 py-24 md:py-40 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
+      <section className="relative px-6 py-24 md:py-40 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20 bg-white">
         <div className="max-w-3xl space-y-12 relative z-10 flex-1">
           <div className="space-y-8">
             <div className="inline-flex items-center gap-4 bg-white border border-border-grey px-6 py-3 rounded-lg shadow-tight animate-in fade-in slide-in-from-left-4 duration-700">
@@ -56,6 +57,7 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row gap-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
             <button
+              type="button"
               onClick={() => setIsModalOpen(true)}
               className="group bg-forest text-white px-12 py-6 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all flex items-center gap-4 shadow-tight"
             >
@@ -99,8 +101,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Trust Blocks Section */}
-      <section className="px-6 py-32 bg-off-white">
+      {/* Trust Blocks Section (Features) */}
+      <section className="px-6 py-32 bg-[#F9FAFB]">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-3 gap-12">
             {[
@@ -110,7 +112,7 @@ export default function LandingPage() {
             ].map((prop, i) => (
               <div key={i} className="bg-white border border-border-grey p-12 rounded-lg group hover:border-forest/30 transition-all duration-500 shadow-tight">
                 <div className={clsx(
-                  "w-20 h-20 rounded-lg flex items-center justify-center mb-10 shadow-tight transition-all duration-500 group-hover:-translate-y-2",
+                  "w-20 h-20 rounded-lg flex items-center justify-center mb-10 shadow-tight transition-all duration-500 group-hover:-translate-y-2 border border-border-grey/50",
                   prop.color === 'forest' ? "bg-forest/10 text-forest" : prop.color === 'charcoal' ? "bg-charcoal/10 text-charcoal" : "bg-slate/10 text-slate"
                 )}>
                   <prop.icon className="w-8 h-8" />
@@ -123,7 +125,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* How It Works Section (Workflow) */}
       <section className="px-6 py-40 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto space-y-24 relative z-10">
           <div className="text-center space-y-6">
@@ -138,13 +140,13 @@ export default function LandingPage() {
               { step: "03", title: "THRIVE", desc: "Secure payouts and high-level management ensure complete peace of mind." }
             ].map((step, i) => (
               <div key={i} className="relative flex flex-col items-center text-center space-y-10 group">
-                <div className="w-28 h-28 rounded-xl bg-off-white flex items-center justify-center shadow-tight border border-border-grey relative group-hover:-translate-y-2 transition-transform">
-                  <span className="text-[9px] font-bold text-forest absolute -top-3 left-1/2 -translate-x-1/2 bg-white px-4 py-1.5 rounded-lg border border-border-grey shadow-tight uppercase tracking-widest leading-none">{step.step}</span>
-                  <span className="text-2xl font-serif text-charcoal">{step.title}</span>
+                <div className="w-36 h-36 rounded-2xl bg-off-white flex items-center justify-center shadow-tight border border-border-grey relative group-hover:-translate-y-2 transition-transform">
+                  <span className="text-[10px] font-bold text-forest absolute -top-4 left-1/2 -translate-x-1/2 bg-white px-5 py-2 rounded-lg border border-border-grey shadow-tight uppercase tracking-widest leading-none">{step.step}</span>
+                  <span className="text-3xl font-serif text-charcoal tracking-widest">{step.title}</span>
                 </div>
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold text-charcoal uppercase tracking-[0.2em]">{step.title} YOUR TERMS</h4>
-                  <p className="text-slate text-[13px] font-medium leading-[1.8] max-w-[280px]">{step.desc}</p>
+                  <h4 className="text-[11px] font-bold text-charcoal uppercase tracking-[0.3em]">{step.title} YOUR TERMS</h4>
+                  <p className="text-slate text-[14px] font-medium leading-[1.8] max-w-[280px]">{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -152,7 +154,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Philosophy Section */}
+      {/* Philosophy Section (Quote) */}
       <section className="px-6 py-40 bg-charcoal relative overflow-hidden">
         <div className="max-w-5xl mx-auto text-center p-16 md:p-32 rounded-xl relative overflow-hidden bg-white/5 border border-white/10">
           <div className="relative z-10 space-y-12">

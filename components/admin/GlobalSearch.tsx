@@ -100,9 +100,9 @@ export default function GlobalSearch({ onOpenBookings }: { onOpenBookings: (id: 
     const handleTogglePartner = async (key: string, id: string, type: 'profile' | 'studio') => {
         const current = editState[key];
         if (!current) return;
-        const newVal = !current.is_founding_partner;
-        setEditState(prev => ({ ...prev, [key]: { ...prev[key], is_founding_partner: newVal, saving: true } }));
-        await updatePartnerFeeSettings(id, type, newVal, current.custom_fee_percentage);
+        // Setting founding partner to true ensures the custom fee logic works, but we don't toggle it in UI anymore.
+        setEditState(prev => ({ ...prev, [key]: { ...prev[key], is_founding_partner: true, saving: true } }));
+        await updatePartnerFeeSettings(id, type, true, current.custom_fee_percentage);
         setEditState(prev => ({ ...prev, [key]: { ...prev[key], saving: false } }));
     };
 
@@ -110,8 +110,8 @@ export default function GlobalSearch({ onOpenBookings }: { onOpenBookings: (id: 
         const newFee = parseInt(fee) || 20;
         const current = editState[key];
         if (!current) return;
-        setEditState(prev => ({ ...prev, [key]: { ...prev[key], custom_fee_percentage: newFee, saving: true } }));
-        await updatePartnerFeeSettings(id, type, current.is_founding_partner, newFee);
+        setEditState(prev => ({ ...prev, [key]: { ...prev[key], custom_fee_percentage: newFee, is_founding_partner: true, saving: true } }));
+        await updatePartnerFeeSettings(id, type, true, newFee);
         setEditState(prev => ({ ...prev, [key]: { ...prev[key], saving: false } }));
     };
 
@@ -171,12 +171,6 @@ export default function GlobalSearch({ onOpenBookings }: { onOpenBookings: (id: 
                                                     {result.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{result.phone}</span>}
                                                 </div>
                                             </div>
-                                            {/* Founder badge preview */}
-                                            {state?.is_founding_partner && (
-                                                <span className="shrink-0 flex items-center gap-1 bg-amber-100 text-amber-700 text-[10px] font-medium px-2 py-0.5 rounded-full border border-amber-200">
-                                                    <Star className="w-2.5 h-2.5 fill-amber-500" /> Founding
-                                                </span>
-                                            )}
                                             <span className="shrink-0 text-charcoal-400">
                                                 {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                                             </span>
@@ -188,33 +182,19 @@ export default function GlobalSearch({ onOpenBookings }: { onOpenBookings: (id: 
                                                 <p className="text-[10px] uppercase tracking-wider text-charcoal-400 mb-3 font-medium">Partner Settings</p>
                                                 <div className="flex flex-wrap items-center gap-3">
                                                     {/* Founding Partner Toggle */}
-                                                    <button
-                                                        onClick={() => handleTogglePartner(key, result.id, result.type)}
-                                                        disabled={state.saving}
-                                                        className={clsx(
-                                                            "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border",
-                                                            state.is_founding_partner
-                                                                ? "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200"
-                                                                : "bg-white text-charcoal-600 border-cream-300 hover:bg-cream-100"
-                                                        )}
-                                                    >
-                                                        <Star className={clsx("w-3.5 h-3.5", state.is_founding_partner ? "fill-amber-500" : "")} />
-                                                        {state.is_founding_partner ? "Founding Partner ✓" : "Standard Partner"}
-                                                    </button>
+                                                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-white text-charcoal-600 border border-cream-300">
+                                                        <Star className="w-3.5 h-3.5 fill-gold/20" />
+                                                        Partner
+                                                    </div>
 
                                                     {/* Fee Selector */}
                                                     <div className="flex items-center gap-2">
                                                         <label className="text-xs text-charcoal-500">Fee:</label>
                                                         <select
-                                                            disabled={!state.is_founding_partner || state.saving}
+                                                            disabled={state.saving}
                                                             value={state.custom_fee_percentage}
                                                             onChange={(e) => handleChangeFee(key, result.id, result.type, e.target.value)}
-                                                            className={clsx(
-                                                                "border rounded-md text-xs px-2 py-1.5 outline-none focus:ring-1 focus:ring-charcoal-500",
-                                                                !state.is_founding_partner
-                                                                    ? "bg-cream-100 border-cream-200 text-charcoal-400 cursor-not-allowed"
-                                                                    : "bg-white border-cream-300 text-charcoal-900"
-                                                            )}
+                                                            className="border rounded-md text-xs px-2 py-1.5 outline-none focus:ring-1 focus:ring-charcoal-500 bg-white border-cream-300 text-charcoal-900"
                                                         >
                                                             <option value="5">5%</option>
                                                             <option value="10">10%</option>
@@ -229,9 +209,6 @@ export default function GlobalSearch({ onOpenBookings }: { onOpenBookings: (id: 
                                                         </span>
                                                     )}
                                                 </div>
-                                                {!state.is_founding_partner && (
-                                                    <p className="text-[10px] text-charcoal-400 italic mt-2">Enable Founding Partner to set a custom fee.</p>
-                                                )}
                                                 <div className="mt-3 pt-3 border-t border-cream-200">
                                                     <Link
                                                         href={result.url || '#'}
