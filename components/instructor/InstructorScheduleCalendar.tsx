@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes, isPast } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react'
 import clsx from 'clsx'
 import { toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
@@ -43,7 +43,13 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     const [singleEndTime, setSingleEndTime] = useState('10:00')
     const [locations, setLocations] = useState<string[]>(['BGC - High Street'])
     const [equipment, setEquipment] = useState<string[]>(['Reformer'])
+    const [expandedCities, setExpandedCities] = useState<string[]>(['BGC', 'Makati'])
 
+    const toggleCityAccordion = (city: string) => {
+        setExpandedCities(prev =>
+            prev.includes(city) ? prev.filter(c => c !== city) : [...prev, city]
+        )
+    }
     const toggleLocation = (loc: string) => {
         setLocations(prev =>
             prev.includes(loc)
@@ -592,42 +598,68 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                             <div className="space-y-6">
                                 <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-2">Geographic Deployment</h4>
-                                <div className="space-y-4 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="space-y-4">
                                     {Object.entries(GROUPED_AREAS).map(([city, cityLocations]) => {
-                                        const allSelected = cityLocations.every(loc => locations.includes(loc));
+                                        const selectedInCity = cityLocations.filter(loc => locations.includes(loc));
+                                        const allSelected = selectedInCity.length === cityLocations.length;
+                                        const isExpanded = expandedCities.includes(city);
+
                                         return (
-                                            <div key={city} className="earth-card p-8 space-y-6 bg-white border border-border-grey shadow-tight">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => toggleCityGroup(cityLocations)}
-                                                        className="text-[10px] font-bold text-forest hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-forest/20 underline-offset-8"
-                                                    >
-                                                        {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
-                                                    </button>
+                                            <div key={city} className="earth-card overflow-hidden bg-white border border-border-grey shadow-tight">
+                                                {/* Accordion Header */}
+                                                <div
+                                                    className="flex items-center justify-between p-6 cursor-pointer hover:bg-off-white transition-all border-b border-border-grey/30"
+                                                    onClick={() => toggleCityAccordion(city)}
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
+                                                        {selectedInCity.length > 0 && (
+                                                            <span className="text-[9px] font-bold text-forest bg-forest/5 px-2.5 py-1 rounded-full uppercase tracking-widest border border-forest/10">
+                                                                {selectedInCity.length} SELECTED
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-6">
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                toggleCityGroup(cityLocations);
+                                                            }}
+                                                            className="text-[9px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-slate/20 underline-offset-8"
+                                                        >
+                                                            {allSelected ? 'DESELECT' : 'SELECT ALL'}
+                                                        </button>
+                                                        {isExpanded ? <ChevronUp className="w-4 h-4 text-slate" /> : <ChevronDown className="w-4 h-4 text-slate" />}
+                                                    </div>
                                                 </div>
-                                                <div className="flex flex-wrap gap-3">
-                                                    {cityLocations.map(area => {
-                                                        const isSelected = locations.includes(area);
-                                                        const displayName = area.split(' - ')[1] || area;
-                                                        return (
-                                                            <button
-                                                                key={area}
-                                                                type="button"
-                                                                onClick={() => toggleLocation(area)}
-                                                                className={clsx(
-                                                                    "px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border",
-                                                                    isSelected
-                                                                        ? "bg-forest text-white border-forest shadow-tight"
-                                                                        : "bg-off-white text-slate border-border-grey hover:border-forest/30 hover:text-forest shadow-sm"
-                                                                )}
-                                                            >
-                                                                {displayName}
-                                                            </button>
-                                                        )
-                                                    })}
-                                                </div>
+
+                                                {/* Accordion Content */}
+                                                {isExpanded && (
+                                                    <div className="p-8 bg-off-white/40 animate-in slide-in-from-top-2 duration-300">
+                                                        <div className="flex flex-wrap gap-2.5">
+                                                            {cityLocations.map(area => {
+                                                                const isSelected = locations.includes(area);
+                                                                const displayName = area.split(' - ')[1] || area;
+                                                                return (
+                                                                    <button
+                                                                        key={area}
+                                                                        type="button"
+                                                                        onClick={() => toggleLocation(area)}
+                                                                        className={clsx(
+                                                                            "px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border",
+                                                                            isSelected
+                                                                                ? "bg-forest text-white border-forest shadow-tight"
+                                                                                : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-forest shadow-sm"
+                                                                        )}
+                                                                    >
+                                                                        {displayName}
+                                                                    </button>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )
                                     })}
@@ -737,16 +769,74 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
-                                <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.3em] ml-6">Location</label>
-                                <select
-                                    value={locations[0] || 'BGC'}
-                                    onChange={(e) => setLocations([e.target.value])}
-                                    className="w-full px-8 py-5 border border-border-grey rounded-lg bg-white text-[10px] font-bold text-charcoal outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-[0.2em] cursor-pointer appearance-none shadow-tight"
-                                    name="location"
-                                >
-                                    {AREAS.map(l => <option key={l} value={l}>{l.toUpperCase()}</option>)}
-                                </select>
+                            <div className="space-y-6">
+                                <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-2">Geographic Deployment</h4>
+                                <div className="space-y-4">
+                                    {Object.entries(GROUPED_AREAS).map(([city, cityLocations]) => {
+                                        const selectedInCity = cityLocations.filter(loc => locations.includes(loc));
+                                        const allSelected = selectedInCity.length === cityLocations.length;
+                                        const isExpanded = expandedCities.includes(city);
+
+                                        return (
+                                            <div key={city} className="earth-card overflow-hidden bg-white border border-border-grey shadow-tight">
+                                                {/* Accordion Header */}
+                                                <div
+                                                    className="flex items-center justify-between p-6 cursor-pointer hover:bg-off-white transition-all border-b border-border-grey/30"
+                                                    onClick={() => toggleCityAccordion(city)}
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
+                                                        {selectedInCity.length > 0 && (
+                                                            <span className="text-[9px] font-bold text-forest bg-forest/5 px-2.5 py-1 rounded-full uppercase tracking-widest border border-forest/10">
+                                                                {selectedInCity.length} SELECTED
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-6">
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                toggleCityGroup(cityLocations);
+                                                            }}
+                                                            className="text-[9px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-slate/20 underline-offset-8"
+                                                        >
+                                                            {allSelected ? 'DESELECT' : 'SELECT ALL'}
+                                                        </button>
+                                                        {isExpanded ? <ChevronUp className="w-4 h-4 text-slate" /> : <ChevronDown className="w-4 h-4 text-slate" />}
+                                                    </div>
+                                                </div>
+
+                                                {/* Accordion Content */}
+                                                {isExpanded && (
+                                                    <div className="p-8 bg-off-white/40 animate-in slide-in-from-top-2 duration-300">
+                                                        <div className="flex flex-wrap gap-2.5">
+                                                            {cityLocations.map(area => {
+                                                                const isSelected = locations.includes(area);
+                                                                const displayName = area.split(' - ')[1] || area;
+                                                                return (
+                                                                    <button
+                                                                        key={area}
+                                                                        type="button"
+                                                                        onClick={() => toggleLocation(area)}
+                                                                        className={clsx(
+                                                                            "px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border",
+                                                                            isSelected
+                                                                                ? "bg-forest text-white border-forest shadow-tight"
+                                                                                : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-forest shadow-sm"
+                                                                        )}
+                                                                    >
+                                                                        {displayName}
+                                                                    </button>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )
+                                    })}
+                                </div>
                             </div>
 
                             <div className="space-y-4">

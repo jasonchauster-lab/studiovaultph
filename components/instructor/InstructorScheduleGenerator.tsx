@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { addAvailability, deleteAvailability, generateRecurringAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
-import { Loader2, Plus, Trash2, Clock, MapPin, Repeat, CheckCircle, AlertCircle, Calendar } from 'lucide-react'
+import { Loader2, Plus, Trash2, Clock, MapPin, Repeat, CheckCircle, AlertCircle, Calendar, ChevronDown, ChevronUp } from 'lucide-react'
 import { clsx } from 'clsx'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -41,6 +41,13 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
     const [endTime, setEndTime] = useState('17:00');
     const [locations, setLocations] = useState<string[]>(['BGC - High Street']);
     const [equipment, setEquipment] = useState<string[]>(['Reformer']);
+    const [expandedCities, setExpandedCities] = useState<string[]>(['BGC', 'Makati']);
+
+    const toggleCityAccordion = (city: string) => {
+        setExpandedCities(prev =>
+            prev.includes(city) ? prev.filter(c => c !== city) : [...prev, city]
+        )
+    }
 
     const toggleLocation = (loc: string) => {
         setLocations(prev =>
@@ -271,42 +278,68 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
 
                             <div className="earth-card p-8 flex flex-col bg-white border border-border-grey shadow-tight">
                                 <h3 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-6 px-2">Location</h3>
-                                <div className="space-y-4 max-h-[350px] overflow-y-auto pr-3 custom-scrollbar flex-1">
+                                <div className="space-y-4 flex-1">
                                     {Object.entries(GROUPED_LOCATIONS).map(([city, cityLocations]) => {
-                                        const allSelected = cityLocations.every(loc => locations.includes(loc));
+                                        const selectedInCity = cityLocations.filter(loc => locations.includes(loc));
+                                        const allSelected = selectedInCity.length === cityLocations.length;
+                                        const isExpanded = expandedCities.includes(city);
+
                                         return (
-                                            <div key={city} className="p-6 bg-off-white rounded-xl border border-border-grey shadow-sm space-y-6">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => toggleCityGroup(cityLocations)}
-                                                        className="text-[10px] font-bold text-forest hover:text-charcoal transition-colors uppercase tracking-[0.22em] underline decoration-forest/20 underline-offset-8"
-                                                    >
-                                                        {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
-                                                    </button>
+                                            <div key={city} className="bg-white rounded-xl border border-border-grey shadow-sm overflow-hidden transition-all duration-300">
+                                                {/* Accordion Header */}
+                                                <div
+                                                    className="flex items-center justify-between p-6 cursor-pointer hover:bg-off-white transition-all border-b border-border-grey/30"
+                                                    onClick={() => toggleCityAccordion(city)}
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
+                                                        {selectedInCity.length > 0 && (
+                                                            <span className="text-[9px] font-bold text-forest bg-forest/5 px-2.5 py-1 rounded-full uppercase tracking-widest border border-forest/10">
+                                                                {selectedInCity.length} SELECTED
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-6">
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                toggleCityGroup(cityLocations);
+                                                            }}
+                                                            className="text-[9px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-slate/20 underline-offset-8"
+                                                        >
+                                                            {allSelected ? 'DESELECT' : 'SELECT ALL'}
+                                                        </button>
+                                                        {isExpanded ? <ChevronUp className="w-4 h-4 text-slate" /> : <ChevronDown className="w-4 h-4 text-slate" />}
+                                                    </div>
                                                 </div>
-                                                <div className="flex flex-wrap gap-1.5">
-                                                    {cityLocations.map(l => {
-                                                        const isSelected = locations.includes(l);
-                                                        const displayName = l.split(' - ')[1] || l;
-                                                        return (
-                                                            <button
-                                                                key={l}
-                                                                type="button"
-                                                                onClick={() => toggleLocation(l)}
-                                                                className={clsx(
-                                                                    "px-4 py-2 rounded-lg text-[9px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border",
-                                                                    isSelected
-                                                                        ? "bg-forest text-white border-forest shadow-tight"
-                                                                        : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-charcoal shadow-sm"
-                                                                )}
-                                                            >
-                                                                {displayName}
-                                                            </button>
-                                                        )
-                                                    })}
-                                                </div>
+
+                                                {/* Accordion Content */}
+                                                {isExpanded && (
+                                                    <div className="p-8 bg-off-white/40 animate-in slide-in-from-top-2 duration-300">
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {cityLocations.map(l => {
+                                                                const isSelected = locations.includes(l);
+                                                                const displayName = l.split(' - ')[1] || l;
+                                                                return (
+                                                                    <button
+                                                                        key={l}
+                                                                        type="button"
+                                                                        onClick={() => toggleLocation(l)}
+                                                                        className={clsx(
+                                                                            "px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border",
+                                                                            isSelected
+                                                                                ? "bg-forest text-white border-forest shadow-tight"
+                                                                                : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-charcoal shadow-sm"
+                                                                        )}
+                                                                    >
+                                                                        {displayName}
+                                                                    </button>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )
                                     })}
