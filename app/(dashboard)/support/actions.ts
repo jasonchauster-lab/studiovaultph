@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function createTicket(message: string) {
+export async function createTicket(message: string, messageId?: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -28,6 +28,7 @@ export async function createTicket(message: string) {
     const { error: messageError } = await supabase
         .from('support_messages')
         .insert({
+            id: messageId,
             ticket_id: ticket.id,
             sender_id: user.id,
             message: message

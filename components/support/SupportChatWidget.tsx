@@ -18,7 +18,7 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
     const [unreadCount, setUnreadCount] = useState(0)
 
     const messagesEndRef = useRef<HTMLDivElement>(null)
-    const supabase = createClient()
+    const [supabase] = useState(() => createClient())
 
     // Scroll to bottom
     const scrollToBottom = () => {
@@ -103,8 +103,10 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
                 (payload) => {
                     const newMsg = payload.new as SupportMessage
                     setMessages((prev) => {
-                        // Avoid duplicates if already added optimistically
-                        if (prev.find(m => m.id === newMsg.id)) return prev
+                        const exists = prev.find(m => m.id === newMsg.id)
+                        if (exists) {
+                            return prev.map(m => m.id === newMsg.id ? newMsg : m)
+                        }
                         return [...prev, newMsg]
                     })
 
@@ -127,8 +129,9 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
         setInputValue('') // Clear immediately for snappy UX
 
         // Optimistic message so it appears instantly
+        const tempId = window.crypto?.randomUUID ? window.crypto.randomUUID() : `temp-${Date.now()}`
         const optimisticMsg: SupportMessage = {
-            id: `optimistic-${Date.now()}`,
+            id: tempId,
             ticket_id: ticket?.id || '',
             sender_id: userId,
             message: text,
@@ -139,7 +142,7 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
         try {
             if (!ticket) {
                 // Create a new ticket + first message
-                const result = await createTicket(text)
+                const result = await createTicket(text, optimisticMsg.id)
                 if (result.error) {
                     console.error(result.error)
                     alert(`Error: ${result.error}`)
@@ -156,17 +159,11 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
                         .single()
                     if (newTicket) setTicket(newTicket)
 
-                    // Replace the optimistic message with the real one from DB
-                    const { data: msgs } = await supabase
-                        .from('support_messages')
-                        .select('*')
-                        .eq('ticket_id', result.ticketId)
-                        .order('created_at', { ascending: true })
-                    if (msgs) setMessages(msgs)
+                    // No need to fetch all messages again, realtime will update the optimistic one
                 }
             } else {
                 // Send message to existing ticket
-                const result = await sendMessage(ticket.id, text)
+                const result = await sendMessage(ticket.id, text, optimisticMsg.id)
                 if (result.error) {
                     console.error(result.error)
                     alert(`Error: ${result.error}`)
