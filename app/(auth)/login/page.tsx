@@ -162,7 +162,7 @@ function LoginContent() {
                             <div className="space-y-8">
                                 <Link href="/" aria-label="Studio Vault PH Home" className="flex items-center gap-0 group/logo">
                                     <div className="bg-white p-3 rounded-xl shadow-tight group-hover/logo:rotate-3 transition-transform border border-border-grey/50">
-                                        <Image src="/logo.png" alt="" width={60} height={60} className="w-12 h-12 object-contain" />
+                                        <Image src="/logo.png" alt="StudioVault Logo" width={60} height={60} className="w-12 h-12 object-contain" />
                                     </div>
                                     <span className="text-2xl font-serif font-bold text-charcoal tracking-tight ml-4">StudioVaultPH</span>
                                 </Link>
@@ -172,11 +172,11 @@ function LoginContent() {
                                 </h2>
                             </div>
 
-                            <p className="text-xl text-slate font-medium leading-relaxed italic border-l-4 border-forest/20 pl-6">
+                            <p className="text-xl text-charcoal-700 font-medium leading-relaxed italic border-l-4 border-forest/20 pl-6">
                                 &ldquo;Experience a platform designed with the precision and grace of Pilates itself.&rdquo;
                             </p>
 
-                            <div className="flex items-center gap-4 text-[10px] font-bold text-slate uppercase tracking-[0.4em] border-t border-border-grey pt-10 mt-12">
+                            <div className="flex items-center gap-4 text-[10px] font-bold text-slate-600 uppercase tracking-[0.4em] border-t border-border-grey pt-10 mt-12">
                                 <Award className="w-5 h-5 text-forest" />
                                 A Foundation Built for Professionals
                             </div>
@@ -186,11 +186,11 @@ function LoginContent() {
             </div>
 
             {/* Right Side: Form Content */}
-            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-24 overflow-y-auto relative bg-off-white">
+            <main className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-24 overflow-y-auto relative bg-off-white">
                 {/* Back Button */}
                 <Link
                     href="/"
-                    className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-3 text-slate hover:text-charcoal transition-all group"
+                    className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-3 text-slate-600 hover:text-charcoal transition-all group"
                 >
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                     <span className="text-[10px] font-bold uppercase tracking-[0.4em]">Return Home</span>
@@ -201,7 +201,7 @@ function LoginContent() {
                         <h1 className="text-4xl font-serif font-bold text-charcoal tracking-tight">
                             {isSignUp ? 'Begin Your Journey' : 'Secure Access'}
                         </h1>
-                        <p className="text-[10px] font-bold text-slate uppercase tracking-[0.4em]">
+                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.4em]">
                             {isSignUp ? 'Establish your digital legacy' : 'Return to your dashboard'}
                         </p>
                     </div>
@@ -225,7 +225,7 @@ function LoginContent() {
                                     onClick={() => setRole(opt.id)}
                                     className={`flex-1 py-3 px-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${role === opt.id
                                         ? 'bg-forest text-white shadow-tight'
-                                        : 'text-slate hover:text-charcoal hover:bg-off-white'
+                                        : 'text-slate-600 hover:text-charcoal hover:bg-off-white'
                                         }`}
                                 >
                                     {opt.label}
@@ -237,7 +237,7 @@ function LoginContent() {
                     <form onSubmit={handleAuth} className="space-y-6">
                         {isSignUp && (
                             <div className="space-y-3">
-                                <label htmlFor="full-name" className="block text-[10px] font-bold text-slate uppercase tracking-widest px-1">Full Name</label>
+                                <label htmlFor="full-name" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest px-1">Full Name</label>
                                 <input
                                     id="full-name"
                                     type="text"
@@ -252,7 +252,7 @@ function LoginContent() {
 
                         {isSignUp && (
                             <div className="space-y-3">
-                                <label htmlFor="birthday" className="block text-[10px] font-bold text-slate uppercase tracking-widest px-1">Date of Birth</label>
+                                <label htmlFor="birthday" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest px-1">Date of Birth</label>
                                 <input
                                     id="birthday"
                                     type="date"
@@ -265,7 +265,7 @@ function LoginContent() {
                         )}
 
                         <div className="space-y-3">
-                            <label htmlFor="email" className="block text-[10px] font-bold text-slate uppercase tracking-widest px-1">Email Address</label>
+                            <label htmlFor="email" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest px-1">Email Address</label>
                             <input
                                 id="email"
                                 type="email"
@@ -279,9 +279,9 @@ function LoginContent() {
 
                         <div className="space-y-3">
                             <div className="flex items-center justify-between px-1">
-                                <label htmlFor="password" id="password-label" className="block text-[10px] font-bold text-slate uppercase tracking-widest">Password</label>
+                                <label htmlFor="password" id="password-label" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest">Password</label>
                                 {!isSignUp && (
-                                    <Link href="/forgot-password" gap-2 className="text-[10px] text-slate hover:text-forest transition-all font-bold uppercase tracking-widest">
+                                    <Link href="/forgot-password" gap-2 className="text-[10px] text-slate-600 hover:text-forest transition-all font-bold uppercase tracking-widest">
                                         Recover Key
                                     </Link>
                                 )}
@@ -321,7 +321,7 @@ function LoginContent() {
                                     setEmail('')
                                     setPassword('')
                                 }}
-                                className="text-slate hover:text-charcoal text-[10px] font-bold uppercase tracking-[0.3em] transition-all group"
+                                className="text-slate-600 hover:text-charcoal text-[10px] font-bold uppercase tracking-[0.3em] transition-all group"
                             >
                                 {isSignUp ? (
                                     <>Account exists? <span className="text-forest border-b border-forest/20 group-hover:border-forest transition-all pb-1">Authenticate</span></>
@@ -333,12 +333,12 @@ function LoginContent() {
                     </form>
 
                     <div className="mt-20 pt-10 border-t border-border-grey text-center">
-                        <p className="text-[9px] font-bold text-slate uppercase tracking-[0.3em] leading-relaxed max-w-xs mx-auto">
-                            By proceeding, you adhere to our <Link href="/terms" className="text-slate hover:text-forest">Terms</Link> and <Link href="/privacy" className="text-slate hover:text-forest">Privacy Policy</Link>.
+                        <p className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.3em] leading-relaxed max-w-xs mx-auto">
+                            By proceeding, you adhere to our <Link href="/terms" className="text-slate-600 hover:text-forest">Terms</Link> and <Link href="/privacy" className="text-slate-600 hover:text-forest">Privacy Policy</Link>.
                         </p>
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
     )
 }

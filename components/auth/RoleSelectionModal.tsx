@@ -75,12 +75,13 @@ export default function RoleSelectionModal({ isOpen, onClose }: RoleSelectionMod
                                 <Image src="/logo.png" alt="StudioVault Logo" width={40} height={40} className="w-10 h-10 object-contain" />
                                 <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">Join StudioVaultPH</h2>
                             </div>
-                            <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">Establish your professional presence</p>
+                            <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em]">Establish your professional presence</p>
                         </div>
                         <button
                             type="button"
                             onClick={onClose}
-                            className="p-2 text-slate hover:text-charcoal hover:bg-off-white rounded-lg transition-colors"
+                            aria-label="Close Modal"
+                            className="p-2 text-slate-600 hover:text-charcoal hover:bg-off-white rounded-lg transition-colors"
                         >
                             <X className="w-6 h-6" />
                         </button>
@@ -100,7 +101,7 @@ export default function RoleSelectionModal({ isOpen, onClose }: RoleSelectionMod
                                     <h3 className="text-xl font-serif font-bold text-charcoal">
                                         {opt.title}
                                     </h3>
-                                    <p className="text-slate text-[13px] font-medium leading-relaxed line-clamp-2">
+                                    <p className="text-charcoal-700 text-[13px] font-medium leading-relaxed line-clamp-2">
                                         {opt.description}
                                     </p>
                                 </div>
@@ -113,7 +114,7 @@ export default function RoleSelectionModal({ isOpen, onClose }: RoleSelectionMod
                     </div>
 
                     <div className="mt-12 pt-10 border-t border-border-grey text-center">
-                        <p className="text-[11px] font-bold text-slate uppercase tracking-[0.2em]">
+                        <p className="text-[11px] font-bold text-slate-600 uppercase tracking-[0.2em]">
                             Already have an account? {' '}
                             <Link href="/login" className="text-forest hover:text-charcoal transition-all border-b border-forest/20 hover:border-charcoal pb-0.5 ml-2">
                                 Authenticate
