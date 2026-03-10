@@ -387,7 +387,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             {/* Modal for Add Slot */}
             {isAddModalOpen && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
                     onClick={() => setIsAddModalOpen(false)}
                 >
                     <div
@@ -488,7 +488,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             {/* Modal for Edit Slot */}
             {isEditModalOpen && editingSlot && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
                     onClick={() => setIsEditModalOpen(false)}
                 >
                     <div
@@ -637,7 +637,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             {/* Bucket Management Modal */}
             {isBucketModalOpen && bucketTime && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
                     onClick={() => setIsBucketModalOpen(false)}
                 >
                     <div

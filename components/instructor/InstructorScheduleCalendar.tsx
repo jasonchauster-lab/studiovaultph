@@ -557,7 +557,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Single Slot Add Modal */}
             {isAddModalOpen && addMode === 'single' && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
                     onClick={() => setIsAddModalOpen(false)}
                 >
                     <div
@@ -619,18 +619,18 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-10">
+                                                    <div className="flex items-center gap-6 shrink-0">
                                                         <button
                                                             type="button"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 toggleCityGroup(cityLocations);
                                                             }}
-                                                            className="text-[9px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-slate/20 underline-offset-8"
+                                                            className="text-[9px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-slate/20 underline-offset-8 whitespace-nowrap"
                                                         >
                                                             {allSelected ? 'DESELECT' : 'SELECT ALL'}
                                                         </button>
-                                                        {isExpanded ? <ChevronUp className="w-4 h-4 text-slate" /> : <ChevronDown className="w-4 h-4 text-slate" />}
+                                                        {isExpanded ? <ChevronUp className="w-4 h-4 text-slate flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate flex-shrink-0" />}
                                                     </div>
                                                 </div>
 
@@ -741,7 +741,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Edit Modal */}
             {isEditModalOpen && editingSlot && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
                     onClick={() => setIsEditModalOpen(false)}
                 >
                     <div
@@ -799,18 +799,18 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-10">
+                                                    <div className="flex items-center gap-6 shrink-0">
                                                         <button
                                                             type="button"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 toggleCityGroup(cityLocations);
                                                             }}
-                                                            className="text-[9px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-slate/20 underline-offset-8"
+                                                            className="text-[9px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-slate/20 underline-offset-8 whitespace-nowrap"
                                                         >
                                                             {allSelected ? 'DESELECT' : 'SELECT ALL'}
                                                         </button>
-                                                        {isExpanded ? <ChevronUp className="w-4 h-4 text-slate" /> : <ChevronDown className="w-4 h-4 text-slate" />}
+                                                        {isExpanded ? <ChevronUp className="w-4 h-4 text-slate flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate flex-shrink-0" />}
                                                     </div>
                                                 </div>
 
@@ -901,7 +901,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Booking Detail Modal */}
             {selectedBooking && (
                 <div
-                    className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
                     onClick={() => setSelectedBooking(null)}
                 >
                     <div

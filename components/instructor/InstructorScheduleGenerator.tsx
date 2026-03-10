@@ -299,18 +299,18 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-10">
+                                                    <div className="flex items-center gap-6 shrink-0">
                                                         <button
                                                             type="button"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 toggleCityGroup(cityLocations);
                                                             }}
-                                                            className="text-[9px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-slate/20 underline-offset-8"
+                                                            className="text-[9px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-slate/20 underline-offset-8 whitespace-nowrap"
                                                         >
                                                             {allSelected ? 'DESELECT' : 'SELECT ALL'}
                                                         </button>
-                                                        {isExpanded ? <ChevronUp className="w-4 h-4 text-slate" /> : <ChevronDown className="w-4 h-4 text-slate" />}
+                                                        {isExpanded ? <ChevronUp className="w-4 h-4 text-slate flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate flex-shrink-0" />}
                                                     </div>
                                                 </div>
 
