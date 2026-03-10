@@ -244,110 +244,213 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
             {/* Calendar Grid */}
             <div className="bg-white border border-border-grey shadow-tight overflow-hidden rounded-[8px]">
-                <div className="min-w-[900px]">
-                    <div className="grid grid-cols-8 border-b border-border-grey bg-off-white">
-                        <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-28 text-center uppercase tracking-[0.3em] flex items-center justify-center">EPOCH</div>
-                        {days.map(day => (
-                            <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 min-w-[120px] transition-all", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
-                                <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
-                                <div className={clsx("text-3xl font-serif tracking-tighter", isSameDay(day, new Date()) ? "text-forest" : "text-charcoal")}>{format(day, 'd')}</div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="divide-y divide-border-grey relative">
-                        {hours.map(hour => (
-                            <div key={hour} className="grid grid-cols-8" style={{ minHeight: `${ROW_HEIGHT}px` }}>
-                                <div className="p-4 text-[10px] text-slate font-black border-r border-border-grey text-center sticky left-0 bg-white z-20 w-28 flex items-center justify-center tracking-[0.2em]">
-                                    {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
+                <div className="overflow-x-auto">
+                    <div className="min-w-[900px]">
+                        <div className="grid grid-cols-8 border-b border-border-grey bg-off-white">
+                            <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-28 text-center uppercase tracking-[0.3em] flex items-center justify-center">EPOCH</div>
+                            {days.map(day => (
+                                <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 min-w-[120px] transition-all", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
+                                    <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
+                                    <div className={clsx("text-3xl font-serif tracking-tighter", isSameDay(day, new Date()) ? "text-forest" : "text-charcoal")}>{format(day, 'd')}</div>
                                 </div>
+                            ))}
+                        </div>
 
-                                {days.map(day => {
-                                    const dayStr = toManilaDateStr(day)
-                                    const startingSlots = availability.filter(a => {
-                                        if (a.date) {
-                                            if (a.date !== dayStr) return false
-                                        } else {
-                                            if (a.day_of_week !== getDay(day)) return false
-                                        }
-                                        const startH = parseInt(a.start_time.split(':')[0])
-                                        return startH === hour
-                                    })
+                        <div className="divide-y divide-border-grey relative">
+                            {hours.map(hour => (
+                                <div key={hour} className="grid grid-cols-8" style={{ minHeight: `${ROW_HEIGHT}px` }}>
+                                    <div className="p-4 text-[10px] text-slate font-black border-r border-border-grey text-center sticky left-0 bg-white z-20 w-28 flex items-center justify-center tracking-[0.2em]">
+                                        {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
+                                    </div>
 
-                                    const startingBookings = bookings.filter(b => {
-                                        const slot = b.slots;
-                                        if (!slot?.date || !slot?.start_time) return false;
-                                        if (slot.date !== dayStr) return false;
-                                        if (['cancelled_refunded', 'rejected', 'expired'].includes(b.status)) return false;
-                                        const startH = parseInt(slot.start_time.split(':')[0]);
-                                        return startH === hour;
-                                    })
+                                    {days.map(day => {
+                                        const dayStr = toManilaDateStr(day)
+                                        const startingSlots = availability.filter(a => {
+                                            if (a.date) {
+                                                if (a.date !== dayStr) return false
+                                            } else {
+                                                if (a.day_of_week !== getDay(day)) return false
+                                            }
+                                            const startH = parseInt(a.start_time.split(':')[0])
+                                            return startH === hour
+                                        })
 
-                                    const isPastCell = isPast(setMinutes(setHours(day, hour + 1), 0))
+                                        const startingBookings = bookings.filter(b => {
+                                            const slot = b.slots;
+                                            if (!slot?.date || !slot?.start_time) return false;
+                                            if (slot.date !== dayStr) return false;
+                                            if (['cancelled_refunded', 'rejected', 'expired'].includes(b.status)) return false;
+                                            const startH = parseInt(slot.start_time.split(':')[0]);
+                                            return startH === hour;
+                                        })
 
-                                    return (
-                                        <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-0", isPastCell && "bg-gray-50")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
-                                            <div
-                                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 bg-forest/5 cursor-pointer z-0"
-                                                onClick={() => {
-                                                    setSingleDate(format(day, 'yyyy-MM-dd'))
-                                                    setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
-                                                    setSingleEndTime(`${(hour + 1).toString().padStart(2, '0')}:00`)
-                                                    setAddMode('single')
-                                                    setIsAddModalOpen(true)
-                                                }}
-                                            />
-                                            {(() => {
-                                                const groupedSlots = startingSlots.reduce((acc, slot) => {
-                                                    const key = `${slot.start_time}-${slot.end_time}`
-                                                    if (!acc[key]) {
-                                                        acc[key] = {
-                                                            primarySlot: slot,
-                                                            allSlots: [slot],
-                                                            locations: [slot.location_area],
-                                                            equipment: [...(slot.equipment || [])]
+                                        const isPastCell = isPast(setMinutes(setHours(day, hour + 1), 0))
+
+                                        return (
+                                            <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-0", isPastCell && "bg-gray-50")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
+                                                <div
+                                                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 bg-forest/5 cursor-pointer z-0"
+                                                    onClick={() => {
+                                                        setSingleDate(format(day, 'yyyy-MM-dd'))
+                                                        setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
+                                                        setSingleEndTime(`${(hour + 1).toString().padStart(2, '0')}:00`)
+                                                        setAddMode('single')
+                                                        setIsAddModalOpen(true)
+                                                    }}
+                                                />
+                                                {(() => {
+                                                    const groupedSlots = startingSlots.reduce((acc, slot) => {
+                                                        const key = `${slot.start_time}-${slot.end_time}`
+                                                        if (!acc[key]) {
+                                                            acc[key] = {
+                                                                primarySlot: slot,
+                                                                allSlots: [slot],
+                                                                locations: [slot.location_area],
+                                                                equipment: [...(slot.equipment || [])]
+                                                            }
+                                                        } else {
+                                                            acc[key].allSlots.push(slot)
+                                                            if (!acc[key].locations.includes(slot.location_area)) {
+                                                                acc[key].locations.push(slot.location_area)
+                                                            }
+                                                            if (slot.equipment) {
+                                                                slot.equipment.forEach(eq => {
+                                                                    if (!acc[key].equipment.includes(eq)) acc[key].equipment.push(eq)
+                                                                })
+                                                            }
                                                         }
-                                                    } else {
-                                                        acc[key].allSlots.push(slot)
-                                                        if (!acc[key].locations.includes(slot.location_area)) {
-                                                            acc[key].locations.push(slot.location_area)
-                                                        }
-                                                        if (slot.equipment) {
-                                                            slot.equipment.forEach(eq => {
-                                                                if (!acc[key].equipment.includes(eq)) acc[key].equipment.push(eq)
-                                                            })
-                                                        }
-                                                    }
-                                                    return acc
-                                                }, {} as Record<string, { primarySlot: Availability, allSlots: Availability[], locations: string[], equipment: string[] }>)
+                                                        return acc
+                                                    }, {} as Record<string, { primarySlot: Availability, allSlots: Availability[], locations: string[], equipment: string[] }>)
 
-                                                return Object.values(groupedSlots).map(({ primarySlot: slot, allSlots, locations, equipment }) => {
-                                                    const startMin = parseInt(slot.start_time.split(':')[1])
-                                                    const [endH, endM] = slot.end_time.split(':').map(Number)
-                                                    const startTotal = hour * 60 + startMin
-                                                    const endTotal = endH * 60 + endM
-                                                    const duration = endTotal - startTotal
-                                                    const topOffset = (startMin / 60) * ROW_HEIGHT
-                                                    const heightPx = (duration / 60) * ROW_HEIGHT
+                                                    return Object.values(groupedSlots).map(({ primarySlot: slot, allSlots, locations, equipment }) => {
+                                                        const startMin = parseInt(slot.start_time.split(':')[1])
+                                                        const [endH, endM] = slot.end_time.split(':').map(Number)
+                                                        const startTotal = hour * 60 + startMin
+                                                        const endTotal = endH * 60 + endM
+                                                        const duration = endTotal - startTotal
+                                                        const topOffset = (startMin / 60) * ROW_HEIGHT
+                                                        const heightPx = (duration / 60) * ROW_HEIGHT
 
-                                                    const isBooked = bookings.some(b => {
-                                                        const bSlot = b.slots;
-                                                        if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time) return false;
-                                                        if (bSlot.date !== dayStr) return false;
-                                                        if (['pending', 'approved'].includes(b.status)) {
-                                                            const [bsh, bsm] = bSlot.start_time.split(':').map(Number);
-                                                            const [beh, bem] = bSlot.end_time.split(':').map(Number);
-                                                            const bStartTotal = bsh * 60 + bsm;
-                                                            const bEndTotal = beh * 60 + bem;
-                                                            return (startTotal < bEndTotal && endTotal > bStartTotal);
-                                                        }
-                                                        return false;
-                                                    });
+                                                        const isBooked = bookings.some(b => {
+                                                            const bSlot = b.slots;
+                                                            if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time) return false;
+                                                            if (bSlot.date !== dayStr) return false;
+                                                            if (['pending', 'approved'].includes(b.status)) {
+                                                                const [bsh, bsm] = bSlot.start_time.split(':').map(Number);
+                                                                const [beh, bem] = bSlot.end_time.split(':').map(Number);
+                                                                const bStartTotal = bsh * 60 + bsm;
+                                                                const bEndTotal = beh * 60 + bem;
+                                                                return (startTotal < bEndTotal && endTotal > bStartTotal);
+                                                            }
+                                                            return false;
+                                                        });
 
-                                                    if (isBooked) return null;
+                                                        if (isBooked) return null;
+
+                                                        const siblings = [
+                                                            ...Object.values(groupedSlots).map(g => g.primarySlot),
+                                                            ...startingBookings.map(sb => sb.slots)
+                                                        ].filter(s => {
+                                                            if (!s || !s.start_time) return false;
+                                                            const [sh, sm] = s.start_time.split(':').map(Number);
+                                                            const [eh, em] = s.end_time.split(':').map(Number);
+                                                            const sStart = sh * 60 + sm;
+                                                            const sEnd = eh * 60 + em;
+                                                            return (startTotal < sEnd && endTotal > sStart);
+                                                        });
+
+                                                        const totalItems = siblings.length;
+                                                        const myIdx = siblings.findIndex(s => s.id === slot.id);
+                                                        const extraLocCount = locations.length - 1;
+                                                        const primaryEq = equipment.length > 0 ? equipment[0] : null;
+                                                        const extraEqCount = equipment.length > 1 ? equipment.length - 1 : 0;
+
+                                                        return (
+                                                            <div
+                                                                key={slot.id}
+                                                                className={clsx(
+                                                                    "absolute rounded-lg text-[10px] hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border z-10 p-4 group/slot flex flex-col gap-3 session-block-earth",
+                                                                    isPastCell
+                                                                        ? "bg-off-white border-border-grey text-slate"
+                                                                        : "bg-green-50/50 border-green-200 text-green-900",
+                                                                    duration < 45 && "py-2 px-4 justify-center"
+                                                                )}
+                                                                style={{
+                                                                    top: `${topOffset}px`,
+                                                                    height: `${heightPx}px`,
+                                                                    width: totalItems > 1 ? `${(100 / totalItems) - 2}%` : '96%',
+                                                                    left: totalItems > 1 ? `${(myIdx * 100) / totalItems + 1}%` : '2%'
+                                                                }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    setEditingSlot(slot); setSingleDate(slot.date || format(day, 'yyyy-MM-dd')); setSingleTime(slot.start_time); setSingleEndTime(slot.end_time); setLocations(locations); setEquipment(equipment.length > 0 ? equipment : ['Reformer']); setIsEditModalOpen(true);
+                                                                }}
+                                                            >
+                                                                <div className={clsx("flex items-center gap-2", duration < 45 ? "flex-row" : "flex-col items-start")}>
+                                                                    <div className="flex items-center gap-2 font-bold text-[10px] text-charcoal uppercase tracking-[0.2em] shrink-0">
+                                                                        <Clock className={clsx(duration < 45 ? "w-3 h-3" : "w-4 h-4", isPastCell ? "text-slate/30" : "text-forest")} />
+                                                                        <span className={isPastCell ? "text-slate" : "text-charcoal"}>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
+                                                                    </div>
+
+                                                                    <div className="flex flex-wrap items-center gap-2">
+                                                                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-off-white text-slate px-3 py-1 rounded-md border border-border-grey">
+                                                                            <MapPin className="w-3 h-3 text-slate/40" />
+                                                                            <span className="truncate max-w-[100px]">{locations[0].split(' - ')[1] || locations[0]}</span>
+                                                                        </div>
+                                                                        {extraLocCount > 0 && duration >= 45 && (
+                                                                            <div className="text-[9px] font-bold text-forest bg-green-50 px-3 py-1 rounded-md border border-green-200">+{extraLocCount} AREAS</div>
+                                                                        )}
+                                                                    </div>
+
+                                                                    {primaryEq && duration >= 45 && (
+                                                                        <div className="flex flex-wrap items-center gap-2 mt-auto">
+                                                                            <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-green-50 text-forest px-3 py-1 rounded-md border border-green-200">
+                                                                                <Box className="w-3 h-3 text-forest" />
+                                                                                <span>{primaryEq}</span>
+                                                                            </div>
+                                                                            {extraEqCount > 0 && (
+                                                                                <div className="text-[9px] font-bold text-slate">+{extraEqCount} NEXT</div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    })
+                                                })()}
+
+                                                {startingBookings.map((booking) => {
+                                                    const slotData = booking.slots;
+                                                    const [s_startH, s_startM] = slotData.start_time.split(':').map(Number);
+                                                    const [s_endH, s_endM] = slotData.end_time.split(':').map(Number);
+                                                    const startTotal = s_startH * 60 + s_startM;
+                                                    const endTotal = s_endH * 60 + s_endM;
+                                                    const duration = endTotal - startTotal;
+                                                    const topOffset = (s_startM / 60) * ROW_HEIGHT;
+                                                    const heightPx = (duration / 60) * ROW_HEIGHT;
+
+                                                    const studioName = slotData.studios?.name || 'Partner Studio';
+                                                    const clientName = booking.client?.full_name || 'Anonymous Client';
 
                                                     const siblings = [
-                                                        ...Object.values(groupedSlots).map(g => g.primarySlot),
+                                                        ...startingSlots.filter(s => {
+                                                            const isBooked = bookings.some(b => {
+                                                                const bSlot = b.slots;
+                                                                if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time) return false;
+                                                                if (bSlot.date !== dayStr) return false;
+                                                                if (['pending', 'approved'].includes(b.status)) {
+                                                                    const [bsh, bsm] = bSlot.start_time.split(':').map(Number);
+                                                                    const [beh, bem] = bSlot.end_time.split(':').map(Number);
+                                                                    const bStart = bsh * 60 + bsm; const bEnd = beh * 60 + bem;
+                                                                    const [ssh, ssm] = s.start_time.split(':').map(Number);
+                                                                    const [seh, sem] = s.end_time.split(':').map(Number);
+                                                                    const sStart = ssh * 60 + ssm; const sEnd = seh * 60 + sem;
+                                                                    return (sStart < bEnd && sEnd > bStart);
+                                                                }
+                                                                return false;
+                                                            });
+                                                            return !isBooked;
+                                                        }),
                                                         ...startingBookings.map(sb => sb.slots)
                                                     ].filter(s => {
                                                         if (!s || !s.start_time) return false;
@@ -359,20 +462,19 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     });
 
                                                     const totalItems = siblings.length;
-                                                    const myIdx = siblings.findIndex(s => s.id === slot.id);
-                                                    const extraLocCount = locations.length - 1;
-                                                    const primaryEq = equipment.length > 0 ? equipment[0] : null;
-                                                    const extraEqCount = equipment.length > 1 ? equipment.length - 1 : 0;
+                                                    const myIdx = siblings.findIndex(s => s.id === booking.slot_id);
 
                                                     return (
                                                         <div
-                                                            key={slot.id}
+                                                            key={booking.id}
                                                             className={clsx(
-                                                                "absolute rounded-lg text-[10px] hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border z-10 p-4 group/slot flex flex-col gap-3 session-block-earth",
+                                                                "absolute rounded-lg text-[10px] bg-white border border-border-grey z-20 p-5 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-tight",
                                                                 isPastCell
-                                                                    ? "bg-off-white border-border-grey text-slate"
-                                                                    : "bg-green-50/50 border-green-200 text-green-900",
-                                                                duration < 45 && "py-2 px-4 justify-center"
+                                                                    ? "bg-off-white text-slate/40"
+                                                                    : booking.status === 'approved'
+                                                                        ? "border-l-4 border-l-forest"
+                                                                        : "border-l-4 border-l-orange-400",
+                                                                duration < 45 && "flex-row items-center gap-4 py-2 px-4"
                                                             )}
                                                             style={{
                                                                 top: `${topOffset}px`,
@@ -380,143 +482,43 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                 width: totalItems > 1 ? `${(100 / totalItems) - 2}%` : '96%',
                                                                 left: totalItems > 1 ? `${(myIdx * 100) / totalItems + 1}%` : '2%'
                                                             }}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation()
-                                                                setEditingSlot(slot); setSingleDate(slot.date || format(day, 'yyyy-MM-dd')); setSingleTime(slot.start_time); setSingleEndTime(slot.end_time); setLocations(locations); setEquipment(equipment.length > 0 ? equipment : ['Reformer']); setIsEditModalOpen(true);
-                                                            }}
+                                                            onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); }}
                                                         >
-                                                            <div className={clsx("flex items-center gap-2", duration < 45 ? "flex-row" : "flex-col items-start")}>
-                                                                <div className="flex items-center gap-2 font-bold text-[10px] text-charcoal uppercase tracking-[0.2em] shrink-0">
-                                                                    <Clock className={clsx(duration < 45 ? "w-3 h-3" : "w-4 h-4", isPastCell ? "text-slate/30" : "text-forest")} />
-                                                                    <span className={isPastCell ? "text-slate" : "text-charcoal"}>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
+                                                            {duration < 45 ? (
+                                                                <div className="flex flex-col justify-center">
+                                                                    <div className="text-[8px] font-bold uppercase tracking-widest text-slate">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</div>
+                                                                    <div className="text-[9px] font-bold text-charcoal truncate">{studioName}</div>
                                                                 </div>
-
-                                                                <div className="flex flex-wrap items-center gap-2">
-                                                                    <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-off-white text-slate px-3 py-1 rounded-md border border-border-grey">
-                                                                        <MapPin className="w-3 h-3 text-slate/40" />
-                                                                        <span className="truncate max-w-[100px]">{locations[0].split(' - ')[1] || locations[0]}</span>
-                                                                    </div>
-                                                                    {extraLocCount > 0 && duration >= 45 && (
-                                                                        <div className="text-[9px] font-bold text-forest bg-green-50 px-3 py-1 rounded-md border border-green-200">+{extraLocCount} AREAS</div>
-                                                                    )}
-                                                                </div>
-
-                                                                {primaryEq && duration >= 45 && (
-                                                                    <div className="flex flex-wrap items-center gap-2 mt-auto">
-                                                                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-green-50 text-forest px-3 py-1 rounded-md border border-green-200">
-                                                                            <Box className="w-3 h-3 text-forest" />
-                                                                            <span>{primaryEq}</span>
+                                                            ) : (
+                                                                <>
+                                                                    <div className="flex items-center justify-between mb-3">
+                                                                        <div className={clsx(
+                                                                            "status-pill-earth inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold",
+                                                                            booking.status === 'approved' ? "bg-green-50 text-green-800" : "bg-orange-50 text-orange-800"
+                                                                        )}>
+                                                                            {booking.status === 'approved' ? 'BOOKED' : 'PENDING'}
                                                                         </div>
-                                                                        {extraEqCount > 0 && (
-                                                                            <div className="text-[9px] font-bold text-slate">+{extraEqCount} NEXT</div>
-                                                                        )}
+                                                                        <ArrowUpRight className="w-4 h-4 text-slate/20 group-hover/booking:text-charcoal transition-all" />
                                                                     </div>
-                                                                )}
-                                                            </div>
+                                                                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-charcoal mb-2 flex items-center gap-2.5">
+                                                                        <MapPin className="w-4 h-4 text-slate/40" />
+                                                                        <span className="truncate">{studioName}</span>
+                                                                    </div>
+                                                                    <div className="text-[10px] font-medium text-slate italic flex items-center gap-2.5 mt-auto">
+                                                                        <User className="w-4 h-4 text-slate/40" />
+                                                                        <span className="truncate">{clientName}</span>
+                                                                    </div>
+                                                                </>
+                                                            )}
                                                         </div>
                                                     )
-                                                })
-                                            })()}
-
-                                            {startingBookings.map((booking) => {
-                                                const slotData = booking.slots;
-                                                const [s_startH, s_startM] = slotData.start_time.split(':').map(Number);
-                                                const [s_endH, s_endM] = slotData.end_time.split(':').map(Number);
-                                                const startTotal = s_startH * 60 + s_startM;
-                                                const endTotal = s_endH * 60 + s_endM;
-                                                const duration = endTotal - startTotal;
-                                                const topOffset = (s_startM / 60) * ROW_HEIGHT;
-                                                const heightPx = (duration / 60) * ROW_HEIGHT;
-
-                                                const studioName = slotData.studios?.name || 'Partner Studio';
-                                                const clientName = booking.client?.full_name || 'Anonymous Client';
-
-                                                const siblings = [
-                                                    ...startingSlots.filter(s => {
-                                                        const isBooked = bookings.some(b => {
-                                                            const bSlot = b.slots;
-                                                            if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time) return false;
-                                                            if (bSlot.date !== dayStr) return false;
-                                                            if (['pending', 'approved'].includes(b.status)) {
-                                                                const [bsh, bsm] = bSlot.start_time.split(':').map(Number);
-                                                                const [beh, bem] = bSlot.end_time.split(':').map(Number);
-                                                                const bStart = bsh * 60 + bsm; const bEnd = beh * 60 + bem;
-                                                                const [ssh, ssm] = s.start_time.split(':').map(Number);
-                                                                const [seh, sem] = s.end_time.split(':').map(Number);
-                                                                const sStart = ssh * 60 + ssm; const sEnd = seh * 60 + sem;
-                                                                return (sStart < bEnd && sEnd > bStart);
-                                                            }
-                                                            return false;
-                                                        });
-                                                        return !isBooked;
-                                                    }),
-                                                    ...startingBookings.map(sb => sb.slots)
-                                                ].filter(s => {
-                                                    if (!s || !s.start_time) return false;
-                                                    const [sh, sm] = s.start_time.split(':').map(Number);
-                                                    const [eh, em] = s.end_time.split(':').map(Number);
-                                                    const sStart = sh * 60 + sm;
-                                                    const sEnd = eh * 60 + em;
-                                                    return (startTotal < sEnd && endTotal > sStart);
-                                                });
-
-                                                const totalItems = siblings.length;
-                                                const myIdx = siblings.findIndex(s => s.id === booking.slot_id);
-
-                                                return (
-                                                    <div
-                                                        key={booking.id}
-                                                        className={clsx(
-                                                            "absolute rounded-lg text-[10px] bg-white border border-border-grey z-20 p-5 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-tight",
-                                                            isPastCell
-                                                                ? "bg-off-white text-slate/40"
-                                                                : booking.status === 'approved'
-                                                                    ? "border-l-4 border-l-forest"
-                                                                    : "border-l-4 border-l-orange-400",
-                                                            duration < 45 && "flex-row items-center gap-4 py-2 px-4"
-                                                        )}
-                                                        style={{
-                                                            top: `${topOffset}px`,
-                                                            height: `${heightPx}px`,
-                                                            width: totalItems > 1 ? `${(100 / totalItems) - 2}%` : '96%',
-                                                            left: totalItems > 1 ? `${(myIdx * 100) / totalItems + 1}%` : '2%'
-                                                        }}
-                                                        onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); }}
-                                                    >
-                                                        {duration < 45 ? (
-                                                            <div className="flex flex-col justify-center">
-                                                                <div className="text-[8px] font-bold uppercase tracking-widest text-slate">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</div>
-                                                                <div className="text-[9px] font-bold text-charcoal truncate">{studioName}</div>
-                                                            </div>
-                                                        ) : (
-                                                            <>
-                                                                <div className="flex items-center justify-between mb-3">
-                                                                    <div className={clsx(
-                                                                        "status-pill-earth inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold",
-                                                                        booking.status === 'approved' ? "bg-green-50 text-green-800" : "bg-orange-50 text-orange-800"
-                                                                    )}>
-                                                                        {booking.status === 'approved' ? 'BOOKED' : 'PENDING'}
-                                                                    </div>
-                                                                    <ArrowUpRight className="w-4 h-4 text-slate/20 group-hover/booking:text-charcoal transition-all" />
-                                                                </div>
-                                                                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-charcoal mb-2 flex items-center gap-2.5">
-                                                                    <MapPin className="w-4 h-4 text-slate/40" />
-                                                                    <span className="truncate">{studioName}</span>
-                                                                </div>
-                                                                <div className="text-[10px] font-medium text-slate italic flex items-center gap-2.5 mt-auto">
-                                                                    <User className="w-4 h-4 text-slate/40" />
-                                                                    <span className="truncate">{clientName}</span>
-                                                                </div>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        ))}
+                                                })}
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
