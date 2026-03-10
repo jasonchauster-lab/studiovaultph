@@ -125,10 +125,13 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
         router.push('?date=' + getManilaTodayStr())
     }
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this availability?')) return;
+    const handleDelete = async (id: string, groupId?: string) => {
+        const message = groupId
+            ? 'Are you sure you want to delete this session for ALL selected areas?'
+            : 'Are you sure you want to delete this availability?';
+        if (!confirm(message)) return;
         setIsSubmitting(true)
-        await deleteAvailability(id)
+        await deleteAvailability(id, groupId)
         setIsSubmitting(false)
         router.refresh()
     }
@@ -778,7 +781,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     type="button"
                                     onClick={() => {
                                         setIsEditModalOpen(false)
-                                        handleDelete(editingSlot.id)
+                                        handleDelete(editingSlot.id, editingSlot.group_id)
                                     }}
                                     disabled={isSubmitting}
                                     className="px-10 py-5 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-red-100 transition-all flex items-center justify-center gap-3 border border-red-200"

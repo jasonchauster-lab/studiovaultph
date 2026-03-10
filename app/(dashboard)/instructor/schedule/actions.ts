@@ -42,21 +42,28 @@ export async function addAvailability(formData: FormData) {
     return { success: true }
 }
 
-export async function deleteAvailability(id: string) {
+export async function deleteAvailability(id: string, groupId?: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    // RLS handles auth check but explicit check is good
     if (!user) return { error: 'Unauthorized' }
 
-    const { error } = await supabase
+    let query = supabase
         .from('instructor_availability')
         .delete()
-        .eq('id', id)
-        .eq('instructor_id', user.id) // Double check ownership
+        .eq('instructor_id', user.id)
+
+    if (groupId) {
+        query = query.eq('group_id', groupId)
+    } else {
+        query = query.eq('id', id)
+    }
+
+    const { error } = await query
 
     if (error) {
-        return { error: 'Failed' }
+        console.error('Delete Availability Error:', error)
+        return { error: 'Failed to delete availability' }
     }
 
     revalidatePath('/instructor/schedule')
