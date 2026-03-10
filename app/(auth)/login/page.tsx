@@ -143,77 +143,71 @@ function LoginContent() {
 
 
     return (
-        <div className="min-h-screen bg-alabaster flex flex-col md:flex-row relative selection:bg-sage/20">
-            <div className="fixed inset-0 bg-white/50 animate-mesh -z-10 pointer-events-none" />
-
+        <div className="min-h-screen bg-off-white flex flex-col md:flex-row relative selection:bg-forest/10">
             {/* Left Side: Brand Narrative - Hidden on mobile, full height on desktop */}
             <div className="hidden md:flex md:w-[45%] relative flex-col justify-center items-center p-20 overflow-hidden group">
                 <Image
                     src={isSignUp ? "/images/auth/auth-left-2.png" : "/images/auth/auth-left-1.png"}
                     alt="Pilates Sanctuary"
                     fill
-                    className="object-cover transition-transform duration-[20s] group-hover:scale-110"
+                    className="object-cover transition-transform duration-[20s] group-hover:scale-105"
                     priority
                 />
-                <div className="absolute inset-0 bg-charcoal/30 backdrop-blur-[2px]" />
+                <div className="absolute inset-0 bg-charcoal/40" />
                 <div className="absolute inset-0 bg-gradient-to-b from-charcoal/20 via-transparent to-charcoal/60" />
 
-                <div className="relative z-10 w-full max-w-md space-y-12 animate-in fade-in slide-in-from-left-8 duration-1000">
-                    <div className="glass-card p-12 border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl">
-                        <div className="space-y-8">
+                <div className="relative z-10 w-full max-w-md animate-in fade-in slide-in-from-left-8 duration-1000">
+                    <div className="earth-card p-12 border-white/10 bg-white/5 backdrop-blur-md shadow-2xl">
+                        <div className="space-y-10">
                             <div className="space-y-6">
                                 <Link href="/" className="flex items-center gap-0 group/logo">
-                                    <div className="bg-white/90 p-2 rounded-2xl shadow-lg group-hover/logo:rotate-6 transition-transform">
+                                    <div className="bg-white p-3 rounded-xl shadow-tight group-hover/logo:rotate-3 transition-transform">
                                         <Image src="/logo.png" alt="StudioVault Logo" width={60} height={60} className="w-12 h-12 object-contain" />
                                     </div>
-                                    <span className="text-2xl font-serif font-bold text-white tracking-tight ml-2 drop-shadow-md">StudioVaultPH</span>
+                                    <span className="text-2xl font-serif font-bold text-white tracking-tight ml-3 drop-shadow-md">StudioVaultPH</span>
                                 </Link>
-                                <h2 className="text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.1] tracking-tight drop-shadow-xl">
+                                <h2 className="text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.1] tracking-tight drop-shadow-lg">
                                     The Sanctuary <br />
-                                    <span className="text-sage-light italic">of Movement.</span>
+                                    <span className="text-white/80 italic">of Movement.</span>
                                 </h2>
                             </div>
 
-                            <p className="text-lg text-white/80 font-medium leading-relaxed italic drop-shadow-md">
+                            <p className="text-lg text-white/90 font-medium leading-relaxed italic drop-shadow-md">
                                 &ldquo;Experience a platform designed with the precision and grace of Pilates itself.&rdquo;
                             </p>
 
-                            <div className="flex items-center gap-4 text-[10px] font-bold text-sage-light uppercase tracking-widest border-t border-white/10 pt-8 mt-12">
+                            <div className="flex items-center gap-4 text-[10px] font-bold text-white/60 uppercase tracking-[0.3em] border-t border-white/10 pt-10 mt-12">
                                 <Award className="w-5 h-5" />
                                 A Foundation Built for Professionals
                             </div>
                         </div>
                     </div>
                 </div>
-
-                {/* Decorative floating elements */}
-                <div className="absolute bottom-12 right-12 w-32 h-32 bg-sage/20 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute top-12 left-12 w-24 h-24 bg-gold/10 rounded-full blur-2xl animate-pulse delay-700" />
             </div>
 
             {/* Right Side: Form Content */}
-            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-24 overflow-y-auto relative bg-white/40 backdrop-blur-sm">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-24 overflow-y-auto relative bg-off-white">
                 {/* Back Button */}
                 <Link
                     href="/"
-                    className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-3 text-charcoal/40 hover:text-sage transition-all group"
+                    className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-3 text-slate hover:text-charcoal transition-all group"
                 >
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Return Home</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Return Home</span>
                 </Link>
 
                 <div className="w-full max-w-md">
-                    <div className="text-center mb-12 space-y-3">
+                    <div className="text-center mb-16 space-y-4">
                         <h1 className="text-4xl font-serif font-bold text-charcoal tracking-tight">
                             {isSignUp ? 'Begin Your Journey' : 'Secure Access'}
                         </h1>
-                        <p className="text-[11px] font-bold text-charcoal/30 uppercase tracking-[0.3em]">
+                        <p className="text-[10px] font-bold text-slate uppercase tracking-[0.4em]">
                             {isSignUp ? 'Establish your digital legacy' : 'Return to your dashboard'}
                         </p>
                     </div>
 
                     {isSignUp && (
-                        <div className="mb-10 p-1.5 bg-white/60 backdrop-blur-md rounded-[24px] flex gap-2 border border-white/80 shadow-cloud">
+                        <div className="mb-10 p-1 bg-white rounded-lg flex gap-1 border border-border-grey shadow-tight">
                             {[
                                 { id: 'customer', label: 'Client' },
                                 { id: 'instructor', label: 'Instructor' },
@@ -223,9 +217,9 @@ function LoginContent() {
                                     key={opt.id}
                                     type="button"
                                     onClick={() => setRole(opt.id)}
-                                    className={`flex-1 py-3.5 px-2 rounded-[20px] text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${role === opt.id
-                                        ? 'bg-sage text-white shadow-sm'
-                                        : 'text-charcoal/40 hover:text-charcoal hover:bg-white/40'
+                                    className={`flex-1 py-3 px-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${role === opt.id
+                                        ? 'bg-forest text-white shadow-tight'
+                                        : 'text-slate hover:text-charcoal hover:bg-off-white'
                                         }`}
                                 >
                                     {opt.label}
@@ -236,49 +230,49 @@ function LoginContent() {
 
                     <form onSubmit={handleAuth} className="space-y-6">
                         {isSignUp && (
-                            <div className="space-y-2">
-                                <label className="block text-[10px] font-bold text-charcoal/40 uppercase tracking-widest px-1">Full Name</label>
+                            <div className="space-y-3">
+                                <label className="block text-[10px] font-bold text-slate uppercase tracking-widest px-1">Full Name</label>
                                 <input
                                     type="text"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
                                     required={isSignUp}
                                     placeholder="Jane Doe"
-                                    className="w-full px-6 py-4 border border-white/60 bg-white/40 rounded-[20px] text-[13px] font-bold text-charcoal focus:ring-1 focus:ring-sage outline-none transition-all placeholder:text-charcoal/20"
+                                    className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all placeholder:text-slate/30"
                                 />
                             </div>
                         )}
 
                         {isSignUp && (
-                            <div className="space-y-2">
-                                <label className="block text-[10px] font-bold text-charcoal/40 uppercase tracking-widest px-1">Date of Birth</label>
+                            <div className="space-y-3">
+                                <label className="block text-[10px] font-bold text-slate uppercase tracking-widest px-1">Date of Birth</label>
                                 <input
                                     type="date"
                                     value={birthday}
                                     onChange={(e) => setBirthday(e.target.value)}
                                     required={isSignUp}
-                                    className="w-full px-6 py-4 border border-white/60 bg-white/40 rounded-[20px] text-[13px] font-bold text-charcoal focus:ring-1 focus:ring-sage outline-none transition-all"
+                                    className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all"
                                 />
                             </div>
                         )}
 
-                        <div className="space-y-2">
-                            <label className="block text-[10px] font-bold text-charcoal/40 uppercase tracking-widest px-1">Email Address</label>
+                        <div className="space-y-3">
+                            <label className="block text-[10px] font-bold text-slate uppercase tracking-widest px-1">Email Address</label>
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                                 placeholder="jane@studio-vault.ph"
-                                className="w-full px-6 py-4 border border-white/60 bg-white/40 rounded-[20px] text-[13px] font-bold text-charcoal focus:ring-1 focus:ring-sage outline-none transition-all placeholder:text-charcoal/20"
+                                className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all placeholder:text-slate/30"
                             />
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             <div className="flex items-center justify-between px-1">
-                                <label className="block text-[10px] font-bold text-charcoal/40 uppercase tracking-widest">Password</label>
+                                <label className="block text-[10px] font-bold text-slate uppercase tracking-widest">Password</label>
                                 {!isSignUp && (
-                                    <Link href="/forgot-password" gap-2 className="text-[9px] text-charcoal/30 hover:text-sage transition-all font-bold uppercase tracking-widest">
+                                    <Link href="/forgot-password" gap-2 className="text-[10px] text-slate hover:text-forest transition-all font-bold uppercase tracking-widest">
                                         Recover Key
                                     </Link>
                                 )}
@@ -289,12 +283,12 @@ function LoginContent() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 placeholder="••••••••"
-                                className="w-full px-6 py-4 border border-white/60 bg-white/40 rounded-[20px] text-[13px] font-bold text-charcoal focus:ring-1 focus:ring-sage outline-none transition-all placeholder:text-charcoal/20"
+                                className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all placeholder:text-slate/30"
                             />
                         </div>
 
                         {message && (
-                            <div className={`text-[10px] font-bold uppercase tracking-widest p-5 rounded-[20px] flex items-center justify-center animate-in fade-in slide-in-from-top-2 shadow-sm ${message.type === 'error' ? 'bg-red-50 text-red-500 border border-red-100' : 'bg-sage/10 text-sage border border-sage/20'}`}>
+                            <div className={`text-[10px] font-bold uppercase tracking-widest p-5 rounded-lg flex items-center justify-center animate-in fade-in slide-in-from-top-2 border shadow-tight ${message.type === 'error' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
                                 {message.text}
                             </div>
                         )}
@@ -302,12 +296,12 @@ function LoginContent() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-charcoal text-white py-5 rounded-[24px] text-[11px] font-bold uppercase tracking-widest hover:opacity-90 active:scale-[0.99] transition-all flex justify-center shadow-cloud shadow-charcoal/10 disabled:opacity-50"
+                            className="btn-forest w-full py-5 rounded-lg text-[11px] font-bold uppercase tracking-[0.2em] shadow-tight disabled:opacity-50"
                         >
                             {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (isSignUp ? 'Initiate Account' : 'Authenticate')}
                         </button>
 
-                        <div className="text-center pt-6">
+                        <div className="text-center pt-8">
                             <button
                                 type="button"
                                 onClick={() => {
@@ -317,20 +311,20 @@ function LoginContent() {
                                     setEmail('')
                                     setPassword('')
                                 }}
-                                className="text-charcoal/30 hover:text-charcoal text-[10px] font-bold uppercase tracking-[0.2em] transition-all group"
+                                className="text-slate hover:text-charcoal text-[10px] font-bold uppercase tracking-[0.3em] transition-all group"
                             >
                                 {isSignUp ? (
-                                    <>Account exists? <span className="text-sage border-b border-sage/20 group-hover:border-sage transition-all pb-0.5">Authenticate</span></>
+                                    <>Account exists? <span className="text-forest border-b border-forest/20 group-hover:border-forest transition-all pb-1">Authenticate</span></>
                                 ) : (
-                                    <>No account? <span className="text-sage border-b border-sage/20 group-hover:border-sage transition-all pb-0.5">Begin Journey</span></>
+                                    <>No account? <span className="text-forest border-b border-forest/20 group-hover:border-forest transition-all pb-1">Begin Journey</span></>
                                 )}
                             </button>
                         </div>
                     </form>
 
-                    <div className="mt-20 pt-10 border-t border-charcoal/5 text-center">
-                        <p className="text-[9px] font-bold text-charcoal/20 uppercase tracking-[0.3em] leading-relaxed max-w-xs mx-auto">
-                            By proceeding, you adhere to our <Link href="/terms" className="text-charcoal/40 hover:text-sage">Terms</Link> and <Link href="/privacy" className="text-charcoal/40 hover:text-sage">Privacy Policy</Link>.
+                    <div className="mt-20 pt-10 border-t border-border-grey text-center">
+                        <p className="text-[9px] font-bold text-slate uppercase tracking-[0.3em] leading-relaxed max-w-xs mx-auto">
+                            By proceeding, you adhere to our <Link href="/terms" className="text-slate hover:text-forest">Terms</Link> and <Link href="/privacy" className="text-slate hover:text-forest">Privacy Policy</Link>.
                         </p>
                     </div>
                 </div>
@@ -342,8 +336,8 @@ function LoginContent() {
 export default function LoginPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-alabaster flex items-center justify-center p-4">
-                <Loader2 className="animate-spin w-8 h-8 text-sage/40" />
+            <div className="min-h-screen bg-off-white flex items-center justify-center p-4">
+                <Loader2 className="animate-spin w-8 h-8 text-forest/20" />
             </div>
         }>
             <LoginContent />

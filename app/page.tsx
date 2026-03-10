@@ -11,24 +11,23 @@ export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-alabaster selection:bg-sage/20 selection:text-charcoal relative">
-      <div className="fixed inset-0 bg-white/50 animate-mesh -z-10 pointer-events-none" />
+    <div className="min-h-screen bg-off-white selection:bg-forest/10 selection:text-charcoal relative">
       <RoleSelectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* Navigation */}
-      <div className="sticky top-0 z-50 w-full px-6 py-4">
-        <nav className="max-w-7xl mx-auto glass-navbar rounded-[32px] px-8 py-4 flex items-center justify-between shadow-cloud border border-white/60">
-          <Link href="/" className="flex items-center gap-0 group">
-            <Image src="/logo.png" alt="StudioVault Logo" width={60} height={60} className="w-12 h-12 object-contain" />
-            <span className="text-xl font-serif font-bold text-charcoal tracking-tight hidden sm:block -ml-2">StudioVaultPH</span>
+      <div className="sticky top-0 z-50 w-full px-6 py-6">
+        <nav className="max-w-7xl mx-auto bg-white rounded-xl px-10 py-5 flex items-center justify-between shadow-tight border border-border-grey">
+          <Link href="/" className="flex items-center gap-1 group">
+            <Image src="/logo.png" alt="StudioVault Logo" width={60} height={60} className="w-10 h-10 object-contain" />
+            <span className="text-xl font-serif font-bold text-charcoal tracking-tighter uppercase hidden sm:block">STUDIO VAULT PH</span>
           </Link>
-          <div className="flex gap-4">
-            <Link href="/login" className="text-charcoal/60 hover:text-charcoal text-[11px] font-bold uppercase tracking-widest px-6 py-3 bg-white/40 backdrop-blur-md rounded-full transition-all hover:bg-white/60 border border-white/40">
+          <div className="flex gap-6 items-center">
+            <Link href="/login" className="text-slate hover:text-charcoal text-[10px] font-bold uppercase tracking-[0.3em] transition-all">
               Log In
             </Link>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="bg-sage text-white px-8 py-3 rounded-full text-[11px] font-bold uppercase tracking-widest hover:opacity-90 transition-all shadow-cloud shadow-sage/20 border border-sage/20"
+              className="bg-charcoal text-white px-8 py-3.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight"
             >
               Sign Up
             </button>
@@ -37,64 +36,63 @@ export default function LandingPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative px-6 py-32 md:py-48 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
-        <div className="max-w-3xl space-y-10 relative z-10 flex-1">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-3 bg-white/40 backdrop-blur-md border border-white/60 px-5 py-2.5 rounded-full shadow-sm animate-in fade-in slide-in-from-left-4 duration-700">
-              <Sparkles className="w-3.5 h-3.5 text-gold" />
-              <span className="text-[10px] font-bold text-charcoal/60 uppercase tracking-widest">A New Era of Movement</span>
+      <section className="relative px-6 py-24 md:py-40 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
+        <div className="max-w-3xl space-y-12 relative z-10 flex-1">
+          <div className="space-y-8">
+            <div className="inline-flex items-center gap-4 bg-white border border-border-grey px-6 py-3 rounded-lg shadow-tight animate-in fade-in slide-in-from-left-4 duration-700">
+              <Sparkles className="w-4 h-4 text-forest" />
+              <span className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">A Grounded Approach to Movement</span>
             </div>
 
-            <h1 className="text-6xl md:text-8xl font-serif font-bold text-charcoal tracking-tight leading-[1.05] animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <h1 className="text-6xl md:text-7xl font-serif text-charcoal tracking-tighter leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-1000">
               Elevating the <br />
-              <span className="text-sage italic">Pilates Experience.</span>
+              <span className="text-forest italic">Studio Experience.</span>
             </h1>
 
-            <p className="text-xl text-charcoal/40 font-medium leading-relaxed max-w-xl animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-100">
-              The premium marketplace connecting certified instructors with elite studios. Monetize space and optimize flow with ease.
+            <p className="text-lg text-slate font-medium leading-relaxed max-w-xl animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-100">
+              The professional marketplace connecting certified instructors with elite boutique studios. Optimized flow, verified networks, and seamless management.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-5 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+          <div className="flex flex-col sm:flex-row gap-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="group bg-charcoal text-white px-10 py-5 rounded-[24px] text-[12px] font-bold uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-3 shadow-xl hover:shadow-charcoal/20"
+              className="group bg-forest text-white px-12 py-6 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all flex items-center gap-4 shadow-tight"
             >
-              Start Your Journey
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              Get Started Now
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
-            <div className="flex items-center gap-4 py-2">
-              <div className="flex -space-x-3">
+            <div className="flex items-center gap-6 py-2">
+              <div className="flex -space-x-4">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-cream-100 flex items-center justify-center overflow-hidden">
-                    <User className="w-6 h-6 text-charcoal/20" />
+                  <div key={i} className="w-12 h-12 rounded-lg border-4 border-white bg-off-white flex items-center justify-center overflow-hidden shadow-tight">
+                    <User className="w-7 h-7 text-slate/20" />
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] font-bold text-charcoal/40 uppercase tracking-widest">Join 50+ Verified Professionals</p>
+              <p className="text-[9px] font-bold text-slate uppercase tracking-[0.2em]">Validated by <br />Certified Professionals</p>
             </div>
           </div>
         </div>
 
         {/* Hero Image Container */}
-        <div className="flex-1 relative w-full aspect-square lg:aspect-auto lg:h-[600px] animate-in fade-in zoom-in duration-1000 delay-300">
-          <div className="absolute inset-0 bg-sage/5 rounded-[40px] blur-3xl animate-pulse -z-10" />
-          <div className="w-full h-full rounded-[40px] overflow-hidden shadow-2xl border-8 border-white group relative">
+        <div className="flex-1 relative w-full lg:h-[650px] animate-in fade-in zoom-in duration-1000 delay-300">
+          <div className="w-full h-full rounded-xl overflow-hidden shadow-tight border border-border-grey group relative">
             <Image
               src="/images/homepage/hero.png"
-              alt="Premium Pilates Studio"
+              alt="Professional Pilates Environment"
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
               priority
             />
-            {/* Glass decoration overlay */}
-            <div className="absolute bottom-8 left-8 right-8 p-6 glass-card border-white/40 border flex items-center gap-4 animate-in slide-in-from-bottom-8 duration-1000 delay-700">
-              <div className="w-12 h-12 bg-sage rounded-2xl flex items-center justify-center shadow-lg">
-                <Sparkles className="w-6 h-6 text-white" />
+            {/* Action overlay */}
+            <div className="absolute bottom-10 left-10 right-10 p-8 bg-white border border-border-grey rounded-lg flex items-center gap-6 shadow-card animate-in slide-in-from-bottom-8 duration-1000 delay-700">
+              <div className="w-14 h-14 bg-forest rounded-lg flex items-center justify-center shadow-tight">
+                <Sparkles className="w-8 h-8 text-white" />
               </div>
               <div>
-                <p className="text-xs font-bold text-charcoal uppercase tracking-widest block mb-1">State-of-the-art Equipment</p>
-                <p className="text-[10px] text-charcoal/60 font-medium">Find the perfect space for your practice.</p>
+                <p className="text-[10px] font-bold text-charcoal uppercase tracking-[0.3em] block mb-2">Validated Excellence</p>
+                <p className="text-[11px] text-slate font-medium leading-relaxed">Certified Equipment and Verified Partners.</p>
               </div>
             </div>
           </div>
@@ -102,23 +100,23 @@ export default function LandingPage() {
       </section>
 
       {/* Trust Blocks Section */}
-      <section className="px-6 py-24">
+      <section className="px-6 py-32 bg-off-white">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-10">
+          <div className="grid md:grid-cols-3 gap-12">
             {[
-              { icon: TrendingUp, title: "Optimize Revenue", desc: "Monetize idle equipment and transform off-peak hours into guaranteed studio income.", color: "sage" },
-              { icon: ShieldCheck, title: "Verified Network", desc: "Security is non-negotiable. Every professional is identity-verified and certified.", color: "gold" },
-              { icon: Award, title: "Elite Standards", desc: "Join an exclusive collective of premium studios and top-tier pilates instructors.", color: "charcoal" }
+              { icon: TrendingUp, title: "Optimize Revenue", desc: "Monetize idle equipment and transform off-peak availability into guaranteed studio income.", color: "forest" },
+              { icon: ShieldCheck, title: "Verified Network", desc: "Security is non-negotiable. Every session is managed through a secure, identity-validated ecosystem.", color: "charcoal" },
+              { icon: Award, title: "Industry Standard", desc: "Join an exclusive collective of certified boutique studios and top-tier movement professionals.", color: "slate" }
             ].map((prop, i) => (
-              <div key={i} className="glass-card p-10 group hover:translate-y-[-8px] transition-all duration-500">
+              <div key={i} className="bg-white border border-border-grey p-12 rounded-lg group hover:border-forest/30 transition-all duration-500 shadow-tight">
                 <div className={clsx(
-                  "w-16 h-16 rounded-3xl flex items-center justify-center mb-8 shadow-cloud transition-transform duration-500 group-hover:rotate-6",
-                  prop.color === 'sage' ? "bg-sage/10 text-sage" : prop.color === 'gold' ? "bg-gold/10 text-gold" : "bg-charcoal/5 text-charcoal"
+                  "w-20 h-20 rounded-lg flex items-center justify-center mb-10 shadow-tight transition-all duration-500 group-hover:-translate-y-2",
+                  prop.color === 'forest' ? "bg-forest/10 text-forest" : prop.color === 'charcoal' ? "bg-charcoal/10 text-charcoal" : "bg-slate/10 text-slate"
                 )}>
-                  <prop.icon className="w-7 h-7" />
+                  <prop.icon className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-serif font-bold text-charcoal mb-4 italic">{prop.title}</h3>
-                <p className="text-charcoal/40 text-sm font-medium leading-relaxed">{prop.desc}</p>
+                <h3 className="text-3xl font-serif text-charcoal mb-6">{prop.title}</h3>
+                <p className="text-slate text-sm font-medium leading-[1.8]">{prop.desc}</p>
               </div>
             ))}
           </div>
@@ -126,33 +124,27 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="px-6 py-32 bg-white/40 relative overflow-hidden">
-        <Image
-          src="/hero-bg.png"
-          alt=""
-          fill
-          className="object-cover opacity-5 pointer-events-none"
-        />
-        <div className="max-w-7xl mx-auto space-y-20 relative z-10">
-          <div className="text-center space-y-4">
-            <h2 className="text-[11px] font-bold text-sage uppercase tracking-[0.4em]">The Methodology</h2>
-            <h3 className="text-4xl md:text-5xl font-serif font-bold text-charcoal tracking-tight">Ethereal Workflow.</h3>
+      <section className="px-6 py-40 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto space-y-24 relative z-10">
+          <div className="text-center space-y-6">
+            <h2 className="text-[10px] font-bold text-forest uppercase tracking-[0.5em]">The Methodology</h2>
+            <h3 className="text-5xl md:text-6xl font-serif text-charcoal tracking-tighter">Professional Workflow.</h3>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-16 relative">
+          <div className="grid md:grid-cols-3 gap-20 relative">
             {[
-              { step: "01", title: "List", desc: "Define your equipment and set your preferred hourly rental rates." },
-              { step: "02", title: "Book", desc: "Instructors discover and reserve your space through our seamless interface." },
-              { step: "03", title: "Thrive", desc: "Automated payouts and professional management ensure total peace of mind." }
+              { step: "01", title: "LIST", desc: "Define your studio availability and set your preferred session rates." },
+              { step: "02", title: "BOOK", desc: "Verified instructors discover and reserve your space via real-time schedules." },
+              { step: "03", title: "THRIVE", desc: "Secure payouts and high-level management ensure complete peace of mind." }
             ].map((step, i) => (
-              <div key={i} className="relative flex flex-col items-center text-center space-y-6 group">
-                <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-cloud border border-white/60 relative group-hover:scale-110 transition-transform">
-                  <span className="text-[10px] font-bold text-sage absolute -top-2 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full border border-white/60 shadow-sm uppercase tracking-widest">{step.step}</span>
-                  <span className="text-2xl font-serif font-bold text-charcoal italic">{step.title}</span>
+              <div key={i} className="relative flex flex-col items-center text-center space-y-10 group">
+                <div className="w-28 h-28 rounded-xl bg-off-white flex items-center justify-center shadow-tight border border-border-grey relative group-hover:-translate-y-2 transition-transform">
+                  <span className="text-[9px] font-bold text-forest absolute -top-3 left-1/2 -translate-x-1/2 bg-white px-4 py-1.5 rounded-lg border border-border-grey shadow-tight uppercase tracking-widest leading-none">{step.step}</span>
+                  <span className="text-2xl font-serif text-charcoal">{step.title}</span>
                 </div>
-                <div className="space-y-2">
-                  <h4 className="text-lg font-bold text-charcoal">{step.title} Your Terms</h4>
-                  <p className="text-charcoal/40 text-[13px] font-medium leading-relaxed max-w-[240px]">{step.desc}</p>
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-bold text-charcoal uppercase tracking-[0.2em]">{step.title} YOUR TERMS</h4>
+                  <p className="text-slate text-[13px] font-medium leading-[1.8] max-w-[280px]">{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -160,77 +152,67 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Designed by Studio Owners Section */}
-      <section className="px-6 py-32">
-        <div className="max-w-4xl mx-auto text-center glass-card p-16 md:p-24 relative overflow-hidden min-h-[500px] flex flex-col justify-center">
-          <Image
-            src="/images/homepage/studio.png"
-            alt="Beautiful studio"
-            fill
-            className="object-cover opacity-20 filter blur-sm group-hover:scale-110 transition-transform duration-[20s]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent" />
-          <div className="relative z-10 space-y-10">
-            <h2 className="text-[11px] font-bold text-gold uppercase tracking-[0.3em] font-sans">The Philosophy</h2>
-            <blockquote className="text-3xl md:text-4xl text-charcoal font-serif font-bold italic leading-tight">
-              &ldquo;We built StudioVault because movement shouldn't be limited by logistics. It's a tool built for professionals, by professionals.&rdquo;
+      {/* Philosophy Section */}
+      <section className="px-6 py-40 bg-charcoal relative overflow-hidden">
+        <div className="max-w-5xl mx-auto text-center p-16 md:p-32 rounded-xl relative overflow-hidden bg-white/5 border border-white/10">
+          <div className="relative z-10 space-y-12">
+            <h2 className="text-[10px] font-bold text-forest uppercase tracking-[0.5em]">The Philosophy</h2>
+            <blockquote className="text-4xl md:text-5xl text-white font-serif leading-tight tracking-tighter italic">
+              &ldquo;We built Studio Vault PH because professional movement shouldn't be limited by logistics. It's a tool built for the industry, by the industry.&rdquo;
             </blockquote>
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-[11px] font-bold text-charcoal uppercase tracking-widest">StudioVaultPH Founders</p>
-              <div className="w-12 h-0.5 bg-gold/40 rounded-full" />
+            <div className="flex flex-col items-center gap-4">
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">STUDIO VAULT PH FOUNDERS</p>
+              <div className="w-16 h-1 bg-forest rounded-full" />
             </div>
           </div>
         </div>
       </section>
 
       {/* Value Proposition Sections */}
-      <section className="px-6 py-32 bg-white/20">
+      <section className="px-6 py-40 bg-white">
         <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-16">
           {[
             {
               title: "For Clients",
-              subtitle: "Premium Access.",
+              subtitle: "UNPARALLELED ACCESS",
               icon: Sparkles,
-              items: ["Curated Instructors", "Seamless Marketplace", "Exceptional Settings"],
-              light: "white",
+              items: ["Curated Instructor Network", "High-End Studio Settings", "Seamless Booking Flow"],
+              accent: "forest",
               image: "/images/homepage/client.png"
             },
             {
               title: "For Instructors",
-              subtitle: "Total Autonomy.",
+              subtitle: "PROFESSIONAL AUTONOMY",
               icon: User,
-              items: ["Prime Locations", "Pay-as-you-go", "Unified Controls"],
-              light: "sage",
+              items: ["Prime Booking Locations", "Transparent Pay-as-you-go", "Unified Session Controls"],
+              accent: "forest",
               image: "/images/homepage/instructor.png"
             },
             {
               title: "For Studios",
-              subtitle: "Loss Recovery.",
+              subtitle: "DENSITY OPTIMIZATION",
               icon: DollarSign,
-              items: ["Revenue Optimization", "Schedule Control", "Verified Staff"],
-              light: "gold",
+              items: ["Automated Revenue Recovery", "Absolute Schedule Control", "Verified Staff Access"],
+              accent: "forest",
               image: "/images/homepage/studio.png"
             }
           ].map((v, i) => (
-            <div key={i} className="flex flex-col space-y-8 p-6 group">
-              <div className="aspect-[4/3] relative rounded-[32px] overflow-hidden shadow-xl mb-4 group-hover:-translate-y-2 transition-transform duration-500">
-                <Image src={v.image} alt={v.title} fill className="object-cover" />
-                <div className="absolute inset-0 bg-charcoal/20 group-hover:bg-transparent transition-colors" />
-                <div className={clsx(
-                  "absolute top-6 left-6 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg backdrop-blur-md",
-                  v.light === 'sage' ? "bg-white/90 text-sage" : v.light === 'gold' ? "bg-white/90 text-gold" : "bg-white/90 text-charcoal"
-                )}>
-                  <v.icon className="w-5 h-5" />
+            <div key={i} className="flex flex-col space-y-10 group">
+              <div className="aspect-[4/5] relative rounded-xl overflow-hidden shadow-card mb-4 group-hover:-translate-y-2 transition-all duration-500 border border-border-grey">
+                <Image src={v.image} alt={v.title} fill className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                <div className="absolute inset-0 bg-charcoal/30 group-hover:bg-transparent transition-all duration-700" />
+                <div className="absolute top-8 left-8 w-14 h-14 rounded-lg flex items-center justify-center bg-white border border-border-grey shadow-tight">
+                  <v.icon className="w-6 h-6 text-forest" />
                 </div>
               </div>
-              <div className="space-y-2 px-2">
-                <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">{v.title}</h2>
-                <p className="text-[11px] font-bold text-charcoal/40 uppercase tracking-widest">{v.subtitle}</p>
+              <div className="space-y-3 px-2">
+                <h2 className="text-3xl font-serif text-charcoal tracking-tighter">{v.title}</h2>
+                <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">{v.subtitle}</p>
               </div>
-              <ul className="space-y-5 px-2">
+              <ul className="space-y-6 px-2">
                 {v.items.map((item, idx) => (
-                  <li key={idx} className="flex items-center gap-3 text-charcoal/60 font-medium text-[13px]">
-                    <div className="w-1.5 h-1.5 rounded-full bg-sage/40" />
+                  <li key={idx} className="flex items-center gap-4 text-slate font-medium text-[14px]">
+                    <div className="w-1.5 h-1.5 rounded-full bg-forest" />
                     {item}
                   </li>
                 ))}
@@ -241,19 +223,19 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="px-6 py-20 border-t border-white/60 bg-alabaster/40">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
-          <div className="flex flex-col items-center md:items-start gap-4">
-            <div className="flex items-center gap-0 opacity-40 grayscale group-hover:grayscale-0 transition-all">
-              <Image src="/logo.png" alt="StudioVault Logo" width={60} height={60} className="w-10 h-10 object-contain" />
-              <span className="text-lg font-serif font-bold text-charcoal tracking-tight -ml-2">StudioVaultPH</span>
+      <footer className="px-6 py-32 border-t border-border-grey bg-white">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-16">
+          <div className="flex flex-col items-center md:items-start gap-6">
+            <div className="flex items-center gap-2 grayscale group-hover:grayscale-0 transition-all opacity-80">
+              <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-12 h-12 object-contain" />
+              <span className="text-xl font-serif text-charcoal tracking-tighter uppercase">STUDIO VAULT PH</span>
             </div>
-            <p className="text-[10px] font-bold text-charcoal/30 uppercase tracking-widest">&copy; {new Date().getFullYear()} StudioVaultPH. All rights reserved.</p>
+            <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">&copy; {new Date().getFullYear()} STUDIO VAULT PH. ALL RIGHTS RESERVED.</p>
           </div>
-          <div className="flex gap-10 text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.2em]">
-            <Link href="/terms-of-service" className="hover:text-sage transition-colors">Terms of Service</Link>
-            <Link href="/privacy" className="hover:text-gold transition-colors">Privacy Policy</Link>
-            <Link href="/support" className="hover:text-charcoal transition-colors">Support</Link>
+          <div className="flex flex-wrap justify-center gap-10 text-[10px] font-bold text-slate uppercase tracking-[0.4em]">
+            <Link href="/terms-of-service" className="hover:text-forest transition-all underline decoration-forest/0 hover:decoration-forest underline-offset-8">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-forest transition-all underline decoration-forest/0 hover:decoration-forest underline-offset-8">Privacy Policy</Link>
+            <Link href="/support" className="hover:text-forest transition-all underline decoration-forest/0 hover:decoration-forest underline-offset-8">Support</Link>
           </div>
         </div>
       </footer>

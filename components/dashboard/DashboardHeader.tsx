@@ -28,8 +28,8 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
 
     return (
         <header className={clsx(
-            "glass-navbar px-6 sm:px-12 fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border-b border-white/60",
-            isScrolled ? "h-20 shadow-cloud" : "h-28 sm:h-32"
+            "px-6 sm:px-12 fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border-b border-border-grey bg-white/95 backdrop-blur-sm",
+            isScrolled ? "h-20 shadow-tight" : "h-28 sm:h-32"
         )}>
             <div className="max-w-7xl mx-auto h-full flex items-center justify-between gap-4">
                 <div className="flex items-center gap-8 h-full">
@@ -47,10 +47,10 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                             />
                         </div>
                         <span className={clsx(
-                            "font-serif font-black text-charcoal tracking-tighter -ml-8 whitespace-nowrap hidden lg:block transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] shrink-0 uppercase text-lg",
+                            "font-serif font-bold text-charcoal tracking-tighter -ml-8 whitespace-nowrap hidden lg:block transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] shrink-0 uppercase text-lg",
                             isScrolled ? "opacity-90 scale-90 translate-x-2" : "opacity-100 scale-100"
                         )}>
-                            StudioVaultPH
+                            Studio Vault PH
                         </span>
                     </Link>
                     <nav className="hidden md:block">
@@ -68,10 +68,10 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                             <p className="text-xs font-bold text-charcoal leading-tight mb-0.5 whitespace-nowrap">
                                 {profile?.role === 'studio' ? (studioData?.name || profile?.full_name || 'Studio') : (profile?.full_name || 'Partner')}
                             </p>
-                            <p className="text-[10px] text-sage font-bold uppercase tracking-widest leading-none">
-                                {profile?.role === 'instructor' ? 'Instructor' :
-                                    profile?.role === 'studio' ? 'Studio' :
-                                        profile?.role || 'User'}
+                            <p className="text-[10px] text-forest font-bold uppercase tracking-widest leading-none">
+                                {profile?.role === 'instructor' ? 'INSTRUCTOR' :
+                                    profile?.role === 'studio' ? 'STUDIO' :
+                                        profile?.role || 'USER'}
                             </p>
                         </div>
                         <Link
@@ -82,7 +82,7 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                                             profile?.role === 'admin' ? '/admin' :
                                                 '#'
                             }
-                            className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-cloud transition-transform hover:scale-110 block"
+                            className="w-10 h-10 rounded-lg overflow-hidden border border-border-grey shadow-tight transition-transform hover:scale-110 block"
                         >
                             <Image
                                 src={avatarUrl}
@@ -93,7 +93,7 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                             />
                         </Link>
                         <form action={signOut} className="hidden sm:block">
-                            <button className="p-2 text-sage hover:text-red-500 transition-colors" title="Log Out">
+                            <button className="p-2 text-slate hover:text-red-500 transition-colors" title="Log Out">
                                 <LogOut className="w-5 h-5" />
                             </button>
                         </form>

@@ -88,14 +88,14 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
     };
 
     return (
-        <div className="bg-white border border-cream-200 rounded-xl p-6 shadow-sm">
-            <h2 className="text-xl font-serif font-bold text-charcoal-900 mb-4 flex items-center gap-2">
-                <Repeat className="w-5 h-5 text-rose-gold" />
-                Recurring Schedule Generator
+        <div className="bg-white border border-border-grey rounded-lg p-10 shadow-tight">
+            <h2 className="text-2xl font-serif text-charcoal mb-4 flex items-center gap-3">
+                <Repeat className="w-6 h-6 text-forest" />
+                Schedule Generator
             </h2>
 
-            <p className="text-sm text-charcoal-600 mb-6">
-                Bulk create available slots for your studio. Select a date range and the days of the week you are open.
+            <p className="text-[10px] text-slate font-bold uppercase tracking-[0.2em] mb-10">
+                BULK CREATE AVAILABLE SESSIONS ACROSS DATE RANGES
             </p>
 
             {message && (
@@ -107,38 +107,38 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
 
             <div className="space-y-6">
                 {/* Date Range */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-charcoal-700 mb-1">Start Date</label>
+                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Start Date</label>
                         <input
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 outline-none"
+                            className="w-full px-5 py-4 border border-border-grey rounded-lg text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-charcoal-700 mb-1">End Date</label>
+                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">End Date</label>
                         <input
                             type="date"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 outline-none"
+                            className="w-full px-5 py-4 border border-border-grey rounded-lg text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer"
                         />
                     </div>
                 </div>
 
                 {/* Days of Week */}
                 <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-2">Days of Week</label>
-                    <div className="flex flex-wrap gap-2">
+                    <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-4 ml-2">Days of Week</label>
+                    <div className="flex flex-wrap gap-3">
                         {daysOfWeek.map(day => (
                             <button
                                 key={day.id}
                                 onClick={() => toggleDay(day.id)}
-                                className={`w-10 h-10 rounded-full text-sm font-bold transition-all border ${selectedDays.includes(day.id)
-                                    ? 'bg-rose-gold text-white border-rose-gold shadow-sm'
-                                    : 'bg-white text-charcoal-600 border-cream-300 hover:border-rose-gold/50'
+                                className={`w-12 h-12 rounded-lg text-[11px] font-bold transition-all border ${selectedDays.includes(day.id)
+                                    ? 'bg-forest text-white border-forest shadow-tight'
+                                    : 'bg-white text-slate border-border-grey hover:border-forest/50'
                                     }`}
                             >
                                 {day.label}
@@ -148,13 +148,13 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
                 </div>
 
                 {/* Time Range */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-charcoal-700 mb-1">Open Time</label>
+                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Open Time</label>
                         <select
                             value={startTime}
                             onChange={(e) => setStartTime(e.target.value)}
-                            className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none bg-white"
+                            className="w-full px-5 py-4 border border-border-grey rounded-lg text-charcoal font-bold text-[10px] outline-none bg-white focus:ring-1 focus:ring-forest cursor-pointer uppercase tracking-widest"
                         >
                             {Array.from({ length: 24 }, (_, i) => i).map(hour => (
                                 <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
@@ -164,11 +164,11 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-charcoal-700 mb-1">Close Time</label>
+                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Close Time</label>
                         <select
                             value={endTime}
                             onChange={(e) => setEndTime(e.target.value)}
-                            className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none bg-white"
+                            className="w-full px-5 py-4 border border-border-grey rounded-lg text-charcoal font-bold text-[10px] outline-none bg-white focus:ring-1 focus:ring-forest cursor-pointer uppercase tracking-widest"
                         >
                             {Array.from({ length: 24 }, (_, i) => i).map(hour => (
                                 <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
@@ -182,44 +182,44 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
                 {/* Equipment Selection */}
                 {availableEquipment.length > 0 && (
                     <div>
-                        <label className="block text-sm font-medium text-charcoal-700 mb-2">Equipment for these slots</label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-4 ml-2">Equipment Selection</label>
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                             {availableEquipment.map(eq => (
                                 <button
                                     key={eq}
                                     onClick={() => toggleEquipment(eq)}
-                                    className={`flex items-center gap-2 p-2 border rounded-lg transition-all text-left ${selectedEquipment.includes(eq)
-                                        ? 'bg-rose-gold text-white border-rose-gold shadow-sm'
-                                        : 'bg-white text-charcoal-700 border-cream-200 hover:bg-cream-50'
+                                    className={`flex items-center gap-3 p-4 border rounded-lg transition-all text-left ${selectedEquipment.includes(eq)
+                                        ? 'bg-forest text-white border-forest shadow-tight font-bold'
+                                        : 'bg-off-white text-slate border-border-grey hover:bg-white'
                                         }`}
                                 >
-                                    <span className="text-sm">{eq}</span>
+                                    <span className="text-[10px] uppercase font-bold tracking-widest">{eq}</span>
                                 </button>
                             ))}
                         </div>
                     </div>
                 )}
 
-                <div className="pt-4 border-t border-cream-100">
+                <div className="pt-10 border-t border-border-grey space-y-4">
                     <button
                         onClick={handleGenerate}
                         disabled={isSubmitting}
-                        className="w-full py-3 bg-rose-gold text-white rounded-lg font-bold hover:brightness-110 transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+                        className="w-full py-5 bg-charcoal text-white rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
                     >
                         {isSubmitting ? (
                             <>
                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                Generating...
+                                PROCESSING...
                             </>
                         ) : (
                             <>
                                 <Repeat className="w-5 h-5" />
-                                Generate Schedule
+                                GENERATE SCHEDULE
                             </>
                         )}
                     </button>
-                    <p className="text-xs text-charcoal-500 mt-2 text-center">
-                        This will generate 1-hour slots for the selected range. Existing slots will be skipped to prevent duplicates.
+                    <p className="text-[9px] text-slate font-bold uppercase tracking-[0.1em] text-center max-w-sm mx-auto leading-relaxed">
+                        system will generate 1-hour sessions for the selected range. existing sessions will be preserved to prevent duplicates.
                     </p>
                 </div>
             </div>

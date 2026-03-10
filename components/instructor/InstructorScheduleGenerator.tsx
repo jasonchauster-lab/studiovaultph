@@ -121,87 +121,87 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
 
     return (
         <div className="space-y-10">
-            <div className="glass-card p-12 relative overflow-hidden">
-                {/* Decorative Bloom */}
-                <div className="absolute top-0 right-0 w-80 h-80 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] pointer-events-none" />
+            <div className="earth-card p-12 relative overflow-hidden bg-white shadow-tight">
+                {/* Decorative Tint */}
+                <div className="absolute top-0 right-0 w-80 h-80 bg-green-50 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] pointer-events-none" />
 
                 <div className="relative z-10">
                     <div className="flex items-center gap-6 mb-4">
-                        <div className="p-4 bg-white/40 rounded-[20px] border border-white/60 shadow-sm">
-                            <Repeat className="w-7 h-7 text-gold" />
+                        <div className="p-4 bg-off-white rounded-lg border border-border-grey shadow-tight">
+                            <Repeat className="w-7 h-7 text-forest" />
                         </div>
                         <div>
                             <h2 className="text-3xl font-serif text-charcoal tracking-tighter">Weekly Schedule Generator</h2>
-                            <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.4em] mt-1.5">Set up your recurring availability</p>
+                            <p className="text-[10px] font-bold text-slate uppercase tracking-[0.4em] mt-1.5">Set up your recurring availability</p>
                         </div>
                     </div>
 
-                    <p className="text-sm text-charcoal/40 leading-relaxed mb-12 max-w-xl italic">
+                    <p className="text-sm text-slate leading-relaxed mb-12 max-w-xl italic">
                         Set your available hours for multiple days at once. Choose a date range, pick the days you're free, and we'll add all the slots for you automatically.
                     </p>
 
                     {message && (
                         <div className={clsx(
-                            "p-5 rounded-[2rem] mb-10 border flex items-center gap-4 animate-in slide-in-from-top-4 duration-500",
-                            message.type === 'success' ? "bg-sage/5 border-sage/20 text-sage" : "bg-red-50/50 border-red-100 text-red-600"
+                            "p-5 rounded-xl mb-10 border flex items-center gap-4 animate-in slide-in-from-top-4 duration-500",
+                            message.type === 'success' ? "bg-green-50 border-green-100 text-green-800" : "bg-red-50 border-red-100 text-red-600"
                         )}>
                             {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                            <span className="text-[10px] font-black uppercase tracking-widest leading-normal">{message.text}</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest leading-normal">{message.text}</span>
                         </div>
                     )}
 
                     <div className="space-y-10">
                         {/* Temporal Boundaries */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="glass-card p-10 space-y-8">
-                                <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-2 px-2">Date Range</h3>
+                            <div className="earth-card p-10 space-y-8 bg-white border border-border-grey shadow-tight">
+                                <h3 className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] mb-2 px-2">Date Range</h3>
                                 <div className="grid grid-cols-1 gap-8">
                                     <div className="relative">
-                                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3 ml-6">Start Date</label>
+                                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-6">Start Date</label>
                                         <div className="relative">
-                                            <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/20" />
+                                            <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-slate/40" />
                                             <input
                                                 type="date"
                                                 value={startDate}
                                                 onChange={(e) => setStartDate(e.target.value)}
-                                                className="w-full pl-14 pr-8 py-5 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer"
+                                                className="w-full pl-14 pr-8 py-5 border border-border-grey rounded-lg bg-off-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-[0.2em] cursor-pointer"
                                             />
                                         </div>
                                     </div>
                                     <div className="relative">
-                                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3 ml-6">End Date</label>
+                                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-6">End Date</label>
                                         <div className="relative">
-                                            <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/20" />
+                                            <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-slate/40" />
                                             <input
                                                 type="date"
                                                 value={endDate}
                                                 onChange={(e) => setEndDate(e.target.value)}
-                                                className="w-full pl-14 pr-8 py-5 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer"
+                                                className="w-full pl-14 pr-8 py-5 border border-border-grey rounded-lg bg-off-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-[0.2em] cursor-pointer"
                                             />
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="glass-card p-10 space-y-8">
-                                <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-2 px-2">Repeat on Days</h3>
+                            <div className="earth-card p-10 space-y-8 bg-white border border-border-grey shadow-tight">
+                                <h3 className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] mb-2 px-2">Repeat on Days</h3>
                                 <div className="flex flex-wrap gap-4">
                                     {daysOfWeek.map(day => (
                                         <button
                                             key={day.id}
                                             onClick={() => toggleDay(day.id)}
                                             className={clsx(
-                                                "w-14 h-14 rounded-[20px] text-[10px] font-black transition-all duration-700 border flex items-center justify-center tracking-[0.2em]",
+                                                "w-14 h-14 rounded-lg text-[10px] font-bold transition-all duration-300 border flex items-center justify-center tracking-[0.2em]",
                                                 selectedDays.includes(day.id)
-                                                    ? "bg-charcoal text-white border-charcoal shadow-cloud active:scale-95"
-                                                    : "bg-white/40 text-charcoal/20 border-white/60 hover:border-gold/30 hover:text-charcoal"
+                                                    ? "bg-charcoal text-white border-charcoal shadow-tight active:scale-95"
+                                                    : "bg-off-white text-slate border-border-grey hover:border-forest hover:text-forest shadow-sm"
                                             )}
                                         >
                                             {day.label}
                                         </button>
                                     ))}
                                 </div>
-                                <p className="text-[9px] text-charcoal/30 uppercase tracking-widest italic leading-relaxed px-2">
+                                <p className="text-[9px] text-slate uppercase tracking-widest italic leading-relaxed px-2">
                                     Select which days to repeat your availability.
                                 </p>
                             </div>
@@ -209,16 +209,16 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
 
                         {/* Operational Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="glass-card p-8 space-y-8">
+                            <div className="earth-card p-8 space-y-8 bg-white border border-border-grey shadow-tight">
                                 <div>
-                                    <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-8 px-2">Session Hours</h3>
+                                    <h3 className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] mb-8 px-2">Session Hours</h3>
                                     <div className="grid grid-cols-2 gap-8">
                                         <div>
-                                            <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3 ml-6">Start Time</label>
+                                            <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-6">Start Time</label>
                                             <select
                                                 value={startTime}
                                                 onChange={(e) => setStartTime(e.target.value)}
-                                                className="w-full px-8 py-5 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer appearance-none shadow-sm"
+                                                className="w-full px-8 py-5 border border-border-grey rounded-lg bg-off-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-[0.2em] cursor-pointer appearance-none shadow-sm"
                                             >
                                                 {Array.from({ length: 24 }, (_, i) => i).map(hour => (
                                                     <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
@@ -228,11 +228,11 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3 ml-6">End Time</label>
+                                            <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-6">End Time</label>
                                             <select
                                                 value={endTime}
                                                 onChange={(e) => setEndTime(e.target.value)}
-                                                className="w-full px-8 py-5 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer appearance-none shadow-sm"
+                                                className="w-full px-8 py-5 border border-border-grey rounded-lg bg-off-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-[0.2em] cursor-pointer appearance-none shadow-sm"
                                             >
                                                 {Array.from({ length: 24 }, (_, i) => i).map(hour => (
                                                     <option key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
@@ -245,8 +245,8 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                 </div>
 
                                 <div>
-                                    <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-8 px-2">Equipment</h3>
-                                    <div className="flex flex-wrap gap-3 p-6 bg-white/40 rounded-[2.5rem] border border-white/60 shadow-sm">
+                                    <h3 className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] mb-8 px-2">Equipment</h3>
+                                    <div className="flex flex-wrap gap-3 p-6 bg-off-white rounded-xl border border-border-grey shadow-sm">
                                         {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
                                             const isSelected = equipment.includes(eq);
                                             return (
@@ -255,10 +255,10 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                                     type="button"
                                                     onClick={() => toggleEquipment(eq)}
                                                     className={clsx(
-                                                        "px-6 py-3 rounded-[20px] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 border",
+                                                        "px-6 py-3 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border",
                                                         isSelected
-                                                            ? "bg-sage text-charcoal border-sage shadow-cloud active:scale-95"
-                                                            : "bg-white/40 text-charcoal/20 border-white/60 hover:border-sage/30 hover:text-charcoal"
+                                                            ? "bg-forest text-white border-forest shadow-tight"
+                                                            : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-charcoal shadow-sm"
                                                     )}
                                                 >
                                                     {eq}
@@ -269,19 +269,19 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                 </div>
                             </div>
 
-                            <div className="glass-card p-8 flex flex-col">
-                                <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-6 px-2">Location</h3>
+                            <div className="earth-card p-8 flex flex-col bg-white border border-border-grey shadow-tight">
+                                <h3 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-6 px-2">Location</h3>
                                 <div className="space-y-4 max-h-[350px] overflow-y-auto pr-3 custom-scrollbar flex-1">
                                     {Object.entries(GROUPED_LOCATIONS).map(([city, cityLocations]) => {
                                         const allSelected = cityLocations.every(loc => locations.includes(loc));
                                         return (
-                                            <div key={city} className="p-6 bg-white/40 rounded-[2rem] border border-white/60 shadow-sm space-y-6">
+                                            <div key={city} className="p-6 bg-off-white rounded-xl border border-border-grey shadow-sm space-y-6">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em]">{city}</span>
+                                                    <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
                                                     <button
                                                         type="button"
                                                         onClick={() => toggleCityGroup(cityLocations)}
-                                                        className="text-[10px] font-black text-gold hover:text-charcoal transition-colors uppercase tracking-[0.22em] underline decoration-gold/20 underline-offset-8"
+                                                        className="text-[10px] font-bold text-forest hover:text-charcoal transition-colors uppercase tracking-[0.22em] underline decoration-forest/20 underline-offset-8"
                                                     >
                                                         {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
                                                     </button>
@@ -296,10 +296,10 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                                                 type="button"
                                                                 onClick={() => toggleLocation(l)}
                                                                 className={clsx(
-                                                                    "px-4 py-2 rounded-[20px] text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-700 border",
+                                                                    "px-4 py-2 rounded-lg text-[9px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border",
                                                                     isSelected
-                                                                        ? "bg-gold text-white border-gold shadow-cloud"
-                                                                        : "bg-white/40 text-charcoal/20 border-white/60 hover:border-gold/30 hover:text-charcoal"
+                                                                        ? "bg-forest text-white border-forest shadow-tight"
+                                                                        : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-charcoal shadow-sm"
                                                                 )}
                                                             >
                                                                 {displayName}
@@ -314,20 +314,20 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                             </div>
                         </div>
 
-                        <div className="pt-12 border-t border-white/60">
+                        <div className="pt-12 border-t border-border-grey">
                             <button
                                 onClick={handleGenerate}
                                 disabled={isSubmitting}
-                                className="w-full py-6 bg-charcoal text-white rounded-[2.5rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-[0.98] flex items-center justify-center gap-6 disabled:opacity-50"
+                                className="w-full py-6 bg-charcoal text-white rounded-xl text-[11px] font-bold uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-tight active:scale-[0.98] flex items-center justify-center gap-6 disabled:opacity-50"
                             >
                                 {isSubmitting ? (
                                     <>
-                                        <Loader2 className="w-5 h-5 animate-spin text-gold" />
+                                        <Loader2 className="w-5 h-5 animate-spin text-forest" />
                                         SAVING SCHEDULE...
                                     </>
                                 ) : (
                                     <>
-                                        <Repeat className="w-5 h-5 text-gold" />
+                                        <Repeat className="w-5 h-5 text-forest" />
                                         SAVE RECURRING SCHEDULE
                                     </>
                                 )}

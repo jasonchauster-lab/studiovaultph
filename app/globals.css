@@ -11,7 +11,7 @@
   --background: var(--off-white);
   --foreground: var(--charcoal);
 
-  --radius: 12px;
+  --radius: 8px;
   --radius-pill: 9999px;
 
   /* Tight, minimal shadows for "Modern Earth" */
@@ -40,6 +40,13 @@
   --radius-2xl: calc(var(--radius) + 4px);
 
   --shadow-tight: var(--shadow-tight);
+  --shadow-card: var(--shadow-card);
+  --shadow-cloud: var(--shadow-card);
+
+  --radius-pill: var(--radius-pill);
+
+  /* Selection color */
+  --color-selection: rgba(47, 82, 51, 0.1);
 }
 
 body {
@@ -57,6 +64,7 @@ h3,
 h4 {
   font-weight: 600;
   color: var(--charcoal);
+  letter-spacing: -0.02em;
 }
 
 @layer utilities {
@@ -67,23 +75,19 @@ h4 {
     border: 1px solid var(--border-grey);
     box-shadow: var(--shadow-tight);
     border-radius: var(--radius);
-    transition: all 0.2s ease-in-out;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .glass-card:hover,
   .earth-card:hover {
     box-shadow: var(--shadow-card);
     transform: translateY(-1px);
-  }
-
-  .status-pill-frosted {
-    @apply px-3 py-1 text-[8px] font-black uppercase rounded-full tracking-[0.2em] backdrop-blur-md border border-white/40;
-    box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    border-color: rgba(31, 41, 55, 0.1);
   }
 
   .sticky-header-antigravity {
-    @apply sticky top-0 z-[60] py-6 px-8 lg:px-12 bg-white border-b border-border-grey transition-all duration-300;
-    box-shadow: var(--shadow-tight);
+    @apply sticky top-0 z-[60] bg-white border-b border-border-grey transition-all duration-300;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
   }
 
   .glass-navbar {
@@ -95,15 +99,21 @@ h4 {
   }
 
   .btn-primary,
-  .btn-forest {
+  .btn-forest,
+  .btn-antigravity,
+  .btn-sage-glow,
+  .btn-rose {
     background: var(--forest);
     color: white;
-    @apply rounded-[8px] font-semibold transition-all duration-200 shadow-sm px-6 py-2 content-center;
+    @apply rounded-lg font-semibold transition-all duration-200 shadow-sm px-6 py-2.5 inline-flex items-center justify-center gap-2;
   }
 
   .btn-primary:hover,
-  .btn-forest:hover {
-    filter: brightness(1.1);
+  .btn-forest:hover,
+  .btn-antigravity:hover,
+  .btn-sage-glow:hover,
+  .btn-rose:hover {
+    filter: brightness(1.2);
     box-shadow: var(--shadow-card);
   }
 
@@ -112,72 +122,41 @@ h4 {
     transform: scale(0.98);
   }
 
-  /* Redefining Antigravity buttons to Forest Green */
-  .btn-antigravity,
-  .btn-sage-glow {
-    background: var(--forest);
-    color: white;
-    @apply rounded-[8px] font-semibold transition-all duration-200 shadow-sm;
-  }
-
-  .btn-antigravity:hover,
-  .btn-sage-glow:hover {
-    filter: brightness(1.1);
-    box-shadow: var(--shadow-card);
-  }
-
-  .btn-rose {
-    @apply rounded-[20px] font-bold transition-all duration-300 shadow-md;
-    background: linear-gradient(135deg, var(--rose) 0%, #D4B2AC 100%);
-    color: var(--charcoal);
-  }
-
-  .btn-rose:hover {
-    @apply -translate-y-1 shadow-lg brightness-110;
-  }
-
-  .btn-rose:active {
-    @apply translate-y-0 shadow-md scale-[0.98];
-  }
-
-  .btn-rose:disabled {
-    @apply opacity-40 cursor-not-allowed transform-none shadow-none;
-  }
-
   /* Modern Earth Status Pills — Dark text on tinted backgrounds */
-  .status-pill-earth {
-    @apply px-3 py-1 text-[10px] font-semibold uppercase rounded-full tracking-wider;
+  .status-pill-earth,
+  .status-pill-frosted {
+    @apply px-3 py-1 text-[10px] font-bold uppercase rounded-full tracking-widest border border-transparent;
   }
 
   .status-pill-green {
-    @apply bg-green-100 text-green-800;
+    @apply bg-green-50 text-green-700 border-green-100;
   }
 
   .status-pill-yellow {
-    @apply bg-yellow-100 text-yellow-800;
+    @apply bg-amber-50 text-amber-700 border-amber-100;
   }
 
   .status-pill-red {
-    @apply bg-red-100 text-red-800;
+    @apply bg-red-50 text-red-700 border-red-100;
   }
 
   .status-pill-grey {
-    @apply bg-gray-100 text-gray-800;
+    @apply bg-gray-50 text-gray-700 border-gray-100;
   }
 
   /* Session block: clean border and shadow */
   .session-block-earth {
-    @apply border border-border-grey bg-white shadow-tight transition-all duration-200;
+    @apply border border-border-grey bg-white shadow-tight transition-all duration-200 rounded-lg;
   }
 
   .session-block-earth:hover {
-    @apply shadow-card;
+    @apply shadow-card border-charcoal/10;
   }
 
   /* Secondary details color detail link */
   .link-secondary {
     color: var(--slate);
-    @apply hover:text-charcoal transition-colors duration-200;
+    @apply hover:text-charcoal transition-colors duration-200 font-medium;
   }
 
   .no-scrollbar::-webkit-scrollbar {

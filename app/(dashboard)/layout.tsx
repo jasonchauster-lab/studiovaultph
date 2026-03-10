@@ -41,9 +41,7 @@ export default async function DashboardLayout({
         : (profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.full_name || user?.email || 'Partner'}`);
 
     return (
-        <div className="min-h-screen bg-alabaster flex flex-col relative overflow-hidden">
-            {/* Background Warmth Bloom */}
-            <div className="fixed inset-0 bg-[radial-gradient(circle_at_70%_80%,var(--linen)_0%,transparent_50%)] opacity-30 pointer-events-none z-0" />
+        <div className="min-h-screen bg-off-white flex flex-col relative overflow-hidden">
 
             {/* Shared Header - Antigravity Glassmorphism */}
             <DashboardHeader
@@ -59,13 +57,13 @@ export default async function DashboardLayout({
                 </div>
             </main>
 
-            <footer className="glass-card m-4 sm:m-8 p-6">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-charcoal/60">
-                    <p>© 2026 Studio Vault PH. All rights reserved.</p>
-                    <div className="flex gap-6">
-                        <Link href="/terms-of-service" className="hover:text-sage transition-colors font-medium">Terms of Service</Link>
-                        <Link href="/privacy" className="hover:text-sage transition-colors font-medium">Privacy Policy</Link>
-                        <Link href="/support" className="hover:text-sage transition-colors font-medium">Support</Link>
+            <footer className="earth-card m-4 sm:m-8 p-10 bg-white border border-border-grey shadow-tight">
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+                    <p className="text-[10px] font-bold text-slate uppercase tracking-widest">© 2026 STUDIO VAULT PH. ALL RIGHTS RESERVED.</p>
+                    <div className="flex gap-8">
+                        <Link href="/terms-of-service" className="text-[10px] font-bold text-slate hover:text-forest transition-all uppercase tracking-widest underline decoration-forest/0 hover:decoration-forest underline-offset-8">Terms of Service</Link>
+                        <Link href="/privacy" className="text-[10px] font-bold text-slate hover:text-forest transition-all uppercase tracking-widest underline decoration-forest/0 hover:decoration-forest underline-offset-8">Privacy Policy</Link>
+                        <Link href="/support" className="text-[10px] font-bold text-slate hover:text-forest transition-all uppercase tracking-widest underline decoration-forest/0 hover:decoration-forest underline-offset-8">Support</Link>
                     </div>
                 </div>
             </footer>

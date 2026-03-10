@@ -189,34 +189,34 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header */}
-            <div className="flex flex-col gap-4 bg-white/40 backdrop-blur-[20px] p-8 rounded-[2rem] border border-white/60 shadow-cloud relative">
-                {/* Background Bloom */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-sage/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+            <div className="earth-card p-10 bg-white shadow-tight relative overflow-hidden">
+                {/* Background Tint */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
                 {/* Row 1: Title + Date Navigation */}
                 <div className="flex flex-wrap items-center gap-4 relative z-10">
                     <h2 className="text-4xl font-serif text-charcoal hidden md:block min-w-[240px] tracking-tighter">
                         {format(currentDate, 'MMMM yyyy')}
                     </h2>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                         <div className="relative group">
-                            <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/20 group-focus-within:text-gold transition-colors" />
+                            <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate group-focus-within:text-forest transition-colors" />
                             <input
                                 type="date"
                                 value={format(currentDate, 'yyyy-MM-dd')}
                                 onChange={(e) => { if (e.target.value) router.push(`?date=${e.target.value}`) }}
-                                className="pl-12 pr-6 py-3 border border-white/60 rounded-[20px] text-[10px] font-black bg-white/40 text-charcoal outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white transition-all cursor-pointer uppercase tracking-[0.2em]"
+                                className="pl-12 pr-6 py-4 border border-border-grey rounded-lg text-[10px] font-bold bg-white text-charcoal outline-none focus:ring-1 focus:ring-forest transition-all cursor-pointer uppercase tracking-[0.2em]"
                                 title="Select any specific date"
                             />
                         </div>
-                        <div className="flex items-center bg-alabaster/50 backdrop-blur-sm rounded-xl p-1 border border-cream-100">
-                            <button onClick={handlePrevWeek} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white rounded-lg transition-all text-charcoal/60 hover:text-charcoal text-[10px] font-black uppercase tracking-widest" title="Previous Week">
+                        <div className="flex items-center bg-off-white rounded-lg p-1 border border-border-grey shadow-tight">
+                            <button onClick={handlePrevWeek} className="flex items-center gap-1.5 px-4 py-2 hover:bg-white rounded-md transition-all text-slate hover:text-charcoal text-[10px] font-bold uppercase tracking-widest" title="Previous Week">
                                 <ChevronLeft className="w-3.5 h-3.5" /> PREV
                             </button>
-                            <button onClick={handleToday} className="px-5 py-1.5 text-[10px] font-black text-charcoal uppercase tracking-widest hover:bg-white rounded-lg transition-all border-x border-cream-100 mx-1" title="Go to Current week">
+                            <button onClick={handleToday} className="px-6 py-2 text-[10px] font-bold text-charcoal uppercase tracking-widest hover:bg-white rounded-md transition-all border-x border-border-grey mx-1" title="Go to Current week">
                                 TODAY
                             </button>
-                            <button onClick={handleNextWeek} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white rounded-lg transition-all text-charcoal/60 hover:text-charcoal text-[10px] font-black uppercase tracking-widest" title="Next Week">
+                            <button onClick={handleNextWeek} className="flex items-center gap-1.5 px-4 py-2 hover:bg-white rounded-md transition-all text-slate hover:text-charcoal text-[10px] font-bold uppercase tracking-widest" title="Next Week">
                                 NEXT <ChevronRight className="w-3.5 h-3.5" />
                             </button>
                         </div>
@@ -224,18 +224,18 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                 </div>
 
                 {/* Row 2: Action Buttons — centered */}
-                <div className="flex justify-center items-center gap-3 relative z-10">
+                <div className="flex justify-center items-center gap-4 mt-6 relative z-10">
                     <button
                         onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
-                        className="bg-[#B4C3B2] text-white px-6 py-2.5 rounded-[12px] text-[10px] font-black uppercase tracking-[0.25em] hover:brightness-105 transition-all flex items-center gap-2 shadow-md active:scale-95"
+                        className="btn-forest px-8 py-3 text-[10px] tracking-[0.2em]"
                     >
-                        <Plus className="w-3.5 h-3.5 stroke-[3px]" /> ADD SLOT
+                        <Plus className="w-4 h-4" /> ADD SLOT
                     </button>
                     <button
                         onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
-                        className="border-2 border-charcoal text-charcoal bg-white px-6 py-2.5 rounded-[12px] text-[10px] font-black uppercase tracking-[0.25em] hover:bg-charcoal hover:text-white transition-all flex items-center gap-2 shadow-sm active:scale-95"
+                        className="h-12 border-2 border-charcoal text-charcoal bg-white px-8 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-charcoal hover:text-white transition-all flex items-center gap-3 shadow-tight active:scale-95"
                     >
-                        <CalendarIcon className="w-3.5 h-3.5" /> RECURRING SCHEDULE
+                        <CalendarIcon className="w-4 h-4" /> RECURRING SCHEDULE
                     </button>
                 </div>
             </div>
@@ -368,10 +368,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         <div
                                                             key={slot.id}
                                                             className={clsx(
-                                                                "absolute rounded-[8px] text-[10px] hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border z-10 p-4 group/slot flex flex-col gap-3 session-block-earth",
+                                                                "absolute rounded-lg text-[10px] hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border z-10 p-4 group/slot flex flex-col gap-3 session-block-earth",
                                                                 isPastCell
-                                                                    ? "bg-gray-50 border-gray-200 text-slate"
-                                                                    : "bg-green-50 border-green-200 text-green-900",
+                                                                    ? "bg-off-white border-border-grey text-slate"
+                                                                    : "bg-green-50/50 border-green-200 text-green-900",
                                                                 duration < 45 && "py-2 px-4 justify-center"
                                                             )}
                                                             style={{
@@ -386,29 +386,29 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                             }}
                                                         >
                                                             <div className={clsx("flex items-center gap-2", duration < 45 ? "flex-row" : "flex-col items-start")}>
-                                                                <div className="flex items-center gap-2 font-black text-[10px] text-charcoal uppercase tracking-[0.2em] shrink-0">
+                                                                <div className="flex items-center gap-2 font-bold text-[10px] text-charcoal uppercase tracking-[0.2em] shrink-0">
                                                                     <Clock className={clsx(duration < 45 ? "w-3 h-3" : "w-4 h-4", isPastCell ? "text-slate/30" : "text-forest")} />
                                                                     <span className={isPastCell ? "text-slate" : "text-charcoal"}>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                                 </div>
 
                                                                 <div className="flex flex-wrap items-center gap-2">
-                                                                    <div className="text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 bg-gray-100 text-slate px-3 py-1 rounded-full border border-gray-200">
+                                                                    <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-off-white text-slate px-3 py-1 rounded-md border border-border-grey">
                                                                         <MapPin className="w-3 h-3 text-slate/40" />
                                                                         <span className="truncate max-w-[100px]">{locations[0].split(' - ')[1] || locations[0]}</span>
                                                                     </div>
                                                                     {extraLocCount > 0 && duration >= 45 && (
-                                                                        <div className="text-[9px] font-black text-forest bg-green-100 px-3 py-1 rounded-full border border-green-200">+{extraLocCount} AREAS</div>
+                                                                        <div className="text-[9px] font-bold text-forest bg-green-50 px-3 py-1 rounded-md border border-green-200">+{extraLocCount} AREAS</div>
                                                                     )}
                                                                 </div>
 
                                                                 {primaryEq && duration >= 45 && (
                                                                     <div className="flex flex-wrap items-center gap-2 mt-auto">
-                                                                        <div className="text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 bg-green-100 text-forest px-3 py-1 rounded-full border border-green-200">
+                                                                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-green-50 text-forest px-3 py-1 rounded-md border border-green-200">
                                                                             <Box className="w-3 h-3 text-forest" />
                                                                             <span>{primaryEq}</span>
                                                                         </div>
                                                                         {extraEqCount > 0 && (
-                                                                            <div className="text-[9px] font-black text-slate">+{extraEqCount} NEXT</div>
+                                                                            <div className="text-[9px] font-bold text-slate">+{extraEqCount} NEXT</div>
                                                                         )}
                                                                     </div>
                                                                 )}
@@ -467,12 +467,12 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     <div
                                                         key={booking.id}
                                                         className={clsx(
-                                                            "absolute rounded-[12px] text-[10px] backdrop-blur-md border-white border z-20 p-5 overflow-hidden transition-all duration-700 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-[0_10px_20px_rgba(0,0,0,0.03)]",
+                                                            "absolute rounded-lg text-[10px] bg-white border border-border-grey z-20 p-5 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-tight",
                                                             isPastCell
-                                                                ? "bg-white/20 text-charcoal/20 opacity-60"
+                                                                ? "bg-off-white text-slate/40"
                                                                 : booking.status === 'approved'
-                                                                    ? "bg-[#B4C3B2]/40 text-charcoal"
-                                                                    : "bg-gold/40 text-charcoal",
+                                                                    ? "border-l-4 border-l-forest"
+                                                                    : "border-l-4 border-l-orange-400",
                                                             duration < 45 && "flex-row items-center gap-4 py-2 px-4"
                                                         )}
                                                         style={{
@@ -485,26 +485,26 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     >
                                                         {duration < 45 ? (
                                                             <div className="flex flex-col justify-center">
-                                                                <div className="text-[8px] font-black uppercase tracking-widest text-charcoal/40">{booking.status === 'approved' ? 'BOOKED' : 'VERIFICATION'}</div>
+                                                                <div className="text-[8px] font-bold uppercase tracking-widest text-slate">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</div>
                                                                 <div className="text-[9px] font-bold text-charcoal truncate">{studioName}</div>
                                                             </div>
                                                         ) : (
                                                             <>
                                                                 <div className="flex items-center justify-between mb-3">
                                                                     <div className={clsx(
-                                                                        "status-pill-frosted inline-flex items-center",
-                                                                        booking.status === 'approved' ? "bg-white/40 border-[#B4C3B2]/40 text-[#B4C3B2]" : "bg-white/40 border-gold/40 text-gold"
+                                                                        "status-pill-earth inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold",
+                                                                        booking.status === 'approved' ? "bg-green-50 text-green-800" : "bg-orange-50 text-orange-800"
                                                                     )}>
-                                                                        {booking.status === 'approved' ? 'BOOKED' : 'VERIFICATION'}
+                                                                        {booking.status === 'approved' ? 'BOOKED' : 'PENDING'}
                                                                     </div>
-                                                                    <ArrowUpRight className="w-4 h-4 text-charcoal/20 group-hover/booking:text-charcoal transition-all" />
+                                                                    <ArrowUpRight className="w-4 h-4 text-slate/20 group-hover/booking:text-charcoal transition-all" />
                                                                 </div>
-                                                                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal mb-2 flex items-center gap-2.5">
-                                                                    <MapPin className="w-4 h-4 text-charcoal/20" />
+                                                                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-charcoal mb-2 flex items-center gap-2.5">
+                                                                    <MapPin className="w-4 h-4 text-slate/40" />
                                                                     <span className="truncate">{studioName}</span>
                                                                 </div>
-                                                                <div className="text-[10px] font-medium text-charcoal/40 italic flex items-center gap-2.5 mt-auto">
-                                                                    <User className="w-4 h-4 text-charcoal/20" />
+                                                                <div className="text-[10px] font-medium text-slate italic flex items-center gap-2.5 mt-auto">
+                                                                    <User className="w-4 h-4 text-slate/40" />
                                                                     <span className="truncate">{clientName}</span>
                                                                 </div>
                                                             </>
@@ -524,11 +524,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Single Slot Add Modal */}
             {isAddModalOpen && addMode === 'single' && (
                 <div
-                    className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-charcoal/40 backdrop-blur-xl animate-in fade-in duration-1000"
+                    className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-charcoal/20 backdrop-blur-sm animate-in fade-in duration-500"
                     onClick={() => setIsAddModalOpen(false)}
                 >
                     <div
-                        className="bg-alabaster/80 backdrop-blur-[40px] rounded-[2.5rem] p-12 max-w-2xl w-full shadow-cloud border border-white/60 animate-in zoom-in-95 duration-700 overflow-y-auto max-h-[90vh]"
+                        className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-12">
@@ -536,46 +536,46 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 <h3 className="text-3xl font-serif text-charcoal tracking-tighter">
                                     Add Time Slot
                                 </h3>
-                                <p className="text-[10px] text-charcoal/20 font-black uppercase tracking-[0.4em] mt-2">
+                                <p className="text-[10px] text-slate font-bold uppercase tracking-[0.4em] mt-2">
                                     DEFINE A SINGLE SESSION TIME AND LOCATION
                                 </p>
                             </div>
-                            <button onClick={() => setIsAddModalOpen(false)} className="p-4 bg-white/40 hover:bg-white rounded-[20px] text-charcoal/20 hover:text-charcoal transition-all border border-white/60 shadow-sm">
+                            <button onClick={() => setIsAddModalOpen(false)} className="p-4 bg-off-white hover:bg-white rounded-lg text-slate hover:text-charcoal transition-all border border-border-grey shadow-tight">
                                 <X className="w-6 h-6" />
                             </button>
                         </div>
 
                         <form onSubmit={handleCreateSingle} className="space-y-8">
-                            <div className="glass-card p-8 space-y-6">
+                            <div className="earth-card p-8 space-y-6 bg-off-white border border-border-grey shadow-tight">
                                 <div>
-                                    <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Calendar Date</label>
-                                    <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
+                                    <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Calendar Date</label>
+                                    <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-5 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
                                 </div>
                                 <div className="grid grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">Start Time</label>
-                                        <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
+                                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Start Time</label>
+                                        <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-5 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-3">End Time</label>
-                                        <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-5 py-3 border border-cream-100 rounded-2xl bg-white/60 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-rose-gold/10 focus:bg-white focus:border-rose-gold/30 transition-all uppercase tracking-widest cursor-pointer" />
+                                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">End Time</label>
+                                        <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-5 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
                                     </div>
                                 </div>
                             </div>
 
                             <div className="space-y-6">
-                                <h4 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Geographic Deployment</h4>
+                                <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-2">Geographic Deployment</h4>
                                 <div className="space-y-4 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
                                     {Object.entries(GROUPED_AREAS).map(([city, cityLocations]) => {
                                         const allSelected = cityLocations.every(loc => locations.includes(loc));
                                         return (
-                                            <div key={city} className="glass-card p-8 space-y-6">
+                                            <div key={city} className="earth-card p-8 space-y-6 bg-white border border-border-grey shadow-tight">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em]">{city}</span>
+                                                    <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
                                                     <button
                                                         type="button"
                                                         onClick={() => toggleCityGroup(cityLocations)}
-                                                        className="text-[10px] font-black text-gold hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-gold/20 underline-offset-8"
+                                                        className="text-[10px] font-bold text-forest hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-forest/20 underline-offset-8"
                                                     >
                                                         {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
                                                     </button>
@@ -590,10 +590,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                 type="button"
                                                                 onClick={() => toggleLocation(area)}
                                                                 className={clsx(
-                                                                    "px-5 py-2.5 rounded-[20px] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 border",
+                                                                    "px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border",
                                                                     isSelected
-                                                                        ? "bg-gold text-white border-gold shadow-cloud"
-                                                                        : "bg-white/40 text-charcoal/20 border-white/60 hover:border-gold/30 hover:text-charcoal shadow-sm"
+                                                                        ? "bg-forest text-white border-forest shadow-tight"
+                                                                        : "bg-off-white text-slate border-border-grey hover:border-forest/30 hover:text-forest shadow-sm"
                                                                 )}
                                                             >
                                                                 {displayName}
@@ -608,8 +608,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </div>
 
                             <div className="space-y-4">
-                                <h4 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Equipment</h4>
-                                <div className="flex flex-wrap gap-3 p-6 bg-alabaster/50 rounded-[2rem] border border-cream-100">
+                                <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-2">Equipment</h4>
+                                <div className="flex flex-wrap gap-3 p-6 bg-off-white rounded-xl border border-border-grey shadow-tight">
                                     {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
                                         const isSelected = equipment.includes(eq);
                                         return (
@@ -618,10 +618,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                 type="button"
                                                 onClick={() => toggleEquipment(eq)}
                                                 className={clsx(
-                                                    "px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 border",
+                                                    "px-5 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all duration-300 border",
                                                     isSelected
-                                                        ? "bg-sage text-white border-sage shadow-lg shadow-sage/20"
-                                                        : "bg-white text-charcoal/40 border-cream-100 hover:border-sage/30 hover:text-charcoal"
+                                                        ? "bg-forest text-white border-forest shadow-tight"
+                                                        : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-forest shadow-sm"
                                                 )}
                                             >
                                                 {eq}
@@ -635,11 +635,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="flex-1 bg-charcoal text-white py-5 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50"
+                                    className="flex-1 bg-charcoal text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50"
                                 >
                                     {isSubmitting ? 'PROCESSING...' : 'CONFIRM SLOT'}
                                 </button>
-                                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-12 py-5 rounded-[20px] text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] hover:text-charcoal hover:bg-white/40 transition-all border border-transparent hover:border-white/60">
+                                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-12 py-5 rounded-lg text-[10px] font-bold text-slate uppercase tracking-[0.3em] hover:text-charcoal hover:bg-off-white transition-all border border-transparent hover:border-border-grey">
                                     CANCEL
                                 </button>
                             </div>
@@ -648,22 +648,22 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                 </div>
             )}
 
-            {/* Bulk Generate Modal - rendered separately to avoid backdrop-filter stacking context issues */}
+            {/* Bulk Generate Modal */}
             {isAddModalOpen && addMode === 'bulk' && (
                 <div
-                    className="fixed inset-0 z-[200] flex items-start justify-center p-6 bg-charcoal/30 overflow-y-auto"
+                    className="fixed inset-0 z-[200] flex items-start justify-center p-6 bg-charcoal/20 backdrop-blur-sm overflow-y-auto"
                     onClick={() => setIsAddModalOpen(false)}
                 >
                     <div
-                        className="bg-white/95 rounded-[2.5rem] p-10 max-w-3xl w-full shadow-2xl border border-white/80 animate-in zoom-in-95 duration-500 my-8"
+                        className="bg-white rounded-xl p-10 max-w-3xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 my-8"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-10">
                             <div>
                                 <h3 className="text-3xl font-serif text-charcoal tracking-tighter">Recurring Schedule</h3>
-                                <p className="text-[10px] text-charcoal/30 font-black uppercase tracking-[0.4em] mt-2">SET UP YOUR WEEKLY AVAILABILITY</p>
+                                <p className="text-[10px] text-slate font-bold uppercase tracking-[0.4em] mt-2">SET UP YOUR WEEKLY AVAILABILITY</p>
                             </div>
-                            <button onClick={() => setIsAddModalOpen(false)} className="p-4 bg-white hover:bg-cream-50 rounded-[20px] text-charcoal/30 hover:text-charcoal transition-all border border-cream-200 shadow-sm">
+                            <button onClick={() => setIsAddModalOpen(false)} className="p-4 bg-off-white hover:bg-white rounded-lg text-slate hover:text-charcoal transition-all border border-border-grey shadow-tight">
                                 <X className="w-6 h-6" />
                             </button>
                         </div>
@@ -675,47 +675,47 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Edit Modal */}
             {isEditModalOpen && editingSlot && (
                 <div
-                    className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-charcoal/40 backdrop-blur-xl animate-in fade-in duration-500"
+                    className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-charcoal/20 backdrop-blur-sm animate-in fade-in duration-500"
                     onClick={() => setIsEditModalOpen(false)}
                 >
                     <div
-                        className="bg-white/80 backdrop-blur-2xl rounded-[2.5rem] p-10 max-w-2xl w-full shadow-2xl border border-white/50 animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh]"
+                        className="bg-white rounded-xl p-10 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-12">
                             <div>
                                 <h3 className="text-3xl font-serif text-charcoal tracking-tighter">Edit Slot</h3>
-                                <p className="text-[10px] text-charcoal/20 font-black uppercase tracking-[0.4em] mt-2">UPDATE SESSION TIME OR LOCATION</p>
+                                <p className="text-[10px] text-slate font-bold uppercase tracking-[0.4em] mt-2">UPDATE SESSION TIME OR LOCATION</p>
                             </div>
-                            <button onClick={() => setIsEditModalOpen(false)} className="p-4 bg-white/40 hover:bg-white rounded-[20px] text-charcoal/20 hover:text-charcoal transition-all border border-white/60 shadow-sm">
+                            <button onClick={() => setIsEditModalOpen(false)} className="p-4 bg-off-white hover:bg-white rounded-lg text-slate hover:text-charcoal transition-all border border-border-grey shadow-tight">
                                 <X className="w-6 h-6" />
                             </button>
                         </div>
 
                         <form onSubmit={handleUpdate} className="space-y-8">
-                            <div className="glass-card p-8 space-y-8">
+                            <div className="earth-card p-8 space-y-8 bg-off-white border border-border-grey shadow-tight">
                                 <div>
-                                    <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-4">Date</label>
-                                    <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-6 py-4 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer" />
+                                    <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.3em] mb-4 ml-6">Date</label>
+                                    <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-6 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-[0.2em] cursor-pointer" />
                                 </div>
                                 <div className="grid grid-cols-2 gap-8">
                                     <div>
-                                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-4">Start Time</label>
-                                        <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-6 py-4 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer" />
+                                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.3em] mb-4 ml-6">Start Time</label>
+                                        <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-6 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-[0.2em] cursor-pointer" />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-4">End Time</label>
-                                        <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-6 py-4 border border-white/60 rounded-[20px] bg-white/40 text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:bg-white focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer" />
+                                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.3em] mb-4 ml-6">End Time</label>
+                                        <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-6 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-[0.2em] cursor-pointer" />
                                     </div>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
-                                <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] ml-6">Location</label>
+                                <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.3em] ml-6">Location</label>
                                 <select
                                     value={locations[0] || 'BGC'}
                                     onChange={(e) => setLocations([e.target.value])}
-                                    className="w-full px-8 py-5 border border-white/60 rounded-[20px] bg-white/40 text-[10px] font-black text-charcoal outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer appearance-none shadow-sm"
+                                    className="w-full px-8 py-5 border border-border-grey rounded-lg bg-white text-[10px] font-bold text-charcoal outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-[0.2em] cursor-pointer appearance-none shadow-tight"
                                     name="location"
                                 >
                                     {AREAS.map(l => <option key={l} value={l}>{l.toUpperCase()}</option>)}
@@ -723,8 +723,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </div>
 
                             <div className="space-y-4">
-                                <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] ml-4">Equipment</label>
-                                <div className="flex flex-wrap gap-3 p-6 bg-alabaster/50 rounded-[2rem] border border-cream-100">
+                                <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-6">Equipment</label>
+                                <div className="flex flex-wrap gap-3 p-6 bg-off-white rounded-xl border border-border-grey shadow-tight">
                                     {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
                                         const isSelected = equipment.includes(eq);
                                         return (
@@ -733,10 +733,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                 type="button"
                                                 onClick={() => toggleEquipment(eq)}
                                                 className={clsx(
-                                                    "px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 border",
+                                                    "px-5 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all duration-300 border",
                                                     isSelected
-                                                        ? "bg-sage text-white border-sage shadow-lg shadow-sage/20"
-                                                        : "bg-white text-charcoal/40 border-cream-100 hover:border-sage/30 hover:text-charcoal"
+                                                        ? "bg-forest text-white border-forest shadow-tight"
+                                                        : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-forest shadow-sm"
                                                 )}
                                             >
                                                 {eq}
@@ -746,8 +746,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 </div>
                             </div>
 
-                            <div className="flex gap-6 pt-12 border-t border-white/60">
-                                <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal text-white py-5 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50">
+                            <div className="flex gap-6 pt-12 border-t border-border-grey">
+                                <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50">
                                     {isSubmitting ? 'SAVING...' : 'UPDATE SLOT'}
                                 </button>
                                 <button
@@ -757,7 +757,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                         handleDelete(editingSlot.id)
                                     }}
                                     disabled={isSubmitting}
-                                    className="px-10 py-5 bg-red-50/50 text-red-600 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:bg-red-50 transition-all flex items-center justify-center gap-3 border border-transparent hover:border-red-100"
+                                    className="px-10 py-5 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-red-100 transition-all flex items-center justify-center gap-3 border border-red-200"
                                 >
                                     <Trash2 className="w-5 h-5" /> DELETE
                                 </button>
@@ -770,46 +770,46 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Booking Detail Modal */}
             {selectedBooking && (
                 <div
-                    className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-charcoal/60 backdrop-blur-2xl animate-in fade-in duration-500"
+                    className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-charcoal/30 backdrop-blur-sm animate-in fade-in duration-500"
                     onClick={() => setSelectedBooking(null)}
                 >
                     <div
-                        className="bg-white/90 backdrop-blur-3xl rounded-[3rem] w-full max-w-2xl shadow-3xl overflow-hidden animate-in zoom-in-95 duration-500 border border-white/50"
+                        className="bg-white rounded-xl w-full max-w-2xl shadow-card overflow-hidden animate-in zoom-in-95 duration-500 border border-border-grey"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Modal Header */}
                         <div className={clsx(
-                            "px-12 py-12 flex justify-between items-center text-charcoal relative",
-                            selectedBooking.status === 'approved' ? "bg-sage/40" : "bg-gold/40"
+                            "px-12 py-12 flex justify-between items-center text-charcoal relative border-b border-border-grey",
+                            selectedBooking.status === 'approved' ? "bg-green-50" : "bg-orange-50"
                         )}>
                             <div className="relative z-10">
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-charcoal/20 mb-3 block">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate/40 mb-3 block">
                                     {selectedBooking.status === 'approved' ? 'RESERVATION CONFIRMED' : 'RESERVATION PENDING'}
                                 </span>
                                 <h3 className="text-4xl font-serif tracking-tighter">
                                     {selectedBooking.status === 'approved' ? 'Session Locked' : 'Verification Required'}
                                 </h3>
                             </div>
-                            <button onClick={() => setSelectedBooking(null)} className="p-5 bg-white/40 hover:bg-white rounded-[20px] transition-all relative z-10 border border-white/60 shadow-sm">
-                                <X className="w-6 h-6 text-charcoal/20 hover:text-charcoal" />
+                            <button onClick={() => setSelectedBooking(null)} className="p-5 bg-white hover:bg-off-white rounded-lg transition-all relative z-10 border border-border-grey shadow-tight">
+                                <X className="w-6 h-6 text-slate/40 hover:text-charcoal" />
                             </button>
                             {/* Decorative background circle */}
-                            <div className="absolute top-0 right-0 w-80 h-80 bg-white/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+                            <div className="absolute top-0 right-0 w-80 h-80 bg-white/50 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
                         </div>
 
-                        <div className="p-10 space-y-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
+                        <div className="p-10 space-y-8 overflow-y-auto max-h-[70vh] custom-scrollbar bg-white">
                             {/* Session Metadata */}
-                            <div className="glass-card p-8">
+                            <div className="earth-card p-8 bg-off-white border border-border-grey shadow-tight">
                                 <div className="flex items-center gap-4 mb-6">
-                                    <div className="p-3 bg-sage/10 rounded-2xl">
-                                        <Clock className="w-6 h-6 text-sage" />
+                                    <div className="p-3 bg-green-100 rounded-lg">
+                                        <Clock className="w-6 h-6 text-forest" />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Session Schedule</p>
+                                        <p className="text-[10px] font-bold text-slate uppercase tracking-[0.2em]">Session Schedule</p>
                                         <p className="text-lg font-serif mt-0.5 text-charcoal">
                                             {format(new Date(selectedBooking.slots.date), 'PPPP')}
                                         </p>
-                                        <p className="text-xs font-black text-charcoal/60 uppercase tracking-widest mt-1">
+                                        <p className="text-xs font-bold text-slate uppercase tracking-widest mt-1">
                                             <span className="font-serif italic text-sm">{selectedBooking.slots.start_time.slice(0, 5)}</span> — <span className="font-serif italic text-sm">{selectedBooking.slots.end_time.slice(0, 5)}</span>
                                         </p>
                                     </div>
@@ -818,56 +818,56 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 {/* Studio Environment */}
-                                <div className="glass-card p-8 group">
+                                <div className="earth-card p-8 bg-white border border-border-grey shadow-tight group">
                                     <div className="flex items-center gap-6 mb-6">
-                                        <div className="p-4 bg-white/40 rounded-[20px] group-hover:bg-white transition-all border border-white/60 shadow-sm">
-                                            <MapPin className="w-6 h-6 text-gold" />
+                                        <div className="p-4 bg-off-white rounded-lg group-hover:bg-off-white transition-all border border-border-grey shadow-tight">
+                                            <MapPin className="w-6 h-6 text-forest" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">Studio</p>
+                                            <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">Studio</p>
                                             <h4 className="font-serif text-charcoal text-xl tracking-tighter truncate w-[200px]">{selectedBooking.slots.studios?.name}</h4>
                                         </div>
                                     </div>
                                     <div className="space-y-3 mt-4">
-                                        <p className="text-[11px] text-charcoal/40 leading-relaxed italic">{selectedBooking.slots.studios?.location || 'Location details within secure perimeter'}</p>
-                                        <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">{selectedBooking.slots.studios?.email}</p>
+                                        <p className="text-[11px] text-slate leading-relaxed italic">{selectedBooking.slots.studios?.location || 'Location details within secure perimeter'}</p>
+                                        <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">{selectedBooking.slots.studios?.email}</p>
                                     </div>
                                 </div>
 
                                 {/* Client Information */}
-                                <div className="glass-card p-8 group">
+                                <div className="earth-card p-8 bg-white border border-border-grey shadow-tight group">
                                     <div className="flex items-center gap-6 mb-6">
-                                        <div className="w-16 h-16 rounded-[20px] bg-white/40 overflow-hidden border border-white/60 flex-shrink-0 shadow-sm">
+                                        <div className="w-16 h-16 rounded-lg bg-off-white overflow-hidden border border-border-grey flex-shrink-0 shadow-tight">
                                             <img
-                                                src={selectedBooking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.client?.full_name || 'C')}&background=FDFDFD&color=333333`}
+                                                src={selectedBooking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.client?.full_name || 'C')}&background=F5F5F5&color=333333`}
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">Client</p>
+                                            <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">Client</p>
                                             <h4 className="font-serif text-charcoal text-xl tracking-tighter truncate w-[200px]">{selectedBooking.client?.full_name}</h4>
                                         </div>
                                     </div>
                                     <div className="space-y-3 mt-4">
                                         {selectedBooking.client?.phone && (
-                                            <div className="flex items-center gap-3 text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em]">
-                                                <MessageSquare className="w-4 h-4 text-charcoal/10" />
+                                            <div className="flex items-center gap-3 text-[10px] font-bold text-slate uppercase tracking-[0.3em]">
+                                                <MessageSquare className="w-4 h-4 text-slate/20" />
                                                 {selectedBooking.client.phone}
                                             </div>
                                         )}
-                                        <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">{selectedBooking.client?.email}</p>
+                                        <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">{selectedBooking.client?.email}</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Medical / Status */}
                             {selectedBooking.client?.medical_conditions && (
-                                <div className="p-8 bg-red-50/50 rounded-[2rem] border border-red-100">
+                                <div className="p-8 bg-red-50 rounded-lg border border-red-100">
                                     <div className="flex items-center gap-3 mb-4">
                                         <AlertTriangle className="w-5 h-5 text-red-500" />
-                                        <h4 className="text-[10px] font-black text-red-700 uppercase tracking-[0.2em]">PHYSICAL CONDITIONS</h4>
+                                        <h4 className="text-[10px] font-bold text-red-700 uppercase tracking-[0.2em]">PHYSICAL CONDITIONS</h4>
                                     </div>
-                                    <p className="text-[11px] text-red-600/80 italic leading-relaxed">
+                                    <p className="text-[11px] text-red-600 italic leading-relaxed">
                                         {Array.isArray(selectedBooking.client.medical_conditions)
                                             ? selectedBooking.client.medical_conditions.join(', ')
                                             : selectedBooking.client.medical_conditions.split(',').join(', ')}
@@ -876,49 +876,49 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             )}
 
                             {/* Booking Specifics */}
-                            <div className="glass-card p-8 space-y-6">
+                            <div className="earth-card p-8 space-y-6 bg-white border border-border-grey shadow-tight">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-[20px] bg-white/40 flex items-center justify-center border border-white/60 shadow-sm">
-                                            <Box className="w-6 h-6 text-gold" />
+                                        <div className="w-12 h-12 rounded-lg bg-off-white flex items-center justify-center border border-border-grey shadow-tight">
+                                            <Box className="w-6 h-6 text-forest" />
                                         </div>
                                         <div>
-                                            <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] block">Equipment</span>
-                                            <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em]">
+                                            <span className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] block">Equipment</span>
+                                            <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">
                                                 {selectedBooking.price_breakdown?.equipment || 'Standard Set'}
                                             </span>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] block">Earnings</span>
-                                        <span className="text-2xl font-serif text-sage tracking-tighter">₱{(selectedBooking.price_breakdown?.instructor_fee || 0).toLocaleString()}</span>
+                                        <span className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] block">Earnings</span>
+                                        <span className="text-2xl font-serif text-forest tracking-tighter">₱{(selectedBooking.price_breakdown?.instructor_fee || 0).toLocaleString()}</span>
                                     </div>
                                 </div>
 
                                 {selectedBooking.notes && (
-                                    <div className="pt-6 border-t border-cream-100">
-                                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-wider block mb-2">Session Notes</span>
-                                        <p className="text-sm text-charcoal-600 italic leading-relaxed">"{selectedBooking.notes}"</p>
+                                    <div className="pt-6 border-t border-border-grey">
+                                        <span className="text-[10px] font-bold text-slate uppercase tracking-wider block mb-2">Session Notes</span>
+                                        <p className="text-sm text-slate italic leading-relaxed">"{selectedBooking.notes}"</p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="px-12 py-10 bg-white/20 border-t border-white/60 flex gap-6">
+                        <div className="px-12 py-10 bg-off-white border-t border-border-grey flex gap-6">
                             <button
                                 onClick={() => setActiveChat({
                                     id: selectedBooking.id,
                                     recipientId: selectedBooking.client_id,
                                     name: selectedBooking.client?.full_name || 'Client'
                                 })}
-                                className="flex-1 bg-charcoal text-white py-5 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] shadow-cloud hover:brightness-[1.2] active:scale-95 transition-all flex items-center justify-center gap-4"
+                                className="flex-1 bg-charcoal text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] shadow-tight hover:brightness-[1.2] active:scale-95 transition-all flex items-center justify-center gap-4"
                             >
                                 <MessageSquare className="w-5 h-5" /> MESSAGE CLIENT
                             </button>
                             <button
                                 onClick={() => setSelectedBooking(null)}
-                                className="px-12 py-5 bg-white/40 text-charcoal/20 hover:text-charcoal rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] transition-all border border-transparent hover:border-white/60"
+                                className="px-12 py-5 bg-white text-slate hover:text-charcoal rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] transition-all border border-border-grey"
                             >
                                 CLOSE
                             </button>
