@@ -68,7 +68,7 @@ export default async function DashboardLayout({
                 </div>
             </footer>
 
-            {user && <SupportChatWidget userId={user.id} />}
+            {user && profile?.role !== 'admin' && <SupportChatWidget userId={user.id} />}
             {user && <UserPresenceTracker />}
         </div>
     )
