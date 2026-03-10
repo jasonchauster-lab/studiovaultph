@@ -160,9 +160,9 @@ function LoginContent() {
                     <div className="earth-card p-12 border-border-grey/50 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
                         <div className="space-y-12">
                             <div className="space-y-8">
-                                <Link href="/" className="flex items-center gap-0 group/logo">
+                                <Link href="/" aria-label="Studio Vault PH Home" className="flex items-center gap-0 group/logo">
                                     <div className="bg-white p-3 rounded-xl shadow-tight group-hover/logo:rotate-3 transition-transform border border-border-grey/50">
-                                        <Image src="/logo.png" alt="StudioVault Logo" width={60} height={60} className="w-12 h-12 object-contain" />
+                                        <Image src="/logo.png" alt="" width={60} height={60} className="w-12 h-12 object-contain" />
                                     </div>
                                     <span className="text-2xl font-serif font-bold text-charcoal tracking-tight ml-4">StudioVaultPH</span>
                                 </Link>
@@ -207,7 +207,11 @@ function LoginContent() {
                     </div>
 
                     {isSignUp && (
-                        <div className="mb-10 p-1 bg-white rounded-lg flex gap-1 border border-border-grey shadow-tight">
+                        <div
+                            role="radiogroup"
+                            aria-label="Selection Role"
+                            className="mb-10 p-1 bg-white rounded-lg flex gap-1 border border-border-grey shadow-tight"
+                        >
                             {[
                                 { id: 'customer', label: 'Client' },
                                 { id: 'instructor', label: 'Instructor' },
@@ -216,6 +220,8 @@ function LoginContent() {
                                 <button
                                     key={opt.id}
                                     type="button"
+                                    role="radio"
+                                    aria-checked={role === opt.id}
                                     onClick={() => setRole(opt.id)}
                                     className={`flex-1 py-3 px-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${role === opt.id
                                         ? 'bg-forest text-white shadow-tight'
@@ -231,8 +237,9 @@ function LoginContent() {
                     <form onSubmit={handleAuth} className="space-y-6">
                         {isSignUp && (
                             <div className="space-y-3">
-                                <label className="block text-[10px] font-bold text-slate uppercase tracking-widest px-1">Full Name</label>
+                                <label htmlFor="full-name" className="block text-[10px] font-bold text-slate uppercase tracking-widest px-1">Full Name</label>
                                 <input
+                                    id="full-name"
                                     type="text"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
@@ -245,8 +252,9 @@ function LoginContent() {
 
                         {isSignUp && (
                             <div className="space-y-3">
-                                <label className="block text-[10px] font-bold text-slate uppercase tracking-widest px-1">Date of Birth</label>
+                                <label htmlFor="birthday" className="block text-[10px] font-bold text-slate uppercase tracking-widest px-1">Date of Birth</label>
                                 <input
+                                    id="birthday"
                                     type="date"
                                     value={birthday}
                                     onChange={(e) => setBirthday(e.target.value)}
@@ -257,8 +265,9 @@ function LoginContent() {
                         )}
 
                         <div className="space-y-3">
-                            <label className="block text-[10px] font-bold text-slate uppercase tracking-widest px-1">Email Address</label>
+                            <label htmlFor="email" className="block text-[10px] font-bold text-slate uppercase tracking-widest px-1">Email Address</label>
                             <input
+                                id="email"
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -270,7 +279,7 @@ function LoginContent() {
 
                         <div className="space-y-3">
                             <div className="flex items-center justify-between px-1">
-                                <label className="block text-[10px] font-bold text-slate uppercase tracking-widest">Password</label>
+                                <label htmlFor="password" id="password-label" className="block text-[10px] font-bold text-slate uppercase tracking-widest">Password</label>
                                 {!isSignUp && (
                                     <Link href="/forgot-password" gap-2 className="text-[10px] text-slate hover:text-forest transition-all font-bold uppercase tracking-widest">
                                         Recover Key
@@ -278,6 +287,7 @@ function LoginContent() {
                                 )}
                             </div>
                             <input
+                                id="password"
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}

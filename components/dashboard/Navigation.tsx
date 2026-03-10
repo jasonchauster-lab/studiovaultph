@@ -28,12 +28,22 @@ export default function Navigation({ role }: NavigationProps) {
         <>
             {isCustomerMode ? (
                 <>
-                    <Link href="/customer" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/customer')}>
+                    <Link
+                        href="/customer"
+                        onClick={() => setMobileOpen(false)}
+                        className={linkClass(pathname === '/customer')}
+                        aria-current={pathname === '/customer' ? "page" : undefined}
+                    >
                         <Search className="w-3.5 h-3.5" />
                         Find a Class
                         {pathname === '/customer' && <span className="absolute -bottom-3 left-0 w-full h-0.5 bg-forest rounded-full" />}
                     </Link>
-                    <Link href="/customer/bookings" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/customer/bookings')}>
+                    <Link
+                        href="/customer/bookings"
+                        onClick={() => setMobileOpen(false)}
+                        className={linkClass(pathname === '/customer/bookings')}
+                        aria-current={pathname === '/customer/bookings' ? "page" : undefined}
+                    >
                         <Calendar className="w-3.5 h-3.5" />
                         Sessions
                         {pathname === '/customer/bookings' && <span className="absolute -bottom-3 left-0 w-full h-0.5 bg-forest rounded-full" />}
@@ -43,7 +53,12 @@ export default function Navigation({ role }: NavigationProps) {
                         Wallet
                         {pathname?.startsWith('/customer/wallet') && <span className="absolute -bottom-3 left-0 w-full h-0.5 bg-forest rounded-full" />}
                     </Link>
-                    <Link href="/customer/profile" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/customer/profile')}>
+                    <Link
+                        href="/customer/profile"
+                        onClick={() => setMobileOpen(false)}
+                        className={linkClass(pathname === '/customer/profile')}
+                        aria-current={pathname === '/customer/profile' ? "page" : undefined}
+                    >
                         <User className="w-3.5 h-3.5" />
                         My Profile
                         {pathname === '/customer/profile' && <span className="absolute -bottom-3 left-0 w-full h-0.5 bg-forest rounded-full" />}
@@ -163,7 +178,11 @@ export default function Navigation({ role }: NavigationProps) {
 
             {/* Mobile drawer */}
             {mobileOpen && (
-                <div className="md:hidden earth-card absolute top-full left-4 right-4 mt-2 p-6 flex flex-col gap-2 z-50">
+                <div
+                    role="menu"
+                    aria-label="Mobile Navigation"
+                    className="md:hidden earth-card absolute top-full left-4 right-4 mt-2 p-6 flex flex-col gap-2 z-50"
+                >
                     {navLinks}
                 </div>
             )}

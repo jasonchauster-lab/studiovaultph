@@ -140,10 +140,10 @@ export default function InstructorDashboardClient({
                                                 <div className="flex justify-between items-start mb-6">
                                                     <div className="flex flex-col gap-1 w-full">
                                                         <div className="flex items-center gap-4">
-                                                            <Link href={`/studios/${session.slots.studios.id}`} className="w-12 h-12 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700">
+                                                            <Link href={`/studios/${session.slots.studios.id}`} aria-label={`View studio details for ${session.slots.studios.name}`} className="w-12 h-12 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700">
                                                                 <img
                                                                     src={session.slots.studios.logo_url || "/logo.png"}
-                                                                    alt={session.slots.studios.name}
+                                                                    alt=""
                                                                     className="w-full h-full object-cover"
                                                                 />
                                                             </Link>
@@ -166,17 +166,18 @@ export default function InstructorDashboardClient({
                                                 </div>
 
                                                 <div className="pt-6 border-t border-white/60 space-y-4">
-                                                    <div
-                                                        className="flex items-center gap-3 cursor-pointer group/client"
+                                                    <button
+                                                        className="flex items-center gap-3 cursor-pointer group/client w-full text-left focus:outline-none focus:ring-1 focus:ring-forest rounded-lg p-1 -m-1"
                                                         onClick={() => setSelectedClient(session.client)}
+                                                        aria-label={`View health record for ${session.client?.full_name}`}
                                                     >
                                                         <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shrink-0 border border-border-grey shadow-tight group-hover/client:scale-110 transition-transform duration-300">
-                                                            <img src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+                                                            <img alt="" src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                                         </div>
                                                         <div className="text-[10px] text-slate uppercase tracking-[0.2em] truncate flex-1 group-hover/client:text-forest transition-colors">
                                                             CLIENT: <span className="font-black text-charcoal">{session.client?.full_name}</span>
                                                         </div>
-                                                    </div>
+                                                    </button>
 
                                                     <div className="flex items-center justify-between text-[10px] pt-1">
                                                         <div className="flex items-center gap-3">
@@ -202,6 +203,7 @@ export default function InstructorDashboardClient({
                                                                 }}
                                                                 className="w-9 h-9 bg-white text-forest border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn"
                                                                 title="Message Client"
+                                                                aria-label={`Message client ${session.client.full_name}`}
                                                             >
                                                                 <MessageSquare className="w-3.5 h-3.5" />
                                                                 <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.client_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.client_id} />
@@ -219,6 +221,7 @@ export default function InstructorDashboardClient({
                                                                 }}
                                                                 className="w-9 h-9 bg-white text-charcoal border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn2"
                                                                 title="Message Studio"
+                                                                aria-label={`Message studio ${session.slots.studios.name}`}
                                                             >
                                                                 <MessageSquare className="w-3.5 h-3.5" />
                                                                 <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.slots.studios.owner_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.slots.studios.owner_id} />
@@ -230,7 +233,8 @@ export default function InstructorDashboardClient({
                                                                     setCancellingBooking(session);
                                                                 }}
                                                                 className="w-9 h-9 bg-white text-red-600 border border-border-grey rounded-full hover:bg-red-600 hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight"
-                                                                title="Cancel"
+                                                                title="Cancel Session"
+                                                                aria-label="Cancel session"
                                                             >
                                                                 <X className="w-3.5 h-3.5" />
                                                             </button>

@@ -17,8 +17,8 @@ export default function LandingPage() {
       {/* Navigation */}
       <div className="sticky top-0 z-50 w-full px-6 py-6">
         <nav className="max-w-7xl mx-auto bg-white rounded-xl px-10 py-5 flex items-center justify-between shadow-tight border border-border-grey">
-          <Link href="/" className="flex items-center gap-1 group">
-            <Image src="/logo.png" alt="StudioVault Logo" width={60} height={60} className="w-10 h-10 object-contain" />
+          <Link href="/" aria-label="Studio Vault PH Home" className="flex items-center gap-1 group">
+            <Image src="/logo.png" alt="" width={60} height={60} className="w-10 h-10 object-contain" />
             <span className="text-xl font-serif font-bold text-charcoal tracking-tighter uppercase hidden sm:block">STUDIO VAULT PH</span>
           </Link>
           <div className="flex gap-6 items-center">
@@ -59,16 +59,17 @@ export default function LandingPage() {
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
+              aria-label="Get Started Now - Sign up for an account"
               className="group bg-forest text-white px-12 py-6 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all flex items-center gap-4 shadow-tight"
             >
               Get Started Now
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
             </button>
             <div className="flex items-center gap-6 py-2">
               <div className="flex -space-x-4">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="w-12 h-12 rounded-lg border-4 border-white bg-off-white flex items-center justify-center overflow-hidden shadow-tight">
-                    <User className="w-7 h-7 text-slate/20" />
+                  <div key={i} role="none" className="w-12 h-12 rounded-lg border-4 border-white bg-off-white flex items-center justify-center overflow-hidden shadow-tight">
+                    <User className="w-7 h-7 text-slate/20" aria-hidden="true" />
                   </div>
                 ))}
               </div>
@@ -207,9 +208,9 @@ export default function LandingPage() {
           ].map((v, i) => (
             <div key={i} className="flex flex-col space-y-10 group">
               <div className="aspect-[4/5] relative rounded-xl overflow-hidden shadow-card mb-4 group-hover:-translate-y-2 transition-all duration-500 border border-border-grey">
-                <Image src={v.image} alt={v.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
-                <div className="absolute inset-0 bg-charcoal/30 group-hover:bg-transparent transition-all duration-700" />
-                <div className="absolute top-8 left-8 w-14 h-14 rounded-lg flex items-center justify-center bg-white border border-border-grey shadow-tight">
+                <Image src={v.image} alt={`Representative image for ${v.title}`} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                <div className="absolute inset-0 bg-charcoal/30 group-hover:bg-transparent transition-all duration-700" aria-hidden="true" />
+                <div className="absolute top-8 left-8 w-14 h-14 rounded-lg flex items-center justify-center bg-white border border-border-grey shadow-tight" aria-hidden="true">
                   <v.icon className="w-6 h-6 text-forest" />
                 </div>
               </div>

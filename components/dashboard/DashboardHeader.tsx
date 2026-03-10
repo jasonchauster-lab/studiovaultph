@@ -33,7 +33,7 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
         )}>
             <div className="max-w-7xl mx-auto h-full flex items-center justify-between gap-4">
                 <div className="flex items-center gap-8 h-full">
-                    <Link href="/welcome" className="flex items-center gap-0 group h-full">
+                    <Link href="/welcome" aria-label="Go to Welcome Dashboard" className="flex items-center gap-0 group h-full">
                         <div className="relative flex items-center">
                             <Image
                                 src="/logo.png"
@@ -82,6 +82,7 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                                             profile?.role === 'admin' ? '/admin' :
                                                 '#'
                             }
+                            aria-label="View and Edit Profile"
                             className="w-10 h-10 rounded-lg overflow-hidden border border-border-grey shadow-tight transition-transform hover:scale-110 block"
                         >
                             <Image
@@ -93,7 +94,11 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                             />
                         </Link>
                         <form action={signOut} className="hidden sm:block">
-                            <button className="p-2 text-slate hover:text-red-500 transition-colors" title="Log Out">
+                            <button
+                                className="p-2 text-slate hover:text-red-500 transition-colors"
+                                title="Log Out"
+                                aria-label="Log Out"
+                            >
                                 <LogOut className="w-5 h-5" />
                             </button>
                         </form>

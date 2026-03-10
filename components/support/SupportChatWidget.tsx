@@ -198,7 +198,11 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
                                 <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em]">Verified Response Team</p>
                             </div>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="p-2 text-white/40 hover:text-white transition-colors rounded-lg hover:bg-white/5">
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="p-2 text-white/40 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+                            aria-label="Close Support Portal"
+                        >
                             <X className="w-5 h-5" />
                         </button>
                     </div>
@@ -248,11 +252,13 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 placeholder="Concise message..."
+                                aria-label="Support Message"
                                 className="flex-1 px-5 py-3 bg-off-white border border-border-grey rounded-lg text-charcoal focus:outline-none focus:ring-1 focus:ring-forest text-[13px] font-medium placeholder:text-slate/30 transition-all"
                             />
                             <button
                                 type="submit"
                                 disabled={!inputValue.trim() || isSending}
+                                aria-label="Send Message"
                                 className="w-12 h-12 bg-charcoal text-white rounded-lg flex items-center justify-center hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-tight"
                             >
                                 {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
@@ -265,11 +271,15 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
             {/* Floating Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
+                aria-label={isOpen ? "Close Support Chat" : "Open Support Chat"}
+                aria-expanded={isOpen}
+                aria-haspopup="true"
                 className="w-16 h-16 bg-forest text-white rounded-lg shadow-card hover:brightness-110 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center pointer-events-auto relative border border-white/10"
             >
                 {isOpen ? <X className="w-7 h-7" /> : <MessageCircle className="w-7 h-7" />}
                 {!isOpen && unreadCount > 0 && (
                     <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-lg bg-charcoal border-2 border-white text-[10px] font-bold text-white shadow-tight">
+                        <span className="sr-only">New messages: </span>
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}
