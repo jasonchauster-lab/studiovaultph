@@ -39,7 +39,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
     const [selectedDays, setSelectedDays] = useState<number[]>([]);
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('17:00');
-    const [locations, setLocations] = useState<string[]>(['BGC - High Street']);
+    const [locations, setLocations] = useState<string[]>([]);
     const [equipment, setEquipment] = useState<string[]>(['Reformer']);
     const [expandedCities, setExpandedCities] = useState<string[]>(['BGC', 'Makati']);
 

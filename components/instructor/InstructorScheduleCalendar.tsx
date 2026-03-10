@@ -41,7 +41,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     const [singleDate, setSingleDate] = useState(format(new Date(), 'yyyy-MM-dd'))
     const [singleTime, setSingleTime] = useState('09:00')
     const [singleEndTime, setSingleEndTime] = useState('10:00')
-    const [locations, setLocations] = useState<string[]>(['BGC - High Street'])
+    const [locations, setLocations] = useState<string[]>([])
     const [equipment, setEquipment] = useState<string[]>(['Reformer'])
     const [expandedCities, setExpandedCities] = useState<string[]>(['BGC', 'Makati'])
 
