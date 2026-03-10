@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, startOfDay, isPast } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Users, User, Calendar as CalendarIcon, Clock, Trash2, Edit2, X, Sparkles } from 'lucide-react'
@@ -57,6 +57,18 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
     // Use server-provided day strings if available, otherwise fallback to potentially shifted client dates
     const days = dayStrings ? dayStrings.map((s: string) => parseISO(s)) : eachDayOfInterval({ start: weekStart, end: weekEnd })
     const hours = Array.from({ length: 16 }, (_, i) => i + 6) // 6 AM to 9 PM
+
+    // Memoized slot mapping for O(1) cell lookup
+    const slotMap = useMemo(() => {
+        const map: Record<string, Slot[]> = {};
+        (slots || []).forEach(slot => {
+            const startHour = parseInt(slot.start_time.split(':')[0], 10);
+            const key = `${slot.date}-${startHour}`;
+            if (!map[key]) map[key] = [];
+            map[key].push(slot);
+        });
+        return map;
+    }, [slots]);
 
     const handlePrevWeek = () => {
         const newDate = subWeeks(currentDate, 1)
@@ -214,10 +226,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                                     {days.map((day: Date) => {
                                         const dayStr = toManilaDateStr(day)
-                                        const cellSlots = (slots || []).filter(s => {
-                                            const startHour = parseInt(s.start_time.split(':')[0], 10);
-                                            return s.date === dayStr && startHour === hour
-                                        })
+                                        const cellSlots = slotMap[`${dayStr}-${hour}`] || []
 
                                         const isPastCell = isPast(new Date(dayStr + "T" + hour.toString().padStart(2, '0') + ":59:59+08:00"))
 
@@ -378,11 +387,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             {/* Modal for Add Slot */}
             {isAddModalOpen && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/20 backdrop-blur-sm animate-in fade-in duration-500"
+                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
                     onClick={() => setIsAddModalOpen(false)}
                 >
                     <div
-                        className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh]"
+                        className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh] will-change-transform"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-10">
@@ -479,11 +488,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             {/* Modal for Edit Slot */}
             {isEditModalOpen && editingSlot && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/20 backdrop-blur-sm animate-in fade-in duration-500"
+                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
                     onClick={() => setIsEditModalOpen(false)}
                 >
                     <div
-                        className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh]"
+                        className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh] will-change-transform"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* ... (Reuse existing form or refactor, keeping logic simple for now) ... */}
@@ -628,11 +637,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             {/* Bucket Management Modal */}
             {isBucketModalOpen && bucketTime && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/20 backdrop-blur-sm animate-in fade-in duration-500"
+                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
                     onClick={() => setIsBucketModalOpen(false)}
                 >
                     <div
-                        className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 max-h-[85vh] overflow-y-auto"
+                        className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 max-h-[85vh] overflow-y-auto will-change-transform"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-10">

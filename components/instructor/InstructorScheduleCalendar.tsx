@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes, isPast } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle } from 'lucide-react'
@@ -78,6 +78,38 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
     const hours = Array.from({ length: 16 }, (_, i) => i + 6) // 6 AM to 9 PM
     const ROW_HEIGHT = 120 // Increased from 80 for better readability
+
+    // Memoized indexing for O(1) cell lookup
+    const { availabilityMap, recurringMap, bookingMap } = useMemo(() => {
+        const aMap: Record<string, Availability[]> = {}
+        const rMap: Record<string, Availability[]> = {}
+        const bMap: Record<string, any[]> = {}
+
+        availability.forEach(a => {
+            const startH = parseInt(a.start_time.split(':')[0])
+            if (a.date) {
+                const key = `${a.date}-${startH}`
+                if (!aMap[key]) aMap[key] = []
+                aMap[key].push(a)
+            } else {
+                const key = `${a.day_of_week}-${startH}`
+                if (!rMap[key]) rMap[key] = []
+                rMap[key].push(a)
+            }
+        })
+
+        bookings.forEach(b => {
+            const slot = b.slots
+            if (!slot?.date || !slot?.start_time) return
+            if (['cancelled_refunded', 'rejected', 'expired'].includes(b.status)) return
+            const startH = parseInt(slot.start_time.split(':')[0])
+            const key = `${slot.date}-${startH}`
+            if (!bMap[key]) bMap[key] = []
+            bMap[key].push(b)
+        })
+
+        return { availabilityMap: aMap, recurringMap: rMap, bookingMap: bMap }
+    }, [availability, bookings])
 
     const handlePrevWeek = () => {
         const newDate = subWeeks(currentDate, 1)
@@ -265,24 +297,14 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                                     {days.map(day => {
                                         const dayStr = toManilaDateStr(day)
-                                        const startingSlots = availability.filter(a => {
-                                            if (a.date) {
-                                                if (a.date !== dayStr) return false
-                                            } else {
-                                                if (a.day_of_week !== getDay(day)) return false
-                                            }
-                                            const startH = parseInt(a.start_time.split(':')[0])
-                                            return startH === hour
-                                        })
+                                        const dow = getDay(day)
 
-                                        const startingBookings = bookings.filter(b => {
-                                            const slot = b.slots;
-                                            if (!slot?.date || !slot?.start_time) return false;
-                                            if (slot.date !== dayStr) return false;
-                                            if (['cancelled_refunded', 'rejected', 'expired'].includes(b.status)) return false;
-                                            const startH = parseInt(slot.start_time.split(':')[0]);
-                                            return startH === hour;
-                                        })
+                                        const startingSlots = [
+                                            ...(availabilityMap[`${dayStr}-${hour}`] || []),
+                                            ...(recurringMap[`${dow}-${hour}`] || [])
+                                        ]
+
+                                        const startingBookings = bookingMap[`${dayStr}-${hour}`] || []
 
                                         const isPastCell = isPast(setMinutes(setHours(day, hour + 1), 0))
 
@@ -526,11 +548,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Single Slot Add Modal */}
             {isAddModalOpen && addMode === 'single' && (
                 <div
-                    className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-charcoal/20 backdrop-blur-sm animate-in fade-in duration-500"
+                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
                     onClick={() => setIsAddModalOpen(false)}
                 >
                     <div
-                        className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh]"
+                        className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh] will-change-transform"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-12">
@@ -653,11 +675,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Bulk Generate Modal */}
             {isAddModalOpen && addMode === 'bulk' && (
                 <div
-                    className="fixed inset-0 z-[200] flex items-start justify-center p-6 bg-charcoal/20 backdrop-blur-sm overflow-y-auto"
+                    className="fixed inset-0 z-[200] flex items-start justify-center p-6 bg-charcoal/40 overflow-y-auto animate-in fade-in duration-300"
                     onClick={() => setIsAddModalOpen(false)}
                 >
                     <div
-                        className="bg-white rounded-xl p-10 max-w-3xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 my-8"
+                        className="bg-white rounded-xl p-10 max-w-3xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 my-8 will-change-transform"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-10">
@@ -677,11 +699,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Edit Modal */}
             {isEditModalOpen && editingSlot && (
                 <div
-                    className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-charcoal/20 backdrop-blur-sm animate-in fade-in duration-500"
+                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
                     onClick={() => setIsEditModalOpen(false)}
                 >
                     <div
-                        className="bg-white rounded-xl p-10 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh]"
+                        className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh] will-change-transform"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-12">
@@ -772,11 +794,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Booking Detail Modal */}
             {selectedBooking && (
                 <div
-                    className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-charcoal/30 backdrop-blur-sm animate-in fade-in duration-500"
+                    className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
                     onClick={() => setSelectedBooking(null)}
                 >
                     <div
-                        className="bg-white rounded-xl w-full max-w-2xl shadow-card overflow-hidden animate-in zoom-in-95 duration-500 border border-border-grey"
+                        className="bg-white rounded-xl w-full max-w-2xl shadow-card overflow-hidden animate-in zoom-in-95 duration-500 border border-border-grey will-change-transform"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Modal Header */}
