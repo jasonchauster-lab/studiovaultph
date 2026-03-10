@@ -196,20 +196,20 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             <div className="bg-white rounded-xl border border-cream-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <div className="min-w-[800px]">
-                        <div className="grid grid-cols-8 border-b border-[rgba(180,160,140,0.04)] bg-[rgba(180,160,140,0.04)]">
-                            <div className="p-4 text-[10px] font-black tracking-[0.2em] text-charcoal/40 border-r border-[rgba(180,160,140,0.04)] sticky left-0 bg-white/80 backdrop-blur-md z-20 uppercase">TIME</div>
+                        <div className="grid grid-cols-8 border-b border-border-grey bg-off-white">
+                            <div className="p-4 text-[10px] font-black tracking-[0.2em] text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 uppercase">TIME</div>
                             {days.map((day: Date) => (
-                                <div key={day.toString()} className={clsx("p-4 text-center border-r border-[rgba(180,160,140,0.04)] last:border-r-0 min-w-[100px] transition-colors", isSameDay(day, new Date()) ? "bg-[#B4C3B2]/5" : "")}>
-                                    <div className="text-[10px] text-charcoal/40 uppercase mb-2 font-bold tracking-[0.2em]">{format(day, 'EEE')}</div>
-                                    <div className={clsx("text-2xl font-serif font-bold", isSameDay(day, new Date()) ? "text-[#B4C3B2]" : "text-charcoal/80")}>{format(day, 'd')}</div>
+                                <div key={day.toString()} className={clsx("p-4 text-center border-r border-border-grey last:border-r-0 min-w-[100px] transition-colors", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
+                                    <div className="text-[10px] text-slate uppercase mb-2 font-bold tracking-[0.2em]">{format(day, 'EEE')}</div>
+                                    <div className={clsx("text-2xl font-serif font-bold", isSameDay(day, new Date()) ? "text-forest" : "text-charcoal")}>{format(day, 'd')}</div>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="divide-y divide-[rgba(180,160,140,0.04)]">
+                        <div className="divide-y divide-border-grey">
                             {hours.map(hour => (
                                 <div key={hour} className="grid grid-cols-8 min-h-[80px]">
-                                    <div className="p-4 text-[10px] text-charcoal/40 font-black border-r border-[rgba(180,160,140,0.04)] text-center sticky left-0 bg-white/80 backdrop-blur-md z-20 uppercase tracking-tighter">
+                                    <div className="p-4 text-[10px] text-slate font-black border-r border-border-grey text-center sticky left-0 bg-white z-20 uppercase tracking-tighter">
                                         {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                     </div>
 
@@ -223,12 +223,12 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                         const isPastCell = isPast(new Date(dayStr + "T" + hour.toString().padStart(2, '0') + ":59:59+08:00"))
 
                                         return (
-                                            <div key={day.toString() + hour} className={clsx("border-r border-[rgba(180,160,140,0.04)] last:border-r-0 relative group p-2 min-h-[100px] transition-all", isPastCell && "opacity-40 grayscale-[0.05]")} style={{ colorScheme: 'light' }}>
+                                            <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-2 min-h-[100px] transition-all", isPastCell && "bg-gray-50")} style={{ colorScheme: 'light' }}>
                                                 <div
-                                                    className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity bg-[#B4C3B2] pointer-events-none z-0"
+                                                    className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity bg-forest pointer-events-none z-0"
                                                 />
                                                 <button
-                                                    className="absolute top-2 right-2 p-1 rounded-full bg-[#B4C3B2]/10 text-[#B4C3B2] opacity-0 group-hover:opacity-100 transition-all hover:bg-[#B4C3B2] hover:text-white z-20"
+                                                    className="absolute top-2 right-2 p-1 rounded-full bg-forest/10 text-forest opacity-0 group-hover:opacity-100 transition-all hover:bg-forest hover:text-white z-20"
                                                     onClick={() => {
                                                         setSingleDate(toManilaDateStr(day))
                                                         setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
@@ -274,14 +274,14 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     <div
                                                                         key={eqType}
                                                                         className={clsx(
-                                                                            "rounded-xl p-3 backdrop-blur-[8px] border-white border session-block-luminous transition-all group/eq relative overflow-hidden cursor-pointer",
+                                                                            "p-3 border session-block-earth transition-all group/eq relative overflow-hidden cursor-pointer",
                                                                             isPastCell
-                                                                                ? "bg-white/40"
+                                                                                ? "bg-gray-50 border-gray-200"
                                                                                 : hasPending
-                                                                                    ? "bg-gold/50"
+                                                                                    ? "bg-yellow-50 border-yellow-200"
                                                                                     : isFullyBooked
-                                                                                        ? "bg-rose-gold/50"
-                                                                                        : "bg-white/70"
+                                                                                        ? "bg-red-50 border-red-200"
+                                                                                        : "bg-green-50 border-green-200"
                                                                         )}
                                                                         onClick={() => {
                                                                             setBucketSlots(cellSlots.filter(s => s.equipment?.[eqType]))
@@ -295,15 +295,18 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                         )}>
                                                                             <span className="flex items-center gap-1.5">
                                                                                 <div className={clsx("w-1.5 h-1.5 rounded-full",
-                                                                                    isFullyBooked ? "bg-rose-gold-deep" : hasPending ? "bg-gold-deep" : "bg-[#B4C3B2]"
+                                                                                    isFullyBooked ? "bg-red-600" : hasPending ? "bg-yellow-600" : "bg-green-600"
                                                                                 )} />
-                                                                                {eqType}
+                                                                                <span className={clsx("font-bold",
+                                                                                    isFullyBooked ? "text-red-900" : hasPending ? "text-yellow-900" : "text-green-900"
+                                                                                )}>{eqType}</span>
                                                                             </span>
                                                                             <Edit2 className="w-2.5 h-2.5 opacity-0 group-hover/eq:opacity-100 transition-opacity" />
                                                                         </div>
                                                                         <div className={clsx(
                                                                             "text-[10px] font-bold tracking-tight",
-                                                                            isPastCell ? "text-charcoal/30" : "text-charcoal/80"
+                                                                            isPastCell ? "text-slate" :
+                                                                                isFullyBooked ? "text-red-800" : hasPending ? "text-yellow-800" : "text-green-800"
                                                                         )}>
                                                                             {counts.free} / {counts.total} <span className="text-[8px] uppercase tracking-wider ml-0.5 font-black opacity-50">Free</span>
                                                                         </div>
@@ -323,14 +326,14 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                             return (
                                                                 <div
                                                                     className={clsx(
-                                                                        "rounded-xl p-3 backdrop-blur-[8px] border-white border session-block-luminous transition-all group/open relative overflow-hidden cursor-pointer",
+                                                                        "p-3 border session-block-earth transition-all group/open relative overflow-hidden cursor-pointer",
                                                                         isPastCell
-                                                                            ? "bg-white/40"
+                                                                            ? "bg-gray-50 border-gray-200"
                                                                             : hasPending
-                                                                                ? "bg-gold/50"
+                                                                                ? "bg-yellow-50 border-yellow-200"
                                                                                 : isFullyBooked
-                                                                                    ? "bg-rose-gold/50"
-                                                                                    : "bg-white/70"
+                                                                                    ? "bg-red-50 border-red-200"
+                                                                                    : "bg-green-50 border-green-200"
                                                                     )}
                                                                     onClick={() => {
                                                                         setBucketSlots(openSlots)
@@ -344,9 +347,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     )}>
                                                                         <span className="flex items-center gap-1.5">
                                                                             <div className={clsx("w-1.5 h-1.5 rounded-full",
-                                                                                isFullyBooked ? "bg-rose-gold-deep" : hasPending ? "bg-gold-deep" : "bg-[#B4C3B2]"
+                                                                                isFullyBooked ? "bg-red-600" : hasPending ? "bg-yellow-600" : "bg-green-600"
                                                                             )} />
-                                                                            Open Space
+                                                                            <span className={clsx("font-bold",
+                                                                                isFullyBooked ? "text-red-900" : hasPending ? "text-yellow-900" : "text-green-900"
+                                                                            )}>Open Space</span>
                                                                         </span>
                                                                         <Edit2 className="w-2.5 h-2.5 opacity-0 group-hover/open:opacity-100 transition-opacity" />
                                                                     </div>

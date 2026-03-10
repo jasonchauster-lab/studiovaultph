@@ -41,8 +41,8 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
                 >
                     <Star
                         className="w-8 h-8"
-                        fill={(hovered || value) >= star ? '#D4A017' : 'none'}
-                        stroke={(hovered || value) >= star ? '#D4A017' : '#9CA3AF'}
+                        fill={(hovered || value) >= star ? '#2F5233' : 'none'}
+                        stroke={(hovered || value) >= star ? '#2F5233' : '#E5E7EB'}
                         strokeWidth={1.5}
                     />
                 </button>
@@ -115,45 +115,45 @@ export default function ReviewModal({ booking, isInstructor, revieweeId: reviewe
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
                 {/* Header */}
-                <div className="bg-gradient-to-br from-charcoal-900 to-charcoal-700 px-8 py-6 text-white relative">
-                    <button onClick={onClose} className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors">
+                <div className="bg-charcoal px-8 py-6 text-white relative">
+                    <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">
                         <X className="w-5 h-5" />
                     </button>
-                    <p className="text-xs uppercase tracking-widest text-white/60 mb-1">Review Your Session</p>
-                    <h2 className="text-xl font-serif">{studioName}</h2>
-                    {sessionDate && <p className="text-sm text-white/70 mt-0.5">{sessionDate}</p>}
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Review Your Session</p>
+                    <h2 className="text-xl font-serif font-bold">{studioName}</h2>
+                    {sessionDate && <p className="text-sm text-white/60 mt-0.5">{sessionDate}</p>}
                 </div>
 
                 {/* Body */}
                 <div className="px-8 py-6 space-y-6">
                     {/* Who you're reviewing */}
                     <div>
-                        <p className="text-xs font-medium text-charcoal-500 uppercase tracking-wider mb-1">
+                        <p className="text-[10px] font-bold text-slate uppercase tracking-wider mb-1">
                             Reviewing {contextLabel}
                         </p>
-                        <p className="text-charcoal-900 font-medium text-lg">
+                        <p className="text-charcoal font-bold text-lg">
                             {displayName}
                         </p>
                     </div>
 
                     {/* Star Rating */}
                     <div>
-                        <p className="text-sm font-medium text-charcoal-700 mb-3">Overall Rating</p>
+                        <p className="text-sm font-bold text-charcoal mb-3">Overall Rating</p>
                         <StarPicker value={rating} onChange={setRating} />
                     </div>
 
                     {/* Quick Tags */}
                     <div>
-                        <p className="text-sm font-medium text-charcoal-700 mb-3">Quick Tags <span className="text-charcoal-400 font-normal">(optional)</span></p>
+                        <p className="text-sm font-bold text-charcoal mb-3">Quick Tags <span className="text-slate font-normal">(optional)</span></p>
                         <div className="flex flex-wrap gap-2">
                             {tags.map(tag => (
                                 <button
                                     key={tag}
                                     type="button"
                                     onClick={() => toggleTag(tag)}
-                                    className={`px-4 py-1.5 rounded-full text-sm border font-bold transition-all ${selectedTags.includes(tag)
-                                        ? 'bg-rose-gold text-white border-rose-gold shadow-sm'
-                                        : 'bg-white text-charcoal-700 border-charcoal-300 hover:border-rose-gold/50'
+                                    className={`px-4 py-1.5 rounded-full text-xs border font-bold transition-all ${selectedTags.includes(tag)
+                                        ? 'bg-forest text-white border-forest shadow-tight'
+                                        : 'bg-white text-charcoal border-border-grey hover:border-forest'
                                         }`}
                                 >
                                     {tag}
@@ -164,8 +164,8 @@ export default function ReviewModal({ booking, isInstructor, revieweeId: reviewe
 
                     {/* Comment */}
                     <div>
-                        <label className="text-sm font-medium text-charcoal-700 block mb-2" htmlFor="review-comment">
-                            Share your experience <span className="text-charcoal-400 font-normal">(optional)</span>
+                        <label className="text-sm font-bold text-charcoal block mb-2" htmlFor="review-comment">
+                            Share your experience <span className="text-slate font-normal">(optional)</span>
                         </label>
                         <textarea
                             id="review-comment"
@@ -173,7 +173,7 @@ export default function ReviewModal({ booking, isInstructor, revieweeId: reviewe
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
                             placeholder="What stood out about this session?"
-                            className="w-full px-4 py-3 rounded-xl border border-charcoal-200 text-sm text-charcoal-900 placeholder:text-charcoal-400 resize-none focus:outline-none focus:ring-2 focus:ring-charcoal-300"
+                            className="w-full px-4 py-3 rounded-lg border border-border-grey text-sm text-charcoal placeholder:text-slate/40 resize-none focus:outline-none focus:ring-1 focus:ring-forest bg-off-white"
                         />
                     </div>
 
@@ -185,7 +185,7 @@ export default function ReviewModal({ booking, isInstructor, revieweeId: reviewe
                     <button
                         onClick={handleSubmit}
                         disabled={isSubmitting || rating === 0}
-                        className="w-full py-3 rounded-xl bg-rose-gold text-white font-bold text-sm hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md active:scale-[0.99]"
+                        className="btn-forest w-full py-4 text-sm font-bold"
                     >
                         {isSubmitting ? 'Submitting…' : 'Submit Review'}
                     </button>

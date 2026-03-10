@@ -188,17 +188,17 @@ export default async function StudioDashboard(props: {
                                 </div>
                                 <div className="space-y-0.5">
                                     <p className="text-lg font-bold text-charcoal tracking-tight">Welcome, {myStudio.name}</p>
-                                    <p className="text-[10px] text-charcoal/40 flex items-center gap-1.5 font-bold uppercase tracking-widest">
-                                        <MapPin className="w-3 h-3 text-sage" />
+                                    <p className="text-[10px] text-slate flex items-center gap-1.5 font-bold uppercase tracking-widest">
+                                        <MapPin className="w-3 h-3 text-forest" />
                                         {myStudio.location}
                                     </p>
                                 </div>
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center gap-2.5 bg-white/40 backdrop-blur-sm px-5 py-2.5 rounded-full border border-white/60 shadow-cloud">
-                        <Sparkles className="w-3.5 h-3.5 text-gold animate-pulse" />
-                        <span className="text-[10px] font-bold text-charcoal/60 uppercase tracking-[0.2em]">Verified Partner</span>
+                    <div className="flex items-center gap-2.5 bg-white px-5 py-2.5 rounded-full border border-border-grey shadow-tight">
+                        <Sparkles className="w-3.5 h-3.5 text-forest animate-pulse" />
+                        <span className="text-[10px] font-bold text-slate uppercase tracking-[0.2em]">Verified Partner</span>
                     </div>
                 </div>
 
@@ -233,17 +233,17 @@ export default async function StudioDashboard(props: {
                         </div>
                     </div>
                 ) : !myStudio.verified ? (
-                    <div className="max-w-md mx-auto glass-card p-10 text-center relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gold/30"></div>
-                        <div className="w-20 h-20 bg-gold/5 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-                            <Clock className="w-10 h-10 text-gold" />
+                    <div className="max-w-md mx-auto earth-card p-10 text-center relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-yellow-400/30"></div>
+                        <div className="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner border border-yellow-100">
+                            <Clock className="w-10 h-10 text-yellow-600" />
                         </div>
                         <h2 className="text-2xl font-serif font-bold text-charcoal tracking-tight mb-4">Studio Under Review</h2>
-                        <p className="text-charcoal/50 mb-8 text-sm leading-relaxed">
+                        <p className="text-slate mb-8 text-sm leading-relaxed">
                             Thanks for registering <strong>{myStudio.name}</strong>. Our team is verifying your studio details. You'll be able to manage slots and bookings once approved.
                         </p>
-                        <div className="bg-alabaster/40 rounded-full py-2.5 px-6 text-[10px] text-gold font-bold uppercase tracking-widest border border-gold/10 inline-block">
-                            Status: <span className="text-gold">Pending Verification</span>
+                        <div className="status-pill-earth status-pill-yellow inline-block">
+                            Status: <span className="font-black">Pending Verification</span>
                         </div>
                     </div>
                 ) : (
@@ -269,13 +269,13 @@ export default async function StudioDashboard(props: {
                             </div>
 
                             <div className="space-y-8">
-                                <div className="glass-card overflow-hidden">
-                                    <div className="bg-sage p-5 flex items-center justify-between">
+                                <div className="earth-card overflow-hidden">
+                                    <div className="bg-forest p-5 flex items-center justify-between">
                                         <h2 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] flex items-center gap-2">
                                             <Calendar className="w-4 h-4" />
                                             Upcoming Bookings
                                         </h2>
-                                        <span className="text-[9px] font-bold text-white/60 border border-white/20 px-3 py-1 rounded-full uppercase tracking-tighter">Next 7 Days</span>
+                                        <span className="text-[9px] font-bold text-white/50 border border-white/20 px-3 py-1 rounded-full uppercase tracking-tighter">Next 7 Days</span>
                                     </div>
                                     <div className="p-6">
                                         <StudioUpcomingBookings

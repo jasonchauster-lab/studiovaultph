@@ -44,10 +44,10 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
 
     if (bookings.length === 0) {
         return (
-            <div className="py-12 text-center bg-alabaster/50 rounded-2xl border border-dashed border-sage/20 flex flex-col items-center justify-center">
-                <Calendar className="w-10 h-10 text-sage/20 mx-auto mb-4" />
+            <div className="py-12 text-center bg-off-white rounded-[8px] border border-dashed border-border-grey flex flex-col items-center justify-center">
+                <Calendar className="w-10 h-10 text-slate/20 mx-auto mb-4" />
                 <h3 className="text-sm font-bold text-charcoal mb-1">Quiet Week</h3>
-                <p className="text-xs text-charcoal/40 max-w-[200px] mx-auto">No upcoming bookings for the next 7 days.</p>
+                <p className="text-xs text-slate max-w-[200px] mx-auto">No upcoming bookings for the next 7 days.</p>
             </div>
         )
     }
@@ -61,7 +61,7 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                 const qty = booking.price_breakdown?.quantity || 1
 
                 return (
-                    <div key={booking.id} className="p-4 border border-white/40 bg-white/30 rounded-2xl hover:bg-white/60 transition-all shadow-sm group">
+                    <div key={booking.id} className="p-4 border border-border-grey bg-white rounded-[8px] hover:bg-off-white transition-all shadow-tight group relative">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex flex-col gap-1 w-full">
                                 <div className="flex items-center gap-3">
@@ -74,16 +74,16 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                     </Link>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-start justify-between gap-1">
-                                            <Link href={`/instructors/${booking.instructor_id}`} className="text-sm font-bold text-charcoal truncate hover:text-sage transition-colors">
+                                            <Link href={`/instructors/${booking.instructor_id}`} className="text-sm font-bold text-charcoal truncate hover:text-forest transition-colors">
                                                 {booking.instructor?.full_name || 'N/A'}
                                             </Link>
                                             <div className="text-right shrink-0">
                                                 <p className="text-[14px] font-bold text-charcoal leading-none">₱{payout.toLocaleString()}</p>
-                                                <p className="text-[8px] text-charcoal/40 uppercase font-bold tracking-[0.2em] mt-1">Studio Fee</p>
+                                                <p className="text-[8px] text-slate uppercase font-bold tracking-[0.2em] mt-1">Studio Fee</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-[10px] text-charcoal/50 font-bold uppercase tracking-tighter mt-1">
-                                            <Calendar className="w-3 h-3 text-sage" />
+                                        <div className="flex items-center gap-1.5 text-[10px] text-slate font-bold uppercase tracking-tighter mt-1">
+                                            <Calendar className="w-3 h-3 text-forest" />
                                             <span>{formatManilaDateStr(slotData.date)} • {formatTo12Hour(slotData.start_time)}</span>
                                         </div>
                                     </div>
@@ -99,32 +99,32 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                 <div className="w-7 h-7 rounded-full overflow-hidden bg-white shrink-0 border border-white shadow-sm group-hover/client:scale-110 transition-transform">
                                     <img src={booking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                 </div>
-                                <div className="text-[11px] text-charcoal/60 truncate flex-1 group-hover/client:text-sage transition-colors tracking-wide">
+                                <div className="text-[11px] text-slate truncate flex-1 group-hover/client:text-forest transition-colors tracking-wide">
                                     Client: <span className="font-bold text-charcoal">{booking.client?.full_name || 'N/A'}</span>
                                 </div>
                             </div>
 
                             <div className="flex items-center justify-between text-[10px] pt-1">
                                 <div className="flex items-center gap-2">
-                                    <Box className="w-3.5 h-3.5 text-sage" />
-                                    <span className="font-bold text-charcoal/80 truncate max-w-[100px] uppercase tracking-tighter">
+                                    <Box className="w-3.5 h-3.5 text-forest" />
+                                    <span className="font-bold text-charcoal truncate max-w-[100px] uppercase tracking-tighter">
                                         {qty} x {equipment}
                                     </span>
                                 </div>
 
                                 <div className="flex items-center gap-3">
                                     <span className={clsx(
-                                        "px-2 py-0.5 text-[8px] font-bold uppercase rounded-md tracking-widest border shrink-0",
+                                        "status-pill-earth shrink-0",
                                         ['approved', 'completed'].includes(booking.status?.toLowerCase())
-                                            ? "bg-sage/10 text-sage border-sage/20"
-                                            : "bg-gold/10 text-gold border-gold/20"
+                                            ? "status-pill-green"
+                                            : "status-pill-yellow"
                                     )}>
                                         {['approved', 'completed'].includes(booking.status?.toLowerCase()) ? 'Confirmed' : 'Pending'}
                                     </span>
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => setCancellingBooking(booking)}
-                                            className="w-7 h-7 bg-white/50 text-red-400 border border-white/40 rounded-full hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
+                                            className="w-7 h-7 bg-off-white text-red-600 border border-border-grey rounded-full hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-tight"
                                             title="Cancel Booking"
                                         >
                                             <X className="w-3 h-3" />
@@ -169,8 +169,8 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
             />
 
             {selectedClient && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/20 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
-                    <div className="glass-card w-full max-w-sm overflow-hidden p-8 relative animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/40 animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
+                    <div className="earth-card w-full max-w-sm overflow-hidden p-8 relative animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setSelectedClient(null)} className="absolute top-6 right-6 text-charcoal/20 hover:text-charcoal transition-colors"><X className="w-5 h-5" /></button>
                         <div className="flex flex-col items-center mt-4 mb-8 text-center">
                             <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-white shadow-cloud scale-110">
@@ -178,27 +178,27 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                             </div>
                             <h3 className="text-2xl font-serif font-bold text-charcoal tracking-tight">{selectedClient.full_name}</h3>
                             <div className="flex items-center gap-2 mt-1">
-                                <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest">{selectedClient.email}</p>
+                                <p className="text-[10px] text-slate font-bold uppercase tracking-widest">{selectedClient.email}</p>
                                 {selectedClient.date_of_birth && (
                                     <>
-                                        <span className="text-charcoal/20">•</span>
-                                        <p className="text-[10px] uppercase font-bold text-gold tracking-widest">{calculateAge(selectedClient.date_of_birth)} years</p>
+                                        <span className="text-slate/20">•</span>
+                                        <p className="text-[10px] uppercase font-bold text-forest tracking-widest">{calculateAge(selectedClient.date_of_birth)} years</p>
                                     </>
                                 )}
                             </div>
                         </div>
                         {selectedClient.medical_conditions ? (
-                            <div className="bg-red-50/50 p-5 rounded-3xl border border-red-100/50">
+                            <div className="bg-red-50 p-5 rounded-lg border border-red-200">
                                 <h4 className="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-2 flex items-center gap-2"><AlertCircle className="w-4 h-4" /> Medical Conditions</h4>
-                                <p className="text-xs text-red-700/80 leading-relaxed font-medium">{selectedClient.medical_conditions}</p>
+                                <p className="text-xs text-red-900 leading-relaxed font-medium">{selectedClient.medical_conditions}</p>
                             </div>
                         ) : (
-                            <div className="bg-sage/5 p-5 rounded-3xl border border-white/40">
-                                <h4 className="text-[10px] font-bold text-sage uppercase tracking-widest mb-1">Health Status</h4>
-                                <p className="text-xs text-charcoal/40 font-medium">Clear / No conditions reported.</p>
+                            <div className="bg-green-50 p-5 rounded-lg border border-green-200">
+                                <h4 className="text-[10px] font-bold text-green-800 uppercase tracking-widest mb-1">Health Status</h4>
+                                <p className="text-xs text-green-900 font-medium">Clear / No conditions reported.</p>
                             </div>
                         )}
-                        <button onClick={() => setSelectedClient(null)} className="w-full mt-8 py-3.5 bg-white text-charcoal border border-white/40 rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:bg-alabaster transition-all shadow-sm">Close</button>
+                        <button onClick={() => setSelectedClient(null)} className="w-full mt-8 py-3.5 bg-off-white text-charcoal border border-border-grey rounded-lg text-[11px] font-bold uppercase tracking-widest hover:bg-white transition-all shadow-tight">Close</button>
                     </div>
                 </div>
             )}

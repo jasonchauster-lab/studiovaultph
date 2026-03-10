@@ -238,7 +238,7 @@ export default async function CustomerDashboard({
                 <div className="space-y-10">
                     <div className="max-w-2xl">
                         <h1 className="text-5xl font-serif font-bold text-charcoal tracking-tight mb-4">Find your flow.</h1>
-                        <p className="text-charcoal/60 text-lg font-medium leading-relaxed">Discover top studios and verified instructors in Metro Manila with ease.</p>
+                        <p className="text-slate text-lg font-medium leading-relaxed">Discover top studios and verified instructors in Metro Manila with ease.</p>
                     </div>
 
                     <DiscoveryFilters availableLocations={availableLocations} />
@@ -253,28 +253,28 @@ export default async function CustomerDashboard({
                             <div className="flex items-center justify-between mb-10">
                                 <div className="flex items-center gap-4">
                                     <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">Verified Instructors</h2>
-                                    <span className="bg-sage/10 text-sage text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-sage/20">
+                                    <span className="status-pill-earth status-pill-green">
                                         {instructors.length} Available
                                     </span>
                                 </div>
                             </div>
 
                             {instructors.length === 0 ? (
-                                <div className="glass-card py-20 text-center flex flex-col items-center justify-center">
-                                    <div className="w-20 h-20 bg-sage/5 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                                        <User className="w-10 h-10 text-sage/30" />
+                                <div className="earth-card py-20 text-center flex flex-col items-center justify-center">
+                                    <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6 shadow-tight">
+                                        <User className="w-10 h-10 text-forest/30" />
                                     </div>
                                     <h3 className="text-xl font-serif font-bold text-charcoal tracking-tight mb-2">No results for this search</h3>
-                                    <p className="text-charcoal/40 max-w-sm mx-auto text-sm font-medium">Try adjusting your filters, location, or checking a different date.</p>
+                                    <p className="text-slate max-w-sm mx-auto text-sm font-medium">Try adjusting your filters, location, or checking a different date.</p>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                                     {instructors.map(inst => (
-                                        <div key={inst.id} className="glass-card hover:translate-y-[-4px] transition-all duration-300 group">
+                                        <div key={inst.id} className="earth-card hover:translate-y-[-4px] transition-all duration-300 group">
                                             <div className="p-8">
                                                 <div className="flex justify-between items-start mb-6">
                                                     <div className="flex items-center gap-5">
-                                                        <Link href={`/instructors/${inst.id}`} className="shrink-0 w-16 h-16 rounded-2xl overflow-hidden bg-white border border-white shadow-cloud group-hover:scale-105 transition-transform">
+                                                        <Link href={`/instructors/${inst.id}`} className="shrink-0 w-16 h-16 rounded-2xl overflow-hidden bg-white border border-border-grey shadow-tight group-hover:scale-105 transition-transform">
                                                             {inst.avatar_url ? (
                                                                 <Image
                                                                     src={inst.avatar_url}
@@ -293,7 +293,7 @@ export default async function CustomerDashboard({
                                                             <h3 className="text-lg font-bold text-charcoal tracking-tight mb-1">{inst.full_name}</h3>
                                                             <div className="flex items-center gap-3">
                                                                 {inst.instagram_handle && (
-                                                                    <p className="text-[10px] font-bold text-sage uppercase tracking-widest">@{inst.instagram_handle}</p>
+                                                                    <p className="text-[10px] font-bold text-forest uppercase tracking-widest">@{inst.instagram_handle}</p>
                                                                 )}
                                                                 <StarRating rating={ratingsMap[inst.id]?.average || null} count={ratingsMap[inst.id]?.count} size="xs" />
                                                             </div>
@@ -308,7 +308,7 @@ export default async function CustomerDashboard({
 
                                                 <div className="flex flex-wrap gap-2 mb-8 min-h-[40px]">
                                                     {(inst.certifications || []).filter((c: any) => c.verified).map((c: any) => (
-                                                        <span key={c.id} className="text-[9px] font-bold uppercase tracking-widest bg-sage/5 text-sage px-3 py-1 rounded-full border border-sage/10">
+                                                        <span key={c.id} className="text-[9px] font-bold uppercase tracking-widest bg-green-50 text-forest px-3 py-1 rounded-full border border-green-200">
                                                             {c.certification_body}
                                                         </span>
                                                     ))}
@@ -346,7 +346,7 @@ export default async function CustomerDashboard({
                             <div className="flex items-center justify-between mb-10">
                                 <div className="flex items-center gap-4">
                                     <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">Partner Studios</h2>
-                                    <span className="bg-gold/10 text-gold text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-gold/20">
+                                    <span className="status-pill-earth status-pill-yellow">
                                         {studios?.length || 0} Registered
                                     </span>
                                 </div>
@@ -371,8 +371,8 @@ export default async function CustomerDashboard({
                                                 </div>
                                             )}
                                             <div className="absolute top-4 right-4">
-                                                <div className="flex items-center gap-1.5 text-[9px] font-bold bg-white/40 backdrop-blur-md px-3 py-1.5 rounded-full text-charcoal border border-white/40 uppercase tracking-widest">
-                                                    <MapPin className="w-3 h-3 text-sage" />
+                                                <div className="status-pill-earth status-pill-green flex items-center gap-1.5 px-3 py-1.5">
+                                                    <MapPin className="w-3 h-3 text-forest" />
                                                     {studio.location}
                                                 </div>
                                             </div>
@@ -383,17 +383,17 @@ export default async function CustomerDashboard({
                                                 <StarRating rating={ratingsMap[studio.owner_id]?.average || null} count={ratingsMap[studio.owner_id]?.count} size="xs" />
                                             </div>
 
-                                            <p className="text-sm text-charcoal/40 font-medium mb-8 line-clamp-2 leading-relaxed">
+                                            <p className="text-sm text-slate font-medium mb-8 line-clamp-2 leading-relaxed">
                                                 {studio.description || 'A premiere pilates studio dedicated to your well-being.'}
                                             </p>
 
-                                            <div className="flex justify-between items-center bg-alabaster/40 p-4 rounded-2xl border border-white/40">
-                                                <span className="text-[10px] font-bold text-sage uppercase tracking-[0.2em]">
+                                            <div className="flex justify-between items-center bg-off-white p-4 rounded-lg border border-border-grey shadow-tight">
+                                                <span className="text-[10px] font-bold text-forest uppercase tracking-[0.2em]">
                                                     {studio.reformers_count} Reformers
                                                 </span>
                                                 <Link
                                                     href={`/studios/${studio.id}`}
-                                                    className="text-[10px] font-bold text-charcoal uppercase tracking-widest hover:text-sage transition-colors"
+                                                    className="text-[10px] font-bold text-charcoal uppercase tracking-widest hover:text-forest transition-colors"
                                                 >
                                                     View Details &rarr;
                                                 </Link>
@@ -411,19 +411,19 @@ export default async function CustomerDashboard({
                             <div className="flex items-center justify-between mb-10">
                                 <div className="flex items-center gap-4">
                                     <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">Available Sessions</h2>
-                                    <span className="bg-sage/10 text-sage text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-sage/20">
+                                    <span className="status-pill-earth status-pill-green">
                                         {slots.length} Ready
                                     </span>
                                 </div>
                             </div>
 
                             {slots.length === 0 ? (
-                                <div className="glass-card py-20 text-center flex flex-col items-center justify-center">
-                                    <div className="w-20 h-20 bg-gold/5 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                                        <Clock className="w-10 h-10 text-gold/30" />
+                                <div className="earth-card py-20 text-center flex flex-col items-center justify-center">
+                                    <div className="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center mb-6 shadow-tight">
+                                        <Clock className="w-10 h-10 text-yellow-600/30" />
                                     </div>
                                     <h3 className="text-xl font-serif font-bold text-charcoal tracking-tight mb-2">No slots available</h3>
-                                    <p className="text-charcoal/40 max-w-sm mx-auto text-sm font-medium">Try adjusting your filters or checking a different date.</p>
+                                    <p className="text-slate max-w-sm mx-auto text-sm font-medium">Try adjusting your filters or checking a different date.</p>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">

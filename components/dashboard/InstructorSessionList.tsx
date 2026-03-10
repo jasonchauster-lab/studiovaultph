@@ -91,7 +91,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
     return (
         <div className="space-y-20">
-            <div className="glass-card p-4 inline-block bg-white/20">
+            <div className="earth-card p-4 inline-block bg-white">
                 <BookingFilter onFilterChange={setFilters} />
             </div>
 
@@ -99,15 +99,15 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-4">
-                        <Calendar className="w-6 h-6 text-gold" />
+                        <Calendar className="w-6 h-6 text-forest" />
                         <h2 className="text-3xl font-serif text-charcoal tracking-tighter">Upcoming Sessions</h2>
                     </div>
                     <div className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em]">{upcomingBookings.length} SESSIONS FOUND</div>
                 </div>
 
                 {upcomingBookings.length === 0 ? (
-                    <div className="py-24 text-center glass-card border-dashed bg-white/20">
-                        <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">No upcoming sessions found.</p>
+                    <div className="py-24 text-center earth-card border-dashed bg-off-white">
+                        <p className="text-[10px] font-black text-slate uppercase tracking-[0.4em]">No upcoming sessions found.</p>
                     </div>
                 ) : (
                     <div className="space-y-6">
@@ -117,7 +117,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             const client = getFirst(booking.client)
 
                             return (
-                                <div key={booking.id} className="glass-card p-8 border border-white/60 bg-white/40 hover:bg-white transition-all duration-700 shadow-sm group">
+                                <div key={booking.id} className="earth-card p-8 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative">
                                     <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
                                         <div className="flex items-center gap-6 flex-1 min-w-0">
                                             <Link href={`/studios/${studio?.id}`} className="w-16 h-16 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700">
@@ -133,27 +133,27 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                         {studio?.name || "Studio"}
                                                     </Link>
                                                     <span className={clsx(
-                                                        "status-pill-frosted shrink-0",
-                                                        booking.status === 'approved' ? "bg-sage/10 text-sage border-sage/20" :
-                                                            "bg-red-50/50 text-red-500 border-red-100"
+                                                        "status-pill-earth shrink-0",
+                                                        booking.status === 'approved' ? "status-pill-green" :
+                                                            "status-pill-red"
                                                     )}>
                                                         {booking.status === 'approved' ? 'BOOKED' : 'CANCELLED'}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <MapPin className="w-3 h-3 text-gold" />
-                                                    <span className="text-[10px] text-charcoal/40 font-black uppercase tracking-[0.2em] truncate">
+                                                    <MapPin className="w-3 h-3 text-forest" />
+                                                    <span className="text-[10px] text-slate font-black uppercase tracking-[0.2em] truncate">
                                                         {studio?.location || "LOCATION UNKNOWN"}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="text-right shrink-0 bg-white/40 p-6 rounded-[12px] border border-[var(--airy-border)] min-w-[180px] shadow-sm group-hover:bg-white transition-all duration-700">
+                                        <div className="text-right shrink-0 bg-off-white p-6 rounded-lg border border-border-grey min-w-[180px] shadow-tight group-hover:bg-white transition-all duration-300">
                                             <p className="text-xl font-serif text-charcoal tracking-tighter leading-tight">
                                                 {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                                             </p>
-                                            <p className="text-[10px] text-gold font-black mt-2 flex items-center justify-end gap-2 uppercase tracking-[0.2em]">
+                                            <p className="text-[10px] text-forest font-black mt-2 flex items-center justify-end gap-2 uppercase tracking-[0.2em]">
                                                 <Clock className="w-3.5 h-3.5" />
                                                 {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                             </p>
@@ -170,11 +170,11 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
                                                 </div>
                                                 <div className="flex flex-col items-start">
-                                                    <span className="text-[9px] text-charcoal/20 font-black uppercase tracking-[0.3em] mb-0.5">Client</span>
-                                                    <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] group-hover/student:text-gold transition-colors">{client.full_name || 'N/A'}</span>
+                                                    <span className="text-[9px] text-slate font-black uppercase tracking-[0.3em] mb-0.5">Client</span>
+                                                    <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] group-hover/student:text-forest transition-colors">{client.full_name || 'N/A'}</span>
                                                 </div>
                                                 {client.medical_conditions && (
-                                                    <span className="ml-4 px-3 py-1 bg-red-50/50 text-red-500 text-[8px] font-black uppercase rounded-full border border-red-100 animate-pulse flex items-center gap-1.5 tracking-widest shadow-sm">
+                                                    <span className="ml-4 px-3 py-1 bg-red-50 text-red-600 text-[8px] font-black uppercase rounded-full border border-red-200 animate-pulse flex items-center gap-1.5 tracking-widest shadow-tight">
                                                         <AlertCircle className="w-3 h-3" />
                                                         MEDICAL CONDITIONS
                                                     </span>
@@ -186,8 +186,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-8 pt-8 border-t border-white/60 gap-6">
                                         <div className="flex items-center gap-6">
                                             <div className="flex items-center gap-2">
-                                                <Box className="w-3.5 h-3.5 text-gold" />
-                                                <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">
+                                                <Box className="w-3.5 h-3.5 text-forest" />
+                                                <span className="text-[10px] font-black text-slate uppercase tracking-[0.2em]">
                                                     {Array.isArray(slot?.equipment) && slot.equipment.length > 0
                                                         ? `${slot.equipment[0]} (${booking.quantity || 1})`
                                                         : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
@@ -199,7 +199,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
                                                 <button
                                                     onClick={() => setCancellingBooking(booking)}
-                                                    className="w-10 h-10 bg-white/40 text-red-300 border border-white/60 rounded-full hover:bg-red-500 hover:text-white transition-all duration-500 flex items-center justify-center shadow-sm"
+                                                    className="w-10 h-10 bg-off-white text-red-600 border border-border-grey rounded-full hover:bg-red-600 hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight"
                                                     title="Cancel Session"
                                                 >
                                                     <X className="w-4 h-4" />
@@ -253,11 +253,11 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                         {studio?.name || "Studio"}
                                                     </Link>
                                                     <span className={clsx(
-                                                        'status-pill-frosted shrink-0',
+                                                        'status-pill-earth shrink-0',
                                                         booking.status === 'completed'
-                                                            ? (booking.funds_unlocked ? 'bg-sage/10 text-sage border-sage/20' : 'bg-gold/10 text-gold border-gold/20') :
-                                                            booking.status === 'approved' ? 'bg-white/40 text-charcoal/40 border-white/60' :
-                                                                'bg-charcoal/5 text-charcoal/20 border-white/60'
+                                                            ? (booking.funds_unlocked ? 'status-pill-green' : 'status-pill-yellow') :
+                                                            booking.status === 'approved' ? 'bg-off-white text-slate border-border-grey' :
+                                                                'bg-charcoal/5 text-slate border-border-grey'
                                                     )}>
                                                         {['completed', 'approved'].includes(booking.status)
                                                             ? (booking.status === 'completed'
@@ -362,15 +362,15 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
                         <div className="flex flex-col items-center text-center mb-10">
-                            <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-cloud relative z-10">
+                            <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
                                 <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
                             </div>
                             <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedClient.full_name}</h3>
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em]">{selectedClient.email}</p>
+                                <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedClient.email}</p>
                                 {selectedClient.date_of_birth && (
-                                    <div className="inline-block px-3 py-1 bg-gold/5 rounded-full border border-gold/10 mt-2">
-                                        <p className="text-[9px] font-black text-gold uppercase tracking-[0.2em]">{calculateAge(selectedClient.date_of_birth)} YEARS OLD</p>
+                                    <div className="inline-block px-3 py-1 bg-forest/5 rounded-full border border-forest/10 mt-2">
+                                        <p className="text-[9px] font-black text-forest uppercase tracking-[0.2em]">{calculateAge(selectedClient.date_of_birth)} YEARS OLD</p>
                                     </div>
                                 )}
                             </div>
@@ -397,16 +397,16 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                     .join(', ');
 
                                 return displayConditions ? (
-                                    <div className="bg-red-50/20 p-8 rounded-[2rem] border border-red-100/50 relative z-10">
+                                    <div className="bg-red-50 p-8 rounded-lg border border-red-200 relative z-10">
                                         <h4 className="text-[10px] font-black text-red-800 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
                                             <AlertCircle className="w-4 h-4" /> PHYSICAL CONDITIONS
                                         </h4>
-                                        <p className="text-[11px] text-red-700/80 font-black uppercase tracking-[0.2em] leading-relaxed">{displayConditions}</p>
+                                        <p className="text-[11px] text-red-900 font-black uppercase tracking-[0.2em] leading-relaxed">{displayConditions}</p>
                                     </div>
                                 ) : (
-                                    <div className="bg-white/40 p-8 rounded-[2rem] border border-white/60 relative z-10">
-                                        <h4 className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-2">HEALTH STATUS</h4>
-                                        <p className="text-[10px] text-charcoal/40 uppercase tracking-[0.2em] italic">No reported conditions.</p>
+                                    <div className="bg-green-50 p-8 rounded-lg border border-green-200 relative z-10">
+                                        <h4 className="text-[10px] font-black text-forest uppercase tracking-[0.4em] mb-2">HEALTH STATUS</h4>
+                                        <p className="text-[10px] text-forest/40 uppercase tracking-[0.2em] italic">No reported conditions.</p>
                                     </div>
                                 );
                             })()}

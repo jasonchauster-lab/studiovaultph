@@ -52,19 +52,17 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {cardData.map((card, index) => (
-                <div key={index} className="glass-card p-6 group transition-all duration-500 hover:-translate-y-2 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-sage/5 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-sage/10 transition-colors" />
-
+                <div key={index} className="earth-card p-6 group transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
                     <div className="flex justify-between items-start mb-6">
-                        <div className={`p-3.5 ${card.bgIcon} rounded-2xl group-hover:scale-110 transition-transform duration-500 shadow-sm border border-white/40`}>
-                            <card.icon className={`w-5 h-5 ${card.iconColor}`} />
+                        <div className={`p-3.5 ${card.bgIcon.replace('bg-sage/10', 'bg-green-50').replace('bg-gold/10', 'bg-yellow-50')} rounded-lg group-hover:scale-110 transition-transform duration-300 shadow-tight border border-border-grey`}>
+                            <card.icon className={`w-5 h-5 ${card.iconColor.replace('text-sage', 'text-green-600').replace('text-gold-deep', 'text-yellow-600')}`} />
                         </div>
-                        <span className={`text-[10px] font-bold uppercase tracking-[0.15em] px-3 py-1.5 rounded-full border border-white/40 ${card.bgIcon} ${card.iconColor} shadow-sm backdrop-blur-md`}>
+                        <span className={`text-[10px] font-bold uppercase tracking-[0.15em] px-3 py-1.5 rounded-full border border-border-grey ${card.bgIcon.replace('bg-sage/10', 'bg-green-50').replace('bg-gold/10', 'bg-yellow-50')} ${card.iconColor.replace('text-sage', 'text-green-700').replace('text-gold-deep', 'text-yellow-700')} shadow-tight`}>
                             {card.trend}
                         </span>
                     </div>
                     <div>
-                        <p className="text-[10px] font-bold text-charcoal/40 uppercase tracking-[0.2em] mb-2">{card.label}</p>
+                        <p className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-2">{card.label}</p>
                         <h3 className="text-3xl font-serif font-bold text-charcoal tracking-tight">{card.value}</h3>
                     </div>
                 </div>

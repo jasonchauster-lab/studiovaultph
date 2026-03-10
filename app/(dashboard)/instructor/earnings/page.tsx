@@ -143,7 +143,7 @@ export default function EarningsPage({
 
                         <button
                             onClick={() => setShowInfoModal(false)}
-                            className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95"
+                            className="btn-forest w-full py-4 text-[10px] font-bold uppercase tracking-[0.4em]"
                         >
                             ACKNOWLEDGE PROTOCOL
                         </button>
@@ -161,15 +161,15 @@ export default function EarningsPage({
                         BACK TO DASHBOARD
                     </Link>
                     <h1 className="text-5xl font-serif text-charcoal tracking-tighter mb-4">Earnings & Payouts</h1>
-                    <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Manage your earnings, payouts, and financial history.</p>
+                    <p className="text-[10px] font-bold text-slate uppercase tracking-[0.4em]">Manage your earnings, payouts, and financial history.</p>
                 </div>
                 <div className="flex flex-wrap gap-4">
                     {recentTransactions && <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />}
                     <button
                         onClick={() => setShowTopUpModal(true)}
-                        className="h-14 bg-white/40 text-charcoal px-8 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 border border-white/60 hover:bg-white transition-all shadow-sm active:scale-95"
+                        className="h-14 bg-white text-charcoal px-8 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] flex items-center gap-3 border border-border-grey hover:bg-off-white transition-all shadow-tight active:scale-95"
                     >
-                        <ArrowUpRight className="w-4 h-4 text-gold stroke-[3px]" />
+                        <ArrowUpRight className="w-4 h-4 text-forest stroke-[3px]" />
                         ADD FUNDS
                     </button>
                     {availableBalance < 0 ? (
@@ -184,31 +184,31 @@ export default function EarningsPage({
                     ) : (
                         <Link
                             href="/instructor/payout"
-                            className="h-14 bg-charcoal text-white px-10 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-[1.2] transition-all shadow-md active:scale-95"
+                            className="h-14 bg-forest text-white px-10 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-110 transition-all shadow-tight active:scale-95"
                         >
-                            <Wallet className="w-4 h-4 text-gold stroke-[3px]" />
+                            <Wallet className="w-4 h-4 text-white" />
                             CASH OUT
                         </Link>
                     )}
                 </div>
             </div>
 
-            <div className="glass-card p-4 inline-block bg-white/20">
+            <div className="earth-card p-4 inline-block bg-white shadow-tight">
                 <DateRangeFilters />
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {/* Available Balance */}
-                <div className="glass-card p-10 relative overflow-hidden bg-sage border-sage/20 hover:-translate-y-2 transition-all duration-700 col-span-1 sm:col-span-2">
+                <div className="earth-card p-10 relative overflow-hidden bg-forest border-forest/20 hover:-translate-y-2 transition-all duration-700 col-span-1 sm:col-span-2 shadow-tight">
                     <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
                     <div className="relative z-10">
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-4">
-                                <div className="p-4 bg-white/20 rounded-[12px] border border-white/40 shadow-sm">
+                                <div className="p-4 bg-white/10 rounded-lg border border-white/20">
                                     <Wallet className="w-6 h-6 text-white" />
                                 </div>
-                                <span className="text-[10px] font-black text-white/90 uppercase tracking-[0.4em]">Available to Cash Out</span>
+                                <span className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">Available to Cash Out</span>
                             </div>
                             <button
                                 onClick={() => setShowInfoModal(true)}
@@ -225,15 +225,15 @@ export default function EarningsPage({
                 </div>
 
                 {/* Gross Earnings */}
-                <div className="glass-card p-10 hover:-translate-y-2 transition-all duration-700 bg-white/40">
+                <div className="earth-card p-10 hover:-translate-y-2 transition-all duration-700 bg-white shadow-tight">
                     <div className="flex items-center gap-4 mb-8">
-                        <div className="p-4 bg-sage/10 rounded-[12px] border border-white/60 shadow-sm">
-                            <TrendingUp className="w-6 h-6 text-sage" />
+                        <div className="p-4 bg-green-50 rounded-lg border border-border-grey shadow-tight">
+                            <TrendingUp className="w-6 h-6 text-forest" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Total Earnings</span>
+                        <span className="text-[10px] font-bold text-slate uppercase tracking-[0.4em]">Total Earnings</span>
                     </div>
                     <h3 className="text-4xl font-serif text-charcoal tracking-tighter mb-3">₱{(data.totalEarned || 0).toLocaleString()}</h3>
-                    <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">LIFETIME EARNINGS</p>
+                    <p className="text-[9px] font-bold text-slate uppercase tracking-[0.2em]">LIFETIME EARNINGS</p>
                 </div>
 
                 {/* Net Earnings */}
@@ -251,15 +251,15 @@ export default function EarningsPage({
                 </div>
 
                 {/* Compensation */}
-                <div className="glass-card p-10 hover:-translate-y-2 transition-all duration-700 bg-white/40 border-l-gold border-l-4">
+                <div className="earth-card p-10 hover:-translate-y-2 transition-all duration-700 bg-white border-l-forest border-l-4 shadow-tight">
                     <div className="flex items-center gap-4 mb-8">
-                        <div className="p-4 bg-gold/5 rounded-[12px] border border-white/60 shadow-sm">
-                            <ShieldCheck className="w-6 h-6 text-gold" />
+                        <div className="p-4 bg-green-50 rounded-lg border border-border-grey shadow-tight">
+                            <ShieldCheck className="w-6 h-6 text-forest" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Adjustments</span>
+                        <span className="text-[10px] font-bold text-slate uppercase tracking-[0.4em]">Adjustments</span>
                     </div>
                     <h3 className="text-4xl font-serif text-charcoal tracking-tighter mb-3">₱{(data.totalCompensation || 0).toLocaleString()}</h3>
-                    <p className="text-[9px] font-black text-gold uppercase tracking-[0.2em]">MANUAL CREDITS</p>
+                    <p className="text-[9px] font-bold text-forest uppercase tracking-[0.2em]">MANUAL CREDITS</p>
                 </div>
 
                 {/* Penalty */}
@@ -312,13 +312,13 @@ export default function EarningsPage({
             </div>
 
             {/* Recent Transactions */}
-            <div className="glass-card overflow-hidden">
-                <div className="p-10 border-b border-white/60 flex items-center justify-between bg-white/40">
+            <div className="earth-card overflow-hidden shadow-tight">
+                <div className="p-10 border-b border-border-grey flex items-center justify-between bg-white">
                     <div className="flex items-center gap-4">
-                        <Clock className="w-6 h-6 text-gold" />
+                        <Clock className="w-6 h-6 text-forest" />
                         <h3 className="text-3xl font-serif text-charcoal tracking-tighter">Transaction History</h3>
                     </div>
-                    <div className="text-[9px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Recent Activity</div>
+                    <div className="text-[9px] font-bold text-slate uppercase tracking-[0.4em]">Recent Activity</div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -354,18 +354,18 @@ export default function EarningsPage({
                                             </div>
                                         </td>
                                         <td className="px-10 py-8">
-                                            <span className={`status-pill-frosted inline-flex items-center
+                                            <span className={`status-pill-earth inline-flex items-center
                                                 ${tx.status === 'approved' || tx.status === 'processed'
-                                                    ? 'bg-sage/10 text-sage border-sage/20'
+                                                    ? 'status-pill-green'
                                                     : tx.status === 'pending'
-                                                        ? 'bg-gold/10 text-gold border-gold/20'
-                                                        : 'bg-charcoal/5 text-charcoal/20 border-white/60'
+                                                        ? 'status-pill-yellow'
+                                                        : 'bg-off-white text-slate border-border-grey'
                                                 }
                                             `}>
                                                 {tx.status}
                                             </span>
                                         </td>
-                                        <td className={`px-10 py-8 text-[11px] font-black uppercase tracking-[0.1em] text-right ${tx.total_amount > 0 ? 'text-sage' : tx.total_amount < 0 ? 'text-red-500' : 'text-charcoal'}`}>
+                                        <td className={`px-10 py-8 text-[11px] font-bold uppercase tracking-[0.1em] text-right ${tx.total_amount > 0 ? 'text-forest' : tx.total_amount < 0 ? 'text-red-600' : 'text-charcoal'}`}>
                                             <div className="flex items-center justify-end gap-2">
                                                 {tx.total_amount > 0 ? <Plus className="w-3 h-3 stroke-[4px]" /> : tx.total_amount < 0 ? <Minus className="w-3 h-3 stroke-[4px]" /> : null}
                                                 ₱{Math.abs(tx.total_amount).toLocaleString()}

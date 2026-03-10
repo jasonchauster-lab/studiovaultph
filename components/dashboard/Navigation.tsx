@@ -21,7 +21,7 @@ export default function Navigation({ role }: NavigationProps) {
     const linkClass = (isActive: boolean) =>
         clsx(
             "text-[10px] uppercase tracking-[0.25em] font-black flex items-center gap-2.5 transition-all py-2 md:py-0 relative group",
-            isActive ? "text-charcoal" : "text-charcoal/30 hover:text-charcoal"
+            isActive ? "text-charcoal" : "text-slate hover:text-charcoal"
         );
 
     const navLinks = (
@@ -36,7 +36,7 @@ export default function Navigation({ role }: NavigationProps) {
                     <Link href="/customer/bookings" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/customer/bookings')}>
                         <Calendar className="w-3.5 h-3.5" />
                         Sessions
-                        {pathname === '/customer/bookings' && <span className="absolute -bottom-3 left-0 w-full h-0.5 bg-gold rounded-full" />}
+                        {pathname === '/customer/bookings' && <span className="absolute -bottom-3 left-0 w-full h-0.5 bg-forest rounded-full" />}
                     </Link>
                     <Link href="/customer/wallet" onClick={() => setMobileOpen(false)} className={linkClass(pathname?.startsWith('/customer/wallet'))}>
                         <Wallet className="w-3.5 h-3.5" />
@@ -53,13 +53,13 @@ export default function Navigation({ role }: NavigationProps) {
                         <div className="h-px w-full md:h-4 md:w-px bg-white/20 my-1 md:my-0 md:mx-2" />
                     )}
                     {role === 'instructor' && (
-                        <Link href="/instructor" onClick={() => setMobileOpen(false)} className="link-secondary text-[10px] uppercase tracking-widest font-bold text-sage hover:text-sage-light flex items-center gap-1 border border-sage/20 bg-sage/5 px-4 py-1.5 rounded-[20px] transition-all hover:shadow-cloud">
+                        <Link href="/instructor" onClick={() => setMobileOpen(false)} className="text-[10px] uppercase tracking-widest font-bold text-forest hover:brightness-110 flex items-center gap-1 border-2 border-forest px-4 py-1.5 rounded-[8px] transition-all">
                             <LayoutDashboard className="w-3 h-3" />
                             Instructor Mode
                         </Link>
                     )}
                     {role === 'studio' && (
-                        <Link href="/studio" onClick={() => setMobileOpen(false)} className="link-secondary text-[10px] uppercase tracking-widest font-bold text-charcoal/60 hover:text-charcoal flex items-center gap-1 border border-white/40 bg-white/20 px-4 py-1.5 rounded-[20px] transition-all hover:shadow-cloud">
+                        <Link href="/studio" onClick={() => setMobileOpen(false)} className="text-[10px] uppercase tracking-widest font-bold text-charcoal hover:bg-off-white flex items-center gap-1 border-2 border-border-grey px-4 py-1.5 rounded-[8px] transition-all">
                             <LayoutDashboard className="w-3 h-3" />
                             Studio Dashboard
                         </Link>
@@ -154,7 +154,7 @@ export default function Navigation({ role }: NavigationProps) {
 
             {/* Mobile hamburger button */}
             <button
-                className="md:hidden p-2.5 rounded-[12px] bg-white/40 backdrop-blur-md border border-white/20 text-charcoal shadow-sm hover:shadow-md transition-all active:scale-95"
+                className="md:hidden p-2.5 rounded-[8px] bg-white border border-border-grey text-charcoal shadow-tight hover:shadow-card transition-all active:scale-95"
                 onClick={() => setMobileOpen(prev => !prev)}
                 aria-label="Toggle menu"
             >
@@ -163,7 +163,7 @@ export default function Navigation({ role }: NavigationProps) {
 
             {/* Mobile drawer */}
             {mobileOpen && (
-                <div className="md:hidden glass-card absolute top-full left-4 right-4 mt-2 p-6 flex flex-col gap-2 z-50">
+                <div className="md:hidden earth-card absolute top-full left-4 right-4 mt-2 p-6 flex flex-col gap-2 z-50">
                     {navLinks}
                 </div>
             )}

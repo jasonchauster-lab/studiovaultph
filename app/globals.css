@@ -1,41 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  /* Antigravity Design System - Ethereal Minimalism */
-  --alabaster: #FDFDFD;
-  --sage: #C5D3C1;
-  --gold: #D4AF37;
-  --linen: #F5E8DE;
-  --rose: #EBD3CF;
-  /* Luminous Ethereal additions */
-  --champagne: #E5D1B8;
-  --sage-glow: #B4C3B2;
-  --warm-sand: #F5E8DE;
-  --warm-neutral-border: rgba(180, 160, 140, 0.04);
+  /* Modern Earth Design System — Grounded, Professional, High-Contrast */
+  --off-white: #FAFAFA;
+  --charcoal: #1F2937;
+  --slate: #4B5563;
+  --forest: #2F5233;
+  --border-grey: #E5E7EB;
 
-  --background: var(--alabaster);
+  --background: var(--off-white);
   --foreground: var(--charcoal);
 
-  /* Refined Glassmorphism: High-blur, luminous white borders */
-  --glass-bg: rgba(255, 255, 255, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.6);
-  --glass-blur: blur(25px);
+  --radius: 12px;
+  --radius-pill: 9999px;
 
-  --radius: 20px;
-  --radius-floating: 12px;
-
-  /* Airy Border: Faint, weightless grid */
-  --airy-border: rgba(0, 0, 0, 0.02);
-  --sage-desaturated: #B4C3B2;
-
-  /* Cloud Shadow: Diffuse, weightless */
-  --shadow-cloud: 0 30px 60px -15px rgba(0, 0, 0, 0.05), 0 15px 30px -10px rgba(0, 0, 0, 0.03);
-
-  /* Floating Card Shadow: Multi-layered - tight for definition + wide 40px for lift */
-  --shadow-floating: 0 2px 8px rgba(0, 0, 0, 0.04), 0 8px 40px rgba(0, 0, 0, 0.06);
-
-  /* Luminous lift shadow for interactive cards */
-  --shadow-luminous: 0 1px 4px rgba(0, 0, 0, 0.05), 0 8px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  /* Tight, minimal shadows for "Modern Earth" */
+  --shadow-tight: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 @theme inline {
@@ -43,55 +24,26 @@
   --color-foreground: var(--foreground);
 
   /* Brand Palette */
-  --color-alabaster: var(--alabaster);
-  --color-sage: var(--sage);
-  --color-gold: var(--gold);
-  --color-linen: var(--linen);
-  --color-rose: var(--rose);
+  --color-off-white: var(--off-white);
   --color-charcoal: var(--charcoal);
-  --color-champagne: var(--champagne);
-  --color-sage-glow: var(--sage-glow);
+  --color-slate: var(--slate);
+  --color-forest: var(--forest);
+  --color-border-grey: var(--border-grey);
 
   /* System Mappings */
-  --color-primary: var(--sage-glow);
+  --color-primary: var(--forest);
   --color-primary-foreground: white;
-  --color-secondary: var(--gold);
+  --color-secondary: var(--slate);
   --color-secondary-foreground: white;
 
   --radius-xl: var(--radius);
   --radius-2xl: calc(var(--radius) + 4px);
 
-  --shadow-cloud: var(--shadow-cloud);
-}
-
-@keyframes mesh-blob {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-}
-
-.animate-mesh {
-  animation: mesh-blob 20s infinite ease-in-out;
+  --shadow-tight: var(--shadow-tight);
 }
 
 body {
   background: var(--background);
-  /* Fine grain texture */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 200px;
-  background-attachment: fixed;
-  opacity: 1;
   color: var(--foreground);
   font-family: var(--font-lexend), sans-serif;
   font-weight: 400;
@@ -99,89 +51,29 @@ body {
   position: relative;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: inherit;
-  z-index: -2;
-}
-
-/* Grain overlay at 2% opacity */
-body::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: inherit;
-  background-repeat: repeat;
-  opacity: 0.02;
-  pointer-events: none;
-  z-index: 100;
-}
-
 h1,
 h2,
 h3,
 h4 {
   font-weight: 600;
-}
-
-/* Background Mesh Gradient blobs at 5% opacity */
-.mesh-gradient-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.mesh-blob-1,
-.mesh-blob-2 {
-  position: absolute;
-  width: 800px;
-  height: 800px;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.05;
-}
-
-.mesh-blob-1 {
-  background: radial-gradient(circle, var(--sage) 0%, transparent 70%);
-  top: -200px;
-  left: -200px;
-  animation: mesh-blob 25s infinite alternate ease-in-out;
-}
-
-.mesh-blob-2 {
-  background: radial-gradient(circle, var(--warm-sand) 0%, transparent 70%);
-  bottom: -200px;
-  right: -200px;
-  animation: mesh-blob 30s infinite alternate-reverse ease-in-out;
+  color: var(--charcoal);
 }
 
 @layer utilities {
-  .glass-card {
-    background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 20px 40px rgba(0, 0, 0, 0.06);
-    border-radius: var(--radius-floating);
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .glass-card,
+  .earth-card {
+    background: white;
+    border: 1px solid var(--border-grey);
+    box-shadow: var(--shadow-tight);
+    border-radius: var(--radius);
+    transition: all 0.2s ease-in-out;
   }
 
-  .glass-card:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02), 0 25px 50px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
+  .glass-card:hover,
+  .earth-card:hover {
+    box-shadow: var(--shadow-card);
+    transform: translateY(-1px);
   }
 
   .status-pill-frosted {
@@ -190,37 +82,48 @@ h4 {
   }
 
   .sticky-header-antigravity {
-    @apply sticky top-0 z-[60] py-6 px-8 lg:px-12 backdrop-blur-[15px] bg-white/70 border-b border-[var(--airy-border)] transition-all duration-500;
+    @apply sticky top-0 z-[60] py-6 px-8 lg:px-12 bg-white border-b border-border-grey transition-all duration-300;
+    box-shadow: var(--shadow-tight);
   }
 
   .glass-navbar {
-    background: rgba(255, 255, 255, 0.70);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.04), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    background: white;
+    border-bottom: 1px solid var(--border-grey);
+    box-shadow: var(--shadow-tight);
     z-index: 50;
-    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: all 0.3s ease;
   }
 
-  .btn-antigravity {
-    @apply rounded-[20px] font-bold transition-all duration-300 shadow-md;
-    background: linear-gradient(135deg, var(--sage) 0%, #D8E2D6 100%);
-    color: var(--charcoal);
-  }
-
-  .btn-antigravity:hover {
-    @apply -translate-y-1 shadow-lg brightness-105;
-  }
-
-  .btn-gold {
-    @apply rounded-[20px] font-bold transition-all duration-300 shadow-md;
-    background: linear-gradient(135deg, var(--gold) 0%, #B8962D 100%);
+  .btn-primary,
+  .btn-forest {
+    background: var(--forest);
     color: white;
+    @apply rounded-[8px] font-semibold transition-all duration-200 shadow-sm px-6 py-2 content-center;
   }
 
-  .btn-gold:hover {
-    @apply -translate-y-1 shadow-lg brightness-110;
+  .btn-primary:hover,
+  .btn-forest:hover {
+    filter: brightness(1.1);
+    box-shadow: var(--shadow-card);
+  }
+
+  .btn-primary:active,
+  .btn-forest:active {
+    transform: scale(0.98);
+  }
+
+  /* Redefining Antigravity buttons to Forest Green */
+  .btn-antigravity,
+  .btn-sage-glow {
+    background: var(--forest);
+    color: white;
+    @apply rounded-[8px] font-semibold transition-all duration-200 shadow-sm;
+  }
+
+  .btn-antigravity:hover,
+  .btn-sage-glow:hover {
+    filter: brightness(1.1);
+    box-shadow: var(--shadow-card);
   }
 
   .btn-rose {
@@ -241,33 +144,40 @@ h4 {
     @apply opacity-40 cursor-not-allowed transform-none shadow-none;
   }
 
-  /* Sage Glow — primary action button */
-  .btn-sage-glow {
-    background: #B4C3B2;
-    color: white;
-    box-shadow: 0 0 0 1px rgba(180, 195, 178, 0.15), 0 4px 20px rgba(180, 195, 178, 0.4), 0 2px 8px rgba(0, 0, 0, 0.06);
-    @apply rounded-[20px] font-semibold transition-all duration-300 active:scale-95;
+  /* Modern Earth Status Pills — Dark text on tinted backgrounds */
+  .status-pill-earth {
+    @apply px-3 py-1 text-[10px] font-semibold uppercase rounded-full tracking-wider;
   }
 
-  .btn-sage-glow:hover {
-    filter: brightness(1.06);
-    box-shadow: 0 0 0 1px rgba(180, 195, 178, 0.2), 0 8px 30px rgba(180, 195, 178, 0.5), 0 2px 12px rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
+  .status-pill-green {
+    @apply bg-green-100 text-green-800;
   }
 
-  /* Session block: 1px inner white border for depth */
-  .session-block-luminous {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.85), 0 2px 8px rgba(0, 0, 0, 0.06);
+  .status-pill-yellow {
+    @apply bg-yellow-100 text-yellow-800;
   }
 
-  /* Secondary link: Champagne hover */
+  .status-pill-red {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .status-pill-grey {
+    @apply bg-gray-100 text-gray-800;
+  }
+
+  /* Session block: clean border and shadow */
+  .session-block-earth {
+    @apply border border-border-grey bg-white shadow-tight transition-all duration-200;
+  }
+
+  .session-block-earth:hover {
+    @apply shadow-card;
+  }
+
+  /* Secondary details color detail link */
   .link-secondary {
-    @apply transition-colors duration-300;
-    color: inherit;
-  }
-
-  .link-secondary:hover {
-    color: #E5D1B8;
+    color: var(--slate);
+    @apply hover:text-charcoal transition-colors duration-200;
   }
 
   .no-scrollbar::-webkit-scrollbar {

@@ -243,22 +243,22 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
 
             {/* Calendar Grid */}
-            <div className="glass-card overflow-hidden !border-[rgba(0,0,0,0.05)] rounded-[12px]">
+            <div className="bg-white border border-border-grey shadow-tight overflow-hidden rounded-[8px]">
                 <div className="min-w-[900px]">
-                    <div className="grid grid-cols-8 border-b border-[rgba(0,0,0,0.05)] bg-white/20">
-                        <div className="p-6 text-[10px] font-black text-charcoal/20 border-r border-[rgba(0,0,0,0.05)] sticky left-0 bg-white/60 backdrop-blur-xl z-20 w-28 text-center uppercase tracking-[0.3em] flex items-center justify-center">EPOCH</div>
+                    <div className="grid grid-cols-8 border-b border-border-grey bg-off-white">
+                        <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-28 text-center uppercase tracking-[0.3em] flex items-center justify-center">EPOCH</div>
                         {days.map(day => (
-                            <div key={day.toString()} className={clsx("p-6 text-center border-r border-[rgba(180,160,140,0.04)] last:border-r-0 min-w-[120px] transition-all duration-1000", isSameDay(day, new Date()) ? "bg-[#B4C3B2]/5" : "")}>
-                                <div className="text-[10px] text-charcoal/20 font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
-                                <div className={clsx("text-3xl font-serif tracking-tighter", isSameDay(day, new Date()) ? "text-[#B4C3B2]" : "text-charcoal")}>{format(day, 'd')}</div>
+                            <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 min-w-[120px] transition-all", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
+                                <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
+                                <div className={clsx("text-3xl font-serif tracking-tighter", isSameDay(day, new Date()) ? "text-forest" : "text-charcoal")}>{format(day, 'd')}</div>
                             </div>
                         ))}
                     </div>
 
-                    <div className="divide-y divide-[rgba(0,0,0,0.05)] relative">
+                    <div className="divide-y divide-border-grey relative">
                         {hours.map(hour => (
                             <div key={hour} className="grid grid-cols-8" style={{ minHeight: `${ROW_HEIGHT}px` }}>
-                                <div className="p-4 text-[10px] text-charcoal/20 font-black border-r border-[rgba(180,160,140,0.04)] text-center sticky left-0 bg-white/40 backdrop-blur-xl z-20 w-28 flex items-center justify-center tracking-[0.2em]">
+                                <div className="p-4 text-[10px] text-slate font-black border-r border-border-grey text-center sticky left-0 bg-white z-20 w-28 flex items-center justify-center tracking-[0.2em]">
                                     {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                 </div>
 
@@ -286,9 +286,9 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     const isPastCell = isPast(setMinutes(setHours(day, hour + 1), 0))
 
                                     return (
-                                        <div key={day.toString() + hour} className={clsx("border-r border-[rgba(180,160,140,0.04)] last:border-r-0 relative group p-0", isPastCell && "bg-alabaster/5")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
+                                        <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-0", isPastCell && "bg-gray-50")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
                                             <div
-                                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 bg-[#B4C3B2]/5 cursor-pointer z-0"
+                                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 bg-forest/5 cursor-pointer z-0"
                                                 onClick={() => {
                                                     setSingleDate(format(day, 'yyyy-MM-dd'))
                                                     setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
@@ -368,10 +368,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         <div
                                                             key={slot.id}
                                                             className={clsx(
-                                                                "absolute rounded-[12px] text-[10px] hover:shadow-cloud hover:scale-[1.02] transition-all duration-700 cursor-pointer overflow-hidden backdrop-blur-md border-white border z-10 p-4 group/slot flex flex-col gap-3 session-block-luminous",
+                                                                "absolute rounded-[8px] text-[10px] hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border z-10 p-4 group/slot flex flex-col gap-3 session-block-earth",
                                                                 isPastCell
-                                                                    ? "bg-white/20 text-charcoal/20 opacity-40"
-                                                                    : "bg-white/80 text-charcoal",
+                                                                    ? "bg-gray-50 border-gray-200 text-slate"
+                                                                    : "bg-green-50 border-green-200 text-green-900",
                                                                 duration < 45 && "py-2 px-4 justify-center"
                                                             )}
                                                             style={{
@@ -387,28 +387,28 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         >
                                                             <div className={clsx("flex items-center gap-2", duration < 45 ? "flex-row" : "flex-col items-start")}>
                                                                 <div className="flex items-center gap-2 font-black text-[10px] text-charcoal uppercase tracking-[0.2em] shrink-0">
-                                                                    <Clock className={clsx(duration < 45 ? "w-3 h-3" : "w-4 h-4", isPastCell ? "text-charcoal/10" : "text-[#B4C3B2]")} />
-                                                                    <span>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
+                                                                    <Clock className={clsx(duration < 45 ? "w-3 h-3" : "w-4 h-4", isPastCell ? "text-slate/30" : "text-forest")} />
+                                                                    <span className={isPastCell ? "text-slate" : "text-charcoal"}>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                                 </div>
 
                                                                 <div className="flex flex-wrap items-center gap-2">
-                                                                    <div className="text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 bg-black/5 px-3 py-1 rounded-full border border-white/60">
-                                                                        <MapPin className="w-3 h-3 text-charcoal/20" />
+                                                                    <div className="text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 bg-gray-100 text-slate px-3 py-1 rounded-full border border-gray-200">
+                                                                        <MapPin className="w-3 h-3 text-slate/40" />
                                                                         <span className="truncate max-w-[100px]">{locations[0].split(' - ')[1] || locations[0]}</span>
                                                                     </div>
                                                                     {extraLocCount > 0 && duration >= 45 && (
-                                                                        <div className="text-[9px] font-black text-[#B4C3B2] bg-[#B4C3B2]/10 px-3 py-1 rounded-full border border-[#B4C3B2]/20">+{extraLocCount} AREAS</div>
+                                                                        <div className="text-[9px] font-black text-forest bg-green-100 px-3 py-1 rounded-full border border-green-200">+{extraLocCount} AREAS</div>
                                                                     )}
                                                                 </div>
 
                                                                 {primaryEq && duration >= 45 && (
                                                                     <div className="flex flex-wrap items-center gap-2 mt-auto">
-                                                                        <div className="text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 bg-[#B4C3B2]/20 text-charcoal px-3 py-1 rounded-full border border-[#B4C3B2]/30">
-                                                                            <Box className="w-3 h-3 text-[#B4C3B2]" />
+                                                                        <div className="text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 bg-green-100 text-forest px-3 py-1 rounded-full border border-green-200">
+                                                                            <Box className="w-3 h-3 text-forest" />
                                                                             <span>{primaryEq}</span>
                                                                         </div>
                                                                         {extraEqCount > 0 && (
-                                                                            <div className="text-[9px] font-black text-charcoal/20">+{extraEqCount} NEXT</div>
+                                                                            <div className="text-[9px] font-black text-slate">+{extraEqCount} NEXT</div>
                                                                         )}
                                                                     </div>
                                                                 )}
