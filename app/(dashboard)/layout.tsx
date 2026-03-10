@@ -5,11 +5,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import DashboardHeader from '@/components/dashboard/DashboardHeader'
 import UserPresenceTracker from '@/components/shared/UserPresenceTracker'
-import dynamic from 'next/dynamic'
-
-const SupportChatWidget = dynamic(() => import('@/components/support/SupportChatWidget'), {
-    ssr: false,
-})
+import SupportChatWrapper from '@/components/support/SupportChatWrapper'
 
 export default async function DashboardLayout({
     children,
@@ -71,7 +67,7 @@ export default async function DashboardLayout({
                 </div>
             </footer>
 
-            {user && profile?.role !== 'admin' && <SupportChatWidget userId={user.id} />}
+            {user && profile?.role !== 'admin' && <SupportChatWrapper userId={user.id} />}
             {user && <UserPresenceTracker />}
         </div>
     )
