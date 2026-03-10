@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, CheckCircle2, MapPin, DollarSign, User, Sparkles, TrendingUp, ShieldCheck, Award } from 'lucide-react'
+import { ArrowRight, CheckCircle2, MapPin, DollarSign, User, Sparkles, TrendingUp, ShieldCheck, Award, ClipboardList, CalendarDays, LineChart } from 'lucide-react'
 import clsx from 'clsx'
 import RoleSelectionModal from '@/components/auth/RoleSelectionModal'
 
@@ -127,26 +127,30 @@ export default function LandingPage() {
 
       {/* How It Works Section (Workflow) */}
       <section className="px-6 py-40 bg-white relative overflow-hidden">
-        <div className="max-w-7xl mx-auto space-y-24 relative z-10">
+        <div className="max-w-7xl mx-auto space-y-28 relative z-10">
           <div className="text-center space-y-6">
             <h2 className="text-[10px] font-bold text-forest uppercase tracking-[0.5em]">The Methodology</h2>
             <h3 className="text-5xl md:text-6xl font-serif text-charcoal tracking-tighter">Professional Workflow.</h3>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-20 relative">
+          <div className="grid md:grid-cols-3 gap-0 relative">
             {[
-              { step: "01", title: "LIST", desc: "Define your studio availability and set your preferred session rates." },
-              { step: "02", title: "BOOK", desc: "Verified instructors discover and reserve your space via real-time schedules." },
-              { step: "03", title: "THRIVE", desc: "Secure payouts and high-level management ensure complete peace of mind." }
+              { step: "01", title: "LIST", icon: ClipboardList, desc: "Define your studio availability and set your preferred session rates." },
+              { step: "02", title: "BOOK", icon: CalendarDays, desc: "Verified instructors discover and reserve your space via real-time schedules." },
+              { step: "03", title: "THRIVE", icon: LineChart, desc: "Secure payouts and high-level management ensure complete peace of mind." }
             ].map((step, i) => (
-              <div key={i} className="relative flex flex-col items-center text-center space-y-10 group">
-                <div className="w-36 h-36 rounded-2xl bg-off-white flex items-center justify-center shadow-tight border border-border-grey relative group-hover:-translate-y-2 transition-transform">
-                  <span className="text-[10px] font-bold text-forest absolute -top-4 left-1/2 -translate-x-1/2 bg-white px-5 py-2 rounded-lg border border-border-grey shadow-tight uppercase tracking-widest leading-none">{step.step}</span>
-                  <span className="text-3xl font-serif text-charcoal tracking-widest">{step.title}</span>
+              <div key={i} className={clsx(
+                "relative flex flex-col items-center text-center px-12 py-8 group",
+                i !== 2 && "md:border-r md:border-border-grey"
+              )}>
+                <div className="w-40 h-40 rounded-2xl bg-off-white flex flex-col items-center justify-center shadow-tight border border-border-grey relative group-hover:-translate-y-2 transition-transform mb-12">
+                  <span className="text-[10px] font-bold text-white absolute -top-4 left-1/2 -translate-x-1/2 bg-forest px-6 py-2 rounded-lg shadow-tight uppercase tracking-widest leading-none border border-forest/10">{step.step}</span>
+                  <step.icon className="w-10 h-10 text-forest mb-4 opacity-80" />
+                  <span className="text-2xl font-serif text-charcoal tracking-widest">{step.title}</span>
                 </div>
                 <div className="space-y-4">
                   <h4 className="text-[11px] font-bold text-charcoal uppercase tracking-[0.3em]">{step.title} YOUR TERMS</h4>
-                  <p className="text-slate text-[14px] font-medium leading-[1.8] max-w-[280px]">{step.desc}</p>
+                  <p className="text-slate text-[16px] font-medium leading-[1.7] max-w-[300px]">{step.desc}</p>
                 </div>
               </div>
             ))}
