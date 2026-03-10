@@ -1,5 +1,6 @@
 ﻿import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { CheckCircle, Clock, Building2, MessageCircle, BarChart3, Wallet, ShieldAlert, AlertTriangle, Users } from 'lucide-react'
+import Link from 'next/link'
 import clsx from 'clsx'
 import VerifyButton from '@/components/admin/VerifyButton'
 import RejectBookingButton from '@/components/admin/RejectBookingButton'
@@ -271,11 +272,11 @@ export default async function AdminDashboard({
                         </div>
                         <div className="flex gap-4">
                             <TriggerFundsUnlockButton />
-                            <a href="/admin/support" className="btn-antigravity px-6 py-3 text-xs tracking-[0.1em] flex items-center gap-2">
+                            <Link href="/admin/support" className="btn-antigravity px-6 py-3 text-xs tracking-[0.1em] flex items-center gap-2">
                                 <MessageCircle className="w-4 h-4" />
                                 SUPPORT CENTER
                                 <SupportNotificationBadge />
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
@@ -819,9 +820,9 @@ export default async function AdminDashboard({
                     </div>
                     <p className="text-charcoal/60 text-sm italic">"{err.message || 'An unexpected error occurred while loading the dashboard.'}"</p>
                     <div className="pt-4">
-                        <a href="/admin" className="inline-block w-full py-4 bg-charcoal text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-[0.2em] shadow-xl">
+                        <Link href="/admin" className="inline-block w-full py-4 bg-charcoal text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-[0.2em] shadow-xl text-center">
                             RESTART DASHBOARD
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>
