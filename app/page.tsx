@@ -86,7 +86,7 @@ export default function LandingPage() {
               alt="Professional Pilates Environment"
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
-              sizes="(max-width: 1024px) 100vw, 50vw"
+              sizes="(max-width: 1024px) 100vw, 800px"
               priority
             />
             {/* Action overlay */}
@@ -208,7 +208,7 @@ export default function LandingPage() {
           ].map((v, i) => (
             <div key={i} className="flex flex-col space-y-10 group">
               <div className="aspect-[4/5] relative rounded-xl overflow-hidden shadow-card mb-4 group-hover:-translate-y-2 transition-all duration-500 border border-border-grey">
-                <Image src={v.image} alt={`Representative image for ${v.title}`} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                <Image src={v.image} alt={`Representative image for ${v.title}`} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px" className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
                 <div className="absolute inset-0 bg-charcoal/30 group-hover:bg-transparent transition-all duration-700" aria-hidden="true" />
                 <div className="absolute top-8 left-8 w-14 h-14 rounded-lg flex items-center justify-center bg-white border border-border-grey shadow-tight" aria-hidden="true">
                   <v.icon className="w-6 h-6 text-forest" />

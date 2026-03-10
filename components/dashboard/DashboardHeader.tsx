@@ -40,6 +40,7 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                                 alt="StudioVault Logo"
                                 width={120}
                                 height={120}
+                                priority
                                 className={clsx(
                                     "object-contain transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]",
                                     isScrolled ? "w-16 h-16" : "w-28 h-28"

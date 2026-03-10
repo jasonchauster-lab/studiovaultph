@@ -3,10 +3,13 @@ import Link from 'next/link'
 import { LogOut } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import SupportChatWidget from '@/components/support/SupportChatWidget'
-import Navigation from '@/components/dashboard/Navigation'
 import DashboardHeader from '@/components/dashboard/DashboardHeader'
 import UserPresenceTracker from '@/components/shared/UserPresenceTracker'
+import dynamic from 'next/dynamic'
+
+const SupportChatWidget = dynamic(() => import('@/components/support/SupportChatWidget'), {
+    ssr: false,
+})
 
 export default async function DashboardLayout({
     children,
