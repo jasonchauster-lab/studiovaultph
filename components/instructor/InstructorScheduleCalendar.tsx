@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes, isPast } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle, ChevronDown, ChevronUp, CheckCircle, Check } from 'lucide-react'
 import clsx from 'clsx'
 import { toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
@@ -578,8 +578,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </button>
                         </div>
 
-                        <form onSubmit={handleCreateSingle} className="space-y-8">
-                            <div className="earth-card p-8 space-y-6 bg-off-white border border-border-grey shadow-tight">
+                        <form onSubmit={handleCreateSingle} className="space-y-6">
+                            <div className="earth-card p-6 space-y-6 bg-off-white border border-border-grey shadow-tight">
                                 <div>
                                     <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Calendar Date</label>
                                     <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-5 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
@@ -598,7 +598,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                             <div className="space-y-6">
                                 <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-2">Geographic Deployment</h4>
-                                <div className="space-y-4">
+                                <div className="space-y-3">
                                     {Object.entries(GROUPED_AREAS).map(([city, cityLocations]) => {
                                         const selectedInCity = cityLocations.filter(loc => locations.includes(loc));
                                         const allSelected = selectedInCity.length === cityLocations.length;
@@ -608,18 +608,18 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                             <div key={city} className="earth-card overflow-hidden bg-white border border-border-grey shadow-tight">
                                                 {/* Accordion Header */}
                                                 <div
-                                                    className="flex items-center justify-between p-6 cursor-pointer hover:bg-off-white transition-all border-b border-border-grey/30"
+                                                    className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-off-white transition-all border-b border-border-grey/30"
                                                     onClick={() => toggleCityAccordion(city)}
                                                 >
                                                     <div className="flex items-center gap-4">
                                                         <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
                                                         {selectedInCity.length > 0 && (
                                                             <span className="text-[9px] font-bold text-forest bg-forest/5 px-2.5 py-1 rounded-full uppercase tracking-widest border border-forest/10">
-                                                                {selectedInCity.length} SELECTED
+                                                                {selectedInCity.length}
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-6">
+                                                    <div className="flex items-center gap-10">
                                                         <button
                                                             type="button"
                                                             onClick={(e) => {
@@ -636,25 +636,32 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                                                 {/* Accordion Content */}
                                                 {isExpanded && (
-                                                    <div className="p-8 bg-off-white/40 animate-in slide-in-from-top-2 duration-300">
-                                                        <div className="flex flex-wrap gap-2.5">
+                                                    <div className="px-6 py-6 bg-off-white/40 animate-in slide-in-from-top-2 duration-300">
+                                                        <div className="grid grid-cols-1 gap-y-4">
                                                             {cityLocations.map(area => {
                                                                 const isSelected = locations.includes(area);
                                                                 const displayName = area.split(' - ')[1] || area;
                                                                 return (
-                                                                    <button
+                                                                    <div
                                                                         key={area}
-                                                                        type="button"
                                                                         onClick={() => toggleLocation(area)}
-                                                                        className={clsx(
-                                                                            "px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border",
-                                                                            isSelected
-                                                                                ? "bg-forest text-white border-forest shadow-tight"
-                                                                                : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-forest shadow-sm"
-                                                                        )}
+                                                                        className="flex items-center gap-4 cursor-pointer group/loc"
                                                                     >
-                                                                        {displayName}
-                                                                    </button>
+                                                                        <div className={clsx(
+                                                                            "w-5 h-5 rounded border flex items-center justify-center transition-all duration-300",
+                                                                            isSelected
+                                                                                ? "bg-forest border-forest text-white"
+                                                                                : "bg-white border-border-grey group-hover/loc:border-forest/50"
+                                                                        )}>
+                                                                            {isSelected && <CheckCircle className="w-3.5 h-3.5" />}
+                                                                        </div>
+                                                                        <span className={clsx(
+                                                                            "text-[10px] font-bold uppercase tracking-[0.2em] transition-colors duration-300",
+                                                                            isSelected ? "text-charcoal" : "text-slate group-hover/loc:text-forest"
+                                                                        )}>
+                                                                            {displayName}
+                                                                        </span>
+                                                                    </div>
                                                                 )
                                                             })}
                                                         </div>
@@ -668,7 +675,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                             <div className="space-y-4">
                                 <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-2">Equipment</h4>
-                                <div className="flex flex-wrap gap-3 p-6 bg-off-white rounded-xl border border-border-grey shadow-tight">
+                                <div className="flex flex-wrap gap-2.5 p-5 bg-off-white rounded-xl border border-border-grey shadow-tight">
                                     {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
                                         const isSelected = equipment.includes(eq);
                                         return (
@@ -751,27 +758,27 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </button>
                         </div>
 
-                        <form onSubmit={handleUpdate} className="space-y-8">
-                            <div className="earth-card p-8 space-y-8 bg-off-white border border-border-grey shadow-tight">
+                        <form onSubmit={handleUpdate} className="space-y-6">
+                            <div className="earth-card p-6 space-y-6 bg-off-white border border-border-grey shadow-tight">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.3em] mb-4 ml-6">Date</label>
-                                    <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-6 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-[0.2em] cursor-pointer" />
+                                    <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Date</label>
+                                    <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-5 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
                                 </div>
-                                <div className="grid grid-cols-2 gap-8">
+                                <div className="grid grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.3em] mb-4 ml-6">Start Time</label>
-                                        <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-6 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-[0.2em] cursor-pointer" />
+                                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Start Time</label>
+                                        <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-5 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.3em] mb-4 ml-6">End Time</label>
-                                        <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-6 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-[0.2em] cursor-pointer" />
+                                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">End Time</label>
+                                        <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-5 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
                                     </div>
                                 </div>
                             </div>
 
                             <div className="space-y-6">
                                 <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-2">Geographic Deployment</h4>
-                                <div className="space-y-4">
+                                <div className="space-y-3">
                                     {Object.entries(GROUPED_AREAS).map(([city, cityLocations]) => {
                                         const selectedInCity = cityLocations.filter(loc => locations.includes(loc));
                                         const allSelected = selectedInCity.length === cityLocations.length;
@@ -781,18 +788,18 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                             <div key={city} className="earth-card overflow-hidden bg-white border border-border-grey shadow-tight">
                                                 {/* Accordion Header */}
                                                 <div
-                                                    className="flex items-center justify-between p-6 cursor-pointer hover:bg-off-white transition-all border-b border-border-grey/30"
+                                                    className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-off-white transition-all border-b border-border-grey/30"
                                                     onClick={() => toggleCityAccordion(city)}
                                                 >
                                                     <div className="flex items-center gap-4">
                                                         <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
                                                         {selectedInCity.length > 0 && (
                                                             <span className="text-[9px] font-bold text-forest bg-forest/5 px-2.5 py-1 rounded-full uppercase tracking-widest border border-forest/10">
-                                                                {selectedInCity.length} SELECTED
+                                                                {selectedInCity.length}
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-6">
+                                                    <div className="flex items-center gap-10">
                                                         <button
                                                             type="button"
                                                             onClick={(e) => {
@@ -809,25 +816,32 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                                                 {/* Accordion Content */}
                                                 {isExpanded && (
-                                                    <div className="p-8 bg-off-white/40 animate-in slide-in-from-top-2 duration-300">
-                                                        <div className="flex flex-wrap gap-2.5">
+                                                    <div className="px-6 py-6 bg-off-white/40 animate-in slide-in-from-top-2 duration-300">
+                                                        <div className="grid grid-cols-1 gap-y-4">
                                                             {cityLocations.map(area => {
                                                                 const isSelected = locations.includes(area);
                                                                 const displayName = area.split(' - ')[1] || area;
                                                                 return (
-                                                                    <button
+                                                                    <div
                                                                         key={area}
-                                                                        type="button"
                                                                         onClick={() => toggleLocation(area)}
-                                                                        className={clsx(
-                                                                            "px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border",
-                                                                            isSelected
-                                                                                ? "bg-forest text-white border-forest shadow-tight"
-                                                                                : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-forest shadow-sm"
-                                                                        )}
+                                                                        className="flex items-center gap-4 cursor-pointer group/loc"
                                                                     >
-                                                                        {displayName}
-                                                                    </button>
+                                                                        <div className={clsx(
+                                                                            "w-5 h-5 rounded border flex items-center justify-center transition-all duration-300",
+                                                                            isSelected
+                                                                                ? "bg-forest border-forest text-white"
+                                                                                : "bg-white border-border-grey group-hover/loc:border-forest/50"
+                                                                        )}>
+                                                                            {isSelected && <CheckCircle className="w-3.5 h-3.5" />}
+                                                                        </div>
+                                                                        <span className={clsx(
+                                                                            "text-[10px] font-bold uppercase tracking-[0.2em] transition-colors duration-300",
+                                                                            isSelected ? "text-charcoal" : "text-slate group-hover/loc:text-forest"
+                                                                        )}>
+                                                                            {displayName}
+                                                                        </span>
+                                                                    </div>
                                                                 )
                                                             })}
                                                         </div>
@@ -840,8 +854,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </div>
 
                             <div className="space-y-4">
-                                <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-6">Equipment</label>
-                                <div className="flex flex-wrap gap-3 p-6 bg-off-white rounded-xl border border-border-grey shadow-tight">
+                                <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-2">Equipment</label>
+                                <div className="flex flex-wrap gap-2.5 p-5 bg-off-white rounded-xl border border-border-grey shadow-tight">
                                     {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
                                         const isSelected = equipment.includes(eq);
                                         return (
