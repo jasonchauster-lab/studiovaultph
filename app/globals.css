@@ -7,7 +7,11 @@
   --gold: #D4AF37;
   --linen: #F5E8DE;
   --rose: #EBD3CF;
-  --charcoal: #333333;
+  /* Luminous Ethereal additions */
+  --champagne: #E5D1B8;
+  --sage-glow: #B4C3B2;
+  --warm-sand: #F5E8DE;
+  --warm-neutral-border: rgba(180, 160, 140, 0.04);
 
   --background: var(--alabaster);
   --foreground: var(--charcoal);
@@ -15,20 +19,23 @@
   /* Refined Glassmorphism: High-blur, luminous white borders */
   --glass-bg: rgba(255, 255, 255, 0.6);
   --glass-border: rgba(255, 255, 255, 0.6);
-  --glass-blur: blur(20px);
+  --glass-blur: blur(25px);
 
   --radius: 20px;
   --radius-floating: 12px;
 
   /* Airy Border: Faint, weightless grid */
-  --airy-border: rgba(0, 0, 0, 0.03);
+  --airy-border: rgba(0, 0, 0, 0.02);
   --sage-desaturated: #B4C3B2;
 
   /* Cloud Shadow: Diffuse, weightless */
   --shadow-cloud: 0 30px 60px -15px rgba(0, 0, 0, 0.05), 0 15px 30px -10px rgba(0, 0, 0, 0.03);
 
-  /* Floating Card Shadow: Subtle depth */
-  --shadow-floating: 0 8px 30px rgba(0, 0, 0, 0.04);
+  /* Floating Card Shadow: Multi-layered - tight for definition + wide 40px for lift */
+  --shadow-floating: 0 2px 8px rgba(0, 0, 0, 0.04), 0 8px 40px rgba(0, 0, 0, 0.06);
+
+  /* Luminous lift shadow for interactive cards */
+  --shadow-luminous: 0 1px 4px rgba(0, 0, 0, 0.05), 0 8px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
 }
 
 @theme inline {
@@ -42,10 +49,12 @@
   --color-linen: var(--linen);
   --color-rose: var(--rose);
   --color-charcoal: var(--charcoal);
+  --color-champagne: var(--champagne);
+  --color-sage-glow: var(--sage-glow);
 
   /* System Mappings */
-  --color-primary: var(--sage);
-  --color-primary-foreground: var(--charcoal);
+  --color-primary: var(--sage-glow);
+  --color-primary-foreground: white;
   --color-secondary: var(--gold);
   --color-secondary-foreground: white;
 
@@ -77,49 +86,102 @@
 
 body {
   background: var(--background);
+  /* Fine grain texture */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px;
+  background-attachment: fixed;
+  opacity: 1;
   color: var(--foreground);
   font-family: var(--font-lexend), sans-serif;
+  font-weight: 400;
   overflow-x: hidden;
   position: relative;
 }
 
-/* Background Mesh Gradient blobs */
-body::before,
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  z-index: -2;
+}
+
+/* Grain overlay at 2% opacity */
 body::after {
   content: "";
   position: fixed;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  filter: blur(80px);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: inherit;
+  background-repeat: repeat;
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: 100;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 600;
+}
+
+/* Background Mesh Gradient blobs at 5% opacity */
+.mesh-gradient-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   z-index: -1;
-  opacity: 0.4;
+  overflow: hidden;
   pointer-events: none;
 }
 
-body::before {
-  background: radial-gradient(circle, var(--sage-light) 0%, transparent 70%);
-  top: -100px;
-  left: -100px;
+.mesh-blob-1,
+.mesh-blob-2 {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.05;
+}
+
+.mesh-blob-1 {
+  background: radial-gradient(circle, var(--sage) 0%, transparent 70%);
+  top: -200px;
+  left: -200px;
   animation: mesh-blob 25s infinite alternate ease-in-out;
 }
 
-body::after {
-  background: radial-gradient(circle, var(--gold) 0%, transparent 70%);
-  bottom: -150px;
-  right: -100px;
+.mesh-blob-2 {
+  background: radial-gradient(circle, var(--warm-sand) 0%, transparent 70%);
+  bottom: -200px;
+  right: -200px;
   animation: mesh-blob 30s infinite alternate-reverse ease-in-out;
 }
 
 @layer utilities {
   .glass-card {
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: var(--shadow-floating);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 20px 40px rgba(0, 0, 0, 0.06);
     border-radius: var(--radius-floating);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02), 0 25px 50px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
   }
 
   .status-pill-frosted {
@@ -132,9 +194,9 @@ body::after {
   }
 
   .glass-navbar {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(255, 255, 255, 0.70);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.6);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.04), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
     z-index: 50;
@@ -179,6 +241,34 @@ body::after {
     @apply opacity-40 cursor-not-allowed transform-none shadow-none;
   }
 
+  /* Sage Glow — primary action button */
+  .btn-sage-glow {
+    background: #B4C3B2;
+    color: white;
+    box-shadow: 0 0 0 1px rgba(180, 195, 178, 0.15), 0 4px 20px rgba(180, 195, 178, 0.4), 0 2px 8px rgba(0, 0, 0, 0.06);
+    @apply rounded-[20px] font-semibold transition-all duration-300 active:scale-95;
+  }
+
+  .btn-sage-glow:hover {
+    filter: brightness(1.06);
+    box-shadow: 0 0 0 1px rgba(180, 195, 178, 0.2), 0 8px 30px rgba(180, 195, 178, 0.5), 0 2px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+
+  /* Session block: 1px inner white border for depth */
+  .session-block-luminous {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.85), 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Secondary link: Champagne hover */
+  .link-secondary {
+    @apply transition-colors duration-300;
+    color: inherit;
+  }
+
+  .link-secondary:hover {
+    color: #E5D1B8;
+  }
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;

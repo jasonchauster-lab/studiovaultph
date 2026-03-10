@@ -248,7 +248,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                     <div className="grid grid-cols-8 border-b border-[rgba(0,0,0,0.05)] bg-white/20">
                         <div className="p-6 text-[10px] font-black text-charcoal/20 border-r border-[rgba(0,0,0,0.05)] sticky left-0 bg-white/60 backdrop-blur-xl z-20 w-28 text-center uppercase tracking-[0.3em] flex items-center justify-center">EPOCH</div>
                         {days.map(day => (
-                            <div key={day.toString()} className={clsx("p-6 text-center border-r border-[rgba(0,0,0,0.05)] last:border-r-0 min-w-[120px] transition-all duration-1000", isSameDay(day, new Date()) ? "bg-[#B4C3B2]/5" : "")}>
+                            <div key={day.toString()} className={clsx("p-6 text-center border-r border-[rgba(180,160,140,0.04)] last:border-r-0 min-w-[120px] transition-all duration-1000", isSameDay(day, new Date()) ? "bg-[#B4C3B2]/5" : "")}>
                                 <div className="text-[10px] text-charcoal/20 font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
                                 <div className={clsx("text-3xl font-serif tracking-tighter", isSameDay(day, new Date()) ? "text-[#B4C3B2]" : "text-charcoal")}>{format(day, 'd')}</div>
                             </div>
@@ -258,7 +258,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                     <div className="divide-y divide-[rgba(0,0,0,0.05)] relative">
                         {hours.map(hour => (
                             <div key={hour} className="grid grid-cols-8" style={{ minHeight: `${ROW_HEIGHT}px` }}>
-                                <div className="p-4 text-[10px] text-charcoal/20 font-black border-r border-[rgba(0,0,0,0.05)] text-center sticky left-0 bg-white/40 backdrop-blur-xl z-20 w-28 flex items-center justify-center tracking-[0.2em]">
+                                <div className="p-4 text-[10px] text-charcoal/20 font-black border-r border-[rgba(180,160,140,0.04)] text-center sticky left-0 bg-white/40 backdrop-blur-xl z-20 w-28 flex items-center justify-center tracking-[0.2em]">
                                     {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                 </div>
 
@@ -286,7 +286,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     const isPastCell = isPast(setMinutes(setHours(day, hour + 1), 0))
 
                                     return (
-                                        <div key={day.toString() + hour} className={clsx("border-r border-[rgba(0,0,0,0.05)] last:border-r-0 relative group p-0", isPastCell && "bg-alabaster/5")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
+                                        <div key={day.toString() + hour} className={clsx("border-r border-[rgba(180,160,140,0.04)] last:border-r-0 relative group p-0", isPastCell && "bg-alabaster/5")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
                                             <div
                                                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 bg-[#B4C3B2]/5 cursor-pointer z-0"
                                                 onClick={() => {
@@ -368,7 +368,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         <div
                                                             key={slot.id}
                                                             className={clsx(
-                                                                "absolute rounded-[12px] text-[10px] hover:shadow-cloud hover:scale-[1.02] transition-all duration-700 cursor-pointer overflow-hidden backdrop-blur-md border-white border z-10 p-4 group/slot flex flex-col gap-3 shadow-[0_10px_20px_rgba(0,0,0,0.03)]",
+                                                                "absolute rounded-[12px] text-[10px] hover:shadow-cloud hover:scale-[1.02] transition-all duration-700 cursor-pointer overflow-hidden backdrop-blur-md border-white border z-10 p-4 group/slot flex flex-col gap-3 session-block-luminous",
                                                                 isPastCell
                                                                     ? "bg-white/20 text-charcoal/20 opacity-40"
                                                                     : "bg-white/80 text-charcoal",

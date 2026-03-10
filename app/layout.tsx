@@ -27,6 +27,11 @@ export default function RootLayout({
       <body
         className={`${lexend.variable} antialiased`}
       >
+        {/* Luminous Ethereal background elements */}
+        <div className="mesh-gradient-container">
+          <div className="mesh-blob-1" />
+          <div className="mesh-blob-2" />
+        </div>
         {children}
       </body>
     </html>

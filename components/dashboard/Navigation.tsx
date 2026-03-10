@@ -53,13 +53,13 @@ export default function Navigation({ role }: NavigationProps) {
                         <div className="h-px w-full md:h-4 md:w-px bg-white/20 my-1 md:my-0 md:mx-2" />
                     )}
                     {role === 'instructor' && (
-                        <Link href="/instructor" onClick={() => setMobileOpen(false)} className="text-[10px] uppercase tracking-widest font-bold text-sage hover:text-sage-light flex items-center gap-1 border border-sage/20 bg-sage/5 px-4 py-1.5 rounded-[20px] transition-all hover:shadow-cloud">
+                        <Link href="/instructor" onClick={() => setMobileOpen(false)} className="link-secondary text-[10px] uppercase tracking-widest font-bold text-sage hover:text-sage-light flex items-center gap-1 border border-sage/20 bg-sage/5 px-4 py-1.5 rounded-[20px] transition-all hover:shadow-cloud">
                             <LayoutDashboard className="w-3 h-3" />
                             Instructor Mode
                         </Link>
                     )}
                     {role === 'studio' && (
-                        <Link href="/studio" onClick={() => setMobileOpen(false)} className="text-[10px] uppercase tracking-widest font-bold text-charcoal/60 hover:text-charcoal flex items-center gap-1 border border-white/40 bg-white/20 px-4 py-1.5 rounded-[20px] transition-all hover:shadow-cloud">
+                        <Link href="/studio" onClick={() => setMobileOpen(false)} className="link-secondary text-[10px] uppercase tracking-widest font-bold text-charcoal/60 hover:text-charcoal flex items-center gap-1 border border-white/40 bg-white/20 px-4 py-1.5 rounded-[20px] transition-all hover:shadow-cloud">
                             <LayoutDashboard className="w-3 h-3" />
                             Studio Dashboard
                         </Link>

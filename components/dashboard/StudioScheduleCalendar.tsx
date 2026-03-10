@@ -196,20 +196,20 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             <div className="bg-white rounded-xl border border-cream-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <div className="min-w-[800px]">
-                        <div className="grid grid-cols-8 border-b border-[rgba(0,0,0,0.02)] bg-[rgba(0,0,0,0.02)]">
-                            <div className="p-4 text-[10px] font-black tracking-[0.2em] text-charcoal/40 border-r border-[rgba(0,0,0,0.02)] sticky left-0 bg-white/80 backdrop-blur-md z-20 uppercase">TIME</div>
+                        <div className="grid grid-cols-8 border-b border-[rgba(180,160,140,0.04)] bg-[rgba(180,160,140,0.04)]">
+                            <div className="p-4 text-[10px] font-black tracking-[0.2em] text-charcoal/40 border-r border-[rgba(180,160,140,0.04)] sticky left-0 bg-white/80 backdrop-blur-md z-20 uppercase">TIME</div>
                             {days.map((day: Date) => (
-                                <div key={day.toString()} className={clsx("p-4 text-center border-r border-[rgba(0,0,0,0.02)] last:border-r-0 min-w-[100px] transition-colors", isSameDay(day, new Date()) ? "bg-[#B4C3B2]/5" : "")}>
+                                <div key={day.toString()} className={clsx("p-4 text-center border-r border-[rgba(180,160,140,0.04)] last:border-r-0 min-w-[100px] transition-colors", isSameDay(day, new Date()) ? "bg-[#B4C3B2]/5" : "")}>
                                     <div className="text-[10px] text-charcoal/40 uppercase mb-2 font-bold tracking-[0.2em]">{format(day, 'EEE')}</div>
                                     <div className={clsx("text-2xl font-serif font-bold", isSameDay(day, new Date()) ? "text-[#B4C3B2]" : "text-charcoal/80")}>{format(day, 'd')}</div>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="divide-y divide-[rgba(0,0,0,0.02)]">
+                        <div className="divide-y divide-[rgba(180,160,140,0.04)]">
                             {hours.map(hour => (
                                 <div key={hour} className="grid grid-cols-8 min-h-[80px]">
-                                    <div className="p-4 text-[10px] text-charcoal/40 font-black border-r border-[rgba(0,0,0,0.02)] text-center sticky left-0 bg-white/80 backdrop-blur-md z-20 uppercase tracking-tighter">
+                                    <div className="p-4 text-[10px] text-charcoal/40 font-black border-r border-[rgba(180,160,140,0.04)] text-center sticky left-0 bg-white/80 backdrop-blur-md z-20 uppercase tracking-tighter">
                                         {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                     </div>
 
@@ -223,7 +223,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                         const isPastCell = isPast(new Date(dayStr + "T" + hour.toString().padStart(2, '0') + ":59:59+08:00"))
 
                                         return (
-                                            <div key={day.toString() + hour} className={clsx("border-r border-[rgba(0,0,0,0.02)] last:border-r-0 relative group p-2 min-h-[100px] transition-all", isPastCell && "opacity-40 grayscale-[0.05]")} style={{ colorScheme: 'light' }}>
+                                            <div key={day.toString() + hour} className={clsx("border-r border-[rgba(180,160,140,0.04)] last:border-r-0 relative group p-2 min-h-[100px] transition-all", isPastCell && "opacity-40 grayscale-[0.05]")} style={{ colorScheme: 'light' }}>
                                                 <div
                                                     className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity bg-[#B4C3B2] pointer-events-none z-0"
                                                 />
@@ -274,7 +274,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     <div
                                                                         key={eqType}
                                                                         className={clsx(
-                                                                            "rounded-xl p-3 backdrop-blur-[8px] border-white shadow-[0_10px_20px_rgba(0,0,0,0.03)] border transition-all group/eq relative overflow-hidden",
+                                                                            "rounded-xl p-3 backdrop-blur-[8px] border-white border session-block-luminous transition-all group/eq relative overflow-hidden cursor-pointer",
                                                                             isPastCell
                                                                                 ? "bg-white/40"
                                                                                 : hasPending
@@ -323,7 +323,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                             return (
                                                                 <div
                                                                     className={clsx(
-                                                                        "rounded-xl p-3 backdrop-blur-[8px] border-white shadow-[0_10px_20px_rgba(0,0,0,0.03)] border transition-all group/open relative overflow-hidden",
+                                                                        "rounded-xl p-3 backdrop-blur-[8px] border-white border session-block-luminous transition-all group/open relative overflow-hidden cursor-pointer",
                                                                         isPastCell
                                                                             ? "bg-white/40"
                                                                             : hasPending
