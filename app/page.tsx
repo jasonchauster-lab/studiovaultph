@@ -140,17 +140,18 @@ export default function LandingPage() {
               { step: "03", title: "THRIVE", icon: LineChart, desc: "Secure payouts and high-level management ensure complete peace of mind." }
             ].map((step, i) => (
               <div key={i} className={clsx(
-                "relative flex flex-col items-center text-center px-12 py-8 group",
+                "relative flex flex-col items-center text-center px-12 py-10 group",
                 i !== 2 && "md:border-r md:border-border-grey"
               )}>
-                <div className="w-40 h-40 rounded-2xl bg-off-white flex flex-col items-center justify-center shadow-tight border border-border-grey relative group-hover:-translate-y-2 transition-transform mb-12">
+                <div className="w-52 h-52 rounded-2xl bg-off-white flex flex-col items-center justify-center shadow-tight border border-border-grey relative group-hover:-translate-y-2 transition-transform mb-12">
                   <span className="text-[10px] font-bold text-white absolute -top-4 left-1/2 -translate-x-1/2 bg-forest px-6 py-2 rounded-lg shadow-tight uppercase tracking-widest leading-none border border-forest/10">{step.step}</span>
-                  <step.icon className="w-10 h-10 text-forest mb-4 opacity-80" />
-                  <span className="text-2xl font-serif text-charcoal tracking-widest">{step.title}</span>
+                  <step.icon className="w-12 h-12 text-forest mb-6 opacity-80" />
+                  <span className="text-4xl font-serif font-bold text-charcoal tracking-widest">{step.title}</span>
                 </div>
-                <div className="space-y-4">
-                  <h4 className="text-[11px] font-bold text-charcoal uppercase tracking-[0.3em]">{step.title} YOUR TERMS</h4>
-                  <p className="text-slate text-[16px] font-medium leading-[1.7] max-w-[300px]">{step.desc}</p>
+                <div className="max-w-[320px]">
+                  <p className="text-slate text-[20px] font-medium leading-[1.6]">
+                    {step.desc}
+                  </p>
                 </div>
               </div>
             ))}
