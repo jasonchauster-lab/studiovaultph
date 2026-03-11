@@ -273,7 +273,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Header */}
             <div className="earth-card p-10 bg-white shadow-tight relative overflow-hidden">
                 {/* Background Tint */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-buttermilk/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
                 {/* Row 1: Title + Date Navigation */}
                 <div className="flex flex-wrap items-center gap-4 relative z-10">
@@ -312,8 +312,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     className={clsx(
                                         "px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all",
                                         view === v
-                                            ? "bg-forest text-white shadow-tight"
-                                            : "text-slate hover:text-charcoal hover:bg-off-white"
+                                            ? "bg-buttermilk text-burgundy shadow-tight"
+                                            : "text-slate hover:text-burgundy hover:bg-off-white"
                                     )}
                                 >
                                     {v}
@@ -384,8 +384,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     width: view === 'day' ? 'calc(100% - 112px)' : '12.5%'
                                                 }}
                                             >
-                                                <div className="w-2.5 h-2.5 bg-forest rounded-full -ml-[5px] ring-2 ring-white shadow-sm" />
-                                                <div className="h-[2px] w-full bg-forest shadow-[0_0_8px_rgba(47,82,51,0.3)]" />
+                                                <div className="w-2.5 h-2.5 bg-burgundy rounded-full -ml-[5px] ring-2 ring-white shadow-sm" />
+                                                <div className="h-[2px] w-full bg-burgundy shadow-[0_0_8px_rgba(67,48,46,0.3)]" />
                                             </div>
                                         )
                                     })()}
@@ -423,6 +423,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         {(() => {
                                                             const groupedSlots = startingSlots.reduce((acc, slot) => {
                                                                 const key = `${slot.start_time}-${slot.end_time}`
+                                                                const shortLoc = slot.location_area.split(' - ')[0]
+
                                                                 if (!acc[key]) {
                                                                     acc[key] = {
                                                                         primarySlot: slot,
@@ -432,7 +434,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                     }
                                                                 } else {
                                                                     acc[key].allSlots.push(slot)
-                                                                    if (!acc[key].locations.includes(slot.location_area)) {
+                                                                    if (!acc[key].locations.some(l => l.split(' - ')[0] === shortLoc)) {
                                                                         acc[key].locations.push(slot.location_area)
                                                                     }
                                                                     if (slot.equipment) {
@@ -515,8 +517,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                                                                             <div className="flex flex-wrap items-center gap-2">
                                                                                 {locations.map((loc, idx) => (
-                                                                                    <div key={loc + idx} className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-[#F3F4F6] text-[#4B5563] px-3 py-1 rounded-md border border-gray-200">
-                                                                                        <MapPin className="w-3 h-3 text-[#4B5563]/40" />
+                                                                                    <div key={loc + idx} className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-pastel-blue text-burgundy px-3 py-1 rounded-md border border-pastel-blue/20">
+                                                                                        <MapPin className="w-3 h-3 text-burgundy/40" />
                                                                                         <span className="truncate max-w-[100px]">{loc.split(' - ')[0]}</span>
                                                                                     </div>
                                                                                 ))}
@@ -524,8 +526,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                                                                             {primaryEq && duration >= 45 && (
                                                                                 <div className="flex flex-wrap items-center gap-2 mt-auto">
-                                                                                    <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-[#F3F4F6] text-[#4B5563] px-3 py-1 rounded-md border border-gray-200">
-                                                                                        <Box className="w-3 h-3 text-[#4B5563]" />
+                                                                                    <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-pastel-blue text-burgundy px-3 py-1 rounded-md border border-pastel-blue/20">
+                                                                                        <Box className="w-3 h-3 text-burgundy/40" />
                                                                                         <span>{primaryEq}</span>
                                                                                     </div>
                                                                                     {extraEqCount > 0 && (
@@ -588,11 +590,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                 <div
                                                                     key={booking.id}
                                                                     className={clsx(
-                                                                        "absolute rounded-lg text-[10px] bg-white border border-border-grey z-20 p-5 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-tight",
+                                                                        "absolute rounded-lg text-[10px] bg-buttermilk border border-burgundy/10 z-20 p-5 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-tight",
                                                                         isPastCell
                                                                             ? "bg-off-white text-slate/40"
                                                                             : booking.status === 'approved'
-                                                                                ? "border-l-4 border-l-forest"
+                                                                                ? "border-l-4 border-l-burgundy"
                                                                                 : "border-l-4 border-l-orange-400",
                                                                         duration < 45 && "flex-row items-center gap-4 py-2 px-4"
                                                                     )}
@@ -619,7 +621,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                             <div className="flex items-center justify-between mb-3">
                                                                                 <div className={clsx(
                                                                                     "status-pill-earth inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold transition-all",
-                                                                                    booking.status === 'approved' ? "bg-green-50 text-green-800 border-green-100" : "bg-orange-50 text-orange-700 border-orange-100 shadow-sm"
+                                                                                    booking.status === 'approved' ? "bg-burgundy text-buttermilk" : "bg-orange-50 text-orange-700 border-orange-100 shadow-sm"
                                                                                 )}>
                                                                                     {booking.status === 'approved' ? 'BOOKED' : 'PENDING'}
                                                                                 </div>

@@ -1,22 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  /* Modern Earth Design System — Grounded, Professional, High-Contrast */
+  /* Studio Vault PH Design System — Premium, Warm, Sophisticated */
   --off-white: #FAFAFA;
-  --charcoal: #1F2937;
-  --slate: #4B5563;
-  --forest: #2F5233;
+  --burgundy: #43302E;
+  --muted-burgundy: #6B5A58;
+  --buttermilk: #FFF1B5;
+  --pastel-blue: #C1DBE8;
   --border-grey: #E5E7EB;
 
   --background: var(--off-white);
-  --foreground: var(--charcoal);
+  --foreground: var(--burgundy);
 
   --radius: 8px;
   --radius-pill: 9999px;
 
-  /* Tight, minimal shadows for "Modern Earth" */
-  --shadow-tight: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  /* Refined shadows */
+  --shadow-tight: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow-card: 0 4px 6px -1px rgba(67, 48, 46, 0.05), 0 2px 4px -1px rgba(67, 48, 46, 0.03);
 }
 
 @theme inline {
@@ -25,16 +26,22 @@
 
   /* Brand Palette */
   --color-off-white: var(--off-white);
-  --color-charcoal: var(--charcoal);
-  --color-slate: var(--slate);
-  --color-forest: var(--forest);
+  --color-burgundy: var(--burgundy);
+  --color-muted-burgundy: var(--muted-burgundy);
+  --color-buttermilk: var(--buttermilk);
+  --color-pastel-blue: var(--pastel-blue);
   --color-border-grey: var(--border-grey);
 
+  /* Legacy Mappings (Maintained for compatibility but updated to new palette) */
+  --color-charcoal: var(--burgundy);
+  --color-slate: var(--muted-burgundy);
+  --color-forest: var(--burgundy);
+
   /* System Mappings */
-  --color-primary: var(--forest);
-  --color-primary-foreground: white;
-  --color-secondary: var(--slate);
-  --color-secondary-foreground: white;
+  --color-primary: var(--burgundy);
+  --color-primary-foreground: var(--buttermilk);
+  --color-secondary: var(--pastel-blue);
+  --color-secondary-foreground: var(--burgundy);
 
   --radius-xl: var(--radius);
   --radius-2xl: calc(var(--radius) + 4px);
@@ -46,7 +53,7 @@
   --radius-pill: var(--radius-pill);
 
   /* Selection color */
-  --color-selection: rgba(47, 82, 51, 0.1);
+  --color-selection: rgba(193, 219, 232, 0.3);
 }
 
 body {
@@ -109,8 +116,8 @@ h4 {
   .btn-antigravity,
   .btn-sage-glow,
   .btn-rose {
-    background: var(--forest);
-    color: white;
+    background: var(--burgundy);
+    color: var(--buttermilk);
     @apply rounded-lg font-semibold transition-all duration-200 shadow-sm px-6 py-2.5 inline-flex items-center justify-center gap-2;
   }
 
@@ -119,7 +126,7 @@ h4 {
   .btn-antigravity:hover,
   .btn-sage-glow:hover,
   .btn-rose:hover {
-    filter: brightness(1.2);
+    filter: brightness(1.1);
     box-shadow: var(--shadow-card);
   }
 
@@ -128,14 +135,14 @@ h4 {
     transform: scale(0.98);
   }
 
-  /* Modern Earth Status Pills — Dark text on tinted backgrounds */
+  /* Studio Vault Status Pills — Adjusted for new palette */
   .status-pill-earth,
   .status-pill-frosted {
-    @apply px-3 py-1 text-[10px] font-bold uppercase rounded-full tracking-widest border border-transparent;
+    @apply px-3 py-1 text-[10px] font-bold uppercase rounded-full tracking-widest border;
   }
 
   .status-pill-green {
-    @apply bg-green-50 text-green-700 border-green-100;
+    @apply bg-buttermilk text-burgundy border-burgundy/10;
   }
 
   .status-pill-yellow {
@@ -147,7 +154,7 @@ h4 {
   }
 
   .status-pill-grey {
-    @apply bg-gray-50 text-gray-700 border-gray-100;
+    @apply bg-pastel-blue text-burgundy border-pastel-blue/20;
   }
 
   /* Session block: clean border and shadow */
@@ -156,13 +163,13 @@ h4 {
   }
 
   .session-block-earth:hover {
-    @apply shadow-card border-charcoal/10;
+    @apply shadow-card border-burgundy/10;
   }
 
   /* Secondary details color detail link */
   .link-secondary {
-    color: var(--slate);
-    @apply hover:text-charcoal transition-colors duration-200 font-medium;
+    color: var(--muted-burgundy);
+    @apply hover:text-burgundy transition-colors duration-200 font-medium underline-offset-4 hover:underline;
   }
 
   .no-scrollbar::-webkit-scrollbar {

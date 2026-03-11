@@ -221,13 +221,13 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                             {view === 'day' ? format(currentDate, 'MMMM d, yyyy') : format(currentDate, 'MMMM yyyy')}
                         </h2>
                         <div className="flex items-center bg-off-white border border-border-grey rounded-full p-1 shadow-tight">
-                            <button onClick={handlePrev} className="p-2 hover:bg-forest/10 rounded-full transition-all text-slate hover:text-forest" title="Previous">
+                            <button onClick={handlePrev} className="p-2 hover:bg-burgundy/10 rounded-full transition-all text-muted-burgundy hover:text-burgundy" title="Previous">
                                 <ChevronLeft className="w-4 h-4" />
                             </button>
-                            <button onClick={handleToday} className="px-3 py-1.5 text-[10px] font-bold text-slate hover:text-charcoal uppercase tracking-widest transition-all" title="Go to Current Date">
+                            <button onClick={handleToday} className="px-3 py-1.5 text-[10px] font-bold text-muted-burgundy hover:text-burgundy uppercase tracking-widest transition-all" title="Go to Current Date">
                                 Today
                             </button>
-                            <button onClick={handleNext} className="p-2 hover:bg-forest/10 rounded-full transition-all text-slate hover:text-forest" title="Next">
+                            <button onClick={handleNext} className="p-2 hover:bg-burgundy/10 rounded-full transition-all text-muted-burgundy hover:text-burgundy" title="Next">
                                 <ChevronRight className="w-4 h-4" />
                             </button>
                         </div>
@@ -245,7 +245,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                 onClick={() => setView('day')}
                                 className={clsx(
                                     "px-4 py-1.5 text-[10px] font-bold rounded-md transition-all uppercase tracking-widest",
-                                    view === 'day' ? "bg-forest text-white shadow-tight" : "text-slate hover:text-charcoal"
+                                    view === 'day' ? "bg-buttermilk text-burgundy shadow-tight" : "text-muted-burgundy hover:text-burgundy"
                                 )}
                             >
                                 Day
@@ -254,7 +254,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                 onClick={() => setView('week')}
                                 className={clsx(
                                     "px-4 py-1.5 text-[10px] font-bold rounded-md transition-all uppercase tracking-widest",
-                                    view === 'week' ? "bg-forest text-white shadow-tight" : "text-slate hover:text-charcoal"
+                                    view === 'week' ? "bg-buttermilk text-burgundy shadow-tight" : "text-muted-burgundy hover:text-burgundy"
                                 )}
                             >
                                 Week
@@ -263,7 +263,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                 onClick={() => setView('month')}
                                 className={clsx(
                                     "px-4 py-1.5 text-[10px] font-bold rounded-md transition-all uppercase tracking-widest",
-                                    view === 'month' ? "bg-forest text-white shadow-tight" : "text-slate hover:text-charcoal"
+                                    view === 'month' ? "bg-buttermilk text-burgundy shadow-tight" : "text-muted-burgundy hover:text-burgundy"
                                 )}
                             >
                                 Month
@@ -302,9 +302,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                 )}>
                                     <div className="p-4 text-[10px] font-bold tracking-[0.2em] text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 uppercase">TIME</div>
                                     {days.map((day: Date) => (
-                                        <div key={day.toString()} className={clsx("p-4 text-center border-r border-border-grey last:border-r-0 min-w-[100px] transition-colors", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
-                                            <div className="text-[10px] text-slate uppercase mb-2 font-bold tracking-[0.2em]">{format(day, 'EEE')}</div>
-                                            <div className={clsx("text-2xl font-serif font-bold", isSameDay(day, new Date()) ? "text-forest" : "text-charcoal")}>{format(day, 'd')}</div>
+                                        <div key={day.toString()} className={clsx("p-4 text-center border-r border-border-grey last:border-r-0 min-w-[100px] transition-colors", isSameDay(day, new Date()) ? "bg-buttermilk/20" : "")}>
+                                            <div className="text-[10px] text-muted-burgundy uppercase mb-2 font-bold tracking-[0.2em]">{format(day, 'EEE')}</div>
+                                            <div className={clsx("text-2xl font-serif font-bold", isSameDay(day, new Date()) ? "text-burgundy" : "text-burgundy")}>{format(day, 'd')}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -327,8 +327,8 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                         : `calc((100% - 100px) / 7)`
                                                 }}
                                             >
-                                                <div className="w-2.5 h-2.5 bg-forest rounded-full -ml-[5px] ring-2 ring-white shadow-sm" />
-                                                <div className="h-[2px] w-full bg-forest shadow-[0_0_8px_rgba(47,82,51,0.3)]" />
+                                                <div className="w-2.5 h-2.5 bg-burgundy rounded-full -ml-[5px] ring-2 ring-white shadow-sm" />
+                                                <div className="h-[2px] w-full bg-burgundy shadow-[0_0_8px_rgba(67,48,46,0.3)]" />
                                             </div>
                                         )}
 
@@ -337,7 +337,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                 "grid min-h-[80px]",
                                                 view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-8"
                                             )}>
-                                                <div className="p-4 text-[10px] text-slate font-bold border-r border-border-grey text-center sticky left-0 bg-white z-20 uppercase tracking-tighter">
+                                                <div className="p-4 text-[10px] text-muted-burgundy font-bold border-r border-border-grey text-center sticky left-0 bg-white z-20 uppercase tracking-tighter">
                                                     {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                                 </div>
 
@@ -348,9 +348,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                                                     return (
                                                         <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-2 min-h-[100px] transition-all", isPastCell && "bg-off-white")} style={{ colorScheme: 'light' }}>
-                                                            <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity bg-forest pointer-events-none z-0" />
+                                                            <div className="absolute inset-0 opacity-0 group-hover:opacity-5 bg-burgundy pointer-events-none z-0" />
                                                             <button
-                                                                className="absolute top-2 right-2 p-1 rounded-full bg-forest/10 text-forest opacity-0 group-hover:opacity-100 transition-all hover:bg-forest hover:text-white z-20"
+                                                                className="absolute top-2 right-2 p-1 rounded-full bg-burgundy/10 text-burgundy opacity-0 group-hover:opacity-100 transition-all hover:bg-burgundy hover:text-white z-20"
                                                                 onClick={() => {
                                                                     setSingleDate(toManilaDateStr(day))
                                                                     setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
@@ -393,7 +393,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                                         "p-3 border session-block-earth transition-all group/eq relative overflow-hidden cursor-pointer rounded-lg",
                                                                                         isPastCell ? "bg-off-white border-border-grey" :
                                                                                             hasPending ? "bg-orange-50/50 border-orange-200" :
-                                                                                                isFullyBooked ? "bg-red-50/50 border-red-200" : "bg-green-50/50 border-green-200"
+                                                                                                isFullyBooked ? "bg-buttermilk border-burgundy/20" : "bg-pastel-blue/40 border-pastel-blue/20"
                                                                                     )}
                                                                                     onClick={() => {
                                                                                         setBucketSlots(cellSlots.filter(s => s.equipment?.[eqType]))
@@ -432,7 +432,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                                     "p-3 border session-block-earth transition-all group/open relative overflow-hidden cursor-pointer rounded-lg",
                                                                                     isPastCell ? "bg-off-white border-border-grey" :
                                                                                         hasPending ? "bg-orange-50/50 border-orange-200" :
-                                                                                            isFullyBooked ? "bg-red-50/50 border-red-200" : "bg-green-50/50 border-green-200"
+                                                                                            isFullyBooked ? "bg-buttermilk border-burgundy/20" : "bg-pastel-blue/40 border-pastel-blue/20"
                                                                                 )}
                                                                                 onClick={() => {
                                                                                     setBucketSlots(openSlots)
@@ -450,7 +450,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                                     </span>
                                                                                     <Edit2 className="w-2.5 h-2.5 opacity-0 group-hover/open:opacity-100 transition-opacity" />
                                                                                 </div>
-                                                                                <div className={clsx("text-[10px] font-bold tracking-tight", isPastCell ? "text-slate/40" : "text-charcoal/80")}>
+                                                                                <div className={clsx("text-[10px] font-bold tracking-tight", isPastCell ? "text-muted-burgundy/40" : "text-burgundy")}>
                                                                                     {availableCount} / {totalCount} <span className="text-[8px] uppercase tracking-wider ml-0.5 font-bold opacity-50">Free</span>
                                                                                 </div>
                                                                             </div>
@@ -503,12 +503,12 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                     <div className="flex justify-between items-start mb-4">
                                                         <span className={clsx(
                                                             "text-xs font-serif font-bold",
-                                                            isSameDay(day, new Date()) ? "text-forest" : "text-charcoal"
+                                                            isSameDay(day, new Date()) ? "text-burgundy underline underline-offset-4 decoration-buttermilk decoration-4" : "text-burgundy"
                                                         )}>
                                                             {format(day, 'd')}
                                                         </span>
                                                         {displaySlotsCount > 0 && (
-                                                            <span className="bg-forest/10 text-forest text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-widest">
+                                                            <span className="bg-buttermilk text-burgundy text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-widest shadow-sm">
                                                                 {displaySlotsCount} {displaySlotsCount === 1 ? 'Slot' : 'Slots'}
                                                             </span>
                                                         )}
@@ -520,7 +520,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                             </div>
                                                         ))}
                                                         {displaySlotsCount > 3 && (
-                                                            <div className="text-[8px] font-black text-forest uppercase tracking-widest pt-1">
+                                                            <div className="text-[8px] font-black text-muted-burgundy uppercase tracking-widest pt-1">
                                                                 + {displaySlotsCount - 3} more
                                                             </div>
                                                         )}
