@@ -1324,7 +1324,7 @@ export default function InstructorScheduleCalendar({
                                     </button>
                                     <button
                                         onClick={() => setSelectedBooking(null)}
-                                        className="p-2 hover:bg-off-white rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
+                                        className="p-2 hover:bg-slate-50 rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
                                         title="Close"
                                     >
                                         <X className="w-5 h-5" />
@@ -1344,23 +1344,26 @@ export default function InstructorScheduleCalendar({
                                     <div className="flex items-center gap-3 text-[#43302E]">
                                         <Clock className="w-4 h-4 opacity-40 shrink-0" />
                                         <span className="text-[11px] font-bold uppercase tracking-widest text-left">
-                                            {selectedBooking.slots?.date ? (
-                                                <>
-                                                    {format(new Date(selectedBooking.slots.date), 'EEEE, MMMM d')} • {selectedBooking.slots.start_time?.slice(0, 5)} - {selectedBooking.slots.end_time?.slice(0, 5)}
-                                                </>
-                                            ) : (
-                                                'Session Time'
-                                            )}
+                                            {(() => {
+                                                if (!selectedBooking.slots?.date) return 'Session Time';
+                                                try {
+                                                    const dateObj = new Date(selectedBooking.slots.date);
+                                                    if (isNaN(dateObj.getTime())) return 'Session Time';
+                                                    return `${format(dateObj, 'EEEE, MMMM d')} • ${selectedBooking.slots.start_time?.slice(0, 5) || '00:00'} - ${selectedBooking.slots.end_time?.slice(0, 5) || '00:00'}`;
+                                                } catch (e) {
+                                                    return 'Session Time';
+                                                }
+                                            })()}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-3 text-[#43302E]">
                                         <MapPin className="w-4 h-4 opacity-40 shrink-0" />
                                         <div className="flex items-baseline gap-2 flex-1 min-w-0">
                                             <span className="text-[11px] font-bold uppercase tracking-widest text-left truncate">
-                                                {selectedBooking.slots.studios?.name || 'Studio'} - {selectedBooking.slots.studios?.location || 'Studio Location'}
+                                                {selectedBooking.slots?.studios?.name || 'Studio'} - {selectedBooking.slots?.studios?.location || 'Studio Location'}
                                             </span>
                                             <a
-                                                href={selectedBooking.slots.studios?.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selectedBooking.slots.studios?.name} ${selectedBooking.slots.studios?.location}`)}`}
+                                                href={selectedBooking.slots?.studios?.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selectedBooking.slots?.studios?.name || ''} ${selectedBooking.slots?.studios?.location || ''}`)}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 onClick={(e) => e.stopPropagation()}
@@ -1410,7 +1413,7 @@ export default function InstructorScheduleCalendar({
 
                                 <div className="space-y-4">
                                     <div
-                                        onClick={() => setSelectedProfile(selectedBooking.client)}
+                                        onClick={() => selectedBooking.client && setSelectedProfile(selectedBooking.client)}
                                         className="flex items-center justify-between bg-[#FFF1B5]/20 p-4 rounded-xl border border-[#FFF1B5]/40 cursor-pointer hover:bg-[#FFF1B5]/30 transition-all group"
                                     >
                                         <div className="flex items-center gap-4">

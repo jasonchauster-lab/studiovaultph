@@ -68,9 +68,9 @@ export default async function InstructorDashboardPage({ searchParams }: { search
             `)
             .eq('instructor_id', user.id)
             .eq('status', 'approved')
-            .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { referencedTable: 'slots' })
-            .order('date', { referencedTable: 'slots', ascending: true })
-            .order('start_time', { referencedTable: 'slots', ascending: true })
+            .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' })
+            .order('date', { foreignTable: 'slots', ascending: true })
+            .order('start_time', { foreignTable: 'slots', ascending: true })
             .limit(5);
 
         // 2. Determine visible week
@@ -158,7 +158,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
             .select('price_breakdown, slots!inner(id, date, start_time)')
             .eq('instructor_id', user.id)
             .eq('status', 'approved')
-            .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { referencedTable: 'slots' });
+            .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' });
 
         const pendingEarnings = upcomingApproved?.reduce((sum, b) => {
             const fee = (b.price_breakdown as any)?.instructor_fee || 0;
