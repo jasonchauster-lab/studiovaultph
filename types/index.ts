@@ -109,3 +109,17 @@ export interface SupportMessage {
     created_at: string;
     is_read?: boolean;
 }
+
+export interface PendingBooking {
+    id: string;
+    client_id: string;
+    instructor_id: string;
+    slots: {
+        date: string;
+        start_time: string;
+        studios: { name: string } | { name: string }[];
+    } | null;
+    studios: { name: string } | { name: string }[] | null;
+    client: { id: string; full_name: string } | null;
+    instructor: { id: string; full_name: string } | null;
+}

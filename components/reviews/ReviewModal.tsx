@@ -4,16 +4,8 @@ import { useState, useEffect } from 'react'
 import { Star, X } from 'lucide-react'
 import { submitReview } from '@/app/(dashboard)/reviews/actions'
 import { CUSTOMER_TAGS, INSTRUCTOR_TAGS, ReviewRole } from '@/lib/reviews'
+import { PendingBooking } from '@/types'
 
-interface PendingBooking {
-    id: string
-    client_id: string
-    instructor_id: string
-    slots: { date: string; start_time: string; studios: { name: string } | { name: string }[] } | null
-    studios: { name: string } | { name: string }[] | null
-    client: { id: string; full_name: string } | null
-    instructor: { id: string; full_name: string } | null
-}
 
 interface ReviewModalProps {
     booking: PendingBooking

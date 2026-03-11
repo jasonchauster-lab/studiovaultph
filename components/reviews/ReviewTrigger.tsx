@@ -3,15 +3,8 @@
 import { useState } from 'react'
 import ReviewModal from '@/components/reviews/ReviewModal'
 import { Star } from 'lucide-react'
+import { PendingBooking } from '@/types'
 
-interface PendingBooking {
-    id: string
-    client_id: string
-    instructor_id: string
-    slots: { date: string; start_time: string; studios: { name: string } | { name: string }[] } | null
-    client: { id: string; full_name: string } | null
-    instructor: { id: string; full_name: string } | null
-}
 
 interface ReviewTriggerProps {
     pendingBookings: PendingBooking[]
