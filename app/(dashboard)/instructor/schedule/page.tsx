@@ -20,12 +20,22 @@ export default async function InstructorSchedulePage(props: {
     const currentDate = new Date(dateParam)
 
     // Fetch existing availability
-    const { data: availability } = await supabase
-        .from('instructor_availability')
-        .select('*')
-        .eq('instructor_id', user.id)
-        .order('day_of_week', { ascending: true })
-        .order('start_time', { ascending: true })
+    const [availabilityRes, profileRes] = await Promise.all([
+        supabase
+            .from('instructor_availability')
+            .select('*')
+            .eq('instructor_id', user.id)
+            .order('day_of_week', { ascending: true })
+            .order('start_time', { ascending: true }),
+        supabase
+            .from('profiles')
+            .select('id, teaching_equipment, rates')
+            .eq('id', user.id)
+            .single()
+    ])
+
+    const availability = availabilityRes.data
+    const profile = profileRes.data
 
     return (
         <div className="min-h-screen p-8 lg:p-12">
@@ -48,6 +58,7 @@ export default async function InstructorSchedulePage(props: {
                         bookings={[]} // Bookings will be fetched/passed if needed, but for now we need the ID for chat
                         currentUserId={user.id}
                         currentDate={currentDate}
+                        instructorProfile={profile}
                     />
                 </div>
             </div>

@@ -142,7 +142,7 @@ export default async function StudioDetailsPage(props: {
     })
 
     // 5. Fetch public reviews for the studio owner's profile
-    const { reviews, averageRating, totalCount } = await getPublicReviews(studio.owner_id)
+    const { reviews, averageRating, totalCount } = await getPublicReviews(studio.owner_id, user?.id)
 
     return (
         <div className="min-h-screen bg-cream-50 p-4 sm:p-8">

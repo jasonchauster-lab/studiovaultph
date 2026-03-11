@@ -9,6 +9,7 @@ import { toManilaDateStr, getManilaTodayStr, toManilaDate } from '@/lib/timezone
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
 import InstructorScheduleGenerator from './InstructorScheduleGenerator'
 import ChatWindow from '@/components/dashboard/ChatWindow'
+import Link from 'next/link'
 
 interface Availability {
     id: string
@@ -27,9 +28,20 @@ interface InstructorScheduleCalendarProps {
     bookings?: any[]
     currentUserId: string
     currentDate?: Date // Made optional with default
+    instructorProfile: {
+        id: string;
+        teaching_equipment?: string[];
+        rates?: Record<string, number>;
+    } | null;
 }
 
-export default function InstructorScheduleCalendar({ availability, bookings = [], currentUserId, currentDate = new Date() }: InstructorScheduleCalendarProps) {
+export default function InstructorScheduleCalendar({ 
+    availability, 
+    bookings = [], 
+    currentUserId, 
+    currentDate = new Date(),
+    instructorProfile
+}: InstructorScheduleCalendarProps) {
     const router = useRouter()
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [addMode, setAddMode] = useState<'single' | 'bulk'>('single')
@@ -45,8 +57,15 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     const [singleTime, setSingleTime] = useState('09:00')
     const [singleEndTime, setSingleEndTime] = useState('10:00')
     const [locations, setLocations] = useState<string[]>([])
-    const [equipment, setEquipment] = useState<string[]>(['Reformer'])
+    const [equipment, setEquipment] = useState<string[]>([])
     const [expandedCities, setExpandedCities] = useState<string[]>(['BGC', 'Makati'])
+
+    const isProfileComplete = !!(
+        instructorProfile?.teaching_equipment && 
+        instructorProfile.teaching_equipment.length > 0 && 
+        instructorProfile.rates && 
+        Object.keys(instructorProfile.rates).length > 0
+    );
 
     const toggleCityAccordion = (city: string) => {
         setExpandedCities(prev =>
@@ -233,12 +252,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
     const handleCreateSingle = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
+        if (isSubmitting) return;
+        if (!isProfileComplete) return;
+
         if (locations.length === 0) {
             alert('Please select at least one location');
-            return;
-        }
-        if (equipment.length === 0) {
-            alert('Please select at least one equipment type');
             return;
         }
 
@@ -252,7 +270,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             startTime: singleTime,
             endTime: singleEndTime,
             locations: locations,
-            equipment: equipment
+            equipment: instructorProfile?.teaching_equipment || []
         })
 
         setIsSubmitting(false)
@@ -268,17 +286,11 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [currentSlotHistory, setCurrentSlotHistory] = useState<any[]>([])
 
-    const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (!editingSlot) return;
+    const handleUpdate = async (id: string, formData: FormData) => {
         setIsSubmitting(true);
 
-        const formData = new FormData(e.currentTarget);
-        // Append the equipment array as custom JSON to the form data
-        formData.append('equipment', JSON.stringify(equipment));
-
         const { updateAvailability } = await import('@/app/(dashboard)/instructor/schedule/actions')
-        const result = await updateAvailability(editingSlot.id, formData)
+        const result = await updateAvailability(id, formData)
 
         setIsSubmitting(false)
         if (result.success) {
@@ -296,7 +308,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
         setSingleTime(slot.start_time)
         setSingleEndTime(slot.end_time)
         setLocations([slot.location_area])
-        setEquipment(slot.equipment || ['Reformer'])
+        // Use slot's equipment if it has it, otherwise profile's
+        setEquipment(slot.equipment || instructorProfile?.teaching_equipment || [])
         setIsEditModalOpen(true)
     }
 
@@ -319,6 +332,26 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {!isProfileComplete && (
+                <div className="earth-card p-6 bg-burgundy/5 border border-burgundy/10 flex items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-burgundy/10 flex items-center justify-center shrink-0">
+                            <AlertTriangle className="w-5 h-5 text-burgundy" />
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-black text-burgundy uppercase tracking-[0.2em]">Profile Incomplete</p>
+                            <p className="text-[10px] text-burgundy/60 uppercase tracking-[0.1em] font-bold">Please set your teaching equipment and rates to start adding sessions.</p>
+                        </div>
+                    </div>
+                    <Link 
+                        href="/instructor/profile" 
+                        className="px-6 py-3 bg-burgundy text-buttermilk rounded-lg text-[9px] font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-tight"
+                    >
+                        COMPLETE PROFILE
+                    </Link>
+                </div>
+            )}
+
             {/* Header */}
             <div className="earth-card p-10 bg-white shadow-tight relative overflow-hidden">
                 {/* Background Tint */}
@@ -375,14 +408,30 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                 {/* Row 2: Action Buttons — centered */}
                 <div className="flex justify-center items-center gap-4 mt-6 relative z-10">
                     <button
-                        onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
-                        className="h-12 border-2 border-burgundy text-burgundy bg-white px-8 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-burgundy/5 transition-all flex items-center gap-3 shadow-tight active:scale-95"
+                        onClick={() => { 
+                            setAddMode('single'); 
+                            setIsAddModalOpen(true); 
+                        }}
+                        className={clsx(
+                            "h-12 border-2 px-8 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-3 shadow-tight active:scale-95",
+                            isProfileComplete 
+                                ? "border-burgundy text-burgundy bg-white hover:bg-burgundy/5" 
+                                : "border-burgundy/30 text-burgundy/60 bg-white hover:bg-burgundy/[0.02]"
+                        )}
                     >
                         <Plus className="w-4 h-4" /> ADD SLOT
                     </button>
                     <button
-                        onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
-                        className="px-8 py-3 text-[10px] tracking-[0.2em] bg-burgundy text-buttermilk rounded-lg font-bold flex items-center gap-3 hover:brightness-110 shadow-tight active:scale-95 transition-all"
+                        onClick={() => { 
+                            setAddMode('bulk'); 
+                            setIsAddModalOpen(true); 
+                        }}
+                        className={clsx(
+                            "px-8 py-3 text-[10px] tracking-[0.2em] rounded-lg font-bold flex items-center gap-3 transition-all",
+                            isProfileComplete
+                                ? "bg-burgundy text-buttermilk hover:brightness-110 shadow-tight active:scale-95"
+                                : "bg-burgundy/70 text-buttermilk/70 hover:brightness-110 shadow-tight active:scale-95"
+                        )}
                     >
                         <CalendarIcon className="w-4 h-4" /> RECURRING SCHEDULE
                     </button>
@@ -511,15 +560,22 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                 return (
                                                     <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-0", isPastCell && "bg-gray-50")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
                                                         <div
-                                                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 bg-forest/5 cursor-pointer z-0"
-                                                            onClick={() => {
+                                                            className={clsx(
+                                                                "absolute inset-0 transition-all duration-700 bg-forest/5 cursor-pointer z-0 flex items-center justify-center",
+                                                                "opacity-0 lg:group-hover:opacity-100", // Hidden on large, shown on hover
+                                                                "md:opacity-10 md:hover:opacity-100" // Always slightly visible on small/tablet
+                                                            )}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
                                                                 setSingleDate(format(day, 'yyyy-MM-dd'))
                                                                 setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
                                                                 setSingleEndTime(`${(hour + 1).toString().padStart(2, '0')}:00`)
                                                                 setAddMode('single')
                                                                 setIsAddModalOpen(true)
                                                             }}
-                                                        />
+                                                        >
+                                                            <Plus className="w-5 h-5 text-forest/20 lg:hidden" />
+                                                        </div>
 
                                                         {allVisibleItems.map((item) => {
                                                             const [sh, sm] = item.start.split(':').map(Number);
@@ -772,16 +828,28 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     <h3 className="text-3xl font-serif text-charcoal tracking-tighter">
                                         Add Time Slot
                                     </h3>
-                                    <p className="text-[10px] text-slate font-bold uppercase tracking-[0.4em] mt-2">
-                                        DEFINE A SINGLE SESSION TIME AND LOCATION
+                                <p className="text-[10px] text-slate font-bold uppercase tracking-[0.4em] mt-2">
+                                    DEFINE A SINGLE SESSION TIME AND LOCATION
+                                </p>
+                            </div>
+                            <button onClick={() => setIsAddModalOpen(false)} className="p-4 bg-off-white hover:bg-white rounded-lg text-slate hover:text-charcoal transition-all border border-border-grey shadow-tight">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        {!isProfileComplete && (
+                            <div className="mb-10 p-6 bg-red-50 border border-red-100 rounded-xl flex items-start gap-4">
+                                <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-1">Incomplete Profile</p>
+                                    <p className="text-[10px] text-red-600/80 leading-relaxed uppercase tracking-wider">
+                                        Please fill out your <Link href="/instructor/profile" className="underline font-bold hover:text-red-800">teaching equipment</Link> and <Link href="/instructor/profile" className="underline font-bold hover:text-red-800">rates</Link> in your profile to be able to set your schedule.
                                     </p>
                                 </div>
-                                <button onClick={() => setIsAddModalOpen(false)} className="p-4 bg-off-white hover:bg-white rounded-lg text-slate hover:text-charcoal transition-all border border-border-grey shadow-tight">
-                                    <X className="w-6 h-6" />
-                                </button>
                             </div>
+                        )}
 
-                            <form onSubmit={handleCreateSingle} className="space-y-6">
+                        <form onSubmit={handleCreateSingle} className="space-y-6">
                                 <div className="earth-card p-6 space-y-6 bg-off-white border border-border-grey shadow-tight">
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Calendar Date</label>
@@ -876,34 +944,12 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     </div>
                                 </div>
 
-                                <div className="space-y-4">
-                                    <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-2">Equipment</h4>
-                                    <div className="flex flex-wrap gap-2.5 p-5 bg-off-white rounded-xl border border-border-grey shadow-tight">
-                                        {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
-                                            const isSelected = equipment.includes(eq);
-                                            return (
-                                                <button
-                                                    key={eq}
-                                                    type="button"
-                                                    onClick={() => toggleEquipment(eq)}
-                                                    className={clsx(
-                                                        "px-5 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all duration-300 border",
-                                                        isSelected
-                                                            ? "bg-forest text-white border-forest shadow-tight"
-                                                            : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-forest shadow-sm"
-                                                    )}
-                                                >
-                                                    {eq}
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
-                                </div>
+                                {/* Equipment picker removed - automatically uses profile equipment */}
 
                                 <div className="flex gap-6 pt-10">
                                     <button
                                         type="submit"
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || !isProfileComplete}
                                         className="flex-1 bg-charcoal text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50"
                                     >
                                         {isSubmitting ? 'PROCESSING...' : 'CONFIRM SLOT'}
@@ -938,7 +984,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     <X className="w-6 h-6" />
                                 </button>
                             </div>
-                            <InstructorScheduleGenerator initialAvailability={[]} />
+                            <InstructorScheduleGenerator 
+                                initialAvailability={[]} 
+                                teachingEquipment={instructorProfile?.teaching_equipment || []}
+                            />
                         </div>
                     </div>
                 )
@@ -965,7 +1014,12 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 </button>
                             </div>
 
-                            <form onSubmit={handleUpdate} className="space-y-6">
+                            <form onSubmit={(e) => {
+                                e.preventDefault();
+                                const formData = new FormData(e.target as HTMLFormElement);
+                                formData.set('equipment', JSON.stringify(instructorProfile?.teaching_equipment || []));
+                                handleUpdate(editingSlot.id, formData);
+                            }} className="space-y-6">
                                 <div className="earth-card p-6 space-y-6 bg-off-white border border-border-grey shadow-tight">
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Date</label>
@@ -1060,29 +1114,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     </div>
                                 </div>
 
-                                <div className="space-y-4">
-                                    <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-2">Equipment</label>
-                                    <div className="flex flex-wrap gap-2.5 p-5 bg-off-white rounded-xl border border-border-grey shadow-tight">
-                                        {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
-                                            const isSelected = equipment.includes(eq);
-                                            return (
-                                                <button
-                                                    key={eq}
-                                                    type="button"
-                                                    onClick={() => toggleEquipment(eq)}
-                                                    className={clsx(
-                                                        "px-5 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all duration-300 border",
-                                                        isSelected
-                                                            ? "bg-forest text-white border-forest shadow-tight"
-                                                            : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-forest shadow-sm"
-                                                    )}
-                                                >
-                                                    {eq}
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
-                                </div>
+                                {/* Equipment picker removed - automatically uses profile equipment */}
 
                                 {currentSlotHistory.length > 0 && (
                                     <div className="space-y-6 pt-6 border-t border-border-grey">

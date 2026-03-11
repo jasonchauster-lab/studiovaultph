@@ -74,7 +74,7 @@ export default async function InstructorProfilePage(props: {
         .eq('status', 'pending') : { data: [] }
 
     // 3. Fetch public reviews for this instructor
-    const { reviews, averageRating, totalCount } = await getPublicReviews(id)
+    const { reviews, averageRating, totalCount } = await getPublicReviews(id, user?.id)
 
     return (
         <div className="min-h-screen bg-alabaster relative selection:bg-sage/20">

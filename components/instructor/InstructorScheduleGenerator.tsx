@@ -26,9 +26,10 @@ const GROUPED_LOCATIONS = LOCATIONS.reduce((acc, loc) => {
 
 interface ScheduleManagerProps {
     initialAvailability: any[];
+    teachingEquipment: string[];
 }
 
-export default function InstructorScheduleGenerator({ initialAvailability }: ScheduleManagerProps) {
+export default function InstructorScheduleGenerator({ initialAvailability, teachingEquipment }: ScheduleManagerProps) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -40,7 +41,6 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('17:00');
     const [locations, setLocations] = useState<string[]>([]);
-    const [equipment, setEquipment] = useState<string[]>(['Reformer']);
     const [expandedCities, setExpandedCities] = useState<string[]>(['BGC', 'Makati']);
 
     const toggleCityAccordion = (city: string) => {
@@ -57,14 +57,6 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
         );
     }
 
-    const toggleEquipment = (eq: string) => {
-        setEquipment(prev =>
-            prev.includes(eq)
-                ? prev.filter(e => e !== eq)
-                : [...prev, eq]
-        );
-    }
-
     const toggleCityGroup = (cityLocations: string[]) => {
         const allSelected = cityLocations.every(loc => locations.includes(loc));
         if (allSelected) {
@@ -78,7 +70,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
     }
 
     const handleGenerate = async () => {
-        if (!startDate || !endDate || selectedDays.length === 0 || locations.length === 0 || equipment.length === 0) {
+        if (!startDate || !endDate || selectedDays.length === 0 || locations.length === 0) {
             setMessage({ type: 'error', text: 'Please fill in all fields before saving.' });
             return;
         }
@@ -94,7 +86,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                 startTime,
                 endTime,
                 locations: locations,
-                equipment: equipment
+                equipment: teachingEquipment
             });
 
             if (result.success) {
@@ -251,29 +243,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                     </div>
                                 </div>
 
-                                <div>
-                                    <h3 className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] mb-6 px-2">Equipment</h3>
-                                    <div className="flex flex-wrap gap-2.5 p-5 bg-off-white rounded-xl border border-border-grey shadow-sm">
-                                        {['Reformer', 'Tower', 'Cadillac', 'Chair', 'Mat', 'Barre'].map(eq => {
-                                            const isSelected = equipment.includes(eq);
-                                            return (
-                                                <button
-                                                    key={eq}
-                                                    type="button"
-                                                    onClick={() => toggleEquipment(eq)}
-                                                    className={clsx(
-                                                        "px-6 py-3 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border",
-                                                        isSelected
-                                                            ? "bg-forest text-white border-forest shadow-tight"
-                                                            : "bg-white text-slate border-border-grey hover:border-forest/30 hover:text-charcoal shadow-sm"
-                                                    )}
-                                                >
-                                                    {eq}
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
-                                </div>
+                                {/* Equipment picker removed - automatically uses profile equipment */}
                             </div>
 
                             <div className="earth-card p-6 flex flex-col bg-white border border-border-grey shadow-tight">
