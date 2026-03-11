@@ -662,38 +662,42 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                             return s?.date === dayStr && ['approved', 'completed', 'pending'].includes(b.status);
                                         });
 
-                                        // 3. Group everything by time and location/equipment
+                                        // 3. Group everything by time and equipment
                                         const groups: Record<string, {
                                             time: string,
-                                            loc: string,
                                             total: number,
                                             booked: number,
-                                            equipment: string[]
+                                            equipment: string[],
+                                            processedSlotIds: Set<string>
                                         }> = {};
+                                        
+                                        const getShortEquipment = (eqs: string[] | undefined) => (eqs && eqs.length > 0) ? eqs[0] : 'Session';
 
-                                        // Process availability first to establish the base capacity
                                         allDayAvailability.forEach(a => {
                                             const time = a.start_time.slice(0, 5);
-                                            const shortLoc = a.location_area.split(' - ')[0];
-                                            const key = `${time}-${shortLoc}`;
+                                            const eq = getShortEquipment(a.equipment);
+                                            const key = `${time}-${eq}`;
+                                            const slotUid = a.group_id || a.id;
 
                                             if (!groups[key]) {
-                                                groups[key] = { time, loc: shortLoc, total: 0, booked: 0, equipment: a.equipment || [] };
+                                                groups[key] = { time, total: 0, booked: 0, equipment: a.equipment || [], processedSlotIds: new Set() };
                                             }
-                                            groups[key].total += 1; // Each availability entry is 1 capacity unit
+                                            
+                                            if (!groups[key].processedSlotIds.has(slotUid)) {
+                                                groups[key].total += 1;
+                                                groups[key].processedSlotIds.add(slotUid);
+                                            }
                                         });
 
-                                        // Process bookings to match groups or create missing ones
                                         dayBookings.forEach(b => {
                                             const s = b.slots;
                                             const time = s.start_time.slice(0, 5);
-                                            const shortLoc = s.location_area?.split(' - ')[0] || (b.price_breakdown as any)?.equipment || 'Session';
-                                            const key = `${time}-${shortLoc}`;
+                                            const eq = getShortEquipment(s.equipment || [(b.price_breakdown as any)?.equipment]);
+                                            const key = `${time}-${eq}`;
                                             const bQty = b.quantity || 1;
 
                                             if (groups[key]) {
                                                 groups[key].booked += bQty;
-                                                // Ensure total capacity is at least as much as bookings
                                                 if ((s.quantity || 1) > groups[key].total) {
                                                     groups[key].total = s.quantity || 1;
                                                 }
@@ -703,10 +707,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                             } else {
                                                 groups[key] = {
                                                     time,
-                                                    loc: shortLoc,
                                                     total: Math.max(s.quantity || 1, bQty),
                                                     booked: bQty,
-                                                    equipment: [(b.price_breakdown as any)?.equipment].filter(Boolean)
+                                                    equipment: s.equipment || [(b.price_breakdown as any)?.equipment].filter(Boolean),
+                                                    processedSlotIds: new Set()
                                                 };
                                             }
                                         });
@@ -737,8 +741,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                 </div>
                                                 <div className="space-y-1">
                                                     {sortedSessions.slice(0, 4).map((s) => (
-                                                        <div key={`${s.time}-${s.loc}`} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter flex items-center justify-between">
-                                                            <span className="truncate mr-2">• {s.time} {s.loc}</span>
+                                                        <div key={`${s.time}-${s.equipment.join(',')}`} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter flex items-center justify-between">
+                                                            <span className="truncate mr-2">• {s.time} {s.equipment.length > 0 ? s.equipment[0] : 'Session'}</span>
                                                             <span className="shrink-0 font-bold text-[#43302E]/60 uppercase tracking-tighter bg-[#43302E]/5 px-1 rounded">
                                                                 {s.booked}/{s.total}
                                                             </span>
@@ -1187,7 +1191,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </div>
 
                             {/* Actual Content */}
-                            <div className="space-y-4 px-6 pt-6">
+                            <div className="space-y-4 px-8 pt-8">
                                 <div className="flex items-center justify-between pt-2">
                                     <h3 className="text-3xl font-serif text-[#43302E] tracking-tighter">
                                         {selectedBooking.price_breakdown?.equipment || 'Standard Session'}
@@ -1247,7 +1251,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </div>
 
                             {/* Booked Section */}
-                            <div className="space-y-6">
+                            <div className="space-y-6 px-8">
                                 <div className="flex items-center justify-between border-b border-[#43302E]/10 pb-4">
                                     <h4 className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em]">Booked</h4>
                                     <span className="text-[10px] font-black text-[#43302E]/40 uppercase tracking-widest">
@@ -1298,7 +1302,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </div>
 
                             {/* Event History Section */}
-                            <div className="pt-6 border-t border-[#43302E]/10 mt-6">
+                            <div className="pt-6 border-t border-[#43302E]/10 mt-6 px-8">
                                 <h4 className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
                                     <Clock className="w-4 h-4 opacity-40" />
                                     Event History
@@ -1339,7 +1343,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 </div>
                             </div>
 
-                            <div className="flex gap-4 pt-4 px-6 pb-6">
+                            <div className="flex gap-4 pt-4 px-8 pb-8">
                                 <button
                                     onClick={() => setActiveChat({
                                         id: selectedBooking.id,
@@ -1359,7 +1363,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Profile Detail Modal */}
             {selectedProfile && (
                 <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedProfile(null)}>
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-10 md:p-14 relative" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setSelectedProfile(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal"><X className="w-5 h-5" /></button>
                         <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
                         <div className="flex flex-col items-center text-center mb-10">
@@ -1418,7 +1422,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Studio Detail Modal */}
             {selectedStudio && (
                 <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedStudio(null)}>
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-10 md:p-14 relative" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setSelectedStudio(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal"><X className="w-5 h-5" /></button>
                         <div className="flex flex-col items-center text-center mb-10">
                             <div className="w-24 h-24 rounded-2xl overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10 bg-white">

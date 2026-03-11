@@ -116,8 +116,8 @@ export default function InstructorDashboardClient({
             />
 
             {/* Dashboard Grid Container */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
-                <div className="xl:col-span-2">
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-10">
+                <div className="xl:col-span-3">
                     {/* Desktop Calendar */}
                     <div className="hidden lg:block border border-border-grey rounded-xl overflow-hidden bg-white">
                         <InstructorScheduleCalendar

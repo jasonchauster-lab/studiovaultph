@@ -188,7 +188,7 @@ export default async function StudioDashboard(props: {
 
     return (
         <div className="space-y-12 pb-20">
-            <div className="max-w-[1600px] mx-auto space-y-12">
+            <div className="max-w-7xl mx-auto space-y-12">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     <div>
@@ -275,8 +275,8 @@ export default async function StudioDashboard(props: {
                             }}
                         />
 
-                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
-                            <div className="xl:col-span-2">
+                        <div className="grid grid-cols-1 xl:grid-cols-4 gap-10">
+                            <div className="xl:col-span-3">
                                 <StudioScheduleCalendar
                                     studioId={myStudio.id}
                                     slots={weeklySlots}
