@@ -111,17 +111,17 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                 </div>
 
                 {/* Net Earnings Card */}
-                <div className="bg-charcoal-900 p-6 rounded-xl shadow-lg border border-rose-gold/20 text-white">
+                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
                     <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 rounded-lg" style={{ background: 'rgba(188,146,110,0.2)' }}>
-                            <TrendingUp className="w-6 h-6 text-rose-gold" />
+                        <div className="p-2 rounded-lg" style={{ background: 'rgba(188,146,110,0.1)' }}>
+                            <TrendingUp className="w-6 h-6" style={{ color: '#BC926E' }} />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-tighter text-rose-gold px-2 py-1 rounded bg-rose-gold/10">
+                        <span className="text-[10px] font-bold uppercase tracking-tighter text-charcoal-400 px-2 py-1 rounded bg-cream-50 border border-cream-100 italic">
                             Calculation: Gross + Comp - Penalty
                         </span>
                     </div>
-                    <p className="text-sm text-white/70 mb-1">Net Earnings</p>
-                    <h3 className="text-2xl font-bold text-white"><strong>₱</strong>{summary.netEarnings.toLocaleString()}</h3>
+                    <p className="text-sm text-charcoal-500 mb-1">Net Earnings</p>
+                    <h3 className="text-2xl font-bold text-charcoal-900"><strong>₱</strong>{summary.netEarnings.toLocaleString()}</h3>
                 </div>
 
                 {/* Available Balance Card */}

@@ -563,9 +563,17 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                             const uniqueDisplaySlots = daySlotsData.reduce((acc, current) => {
                                                 const time = current.start_time.slice(0, 5);
                                                 const type = current.equipment ? Object.keys(current.equipment)[0] : 'Open';
+                                                
+                                                // Calculate capacity for this specific equipment type
+                                                const total = current.equipment?.[type] || 0;
+                                                const booked = current.bookings?.filter(b => 
+                                                    ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '') &&
+                                                    (b.price_breakdown?.equipment?.toUpperCase() === type.toUpperCase() || b.equipment?.toUpperCase() === type.toUpperCase())
+                                                ).length || 0;
+
                                                 const key = `${time}-${type}`;
                                                 if (!acc.some((s: any) => s.key === key)) {
-                                                    acc.push({ ...current, key, displayType: type });
+                                                    acc.push({ ...current, key, displayType: type, booked, total });
                                                 }
                                                 return acc;
                                             }, [] as any[]);
@@ -601,8 +609,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                     </div>
                                                     <div className="space-y-1">
                                                         {uniqueDisplaySlots.slice(0, 3).map((s: any) => (
-                                                            <div key={s.key} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter">
-                                                                • {s.start_time.slice(0, 5)} {s.displayType}
+                                                            <div key={s.key} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter flex items-center justify-between gap-1">
+                                                                <span className="truncate">• {s.start_time.slice(0, 5)} {s.displayType}</span>
+                                                                <span className="shrink-0 font-bold text-[#43302E]/60 uppercase tracking-tighter bg-[#43302E]/5 px-1 rounded">
+                                                                    {s.booked}/{s.total}
+                                                                </span>
                                                             </div>
                                                         ))}
                                                         {displaySlotsCount > 3 && (

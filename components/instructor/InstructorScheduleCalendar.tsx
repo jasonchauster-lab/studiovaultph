@@ -744,10 +744,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     {sortedSessions.slice(0, 4).map((s) => (
                                                         <div key={`${s.time}-${s.loc}`} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter flex items-center justify-between">
                                                             <span className="truncate mr-2">• {s.time} {s.loc}</span>
-                                                            <span className={clsx(
-                                                                "shrink-0 font-black px-1 rounded",
-                                                                s.booked >= s.total ? "text-forest bg-forest/5" : "text-slate/40"
-                                                            )}>
+                                                            <span className="shrink-0 font-bold text-[#43302E]/60 uppercase tracking-tighter bg-[#43302E]/5 px-1 rounded">
                                                                 {s.booked}/{s.total}
                                                             </span>
                                                         </div>

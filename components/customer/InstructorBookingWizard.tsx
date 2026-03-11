@@ -398,28 +398,37 @@ export default function InstructorBookingWizard({
             {/* Step 1: Select Date & Time */}
             {step === 1 && (
                 <div className="space-y-10">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                        <h3 className="text-xl font-serif font-bold text-charcoal">1. Select a Date & Time</h3>
-                        <div className="relative group">
-                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30 group-hover:text-sage transition-colors" />
-                            <select
-                                value={filterLocation || ''}
-                                onChange={(e) => {
-                                    const params = new URLSearchParams(searchParams.toString())
-                                    if (e.target.value) {
-                                        params.set('location', e.target.value)
-                                    } else {
-                                        params.delete('location')
-                                    }
-                                    router.push(`?${params.toString()}`, { scroll: false })
-                                }}
-                                className="appearance-none bg-white/40 border border-white/60 text-charcoal text-[11px] font-bold uppercase tracking-widest rounded-[14px] pl-10 pr-10 py-3 outline-none focus:ring-1 focus:ring-sage focus:border-transparent w-full sm:w-64 transition-all"
-                            >
-                                <option value="">All Teaching Areas</option>
-                                {Array.from(new Set(processedAvailability.map(a => a.location_area).filter(Boolean))).sort().map(loc => (
-                                    <option key={loc as string} value={loc as string}>{loc as string}</option>
-                                ))}
-                            </select>
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+                        <div className="space-y-2">
+                            <h3 className="text-xl font-serif font-bold text-charcoal">1. Select Location, Date & Time</h3>
+                            <p className="text-[9px] font-black text-[#B4C3B2] uppercase tracking-[0.3em] ml-0.5">Start by picking your preferred area</p>
+                        </div>
+                        <div className="space-y-3 w-full sm:w-64">
+                            <label className="block text-[8px] font-black text-charcoal/30 uppercase tracking-[0.4em] ml-2">
+                                Select Teaching Area
+                            </label>
+                            <div className="relative group">
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30 group-hover:text-sage transition-colors z-10" />
+                                <select
+                                    value={filterLocation || ''}
+                                    onChange={(e) => {
+                                        const params = new URLSearchParams(searchParams.toString())
+                                        if (e.target.value) {
+                                            params.set('location', e.target.value)
+                                        } else {
+                                            params.delete('location')
+                                        }
+                                        router.push(`?${params.toString()}`, { scroll: false })
+                                    }}
+                                    className="appearance-none bg-white/40 border-2 border-white/80 text-charcoal text-[11px] font-bold uppercase tracking-widest rounded-[14px] pl-11 pr-12 py-4 outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage/40 w-full transition-all cursor-pointer shadow-tight hover:bg-white/60"
+                                >
+                                    <option value="">All Teaching Areas</option>
+                                    {Array.from(new Set(processedAvailability.map(a => a.location_area).filter(Boolean))).sort().map(loc => (
+                                        <option key={loc as string} value={loc as string}>{loc as string}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30 group-hover:text-sage transition-all pointer-events-none" />
+                            </div>
                         </div>
                     </div>
 
