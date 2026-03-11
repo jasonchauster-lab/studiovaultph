@@ -139,9 +139,27 @@ export default async function StudioDashboard(props: {
                 bookings (
                     id,
                     status,
+                    created_at,
+                    updated_at,
                     price_breakdown,
-                    client:profiles!client_id(full_name, avatar_url),
-                    instructor:profiles!instructor_id(full_name, avatar_url)
+                    client:profiles!client_id(
+                        full_name, 
+                        avatar_url,
+                        bio,
+                        email,
+                        medical_conditions,
+                        other_medical_condition,
+                        date_of_birth
+                    ),
+                    instructor:profiles!instructor_id(
+                        full_name, 
+                        avatar_url,
+                        bio,
+                        email,
+                        medical_conditions,
+                        other_medical_condition,
+                        date_of_birth
+                    )
                 )
             `)
             .eq('studio_id', myStudio.id)

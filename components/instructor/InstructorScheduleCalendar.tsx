@@ -35,6 +35,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     const [addMode, setAddMode] = useState<'single' | 'bulk'>('single')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [selectedBooking, setSelectedBooking] = useState<any>(null)
+    const [selectedProfile, setSelectedProfile] = useState<any>(null)
+    const [selectedStudio, setSelectedStudio] = useState<any>(null)
     const [activeChat, setActiveChat] = useState<{ id: string, recipientId: string, name: string } | null>(null)
     const [view, setView] = useState<'day' | 'week' | 'month'>('week')
 
@@ -148,6 +150,33 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
         return { availabilityMap: aMap, recurringMap: rMap, bookingMap: bMap, historyMap: hMap }
     }, [availability, bookings])
+
+    // Helper functions
+    const calculateAge = (dob: string) => {
+        if (!dob) return null;
+        const birthDate = new Date(dob);
+        const ageDifMs = Date.now() - birthDate.getTime();
+        const ageDate = new Date(ageDifMs);
+        return Math.abs(ageDate.getUTCFullYear() - 1970);
+    };
+
+    // Scroll Lock for all modals
+    useEffect(() => {
+        const anyModalOpen = isAddModalOpen || selectedBooking || activeChat || selectedProfile || selectedStudio;
+        if (anyModalOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isAddModalOpen, selectedBooking, activeChat, selectedProfile, selectedStudio]);
+
+    const getSlotDateTime = (date: string | undefined, time: string | undefined) => {
+        if (!date || !time) return new Date(0)
+        return new Date(`${date}T${time}+08:00`)
+    }
 
     // Current Time Line Logic
     const [now, setNow] = useState(toManilaDate(new Date()))
@@ -580,7 +609,13 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                             width: `${widthPercent - 2}%`,
                                                                             left: `${leftPercent + 1}%`
                                                                         }}
-                                                                        onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); }}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            const slot = booking.slots;
+                                                                            const startH = parseInt(slot.start_time.split(':')[0]);
+                                                                            setCurrentSlotHistory(historyMap[`${slot.date}-${startH}`] || []);
+                                                                            setSelectedBooking(booking);
+                                                                        }}
                                                                     >
                                                                         <div className={clsx("flex justify-between items-start w-full", duration < 45 && "items-center")}>
                                                                             <div className="flex flex-col min-w-0">
@@ -1075,6 +1110,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     onClick={() => {
                                         setEditingSlot(selectedBooking.slots);
                                         setIsEditModalOpen(true);
+                                        setSelectedBooking(null);
                                     }}
                                     className="p-2 hover:bg-[#FFF1B5]/30 rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
                                     title="Edit Session"
@@ -1088,7 +1124,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     <Copy className="w-4 h-4" />
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(selectedBooking.slot_id)}
+                                    onClick={() => {
+                                        handleDelete(selectedBooking.slot_id);
+                                        setSelectedBooking(null);
+                                    }}
                                     className="p-2 hover:bg-red-50 rounded-full text-[#43302E]/40 hover:text-red-600 transition-all"
                                     title="Delete Session"
                                 >
@@ -1109,9 +1148,27 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     <h3 className="text-3xl font-serif text-[#43302E] tracking-tighter">
                                         {selectedBooking.price_breakdown?.equipment || 'Standard Session'}
                                     </h3>
-                                    <span className="bg-[#FFF1B5] text-[#43302E] text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
-                                        {selectedBooking.status === 'approved' ? 'Confirmed' : 'Pending'}
-                                    </span>
+                                    {(() => {
+                                        const isPastStart = getSlotDateTime(selectedBooking.slots?.date, selectedBooking.slots?.start_time) < now
+                                        const isPastEnd = getSlotDateTime(selectedBooking.slots?.date, selectedBooking.slots?.end_time) < now
+
+                                        let statusLabel = selectedBooking.status === 'approved' ? 'Confirmed' :
+                                            selectedBooking.status === 'completed' ? 'Completed' : 'Pending'
+
+                                        if (selectedBooking.status === 'approved' && isPastEnd) statusLabel = 'Completed'
+                                        if (selectedBooking.status === 'pending' && isPastStart) statusLabel = 'Expired'
+
+                                        return (
+                                            <span className={clsx(
+                                                "text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm",
+                                                statusLabel === 'Completed' ? "bg-forest/10 text-forest" :
+                                                    statusLabel === 'Expired' ? "bg-red-50 text-red-600" :
+                                                        "bg-[#FFF1B5] text-[#43302E]"
+                                            )}>
+                                                {statusLabel}
+                                            </span>
+                                        )
+                                    })()}
                                 </div>
 
                                 <div className="space-y-3">
@@ -1123,20 +1180,12 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     </div>
                                     <div className="flex items-center gap-3 text-[#43302E]">
                                         <MapPin className="w-4 h-4 opacity-40" />
-                                        {['approved', 'completed'].includes(selectedBooking.status) && selectedBooking.slots.studios?.google_maps_url ? (
-                                            <a
-                                                href={selectedBooking.slots.studios.google_maps_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-[11px] font-bold uppercase tracking-widest underline decoration-[#43302E]/20 hover:decoration-[#43302E] transition-all"
-                                            >
-                                                {selectedBooking.slots.studios?.location || 'Studio Location'}
-                                            </a>
-                                        ) : (
-                                            <span className="text-[11px] font-bold uppercase tracking-widest">
-                                                {selectedBooking.slots.studios?.location || 'Studio Location'}
-                                            </span>
-                                        )}
+                                        <button
+                                            onClick={() => setSelectedStudio(selectedBooking.slots.studios)}
+                                            className="text-[11px] font-bold uppercase tracking-widest underline decoration-[#43302E]/20 hover:decoration-forest hover:text-forest transition-all"
+                                        >
+                                            {selectedBooking.slots.studios?.name || 'Studio'} - {selectedBooking.slots.studios?.location || 'Studio Location'}
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -1151,23 +1200,86 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 </div>
 
                                 <div className="space-y-4">
-                                    <div className="flex items-center justify-between bg-[#FFF1B5]/20 p-4 rounded-xl border border-[#FFF1B5]/40">
+                                    <div
+                                        onClick={() => setSelectedProfile(selectedBooking.client)}
+                                        className="flex items-center justify-between bg-[#FFF1B5]/20 p-4 rounded-xl border border-[#FFF1B5]/40 cursor-pointer hover:bg-[#FFF1B5]/30 transition-all group"
+                                    >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm group-hover:scale-105 transition-transform">
                                                 <img
                                                     src={selectedBooking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.client?.full_name || 'C')}&background=F5F2EB&color=43302E`}
                                                     className="w-full h-full object-cover"
                                                 />
                                             </div>
                                             <div>
-                                                <p className="text-[11px] font-black text-[#43302E] uppercase tracking-wider">{selectedBooking.client?.full_name}</p>
+                                                <p className="text-[11px] font-black text-[#43302E] uppercase tracking-wider group-hover:text-forest transition-colors">{selectedBooking.client?.full_name}</p>
                                                 <p className="text-[9px] font-medium text-[#43302E]/50 uppercase tracking-tighter">Verified Client</p>
                                             </div>
                                         </div>
-                                        <span className="text-[9px] font-black text-[#43302E] bg-white px-3 py-1 rounded-full uppercase tracking-widest border border-[#43302E]/5">
-                                            Confirmed
-                                        </span>
+                                        {(() => {
+                                            const isPastStart = getSlotDateTime(selectedBooking.slots?.date, selectedBooking.slots?.start_time) < now
+                                            const isPastEnd = getSlotDateTime(selectedBooking.slots?.date, selectedBooking.slots?.end_time) < now
+
+                                            let statusLabel = selectedBooking.status === 'approved' ? 'Confirmed' :
+                                                selectedBooking.status === 'completed' ? 'Completed' : 'Pending'
+
+                                            if (selectedBooking.status === 'approved' && isPastEnd) statusLabel = 'Completed'
+                                            if (selectedBooking.status === 'pending' && isPastStart) statusLabel = 'Expired'
+
+                                            return (
+                                                <span className={clsx(
+                                                    "text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest border",
+                                                    statusLabel === 'Completed' ? "bg-forest/5 text-forest border-forest/10" :
+                                                        statusLabel === 'Expired' ? "bg-red-50 text-red-600 border-red-100" :
+                                                            "bg-white text-[#43302E] border-[#43302E]/5"
+                                                )}>
+                                                    {statusLabel}
+                                                </span>
+                                            )
+                                        })()}
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Event History Section */}
+                            <div className="pt-6 border-t border-[#43302E]/10 mt-6">
+                                <h4 className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
+                                    <Clock className="w-4 h-4 opacity-40" />
+                                    Event History
+                                </h4>
+                                <div className="space-y-3">
+                                    <div className="text-[10px] space-y-1">
+                                        <div className="flex items-center justify-between font-bold text-[#43302E]/60">
+                                            <span>Current Session</span>
+                                            <span className="uppercase tracking-tighter text-[8px] bg-[#F5F2EB] px-2 py-0.5 rounded border border-[#43302E]/10">
+                                                {selectedBooking.status}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-col gap-0.5 text-[#43302E]/40 font-medium">
+                                            <p>Booked on {format(new Date(selectedBooking.created_at), 'MMM d, h:mm a')}</p>
+                                            {['cancelled_refunded', 'cancelled_charged', 'rejected'].includes(selectedBooking.status?.toLowerCase()) && (
+                                                <p className="text-red-900/40 italic">
+                                                    Cancelled on {format(new Date(selectedBooking.updated_at), 'MMM d, h:mm a')}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {currentSlotHistory.map(h => (
+                                        <div key={h.id} className="text-[10px] space-y-1 opacity-60">
+                                            <div className="flex items-center justify-between font-bold text-[#43302E]/60">
+                                                <span>{h.client?.full_name || 'Previous Client'}</span>
+                                                <span className="uppercase tracking-tighter text-[8px] bg-red-50 text-red-600 px-2 py-0.5 rounded border border-red-100">
+                                                    {h.status}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-col gap-0.5 text-[#43302E]/40 font-medium">
+                                                <p>Booked on {format(new Date(h.created_at || h.updated_at), 'MMM d, h:mm a')}</p>
+                                                <p className="text-red-900/40 italic">
+                                                    Cancelled on {format(new Date(h.updated_at), 'MMM d, h:mm a')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
@@ -1187,6 +1299,115 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                     </div>
                 )
             }
+
+            {/* Profile Detail Modal */}
+            {selectedProfile && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedProfile(null)}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedProfile(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal"><X className="w-5 h-5" /></button>
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                        <div className="flex flex-col items-center text-center mb-10">
+                            <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
+                                <img src={selectedProfile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedProfile.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
+                            </div>
+                            <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedProfile.full_name}</h3>
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedProfile.email}</p>
+                                {selectedProfile.date_of_birth && (
+                                    <div className="inline-block px-3 py-1 bg-forest/5 rounded-full border border-forest/10 mt-2">
+                                        <p className="text-[9px] font-black text-forest uppercase tracking-[0.2em]">{calculateAge(selectedProfile.date_of_birth)} YEARS OLD</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {selectedProfile.bio && (
+                            <div className="bg-white/40 p-6 rounded-[2rem] border border-white/60 mb-6 relative z-10">
+                                <h4 className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">BIO</h4>
+                                <p className="text-[11px] text-charcoal/60 leading-relaxed italic uppercase tracking-wider">"{selectedProfile.bio}"</p>
+                            </div>
+                        )}
+
+                        <div className="mb-8">
+                            {(() => {
+                                const conditions = typeof selectedProfile.medical_conditions === 'string'
+                                    ? selectedProfile.medical_conditions.split(',').map((c: string) => c.trim())
+                                    : Array.isArray(selectedProfile.medical_conditions)
+                                        ? selectedProfile.medical_conditions
+                                        : [];
+
+                                const displayConditions = conditions
+                                    .map((c: string) => c === 'Others' ? selectedProfile.other_medical_condition : c)
+                                    .filter(Boolean)
+                                    .join(', ');
+
+                                return displayConditions ? (
+                                    <div className="bg-red-50 p-8 rounded-lg border border-red-200 relative z-10">
+                                        <h4 className="text-[10px] font-black text-red-800 uppercase tracking-[0.3em] mb-4 flex items-center gap-3"><AlertTriangle className="w-4 h-4" /> PHYSICAL CONDITIONS</h4>
+                                        <p className="text-[11px] text-red-900 font-black uppercase tracking-[0.2em] leading-relaxed">{displayConditions}</p>
+                                    </div>
+                                ) : (
+                                    <div className="bg-green-50 p-8 rounded-lg border border-green-200 relative z-10">
+                                        <h4 className="text-[10px] font-black text-forest uppercase tracking-[0.4em] mb-2">HEALTH STATUS</h4>
+                                        <p className="text-[10px] text-forest/40 uppercase tracking-[0.2em] italic">No reported conditions.</p>
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                        <button onClick={() => setSelectedProfile(null)} className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
+                    </div>
+                </div>
+            )}
+
+            {/* Studio Detail Modal */}
+            {selectedStudio && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedStudio(null)}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedStudio(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal"><X className="w-5 h-5" /></button>
+                        <div className="flex flex-col items-center text-center mb-10">
+                            <div className="w-24 h-24 rounded-2xl overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10 bg-white">
+                                <img src={selectedStudio.logo_url || "/logo.png"} className="w-full h-full object-contain p-2" />
+                            </div>
+                            <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedStudio.name}</h3>
+                            <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedStudio.location}</p>
+                        </div>
+
+                        <div className="space-y-6 mb-10">
+                            {selectedStudio.description && (
+                                <div className="bg-off-white/50 p-6 rounded-2xl border border-border-grey/50">
+                                    <h4 className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">ABOUT THE STUDIO</h4>
+                                    <p className="text-[11px] text-charcoal/70 leading-relaxed">{selectedStudio.description}</p>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 gap-3">
+                                <div className="flex items-center gap-4 p-4 bg-white border border-border-grey rounded-xl shadow-tight">
+                                    <div className="w-10 h-10 rounded-lg bg-forest/5 flex items-center justify-center"><Clock className="w-5 h-5 text-forest/40" /></div>
+                                    <div>
+                                        <p className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.2em]">CONTACT INFO</p>
+                                        <p className="text-[11px] font-bold text-charcoal">{selectedStudio.email || 'No email provided'}</p>
+                                        <p className="text-[11px] font-bold text-slate">{selectedStudio.phone || 'No phone provided'}</p>
+                                    </div>
+                                </div>
+                                {selectedStudio.google_maps_url && (
+                                    <a href={selectedStudio.google_maps_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-white border border-border-grey rounded-xl shadow-tight hover:border-forest/40 hover:bg-forest/5 transition-all group">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-lg bg-forest/5 flex items-center justify-center"><MapPin className="w-5 h-5 text-forest/40" /></div>
+                                            <div>
+                                                <p className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.2em]">LOCATION</p>
+                                                <p className="text-[11px] font-bold text-charcoal group-hover:text-forest transition-colors">Open in Google Maps</p>
+                                            </div>
+                                        </div>
+                                        <ArrowUpRight className="w-4 h-4 text-charcoal/20 group-hover:text-forest transition-all" />
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+
+                        <button onClick={() => setSelectedStudio(null)} className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
+                    </div>
+                </div>
+            )}
 
             {activeChat && (
                 <ChatWindow

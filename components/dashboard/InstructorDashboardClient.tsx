@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Loader2, Calendar, Box, X, AlertCircle, MessageSquare } from 'lucide-react';
+import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2 } from 'lucide-react'
 import Link from 'next/link';
 import ChatWindow from '@/components/dashboard/ChatWindow';
 import MessageCountBadge from '@/components/dashboard/MessageCountBadge';
@@ -47,7 +47,8 @@ export default function InstructorDashboardClient({
 
     const [activeChat, setActiveChat] = useState<{ id: string, recipientId: string, name: string, isExpired: boolean } | null>(null);
     const [cancellingBooking, setCancellingBooking] = useState<any>(null);
-    const [selectedClient, setSelectedClient] = useState<any>(null);
+    const [selectedProfile, setSelectedProfile] = useState<any>(null);
+    const [selectedStudio, setSelectedStudio] = useState<any>(null);
 
 
     const isChatExpired = (booking: any) => {
@@ -67,6 +68,27 @@ export default function InstructorDashboardClient({
         }
         return result;
     };
+
+    const calculateAge = (dob: string) => {
+        if (!dob) return null;
+        const birthDate = new Date(dob);
+        const ageDifMs = Date.now() - birthDate.getTime();
+        const ageDate = new Date(ageDifMs);
+        return Math.abs(ageDate.getUTCFullYear() - 1970);
+    };
+
+    // Scroll Lock
+    useEffect(() => {
+        const anyModalOpen = cancellingBooking || selectedProfile || selectedStudio || activeChat;
+        if (anyModalOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [cancellingBooking, selectedProfile, selectedStudio, activeChat]);
 
     return (
         <div className="space-y-16 pb-20">
@@ -171,18 +193,24 @@ export default function InstructorDashboardClient({
                                                 <div className="flex justify-between items-start mb-6">
                                                     <div className="flex flex-col gap-1 w-full">
                                                         <div className="flex items-center gap-4">
-                                                            <Link href={`/studios/${session.slots.studios.id}`} aria-label={`View studio details for ${session.slots.studios.name}`} className="w-12 h-12 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700">
+                                                            <button
+                                                                onClick={() => setSelectedStudio(session.slots.studios)}
+                                                                className="w-12 h-12 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700"
+                                                            >
                                                                 <img
                                                                     src={session.slots.studios.logo_url || "/logo.png"}
                                                                     alt=""
                                                                     className="w-full h-full object-cover"
                                                                 />
-                                                            </Link>
+                                                            </button>
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-start justify-between gap-2">
-                                                                    <Link href={`/studios/${session.slots.studios.id}`} className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] truncate hover:text-forest transition-colors">
+                                                                    <button
+                                                                        onClick={() => setSelectedStudio(session.slots.studios)}
+                                                                        className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] truncate hover:text-forest transition-colors text-left"
+                                                                    >
                                                                         {session.slots.studios.name}
-                                                                    </Link>
+                                                                    </button>
                                                                     <div className="flex items-center gap-2 bg-[#FFF1B5]/40 px-2 py-0.5 rounded border border-[#43302E]/5 whitespace-nowrap">
                                                                         <span className="text-[9px] font-black text-[#43302E]">1/1</span>
                                                                     </div>
@@ -199,8 +227,8 @@ export default function InstructorDashboardClient({
                                                 <div className="pt-6 border-t border-white/60 space-y-4">
                                                     <button
                                                         className="flex items-center gap-3 cursor-pointer group/client w-full text-left focus:outline-none focus:ring-1 focus:ring-forest rounded-lg p-1 -m-1"
-                                                        onClick={() => setSelectedClient(session.client)}
-                                                        aria-label={`View health record for ${session.client?.full_name}`}
+                                                        onClick={() => setSelectedProfile(session.client)}
+                                                        aria-label={`View record for ${session.client?.full_name}`}
                                                     >
                                                         <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shrink-0 border border-border-grey shadow-tight group-hover/client:scale-110 transition-transform duration-300">
                                                             <img alt="" src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
@@ -305,40 +333,111 @@ export default function InstructorDashboardClient({
                 />
             )}
 
-            {selectedClient && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/40 animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
-                    <div className="earth-card w-full max-w-sm overflow-hidden p-10 relative animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setSelectedClient(null)} className="absolute top-8 right-8 text-slate/20 hover:text-charcoal transition-colors p-2 bg-white rounded-lg border border-border-grey shadow-tight"><X className="w-5 h-5" /></button>
-
-                        <div className="flex flex-col items-center mt-6 mb-10 text-center relative z-10">
-                            <div className="w-28 h-28 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight scale-110 relative">
-                                <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+            {/* Profile Detail Modal */}
+            {selectedProfile && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedProfile(null)}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedProfile(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal"><X className="w-5 h-5" /></button>
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                        <div className="flex flex-col items-center text-center mb-10">
+                            <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
+                                <img src={selectedProfile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedProfile.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
                             </div>
-                            <h3 className="text-3xl font-serif text-charcoal tracking-tighter">{selectedClient.full_name}</h3>
-                            <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em] mt-2">{selectedClient.email}</p>
+                            <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedProfile.full_name}</h3>
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedProfile.email}</p>
+                                {selectedProfile.date_of_birth && (
+                                    <div className="inline-block px-3 py-1 bg-forest/5 rounded-full border border-forest/10 mt-2">
+                                        <p className="text-[9px] font-black text-forest uppercase tracking-[0.2em]">{calculateAge(selectedProfile.date_of_birth)} YEARS OLD</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        {selectedClient.medical_conditions ? (
-                            <div className="bg-red-50 p-8 rounded-lg border border-red-200 relative z-10">
-                                <h4 className="text-[10px] font-black text-red-800 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
-                                    <AlertCircle className="w-4 h-4" />
-                                    Medical Conditions
-                                </h4>
-                                <p className="text-xs text-red-900 leading-relaxed font-medium italic">{selectedClient.medical_conditions}</p>
-                            </div>
-                        ) : (
-                            <div className="bg-green-50 p-8 rounded-lg border border-green-200 relative z-10">
-                                <h4 className="text-[10px] font-black text-forest uppercase tracking-[0.3em] mb-2">Health Status</h4>
-                                <p className="text-[11px] text-forest/60 font-black uppercase tracking-[0.1em]">Clear / No conditions reported.</p>
+                        {selectedProfile.bio && (
+                            <div className="bg-white/40 p-6 rounded-[2rem] border border-white/60 mb-6 relative z-10">
+                                <h4 className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">BIO</h4>
+                                <p className="text-[11px] text-charcoal/60 leading-relaxed italic uppercase tracking-wider">"{selectedProfile.bio}"</p>
                             </div>
                         )}
 
-                        <button
-                            onClick={() => setSelectedClient(null)}
-                            className="w-full mt-10 py-5 bg-charcoal text-white rounded-lg text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 z-10 relative"
-                        >
-                            CLOSE RECORD
-                        </button>
+                        <div className="mb-8">
+                            {(() => {
+                                const conditions = typeof selectedProfile.medical_conditions === 'string'
+                                    ? selectedProfile.medical_conditions.split(',').map((c: string) => c.trim())
+                                    : Array.isArray(selectedProfile.medical_conditions)
+                                        ? selectedProfile.medical_conditions
+                                        : [];
+
+                                const displayConditions = conditions
+                                    .map((c: string) => c === 'Others' ? selectedProfile.other_medical_condition : c)
+                                    .filter(Boolean)
+                                    .join(', ');
+
+                                return displayConditions ? (
+                                    <div className="bg-red-50 p-8 rounded-lg border border-red-200 relative z-10">
+                                        <h4 className="text-[10px] font-black text-red-800 uppercase tracking-[0.3em] mb-4 flex items-center gap-3"><AlertCircle className="w-4 h-4" /> PHYSICAL CONDITIONS</h4>
+                                        <p className="text-[11px] text-red-900 font-black uppercase tracking-[0.2em] leading-relaxed">{displayConditions}</p>
+                                    </div>
+                                ) : (
+                                    <div className="bg-green-50 p-8 rounded-lg border border-green-200 relative z-10">
+                                        <h4 className="text-[10px] font-black text-forest uppercase tracking-[0.4em] mb-2">HEALTH STATUS</h4>
+                                        <p className="text-[10px] text-forest/40 uppercase tracking-[0.2em] italic">No reported conditions.</p>
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                        <button onClick={() => setSelectedProfile(null)} className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
+                    </div>
+                </div>
+            )}
+
+            {/* Studio Detail Modal */}
+            {selectedStudio && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedStudio(null)}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedStudio(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal"><X className="w-5 h-5" /></button>
+                        <div className="flex flex-col items-center text-center mb-10">
+                            <div className="w-24 h-24 rounded-2xl overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10 bg-white">
+                                <img src={selectedStudio.logo_url || "/logo.png"} className="w-full h-full object-contain p-2" />
+                            </div>
+                            <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedStudio.name}</h3>
+                            <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedStudio.location}</p>
+                        </div>
+
+                        <div className="space-y-6 mb-10">
+                            {selectedStudio.description && (
+                                <div className="bg-off-white/50 p-6 rounded-2xl border border-border-grey/50">
+                                    <h4 className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">ABOUT THE STUDIO</h4>
+                                    <p className="text-[11px] text-charcoal/70 leading-relaxed">{selectedStudio.description}</p>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 gap-3">
+                                <div className="flex items-center gap-4 p-4 bg-white border border-border-grey rounded-xl shadow-tight">
+                                    <div className="w-10 h-10 rounded-lg bg-forest/5 flex items-center justify-center"><Box className="w-5 h-5 text-forest/40" /></div>
+                                    <div>
+                                        <p className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.2em]">CONTACT INFO</p>
+                                        <p className="text-[11px] font-bold text-charcoal">{selectedStudio.email || 'No email provided'}</p>
+                                        <p className="text-[11px] font-bold text-slate">{selectedStudio.phone || 'No phone provided'}</p>
+                                    </div>
+                                </div>
+                                {selectedStudio.google_maps_url && (
+                                    <a href={selectedStudio.google_maps_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-white border border-border-grey rounded-xl shadow-tight hover:border-forest/40 hover:bg-forest/5 transition-all group">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-lg bg-forest/5 flex items-center justify-center"><MapPin className="w-5 h-5 text-forest/40" /></div>
+                                            <div>
+                                                <p className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.2em]">LOCATION</p>
+                                                <p className="text-[11px] font-bold text-charcoal group-hover:text-forest transition-colors">Open in Google Maps</p>
+                                            </div>
+                                        </div>
+                                        <ArrowUpRight className="w-4 h-4 text-charcoal/20 group-hover:text-forest transition-all" />
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+
+                        <button onClick={() => setSelectedStudio(null)} className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
                     </div>
                 </div>
             )}

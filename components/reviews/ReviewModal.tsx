@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Star, X } from 'lucide-react'
 import { submitReview } from '@/app/(dashboard)/reviews/actions'
 import { CUSTOMER_TAGS, INSTRUCTOR_TAGS, ReviewRole } from '@/lib/reviews'
@@ -58,6 +58,15 @@ export default function ReviewModal({ booking, isInstructor, revieweeId: reviewe
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
+    // Implement scroll lock
+    useEffect(() => {
+        const originalStyle = window.getComputedStyle(document.body).overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = originalStyle;
+        };
+    }, []);
+
     // Studio reviews use customer tags too (same pool as rating the instructor)
     const tags = isInstructor ? INSTRUCTOR_TAGS : CUSTOMER_TAGS
     const role: ReviewRole = isInstructor ? 'instructor' : 'customer'
@@ -112,8 +121,8 @@ export default function ReviewModal({ booking, isInstructor, revieweeId: reviewe
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500">
                 {/* Header */}
                 <div className="bg-charcoal px-8 py-6 text-white relative">
                     <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">

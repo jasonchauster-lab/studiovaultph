@@ -38,6 +38,8 @@ export default async function InstructorDashboardPage({ searchParams }: { search
         .from('bookings')
         .select(`
             *,
+            created_at,
+            updated_at,
             price_breakdown,
             slots!inner (
                 date,
@@ -56,7 +58,10 @@ export default async function InstructorDashboardPage({ searchParams }: { search
                 full_name,
                 email,
                 avatar_url,
-                medical_conditions
+                bio,
+                medical_conditions,
+                other_medical_condition,
+                date_of_birth
             )
         `)
         .eq('instructor_id', user.id)
@@ -79,6 +84,8 @@ export default async function InstructorDashboardPage({ searchParams }: { search
         .from('bookings')
         .select(`
             *,
+            created_at,
+            updated_at,
             price_breakdown,
             slots!inner (
                 id,
@@ -98,7 +105,10 @@ export default async function InstructorDashboardPage({ searchParams }: { search
                 full_name,
                 email,
                 avatar_url,
-                medical_conditions
+                bio,
+                medical_conditions,
+                other_medical_condition,
+                date_of_birth
             )
         `)
         .eq('instructor_id', user.id)

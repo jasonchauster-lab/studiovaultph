@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Calendar, MapPin, Box, X, AlertCircle, Clock } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
@@ -21,12 +21,26 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
         dateRange: { from: null, to: null }
     })
     const [selectedClient, setSelectedClient] = useState<any>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [error, setError] = useState<string | null>(null)
     const [cancellingBooking, setCancellingBooking] = useState<any>(null)
     const [reviewTarget, setReviewTarget] = useState<{
         booking: any,
         revieweeId: string,
         revieweeName: string
     } | null>(null)
+
+    // Implement scroll lock
+    useEffect(() => {
+        if (selectedClient || cancellingBooking || reviewTarget) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [selectedClient, cancellingBooking, reviewTarget]);
 
     const handleCancelConfirm = async (reason: string) => {
         if (!cancellingBooking) return { error: 'No booking selected' }
@@ -61,7 +75,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     const now = new Date()
 
     // 1. Filter ALL bookings based on local state
-    const filteredBookings = bookings.filter((b) => {
+    const filteredBookings = useMemo(() => bookings.filter((b: any) => {
         const slot = getFirst(b.slots)
         if (!slot) return false
 
@@ -80,23 +94,23 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
         }
 
         return true
-    })
+    }), [bookings, filters]);
 
     // 2. Split filtered bookings into active/past
     // "Active" includes anything today (even if started) or in the future that is approved
-    const activeBookings = filteredBookings.filter(b => {
+    const activeBookings = useMemo(() => filteredBookings.filter((b: any) => {
         const slot = getFirst(b.slots)
         if (!slot) return false
         const endDateTime = getSlotEndDateTime(slot.date, slot.end_time || slot.start_time)
         return b.status === 'approved' && endDateTime > now
-    })
+    }), [filteredBookings, now]);
 
-    const historicalBookings = filteredBookings.filter(b => {
+    const historicalBookings = useMemo(() => filteredBookings.filter((b: any) => {
         const slot = getFirst(b.slots)
         if (!slot) return false
         const endDateTime = getSlotEndDateTime(slot.date, slot.end_time || slot.start_time)
         return (b.status !== 'approved' || endDateTime <= now)
-    })
+    }), [filteredBookings, now]);
 
     return (
         <div className="space-y-20">
@@ -105,7 +119,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             </div>
 
             {/* Active Sessions List */}
-            <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <section>
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-4">
                         <Calendar className="w-6 h-6 text-forest" />
@@ -227,7 +241,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
             {/* Past Sessions List */}
             {historicalBookings.length > 0 && (
-                <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                <section>
                     <div className="flex items-center justify-between mb-10">
                         <div className="flex items-center gap-4">
                             <Clock className="w-6 h-6 text-charcoal/40" />
@@ -360,8 +374,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
             {/* Client Detail Modal overhaul */}
             {selectedClient && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/20 backdrop-blur-xl animate-in fade-in duration-700" onClick={() => setSelectedClient(null)}>
-                    <div className="glass-card w-full max-w-sm overflow-hidden p-10 relative animate-in zoom-in-95 duration-700 shadow-cloud rounded-[3rem]" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500" onClick={e => e.stopPropagation()}>
                         <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
                         <div className="flex flex-col items-center text-center mb-10">

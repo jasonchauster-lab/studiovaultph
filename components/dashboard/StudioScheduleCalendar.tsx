@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, startOfDay, isPast, startOfMonth, endOfMonth, addDays, subDays, addMonths, subMonths, getDay, setHours, setMinutes } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Users, User, Calendar as CalendarIcon, Clock, Trash2, Edit2, X, Sparkles, MapPin, Box, ArrowUpRight, Pencil, Copy } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Users, User, Calendar as CalendarIcon, Clock, Trash2, Edit2, X, Sparkles, MapPin, Box, ArrowUpRight, Pencil, Copy, AlertCircle } from 'lucide-react'
 import clsx from 'clsx'
 import { createSlot, deleteSlot, updateSlot } from '@/app/(dashboard)/studio/actions' // For single slot
 import ScheduleManager from './ScheduleManager' // Bulk generator
@@ -23,6 +23,8 @@ interface Slot {
     bookings?: Array<{
         id: string;
         status: string;
+        created_at: string;
+        updated_at: string;
         equipment?: string;
         price_breakdown?: any;
         client?: { full_name: string; avatar_url: string };
@@ -52,6 +54,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
     const [isBucketModalOpen, setIsBucketModalOpen] = useState(false)
     const [bucketSlots, setBucketSlots] = useState<Slot[]>([])
     const [bucketTime, setBucketTime] = useState<{ date: Date, hour: number } | null>(null)
+
+    // Profile Detail Modal State
+    const [selectedProfile, setSelectedProfile] = useState<any>(null)
 
     // Calendar Calculations
     const days = useMemo(() => {
@@ -90,6 +95,26 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
         }, 60000) // Update every minute
         return () => clearInterval(timer)
     }, [])
+
+    // Centralized Scroll Lock for all modals
+    useEffect(() => {
+        if (isAddModalOpen || isEditModalOpen || isBucketModalOpen || selectedProfile) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isAddModalOpen, isEditModalOpen, isBucketModalOpen, selectedProfile]);
+
+    const calculateAge = (birthday: string) => {
+        if (!birthday) return null
+        const birthDate = new Date(birthday)
+        const ageDifMs = Date.now() - birthDate.getTime()
+        const ageDate = new Date(ageDifMs)
+        return Math.abs(ageDate.getUTCFullYear() - 1970)
+    }
 
     const currentTimePosition = useMemo(() => {
         const hours24 = now.getUTCHours()
@@ -833,11 +858,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                 {isBucketModalOpen && bucketTime && (() => {
                     const allBookings = bucketSlots.flatMap(s => s.bookings || []);
                     const activeBookings = allBookings.filter(b => ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || ''));
-                    const cancelledBookings = allBookings.filter(b => ['cancelled_refunded', 'cancelled_charged', 'rejected'].includes(b.status?.toLowerCase() || ''));
-
-                    const instructors = new Set<string>();
+                    const instructorsMap = new Map<string, any>();
                     activeBookings.forEach(b => {
-                        if (b.instructor?.full_name) instructors.add(b.instructor.full_name);
+                        if (b.instructor?.full_name) instructorsMap.set(b.instructor.full_name, b.instructor);
                     });
 
                     const bookingsByEquipment: Record<string, typeof activeBookings> = {};
@@ -847,18 +870,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                         bookingsByEquipment[eq].push(b);
                     });
 
-                    // For the top-right actions, we target the first slot if available
                     const primarySlot = bucketSlots[0];
 
                     return (
-                        <div
-                            className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
-                            onClick={() => setIsBucketModalOpen(false)}
-                        >
-                            <div
-                                className="bg-white rounded-xl p-8 md:p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 max-h-[90vh] overflow-y-auto will-change-transform"
-                                onClick={(e) => e.stopPropagation()}
-                            >
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300" onClick={() => setIsBucketModalOpen(false)}>
+                            <div className="bg-white rounded-xl p-8 md:p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 max-h-[90vh] overflow-y-auto will-change-transform" onClick={e => e.stopPropagation()}>
                                 <div className="flex justify-between items-start mb-10">
                                     <div>
                                         <h3 className="text-3xl font-serif text-[#43302E] tracking-tighter">
@@ -870,49 +886,33 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                             </div>
                                             <div className="space-y-0.5">
                                                 <p className="text-[10px] text-[#43302E]/60 font-bold uppercase tracking-[0.2em]">Staffing</p>
-                                                <p className="text-[14px] font-bold text-[#43302E] tracking-tight">
-                                                    {instructors.size > 0 ? Array.from(instructors).join(', ') : 'Unassigned'}
-                                                </p>
+                                                <div className="flex flex-wrap gap-x-2">
+                                                    {instructorsMap.size > 0 ? (
+                                                        Array.from(instructorsMap.values()).map((instructor, idx) => (
+                                                            <button
+                                                                key={instructor.full_name + idx}
+                                                                onClick={() => setSelectedProfile(instructor)}
+                                                                className="text-[14px] font-bold text-[#43302E] tracking-tight hover:text-forest transition-colors flex items-center gap-1"
+                                                            >
+                                                                {instructor.full_name}{idx < instructorsMap.size - 1 ? ',' : ''}
+                                                            </button>
+                                                        ))
+                                                    ) : (
+                                                        <p className="text-[14px] font-bold text-[#43302E] tracking-tight">Unassigned</p>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => {
-                                                if (primarySlot) {
-                                                    setIsBucketModalOpen(false);
-                                                    onSlotClick(primarySlot);
-                                                }
-                                            }}
-                                            className="p-3 bg-white hover:bg-off-white rounded-lg text-[#43302E] transition-all border border-border-grey shadow-tight"
-                                            title="Edit"
-                                        >
+                                        <button onClick={() => { if (primarySlot) { setIsBucketModalOpen(false); onSlotClick(primarySlot); } }} className="p-3 bg-white hover:bg-off-white rounded-lg text-[#43302E] transition-all border border-border-grey shadow-tight" title="Edit">
                                             <Pencil className="w-5 h-5" />
                                         </button>
-                                        <button
-                                            onClick={() => {
-                                                if (primarySlot) {
-                                                    setIsBucketModalOpen(false);
-                                                    setSingleDate(primarySlot.date);
-                                                    setSingleTime(primarySlot.start_time);
-                                                    setSingleEndTime(primarySlot.end_time);
-                                                    // Copy equipment from primary slot
-                                                    const newEq: Record<string, number> = {};
-                                                    if (primarySlot.equipment) Object.assign(newEq, primarySlot.equipment);
-                                                    setAddMode('single');
-                                                    setIsAddModalOpen(true);
-                                                }
-                                            }}
-                                            className="p-3 bg-white hover:bg-off-white rounded-lg text-[#43302E] transition-all border border-border-grey shadow-tight"
-                                            title="Duplicate"
-                                        >
+                                        <button onClick={() => { if (primarySlot) { setIsBucketModalOpen(false); setSingleDate(primarySlot.date); setSingleTime(primarySlot.start_time); setSingleEndTime(primarySlot.end_time); const newEq: Record<string, number> = {}; if (primarySlot.equipment) Object.assign(newEq, primarySlot.equipment); setAddMode('single'); setIsAddModalOpen(true); } }} className="p-3 bg-white hover:bg-off-white rounded-lg text-[#43302E] transition-all border border-border-grey shadow-tight" title="Duplicate">
                                             <Copy className="w-5 h-5" />
                                         </button>
-                                        <button
-                                            onClick={() => setIsBucketModalOpen(false)}
-                                            className="p-3 bg-off-white hover:bg-white rounded-lg text-slate hover:text-charcoal transition-all border border-border-grey shadow-tight"
-                                        >
+                                        <button onClick={() => setIsBucketModalOpen(false)} className="p-3 bg-off-white hover:bg-white rounded-lg text-slate hover:text-charcoal transition-all border border-border-grey shadow-tight">
                                             <X className="w-5 h-5" />
                                         </button>
                                     </div>
@@ -929,11 +929,15 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                                             <div className="grid gap-3">
                                                 {bookings.map(b => (
-                                                    <div key={b.id} className="flex items-center justify-between p-4 bg-white border border-border-grey rounded-xl shadow-tight group hover:border-[#43302E]/20 transition-all">
+                                                    <div
+                                                        key={b.id}
+                                                        onClick={() => setSelectedProfile(b.client)}
+                                                        className="flex items-center justify-between p-4 bg-white border border-border-grey rounded-xl shadow-tight group hover:border-forest/40 hover:bg-forest/5 transition-all cursor-pointer"
+                                                    >
                                                         <div className="flex items-center gap-4">
                                                             <div className="w-10 h-10 rounded-full bg-off-white flex items-center justify-center overflow-hidden border border-border-grey shadow-inner">
                                                                 {b.client?.avatar_url ? (
-                                                                    <Image src={b.client.avatar_url} alt={b.client.full_name || 'Client'} width={40} height={40} className="object-cover w-full h-full" />
+                                                                    <img src={b.client.avatar_url} alt="" className="object-cover w-full h-full" />
                                                                 ) : (
                                                                     <User className="w-5 h-5 text-slate" />
                                                                 )}
@@ -952,24 +956,33 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                         </div>
                                     ))}
 
-                                    {cancelledBookings.length > 0 && (
-                                        <div className="pt-6 border-t border-border-grey/50">
-                                            <h4 className="text-[11px] font-bold text-red-900/40 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
-                                                <X className="w-4 h-4" />
-                                                Cancelled Bookings
-                                            </h4>
-                                            <div className="grid gap-2">
-                                                {cancelledBookings.map(b => (
-                                                    <div key={b.id} className="flex items-center justify-between p-3 bg-red-50/30 border border-red-100/50 rounded-lg">
-                                                        <div className="flex items-center gap-3">
-                                                            <p className="text-[12px] font-medium text-red-900/60 line-through">{b.client?.full_name || 'Client'}</p>
-                                                        </div>
-                                                        <p className="text-[9px] font-bold text-red-900/30 uppercase tracking-tighter">Cancelled</p>
+                                    {/* Event History Section */}
+                                    <div className="pt-6 border-t border-border-grey/50">
+                                        <h4 className="text-[11px] font-bold text-[#43302E]/40 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
+                                            <Clock className="w-4 h-4" />
+                                            Event History
+                                        </h4>
+                                        <div className="space-y-3">
+                                            {allBookings.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map(b => (
+                                                <div key={b.id} className="text-[10px] space-y-1">
+                                                    <div className="flex items-center justify-between font-bold text-[#43302E]/60">
+                                                        <span>{b.client?.full_name || 'Client'}</span>
+                                                        <span className="uppercase tracking-tighter text-[8px] bg-off-white px-2 py-0.5 rounded border border-border-grey/50">
+                                                            {b.status}
+                                                        </span>
                                                     </div>
-                                                ))}
-                                            </div>
+                                                    <div className="flex flex-col gap-0.5 text-[#43302E]/40 font-medium">
+                                                        <p>Booked on {format(new Date(b.created_at), 'MMM d, h:mm a')}</p>
+                                                        {['cancelled_refunded', 'cancelled_charged', 'rejected'].includes(b.status?.toLowerCase()) && (
+                                                            <p className="text-red-900/40 italic">
+                                                                Cancelled on {format(new Date(b.updated_at), 'MMM d, h:mm a')}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
 
                                 <div className="mt-12 pt-10 border-t border-border-grey flex justify-between items-center">
@@ -995,7 +1008,78 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                     );
                 })()}
 
-            </div>
-        </div>
+                {/* Profile Detail Modal */}
+                {selectedProfile && (
+                    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedProfile(null)}>
+                        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative" onClick={e => e.stopPropagation()}>
+                            <button onClick={() => setSelectedProfile(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal">
+                                <X className="w-5 h-5" />
+                            </button>
+
+                            <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+
+                            <div className="flex flex-col items-center text-center mb-10">
+                                <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
+                                    <img src={selectedProfile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedProfile.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
+                                </div>
+                                <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedProfile.full_name}</h3>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedProfile.email}</p>
+                                    {selectedProfile.date_of_birth && (
+                                        <div className="inline-block px-3 py-1 bg-forest/5 rounded-full border border-forest/10 mt-2">
+                                            <p className="text-[9px] font-black text-forest uppercase tracking-[0.2em]">{calculateAge(selectedProfile.date_of_birth)} YEARS OLD</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {selectedProfile.bio && (
+                                <div className="bg-white/40 p-6 rounded-[2rem] border border-white/60 mb-6 relative z-10">
+                                    <h4 className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">BIO</h4>
+                                    <p className="text-[11px] text-charcoal/60 leading-relaxed italic uppercase tracking-wider">"{selectedProfile.bio}"</p>
+                                </div>
+                            )}
+
+                            <div className="mb-8">
+                                {(() => {
+                                    const conditions = typeof selectedProfile.medical_conditions === 'string'
+                                        ? selectedProfile.medical_conditions.split(',').map((c: string) => c.trim())
+                                        : Array.isArray(selectedProfile.medical_conditions)
+                                            ? selectedProfile.medical_conditions
+                                            : [];
+
+                                    const displayConditions = conditions
+                                        .map((c: string) => c === 'Others' ? selectedProfile.other_medical_condition : c)
+                                        .filter(Boolean)
+                                        .join(', ');
+
+                                    return displayConditions ? (
+                                        <div className="bg-red-50 p-8 rounded-lg border border-red-200 relative z-10">
+                                            <h4 className="text-[10px] font-black text-red-800 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
+                                                <AlertCircle className="w-4 h-4" /> PHYSICAL CONDITIONS
+                                            </h4>
+                                            <p className="text-[11px] text-red-900 font-black uppercase tracking-[0.2em] leading-relaxed">{displayConditions}</p>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-green-50 p-8 rounded-lg border border-green-200 relative z-10">
+                                            <h4 className="text-[10px] font-black text-forest uppercase tracking-[0.4em] mb-2">HEALTH STATUS</h4>
+                                            <p className="text-[10px] text-forest/40 uppercase tracking-[0.2em] italic">No reported conditions.</p>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+
+                            <button
+                                onClick={() => setSelectedProfile(null)}
+                                className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95"
+                            >
+                                CLOSE
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+            </div >
+        </div >
     );
 }
