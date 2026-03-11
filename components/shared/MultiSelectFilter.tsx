@@ -47,7 +47,7 @@ export default function MultiSelectFilter({ label, options, value, onChange, cla
                     'flex items-center gap-3 px-4 py-2 rounded-xl border text-[11px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-sm',
                     isActive
                         ? 'bg-sage text-white border-sage'
-                        : 'bg-white/50 text-charcoal border-white/60 hover:border-sage/40'
+                        : 'bg-white text-charcoal border-border-grey hover:border-sage/40 hover:bg-off-white'
                 )}
             >
                 <Filter className="w-3.5 h-3.5 shrink-0" />
@@ -69,9 +69,9 @@ export default function MultiSelectFilter({ label, options, value, onChange, cla
             </button>
 
             {open && (
-                <div className="absolute z-50 top-full mt-3 left-0 w-64 bg-white/60 backdrop-blur-xl rounded-[24px] border border-white/60 shadow-cloud overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="p-4 border-b border-white/40">
-                        <div className="flex items-center gap-3 border border-white/60 focus-within:border-sage rounded-xl px-4 py-2 transition-all bg-white/40 shadow-inner">
+                <div className="absolute z-50 top-full mt-3 left-0 w-64 bg-white rounded-[24px] border border-border-grey shadow-cloud overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="p-4 border-b border-border-grey/10">
+                        <div className="flex items-center gap-3 border border-border-grey focus-within:border-sage rounded-xl px-4 py-2 transition-all bg-off-white shadow-inner">
                             <Search className="w-3.5 h-3.5 text-charcoal/30 shrink-0" />
                             <input
                                 autoFocus
@@ -101,7 +101,7 @@ export default function MultiSelectFilter({ label, options, value, onChange, cla
                                             'w-full flex items-center justify-between px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all',
                                             isSelected 
                                                 ? 'bg-sage/10 text-sage' 
-                                                : 'text-charcoal/60 hover:bg-white/40 hover:text-charcoal'
+                                                : 'text-charcoal/60 hover:bg-off-white hover:text-charcoal'
                                         )}
                                     >
                                         <span>{opt}</span>
@@ -113,7 +113,7 @@ export default function MultiSelectFilter({ label, options, value, onChange, cla
                     </div>
 
                     {isActive && (
-                        <div className="p-2 border-t border-white/40 bg-white/20">
+                        <div className="p-2 border-t border-border-grey/10 bg-off-white/50">
                             <button
                                 onClick={() => onChange([])}
                                 className="w-full py-2 text-[9px] font-bold uppercase tracking-[0.2em] text-charcoal/40 hover:text-charcoal transition-colors"
