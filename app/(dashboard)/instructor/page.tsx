@@ -177,7 +177,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
                 totalSessionsTaught={sessionCount || 0}
                 pendingEarnings={pendingEarnings}
                 currentDateStr={dateParam}
-                instructorProfile={profile || { id: user.id }}
+                instructorProfile={profile || { id: user.id, teaching_equipment: [], rates: {} }}
             />
         )
     } catch (error) {

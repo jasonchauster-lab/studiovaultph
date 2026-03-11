@@ -325,7 +325,7 @@ export default function InstructorScheduleCalendar({
     ];
 
     const GROUPED_AREAS = AREAS.reduce((acc, loc) => {
-        const city = loc.split(' - ')[0];
+        const city = loc?.split(' - ')[0] || loc || 'Studio';
         if (!acc[city]) acc[city] = [];
         acc[city].push(loc);
         return acc;
@@ -707,9 +707,9 @@ export default function InstructorScheduleCalendar({
 
                                                                             <div className="flex flex-wrap items-center gap-2">
                                                                                 {locations.map((loc, idx) => (
-                                                                                    <div key={loc + idx} className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-pastel-blue text-burgundy px-3 py-1 rounded-md border border-pastel-blue/20">
+                                                                                    <div key={(loc || 'loc') + idx} className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-pastel-blue text-burgundy px-3 py-1 rounded-md border border-pastel-blue/20">
                                                                                         <MapPin className="w-3 h-3 text-burgundy/40" />
-                                                                                        <span className="truncate max-w-[100px]">{loc.split(' - ')[0]}</span>
+                                                                                        <span className="truncate max-w-[100px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
                                                                                     </div>
                                                                                 ))}
                                                                             </div>
@@ -758,7 +758,7 @@ export default function InstructorScheduleCalendar({
                                                                                             {slotData.studios?.location && (
                                                                                                 <div className="text-[7px] font-black uppercase tracking-[0.1em] flex items-center gap-1 bg-burgundy/5 text-burgundy/60 px-2 py-0.5 rounded-md border border-burgundy/10">
                                                                                                     <MapPin className="w-2 h-2 shrink-0" />
-                                                                                                    <span className="truncate max-w-[60px]">{slotData.studios.location.split(' - ')[0]}</span>
+                                                                                                    <span className="truncate max-w-[60px]">{slotData.studios.location.split(' - ')[0] || 'Studio'}</span>
                                                                                                 </div>
                                                                                             )}
                                                                                             {slotData.equipment?.map((eq: string, idx: number) => (
@@ -1564,7 +1564,7 @@ export default function InstructorScheduleCalendar({
                                         : [];
 
                                 const displayConditions = conditions
-                                    .map((c: string) => c === 'Others' ? selectedProfile.other_medical_condition : c)
+                                    .map((c: string) => c === 'Others' ? (selectedProfile.other_medical_condition || 'Other Conditions') : c)
                                     .filter(Boolean)
                                     .join(', ');
 

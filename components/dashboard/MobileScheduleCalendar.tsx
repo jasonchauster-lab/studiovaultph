@@ -58,7 +58,7 @@ export default function MobileScheduleCalendar({
                 consolidated.push(s);
             } else {
                 const key = `${s.start_time}-${s.end_time}`;
-                const mainLoc = s.location?.split(' - ')[0] || s.location;
+                const mainLoc = s.location?.split(' - ')[0] || s.location || 'Studio';
 
                 if (!availabilityGroups[key]) {
                     availabilityGroups[key] = {
@@ -310,7 +310,7 @@ export default function MobileScheduleCalendar({
                                                 className="flex items-center gap-2 text-muted-burgundy hover:text-forest transition-all"
                                             >
                                                 <MapPin className="w-4 h-4 text-burgundy/40" />
-                                                <span className="font-bold uppercase tracking-wider text-[10px]">{session.location?.split(' - ')[0] || session.location}</span>
+                                                <span className="font-bold uppercase tracking-wider text-[10px]">{session.location?.split(' - ')[0] || session.location || 'Studio'}</span>
                                             </a>
                                         )}
                                     </div>

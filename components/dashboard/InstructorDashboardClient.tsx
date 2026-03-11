@@ -324,8 +324,8 @@ export default function InstructorDashboardClient({
                                     start_time: a.start_time,
                                     end_time: a.end_time,
                                     date: a.date || getManilaTodayStr(),
-                                    type: `Availability: ${a.location_area?.split(' - ').slice(-1)[0] || a.location_area}`,
-                                    location: a.location_area,
+                                    type: `Availability: ${a.location_area?.split(' - ').slice(-1)[0] || a.location_area || 'Standard'}`,
+                                    location: a.location_area || 'Studio',
                                     is_booked: false
                                 })),
                                 ...calendarBookings.map(b => {
@@ -560,8 +560,9 @@ export default function InstructorDashboardClient({
 
                                  const displayConditions = conditions
                                      .map((c: any) => {
+                                         if (!c) return null;
                                          const conditionStr = String(c);
-                                         return conditionStr === 'Others' ? selectedProfile.other_medical_condition : conditionStr;
+                                         return conditionStr === 'Others' ? (selectedProfile.other_medical_condition || 'Other Conditions') : conditionStr;
                                      })
                                      .filter(Boolean)
                                      .join(', ');
