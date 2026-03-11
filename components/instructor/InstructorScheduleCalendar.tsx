@@ -524,17 +524,6 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                                 ))}
                                                                             </div>
 
-                                                                            {primaryEq && duration >= 45 && (
-                                                                                <div className="flex flex-wrap items-center gap-2 mt-auto">
-                                                                                    <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-pastel-blue text-burgundy px-3 py-1 rounded-md border border-pastel-blue/20">
-                                                                                        <Box className="w-3 h-3 text-burgundy/40" />
-                                                                                        <span>{primaryEq}</span>
-                                                                                    </div>
-                                                                                    {extraEqCount > 0 && (
-                                                                                        <div className="text-[9px] font-bold text-slate">+{extraEqCount} NEXT</div>
-                                                                                    )}
-                                                                                </div>
-                                                                            )}
                                                                         </div>
                                                                     </div>
                                                                 )
