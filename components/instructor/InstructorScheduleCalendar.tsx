@@ -517,7 +517,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                             <div className="flex flex-wrap items-center gap-2">
                                                                                 <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-[#F3F4F6] text-[#4B5563] px-3 py-1 rounded-md border border-gray-200">
                                                                                     <MapPin className="w-3 h-3 text-[#4B5563]/40" />
-                                                                                    <span className="truncate max-w-[100px]">{locations[0].split(' - ')[1] || locations[0]}</span>
+                                                                                    <span className="truncate max-w-[100px]">{locations[0].split(' - ')[0]}</span>
                                                                                 </div>
                                                                                 {extraLocCount > 0 && duration >= 45 && (
                                                                                     <div className="text-[9px] font-bold text-[#4B5563] bg-[#F3F4F6] px-3 py-1 rounded-md border border-gray-200">+{extraLocCount} AREAS</div>
@@ -654,10 +654,22 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                         const dayStr = toManilaDateStr(day);
                                         const isCurrentMonth = day.getMonth() === currentDate.getMonth();
 
-                                        // Count slots for this day
                                         const daySessions = availability.filter(a => a.date === dayStr);
                                         const dayRecurring = availability.filter(a => !a.date && a.day_of_week === getDay(day));
-                                        const totalSessions = daySessions.length + dayRecurring.length;
+
+                                        // Deduplicate sessions for display (one per time block/location)
+                                        const allDaySessions = [...daySessions, ...dayRecurring].sort((a, b) => a.start_time.localeCompare(b.start_time));
+                                        const uniqueSessions = allDaySessions.reduce((acc, current) => {
+                                            const time = current.start_time.slice(0, 5);
+                                            const loc = current.location_area.split(' - ')[0];
+                                            const key = `${time}-${loc}`;
+                                            if (!acc.some((s: any) => s.key === key)) {
+                                                acc.push({ ...current, key });
+                                            }
+                                            return acc;
+                                        }, [] as any[]);
+
+                                        const displaySessionsCount = uniqueSessions.length;
 
                                         return (
                                             <div
@@ -679,21 +691,21 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     )}>
                                                         {format(day, 'd')}
                                                     </span>
-                                                    {totalSessions > 0 && (
+                                                    {displaySessionsCount > 0 && (
                                                         <span className="bg-forest/10 text-forest text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-widest">
-                                                            {totalSessions} Slots
+                                                            {displaySessionsCount} {displaySessionsCount === 1 ? 'Slot' : 'Slots'}
                                                         </span>
                                                     )}
                                                 </div>
                                                 <div className="space-y-1">
-                                                    {daySessions.slice(0, 3).map(s => (
-                                                        <div key={s.id} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter">
+                                                    {uniqueSessions.slice(0, 3).map((s: any) => (
+                                                        <div key={s.key} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter">
                                                             • {s.start_time.slice(0, 5)} {s.location_area.split(' - ')[0]}
                                                         </div>
                                                     ))}
-                                                    {totalSessions > 3 && (
+                                                    {displaySessionsCount > 3 && (
                                                         <div className="text-[8px] font-black text-forest uppercase tracking-widest pt-1">
-                                                            + {totalSessions - 3} more
+                                                            + {displaySessionsCount - 3} more
                                                         </div>
                                                     )}
                                                 </div>

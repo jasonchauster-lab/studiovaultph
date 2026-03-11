@@ -472,9 +472,19 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                             const dayStr = toManilaDateStr(day);
                                             const isCurrentMonth = day.getMonth() === currentDate.getMonth();
 
-                                            // Count slots for this day
-                                            const daySlots = slots.filter(s => s.date === dayStr);
-                                            const totalSlots = daySlots.length;
+                                            // Count unique display slots for this day
+                                            const daySlotsData = slots.filter(s => s.date === dayStr).sort((a, b) => a.start_time.localeCompare(b.start_time));
+                                            const uniqueDisplaySlots = daySlotsData.reduce((acc, current) => {
+                                                const time = current.start_time.slice(0, 5);
+                                                const type = current.equipment ? Object.keys(current.equipment)[0] : 'Open';
+                                                const key = `${time}-${type}`;
+                                                if (!acc.some((s: any) => s.key === key)) {
+                                                    acc.push({ ...current, key, displayType: type });
+                                                }
+                                                return acc;
+                                            }, [] as any[]);
+
+                                            const displaySlotsCount = uniqueDisplaySlots.length;
 
                                             return (
                                                 <div
@@ -497,21 +507,21 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                         )}>
                                                             {format(day, 'd')}
                                                         </span>
-                                                        {totalSlots > 0 && (
+                                                        {displaySlotsCount > 0 && (
                                                             <span className="bg-forest/10 text-forest text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-widest">
-                                                                {totalSlots} Slots
+                                                                {displaySlotsCount} {displaySlotsCount === 1 ? 'Slot' : 'Slots'}
                                                             </span>
                                                         )}
                                                     </div>
                                                     <div className="space-y-1">
-                                                        {daySlots.slice(0, 3).map(s => (
-                                                            <div key={s.id} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter">
-                                                                • {s.start_time.slice(0, 5)} {s.equipment ? Object.keys(s.equipment)[0] : 'Open'}
+                                                        {uniqueDisplaySlots.slice(0, 3).map((s: any) => (
+                                                            <div key={s.key} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter">
+                                                                • {s.start_time.slice(0, 5)} {s.displayType}
                                                             </div>
                                                         ))}
-                                                        {totalSlots > 3 && (
+                                                        {displaySlotsCount > 3 && (
                                                             <div className="text-[8px] font-black text-forest uppercase tracking-widest pt-1">
-                                                                + {totalSlots - 3} more
+                                                                + {displaySlotsCount - 3} more
                                                             </div>
                                                         )}
                                                     </div>
