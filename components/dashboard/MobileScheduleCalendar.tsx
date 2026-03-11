@@ -289,16 +289,29 @@ export default function MobileScheduleCalendar({
                                     <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[#FAFAFA]">
                                         {session.locations ? (
                                             session.locations.map((loc: string, idx: number) => (
-                                                <div key={idx} className="flex items-center gap-2 text-muted-burgundy bg-pastel-blue/20 px-3 py-1.5 rounded-lg border border-pastel-blue/40">
-                                                    <MapPin className="w-3.5 h-3.5 text-burgundy/40" />
+                                                <a 
+                                                    key={idx} 
+                                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="flex items-center gap-2 text-muted-burgundy bg-pastel-blue/20 px-3 py-1.5 rounded-lg border border-pastel-blue/40 hover:bg-forest hover:text-white hover:border-forest transition-all"
+                                                >
+                                                    <MapPin className="w-3.5 h-3.5 text-burgundy/40 group-hover:text-white" />
                                                     <span className="font-bold uppercase tracking-wider text-[9px]">{loc}</span>
-                                                </div>
+                                                </a>
                                             ))
                                         ) : (
-                                            <div className="flex items-center gap-2 text-muted-burgundy">
+                                            <a 
+                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(session.location)}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="flex items-center gap-2 text-muted-burgundy hover:text-forest transition-all"
+                                            >
                                                 <MapPin className="w-4 h-4 text-burgundy/40" />
                                                 <span className="font-bold uppercase tracking-wider text-[10px]">{session.location?.split(' - ')[0] || session.location}</span>
-                                            </div>
+                                            </a>
                                         )}
                                     </div>
                                 </div>

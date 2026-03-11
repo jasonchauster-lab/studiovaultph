@@ -433,8 +433,13 @@ export default function InstructorDashboardClient({
                                         <p className="text-[11px] font-bold text-slate">{selectedStudio.phone || 'No phone provided'}</p>
                                     </div>
                                 </div>
-                                {selectedStudio.google_maps_url && (
-                                    <a href={selectedStudio.google_maps_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-white border border-border-grey rounded-xl shadow-tight hover:border-forest/40 hover:bg-forest/5 transition-all group">
+                                {selectedStudio && (
+                                    <a 
+                                        href={selectedStudio.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selectedStudio.name} ${selectedStudio.location}`)}`}
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className="flex items-center justify-between p-4 bg-white border border-border-grey rounded-xl shadow-tight hover:border-forest/40 hover:bg-forest/5 transition-all group"
+                                    >
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-lg bg-forest/5 flex items-center justify-center"><MapPin className="w-5 h-5 text-forest/40" /></div>
                                             <div>

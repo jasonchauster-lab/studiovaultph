@@ -394,10 +394,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {/* Calendar Grid */}
             <div className="bg-white border border-border-grey shadow-tight overflow-hidden rounded-[8px]">
                 <div className="overflow-x-auto">
-                    <div className={clsx("min-w-[900px]", view === 'month' && "min-w-0")}>
+                    <div className={clsx("min-w-[800px] xl:min-w-full", view === 'month' && "min-w-0")}>
                         {view !== 'month' ? (
-                            <div className={clsx("grid border-b border-border-grey bg-off-white", view === 'day' ? "grid-cols-[112px_1fr]" : "grid-cols-8")}>
-                                <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-28 text-center uppercase tracking-[0.3em] flex items-center justify-center"></div>
+                            <div className={clsx("grid border-b border-border-grey bg-off-white", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-8")}>
+                                <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-[100px] text-center uppercase tracking-[0.3em] flex items-center justify-center"></div>
                                 {days.map(day => (
                                     <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 min-w-[120px] transition-all", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
                                         <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
@@ -429,8 +429,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                 className="absolute z-30 pointer-events-none flex items-center transition-all duration-1000"
                                                 style={{
                                                     top: `${currentTimePosition}%`,
-                                                    left: view === 'day' ? '112px' : `${(todayIdx + 1) * 12.5}%`,
-                                                    width: view === 'day' ? 'calc(100% - 112px)' : '12.5%'
+                                                    left: view === 'day' ? '100px' : `${(todayIdx + 1) * 12.5}%`,
+                                                    width: view === 'day' ? 'calc(100% - 100px)' : '12.5%'
                                                 }}
                                             >
                                                 <div className="w-[12px] h-[12px] bg-burgundy rounded-full -ml-[6px] ring-2 ring-white shadow-sm" />
@@ -440,8 +440,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     })()}
 
                                     {hours.map(hour => (
-                                        <div key={hour} className={clsx("grid", view === 'day' ? "grid-cols-[112px_1fr]" : "grid-cols-8")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
-                                            <div className="p-4 text-[10px] text-slate font-black border-r border-border-grey text-center sticky left-0 bg-white z-20 w-28 flex items-center justify-center tracking-[0.2em]">
+                                        <div key={hour} className={clsx("grid", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-8")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
+                                            <div className="p-4 text-[10px] text-slate font-black border-r border-border-grey text-center sticky left-0 bg-white z-20 w-[100px] flex items-center justify-center tracking-[0.2em]">
                                                 {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                             </div>
 
@@ -620,7 +620,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                         <div className={clsx("flex justify-between items-start w-full", duration < 45 && "items-center")}>
                                                                             <div className="flex flex-col min-w-0">
                                                                                 <span className="text-[10px] font-bold text-[#43302E] uppercase tracking-widest truncate">
-                                                                                    {booking.client?.full_name || booking.price_breakdown?.equipment || 'Standard session'}
+                                                                                    {booking.client?.full_name || 'Session'}
                                                                                 </span>
                                                                                 {duration >= 45 && (
                                                                                     <span className="text-[8px] font-medium text-[#43302E]/60 uppercase tracking-tighter mt-0.5 truncate">
@@ -629,7 +629,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                                 )}
                                                                             </div>
                                                                             <div className="text-[9px] font-black text-[#43302E] bg-buttermilk/40 px-1.5 py-0.5 rounded border border-[#43302E]/5 whitespace-nowrap">
-                                                                                {booking.quantity || 1}/{booking.quantity || 1}
+                                                                                {Math.min(booking.quantity || 1, 1)}/1
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -675,41 +675,33 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                                         allDayAvailability.forEach(a => {
                                             const time = a.start_time.slice(0, 5);
-                                            const eq = getShortEquipment(a.equipment);
-                                            const key = `${time}-${eq}`;
-                                            const slotUid = a.group_id || a.id;
+                                            // Key by time only to consolidate multiple availability locations into one "slot" for the instructor
+                                            const key = time;
 
                                             if (!groups[key]) {
-                                                groups[key] = { time, total: 0, booked: 0, equipment: a.equipment || [], processedSlotIds: new Set() };
+                                                groups[key] = { time, total: 1, booked: 0, equipment: ['Session'], processedSlotIds: new Set() };
                                             }
                                             
-                                            if (!groups[key].processedSlotIds.has(slotUid)) {
-                                                groups[key].total += 1;
-                                                groups[key].processedSlotIds.add(slotUid);
-                                            }
+                                            // Ensure total is capped at 1 for instructor-only view
+                                            groups[key].total = 1;
                                         });
 
                                         dayBookings.forEach(b => {
                                             const s = b.slots;
                                             const time = s.start_time.slice(0, 5);
-                                            const eq = getShortEquipment(s.equipment || [(b.price_breakdown as any)?.equipment]);
-                                            const key = `${time}-${eq}`;
+                                            const key = time;
                                             const bQty = b.quantity || 1;
 
                                             if (groups[key]) {
-                                                groups[key].booked += bQty;
-                                                if ((s.quantity || 1) > groups[key].total) {
-                                                    groups[key].total = s.quantity || 1;
-                                                }
-                                                if (groups[key].booked > groups[key].total) {
-                                                    groups[key].total = groups[key].booked;
-                                                }
+                                                groups[key].booked = Math.max(groups[key].booked, bQty);
+                                                // Always cap at 1 for instructor perspective
+                                                groups[key].total = 1;
                                             } else {
                                                 groups[key] = {
                                                     time,
-                                                    total: Math.max(s.quantity || 1, bQty),
+                                                    total: 1,
                                                     booked: bQty,
-                                                    equipment: s.equipment || [(b.price_breakdown as any)?.equipment].filter(Boolean),
+                                                    equipment: ['Session'],
                                                     processedSlotIds: new Set()
                                                 };
                                             }
@@ -741,10 +733,10 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                 </div>
                                                 <div className="space-y-1">
                                                     {sortedSessions.slice(0, 4).map((s) => (
-                                                        <div key={`${s.time}-${s.equipment.join(',')}`} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter flex items-center justify-between">
-                                                            <span className="truncate mr-2">• {s.time} {s.equipment.length > 0 ? s.equipment[0] : 'Session'}</span>
+                                                        <div key={`${s.time}`} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter flex items-center justify-between">
+                                                            <span className="truncate mr-2">• {s.time} SESSION</span>
                                                             <span className="shrink-0 font-bold text-[#43302E]/60 uppercase tracking-tighter bg-[#43302E]/5 px-1 rounded">
-                                                                {s.booked}/{s.total}
+                                                                {Math.min(s.booked, 1)}/1
                                                             </span>
                                                         </div>
                                                     ))}
@@ -1228,24 +1220,24 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     </div>
                                     <div className="flex items-center gap-3 text-[#43302E]">
                                         <MapPin className="w-4 h-4 opacity-40 shrink-0" />
-                                        <button
-                                            onClick={() => setSelectedStudio(selectedBooking.slots.studios)}
-                                            className="text-[11px] font-bold uppercase tracking-widest underline decoration-[#43302E]/20 hover:decoration-forest hover:text-forest transition-all text-left"
-                                        >
-                                            {selectedBooking.slots.studios?.name || 'Studio'} - {selectedBooking.slots.studios?.location || 'Studio Location'}
-                                        </button>
-                                        {selectedBooking.slots.studios?.google_maps_url && (
+                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                            <button
+                                                onClick={() => setSelectedStudio(selectedBooking.slots.studios)}
+                                                className="text-[11px] font-bold uppercase tracking-widest underline decoration-[#43302E]/20 hover:decoration-forest hover:text-forest transition-all text-left truncate"
+                                            >
+                                                {selectedBooking.slots.studios?.name || 'Studio'} - {selectedBooking.slots.studios?.location || 'Studio Location'}
+                                            </button>
                                             <a
-                                                href={selectedBooking.slots.studios.google_maps_url}
+                                                href={selectedBooking.slots.studios?.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selectedBooking.slots.studios?.name} ${selectedBooking.slots.studios?.location}`)}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="shrink-0 p-1.5 rounded-md bg-green-50 border border-green-200 text-forest hover:bg-forest hover:text-white transition-all"
+                                                className="shrink-0 p-1.5 rounded-md bg-green-50 border border-green-200 text-forest hover:bg-forest hover:text-white transition-all flex items-center justify-center"
                                                 title="Open in Google Maps"
                                             >
                                                 <ArrowUpRight className="w-3 h-3" />
                                             </a>
-                                        )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1345,11 +1337,14 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                             <div className="flex gap-4 pt-4 px-8 pb-8">
                                 <button
-                                    onClick={() => setActiveChat({
-                                        id: selectedBooking.id,
-                                        recipientId: selectedBooking.client_id,
-                                        name: selectedBooking.client?.full_name || 'Client'
-                                    })}
+                                    onClick={() => {
+                                        setActiveChat({
+                                            id: selectedBooking.id,
+                                            recipientId: selectedBooking.client_id,
+                                            name: selectedBooking.client?.full_name || 'Client'
+                                        });
+                                        setSelectedBooking(null);
+                                    }}
                                     className="flex-1 bg-[#43302E] text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-125 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3"
                                 >
                                     <MessageSquare className="w-4 h-4" /> Message Client
@@ -1449,8 +1444,13 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                         <p className="text-[11px] font-bold text-slate">{selectedStudio.phone || 'No phone provided'}</p>
                                     </div>
                                 </div>
-                                {selectedStudio.google_maps_url && (
-                                    <a href={selectedStudio.google_maps_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-white border border-border-grey rounded-xl shadow-tight hover:border-forest/40 hover:bg-forest/5 transition-all group">
+                                {selectedStudio && (
+                                    <a 
+                                        href={selectedStudio.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selectedStudio.name} ${selectedStudio.location}`)}`}
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className="flex items-center justify-between p-4 bg-white border border-border-grey rounded-xl shadow-tight hover:border-forest/40 hover:bg-forest/5 transition-all group"
+                                    >
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-lg bg-forest/5 flex items-center justify-center"><MapPin className="w-5 h-5 text-forest/40" /></div>
                                             <div>

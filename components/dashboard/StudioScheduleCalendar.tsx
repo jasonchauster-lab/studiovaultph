@@ -392,7 +392,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                 {/* Calendar Grid */}
                 <div className="bg-white border border-border-grey shadow-tight overflow-hidden rounded-[8px]">
                     <div className="overflow-x-auto">
-                        <div className={clsx("min-w-[900px]", view === 'month' && "min-w-0")}>
+                    <div className={clsx("min-w-[800px] xl:min-w-full", view === 'month' && "min-w-0")}>
                             {view !== 'month' && (
                                 <div className={clsx(
                                     "grid border-b border-border-grey bg-off-white",
