@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2 } from 'lucide-react'
+import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2, Pencil, Copy, Trash2, AlertTriangle, CheckCircle } from 'lucide-react'
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ChatWindow from '@/components/dashboard/ChatWindow';
@@ -12,6 +12,9 @@ import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions'
 import InstructorScheduleCalendar from '@/components/instructor/InstructorScheduleCalendar';
 import InstructorStatCards from './InstructorStatCards';
 import MobileScheduleCalendar from '@/components/dashboard/MobileScheduleCalendar';
+import { deleteAvailability } from '@/app/(dashboard)/instructor/schedule/actions';
+import clsx from 'clsx';
+import { format } from 'date-fns';
 
 interface InstructorDashboardClientProps {
     userId: string;
@@ -57,6 +60,85 @@ export default function InstructorDashboardClient({
     const [cancellingBooking, setCancellingBooking] = useState<any>(null);
     const [selectedProfile, setSelectedProfile] = useState<any>(null);
     const [selectedStudio, setSelectedStudio] = useState<any>(null);
+    const [selectedBooking, setSelectedBooking] = useState<any>(null);
+    const [editingSlot, setEditingSlot] = useState<any>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [currentSlotHistory, setCurrentSlotHistory] = useState<any[]>([]);
+
+    // State for Add/Edit Form
+    const [singleDate, setSingleDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+    const [singleTime, setSingleTime] = useState('09:00');
+    const [singleEndTime, setSingleEndTime] = useState('10:00');
+    const [locations, setLocations] = useState<string[]>([]);
+    const [equipment, setEquipment] = useState<string[]>([]);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [addMode, setAddMode] = useState<'single' | 'bulk'>('single');
+
+    const isProfileComplete = !!(
+        instructorProfile?.teaching_equipment &&
+        instructorProfile.teaching_equipment.length > 0 &&
+        instructorProfile.rates &&
+        Object.keys(instructorProfile.rates).length > 0
+    );
+
+    const [expandedCities, setExpandedCities] = useState<string[]>(['BGC', 'Makati']);
+
+    const toggleCityAccordion = (city: string) => {
+        setExpandedCities(prev =>
+            prev.includes(city) ? prev.filter(c => c !== city) : [...prev, city]
+        );
+    };
+    const toggleLocation = (loc: string) => {
+        setLocations(prev =>
+            prev.includes(loc)
+                ? prev.filter(l => l !== loc)
+                : [...prev, loc]
+        );
+    };
+
+    const toggleEquipment = (eq: string) => {
+        setEquipment(prev =>
+            prev.includes(eq)
+                ? prev.filter(e => e !== eq)
+                : [...prev, eq]
+        );
+    };
+
+    const toggleCityGroup = (cityLocations: string[]) => {
+        const allSelected = cityLocations.every(loc => locations.includes(loc));
+        if (allSelected) {
+            setLocations(prev => prev.filter(l => !cityLocations.includes(l)));
+        } else {
+            setLocations(prev => {
+                const newSelections = cityLocations.filter(loc => !prev.includes(loc));
+                return [...prev, ...newSelections];
+            });
+        }
+    };
+
+    const getSlotDateTime = (date: string | undefined, time: string | undefined) => {
+        if (!date || !time) return new Date(0);
+        return new Date(`${date}T${time}+08:00`);
+    };
+
+    const now = new Date();
+    const AREAS = [
+        'Alabang - Madrigal/Ayala Alabang', 'Alabang - Filinvest City', 'Alabang - Alabang Town Center Area', 'Alabang - Others',
+        'BGC - High Street', 'BGC - Central Square/Uptown', 'BGC - Forbes Town', 'BGC - Others',
+        'Ortigas - Ortigas Center', 'Ortigas - Greenhills', 'Ortigas - San Juan', 'Ortigas - Others',
+        'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others',
+        'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer',
+        'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village',
+        'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others'
+    ];
+
+    const GROUPED_AREAS = AREAS.reduce((acc: Record<string, string[]>, loc: string) => {
+        const city = loc.split(' - ')[0];
+        if (!acc[city]) acc[city] = [];
+        acc[city].push(loc);
+        return acc;
+    }, {});
 
 
     const isChatExpired = (booking: any) => {
@@ -77,6 +159,69 @@ export default function InstructorDashboardClient({
         return result;
     };
 
+    const handleDelete = async (id: string, groupId?: string) => {
+        const message = groupId
+            ? 'Are you sure you want to delete this session for ALL selected areas?'
+            : 'Are you sure you want to delete this availability?';
+        if (!confirm(message)) return;
+        setIsSubmitting(true);
+        const result = await deleteAvailability(id, groupId);
+        setIsSubmitting(false);
+        if (result.success) {
+            setCalendarBookings(prev => prev.filter(b => b.id !== id && (!groupId || b.group_id !== groupId)));
+            setIsEditModalOpen(false);
+            setEditingSlot(null);
+            router.refresh();
+        } else {
+            alert(result.error);
+        }
+    };
+
+    const handleUpdate = async (id: string, formData: FormData) => {
+        setIsSubmitting(true);
+        const { updateAvailability } = await import('@/app/(dashboard)/instructor/schedule/actions');
+        const result = await updateAvailability(id, formData);
+        setIsSubmitting(false);
+        if (result.success) {
+            setIsEditModalOpen(false);
+            setEditingSlot(null);
+            router.refresh();
+        } else {
+            alert(result.error);
+        }
+    };
+
+    const handleCreateSingle = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        if (isSubmitting) return;
+
+        if (locations.length === 0) {
+            alert('Please select at least one location');
+            return;
+        }
+
+        setIsSubmitting(true);
+        const { generateRecurringAvailability } = await import('@/app/(dashboard)/instructor/schedule/actions');
+
+        const result = await generateRecurringAvailability({
+            startDate: singleDate,
+            endDate: singleDate,
+            days: [new Date(singleDate).getDay()],
+            startTime: singleTime,
+            endTime: singleEndTime,
+            locations: locations,
+            equipment: instructorProfile?.teaching_equipment || []
+        });
+
+        setIsSubmitting(false);
+        if (result.success) {
+            setIsAddModalOpen(false);
+            router.refresh();
+        } else {
+            alert(result.error);
+        }
+    };
+
     const calculateAge = (dob: string) => {
         if (!dob) return null;
         const birthDate = new Date(dob);
@@ -87,7 +232,7 @@ export default function InstructorDashboardClient({
 
     // Scroll Lock
     useEffect(() => {
-        const anyModalOpen = cancellingBooking || selectedProfile || selectedStudio || activeChat;
+        const anyModalOpen = cancellingBooking || selectedProfile || selectedStudio || activeChat || selectedBooking || isEditModalOpen || isAddModalOpen;
         if (anyModalOpen) {
             document.body.style.overflow = 'hidden';
         } else {
@@ -142,7 +287,11 @@ export default function InstructorDashboardClient({
                         <MobileScheduleCalendar
                             currentDate={new Date(currentDateStr || getManilaTodayStr())}
                             onAddSlot={() => {
-                                router.push('/instructor/schedule');
+                                setSingleDate(getManilaTodayStr());
+                                setSingleTime('09:00');
+                                setSingleEndTime('10:00');
+                                setLocations([]);
+                                setIsAddModalOpen(true);
                             }}
                             onRecurringSchedule={() => {
                                 router.push('/instructor/schedule');
@@ -150,7 +299,18 @@ export default function InstructorDashboardClient({
                             onSlotClick={(session) => {
                                 if (session.is_booked) {
                                     const booking = calendarBookings.find(b => b.id === session.id);
-                                    if (booking) setCancellingBooking(booking); // Using this as it shows a modal, but user wants info.
+                                    if (booking) setSelectedBooking(booking);
+                                } else {
+                                    const slot = availability.find(a => a.id === session.id);
+                                    if (slot) {
+                                        setEditingSlot(slot);
+                                        setSingleDate(slot.date || getManilaTodayStr());
+                                        setSingleTime(slot.start_time);
+                                        setSingleEndTime(slot.end_time);
+                                        setLocations([slot.location_area]);
+                                        setEquipment(slot.equipment || instructorProfile?.teaching_equipment || []);
+                                        setIsEditModalOpen(true);
+                                    }
                                 }
                             }}
                             initialSessions={[
@@ -163,15 +323,18 @@ export default function InstructorDashboardClient({
                                     location: a.location_area,
                                     is_booked: false
                                 })),
-                                ...calendarBookings.map(b => ({
-                                    id: b.id,
-                                    start_time: b.slots.start_time,
-                                    end_time: b.slots.end_time,
-                                    date: b.slots.date,
-                                    type: `Booking: ${b.slots.studios.name}`,
-                                    location: b.slots.studios.location,
-                                    is_booked: b.status === 'approved'
-                                }))
+                                ...calendarBookings.map(b => {
+                                    const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+                                    return {
+                                        id: b.id,
+                                        start_time: slot?.start_time || '00:00:00',
+                                        end_time: slot?.end_time || '00:00:00',
+                                        date: slot?.date || getManilaTodayStr(),
+                                        type: `Booking: ${slot?.studios?.name || 'Partner'}`,
+                                        location: slot?.studios?.location || 'Studio',
+                                        is_booked: b.status === 'approved'
+                                    };
+                                })
                             ]}
                         />
                     </div>
@@ -409,6 +572,369 @@ export default function InstructorDashboardClient({
                             })()}
                         </div>
                         <button onClick={() => setSelectedProfile(null)} className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
+                    </div>
+                </div>
+            )}
+
+            {/* Booking Detail Modal (Mobile) */}
+            {selectedBooking && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 md:p-6 bg-charcoal/40 backdrop-blur-sm" onClick={() => setSelectedBooking(null)}>
+                    <div className="bg-white rounded-[2rem] w-full max-w-2xl shadow-card border border-border-grey overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 md:p-8 border-b border-border-grey flex justify-between items-center bg-alabaster/50">
+                            <div>
+                                <h3 className="text-2xl font-serif text-charcoal tracking-tight">Booking Details</h3>
+                                <p className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] mt-1">SESSION OVERVIEW</p>
+                            </div>
+                            <button onClick={() => setSelectedBooking(null)} className="p-3 hover:bg-white rounded-xl transition-colors border border-border-grey shadow-tight">
+                                <X className="w-5 h-5 text-slate" />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-10">
+                            {/* Client Info */}
+                            <div className="flex items-center gap-6 bg-white p-6 rounded-2xl border border-border-grey shadow-tight">
+                                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-tight shrink-0">
+                                    {selectedBooking.client?.avatar_url ? (
+                                        <img src={selectedBooking.client.avatar_url} alt={selectedBooking.client.full_name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full bg-buttermilk flex items-center justify-center">
+                                            <User className="w-8 h-8 text-burgundy/40" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <h4 className="text-xl font-serif text-charcoal truncate">{selectedBooking.client?.full_name}</h4>
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        <button 
+                                            onClick={() => setSelectedProfile(selectedBooking.client)}
+                                            className="px-4 py-2 bg-white border border-border-grey rounded-full text-[10px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.15em] shadow-tight"
+                                        >
+                                            View Profile
+                                        </button>
+                                        <button 
+                                            onClick={() => {
+                                                const chat = { 
+                                                    id: selectedBooking.id, 
+                                                    recipientId: selectedBooking.client_id, 
+                                                    name: selectedBooking.client?.full_name || 'Client',
+                                                    isExpired: isChatExpired(selectedBooking)
+                                                };
+                                                setActiveChat(chat);
+                                                setSelectedBooking(null);
+                                            }}
+                                            className="px-4 py-2 bg-forest text-white rounded-full text-[10px] font-bold hover:brightness-110 transition-all flex items-center gap-2 uppercase tracking-[0.15em] shadow-tight"
+                                        >
+                                            <MessageSquare className="w-3.5 h-3.5" /> Message
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="earth-card p-6 bg-white border border-border-grey shadow-tight">
+                                    <p className="text-[10px] font-bold text-slate uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        <Clock className="w-4 h-4 text-forest" /> Session Info
+                                    </p>
+                                    <div className="space-y-4">
+                                        <div className="text-charcoal">
+                                            <p className="text-[9px] font-black text-slate/40 uppercase tracking-widest mb-1">DATE & TIME</p>
+                                            <p className="text-sm font-bold uppercase tracking-tight">
+                                                {(() => {
+                                                    const slot = Array.isArray(selectedBooking.slots) ? selectedBooking.slots[0] : selectedBooking.slots;
+                                                    const date = slot?.date || selectedBooking.date;
+                                                    return date ? format(new Date(date), 'EEEE, MMMM d, yyyy') : 'Session Date';
+                                                })()}
+                                            </p>
+                                            <p className="text-sm font-bold text-forest mt-0.5">
+                                                {(() => {
+                                                    const slot = Array.isArray(selectedBooking.slots) ? selectedBooking.slots[0] : selectedBooking.slots;
+                                                    return `${slot?.start_time || '--:--'} - ${slot?.end_time || '--:--'}`;
+                                                })()}
+                                            </p>
+                                        </div>
+                                        <div className="text-charcoal">
+                                            <p className="text-[9px] font-black text-slate/40 uppercase tracking-widest mb-1">EQUIPMENT</p>
+                                            <p className="text-sm font-bold uppercase tracking-wider">{selectedBooking.price_breakdown?.equipment || 'Standard'}</p>
+                                            <p className="text-[10px] font-bold text-slate mt-0.5 capitalize">UNITS: {selectedBooking.price_breakdown?.units || 1}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="earth-card p-6 bg-white border border-border-grey shadow-tight">
+                                    <p className="text-[10px] font-bold text-slate uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        <MapPin className="w-4 h-4 text-forest" /> Studio Location
+                                    </p>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <p className="text-[9px] font-black text-slate/40 uppercase tracking-widest mb-1">STUDIO</p>
+                                            <p className="text-sm font-bold text-charcoal uppercase tracking-tight">{selectedBooking.studio?.name}</p>
+                                            <p className="text-xs text-slate mt-1 leading-relaxed capitalize">{selectedBooking.studio?.location}</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => setSelectedStudio(selectedBooking.studio)}
+                                            className="text-[10px] font-bold text-forest hover:text-charcoal transition-colors uppercase tracking-[0.2em] flex items-center gap-2"
+                                        >
+                                            View Details <ArrowUpRight className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Booking History */}
+                            {selectedBooking.booking_history && selectedBooking.booking_history.length > 0 && (
+                                <div className="space-y-6 bg-off-white/50 p-6 rounded-2xl border border-border-grey/50 shadow-inner">
+                                    <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] flex items-center gap-2">
+                                        <Clock className="w-4 h-4" /> Activity History
+                                    </h4>
+                                    <div className="space-y-4">
+                                        {(selectedBooking.booking_history as any[]).map((entry, idx) => (
+                                            <div key={idx} className="flex gap-4 items-start pb-4 border-b border-border-grey/30 last:border-0 last:pb-0">
+                                                <div className="w-2 h-2 rounded-full bg-forest mt-1.5 shrink-0 shadow-sm" />
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-xs text-charcoal font-bold uppercase tracking-tight leading-snug">{entry.action_description || entry.status}</p>
+                                                    <p className="text-[10px] text-slate mt-1 font-medium">{format(new Date(entry.timestamp), 'MMM d, h:mm a')}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-6 md:p-8 border-t border-border-grey bg-alabaster/50 flex flex-col md:flex-row gap-4">
+                            {selectedBooking.status === 'approved' && (
+                                <button 
+                                    onClick={() => {
+                                        setCancellingBooking(selectedBooking);
+                                        setSelectedBooking(null);
+                                    }}
+                                    className="flex-1 px-8 py-4 bg-white border-2 border-burgundy/10 text-burgundy rounded-2xl text-[10px] font-bold hover:bg-burgundy/5 transition-all uppercase tracking-[0.25em] shadow-tight active:scale-95"
+                                >
+                                    Cancel Session
+                                </button>
+                            )}
+                            <button 
+                                onClick={() => setSelectedBooking(null)}
+                                className="flex-1 px-8 py-4 bg-charcoal text-white rounded-2xl text-[10px] font-bold hover:brightness-110 transition-all uppercase tracking-[0.25em] shadow-tight active:scale-95"
+                            >
+                                Close Overview
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Availability Modal (Mobile) */}
+            {isEditModalOpen && editingSlot && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-charcoal/40 backdrop-blur-sm" onClick={() => setIsEditModalOpen(false)}>
+                    <div className="bg-white rounded-[2rem] w-full max-w-lg shadow-card border border-border-grey overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b border-border-grey flex justify-between items-center bg-alabaster/50">
+                            <div>
+                                <h3 className="text-xl font-serif text-charcoal tracking-tight">Edit Availability</h3>
+                                <p className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] mt-1">UPDATE PARAMETERS</p>
+                            </div>
+                            <button onClick={() => setIsEditModalOpen(false)} className="p-3 hover:bg-white rounded-xl transition-colors border border-border-grey shadow-tight">
+                                <X className="w-5 h-5 text-slate" />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8">
+                            <form action={(formData) => handleUpdate(editingSlot.id, formData)} className="space-y-8">
+                                <div className="grid grid-cols-1 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-slate uppercase tracking-widest pl-1">Target Date</label>
+                                        <input 
+                                            name="date" 
+                                            type="date" 
+                                            required 
+                                            value={singleDate} 
+                                            onChange={(e) => setSingleDate(e.target.value)}
+                                            className="w-full px-5 py-4 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all uppercase tracking-widest shadow-inner cursor-pointer"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-slate uppercase tracking-widest pl-1">Starts</label>
+                                            <input 
+                                                name="start_time" 
+                                                type="time" 
+                                                required 
+                                                value={singleTime} 
+                                                onChange={(e) => setSingleTime(e.target.value)}
+                                                className="w-full px-5 py-4 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all shadow-inner cursor-pointer"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-slate uppercase tracking-widest pl-1">Ends</label>
+                                            <input 
+                                                name="end_time" 
+                                                type="time" 
+                                                required 
+                                                value={singleEndTime} 
+                                                onChange={(e) => setSingleEndTime(e.target.value)}
+                                                className="w-full px-5 py-4 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all shadow-inner cursor-pointer"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-slate uppercase tracking-widest pl-1">Primary Location</label>
+                                    <select 
+                                        name="location_area" 
+                                        required 
+                                        defaultValue={editingSlot.location_area}
+                                        className="w-full px-5 py-4 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all uppercase tracking-widest shadow-inner cursor-pointer"
+                                    >
+                                        {AREAS.sort().map(loc => (
+                                            <option key={loc} value={loc}>{loc}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="pt-6 flex flex-col gap-4">
+                                    <button 
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="w-full py-5 bg-forest text-white rounded-2xl text-[10px] font-bold hover:brightness-110 transition-all uppercase tracking-[0.25em] shadow-tight disabled:opacity-50 active:scale-95"
+                                    >
+                                        {isSubmitting ? 'Updating...' : 'Save Parameters'}
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={() => handleDelete(editingSlot.id, editingSlot.group_id)}
+                                        className="w-full py-5 bg-white border-2 border-burgundy/10 text-burgundy rounded-2xl text-[10px] font-bold hover:bg-burgundy/5 transition-all uppercase tracking-[0.25em] flex items-center justify-center gap-3 shadow-tight active:scale-95"
+                                    >
+                                        <Trash2 className="w-4 h-4" /> Delete Availability
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Add Slot Modal (Mobile) */}
+            {isAddModalOpen && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-charcoal/40 backdrop-blur-sm" onClick={() => setIsAddModalOpen(false)}>
+                    <div className="bg-white rounded-[2rem] w-full max-w-lg shadow-card border border-border-grey overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b border-border-grey flex justify-between items-center bg-alabaster/50">
+                            <div>
+                                <h3 className="text-xl font-serif text-charcoal tracking-tight">Add Single Slot</h3>
+                                <p className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] mt-1">NEW AVAILABILITY</p>
+                            </div>
+                            <button onClick={() => setIsAddModalOpen(false)} className="p-3 hover:bg-white rounded-xl transition-colors border border-border-grey shadow-tight">
+                                <X className="w-5 h-5 text-slate" />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6 md:p-8">
+                            {!isProfileComplete ? (
+                                <div className="p-8 bg-burgundy/5 border border-burgundy/10 rounded-[2rem] text-center space-y-6">
+                                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-tight border border-burgundy/10">
+                                        <AlertTriangle className="w-8 h-8 text-burgundy" />
+                                    </div>
+                                    <h4 className="text-xl font-serif text-charcoal tracking-tight">Setup Required</h4>
+                                    <p className="text-xs text-slate leading-relaxed uppercase tracking-widest font-medium">Please define your teaching equipment and rates in settings first.</p>
+                                    <Link href="/instructor/settings" className="block w-full py-4 bg-burgundy text-white rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-tight active:scale-95">Go to Settings</Link>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleCreateSingle} className="space-y-8">
+                                    <div className="space-y-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-slate uppercase tracking-widest pl-1">Select Date</label>
+                                            <input 
+                                                type="date" 
+                                                required 
+                                                value={singleDate} 
+                                                onChange={(e) => setSingleDate(e.target.value)}
+                                                className="w-full px-5 py-5 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all uppercase tracking-widest shadow-inner cursor-pointer"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-slate uppercase tracking-widest pl-1">Starts</label>
+                                                <input 
+                                                    type="time" 
+                                                    required 
+                                                    value={singleTime} 
+                                                    onChange={(e) => setSingleTime(e.target.value)}
+                                                    className="w-full px-5 py-5 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all shadow-inner cursor-pointer"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-slate uppercase tracking-widest pl-1">Ends</label>
+                                                <input 
+                                                    type="time" 
+                                                    required 
+                                                    value={singleEndTime} 
+                                                    onChange={(e) => setSingleEndTime(e.target.value)}
+                                                    className="w-full px-5 py-5 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all shadow-inner cursor-pointer"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-bold text-slate uppercase tracking-widest pl-1">Target Areas</label>
+                                        <div className="space-y-4">
+                                            {Object.entries(GROUPED_AREAS).sort().map(([city, cityLocations]) => (
+                                                <div key={city} className="border border-border-grey rounded-[1.5rem] overflow-hidden bg-off-white/50 shadow-sm">
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => toggleCityAccordion(city)}
+                                                        className="w-full px-5 py-4 flex items-center justify-between hover:bg-white transition-all border-b border-border-grey/50"
+                                                    >
+                                                        <span className="text-[10px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
+                                                        <div className="flex items-center gap-4">
+                                                            <span className="text-[9px] text-slate font-black uppercase tracking-tighter">{cityLocations.filter(l => locations.includes(l)).length} SET</span>
+                                                            <ChevronRight className={clsx("w-4 h-4 text-slate/40 transition-transform", expandedCities.includes(city) && "rotate-90")} />
+                                                        </div>
+                                                    </button>
+                                                    {expandedCities.includes(city) && (
+                                                        <div className="p-4 grid grid-cols-1 gap-2 bg-white animate-in slide-in-from-top-2 duration-200">
+                                                            <button 
+                                                                type="button"
+                                                                onClick={() => toggleCityGroup(cityLocations)}
+                                                                className="text-left px-4 py-2.5 text-[9px] font-black text-forest hover:bg-forest/5 rounded-xl transition-all uppercase tracking-[0.2em] mb-1"
+                                                            >
+                                                                {cityLocations.every(l => locations.includes(l)) ? 'Deselect All' : 'Select Entire ' + city}
+                                                            </button>
+                                                            {cityLocations.map(loc => (
+                                                                <button 
+                                                                    key={loc}
+                                                                    type="button"
+                                                                    onClick={() => toggleLocation(loc)}
+                                                                    className={clsx(
+                                                                        "text-left px-4 py-4 rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest flex items-center justify-between border",
+                                                                        locations.includes(loc) 
+                                                                            ? "bg-buttermilk border-burgundy/10 text-burgundy shadow-tight scale-[1.02]" 
+                                                                            : "text-slate bg-off-white/50 border-transparent hover:border-border-grey"
+                                                                    )}
+                                                                >
+                                                                    {loc.split(' - ')[1] || loc}
+                                                                    {locations.includes(loc) && <CheckCircle className="w-4 h-4 text-burgundy" />}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-6">
+                                        <button 
+                                            type="submit"
+                                            disabled={isSubmitting || locations.length === 0}
+                                            className="w-full py-5 bg-charcoal text-white rounded-2xl text-[10px] font-bold hover:brightness-110 transition-all uppercase tracking-[0.3em] shadow-tight disabled:opacity-50 active:scale-95"
+                                        >
+                                            {isSubmitting ? 'Creating Session...' : 'Activate Session'}
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

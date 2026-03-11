@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes, isPast, addDays, subDays, startOfMonth, endOfMonth, startOfDay } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle, ChevronDown, ChevronUp, CheckCircle, Check, Pencil, Copy } from 'lucide-react'
 import clsx from 'clsx'
-import { toManilaDateStr, getManilaTodayStr, toManilaDate } from '@/lib/timezone'
+import { toManilaDateStr, getManilaTodayStr, toManilaDate, getSlotDateTime } from '@/lib/timezone'
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
 import InstructorScheduleGenerator from './InstructorScheduleGenerator'
 import ChatWindow from '@/components/dashboard/ChatWindow'
 import Link from 'next/link'
+import MobileScheduleCalendar from '@/components/dashboard/MobileScheduleCalendar'
 
 interface Availability {
     id: string
@@ -352,8 +353,67 @@ export default function InstructorScheduleCalendar({
                 </div>
             )}
 
-            {/* Header */}
-            <div className="earth-card p-10 bg-white shadow-tight relative overflow-hidden">
+            <div className="lg:hidden">
+                <MobileScheduleCalendar
+                    onAddSlot={() => { setAddMode('single'); setIsAddModalOpen(true); }}
+                    onRecurringSchedule={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
+                    onSlotClick={(session) => {
+                        // For instructor, session.id is either a booking ID or a slot ID
+                        const booking = bookings.find(b => b.id === session.id);
+                        if (booking) {
+                            setSelectedBooking(booking);
+                        } else {
+                            const slot = availability.find(s => s.id === session.id);
+                            if (slot) {
+                                setEditingSlot(slot);
+                                setSingleDate(slot.date || format(new Date(), 'yyyy-MM-dd'));
+                                setSingleTime(slot.start_time.slice(0, 5));
+                                setSingleEndTime(slot.end_time.slice(0, 5));
+                                setIsEditModalOpen(true);
+                            }
+                        }
+                    }}
+                    initialSessions={(() => {
+                        const items: any[] = [];
+                        
+                        // Add bookings
+                        bookings.forEach(b => {
+                            if (['pending', 'approved', 'completed'].includes(b.status)) {
+                                items.push({
+                                    id: b.id,
+                                    title: b.client?.full_name || 'Booking',
+                                    date: b.slots.date,
+                                    start_time: b.slots.start_time,
+                                    end_time: b.slots.end_time,
+                                    type: 'booking',
+                                    status: b.status
+                                });
+                            }
+                        });
+
+                        // Add availability slots
+                        availability.forEach(s => {
+                            if (s.date) {
+                                items.push({
+                                    id: s.id,
+                                    title: 'Available',
+                                    date: s.date,
+                                    start_time: s.start_time,
+                                    end_time: s.end_time,
+                                    type: 'availability'
+                                });
+                            }
+                        });
+
+                        return items;
+                    })()}
+                />
+            </div>
+
+            {/* Desktop View */}
+            <div className="hidden lg:block space-y-10">
+                {/* Header */}
+                <div className="earth-card p-10 bg-white shadow-tight relative overflow-hidden">
                 {/* Background Tint */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-buttermilk/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
@@ -554,7 +614,16 @@ export default function InstructorScheduleCalendar({
                                                 // 3. Combine with starting bookings to get ALL visible items in this cell block
                                                 const allVisibleItems = [
                                                     ...visibleSlots.map(g => ({ type: 'slot' as const, id: g.primarySlot.id, data: g, start: g.primarySlot.start_time, end: g.primarySlot.end_time })),
-                                                    ...startingBookings.map(b => ({ type: 'booking' as const, id: b.id, data: b, start: b.slots.start_time, end: b.slots.end_time }))
+                                                    ...startingBookings.map(b => {
+                                                        const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+                                                        return { 
+                                                            type: 'booking' as const, 
+                                                            id: b.id, 
+                                                            data: b, 
+                                                            start: slot?.start_time || '00:00:00', 
+                                                            end: slot?.end_time || '00:00:00' 
+                                                        };
+                                                    })
                                                 ];
 
                                                 return (
@@ -667,9 +736,11 @@ export default function InstructorScheduleCalendar({
                                                                         }}
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
-                                                                            const slot = booking.slots;
-                                                                            const startH = parseInt(slot.start_time.split(':')[0]);
-                                                                            setCurrentSlotHistory(historyMap[`${slot.date}-${startH}`] || []);
+                                                                            const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
+                                                                            if (slot?.start_time && slot?.date) {
+                                                                                const startH = parseInt(slot.start_time.split(':')[0]);
+                                                                                setCurrentSlotHistory(historyMap[`${slot.date}-${startH}`] || []);
+                                                                            }
                                                                             setSelectedBooking(booking);
                                                                         }}
                                                                     >
@@ -827,6 +898,13 @@ export default function InstructorScheduleCalendar({
                     </div>
                 </div>
             </div>
+            </div>
+
+            {/* Modals & Chat */}
+
+            {/* Modals & Chat */}
+
+            {/* Modals & Chat */}
 
             {/* Single Slot Add Modal */}
             {
@@ -1266,7 +1344,13 @@ export default function InstructorScheduleCalendar({
                                     <div className="flex items-center gap-3 text-[#43302E]">
                                         <Clock className="w-4 h-4 opacity-40 shrink-0" />
                                         <span className="text-[11px] font-bold uppercase tracking-widest text-left">
-                                            {format(new Date(selectedBooking.slots.date), 'EEEE, MMMM d')} • {selectedBooking.slots.start_time.slice(0, 5)} - {selectedBooking.slots.end_time.slice(0, 5)}
+                                            {selectedBooking.slots?.date ? (
+                                                <>
+                                                    {format(new Date(selectedBooking.slots.date), 'EEEE, MMMM d')} • {selectedBooking.slots.start_time?.slice(0, 5)} - {selectedBooking.slots.end_time?.slice(0, 5)}
+                                                </>
+                                            ) : (
+                                                'Session Time'
+                                            )}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-3 text-[#43302E]">

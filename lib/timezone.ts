@@ -155,3 +155,10 @@ export function normalizeTimeTo24h(timeStr: string): string {
     const s = (parts[2] || '00').padStart(2, '0');
     return `${h}:${m}:${s}`;
 }
+
+/**
+ * Combines a YYYY-MM-DD date and HH:mm or HH:mm:ss time into a Date object.
+ */
+export function getSlotDateTime(date: string, time: string): Date {
+    return new Date(`${date}T${time}`);
+}
