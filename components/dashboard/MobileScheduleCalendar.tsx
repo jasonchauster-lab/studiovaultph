@@ -13,6 +13,8 @@ interface Session {
     type: string;
     location: string;
     is_booked: boolean;
+    displayRatio?: string;
+    displayTitle?: string;
 }
 
 interface MobileScheduleCalendarProps {
@@ -37,12 +39,41 @@ export default function MobileScheduleCalendar({
         }), [weekStart]
     );
 
-    // Filter sessions for selected date
-    const agendaSessions = useMemo(() =>
-        initialSessions.filter(s => isSameDay(new Date(s.date), selectedDate))
-            .sort((a, b) => a.start_time.localeCompare(b.start_time)),
-        [initialSessions, selectedDate]
-    );
+    // Filter and consolidate sessions for selected date
+    const agendaSessions = useMemo(() => {
+        const filtered = initialSessions.filter(s => isSameDay(new Date(s.date), selectedDate));
+
+        // Group availability-only slots by time
+        const consolidated: any[] = [];
+        const availabilityGroups: Record<string, any> = {};
+
+        filtered.forEach(s => {
+            if (s.is_booked) {
+                consolidated.push(s);
+            } else {
+                const key = `${s.start_time}-${s.end_time}`;
+                const mainLoc = s.location?.split(' - ')[0] || s.location;
+
+                if (!availabilityGroups[key]) {
+                    availabilityGroups[key] = {
+                        ...s,
+                        locations: [mainLoc]
+                    };
+                } else {
+                    if (!availabilityGroups[key].locations.includes(mainLoc)) {
+                        availabilityGroups[key].locations.push(mainLoc);
+                    }
+                }
+            }
+        });
+
+        // Add grouped availability to the list
+        Object.values(availabilityGroups).forEach(group => {
+            consolidated.push(group);
+        });
+
+        return consolidated.sort((a, b) => a.start_time.localeCompare(b.start_time));
+    }, [initialSessions, selectedDate]);
 
     // Helper to check for dots
     const getDateStatus = (date: Date) => {
@@ -212,23 +243,38 @@ export default function MobileScheduleCalendar({
                                                 <span>{formatTo12Hour(session.start_time)} — {formatTo12Hour(session.end_time)}</span>
                                             </div>
                                             <h3 className="text-xl font-serif font-black text-burgundy tracking-tight pt-2">
-                                                {session.type}
+                                                {session.displayTitle || (session.is_booked ? session.type : 'Availability')}
                                             </h3>
                                         </div>
-                                        <div className={clsx(
-                                            "px-4 py-1.5 rounded-full text-[9px] font-black tracking-[0.1em] shadow-sm flex items-center gap-2",
-                                            session.is_booked
-                                                ? "bg-buttermilk text-burgundy border border-burgundy/10"
-                                                : "bg-white text-muted-burgundy border border-[#E5E7EB]"
-                                        )}>
-                                            {session.is_booked ? <Sparkles className="w-3 h-3" /> : null}
-                                            {session.is_booked ? 'BOOKED' : 'OPEN'}
-                                        </div>
+                                        {session.displayRatio ? (
+                                            <div className="bg-[#FFF1B5] text-[#43302E] px-3 py-1 rounded-full text-[9px] font-black tracking-widest shadow-sm">
+                                                {session.displayRatio}
+                                            </div>
+                                        ) : session.is_booked ? (
+                                            <div className="bg-[#FFF1B5] text-[#43302E] px-3 py-1 rounded-full text-[9px] font-black tracking-widest shadow-sm">
+                                                1/1
+                                            </div>
+                                        ) : (
+                                            <div className="bg-white text-muted-burgundy border border-[#E5E7EB] px-3 py-1 rounded-full text-[9px] font-black tracking-[0.1em]">
+                                                OPEN
+                                            </div>
+                                        )}
                                     </div>
 
-                                    <div className="flex items-center gap-3 text-muted-burgundy text-xs pt-2 border-t border-[#FAFAFA]">
-                                        <MapPin className="w-4 h-4 text-burgundy/40" />
-                                        <span className="font-bold uppercase tracking-wider text-[10px]">{session.location}</span>
+                                    <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[#FAFAFA]">
+                                        {session.locations ? (
+                                            session.locations.map((loc: string, idx: number) => (
+                                                <div key={idx} className="flex items-center gap-2 text-muted-burgundy bg-pastel-blue/20 px-3 py-1.5 rounded-lg border border-pastel-blue/40">
+                                                    <MapPin className="w-3.5 h-3.5 text-burgundy/40" />
+                                                    <span className="font-bold uppercase tracking-wider text-[9px]">{loc}</span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="flex items-center gap-2 text-muted-burgundy">
+                                                <MapPin className="w-4 h-4 text-burgundy/40" />
+                                                <span className="font-bold uppercase tracking-wider text-[10px]">{session.location?.split(' - ')[0] || session.location}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </React.Fragment>

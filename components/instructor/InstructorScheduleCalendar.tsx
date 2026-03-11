@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes, isPast, addDays, subDays, startOfMonth, endOfMonth, startOfDay } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle, ChevronDown, ChevronUp, CheckCircle, Check } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle, ChevronDown, ChevronUp, CheckCircle, Check, Pencil, Copy } from 'lucide-react'
 import clsx from 'clsx'
 import { toManilaDateStr, getManilaTodayStr, toManilaDate } from '@/lib/timezone'
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
@@ -99,7 +99,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
     const ROW_HEIGHT = 120 // Increased from 80 for better readability
 
     // Memoized indexing for O(1) cell lookup
-    const { availabilityMap, recurringMap, bookingMap } = useMemo(() => {
+    const { availabilityMap, recurringMap, bookingMap, historyMap } = useMemo(() => {
         const aMap: Record<string, Availability[]> = {}
         const rMap: Record<string, Availability[]> = {}
         const bMap: Record<string, any[]> = {}
@@ -117,17 +117,36 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             }
         })
 
-        bookings.forEach(b => {
+        const calendarBookings = bookings.filter(b => {
+            const slot = b.slots
+            return slot?.date && ['approved', 'completed', 'pending'].includes(b.status)
+        })
+
+        const historicalBookings = bookings.filter(b => {
+            const slot = b.slots
+            return slot?.date && ['cancelled_refunded', 'cancelled_charged', 'rejected'].includes(b.status)
+        })
+
+        calendarBookings.forEach(b => {
             const slot = b.slots
             if (!slot?.date || !slot?.start_time) return
-            if (['cancelled_refunded', 'rejected', 'expired'].includes(b.status)) return
             const startH = parseInt(slot.start_time.split(':')[0])
             const key = `${slot.date}-${startH}`
             if (!bMap[key]) bMap[key] = []
             bMap[key].push(b)
         })
 
-        return { availabilityMap: aMap, recurringMap: rMap, bookingMap: bMap }
+        const hMap: Record<string, any[]> = {}
+        historicalBookings.forEach(b => {
+            const slot = b.slots
+            if (!slot?.date || !slot?.start_time) return
+            const startH = parseInt(slot.start_time.split(':')[0])
+            const key = `${slot.date}-${startH}`
+            if (!hMap[key]) hMap[key] = []
+            hMap[key].push(b)
+        })
+
+        return { availabilityMap: aMap, recurringMap: rMap, bookingMap: bMap, historyMap: hMap }
     }, [availability, bookings])
 
     // Current Time Line Logic
@@ -218,6 +237,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
     const [editingSlot, setEditingSlot] = useState<Availability | null>(null)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+    const [currentSlotHistory, setCurrentSlotHistory] = useState<any[]>([])
 
     const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -506,7 +526,14 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                         }}
                                                                         onClick={(e) => {
                                                                             e.stopPropagation()
-                                                                            setEditingSlot(slot); setSingleDate(slot.date || format(day, 'yyyy-MM-dd')); setSingleTime(slot.start_time); setSingleEndTime(slot.end_time); setLocations(locations); setEquipment(equipment.length > 0 ? equipment : ['Reformer']); setIsEditModalOpen(true);
+                                                                            setEditingSlot(slot);
+                                                                            setSingleDate(slot.date || format(day, 'yyyy-MM-dd'));
+                                                                            setSingleTime(slot.start_time);
+                                                                            setSingleEndTime(slot.end_time);
+                                                                            setLocations(locations);
+                                                                            setEquipment(equipment.length > 0 ? equipment : ['Reformer']);
+                                                                            setCurrentSlotHistory(historyMap[`${dayStr}-${hour}`] || []);
+                                                                            setIsEditModalOpen(true);
                                                                         }}
                                                                     >
                                                                         <div className={clsx("flex items-center gap-2", duration < 45 ? "flex-row" : "flex-col items-start")}>
@@ -579,13 +606,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                 <div
                                                                     key={booking.id}
                                                                     className={clsx(
-                                                                        "absolute rounded-lg text-[10px] bg-buttermilk border border-burgundy/10 z-20 p-5 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-tight",
-                                                                        isPastCell
-                                                                            ? "bg-off-white text-slate/40"
-                                                                            : booking.status === 'approved'
-                                                                                ? "border-l-4 border-l-burgundy"
-                                                                                : "border-l-4 border-l-orange-400",
-                                                                        duration < 45 && "flex-row items-center gap-4 py-2 px-4"
+                                                                        "absolute rounded-lg text-[10px] z-20 p-4 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-tight border border-[#43302E]/10 bg-white",
+                                                                        duration < 45 && "flex-row items-center justify-between py-2 px-3"
                                                                     )}
                                                                     style={{
                                                                         top: `${topOffset}px`,
@@ -595,37 +617,21 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                     }}
                                                                     onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); }}
                                                                 >
-                                                                    {duration < 45 ? (
-                                                                        <div className="flex flex-col justify-center">
-                                                                            <div className={clsx(
-                                                                                "text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md w-fit mb-1",
-                                                                                booking.status === 'approved' ? "text-forest bg-green-50" : "text-orange-700 bg-orange-50 border border-orange-100"
-                                                                            )}>
-                                                                                {booking.status === 'approved' ? 'BOOKED' : 'PENDING'}
-                                                                            </div>
-                                                                            <div className="text-[9px] font-bold text-charcoal truncate">{studioName}</div>
+                                                                    <div className={clsx("flex justify-between items-start w-full", duration < 45 && "items-center")}>
+                                                                        <div className="flex flex-col min-w-0">
+                                                                            <span className="text-[10px] font-bold text-[#43302E] uppercase tracking-widest truncate">
+                                                                                {booking.price_breakdown?.equipment || 'Standard session'}
+                                                                            </span>
+                                                                            {duration >= 45 && (
+                                                                                <span className="text-[8px] font-medium text-[#43302E]/60 uppercase tracking-tighter mt-0.5 truncate">
+                                                                                    {studioName}
+                                                                                </span>
+                                                                            )}
                                                                         </div>
-                                                                    ) : (
-                                                                        <>
-                                                                            <div className="flex items-center justify-between mb-3">
-                                                                                <div className={clsx(
-                                                                                    "status-pill-earth inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold transition-all",
-                                                                                    booking.status === 'approved' ? "bg-burgundy text-buttermilk" : "bg-orange-50 text-orange-700 border-orange-100 shadow-sm"
-                                                                                )}>
-                                                                                    {booking.status === 'approved' ? 'BOOKED' : 'PENDING'}
-                                                                                </div>
-                                                                                <ArrowUpRight className="w-4 h-4 text-slate/20 group-hover/booking:text-charcoal transition-all" />
-                                                                            </div>
-                                                                            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-charcoal mb-2 flex items-center gap-2.5">
-                                                                                <MapPin className="w-4 h-4 text-slate/40" />
-                                                                                <span className="truncate">{studioName}</span>
-                                                                            </div>
-                                                                            <div className="text-[10px] font-medium text-slate italic flex items-center gap-2.5 mt-auto">
-                                                                                <User className="w-4 h-4 text-slate/40" />
-                                                                                <span className="truncate">{clientName}</span>
-                                                                            </div>
-                                                                        </>
-                                                                    )}
+                                                                        <div className="text-[9px] font-black text-[#43302E] bg-buttermilk/40 px-1.5 py-0.5 rounded border border-[#43302E]/5 whitespace-nowrap">
+                                                                            {booking.quantity || 1}/{booking.quantity || 1}
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             )
                                                         })}
@@ -1036,6 +1042,33 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                     </div>
                                 </div>
 
+                                {currentSlotHistory.length > 0 && (
+                                    <div className="space-y-6 pt-6 border-t border-border-grey">
+                                        <div className="flex items-center gap-3 ml-2">
+                                            <AlertTriangle className="w-4 h-4 text-orange-400" />
+                                            <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em]">Cancellation History</h4>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {currentSlotHistory.map((h, i) => (
+                                                <div key={h.id + i} className="p-5 bg-orange-50/50 border border-orange-100 rounded-xl flex flex-col gap-2 shadow-sm">
+                                                    <div className="flex justify-between items-start">
+                                                        <span className="text-[10px] font-bold text-charcoal uppercase tracking-widest">{h.client?.full_name || 'Client'}</span>
+                                                        <span className="text-[8px] font-black bg-orange-100 text-orange-700 px-2 py-0.5 rounded uppercase tracking-tighter">
+                                                            {h.status === 'rejected' ? 'REJECTED' : 'CANCELLED'}
+                                                        </span>
+                                                    </div>
+                                                    {h.cancel_reason && (
+                                                        <p className="text-[10px] text-slate italic leading-relaxed">"{h.cancel_reason}"</p>
+                                                    )}
+                                                    <div className="text-[8px] font-bold text-slate/40 uppercase tracking-widest">
+                                                        BY {h.cancelled_by === h.instructor_id ? 'INSTRUCTOR' : 'CLIENT'}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="flex gap-6 pt-12 border-t border-border-grey">
                                     <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50">
                                         {isSubmitting ? 'SAVING...' : 'UPDATE SLOT'}
@@ -1062,157 +1095,125 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
             {
                 selectedBooking && (
                     <div
-                        className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
+                        className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-[#43302E]/40 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setSelectedBooking(null)}
                     >
                         <div
-                            className="bg-white rounded-xl w-full max-w-2xl shadow-card overflow-hidden animate-in zoom-in-95 duration-500 border border-border-grey will-change-transform"
+                            className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500 border border-[#43302E]/5 relative"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            {/* Modal Header */}
-                            <div className={clsx(
-                                "px-12 py-12 flex justify-between items-center text-charcoal relative border-b border-border-grey",
-                                selectedBooking.status === 'approved' ? "bg-green-50" : "bg-orange-50"
-                            )}>
-                                <div className="relative z-10">
-                                    <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate/40 mb-3 block">
-                                        {selectedBooking.status === 'approved' ? 'RESERVATION CONFIRMED' : 'RESERVATION PENDING'}
-                                    </span>
-                                    <h3 className="text-4xl font-serif tracking-tighter">
-                                        {selectedBooking.status === 'approved' ? 'Session Locked' : 'Verification Required'}
-                                    </h3>
-                                </div>
-                                <button onClick={() => setSelectedBooking(null)} className="p-5 bg-white hover:bg-off-white rounded-lg transition-all relative z-10 border border-border-grey shadow-tight">
-                                    <X className="w-6 h-6 text-slate/40 hover:text-charcoal" />
+                            {/* Action Icons Proper Alignment */}
+                            <div className="absolute top-6 right-8 flex items-center gap-1">
+                                <button
+                                    onClick={() => {
+                                        setEditingSlot(selectedBooking.slots);
+                                        setIsEditModalOpen(true);
+                                    }}
+                                    className="p-2 hover:bg-[#FFF1B5]/30 rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
+                                    title="Edit Session"
+                                >
+                                    <Pencil className="w-4 h-4" />
                                 </button>
-                                {/* Decorative background circle */}
-                                <div className="absolute top-0 right-0 w-80 h-80 bg-white/50 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+                                <button
+                                    className="p-2 hover:bg-[#FFF1B5]/30 rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
+                                    title="Duplicate Session"
+                                >
+                                    <Copy className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(selectedBooking.slot_id)}
+                                    className="p-2 hover:bg-red-50 rounded-full text-[#43302E]/40 hover:text-red-600 transition-all"
+                                    title="Delete Session"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => setSelectedBooking(null)}
+                                    className="p-2 hover:bg-off-white rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
+                                    title="Close"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
                             </div>
 
-                            <div className="p-10 space-y-8 overflow-y-auto max-h-[70vh] custom-scrollbar bg-white">
-                                {/* Session Metadata */}
-                                <div className="earth-card p-8 bg-off-white border border-border-grey shadow-tight">
-                                    <div className="flex items-center gap-4 mb-6">
-                                        <div className="p-3 bg-green-100 rounded-lg">
-                                            <Clock className="w-6 h-6 text-forest" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-slate uppercase tracking-[0.2em]">Session Schedule</p>
-                                            <p className="text-lg font-serif mt-0.5 text-charcoal">
-                                                {format(new Date(selectedBooking.slots.date), 'PPPP')}
-                                            </p>
-                                            <p className="text-xs font-bold text-slate uppercase tracking-widest mt-1">
-                                                <span className="font-serif italic text-sm">{selectedBooking.slots.start_time.slice(0, 5)}</span> — <span className="font-serif italic text-sm">{selectedBooking.slots.end_time.slice(0, 5)}</span>
-                                            </p>
-                                        </div>
-                                    </div>
+                            {/* Actual Content */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between pt-2">
+                                    <h3 className="text-3xl font-serif text-[#43302E] tracking-tighter">
+                                        {selectedBooking.price_breakdown?.equipment || 'Standard Session'}
+                                    </h3>
+                                    <span className="bg-[#FFF1B5] text-[#43302E] text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
+                                        {selectedBooking.status === 'approved' ? 'Confirmed' : 'Pending'}
+                                    </span>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    {/* Studio Environment */}
-                                    <div className="earth-card p-8 bg-white border border-border-grey shadow-tight group">
-                                        <div className="flex items-center gap-6 mb-6">
-                                            <div className="p-4 bg-off-white rounded-lg group-hover:bg-off-white transition-all border border-border-grey shadow-tight">
-                                                <MapPin className="w-6 h-6 text-forest" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">Studio</p>
-                                                <h4 className="font-serif text-charcoal text-xl tracking-tighter truncate w-[200px]">{selectedBooking.slots.studios?.name}</h4>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-3 mt-4">
-                                            <p className="text-[11px] text-slate leading-relaxed italic">{selectedBooking.slots.studios?.location || 'Location details within secure perimeter'}</p>
-                                            <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">{selectedBooking.slots.studios?.email}</p>
-                                        </div>
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3 text-[#43302E]">
+                                        <Clock className="w-4 h-4 opacity-40" />
+                                        <span className="text-[11px] font-bold uppercase tracking-widest">
+                                            {format(new Date(selectedBooking.slots.date), 'EEEE, MMMM d')} • {selectedBooking.slots.start_time.slice(0, 5)} - {selectedBooking.slots.end_time.slice(0, 5)}
+                                        </span>
                                     </div>
+                                    <div className="flex items-center gap-3 text-[#43302E]">
+                                        <MapPin className="w-4 h-4 opacity-40" />
+                                        {['approved', 'completed'].includes(selectedBooking.status) && selectedBooking.slots.studios?.google_maps_url ? (
+                                            <a
+                                                href={selectedBooking.slots.studios.google_maps_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-[11px] font-bold uppercase tracking-widest underline decoration-[#43302E]/20 hover:decoration-[#43302E] transition-all"
+                                            >
+                                                {selectedBooking.slots.studios?.location || 'Studio Location'}
+                                            </a>
+                                        ) : (
+                                            <span className="text-[11px] font-bold uppercase tracking-widest">
+                                                {selectedBooking.slots.studios?.location || 'Studio Location'}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
 
-                                    {/* Client Information */}
-                                    <div className="earth-card p-8 bg-white border border-border-grey shadow-tight group">
-                                        <div className="flex items-center gap-6 mb-6">
-                                            <div className="w-16 h-16 rounded-lg bg-off-white overflow-hidden border border-border-grey flex-shrink-0 shadow-tight">
+                            {/* Booked Section */}
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between border-b border-[#43302E]/10 pb-4">
+                                    <h4 className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em]">Booked</h4>
+                                    <span className="text-[10px] font-black text-[#43302E]/40 uppercase tracking-widest">
+                                        {currentSlotHistory.length} Cancelled
+                                    </span>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between bg-[#FFF1B5]/20 p-4 rounded-xl border border-[#FFF1B5]/40">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
                                                 <img
-                                                    src={selectedBooking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.client?.full_name || 'C')}&background=F5F5F5&color=333333`}
+                                                    src={selectedBooking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.client?.full_name || 'C')}&background=F5F2EB&color=43302E`}
                                                     className="w-full h-full object-cover"
                                                 />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">Client</p>
-                                                <h4 className="font-serif text-charcoal text-xl tracking-tighter truncate w-[200px]">{selectedBooking.client?.full_name}</h4>
+                                                <p className="text-[11px] font-black text-[#43302E] uppercase tracking-wider">{selectedBooking.client?.full_name}</p>
+                                                <p className="text-[9px] font-medium text-[#43302E]/50 uppercase tracking-tighter">Verified Client</p>
                                             </div>
                                         </div>
-                                        <div className="space-y-3 mt-4">
-                                            {selectedBooking.client?.phone && (
-                                                <div className="flex items-center gap-3 text-[10px] font-bold text-slate uppercase tracking-[0.3em]">
-                                                    <MessageSquare className="w-4 h-4 text-slate/20" />
-                                                    {selectedBooking.client.phone}
-                                                </div>
-                                            )}
-                                            <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">{selectedBooking.client?.email}</p>
-                                        </div>
+                                        <span className="text-[9px] font-black text-[#43302E] bg-white px-3 py-1 rounded-full uppercase tracking-widest border border-[#43302E]/5">
+                                            Confirmed
+                                        </span>
                                     </div>
-                                </div>
-
-                                {/* Medical / Status */}
-                                {selectedBooking.client?.medical_conditions && (
-                                    <div className="p-8 bg-red-50 rounded-lg border border-red-100">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <AlertTriangle className="w-5 h-5 text-red-500" />
-                                            <h4 className="text-[10px] font-bold text-red-700 uppercase tracking-[0.2em]">PHYSICAL CONDITIONS</h4>
-                                        </div>
-                                        <p className="text-[11px] text-red-600 italic leading-relaxed">
-                                            {Array.isArray(selectedBooking.client.medical_conditions)
-                                                ? selectedBooking.client.medical_conditions.join(', ')
-                                                : selectedBooking.client.medical_conditions.split(',').join(', ')}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {/* Booking Specifics */}
-                                <div className="earth-card p-8 space-y-6 bg-white border border-border-grey shadow-tight">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-lg bg-off-white flex items-center justify-center border border-border-grey shadow-tight">
-                                                <Box className="w-6 h-6 text-[#4B5563]" />
-                                            </div>
-                                            <div>
-                                                <span className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] block">Equipment</span>
-                                                <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">
-                                                    {selectedBooking.price_breakdown?.equipment || 'Standard Set'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] block">Earnings</span>
-                                            <span className="text-2xl font-serif text-forest tracking-tighter">₱{(selectedBooking.price_breakdown?.instructor_fee || 0).toLocaleString()}</span>
-                                        </div>
-                                    </div>
-
-                                    {selectedBooking.notes && (
-                                        <div className="pt-6 border-t border-border-grey">
-                                            <span className="text-[10px] font-bold text-slate uppercase tracking-wider block mb-2">Session Notes</span>
-                                            <p className="text-sm text-slate italic leading-relaxed">"{selectedBooking.notes}"</p>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
 
-                            {/* Modal Footer */}
-                            <div className="px-12 py-10 bg-off-white border-t border-border-grey flex gap-6">
+                            <div className="flex gap-4 pt-4">
                                 <button
                                     onClick={() => setActiveChat({
                                         id: selectedBooking.id,
                                         recipientId: selectedBooking.client_id,
                                         name: selectedBooking.client?.full_name || 'Client'
                                     })}
-                                    className="flex-1 bg-charcoal text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] shadow-tight hover:brightness-[1.2] active:scale-95 transition-all flex items-center justify-center gap-4"
+                                    className="flex-1 bg-[#43302E] text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-125 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3"
                                 >
-                                    <MessageSquare className="w-5 h-5" /> MESSAGE CLIENT
-                                </button>
-                                <button
-                                    onClick={() => setSelectedBooking(null)}
-                                    className="px-12 py-5 bg-white text-slate hover:text-charcoal rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] transition-all border border-border-grey"
-                                >
-                                    CLOSE
+                                    <MessageSquare className="w-4 h-4" /> Message Client
                                 </button>
                             </div>
                         </div>
@@ -1220,19 +1221,17 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                 )
             }
 
-            {
-                activeChat && (
-                    <ChatWindow
-                        bookingId={activeChat.id}
-                        recipientId={activeChat.recipientId}
-                        recipientName={activeChat.name}
-                        onClose={() => setActiveChat(null)}
-                        currentUserId={currentUserId}
-                        isExpired={false}
-                        isOpen={true}
-                    />
-                )
-            }
-        </div >
+            {activeChat && (
+                <ChatWindow
+                    bookingId={activeChat.id}
+                    recipientId={activeChat.recipientId}
+                    recipientName={activeChat.name}
+                    onClose={() => setActiveChat(null)}
+                    currentUserId={currentUserId}
+                    isExpired={false}
+                    isOpen={true}
+                />
+            )}
+        </div>
     )
 }

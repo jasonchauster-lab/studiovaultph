@@ -1,26 +1,11 @@
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config({ path: '.env.local' });
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-async function checkSchema() {
-    const tables = ['bookings', 'slots', 'profiles', 'payout_requests', 'certifications', 'studios'];
-    for (const table of tables) {
-        const { data, error } = await supabase.from(table).select('*').limit(1);
-        if (error) {
-            console.error(`Error fetching ${table}:`, error.message);
-        } else if (data && data.length > 0) {
-            console.log(`\nTable ${table} columns:`);
-            console.log(Object.keys(data[0]).join(', '));
-        } else {
-            console.log(`\nTable ${table} is empty but structure should be accessible via rpc if needed, or by selecting 0 rows`);
-            const res = await supabase.from(table).select('*').limit(0)
-            if (res.data) console.log(`Table ${table} columns (from empty set):`, Object.keys(res.data[0] || {}))
-        }
-    }
+const SUPABASE_URL = 'https://wzacmyemiljzpdskyvie.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6YWNteWVtaWxqenBkc2t5dmllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTIxNTI4OCwiZXhwIjoyMDg2NzkxMjg4fQ.cVVEAR4_EM3ytz4LtPKD8g9RJ__XqI0YTPInPNuDZMI';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+async function run() {
+    const { data, error } = await supabase.from('bookings').select('*').limit(1);
+    if (error) console.error(error);
+    else if (data && data.length > 0) console.log(Object.keys(data[0]));
+    else console.log('No bookings found');
 }
-
-checkSchema();
+run();

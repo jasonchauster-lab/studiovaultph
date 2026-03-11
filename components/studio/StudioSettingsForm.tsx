@@ -247,11 +247,12 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-charcoal-700 mb-1">Google Maps Link (Optional)</label>
+                        <label className="block text-sm font-medium text-charcoal-700 mb-1">Google Maps Link <span className="text-rose-gold font-bold">*</span></label>
                         <input
                             type="url"
                             name="googleMapsUrl"
                             defaultValue={studio.google_maps_url || ''}
+                            required
                             placeholder="e.g. https://maps.app.goo.gl/..."
                             className="w-full px-4 py-2 bg-cream-50 border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
                         />

@@ -183,9 +183,9 @@ export default function InstructorDashboardClient({
                                                                     <Link href={`/studios/${session.slots.studios.id}`} className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] truncate hover:text-forest transition-colors">
                                                                         {session.slots.studios.name}
                                                                     </Link>
-                                                                    <span className="status-pill-earth status-pill-green shrink-0">
-                                                                        BOOKED
-                                                                    </span>
+                                                                    <div className="flex items-center gap-2 bg-[#FFF1B5]/40 px-2 py-0.5 rounded border border-[#43302E]/5 whitespace-nowrap">
+                                                                        <span className="text-[9px] font-black text-[#43302E]">1/1</span>
+                                                                    </div>
                                                                 </div>
                                                                 <div className="flex items-center gap-2 text-[10px] text-slate font-black uppercase tracking-[0.1em] mt-1.5">
                                                                     <Calendar className="w-3.5 h-3.5 text-forest/40" />

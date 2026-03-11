@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, startOfDay, isPast, startOfMonth, endOfMonth, addDays, subDays, addMonths, subMonths, getDay, setHours, setMinutes } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Users, User, Calendar as CalendarIcon, Clock, Trash2, Edit2, X, Sparkles, MapPin, Box, ArrowUpRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Users, User, Calendar as CalendarIcon, Clock, Trash2, Edit2, X, Sparkles, MapPin, Box, ArrowUpRight, Pencil, Copy } from 'lucide-react'
 import clsx from 'clsx'
 import { createSlot, deleteSlot, updateSlot } from '@/app/(dashboard)/studio/actions' // For single slot
 import ScheduleManager from './ScheduleManager' // Bulk generator
@@ -199,15 +199,73 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             <div className="lg:hidden">
                 <MobileScheduleCalendar
                     currentDate={currentDate}
-                    initialSessions={slots.map(s => ({
-                        id: s.id,
-                        start_time: s.start_time,
-                        end_time: s.end_time,
-                        date: s.date,
-                        type: s.equipment ? Object.keys(s.equipment).join(', ') : 'Open Space',
-                        location: 'Studio Floor', // Since it's the studio's own dashboard
-                        is_booked: (s.bookings?.length || 0) > 0
-                    }))}
+                    initialSessions={(() => {
+                        const groups: Record<string, typeof slots> = {};
+                        slots.forEach(s => {
+                            const key = `${s.date}-${s.start_time}`;
+                            if (!groups[key]) groups[key] = [];
+                            groups[key].push(s);
+                        });
+
+                        return Object.entries(groups).map(([key, groupSlots]) => {
+                            const first = groupSlots[0];
+                            const allBookings = groupSlots.flatMap(s => s.bookings || []);
+                            const activeBookings = allBookings.filter(b => ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || ''));
+
+                            const instructors = new Set<string>();
+                            const classNames = new Set<string>();
+                            activeBookings.forEach(b => {
+                                if (b.instructor?.full_name) instructors.add(b.instructor.full_name);
+                            });
+
+                            let totalBooked = 0;
+                            let totalQty = 0;
+                            const eqRatios: string[] = [];
+
+                            const equipmentMap: Record<string, { booked: number, total: number }> = {};
+                            groupSlots.forEach(s => {
+                                if (s.equipment) {
+                                    Object.entries(s.equipment).forEach(([eq, qty]) => {
+                                        if (!equipmentMap[eq]) equipmentMap[eq] = { booked: 0, total: qty };
+                                        else equipmentMap[eq].total += qty;
+
+                                        const bookedForThisEq = s.bookings?.filter(b =>
+                                            ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '') &&
+                                            (b.price_breakdown?.equipment?.toUpperCase() === eq.toUpperCase() || b.equipment?.toUpperCase() === eq.toUpperCase())
+                                        ).length || 0;
+                                        equipmentMap[eq].booked += bookedForThisEq;
+                                        classNames.add(eq);
+                                    });
+                                }
+                            });
+
+                            Object.values(equipmentMap).forEach(m => {
+                                totalBooked += m.booked;
+                                totalQty += m.total;
+                            });
+
+                            const displayTitle = Array.from(classNames).length > 2
+                                ? "Multiple Classes"
+                                : Array.from(classNames).join(' / ') || "Studio Session";
+
+                            const instructorNames = Array.from(instructors);
+                            const footerText = instructorNames.length > 0
+                                ? `With ${instructorNames.join(', ')}`
+                                : "Instructor: Unassigned";
+
+                            return {
+                                id: key,
+                                start_time: first.start_time,
+                                end_time: first.end_time,
+                                date: first.date,
+                                type: displayTitle,
+                                location: footerText,
+                                is_booked: totalBooked > 0,
+                                displayRatio: `${totalBooked}/${totalQty}`,
+                                displayTitle: displayTitle
+                            };
+                        });
+                    })()}
                 />
             </div>
 
@@ -362,102 +420,88 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                 <Plus className="w-3 h-3" />
                                                             </button>
 
-                                                            {cellSlots.length > 0 && (
-                                                                <div className="space-y-1 relative z-10 cursor-pointer">
-                                                                    {(() => {
-                                                                        const equipmentCounts: Record<string, { free: number, total: number }> = {};
-                                                                        cellSlots.forEach(s => {
-                                                                            if (s.equipment && typeof s.equipment === 'object') {
-                                                                                Object.entries(s.equipment).forEach(([eq, count]) => {
-                                                                                    if (!equipmentCounts[eq]) equipmentCounts[eq] = { free: 0, total: 0 };
-                                                                                    equipmentCounts[eq].total += count;
-                                                                                    const bookedForThisEq = s.bookings?.filter(b =>
-                                                                                        ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '') &&
-                                                                                        (b.price_breakdown?.equipment?.toUpperCase() === eq.toUpperCase() || b.equipment?.toUpperCase() === eq.toUpperCase())
-                                                                                    ).length || 0;
-                                                                                    equipmentCounts[eq].free += Math.max(0, count - bookedForThisEq);
-                                                                                });
-                                                                            }
+                                                            {cellSlots.length > 0 && (() => {
+                                                                const allActiveBookings = cellSlots.flatMap(s => s.bookings || []).filter(b =>
+                                                                    ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '')
+                                                                );
+
+                                                                const equipmentCounts: Record<string, { booked: number, total: number }> = {};
+                                                                const instructors = new Set<string>();
+                                                                const classNames = new Set<string>();
+
+                                                                cellSlots.forEach(s => {
+                                                                    if (s.equipment && typeof s.equipment === 'object') {
+                                                                        Object.entries(s.equipment).forEach(([eq, count]) => {
+                                                                            if (!equipmentCounts[eq]) equipmentCounts[eq] = { booked: 0, total: count };
+                                                                            else equipmentCounts[eq].total += count;
+
+                                                                            const bookedForThisEq = s.bookings?.filter(b =>
+                                                                                ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '') &&
+                                                                                (b.price_breakdown?.equipment?.toUpperCase() === eq.toUpperCase() || b.equipment?.toUpperCase() === eq.toUpperCase())
+                                                                            ).length || 0;
+                                                                            equipmentCounts[eq].booked += bookedForThisEq;
+                                                                            classNames.add(eq);
                                                                         });
+                                                                    }
+                                                                });
 
-                                                                        return Object.entries(equipmentCounts).map(([eqType, counts]) => {
-                                                                            const isFullyBooked = counts.free === 0;
-                                                                            const hasPending = cellSlots.some(s =>
-                                                                                s.bookings?.some(b => b.status === 'pending' && (b.price_breakdown?.equipment?.toUpperCase() === eqType.toUpperCase() || b.equipment?.toUpperCase() === eqType.toUpperCase()))
-                                                                            );
+                                                                allActiveBookings.forEach(b => {
+                                                                    if (b.instructor?.full_name) instructors.add(b.instructor.full_name);
+                                                                });
 
-                                                                            return (
-                                                                                <div
-                                                                                    key={eqType}
-                                                                                    className={clsx(
-                                                                                        "p-3 border session-block-earth transition-all group/eq relative overflow-hidden cursor-pointer rounded-lg",
-                                                                                        isPastCell ? "bg-off-white border-border-grey" :
-                                                                                            hasPending ? "bg-orange-50/50 border-orange-200" :
-                                                                                                isFullyBooked ? "bg-buttermilk border-burgundy/20" : "bg-pastel-blue/40 border-pastel-blue/20"
-                                                                                    )}
-                                                                                    onClick={() => {
-                                                                                        setBucketSlots(cellSlots.filter(s => s.equipment?.[eqType]))
-                                                                                        setBucketTime({ date: day, hour })
-                                                                                        setIsBucketModalOpen(true)
-                                                                                    }}
-                                                                                >
-                                                                                    <div className={clsx("text-[9px] font-bold uppercase tracking-[0.15em] flex justify-between items-center mb-1.5", isPastCell ? "text-slate/40" : "text-charcoal/60")}>
-                                                                                        <span className="flex items-center gap-1.5">
-                                                                                            <div className={clsx("w-1.5 h-1.5 rounded-full outline outline-offset-1 outline-transparent transition-all", isFullyBooked ? "bg-red-600" : hasPending ? "bg-orange-500 animate-pulse outline-orange-200" : "bg-green-600")} />
-                                                                                            <span className={clsx("font-bold flex items-center gap-2", isFullyBooked ? "text-red-900" : hasPending ? "text-orange-900" : "text-green-900")}>
-                                                                                                {eqType}
-                                                                                                {hasPending && <span className="text-[7px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded border border-orange-200 tracking-tighter shadow-sm">PENDING</span>}
-                                                                                            </span>
-                                                                                        </span>
-                                                                                        <Edit2 className="w-2.5 h-2.5 opacity-0 group-hover/eq:opacity-100 transition-opacity" />
-                                                                                    </div>
-                                                                                    <div className={clsx("text-[10px] font-bold tracking-tight", isPastCell ? "text-slate" : isFullyBooked ? "text-red-800" : hasPending ? "text-orange-800" : "text-green-800")}>
-                                                                                        {counts.free} / {counts.total} <span className="text-[8px] uppercase tracking-wider ml-0.5 font-bold opacity-50">Free</span>
-                                                                                    </div>
-                                                                                </div>
-                                                                            );
-                                                                        });
-                                                                    })()}
+                                                                const isBooked = allActiveBookings.length > 0;
+                                                                const hasPending = allActiveBookings.some(b => b.status?.toLowerCase() === 'pending');
 
-                                                                    {cellSlots.some(s => !s.equipment || Object.keys(s.equipment).length === 0) && (() => {
-                                                                        const openSlots = cellSlots.filter(s => !s.equipment || Object.keys(s.equipment).length === 0)
-                                                                        const availableCount = openSlots.reduce((sum, s) => sum + (s.is_available ? (s.quantity || 1) : 0), 0)
-                                                                        const totalCount = openSlots.reduce((sum, s) => sum + (s.quantity || 1), 0)
-                                                                        const isFullyBooked = availableCount === 0
-                                                                        const hasPending = openSlots.some(s => s.bookings?.some(b => b.status === 'pending'))
+                                                                const mainTitle = Array.from(classNames).length > 2
+                                                                    ? "Multiple Classes"
+                                                                    : Array.from(classNames).join(' / ') || "Studio Session";
 
-                                                                        return (
-                                                                            <div
-                                                                                className={clsx(
-                                                                                    "p-3 border session-block-earth transition-all group/open relative overflow-hidden cursor-pointer rounded-lg",
-                                                                                    isPastCell ? "bg-off-white border-border-grey" :
-                                                                                        hasPending ? "bg-orange-50/50 border-orange-200" :
-                                                                                            isFullyBooked ? "bg-buttermilk border-burgundy/20" : "bg-pastel-blue/40 border-pastel-blue/20"
-                                                                                )}
-                                                                                onClick={() => {
-                                                                                    setBucketSlots(openSlots)
-                                                                                    setBucketTime({ date: day, hour })
-                                                                                    setIsBucketModalOpen(true)
-                                                                                }}
-                                                                            >
-                                                                                <div className={clsx("text-[9px] font-bold uppercase tracking-[0.15em] flex justify-between items-center mb-1.5", isPastCell ? "text-slate/40" : "text-charcoal/60")}>
-                                                                                    <span className="flex items-center gap-1.5">
-                                                                                        <div className={clsx("w-1.5 h-1.5 rounded-full outline outline-offset-1 outline-transparent transition-all", isFullyBooked ? "bg-red-600" : hasPending ? "bg-orange-500 animate-pulse outline-orange-200" : "bg-green-600")} />
-                                                                                        <span className={clsx("font-bold flex items-center gap-2", isFullyBooked ? "text-red-900" : hasPending ? "text-orange-900" : "text-green-900")}>
-                                                                                            Open Space
-                                                                                            {hasPending && <span className="text-[7px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded border border-orange-200 tracking-tighter shadow-sm">PENDING</span>}
-                                                                                        </span>
-                                                                                    </span>
-                                                                                    <Edit2 className="w-2.5 h-2.5 opacity-0 group-hover/open:opacity-100 transition-opacity" />
-                                                                                </div>
-                                                                                <div className={clsx("text-[10px] font-bold tracking-tight", isPastCell ? "text-muted-burgundy/40" : "text-burgundy")}>
-                                                                                    {availableCount} / {totalCount} <span className="text-[8px] uppercase tracking-wider ml-0.5 font-bold opacity-50">Free</span>
-                                                                                </div>
+                                                                return (
+                                                                    <div
+                                                                        className={clsx(
+                                                                            "p-4 border session-block-earth transition-all group/slot relative overflow-hidden cursor-pointer rounded-lg h-full flex flex-col justify-between",
+                                                                            isPastCell ? "bg-off-white border-border-grey" :
+                                                                                hasPending ? "bg-orange-50/50 border-orange-200" :
+                                                                                    isBooked ? "bg-buttermilk border-burgundy/20" : "bg-white border-border-grey shadow-tight"
+                                                                        )}
+                                                                        onClick={() => {
+                                                                            setBucketSlots(cellSlots);
+                                                                            setBucketTime({ date: day, hour });
+                                                                            setIsBucketModalOpen(true);
+                                                                        }}
+                                                                    >
+                                                                        <div>
+                                                                            <div className="flex justify-between items-start mb-2">
+                                                                                <h4 className="text-[11px] font-bold text-[#43302E] uppercase tracking-widest truncate max-w-[80%]">
+                                                                                    {mainTitle}
+                                                                                </h4>
+                                                                                <Edit2 className="w-3 h-3 text-[#43302E]/40 opacity-0 group-hover/slot:opacity-100 transition-opacity" />
                                                                             </div>
-                                                                        )
-                                                                    })()}
-                                                                </div>
-                                                            )}
+
+                                                                            <div className="flex flex-wrap gap-1.5">
+                                                                                {Object.entries(equipmentCounts).map(([eq, counts]) => (
+                                                                                    <span key={eq} className="text-[9px] font-bold text-[#43302E]/60 uppercase tracking-tighter bg-[#43302E]/5 px-1.5 py-0.5 rounded">
+                                                                                        {counts.booked}/{counts.total} {eq}
+                                                                                    </span>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div className="mt-3 pt-2 border-t border-[#43302E]/5">
+                                                                            {instructors.size > 0 ? (
+                                                                                <p className="text-[9px] font-bold text-[#43302E] uppercase tracking-widest truncate">
+                                                                                    {instructors.size === 1 ? 'Instructor: ' : 'Instructors: '}
+                                                                                    {Array.from(instructors).join(', ')}
+                                                                                </p>
+                                                                            ) : (
+                                                                                <p className="text-[9px] font-bold text-[#6B5A58] uppercase tracking-widest italic">
+                                                                                    Instructor: Unassigned
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })()}
                                                         </div>
                                                     )
                                                 })}
@@ -786,104 +830,170 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                 )}
 
                 {/* Bucket Management Modal */}
-                {isBucketModalOpen && bucketTime && (
-                    <div
-                        className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
-                        onClick={() => setIsBucketModalOpen(false)}
-                    >
-                        <div
-                            className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 max-h-[85vh] overflow-y-auto will-change-transform"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="flex justify-between items-center mb-10">
-                                <div>
-                                    <h3 className="text-3xl font-serif text-charcoal tracking-tighter">
-                                        {format(bucketTime.date, 'EEEE, MMM d')} &bull; {bucketTime.hour > 12 ? `${bucketTime.hour - 12} PM` : bucketTime.hour === 12 ? '12 PM' : `${bucketTime.hour} AM`}
-                                    </h3>
-                                    <p className="text-[10px] text-slate font-bold uppercase tracking-[0.4em] mt-2">MANAGING {bucketSlots.length} ACTIVE SESSIONS</p>
-                                </div>
-                                <button onClick={() => setIsBucketModalOpen(false)} className="p-4 bg-off-white hover:bg-white rounded-lg text-slate hover:text-charcoal transition-all border border-border-grey shadow-tight">
-                                    <X className="w-6 h-6" />
-                                </button>
-                            </div>
+                {isBucketModalOpen && bucketTime && (() => {
+                    const allBookings = bucketSlots.flatMap(s => s.bookings || []);
+                    const activeBookings = allBookings.filter(b => ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || ''));
+                    const cancelledBookings = allBookings.filter(b => ['cancelled_refunded', 'cancelled_charged', 'rejected'].includes(b.status?.toLowerCase() || ''));
 
-                            <div className="space-y-4">
-                                {bucketSlots.map(slot => (
-                                    <div key={slot.id} className="earth-card p-6 bg-off-white border border-border-grey rounded-lg flex items-center justify-between shadow-tight transition-all hover:bg-white group">
-                                        <div className="flex items-center gap-5">
-                                            <div className="bg-white p-3 rounded-lg border border-border-grey shadow-tight text-forest">
-                                                <Clock className="w-5 h-5" />
+                    const instructors = new Set<string>();
+                    activeBookings.forEach(b => {
+                        if (b.instructor?.full_name) instructors.add(b.instructor.full_name);
+                    });
+
+                    const bookingsByEquipment: Record<string, typeof activeBookings> = {};
+                    activeBookings.forEach(b => {
+                        const eq = b.price_breakdown?.equipment || b.equipment || 'Other';
+                        if (!bookingsByEquipment[eq]) bookingsByEquipment[eq] = [];
+                        bookingsByEquipment[eq].push(b);
+                    });
+
+                    // For the top-right actions, we target the first slot if available
+                    const primarySlot = bucketSlots[0];
+
+                    return (
+                        <div
+                            className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
+                            onClick={() => setIsBucketModalOpen(false)}
+                        >
+                            <div
+                                className="bg-white rounded-xl p-8 md:p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 max-h-[90vh] overflow-y-auto will-change-transform"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="flex justify-between items-start mb-10">
+                                    <div>
+                                        <h3 className="text-3xl font-serif text-[#43302E] tracking-tighter">
+                                            {format(bucketTime.date, 'EEEE, MMM d')} &bull; {bucketTime.hour > 12 ? `${bucketTime.hour - 12} PM` : bucketTime.hour === 12 ? '12 PM' : `${bucketTime.hour} AM`}
+                                        </h3>
+                                        <div className="flex items-center gap-3 mt-4">
+                                            <div className="bg-off-white p-2.5 rounded-lg border border-border-grey shadow-tight text-[#43302E]">
+                                                <User className="w-5 h-5" />
                                             </div>
-                                            <div className="space-y-1.5">
-                                                <div>
-                                                    <p className="text-[11px] font-bold text-charcoal tracking-widest uppercase">
-                                                        {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}
-                                                    </p>
-                                                    <p className="text-[10px] font-bold text-slate uppercase tracking-[0.1em] mt-1">
-                                                        {slot.equipment ? Object.entries(slot.equipment).map(([eq, qty]) => `${qty}x ${eq.toUpperCase()}`).join(', ') : 'OPEN SPACE'}
-                                                    </p>
-                                                </div>
-                                                {(() => {
-                                                    const activeBooking = slot.bookings?.find(b => ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || ''));
-                                                    if (!activeBooking) return null;
-                                                    return (
-                                                        <div className="flex items-center gap-3 pt-3 mt-3 border-t border-border-grey/50">
-                                                            {activeBooking.instructor && (
-                                                                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border border-border-grey shadow-tight" title="Instructor">
-                                                                    {activeBooking.instructor.avatar_url ? (
-                                                                        <Image src={activeBooking.instructor.avatar_url} alt="Instructor" width={18} height={18} className="rounded-full w-4.5 h-4.5 object-cover" />
-                                                                    ) : (
-                                                                        <User className="w-4 h-4 text-slate" />
-                                                                    )}
-                                                                    <span className="text-[10px] font-bold text-charcoal uppercase tracking-widest">{activeBooking.instructor.full_name || 'N/A'}</span>
-                                                                </div>
-                                                            )}
-                                                            {activeBooking.client && (
-                                                                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border border-border-grey shadow-tight" title="Client">
-                                                                    {activeBooking.client.avatar_url ? (
-                                                                        <Image src={activeBooking.client.avatar_url} alt="Client" width={18} height={18} className="rounded-full w-4.5 h-4.5 object-cover" />
-                                                                    ) : (
-                                                                        <Users className="w-4 h-4 text-slate" />
-                                                                    )}
-                                                                    <span className="text-[10px] font-bold text-charcoal uppercase tracking-widest">{activeBooking.client.full_name || 'N/A'}</span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })()}
+                                            <div className="space-y-0.5">
+                                                <p className="text-[10px] text-[#43302E]/60 font-bold uppercase tracking-[0.2em]">Staffing</p>
+                                                <p className="text-[14px] font-bold text-[#43302E] tracking-tight">
+                                                    {instructors.size > 0 ? Array.from(instructors).join(', ') : 'Unassigned'}
+                                                </p>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
                                         <button
                                             onClick={() => {
-                                                setIsBucketModalOpen(false);
-                                                onSlotClick(slot);
+                                                if (primarySlot) {
+                                                    setIsBucketModalOpen(false);
+                                                    onSlotClick(primarySlot);
+                                                }
                                             }}
-                                            className="text-[10px] font-bold text-forest hover:text-charcoal uppercase tracking-widest underline decoration-forest/20 hover:decoration-forest underline-offset-8 transition-all px-4 py-2 hover:bg-white rounded-lg"
+                                            className="p-3 bg-white hover:bg-off-white rounded-lg text-[#43302E] transition-all border border-border-grey shadow-tight"
+                                            title="Edit"
                                         >
-                                            EDIT SESSION
+                                            <Pencil className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (primarySlot) {
+                                                    setIsBucketModalOpen(false);
+                                                    setSingleDate(primarySlot.date);
+                                                    setSingleTime(primarySlot.start_time);
+                                                    setSingleEndTime(primarySlot.end_time);
+                                                    // Copy equipment from primary slot
+                                                    const newEq: Record<string, number> = {};
+                                                    if (primarySlot.equipment) Object.assign(newEq, primarySlot.equipment);
+                                                    setAddMode('single');
+                                                    setIsAddModalOpen(true);
+                                                }
+                                            }}
+                                            className="p-3 bg-white hover:bg-off-white rounded-lg text-[#43302E] transition-all border border-border-grey shadow-tight"
+                                            title="Duplicate"
+                                        >
+                                            <Copy className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => setIsBucketModalOpen(false)}
+                                            className="p-3 bg-off-white hover:bg-white rounded-lg text-slate hover:text-charcoal transition-all border border-border-grey shadow-tight"
+                                        >
+                                            <X className="w-5 h-5" />
                                         </button>
                                     </div>
-                                ))}
-                            </div>
+                                </div>
 
-                            <div className="mt-12 pt-10 border-t border-border-grey flex justify-center">
-                                <button
-                                    onClick={() => {
-                                        setIsBucketModalOpen(false);
-                                        setSingleDate(format(bucketTime.date, 'yyyy-MM-dd'));
-                                        setSingleTime(`${bucketTime.hour.toString().padStart(2, '0')}:00`);
-                                        setSingleEndTime(`${(bucketTime.hour + 1).toString().padStart(2, '0')}:00`);
-                                        setAddMode('single');
-                                        setIsAddModalOpen(true);
-                                    }}
-                                    className="bg-charcoal text-white px-10 py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 flex items-center gap-4"
-                                >
-                                    <Plus className="w-5 h-5" /> ADD ANOTHER SESSION HERE
-                                </button>
+                                <div className="space-y-10">
+                                    {Object.entries(bookingsByEquipment).map(([eqType, bookings]) => (
+                                        <div key={eqType} className="space-y-4">
+                                            <h4 className="text-[11px] font-bold text-[#43302E]/60 uppercase tracking-[0.3em] flex items-center gap-3">
+                                                <Box className="w-4 h-4 text-[#43302E]/30" />
+                                                {eqType}S
+                                                <span className="h-px flex-1 bg-border-grey" />
+                                            </h4>
+
+                                            <div className="grid gap-3">
+                                                {bookings.map(b => (
+                                                    <div key={b.id} className="flex items-center justify-between p-4 bg-white border border-border-grey rounded-xl shadow-tight group hover:border-[#43302E]/20 transition-all">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-10 h-10 rounded-full bg-off-white flex items-center justify-center overflow-hidden border border-border-grey shadow-inner">
+                                                                {b.client?.avatar_url ? (
+                                                                    <Image src={b.client.avatar_url} alt={b.client.full_name || 'Client'} width={40} height={40} className="object-cover w-full h-full" />
+                                                                ) : (
+                                                                    <User className="w-5 h-5 text-slate" />
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[13px] font-bold text-[#43302E]">{b.client?.full_name || 'Anonymous Client'}</p>
+                                                                <p className="text-[9px] font-bold text-[#43302E]/40 uppercase tracking-widest">{b.status}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <ArrowUpRight className="w-4 h-4 text-[#43302E]/20" />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {cancelledBookings.length > 0 && (
+                                        <div className="pt-6 border-t border-border-grey/50">
+                                            <h4 className="text-[11px] font-bold text-red-900/40 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
+                                                <X className="w-4 h-4" />
+                                                Cancelled Bookings
+                                            </h4>
+                                            <div className="grid gap-2">
+                                                {cancelledBookings.map(b => (
+                                                    <div key={b.id} className="flex items-center justify-between p-3 bg-red-50/30 border border-red-100/50 rounded-lg">
+                                                        <div className="flex items-center gap-3">
+                                                            <p className="text-[12px] font-medium text-red-900/60 line-through">{b.client?.full_name || 'Client'}</p>
+                                                        </div>
+                                                        <p className="text-[9px] font-bold text-red-900/30 uppercase tracking-tighter">Cancelled</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mt-12 pt-10 border-t border-border-grey flex justify-between items-center">
+                                    <p className="text-[10px] text-slate font-bold uppercase tracking-widest">
+                                        {bucketSlots.length} Active Slot(s) in this block
+                                    </p>
+                                    <button
+                                        onClick={() => {
+                                            setIsBucketModalOpen(false);
+                                            setSingleDate(format(bucketTime.date, 'yyyy-MM-dd'));
+                                            setSingleTime(`${bucketTime.hour.toString().padStart(2, '0')}:00`);
+                                            setSingleEndTime(`${(bucketTime.hour + 1).toString().padStart(2, '0')}:00`);
+                                            setAddMode('single');
+                                            setIsAddModalOpen(true);
+                                        }}
+                                        className="bg-[#43302E] text-white px-8 py-4 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 flex items-center gap-3"
+                                    >
+                                        <Plus className="w-4 h-4" /> Add Slot
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    );
+                })()}
 
             </div>
         </div>

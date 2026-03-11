@@ -248,8 +248,8 @@ export async function createStudio(formData: FormData) {
         const govIdExpiry = formData.get('govIdExpiry') as string
         const insuranceExpiry = formData.get('insuranceExpiry') as string
 
-        if (!name || !location || !contactNumber || !dateOfBirth || !address || !birPath || !govIdPath || spacePhotosUrls.length === 0) {
-            return { error: 'All fields and documents are required' }
+        if (!name || !location || !contactNumber || !dateOfBirth || !address || !googleMapsUrl || !birPath || !govIdPath || spacePhotosUrls.length === 0) {
+            return { error: 'All fields and documents are required (including Google Maps Link)' }
         }
 
 
@@ -571,8 +571,8 @@ export async function updateStudio(formData: FormData) {
 
     // Pricing was parsed successfully via replaced block
 
-    if (!studioId || !name || !location || !contactNumber) {
-        return { error: 'All fields are required' }
+    if (!studioId || !name || !location || !contactNumber || !address || !formData.get('googleMapsUrl')) {
+        return { error: 'All fields are required (including Full Address and Google Maps Link)' }
     }
 
     const updateData: any = {

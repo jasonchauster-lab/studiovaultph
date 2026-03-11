@@ -37,6 +37,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
 
     const getSlotDateTime = (date: string, time: string) => {
+        if (!date || !time) return new Date(0)
         return new Date(`${date}T${time}+08:00`)
     }
 
@@ -50,6 +51,11 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             age--
         }
         return age
+    }
+
+    const getSlotEndDateTime = (date: string, time: string) => {
+        if (!date || !time) return new Date(0)
+        return new Date(`${date}T${time}+08:00`)
     }
 
     const now = new Date()
@@ -76,17 +82,20 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
         return true
     })
 
-    // 2. Split filtered bookings into upcoming/past
-    const upcomingBookings = filteredBookings.filter(b => {
+    // 2. Split filtered bookings into active/past
+    // "Active" includes anything today (even if started) or in the future that is approved
+    const activeBookings = filteredBookings.filter(b => {
         const slot = getFirst(b.slots)
         if (!slot) return false
-        return b.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) > now
+        const endDateTime = getSlotEndDateTime(slot.date, slot.end_time || slot.start_time)
+        return b.status === 'approved' && endDateTime > now
     })
 
-    const pastBookings = filteredBookings.filter(b => {
+    const historicalBookings = filteredBookings.filter(b => {
         const slot = getFirst(b.slots)
         if (!slot) return false
-        return (b.status === 'completed' || b.status === 'cancelled_refunded' || b.status === 'cancelled_charged' || (b.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) <= now))
+        const endDateTime = getSlotEndDateTime(slot.date, slot.end_time || slot.start_time)
+        return (b.status !== 'approved' || endDateTime <= now)
     })
 
     return (
@@ -95,23 +104,23 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 <BookingFilter onFilterChange={setFilters} />
             </div>
 
-            {/* Upcoming List */}
+            {/* Active Sessions List */}
             <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-4">
                         <Calendar className="w-6 h-6 text-forest" />
-                        <h2 className="text-3xl font-serif text-charcoal tracking-tighter">Upcoming Sessions</h2>
+                        <h2 className="text-3xl font-serif text-charcoal tracking-tighter">My Sessions</h2>
                     </div>
-                    <div className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em]">{upcomingBookings.length} SESSIONS FOUND</div>
+                    <div className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em]">{activeBookings.length} SESSIONS FOUND</div>
                 </div>
 
-                {upcomingBookings.length === 0 ? (
+                {activeBookings.length === 0 ? (
                     <div className="py-24 text-center earth-card border-dashed bg-off-white">
-                        <p className="text-[10px] font-black text-slate uppercase tracking-[0.4em]">No upcoming sessions found.</p>
+                        <p className="text-[10px] font-black text-slate uppercase tracking-[0.4em]">No active sessions found.</p>
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {upcomingBookings.map((booking: any) => {
+                        {activeBookings.map((booking: any) => {
                             const slot = getFirst(booking.slots)
                             const studio = getFirst(slot?.studios)
                             const client = getFirst(booking.client)
@@ -132,13 +141,9 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     <Link href={`/studios/${studio?.id}`} className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] hover:text-gold transition-colors">
                                                         {studio?.name || "Studio"}
                                                     </Link>
-                                                    <span className={clsx(
-                                                        "status-pill-earth shrink-0",
-                                                        booking.status === 'approved' ? "status-pill-green" :
-                                                            "status-pill-red"
-                                                    )}>
-                                                        {booking.status === 'approved' ? 'BOOKED' : 'CANCELLED'}
-                                                    </span>
+                                                    <div className="flex items-center gap-2 bg-[#FFF1B5]/40 px-2 py-0.5 rounded border border-[#43302E]/5 whitespace-nowrap">
+                                                        <span className="text-[9px] font-black text-[#43302E]">1/1</span>
+                                                    </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <MapPin className="w-3 h-3 text-forest" />
@@ -221,17 +226,17 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             </section>
 
             {/* Past Sessions List */}
-            {pastBookings.length > 0 && (
+            {historicalBookings.length > 0 && (
                 <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
                     <div className="flex items-center justify-between mb-10">
                         <div className="flex items-center gap-4">
                             <Clock className="w-6 h-6 text-charcoal/20" />
-                            <h2 className="text-3xl font-serif text-charcoal/60 tracking-tighter">Session History</h2>
+                            <h2 className="text-3xl font-serif text-charcoal/60 tracking-tighter">Past Sessions</h2>
                         </div>
                     </div>
 
                     <div className="space-y-6">
-                        {pastBookings.map((booking: any) => {
+                        {historicalBookings.map((booking: any) => {
                             const slot = getFirst(booking.slots)
                             const studio = getFirst(slot?.studios)
                             const client = getFirst(booking.client)
@@ -252,19 +257,9 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     <Link href={`/studios/${studio?.id}`} className="text-[11px] font-black text-charcoal/40 uppercase tracking-[0.2em]">
                                                         {studio?.name || "Studio"}
                                                     </Link>
-                                                    <span className={clsx(
-                                                        'status-pill-earth shrink-0',
-                                                        booking.status === 'completed'
-                                                            ? (booking.funds_unlocked ? 'status-pill-green' : 'status-pill-yellow') :
-                                                            booking.status === 'approved' ? 'bg-off-white text-slate border-border-grey' :
-                                                                'bg-charcoal/5 text-slate border-border-grey'
-                                                    )}>
-                                                        {['completed', 'approved'].includes(booking.status)
-                                                            ? (booking.status === 'completed'
-                                                                ? 'COMPLETED'
-                                                                : 'BOOKED')
-                                                            : 'CANCELLED'}
-                                                    </span>
+                                                    <div className="flex items-center gap-2 bg-[#43302E]/5 px-2 py-0.5 rounded border border-[#43302E]/10 whitespace-nowrap group-hover:bg-[#FFF1B5]/20 transition-all">
+                                                        <span className="text-[9px] font-black text-[#43302E]/60 group-hover:text-[#43302E]">1/1</span>
+                                                    </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <MapPin className="w-3 h-3 text-charcoal/20" />
