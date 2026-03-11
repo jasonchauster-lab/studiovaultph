@@ -10,6 +10,7 @@ import CancelBookingModal from './CancelBookingModal';
 import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions';
 import InstructorScheduleCalendar from '@/components/instructor/InstructorScheduleCalendar';
 import InstructorStatCards from './InstructorStatCards';
+import MobileScheduleCalendar from '@/components/dashboard/MobileScheduleCalendar';
 
 interface InstructorDashboardClientProps {
     userId: string;
@@ -95,12 +96,42 @@ export default function InstructorDashboardClient({
             {/* Dashboard Grid Container */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
                 <div className="xl:col-span-2">
-                    <InstructorScheduleCalendar
-                        availability={availability}
-                        bookings={calendarBookings}
-                        currentUserId={userId || ''}
-                        currentDate={new Date(currentDateStr || getManilaTodayStr())}
-                    />
+                    {/* Desktop Calendar */}
+                    <div className="hidden lg:block border border-border-grey rounded-xl overflow-hidden bg-white">
+                        <InstructorScheduleCalendar
+                            availability={availability}
+                            bookings={calendarBookings}
+                            currentUserId={userId || ''}
+                            currentDate={new Date(currentDateStr || getManilaTodayStr())}
+                        />
+                    </div>
+
+                    {/* Mobile Schedule View */}
+                    <div className="lg:hidden">
+                        <MobileScheduleCalendar
+                            currentDate={new Date(currentDateStr || getManilaTodayStr())}
+                            initialSessions={[
+                                ...availability.map(a => ({
+                                    id: a.id,
+                                    start_time: a.start_time,
+                                    end_time: a.end_time,
+                                    date: a.date || getManilaTodayStr(),
+                                    type: `Availability: ${a.location_area?.split(' - ').pop() || a.location_area}`,
+                                    location: a.location_area,
+                                    is_booked: false
+                                })),
+                                ...calendarBookings.map(b => ({
+                                    id: b.id,
+                                    start_time: b.slots.start_time,
+                                    end_time: b.slots.end_time,
+                                    date: b.slots.date,
+                                    type: `Booking: ${b.slots.studios.name}`,
+                                    location: b.slots.studios.location,
+                                    is_booked: b.status === 'approved'
+                                }))
+                            ]}
+                        />
+                    </div>
                 </div>
 
                 {/* Upcoming Bookings Sidebar */}

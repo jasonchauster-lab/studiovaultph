@@ -15,20 +15,20 @@ export default function LandingPage() {
       <RoleSelectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* Navigation */}
-      <header className="sticky top-0 z-50 w-full px-6 py-6">
-        <nav className="max-w-7xl mx-auto bg-white rounded-xl px-10 py-5 flex items-center justify-between shadow-tight border border-border-grey">
+      <header className="sticky top-0 z-50 w-full px-4 md:px-8 py-6">
+        <nav className="max-w-7xl mx-auto bg-white rounded-xl px-4 sm:px-10 py-5 flex items-center justify-between shadow-tight border border-border-grey">
           <Link href="/" aria-label="Studio Vault PH Home" className="flex items-center gap-1 group">
             <Image src="/logo.png" alt="" width={60} height={60} className="w-10 h-10 object-contain" />
             <span className="text-xl font-serif font-bold text-charcoal tracking-tighter uppercase hidden sm:block">STUDIO VAULT PH</span>
           </Link>
-          <div className="flex gap-6 items-center">
+          <div className="flex gap-4 sm:gap-6 items-center">
             <Link href="/login" className="text-slate-600 hover:text-charcoal text-[10px] font-bold uppercase tracking-[0.3em] transition-all">
               Log In
             </Link>
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="bg-charcoal text-white px-8 py-3.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight"
+              className="bg-charcoal text-white px-6 sm:px-8 py-3.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight"
             >
               Sign Up
             </button>
@@ -38,16 +38,16 @@ export default function LandingPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="relative px-6 py-24 md:py-40 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20 bg-white">
-          <div className="max-w-3xl space-y-12 relative z-10 flex-1">
-            <div className="space-y-8">
+        <section className="relative px-4 md:px-8 py-16 md:py-40 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20 bg-white">
+          <div className="max-w-3xl space-y-10 md:space-y-12 relative z-10 flex-1 w-full">
+            <div className="space-y-6 md:space-y-8">
               <div className="inline-flex items-center gap-4 bg-white border border-border-grey px-6 py-3 rounded-lg shadow-tight animate-in fade-in slide-in-from-left-4 duration-700">
                 <Sparkles className="w-4 h-4 text-forest" />
                 <span className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em]">A Grounded Approach to Movement</span>
               </div>
 
-              <h1 className="text-6xl md:text-7xl font-serif text-charcoal tracking-tighter leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                Elevating the <br />
+              <h1 className="text-4xl md:text-7xl font-serif text-charcoal tracking-tighter leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                Elevating the <br className="hidden sm:block" />
                 <span className="text-forest italic">Studio Experience.</span>
               </h1>
 
@@ -61,7 +61,7 @@ export default function LandingPage() {
                 type="button"
                 onClick={() => setIsModalOpen(true)}
                 aria-label="Get Started Now - Sign up for an account"
-                className="group bg-forest text-white px-12 py-6 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all flex items-center gap-4 shadow-tight"
+                className="group bg-forest text-white w-full sm:w-auto px-12 py-6 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all flex items-center justify-center sm:justify-start gap-4 shadow-tight"
               >
                 Get Started Now
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
@@ -91,13 +91,13 @@ export default function LandingPage() {
                 priority
               />
               {/* Action overlay */}
-              <div className="absolute bottom-10 left-10 right-10 p-8 bg-white border border-border-grey rounded-lg flex items-center gap-6 shadow-card animate-in slide-in-from-bottom-8 duration-1000 delay-700">
-                <div className="w-14 h-14 bg-forest rounded-lg flex items-center justify-center shadow-tight">
-                  <Sparkles className="w-8 h-8 text-white" />
+              <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 right-6 md:right-10 p-6 md:p-8 bg-white border border-border-grey rounded-lg flex items-center gap-6 shadow-card animate-in slide-in-from-bottom-8 duration-1000 delay-700">
+                <div className="w-12 h-12 md:w-14 md:h-14 bg-forest rounded-lg flex items-center justify-center shadow-tight flex-shrink-0">
+                  <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-white" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-charcoal uppercase tracking-[0.3em] block mb-2">Validated Excellence</p>
-                  <p className="text-[11px] text-charcoal-700 font-medium leading-relaxed">Certified Equipment and Verified Partners.</p>
+                  <p className="text-[10px] font-bold text-charcoal uppercase tracking-[0.3em] block mb-1 md:mb-2">Validated Excellence</p>
+                  <p className="text-[10px] md:text-[11px] text-charcoal-700 font-medium leading-relaxed">Certified Equipment and Verified Partners.</p>
                 </div>
               </div>
             </div>
@@ -105,9 +105,9 @@ export default function LandingPage() {
         </section>
 
         {/* Trust Blocks Section (Features) */}
-        <section className="px-6 py-32 bg-[#F9FAFB]">
+        <section className="px-4 md:px-8 py-20 md:py-32 bg-[#F9FAFB]">
           <div className="max-w-7xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
               {[
                 { icon: TrendingUp, title: "Optimize Revenue", desc: "Monetize idle equipment and transform off-peak availability into guaranteed studio income.", color: "forest" },
                 { icon: ShieldCheck, title: "Verified Network", desc: "Security is non-negotiable. Every session is managed through a secure, identity-validated ecosystem.", color: "charcoal" },
@@ -120,7 +120,7 @@ export default function LandingPage() {
                   )}>
                     <prop.icon className="w-8 h-8" />
                   </div>
-                  <h2 className="text-3xl font-serif text-charcoal mb-6">{prop.title}</h2>
+                  <h2 className="text-2xl md:text-3xl font-serif text-charcoal mb-4 md:mb-6">{prop.title}</h2>
                   <p className="text-charcoal-700 text-sm font-medium leading-[1.8]">{prop.desc}</p>
                 </div>
               ))}
@@ -129,14 +129,14 @@ export default function LandingPage() {
         </section>
 
         {/* How It Works Section (Workflow) */}
-        <section className="px-6 py-40 bg-white relative overflow-hidden">
-          <div className="max-w-7xl mx-auto space-y-28 relative z-10">
-            <div className="text-center space-y-6">
+        <section className="px-4 md:px-8 py-24 md:py-40 bg-white relative overflow-hidden">
+          <div className="max-w-7xl mx-auto space-y-16 md:space-y-28 relative z-10">
+            <div className="text-center space-y-4 md:space-y-6">
               <p className="text-[10px] font-bold text-forest uppercase tracking-[0.5em]">The Methodology</p>
-              <h2 className="text-5xl md:text-6xl font-serif text-charcoal tracking-tighter">Professional Workflow.</h2>
+              <h2 className="text-4xl md:text-6xl font-serif text-charcoal tracking-tighter">Professional Workflow.</h2>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-0 relative">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-0 relative">
               {[
                 { step: "01", title: "LIST", icon: ClipboardList, desc: "Define your studio availability and set your preferred session rates." },
                 { step: "02", title: "BOOK", icon: CalendarDays, desc: "Verified instructors discover and reserve your space via real-time schedules." },
@@ -146,13 +146,13 @@ export default function LandingPage() {
                   "relative flex flex-col items-center text-center px-12 py-10 group",
                   i !== 2 && "md:border-r md:border-border-grey"
                 )}>
-                  <div className="w-52 h-52 rounded-2xl bg-off-white flex flex-col items-center justify-center shadow-tight border border-border-grey relative group-hover:-translate-y-2 transition-transform mb-12">
+                  <div className="w-40 h-40 md:w-52 md:h-52 rounded-2xl bg-off-white flex flex-col items-center justify-center shadow-tight border border-border-grey relative group-hover:-translate-y-2 transition-transform mb-8 md:mb-12">
                     <span className="text-[10px] font-bold text-white absolute -top-4 left-1/2 -translate-x-1/2 bg-forest px-6 py-2 rounded-lg shadow-tight uppercase tracking-widest leading-none border border-forest/10">{step.step}</span>
-                    <step.icon className="w-12 h-12 text-forest mb-6 opacity-80" />
-                    <span className="text-4xl font-serif font-bold text-charcoal tracking-widest">{step.title}</span>
+                    <step.icon className="w-10 h-10 md:w-12 md:h-12 text-forest mb-4 md:mb-6 opacity-80" />
+                    <span className="text-3xl md:text-4xl font-serif font-bold text-charcoal tracking-widest">{step.title}</span>
                   </div>
                   <div className="max-w-[320px]">
-                    <p className="text-charcoal-700 text-[20px] font-medium leading-[1.6]">
+                    <p className="text-charcoal-700 text-[18px] md:text-[20px] font-medium leading-[1.6]">
                       {step.desc}
                     </p>
                   </div>
@@ -163,11 +163,11 @@ export default function LandingPage() {
         </section>
 
         {/* Philosophy Section (Quote) */}
-        <section className="px-6 py-40 bg-charcoal relative overflow-hidden">
-          <div className="max-w-5xl mx-auto text-center p-16 md:p-32 rounded-xl relative overflow-hidden bg-white/5 border border-white/10">
-            <div className="relative z-10 space-y-12">
+        <section className="px-4 md:px-8 py-24 md:py-40 bg-charcoal relative overflow-hidden">
+          <div className="max-w-5xl mx-auto text-center p-8 md:p-32 rounded-xl relative overflow-hidden bg-white/5 border border-white/10">
+            <div className="relative z-10 space-y-10 md:space-y-12">
               <h2 className="text-[10px] font-bold text-forest uppercase tracking-[0.5em]">The Philosophy</h2>
-              <blockquote className="text-4xl md:text-5xl text-white font-serif leading-tight tracking-tighter italic">
+              <blockquote className="text-2xl md:text-5xl text-white font-serif leading-tight tracking-tighter italic">
                 &ldquo;We built Studio Vault PH because professional movement shouldn't be limited by logistics. It's a tool built for the industry, by the industry.&rdquo;
               </blockquote>
               <div className="flex flex-col items-center gap-4">
@@ -178,9 +178,9 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Value Proposition Sections */}
-        <section className="px-6 py-40 bg-white">
-          <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-16">
+        {/* Target Audience Sections */}
+        <section className="px-4 md:px-8 py-24 md:py-40 bg-white">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-16">
             {[
               {
                 title: "For Clients",
@@ -215,8 +215,8 @@ export default function LandingPage() {
                     <v.icon className="w-6 h-6 text-forest" />
                   </div>
                 </div>
-                <div className="space-y-3 px-2">
-                  <h2 className="text-3xl font-serif text-charcoal tracking-tighter">{v.title}</h2>
+                <div className="space-y-2 md:space-y-3 px-2">
+                  <h2 className="text-2xl md:text-3xl font-serif text-charcoal tracking-tighter">{v.title}</h2>
                   <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em]">{v.subtitle}</p>
                 </div>
                 <ul className="space-y-6 px-2">
@@ -234,16 +234,16 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="px-6 py-32 border-t border-border-grey bg-white">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-16">
+      <footer className="px-4 md:px-8 py-20 md:py-32 border-t border-border-grey bg-white">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12 md:gap-16">
           <div className="flex flex-col items-center md:items-start gap-6">
             <div className="flex items-center gap-2 grayscale group-hover:grayscale-0 transition-all opacity-80">
-              <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-12 h-12 object-contain" />
-              <span className="text-xl font-serif text-charcoal tracking-tighter uppercase">STUDIO VAULT PH</span>
+              <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-10 h-10 md:w-12 md:h-12 object-contain" />
+              <span className="text-lg md:text-xl font-serif text-charcoal tracking-tighter uppercase text-center md:text-left transition-all">STUDIO VAULT PH</span>
             </div>
-            <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em]">&copy; {new Date().getFullYear()} STUDIO VAULT PH. ALL RIGHTS RESERVED.</p>
+            <p className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] text-center md:text-left">&copy; {new Date().getFullYear()} STUDIO VAULT PH. ALL RIGHTS RESERVED.</p>
           </div>
-          <div className="flex flex-wrap justify-center gap-10 text-[10px] font-bold text-slate uppercase tracking-[0.4em]">
+          <div className="flex flex-wrap justify-center md:justify-end gap-6 md:gap-10 text-[10px] font-bold text-slate uppercase tracking-[0.4em]">
             <Link href="/terms-of-service" className="hover:text-forest transition-all underline decoration-forest/0 hover:decoration-forest underline-offset-8">Terms of Service</Link>
             <Link href="/privacy" className="hover:text-forest transition-all underline decoration-forest/0 hover:decoration-forest underline-offset-8">Privacy Policy</Link>
             <Link href="/support" className="hover:text-forest transition-all underline decoration-forest/0 hover:decoration-forest underline-offset-8">Support</Link>

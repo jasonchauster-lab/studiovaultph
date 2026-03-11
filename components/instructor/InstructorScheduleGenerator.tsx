@@ -294,7 +294,7 @@ export default function InstructorScheduleGenerator({ initialAvailability }: Sch
                                                     <div className="flex items-center gap-4">
                                                         <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
                                                         {selectedInCity.length > 0 && (
-                                                            <span className="text-[9px] font-bold text-forest bg-forest/5 px-2.5 py-1 rounded-full uppercase tracking-widest border border-forest/10">
+                                                            <span className="text-[9px] font-bold text-[#4B5563] bg-[#F3F4F6] px-2.5 py-1 rounded-full uppercase tracking-widest border border-gray-200">
                                                                 {selectedInCity.length}
                                                             </span>
                                                         )}

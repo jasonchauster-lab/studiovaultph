@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes, isPast } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle, ChevronDown, ChevronUp, CheckCircle, Check } from 'lucide-react'
 import clsx from 'clsx'
-import { toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
+import { toManilaDateStr, getManilaTodayStr, toManilaDate } from '@/lib/timezone'
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
 import InstructorScheduleGenerator from './InstructorScheduleGenerator'
 import ChatWindow from '@/components/dashboard/ChatWindow'
@@ -116,6 +116,28 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
         return { availabilityMap: aMap, recurringMap: rMap, bookingMap: bMap }
     }, [availability, bookings])
+
+    // Current Time Line Logic
+    const [now, setNow] = useState(toManilaDate(new Date()))
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setNow(toManilaDate(new Date()))
+        }, 60000) // Update every minute
+        return () => clearInterval(timer)
+    }, [])
+
+    const currentTimePosition = useMemo(() => {
+        const hours24 = now.getUTCHours()
+        const minutes = now.getUTCMinutes()
+        const totalMinutes = hours24 * 60 + minutes
+        const startMinutes = 6 * 60
+        const endMinutes = 22 * 60
+
+        if (totalMinutes < startMinutes || totalMinutes > endMinutes) return null
+
+        return ((totalMinutes - startMinutes) / (endMinutes - startMinutes)) * 100
+    }, [now])
 
     const handlePrevWeek = () => {
         const newDate = subWeeks(currentDate, 1)
@@ -298,6 +320,17 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                         </div>
 
                         <div className="divide-y divide-border-grey relative">
+                            {/* Current Time Indicator */}
+                            {currentTimePosition !== null && (
+                                <div
+                                    className="absolute w-full z-30 pointer-events-none flex items-center"
+                                    style={{ top: `${currentTimePosition}%` }}
+                                >
+                                    <div className="w-2.5 h-2.5 bg-forest rounded-full -ml-[5px] ring-2 ring-white shadow-sm" />
+                                    <div className="h-[2px] w-full bg-forest shadow-[0_0_8px_rgba(47,82,51,0.3)] transition-all duration-1000" />
+                                </div>
+                            )}
+
                             {hours.map(hour => (
                                 <div key={hour} className="grid grid-cols-8" style={{ minHeight: `${ROW_HEIGHT}px` }}>
                                     <div className="p-4 text-[10px] text-slate font-black border-r border-border-grey text-center sticky left-0 bg-white z-20 w-28 flex items-center justify-center tracking-[0.2em]">
@@ -424,19 +457,19 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                     </div>
 
                                                                     <div className="flex flex-wrap items-center gap-2">
-                                                                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-off-white text-slate px-3 py-1 rounded-md border border-border-grey">
-                                                                            <MapPin className="w-3 h-3 text-slate/40" />
+                                                                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-[#F3F4F6] text-[#4B5563] px-3 py-1 rounded-md border border-gray-200">
+                                                                            <MapPin className="w-3 h-3 text-[#4B5563]/40" />
                                                                             <span className="truncate max-w-[100px]">{locations[0].split(' - ')[1] || locations[0]}</span>
                                                                         </div>
                                                                         {extraLocCount > 0 && duration >= 45 && (
-                                                                            <div className="text-[9px] font-bold text-forest bg-green-50 px-3 py-1 rounded-md border border-green-200">+{extraLocCount} AREAS</div>
+                                                                            <div className="text-[9px] font-bold text-[#4B5563] bg-[#F3F4F6] px-3 py-1 rounded-md border border-gray-200">+{extraLocCount} AREAS</div>
                                                                         )}
                                                                     </div>
 
                                                                     {primaryEq && duration >= 45 && (
                                                                         <div className="flex flex-wrap items-center gap-2 mt-auto">
-                                                                            <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-green-50 text-forest px-3 py-1 rounded-md border border-green-200">
-                                                                                <Box className="w-3 h-3 text-forest" />
+                                                                            <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-[#F3F4F6] text-[#4B5563] px-3 py-1 rounded-md border border-gray-200">
+                                                                                <Box className="w-3 h-3 text-[#4B5563]" />
                                                                                 <span>{primaryEq}</span>
                                                                             </div>
                                                                             {extraEqCount > 0 && (
@@ -517,15 +550,20 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                         >
                                                             {duration < 45 ? (
                                                                 <div className="flex flex-col justify-center">
-                                                                    <div className="text-[8px] font-bold uppercase tracking-widest text-slate">{booking.status === 'approved' ? 'BOOKED' : 'PENDING'}</div>
+                                                                    <div className={clsx(
+                                                                        "text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md w-fit mb-1",
+                                                                        booking.status === 'approved' ? "text-forest bg-green-50" : "text-orange-700 bg-orange-50 border border-orange-100"
+                                                                    )}>
+                                                                        {booking.status === 'approved' ? 'BOOKED' : 'PENDING'}
+                                                                    </div>
                                                                     <div className="text-[9px] font-bold text-charcoal truncate">{studioName}</div>
                                                                 </div>
                                                             ) : (
                                                                 <>
                                                                     <div className="flex items-center justify-between mb-3">
                                                                         <div className={clsx(
-                                                                            "status-pill-earth inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold",
-                                                                            booking.status === 'approved' ? "bg-green-50 text-green-800" : "bg-orange-50 text-orange-800"
+                                                                            "status-pill-earth inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold transition-all",
+                                                                            booking.status === 'approved' ? "bg-green-50 text-green-800 border-green-100" : "bg-orange-50 text-orange-700 border-orange-100 shadow-sm"
                                                                         )}>
                                                                             {booking.status === 'approved' ? 'BOOKED' : 'PENDING'}
                                                                         </div>
@@ -614,7 +652,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     <div className="flex items-center gap-4">
                                                         <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
                                                         {selectedInCity.length > 0 && (
-                                                            <span className="text-[9px] font-bold text-forest bg-forest/5 px-2.5 py-1 rounded-full uppercase tracking-widest border border-forest/10">
+                                                            <span className="text-[9px] font-bold text-[#4B5563] bg-[#F3F4F6] px-2.5 py-1 rounded-full uppercase tracking-widest border border-gray-200">
                                                                 {selectedInCity.length}
                                                             </span>
                                                         )}
@@ -794,7 +832,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     <div className="flex items-center gap-4">
                                                         <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
                                                         {selectedInCity.length > 0 && (
-                                                            <span className="text-[9px] font-bold text-forest bg-forest/5 px-2.5 py-1 rounded-full uppercase tracking-widest border border-forest/10">
+                                                            <span className="text-[9px] font-bold text-[#4B5563] bg-[#F3F4F6] px-2.5 py-1 rounded-full uppercase tracking-widest border border-gray-200">
                                                                 {selectedInCity.length}
                                                             </span>
                                                         )}
@@ -1011,7 +1049,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
                                         <div className="w-12 h-12 rounded-lg bg-off-white flex items-center justify-center border border-border-grey shadow-tight">
-                                            <Box className="w-6 h-6 text-forest" />
+                                            <Box className="w-6 h-6 text-[#4B5563]" />
                                         </div>
                                         <div>
                                             <span className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] block">Equipment</span>
