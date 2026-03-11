@@ -163,16 +163,16 @@ export default function LandingPage() {
         </section>
 
         {/* Philosophy Section (Quote) */}
-        <section className="px-4 md:px-8 py-24 md:py-40 bg-charcoal relative overflow-hidden">
-          <div className="max-w-5xl mx-auto text-center p-8 md:p-32 rounded-xl relative overflow-hidden bg-white/5 border border-white/10">
+        <section className="px-4 md:px-8 py-24 md:py-40 bg-buttermilk relative overflow-hidden border-t border-burgundy/5">
+          <div className="max-w-5xl mx-auto text-center p-8 md:p-32 rounded-xl relative overflow-hidden bg-white border border-burgundy/10 shadow-tight">
             <div className="relative z-10 space-y-10 md:space-y-12">
-              <h2 className="text-[10px] font-bold text-forest uppercase tracking-[0.5em]">The Philosophy</h2>
-              <blockquote className="text-2xl md:text-5xl text-white font-serif leading-tight tracking-tighter italic">
+              <h2 className="text-[10px] font-bold text-burgundy uppercase tracking-[0.5em]">The Philosophy</h2>
+              <blockquote className="text-2xl md:text-5xl text-burgundy font-serif leading-tight tracking-tighter italic">
                 &ldquo;We built Studio Vault PH because professional movement shouldn't be limited by logistics. It's a tool built for the industry, by the industry.&rdquo;
               </blockquote>
               <div className="flex flex-col items-center gap-4">
-                <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em]">STUDIO VAULT PH FOUNDERS</p>
-                <div className="w-16 h-1 bg-forest rounded-full" />
+                <p className="text-[10px] font-bold text-burgundy/60 uppercase tracking-[0.3em]">STUDIO VAULT PH FOUNDERS</p>
+                <div className="w-16 h-1 bg-burgundy rounded-full" />
               </div>
             </div>
           </div>
