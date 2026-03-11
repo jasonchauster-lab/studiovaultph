@@ -275,13 +275,13 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                     <div className="flex justify-center gap-3">
                         <button
                             onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
-                            className="btn-forest px-6 py-2.5 text-[10px] tracking-[0.2em] flex items-center gap-2 rounded-lg font-bold shadow-tight"
+                            className="h-10 border-2 border-burgundy text-burgundy bg-white px-6 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-burgundy/5 transition-all flex items-center gap-2 shadow-tight active:scale-95"
                         >
                             <Plus className="w-4 h-4" /> ADD SLOT
                         </button>
                         <button
                             onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
-                            className="px-6 py-2.5 text-[10px] tracking-[0.2em] flex items-center gap-2 rounded-lg font-bold border border-charcoal text-charcoal bg-white hover:bg-off-white transition-all duration-300 shadow-tight active:scale-95"
+                            className="px-6 py-2.5 text-[10px] bg-burgundy text-buttermilk rounded-lg font-bold tracking-[0.2em] flex items-center gap-2 hover:brightness-110 shadow-tight active:scale-95 transition-all"
                         >
                             <CalendarIcon className="w-4 h-4" /> BULK GENERATE
                         </button>
@@ -327,8 +327,8 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                         : `calc((100% - 100px) / 7)`
                                                 }}
                                             >
-                                                <div className="w-2.5 h-2.5 bg-burgundy rounded-full -ml-[5px] ring-2 ring-white shadow-sm" />
-                                                <div className="h-[2px] w-full bg-burgundy shadow-[0_0_8px_rgba(67,48,46,0.3)]" />
+                                                <div className="w-[12px] h-[12px] bg-burgundy rounded-full -ml-[6px] ring-2 ring-white shadow-sm" />
+                                                <div className="h-[3px] w-full bg-burgundy shadow-[0_0_12px_rgba(67,48,46,0.4)]" />
                                             </div>
                                         )}
 

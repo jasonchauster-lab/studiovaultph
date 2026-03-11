@@ -81,9 +81,9 @@ export default function InstructorStatCards({ stats, hasPendingPayout }: Instruc
                         <div className="mt-8 pt-8 border-t border-border-grey">
                             <Link
                                 href="/instructor/payout"
-                                className="w-full h-14 bg-charcoal text-white rounded-lg text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-[1.2] transition-all shadow-tight active:scale-95"
+                                className="w-full h-14 bg-burgundy text-buttermilk rounded-lg text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-110 transition-all shadow-tight active:scale-95"
                             >
-                                <ArrowUpRight className="w-4 h-4 text-forest stroke-[3px]" />
+                                <ArrowUpRight className="w-4 h-4 text-buttermilk stroke-[3px]" />
                                 REQUEST PAYOUT
                             </Link>
                         </div>

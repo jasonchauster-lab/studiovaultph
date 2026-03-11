@@ -327,13 +327,13 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                 <div className="flex justify-center items-center gap-4 mt-6 relative z-10">
                     <button
                         onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
-                        className="btn-forest px-8 py-3 text-[10px] tracking-[0.2em]"
+                        className="h-12 border-2 border-burgundy text-burgundy bg-white px-8 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-burgundy/5 transition-all flex items-center gap-3 shadow-tight active:scale-95"
                     >
                         <Plus className="w-4 h-4" /> ADD SLOT
                     </button>
                     <button
                         onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
-                        className="h-12 border-2 border-charcoal text-charcoal bg-white px-8 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-charcoal hover:text-white transition-all flex items-center gap-3 shadow-tight active:scale-95"
+                        className="px-8 py-3 text-[10px] tracking-[0.2em] bg-burgundy text-buttermilk rounded-lg font-bold flex items-center gap-3 hover:brightness-110 shadow-tight active:scale-95 transition-all"
                     >
                         <CalendarIcon className="w-4 h-4" /> RECURRING SCHEDULE
                     </button>
@@ -384,8 +384,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     width: view === 'day' ? 'calc(100% - 112px)' : '12.5%'
                                                 }}
                                             >
-                                                <div className="w-2.5 h-2.5 bg-burgundy rounded-full -ml-[5px] ring-2 ring-white shadow-sm" />
-                                                <div className="h-[2px] w-full bg-burgundy shadow-[0_0_8px_rgba(67,48,46,0.3)]" />
+                                                <div className="w-[12px] h-[12px] bg-burgundy rounded-full -ml-[6px] ring-2 ring-white shadow-sm" />
+                                                <div className="h-[3px] w-full bg-burgundy shadow-[0_0_12px_rgba(67,48,46,0.4)]" />
                                             </div>
                                         )
                                     })()}
