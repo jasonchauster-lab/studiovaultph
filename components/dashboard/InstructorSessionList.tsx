@@ -230,8 +230,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
                     <div className="flex items-center justify-between mb-10">
                         <div className="flex items-center gap-4">
-                            <Clock className="w-6 h-6 text-charcoal/20" />
-                            <h2 className="text-3xl font-serif text-charcoal/60 tracking-tighter">Past Sessions</h2>
+                            <Clock className="w-6 h-6 text-charcoal/40" />
+                            <h2 className="text-3xl font-serif text-charcoal/80 tracking-tighter">Past Sessions</h2>
                         </div>
                     </div>
 
@@ -242,7 +242,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             const client = getFirst(booking.client)
 
                             return (
-                                <div key={booking.id} className="glass-card p-8 border border-white/60 bg-white/20 hover:bg-white/40 transition-all duration-700 shadow-sm opacity-60 hover:opacity-100">
+                                <div key={booking.id} className="glass-card p-8 border border-white/60 bg-white/20 hover:bg-white/40 transition-all duration-700 shadow-sm group relative">
                                     <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
                                         <div className="flex items-center gap-6 flex-1 min-w-0">
                                             <Link href={`/studios/${studio?.id}`} className="w-16 h-16 rounded-[20px] overflow-hidden border border-white bg-white/40 shadow-sm shrink-0 grayscale group-hover:grayscale-0 transition-all duration-700">
@@ -254,7 +254,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             </Link>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-3 mb-2">
-                                                    <Link href={`/studios/${studio?.id}`} className="text-[11px] font-black text-charcoal/40 uppercase tracking-[0.2em]">
+                                                    <Link href={`/studios/${studio?.id}`} className="text-[11px] font-black text-charcoal/60 uppercase tracking-[0.2em] group-hover:text-gold transition-colors">
                                                         {studio?.name || "Studio"}
                                                     </Link>
                                                     <div className="flex items-center gap-2 bg-[#43302E]/5 px-2 py-0.5 rounded border border-[#43302E]/10 whitespace-nowrap group-hover:bg-[#FFF1B5]/20 transition-all">
@@ -262,19 +262,19 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <MapPin className="w-3 h-3 text-charcoal/20" />
-                                                    <span className="text-[10px] text-charcoal/20 font-black uppercase tracking-[0.2em] truncate">
+                                                    <MapPin className="w-3 h-3 text-charcoal/40" />
+                                                    <span className="text-[10px] text-charcoal/60 font-black uppercase tracking-[0.2em] truncate">
                                                         {studio?.location || "N/A"}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="text-right shrink-0 bg-white/20 p-6 rounded-[12px] border border-[var(--airy-border)] min-w-[180px]">
-                                            <p className="text-xl font-serif text-charcoal/40 tracking-tighter leading-tight">
+                                        <div className="text-right shrink-0 bg-white/40 p-6 rounded-[12px] border border-[var(--airy-border)] min-w-[180px]">
+                                            <p className="text-xl font-serif text-charcoal/60 tracking-tighter leading-tight">
                                                 {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                                             </p>
-                                            <p className="text-[10px] text-charcoal/20 font-black mt-2 flex items-center justify-end gap-2 uppercase tracking-[0.2em]">
+                                            <p className="text-[10px] text-charcoal/40 font-black mt-2 flex items-center justify-end gap-2 uppercase tracking-[0.2em]">
                                                 {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                             </p>
                                         </div>
@@ -283,8 +283,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-8 pt-8 border-t border-white/60 gap-6">
                                         <div className="flex items-center gap-6">
                                             <div className="flex items-center gap-2">
-                                                <Box className="w-3.5 h-3.5 text-charcoal/20" />
-                                                <span className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.2em]">
+                                                <Box className="w-3.5 h-3.5 text-charcoal/40" />
+                                                <span className="text-[10px] font-black text-charcoal/60 uppercase tracking-[0.2em]">
                                                     {Array.isArray(slot?.equipment) && slot.equipment.length > 0
                                                         ? `${slot.equipment[0]} (${booking.quantity || 1})`
                                                         : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
@@ -292,31 +292,39 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             </div>
                                             {client && (
                                                 <div className="flex items-center gap-3">
-                                                    <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-6 h-6 rounded-full grayscale opacity-50" />
-                                                    <span className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.2em]">{client.full_name}</span>
+                                                    <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-6 h-6 rounded-full group-hover:grayscale-0 grayscale group-hover:opacity-100 opacity-60 transition-all duration-700" />
+                                                    <span className="text-[9px] font-black text-charcoal/60 uppercase tracking-[0.2em]">{client.full_name}</span>
                                                 </div>
                                             )}
                                         </div>
 
                                         <div className="flex items-center gap-3">
-                                            {booking.status === 'completed' && (
-                                                <div className="flex items-center gap-3">
-                                                    {!booking.instructor_reviewed_studio ? (
-                                                        <button
-                                                            onClick={() => setReviewTarget({
-                                                                booking,
-                                                                revieweeId: studio?.owner_id || '',
-                                                                revieweeName: studio?.name || 'Studio'
-                                                            })}
-                                                            className="h-10 bg-charcoal text-white px-6 rounded-full text-[9px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95"
-                                                        >
-                                                            LEAVE FEEDBACK
-                                                        </button>
-                                                    ) : (
-                                                        <span className="text-[9px] text-sage font-black uppercase tracking-[0.3em] bg-sage/5 px-4 py-2 rounded-full border border-sage/20">FEEDBACK SUBMITTED</span>
-                                                    )}
-                                                </div>
-                                            )}
+                                            <div className="flex items-center gap-4">
+                                                {booking.price_breakdown?.instructor_fee && (
+                                                    <div className="px-4 py-2 bg-forest/5 border border-forest/10 rounded-full flex items-center gap-2">
+                                                        <span className="text-[8px] font-black text-forest/40 uppercase tracking-widest">Earned</span>
+                                                        <span className="text-[11px] font-black text-forest tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                                                    </div>
+                                                )}
+                                                {booking.status === 'completed' && (
+                                                    <div className="flex items-center gap-3">
+                                                        {!booking.instructor_reviewed_studio ? (
+                                                            <button
+                                                                onClick={() => setReviewTarget({
+                                                                    booking,
+                                                                    revieweeId: studio?.owner_id || '',
+                                                                    revieweeName: studio?.name || 'Studio'
+                                                                })}
+                                                                className="h-10 bg-charcoal text-white px-6 rounded-full text-[9px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95"
+                                                            >
+                                                                LEAVE FEEDBACK
+                                                            </button>
+                                                        ) : (
+                                                            <span className="text-[9px] text-sage font-black uppercase tracking-[0.3em] bg-sage/5 px-4 py-2 rounded-full border border-sage/20">FEEDBACK SUBMITTED</span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

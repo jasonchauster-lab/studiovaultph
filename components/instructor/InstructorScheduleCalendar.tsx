@@ -428,6 +428,57 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                 const startingBookings = bookingMap[`${dayStr}-${hour}`] || []
                                                 const isPastCell = isPast(setMinutes(setHours(day, hour + 1), 0))
 
+                                                // --- LAYOUT LOGIC REFACTOR ---
+                                                // 1. Group availability slots by time range (ignoring location differences for the card)
+                                                const groupedByTime = startingSlots.reduce((acc, slot) => {
+                                                    const key = `${slot.start_time.slice(0, 5)}-${slot.end_time.slice(0, 5)}`
+                                                    const shortLoc = slot.location_area.split(' - ')[0]
+
+                                                    if (!acc[key]) {
+                                                        acc[key] = {
+                                                            primarySlot: slot,
+                                                            allSlots: [slot],
+                                                            locations: [slot.location_area],
+                                                            equipment: [...(slot.equipment || [])]
+                                                        }
+                                                    } else {
+                                                        acc[key].allSlots.push(slot)
+                                                        if (!acc[key].locations.some(l => l.split(' - ')[0] === shortLoc)) {
+                                                            acc[key].locations.push(slot.location_area)
+                                                        }
+                                                        if (slot.equipment) {
+                                                            slot.equipment.forEach(eq => {
+                                                                if (!acc[key].equipment.includes(eq)) acc[key].equipment.push(eq)
+                                                            })
+                                                        }
+                                                    }
+                                                    return acc
+                                                }, {} as Record<string, { primarySlot: Availability, allSlots: Availability[], locations: string[], equipment: string[] }>)
+
+                                                // 2. Determine which grouped slots are NOT booked
+                                                const visibleSlots = Object.values(groupedByTime).filter(group => {
+                                                    const slot = group.primarySlot;
+                                                    const [sh, sm] = slot.start_time.split(':').map(Number);
+                                                    const [eh, em] = slot.end_time.split(':').map(Number);
+                                                    const sStart = sh * 60 + sm;
+                                                    const sEnd = eh * 60 + em;
+
+                                                    return !bookings.some(b => {
+                                                        const bSlot = b.slots;
+                                                        if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time || bSlot.date !== dayStr) return false;
+                                                        if (!['pending', 'approved', 'completed'].includes(b.status)) return false;
+                                                        const [bsh, bsm] = bSlot.start_time.split(':').map(Number);
+                                                        const [beh, bem] = bSlot.end_time.split(':').map(Number);
+                                                        return (sStart < (beh * 60 + bem) && sEnd > (bsh * 60 + bsm));
+                                                    });
+                                                });
+
+                                                // 3. Combine with starting bookings to get ALL visible items in this cell block
+                                                const allVisibleItems = [
+                                                    ...visibleSlots.map(g => ({ type: 'slot' as const, id: g.primarySlot.id, data: g, start: g.primarySlot.start_time, end: g.primarySlot.end_time })),
+                                                    ...startingBookings.map(b => ({ type: 'booking' as const, id: b.id, data: b, start: b.slots.start_time, end: b.slots.end_time }))
+                                                ];
+
                                                 return (
                                                     <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-0", isPastCell && "bg-gray-50")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
                                                         <div
@@ -440,74 +491,32 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                 setIsAddModalOpen(true)
                                                             }}
                                                         />
-                                                        {(() => {
-                                                            const groupedSlots = startingSlots.reduce((acc, slot) => {
-                                                                const key = `${slot.start_time}-${slot.end_time}`
-                                                                const shortLoc = slot.location_area.split(' - ')[0]
 
-                                                                if (!acc[key]) {
-                                                                    acc[key] = {
-                                                                        primarySlot: slot,
-                                                                        allSlots: [slot],
-                                                                        locations: [slot.location_area],
-                                                                        equipment: [...(slot.equipment || [])]
-                                                                    }
-                                                                } else {
-                                                                    acc[key].allSlots.push(slot)
-                                                                    if (!acc[key].locations.some(l => l.split(' - ')[0] === shortLoc)) {
-                                                                        acc[key].locations.push(slot.location_area)
-                                                                    }
-                                                                    if (slot.equipment) {
-                                                                        slot.equipment.forEach(eq => {
-                                                                            if (!acc[key].equipment.includes(eq)) acc[key].equipment.push(eq)
-                                                                        })
-                                                                    }
-                                                                }
-                                                                return acc
-                                                            }, {} as Record<string, { primarySlot: Availability, allSlots: Availability[], locations: string[], equipment: string[] }>)
+                                                        {allVisibleItems.map((item) => {
+                                                            const [sh, sm] = item.start.split(':').map(Number);
+                                                            const [eh, em] = item.end.split(':').map(Number);
+                                                            const startTotal = sh * 60 + sm;
+                                                            const endTotal = eh * 60 + em;
+                                                            const duration = endTotal - startTotal;
+                                                            const topOffset = ((sh % 24 === hour ? sm : 0) / 60) * ROW_HEIGHT;
+                                                            const heightPx = (duration / 60) * ROW_HEIGHT;
 
-                                                            return Object.values(groupedSlots).map(({ primarySlot: slot, allSlots, locations, equipment }) => {
-                                                                const startMin = parseInt(slot.start_time.split(':')[1])
-                                                                const [endH, endM] = slot.end_time.split(':').map(Number)
-                                                                const startTotal = hour * 60 + startMin
-                                                                const endTotal = endH * 60 + endM
-                                                                const duration = endTotal - startTotal
-                                                                const topOffset = (startMin / 60) * ROW_HEIGHT
-                                                                const heightPx = (duration / 60) * ROW_HEIGHT
+                                                            // Find items that visibly overlap with THIS block to determine width/split
+                                                            const siblings = allVisibleItems.filter(other => {
+                                                                const [osh, osm] = other.start.split(':').map(Number);
+                                                                const [oeh, oem] = other.end.split(':').map(Number);
+                                                                const oStart = osh * 60 + osm;
+                                                                const oEnd = oeh * 60 + oem;
+                                                                return (startTotal < oEnd && endTotal > oStart);
+                                                            });
 
-                                                                const isBooked = bookings.some(b => {
-                                                                    const bSlot = b.slots;
-                                                                    if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time) return false;
-                                                                    if (bSlot.date !== dayStr) return false;
-                                                                    if (['pending', 'approved'].includes(b.status)) {
-                                                                        const [bsh, bsm] = bSlot.start_time.split(':').map(Number);
-                                                                        const [beh, bem] = bSlot.end_time.split(':').map(Number);
-                                                                        const bStartTotal = bsh * 60 + bsm;
-                                                                        const bEndTotal = beh * 60 + bem;
-                                                                        return (startTotal < bEndTotal && endTotal > bStartTotal);
-                                                                    }
-                                                                    return false;
-                                                                });
+                                                            const totalItems = siblings.length;
+                                                            const myIdx = siblings.findIndex(s => s.id === item.id);
+                                                            const widthPercent = totalItems > 1 ? (100 / totalItems) : 100;
+                                                            const leftPercent = totalItems > 1 ? (myIdx * 100 / totalItems) : 0;
 
-                                                                if (isBooked) return null;
-
-                                                                const siblings = [
-                                                                    ...Object.values(groupedSlots).map(g => g.primarySlot),
-                                                                    ...startingBookings.map(sb => sb.slots)
-                                                                ].filter(s => {
-                                                                    if (!s || !s.start_time) return false;
-                                                                    const [sh, sm] = s.start_time.split(':').map(Number);
-                                                                    const [eh, em] = s.end_time.split(':').map(Number);
-                                                                    const sStart = sh * 60 + sm;
-                                                                    const sEnd = eh * 60 + em;
-                                                                    return (startTotal < sEnd && endTotal > sStart);
-                                                                });
-
-                                                                const totalItems = siblings.length;
-                                                                const myIdx = siblings.findIndex(s => s.id === slot.id);
-                                                                const primaryEq = equipment.length > 0 ? equipment[0] : null;
-                                                                const extraEqCount = equipment.length > 1 ? equipment.length - 1 : 0;
-
+                                                            if (item.type === 'slot') {
+                                                                const { primarySlot: slot, locations, equipment } = item.data;
                                                                 return (
                                                                     <div
                                                                         key={slot.id}
@@ -521,8 +530,8 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                         style={{
                                                                             top: `${topOffset}px`,
                                                                             height: `${heightPx}px`,
-                                                                            width: totalItems > 1 ? `${(100 / totalItems) - 2}%` : '96%',
-                                                                            left: totalItems > 1 ? `${(myIdx * 100) / totalItems + 1}%` : '2%'
+                                                                            width: `${widthPercent - 2}%`,
+                                                                            left: `${leftPercent + 1}%`
                                                                         }}
                                                                         onClick={(e) => {
                                                                             e.stopPropagation()
@@ -550,93 +559,51 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                                     </div>
                                                                                 ))}
                                                                             </div>
-
                                                                         </div>
                                                                     </div>
                                                                 )
-                                                            })
-                                                        })()}
+                                                            } else {
+                                                                const booking = item.data;
+                                                                const slotData = booking.slots;
+                                                                const studioName = slotData.studios?.name || 'Partner Studio';
 
-                                                        {startingBookings.map((booking) => {
-                                                            const slotData = booking.slots;
-                                                            const [s_startH, s_startM] = slotData.start_time.split(':').map(Number);
-                                                            const [s_endH, s_endM] = slotData.end_time.split(':').map(Number);
-                                                            const startTotal = s_startH * 60 + s_startM;
-                                                            const endTotal = s_endH * 60 + s_endM;
-                                                            const duration = endTotal - startTotal;
-                                                            const topOffset = (s_startM / 60) * ROW_HEIGHT;
-                                                            const heightPx = (duration / 60) * ROW_HEIGHT;
-
-                                                            const studioName = slotData.studios?.name || 'Partner Studio';
-                                                            const clientName = booking.client?.full_name || 'Anonymous Client';
-
-                                                            const siblings = [
-                                                                ...startingSlots.filter(s => {
-                                                                    const isBooked = bookings.some(b => {
-                                                                        const bSlot = b.slots;
-                                                                        if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time) return false;
-                                                                        if (bSlot.date !== dayStr) return false;
-                                                                        if (['pending', 'approved'].includes(b.status)) {
-                                                                            const [bsh, bsm] = bSlot.start_time.split(':').map(Number);
-                                                                            const [beh, bem] = bSlot.end_time.split(':').map(Number);
-                                                                            const bStart = bsh * 60 + bsm; const bEnd = beh * 60 + bem;
-                                                                            const [ssh, ssm] = s.start_time.split(':').map(Number);
-                                                                            const [seh, sem] = s.end_time.split(':').map(Number);
-                                                                            const sStart = ssh * 60 + ssm; const sEnd = seh * 60 + sem;
-                                                                            return (sStart < bEnd && sEnd > bStart);
-                                                                        }
-                                                                        return false;
-                                                                    });
-                                                                    return !isBooked;
-                                                                }),
-                                                                ...startingBookings.map(sb => sb.slots)
-                                                            ].filter(s => {
-                                                                if (!s || !s.start_time) return false;
-                                                                const [sh, sm] = s.start_time.split(':').map(Number);
-                                                                const [eh, em] = s.end_time.split(':').map(Number);
-                                                                const sStart = sh * 60 + sm;
-                                                                const sEnd = eh * 60 + em;
-                                                                return (startTotal < sEnd && endTotal > sStart);
-                                                            });
-
-                                                            const totalItems = siblings.length;
-                                                            const myIdx = siblings.findIndex(s => s.id === booking.slot_id);
-
-                                                            return (
-                                                                <div
-                                                                    key={booking.id}
-                                                                    className={clsx(
-                                                                        "absolute rounded-lg text-[10px] z-20 p-4 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-tight border border-[#43302E]/10 bg-white",
-                                                                        duration < 45 && "flex-row items-center justify-between py-2 px-3"
-                                                                    )}
-                                                                    style={{
-                                                                        top: `${topOffset}px`,
-                                                                        height: `${heightPx}px`,
-                                                                        width: totalItems > 1 ? `${(100 / totalItems) - 2}%` : '96%',
-                                                                        left: totalItems > 1 ? `${(myIdx * 100) / totalItems + 1}%` : '2%'
-                                                                    }}
-                                                                    onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); }}
-                                                                >
-                                                                    <div className={clsx("flex justify-between items-start w-full", duration < 45 && "items-center")}>
-                                                                        <div className="flex flex-col min-w-0">
-                                                                            <span className="text-[10px] font-bold text-[#43302E] uppercase tracking-widest truncate">
-                                                                                {booking.price_breakdown?.equipment || 'Standard session'}
-                                                                            </span>
-                                                                            {duration >= 45 && (
-                                                                                <span className="text-[8px] font-medium text-[#43302E]/60 uppercase tracking-tighter mt-0.5 truncate">
-                                                                                    {studioName}
+                                                                return (
+                                                                    <div
+                                                                        key={booking.id}
+                                                                        className={clsx(
+                                                                            "absolute rounded-lg text-[10px] z-20 p-4 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-tight border border-[#43302E]/10 bg-white",
+                                                                            duration < 45 && "flex-row items-center justify-between py-2 px-3"
+                                                                        )}
+                                                                        style={{
+                                                                            top: `${topOffset}px`,
+                                                                            height: `${heightPx}px`,
+                                                                            width: `${widthPercent - 2}%`,
+                                                                            left: `${leftPercent + 1}%`
+                                                                        }}
+                                                                        onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); }}
+                                                                    >
+                                                                        <div className={clsx("flex justify-between items-start w-full", duration < 45 && "items-center")}>
+                                                                            <div className="flex flex-col min-w-0">
+                                                                                <span className="text-[10px] font-bold text-[#43302E] uppercase tracking-widest truncate">
+                                                                                    {booking.price_breakdown?.equipment || 'Standard session'}
                                                                                 </span>
-                                                                            )}
-                                                                        </div>
-                                                                        <div className="text-[9px] font-black text-[#43302E] bg-buttermilk/40 px-1.5 py-0.5 rounded border border-[#43302E]/5 whitespace-nowrap">
-                                                                            {booking.quantity || 1}/{booking.quantity || 1}
+                                                                                {duration >= 45 && (
+                                                                                    <span className="text-[8px] font-medium text-[#43302E]/60 uppercase tracking-tighter mt-0.5 truncate">
+                                                                                        {studioName}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="text-[9px] font-black text-[#43302E] bg-buttermilk/40 px-1.5 py-0.5 rounded border border-[#43302E]/5 whitespace-nowrap">
+                                                                                {booking.quantity || 1}/{booking.quantity || 1}
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                            )
+                                                                )
+                                                            }
                                                         })}
                                                     </div>
                                                 )
+
                                             })}
                                         </div>
                                     ))}
