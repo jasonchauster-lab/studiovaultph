@@ -552,16 +552,19 @@ export default function InstructorDashboardClient({
 
                         <div className="mb-8">
                             {(() => {
-                                const conditions = typeof selectedProfile.medical_conditions === 'string'
-                                    ? selectedProfile.medical_conditions.split(',').map((c: string) => c.trim())
-                                    : Array.isArray(selectedProfile.medical_conditions)
-                                        ? selectedProfile.medical_conditions
-                                        : [];
+                                 const conditions = Array.isArray(selectedProfile.medical_conditions)
+                                     ? selectedProfile.medical_conditions
+                                     : typeof selectedProfile.medical_conditions === 'string'
+                                         ? selectedProfile.medical_conditions.split(',').map((c: string) => c.trim())
+                                         : [];
 
-                                const displayConditions = conditions
-                                    .map((c: string) => c === 'Others' ? selectedProfile.other_medical_condition : c)
-                                    .filter(Boolean)
-                                    .join(', ');
+                                 const displayConditions = conditions
+                                     .map((c: any) => {
+                                         const conditionStr = String(c);
+                                         return conditionStr === 'Others' ? selectedProfile.other_medical_condition : conditionStr;
+                                     })
+                                     .filter(Boolean)
+                                     .join(', ');
 
                                 return displayConditions ? (
                                     <div className="bg-red-50 p-8 rounded-lg border border-red-200 relative z-10">

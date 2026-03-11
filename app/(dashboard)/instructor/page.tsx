@@ -23,6 +23,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
 
     // If not verified (or no cert at all), redirect to onboarding
     if (!cert || !cert.verified) {
+        console.log(`[Dashboard] User ${user.email} (${user.id}) is not verified or has no certs. Redirecting to onboarding.`);
         redirect('/instructor/onboarding')
     }
 
@@ -176,7 +177,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
                 totalSessionsTaught={sessionCount || 0}
                 pendingEarnings={pendingEarnings}
                 currentDateStr={dateParam}
-                instructorProfile={profile}
+                instructorProfile={profile || { id: user.id }}
             />
         )
     } catch (error) {
