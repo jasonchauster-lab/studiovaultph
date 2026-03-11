@@ -48,7 +48,7 @@ export default function LandingPage() {
 
               <h1 className="text-4xl md:text-7xl font-serif text-charcoal tracking-tighter leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-1000">
                 Elevating the <br className="hidden sm:block" />
-                <span className="text-forest italic">Studio Experience.</span>
+                <span className="text-burgundy italic">Studio Experience.</span>
               </h1>
 
               <p className="text-lg text-charcoal-700 font-medium leading-relaxed max-w-xl animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-100">
@@ -61,7 +61,7 @@ export default function LandingPage() {
                 type="button"
                 onClick={() => setIsModalOpen(true)}
                 aria-label="Get Started Now - Sign up for an account"
-                className="group bg-forest text-white w-full sm:w-auto px-12 py-6 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all flex items-center justify-center sm:justify-start gap-4 shadow-tight"
+                className="group bg-burgundy text-white w-full sm:w-auto px-12 py-6 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all flex items-center justify-center sm:justify-start gap-4 shadow-tight"
               >
                 Get Started Now
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
@@ -83,7 +83,7 @@ export default function LandingPage() {
           <div className="flex-1 relative w-full lg:h-[650px] animate-in fade-in zoom-in duration-1000 delay-300">
             <div className="w-full h-full rounded-xl overflow-hidden shadow-tight border border-border-grey group relative">
               <Image
-                src="/images/homepage/hero.png"
+                src="/images/homepage/hero_lifestyle_reformer.png"
                 alt="Professional Pilates Environment"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -92,7 +92,7 @@ export default function LandingPage() {
               />
               {/* Action overlay */}
               <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 right-6 md:right-10 p-6 md:p-8 bg-white border border-border-grey rounded-lg flex items-center gap-6 shadow-card animate-in slide-in-from-bottom-8 duration-1000 delay-700">
-                <div className="w-12 h-12 md:w-14 md:h-14 bg-forest rounded-lg flex items-center justify-center shadow-tight flex-shrink-0">
+                <div className="w-12 h-12 md:w-14 md:h-14 bg-burgundy rounded-lg flex items-center justify-center shadow-tight flex-shrink-0">
                   <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-white" />
                 </div>
                 <div>
