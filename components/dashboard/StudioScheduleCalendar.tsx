@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, startOfDay, isPast } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Users, User, Calendar as CalendarIcon, Clock, Trash2, Edit2, X, Sparkles } from 'lucide-react'
+import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, startOfDay, isPast, startOfMonth, endOfMonth, addDays, subDays, addMonths, subMonths, getDay, setHours, setMinutes } from 'date-fns'
+import { ChevronLeft, ChevronRight, Plus, Users, User, Calendar as CalendarIcon, Clock, Trash2, Edit2, X, Sparkles, MapPin, Box, ArrowUpRight } from 'lucide-react'
 import clsx from 'clsx'
 import { createSlot, deleteSlot, updateSlot } from '@/app/(dashboard)/studio/actions' // For single slot
 import ScheduleManager from './ScheduleManager' // Bulk generator
@@ -42,6 +42,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
     const router = useRouter()
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [addMode, setAddMode] = useState<'single' | 'bulk'>('single')
+    const [view, setView] = useState<'day' | 'week' | 'month'>('week')
 
     // Edit Modal State
     const [editingSlot, setEditingSlot] = useState<Slot | null>(null)
@@ -53,11 +54,19 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
     const [bucketTime, setBucketTime] = useState<{ date: Date, hour: number } | null>(null)
 
     // Calendar Calculations
-    const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 }) // Monday start
-    const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 })
+    const days = useMemo(() => {
+        if (view === 'day') return [currentDate]
+        if (view === 'week') {
+            const start = startOfWeek(currentDate, { weekStartsOn: 1 })
+            const end = endOfWeek(currentDate, { weekStartsOn: 1 })
+            return eachDayOfInterval({ start, end })
+        }
+        // Month view
+        const start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 1 })
+        const end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 1 })
+        return eachDayOfInterval({ start, end })
+    }, [currentDate, view])
 
-    // Use server-provided day strings if available, otherwise fallback to potentially shifted client dates
-    const days = dayStrings ? dayStrings.map((s: string) => parseISO(s)) : eachDayOfInterval({ start: weekStart, end: weekEnd })
     const hours = Array.from({ length: 16 }, (_, i) => i + 6) // 6 AM to 9 PM
 
     // Memoized slot mapping for O(1) cell lookup
@@ -94,13 +103,19 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
         return ((totalMinutes - startMinutes) / (endMinutes - startMinutes)) * 100
     }, [now])
 
-    const handlePrevWeek = () => {
-        const newDate = subWeeks(currentDate, 1)
+    const handlePrev = () => {
+        let newDate;
+        if (view === 'day') newDate = subDays(currentDate, 1)
+        else if (view === 'week') newDate = subWeeks(currentDate, 1)
+        else newDate = subMonths(currentDate, 1)
         router.push(`?date=${toManilaDateStr(newDate)}`)
     }
 
-    const handleNextWeek = () => {
-        const newDate = addWeeks(currentDate, 1)
+    const handleNext = () => {
+        let newDate;
+        if (view === 'day') newDate = addDays(currentDate, 1)
+        else if (view === 'week') newDate = addWeeks(currentDate, 1)
+        else newDate = addMonths(currentDate, 1)
         router.push(`?date=${toManilaDateStr(newDate)}`)
     }
 
@@ -203,16 +218,16 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                     {/* Row 1: Title + Nav controls */}
                     <div className="flex flex-wrap items-center gap-3">
                         <h2 className="text-xl font-serif text-charcoal hidden md:block min-w-[140px]">
-                            {format(currentDate, 'MMMM yyyy')}
+                            {view === 'day' ? format(currentDate, 'MMMM d, yyyy') : format(currentDate, 'MMMM yyyy')}
                         </h2>
                         <div className="flex items-center bg-off-white border border-border-grey rounded-full p-1 shadow-tight">
-                            <button onClick={handlePrevWeek} className="p-2 hover:bg-forest/10 rounded-full transition-all text-slate hover:text-forest" title="Previous Week">
+                            <button onClick={handlePrev} className="p-2 hover:bg-forest/10 rounded-full transition-all text-slate hover:text-forest" title="Previous">
                                 <ChevronLeft className="w-4 h-4" />
                             </button>
-                            <button onClick={handleToday} className="px-3 py-1.5 text-[10px] font-bold text-slate hover:text-charcoal uppercase tracking-widest transition-all" title="Go to Current week">
+                            <button onClick={handleToday} className="px-3 py-1.5 text-[10px] font-bold text-slate hover:text-charcoal uppercase tracking-widest transition-all" title="Go to Current Date">
                                 Today
                             </button>
-                            <button onClick={handleNextWeek} className="p-2 hover:bg-forest/10 rounded-full transition-all text-slate hover:text-forest" title="Next Week">
+                            <button onClick={handleNext} className="p-2 hover:bg-forest/10 rounded-full transition-all text-slate hover:text-forest" title="Next">
                                 <ChevronRight className="w-4 h-4" />
                             </button>
                         </div>
@@ -223,6 +238,37 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                             className="px-3 py-1.5 bg-white border border-border-grey rounded-full text-[10px] font-bold text-slate outline-none focus:ring-1 focus:ring-forest cursor-pointer shadow-tight hover:border-forest/50 transition-all uppercase tracking-tighter"
                             title="Select any specific date"
                         />
+
+                        {/* View Switcher - Desktop Only */}
+                        <div className="flex items-center ml-auto bg-off-white border border-border-grey rounded-lg p-1 shadow-tight">
+                            <button
+                                onClick={() => setView('day')}
+                                className={clsx(
+                                    "px-4 py-1.5 text-[10px] font-bold rounded-md transition-all uppercase tracking-widest",
+                                    view === 'day' ? "bg-forest text-white shadow-tight" : "text-slate hover:text-charcoal"
+                                )}
+                            >
+                                Day
+                            </button>
+                            <button
+                                onClick={() => setView('week')}
+                                className={clsx(
+                                    "px-4 py-1.5 text-[10px] font-bold rounded-md transition-all uppercase tracking-widest",
+                                    view === 'week' ? "bg-forest text-white shadow-tight" : "text-slate hover:text-charcoal"
+                                )}
+                            >
+                                Week
+                            </button>
+                            <button
+                                onClick={() => setView('month')}
+                                className={clsx(
+                                    "px-4 py-1.5 text-[10px] font-bold rounded-md transition-all uppercase tracking-widest",
+                                    view === 'month' ? "bg-forest text-white shadow-tight" : "text-slate hover:text-charcoal"
+                                )}
+                            >
+                                Month
+                            </button>
+                        </div>
                     </div>
 
                     {/* Row 2: Action buttons — centered */}
@@ -246,202 +292,234 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
 
                 {/* Calendar Grid */}
-                <div className="bg-white rounded-xl border border-border-grey shadow-tight overflow-hidden">
+                <div className="bg-white border border-border-grey shadow-tight overflow-hidden rounded-[8px]">
                     <div className="overflow-x-auto">
-                        <div className="min-w-[800px]">
-                            <div className="grid grid-cols-8 border-b border-border-grey bg-off-white">
-                                <div className="p-4 text-[10px] font-bold tracking-[0.2em] text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 uppercase">TIME</div>
-                                {days.map((day: Date) => (
-                                    <div key={day.toString()} className={clsx("p-4 text-center border-r border-border-grey last:border-r-0 min-w-[100px] transition-colors", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
-                                        <div className="text-[10px] text-slate uppercase mb-2 font-bold tracking-[0.2em]">{format(day, 'EEE')}</div>
-                                        <div className={clsx("text-2xl font-serif font-bold", isSameDay(day, new Date()) ? "text-forest" : "text-charcoal")}>{format(day, 'd')}</div>
-                                    </div>
-                                ))}
-                            </div>
+                        <div className={clsx("min-w-[900px]", view === 'month' && "min-w-0")}>
+                            {view !== 'month' && (
+                                <div className={clsx(
+                                    "grid border-b border-border-grey bg-off-white",
+                                    view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-8"
+                                )}>
+                                    <div className="p-4 text-[10px] font-bold tracking-[0.2em] text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 uppercase">TIME</div>
+                                    {days.map((day: Date) => (
+                                        <div key={day.toString()} className={clsx("p-4 text-center border-r border-border-grey last:border-r-0 min-w-[100px] transition-colors", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
+                                            <div className="text-[10px] text-slate uppercase mb-2 font-bold tracking-[0.2em]">{format(day, 'EEE')}</div>
+                                            <div className={clsx("text-2xl font-serif font-bold", isSameDay(day, new Date()) ? "text-forest" : "text-charcoal")}>{format(day, 'd')}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
 
                             <div className="divide-y divide-border-grey relative">
-                                {/* Current Time Indicator */}
-                                {currentTimePosition !== null && (
-                                    <div
-                                        className="absolute w-full z-30 pointer-events-none flex items-center"
-                                        style={{ top: `${currentTimePosition}%` }}
-                                    >
-                                        <div className="w-2.5 h-2.5 bg-forest rounded-full -ml-[5px] ring-2 ring-white shadow-sm" />
-                                        <div className="h-[2px] w-full bg-forest shadow-[0_0_8px_rgba(47,82,51,0.3)] transition-all duration-1000" />
-                                    </div>
+                                {view !== 'month' && (
+                                    <>
+                                        {/* Current Time Indicator — Improved to show only on today */}
+                                        {currentTimePosition !== null && days.some(d => isSameDay(d, new Date())) && (
+                                            <div
+                                                className="absolute z-30 pointer-events-none flex items-center transition-all duration-1000"
+                                                style={{
+                                                    top: `${currentTimePosition}%`,
+                                                    left: view === 'day'
+                                                        ? '100px'
+                                                        : `calc(100px + ${(days.findIndex(d => isSameDay(d, new Date()))) * (100 / 8)}%)`,
+                                                    width: view === 'day'
+                                                        ? 'calc(100% - 100px)'
+                                                        : `calc((100% - 100px) / 7)`
+                                                }}
+                                            >
+                                                <div className="w-2.5 h-2.5 bg-forest rounded-full -ml-[5px] ring-2 ring-white shadow-sm" />
+                                                <div className="h-[2px] w-full bg-forest shadow-[0_0_8px_rgba(47,82,51,0.3)]" />
+                                            </div>
+                                        )}
+
+                                        {hours.map(hour => (
+                                            <div key={hour} className={clsx(
+                                                "grid min-h-[80px]",
+                                                view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-8"
+                                            )}>
+                                                <div className="p-4 text-[10px] text-slate font-bold border-r border-border-grey text-center sticky left-0 bg-white z-20 uppercase tracking-tighter">
+                                                    {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
+                                                </div>
+
+                                                {days.map((day: Date) => {
+                                                    const dayStr = toManilaDateStr(day)
+                                                    const cellSlots = slotMap[`${dayStr}-${hour}`] || []
+                                                    const isPastCell = isPast(new Date(dayStr + "T" + hour.toString().padStart(2, '0') + ":59:59+08:00"))
+
+                                                    return (
+                                                        <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-2 min-h-[100px] transition-all", isPastCell && "bg-off-white")} style={{ colorScheme: 'light' }}>
+                                                            <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity bg-forest pointer-events-none z-0" />
+                                                            <button
+                                                                className="absolute top-2 right-2 p-1 rounded-full bg-forest/10 text-forest opacity-0 group-hover:opacity-100 transition-all hover:bg-forest hover:text-white z-20"
+                                                                onClick={() => {
+                                                                    setSingleDate(toManilaDateStr(day))
+                                                                    setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
+                                                                    setSingleEndTime(`${(hour + 1).toString().padStart(2, '0')}:00`)
+                                                                    setAddMode('single')
+                                                                    setIsAddModalOpen(true)
+                                                                }}
+                                                            >
+                                                                <Plus className="w-3 h-3" />
+                                                            </button>
+
+                                                            {cellSlots.length > 0 && (
+                                                                <div className="space-y-1 relative z-10 cursor-pointer">
+                                                                    {(() => {
+                                                                        const equipmentCounts: Record<string, { free: number, total: number }> = {};
+                                                                        cellSlots.forEach(s => {
+                                                                            if (s.equipment && typeof s.equipment === 'object') {
+                                                                                Object.entries(s.equipment).forEach(([eq, count]) => {
+                                                                                    if (!equipmentCounts[eq]) equipmentCounts[eq] = { free: 0, total: 0 };
+                                                                                    equipmentCounts[eq].total += count;
+                                                                                    const bookedForThisEq = s.bookings?.filter(b =>
+                                                                                        ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '') &&
+                                                                                        (b.price_breakdown?.equipment?.toUpperCase() === eq.toUpperCase() || b.equipment?.toUpperCase() === eq.toUpperCase())
+                                                                                    ).length || 0;
+                                                                                    equipmentCounts[eq].free += Math.max(0, count - bookedForThisEq);
+                                                                                });
+                                                                            }
+                                                                        });
+
+                                                                        return Object.entries(equipmentCounts).map(([eqType, counts]) => {
+                                                                            const isFullyBooked = counts.free === 0;
+                                                                            const hasPending = cellSlots.some(s =>
+                                                                                s.bookings?.some(b => b.status === 'pending' && (b.price_breakdown?.equipment?.toUpperCase() === eqType.toUpperCase() || b.equipment?.toUpperCase() === eqType.toUpperCase()))
+                                                                            );
+
+                                                                            return (
+                                                                                <div
+                                                                                    key={eqType}
+                                                                                    className={clsx(
+                                                                                        "p-3 border session-block-earth transition-all group/eq relative overflow-hidden cursor-pointer rounded-lg",
+                                                                                        isPastCell ? "bg-off-white border-border-grey" :
+                                                                                            hasPending ? "bg-orange-50/50 border-orange-200" :
+                                                                                                isFullyBooked ? "bg-red-50/50 border-red-200" : "bg-green-50/50 border-green-200"
+                                                                                    )}
+                                                                                    onClick={() => {
+                                                                                        setBucketSlots(cellSlots.filter(s => s.equipment?.[eqType]))
+                                                                                        setBucketTime({ date: day, hour })
+                                                                                        setIsBucketModalOpen(true)
+                                                                                    }}
+                                                                                >
+                                                                                    <div className={clsx("text-[9px] font-bold uppercase tracking-[0.15em] flex justify-between items-center mb-1.5", isPastCell ? "text-slate/40" : "text-charcoal/60")}>
+                                                                                        <span className="flex items-center gap-1.5">
+                                                                                            <div className={clsx("w-1.5 h-1.5 rounded-full outline outline-offset-1 outline-transparent transition-all", isFullyBooked ? "bg-red-600" : hasPending ? "bg-orange-500 animate-pulse outline-orange-200" : "bg-green-600")} />
+                                                                                            <span className={clsx("font-bold flex items-center gap-2", isFullyBooked ? "text-red-900" : hasPending ? "text-orange-900" : "text-green-900")}>
+                                                                                                {eqType}
+                                                                                                {hasPending && <span className="text-[7px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded border border-orange-200 tracking-tighter shadow-sm">PENDING</span>}
+                                                                                            </span>
+                                                                                        </span>
+                                                                                        <Edit2 className="w-2.5 h-2.5 opacity-0 group-hover/eq:opacity-100 transition-opacity" />
+                                                                                    </div>
+                                                                                    <div className={clsx("text-[10px] font-bold tracking-tight", isPastCell ? "text-slate" : isFullyBooked ? "text-red-800" : hasPending ? "text-orange-800" : "text-green-800")}>
+                                                                                        {counts.free} / {counts.total} <span className="text-[8px] uppercase tracking-wider ml-0.5 font-bold opacity-50">Free</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            );
+                                                                        });
+                                                                    })()}
+
+                                                                    {cellSlots.some(s => !s.equipment || Object.keys(s.equipment).length === 0) && (() => {
+                                                                        const openSlots = cellSlots.filter(s => !s.equipment || Object.keys(s.equipment).length === 0)
+                                                                        const availableCount = openSlots.reduce((sum, s) => sum + (s.is_available ? (s.quantity || 1) : 0), 0)
+                                                                        const totalCount = openSlots.reduce((sum, s) => sum + (s.quantity || 1), 0)
+                                                                        const isFullyBooked = availableCount === 0
+                                                                        const hasPending = openSlots.some(s => s.bookings?.some(b => b.status === 'pending'))
+
+                                                                        return (
+                                                                            <div
+                                                                                className={clsx(
+                                                                                    "p-3 border session-block-earth transition-all group/open relative overflow-hidden cursor-pointer rounded-lg",
+                                                                                    isPastCell ? "bg-off-white border-border-grey" :
+                                                                                        hasPending ? "bg-orange-50/50 border-orange-200" :
+                                                                                            isFullyBooked ? "bg-red-50/50 border-red-200" : "bg-green-50/50 border-green-200"
+                                                                                )}
+                                                                                onClick={() => {
+                                                                                    setBucketSlots(openSlots)
+                                                                                    setBucketTime({ date: day, hour })
+                                                                                    setIsBucketModalOpen(true)
+                                                                                }}
+                                                                            >
+                                                                                <div className={clsx("text-[9px] font-bold uppercase tracking-[0.15em] flex justify-between items-center mb-1.5", isPastCell ? "text-slate/40" : "text-charcoal/60")}>
+                                                                                    <span className="flex items-center gap-1.5">
+                                                                                        <div className={clsx("w-1.5 h-1.5 rounded-full outline outline-offset-1 outline-transparent transition-all", isFullyBooked ? "bg-red-600" : hasPending ? "bg-orange-500 animate-pulse outline-orange-200" : "bg-green-600")} />
+                                                                                        <span className={clsx("font-bold flex items-center gap-2", isFullyBooked ? "text-red-900" : hasPending ? "text-orange-900" : "text-green-900")}>
+                                                                                            Open Space
+                                                                                            {hasPending && <span className="text-[7px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded border border-orange-200 tracking-tighter shadow-sm">PENDING</span>}
+                                                                                        </span>
+                                                                                    </span>
+                                                                                    <Edit2 className="w-2.5 h-2.5 opacity-0 group-hover/open:opacity-100 transition-opacity" />
+                                                                                </div>
+                                                                                <div className={clsx("text-[10px] font-bold tracking-tight", isPastCell ? "text-slate/40" : "text-charcoal/80")}>
+                                                                                    {availableCount} / {totalCount} <span className="text-[8px] uppercase tracking-wider ml-0.5 font-bold opacity-50">Free</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        )
+                                                                    })()}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        ))}
+                                    </>
                                 )}
 
-                                {hours.map(hour => (
-                                    <div key={hour} className="grid grid-cols-8 min-h-[80px]">
-                                        <div className="p-4 text-[10px] text-slate font-bold border-r border-border-grey text-center sticky left-0 bg-white z-20 uppercase tracking-tighter">
-                                            {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
-                                        </div>
+                                {view === 'month' && (
+                                    <div className="grid grid-cols-7 divide-x divide-y divide-border-grey">
+                                        {days.map((day) => {
+                                            const dayStr = toManilaDateStr(day);
+                                            const isCurrentMonth = day.getMonth() === currentDate.getMonth();
 
-                                        {days.map((day: Date) => {
-                                            const dayStr = toManilaDateStr(day)
-                                            const cellSlots = slotMap[`${dayStr}-${hour}`] || []
-
-                                            const isPastCell = isPast(new Date(dayStr + "T" + hour.toString().padStart(2, '0') + ":59:59+08:00"))
+                                            // Count slots for this day
+                                            const daySlots = slots.filter(s => s.date === dayStr);
+                                            const totalSlots = daySlots.length;
 
                                             return (
-                                                <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-2 min-h-[100px] transition-all", isPastCell && "bg-off-white")} style={{ colorScheme: 'light' }}>
-                                                    <div
-                                                        className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity bg-forest pointer-events-none z-0"
-                                                    />
-                                                    <button
-                                                        className="absolute top-2 right-2 p-1 rounded-full bg-forest/10 text-forest opacity-0 group-hover:opacity-100 transition-all hover:bg-forest hover:text-white z-20"
-                                                        onClick={() => {
-                                                            setSingleDate(toManilaDateStr(day))
-                                                            setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
-                                                            setSingleEndTime(`${(hour + 1).toString().padStart(2, '0')}:00`)
-                                                            setAddMode('single')
-                                                            setIsAddModalOpen(true)
-                                                        }}
-                                                    >
-                                                        <Plus className="w-3 h-3" />
-                                                    </button>
-
-                                                    {cellSlots.length > 0 && (
-                                                        <div className="space-y-1 relative z-10 cursor-pointer">
-                                                            {/* Equipment Slots */}
-                                                            {(() => {
-                                                                const equipmentCounts: Record<string, { free: number, total: number }> = {};
-
-                                                                // Populate totals and free counts
-                                                                cellSlots.forEach(s => {
-                                                                    if (s.equipment && typeof s.equipment === 'object') {
-                                                                        Object.entries(s.equipment).forEach(([eq, count]) => {
-                                                                            if (!equipmentCounts[eq]) equipmentCounts[eq] = { free: 0, total: 0 };
-                                                                            equipmentCounts[eq].total += count;
-
-                                                                            // Count active bookings for this specific equipment in this slot
-                                                                            const bookedForThisEq = s.bookings?.filter(b =>
-                                                                                ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '') &&
-                                                                                (b.price_breakdown?.equipment?.toUpperCase() === eq.toUpperCase() || b.equipment?.toUpperCase() === eq.toUpperCase())
-                                                                            ).length || 0;
-
-                                                                            equipmentCounts[eq].free += Math.max(0, count - bookedForThisEq);
-                                                                        });
-                                                                    }
-                                                                });
-
-                                                                return Object.entries(equipmentCounts).map(([eqType, counts]) => {
-                                                                    const isFullyBooked = counts.free === 0;
-                                                                    const hasPending = cellSlots.some(s =>
-                                                                        s.bookings?.some(b => b.status === 'pending' && (b.price_breakdown?.equipment?.toUpperCase() === eqType.toUpperCase() || b.equipment?.toUpperCase() === eqType.toUpperCase()))
-                                                                    );
-
-                                                                    return (
-                                                                        <div
-                                                                            key={eqType}
-                                                                            className={clsx(
-                                                                                "p-3 border session-block-earth transition-all group/eq relative overflow-hidden cursor-pointer rounded-lg",
-                                                                                isPastCell
-                                                                                    ? "bg-off-white border-border-grey"
-                                                                                    : hasPending
-                                                                                        ? "bg-orange-50/50 border-orange-200"
-                                                                                        : isFullyBooked
-                                                                                            ? "bg-red-50/50 border-red-200"
-                                                                                            : "bg-green-50/50 border-green-200"
-                                                                            )}
-                                                                            onClick={() => {
-                                                                                setBucketSlots(cellSlots.filter(s => s.equipment?.[eqType]))
-                                                                                setBucketTime({ date: day, hour })
-                                                                                setIsBucketModalOpen(true)
-                                                                            }}
-                                                                        >
-                                                                            <div className={clsx(
-                                                                                "text-[9px] font-bold uppercase tracking-[0.15em] flex justify-between items-center mb-1.5",
-                                                                                isPastCell ? "text-slate/40" : "text-charcoal/60"
-                                                                            )}>
-                                                                                <span className="flex items-center gap-1.5">
-                                                                                    <div className={clsx("w-1.5 h-1.5 rounded-full outline outline-offset-1 outline-transparent transition-all",
-                                                                                        isFullyBooked ? "bg-red-600" : hasPending ? "bg-orange-500 animate-pulse outline-orange-200" : "bg-green-600"
-                                                                                    )} />
-                                                                                    <span className={clsx("font-bold flex items-center gap-2",
-                                                                                        isFullyBooked ? "text-red-900" : hasPending ? "text-orange-900" : "text-green-900"
-                                                                                    )}>
-                                                                                        {eqType}
-                                                                                        {hasPending && (
-                                                                                            <span className="text-[7px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded border border-orange-200 tracking-tighter shadow-sm">PENDING</span>
-                                                                                        )}
-                                                                                    </span>
-                                                                                </span>
-                                                                                <Edit2 className="w-2.5 h-2.5 opacity-0 group-hover/eq:opacity-100 transition-opacity" />
-                                                                            </div>
-                                                                            <div className={clsx(
-                                                                                "text-[10px] font-bold tracking-tight",
-                                                                                isPastCell ? "text-slate" :
-                                                                                    isFullyBooked ? "text-red-800" : hasPending ? "text-orange-800" : "text-green-800"
-                                                                            )}>
-                                                                                {counts.free} / {counts.total} <span className="text-[8px] uppercase tracking-wider ml-0.5 font-bold opacity-50">Free</span>
-                                                                            </div>
-                                                                        </div>
-                                                                    );
-                                                                });
-                                                            })()}
-
-                                                            {/* Open Space Slots */}
-                                                            {cellSlots.some(s => !s.equipment || Object.keys(s.equipment).length === 0) && (() => {
-                                                                const openSlots = cellSlots.filter(s => !s.equipment || Object.keys(s.equipment).length === 0)
-                                                                const availableCount = openSlots.reduce((sum, s) => sum + (s.is_available ? (s.quantity || 1) : 0), 0)
-                                                                const totalCount = openSlots.reduce((sum, s) => sum + (s.quantity || 1), 0)
-                                                                const isFullyBooked = availableCount === 0
-                                                                const hasPending = openSlots.some(s => s.bookings?.some(b => b.status === 'pending'))
-
-                                                                return (
-                                                                    <div
-                                                                        className={clsx(
-                                                                            "p-3 border session-block-earth transition-all group/open relative overflow-hidden cursor-pointer rounded-lg",
-                                                                            isPastCell
-                                                                                ? "bg-off-white border-border-grey"
-                                                                                : hasPending
-                                                                                    ? "bg-orange-50/50 border-orange-200"
-                                                                                    : isFullyBooked
-                                                                                        ? "bg-red-50/50 border-red-200"
-                                                                                        : "bg-green-50/50 border-green-200"
-                                                                        )}
-                                                                        onClick={() => {
-                                                                            setBucketSlots(openSlots)
-                                                                            setBucketTime({ date: day, hour })
-                                                                            setIsBucketModalOpen(true)
-                                                                        }}
-                                                                    >
-                                                                        <div className={clsx(
-                                                                            "text-[9px] font-bold uppercase tracking-[0.15em] flex justify-between items-center mb-1.5",
-                                                                            isPastCell ? "text-slate/40" : "text-charcoal/60"
-                                                                        )}>
-                                                                            <span className="flex items-center gap-1.5">
-                                                                                <div className={clsx("w-1.5 h-1.5 rounded-full outline outline-offset-1 outline-transparent transition-all",
-                                                                                    isFullyBooked ? "bg-red-600" : hasPending ? "bg-orange-500 animate-pulse outline-orange-200" : "bg-green-600"
-                                                                                )} />
-                                                                                <span className={clsx("font-bold flex items-center gap-2",
-                                                                                    isFullyBooked ? "text-red-900" : hasPending ? "text-orange-900" : "text-green-900"
-                                                                                )}>
-                                                                                    Open Space
-                                                                                    {hasPending && (
-                                                                                        <span className="text-[7px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded border border-orange-200 tracking-tighter shadow-sm">PENDING</span>
-                                                                                    )}
-                                                                                </span>
-                                                                            </span>
-                                                                            <Edit2 className="w-2.5 h-2.5 opacity-0 group-hover/open:opacity-100 transition-opacity" />
-                                                                        </div>
-                                                                        <div className={clsx(
-                                                                            "text-[10px] font-bold tracking-tight",
-                                                                            isPastCell ? "text-slate/40" : "text-charcoal/80"
-                                                                        )}>
-                                                                            {availableCount} / {totalCount} <span className="text-[8px] uppercase tracking-wider ml-0.5 font-bold opacity-50">Free</span>
-                                                                        </div>
-                                                                    </div>
-                                                                )
-                                                            })()}
-                                                        </div>
+                                                <div
+                                                    key={day.toString()}
+                                                    className={clsx(
+                                                        "min-h-[140px] p-4 transition-all hover:bg-forest/5 cursor-pointer",
+                                                        !isCurrentMonth && "bg-off-white opacity-40",
+                                                        isSameDay(day, new Date()) && "bg-forest/5"
                                                     )}
+                                                    onClick={() => {
+                                                        const targetDate = format(day, 'yyyy-MM-dd')
+                                                        router.push(`?date=${targetDate}`)
+                                                        setView('day');
+                                                    }}
+                                                >
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <span className={clsx(
+                                                            "text-xs font-serif font-bold",
+                                                            isSameDay(day, new Date()) ? "text-forest" : "text-charcoal"
+                                                        )}>
+                                                            {format(day, 'd')}
+                                                        </span>
+                                                        {totalSlots > 0 && (
+                                                            <span className="bg-forest/10 text-forest text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-widest">
+                                                                {totalSlots} Slots
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        {daySlots.slice(0, 3).map(s => (
+                                                            <div key={s.id} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter">
+                                                                • {s.start_time.slice(0, 5)} {s.equipment ? Object.keys(s.equipment)[0] : 'Open'}
+                                                            </div>
+                                                        ))}
+                                                        {totalSlots > 3 && (
+                                                            <div className="text-[8px] font-black text-forest uppercase tracking-widest pt-1">
+                                                                + {totalSlots - 3} more
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            )
+                                            );
                                         })}
                                     </div>
-                                ))}
+                                )}
                             </div>
                         </div>
                     </div>
