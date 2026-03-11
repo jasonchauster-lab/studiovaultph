@@ -54,36 +54,36 @@ export default function InstructorStatCards({ stats, hasPendingPayout }: Instruc
     ]
 
     return (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
             {cardData.map((card, index) => (
-                <div key={index} className="earth-card p-8 group relative overflow-hidden transition-all duration-300 hover:-translate-y-1">
+                <div key={index} className="earth-card p-4 group relative overflow-hidden transition-all duration-300 hover:-translate-y-1">
 
-                    <div className="flex justify-between items-start mb-8">
+                    <div className="flex justify-between items-start mb-4">
                         <div className={clsx(
-                            "p-4 rounded-lg group-hover:scale-110 transition-all duration-300 border border-border-grey shadow-tight",
+                            "p-2.5 rounded-lg group-hover:scale-110 transition-all duration-300 border border-border-grey shadow-tight",
                             card.iconColor === 'text-gold' ? "bg-yellow-50" : "bg-green-50"
                         )}>
-                            <card.icon className={clsx("w-6 h-6", card.iconColor === 'text-gold' ? "text-yellow-600" : "text-green-600")} />
+                            <card.icon className={clsx("w-4 h-4", card.iconColor === 'text-gold' ? "text-yellow-600" : "text-green-600")} />
                         </div>
                         <span className={clsx(
-                            "text-[9px] font-black uppercase tracking-[0.3em] px-4 py-1.5 rounded-full border border-border-grey shadow-tight",
+                            "text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full border border-border-grey shadow-tight",
                             card.iconColor === 'text-gold' ? "bg-yellow-50 text-yellow-800" : "bg-green-50 text-green-800"
                         )}>
                             {card.trend}
                         </span>
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-slate uppercase tracking-[0.4em] mb-3">{card.label}</p>
-                        <h3 className="text-4xl font-serif text-charcoal tracking-tighter">{card.value}</h3>
+                        <p className="text-[9px] font-black text-slate uppercase tracking-[0.3em] mb-1.5">{card.label}</p>
+                        <h3 className="text-2xl font-serif text-charcoal tracking-tighter">{card.value}</h3>
                     </div>
 
                     {card.hasAction && (
-                        <div className="mt-8 pt-8 border-t border-border-grey">
+                        <div className="mt-4 pt-4 border-t border-border-grey">
                             <Link
                                 href="/instructor/payout"
-                                className="w-full h-14 bg-burgundy text-buttermilk rounded-lg text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-110 transition-all shadow-tight active:scale-95"
+                                className="w-full h-9 bg-burgundy text-buttermilk rounded-lg text-[8px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-tight active:scale-95"
                             >
-                                <ArrowUpRight className="w-4 h-4 text-buttermilk stroke-[3px]" />
+                                <ArrowUpRight className="w-3 h-3 text-buttermilk stroke-[3px]" />
                                 REQUEST PAYOUT
                             </Link>
                         </div>

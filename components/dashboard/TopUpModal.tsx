@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { X, Loader2, Upload, CheckCircle2, QrCode, CreditCard } from 'lucide-react'
 import { topUpWallet, submitTopUpPaymentProof } from '@/app/(dashboard)/customer/actions'
 import { useRouter } from 'next/navigation'
@@ -14,7 +14,7 @@ interface TopUpModalProps {
 
 export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
     const router = useRouter()
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
     const [step, setStep] = useState(1)
     const [amount, setAmount] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -128,12 +128,12 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-burgundy/40 backdrop-blur-sm" onClick={resetAndClose} />
+            <div className="absolute inset-0 bg-burgundy/50" onClick={resetAndClose} />
 
             {/* Zoom Overlay */}
             {zoomedImage && (
                 <div
-                    className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-burgundy/90 backdrop-blur-md animate-in fade-in duration-200 cursor-zoom-out"
+                    className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-burgundy/95 animate-in fade-in duration-200 cursor-zoom-out"
                     onClick={() => setZoomedImage(null)}
                 >
                     <button
@@ -331,8 +331,8 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                             {[1, 2, 3].map((s) => (
                                 <div
                                     key={s}
-                                    className={`h-1.5 rounded-full transition-all duration-700 ${step === s ? 'bg-burgundy w-10' :
-                                        step > s ? 'bg-burgundy/20' : 'bg-border-grey w-6'
+                                    className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${step === s ? 'bg-burgundy w-10' :
+                                        step > s ? 'bg-burgundy/20 w-6' : 'bg-border-grey w-6'
                                         }`}
                                 />
                             ))}

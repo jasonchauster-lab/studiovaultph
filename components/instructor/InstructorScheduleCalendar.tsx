@@ -734,11 +734,6 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     )}>
                                                         {format(day, 'd')}
                                                     </span>
-                                                    {totalCapacity > 0 && (
-                                                        <span className="bg-forest/10 text-forest text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-widest">
-                                                            {totalCapacity} {totalCapacity === 1 ? 'Slot' : 'Slots'}
-                                                        </span>
-                                                    )}
                                                 </div>
                                                 <div className="space-y-1">
                                                     {sortedSessions.slice(0, 4).map((s) => (
@@ -1192,7 +1187,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </div>
 
                             {/* Actual Content */}
-                            <div className="space-y-4">
+                            <div className="space-y-4 px-6 pt-6">
                                 <div className="flex items-center justify-between pt-2">
                                     <h3 className="text-3xl font-serif text-[#43302E] tracking-tighter">
                                         {selectedBooking.price_breakdown?.equipment || 'Standard Session'}
@@ -1228,13 +1223,25 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-3 text-[#43302E]">
-                                        <MapPin className="w-4 h-4 opacity-40" />
+                                        <MapPin className="w-4 h-4 opacity-40 shrink-0" />
                                         <button
                                             onClick={() => setSelectedStudio(selectedBooking.slots.studios)}
-                                            className="text-[11px] font-bold uppercase tracking-widest underline decoration-[#43302E]/20 hover:decoration-forest hover:text-forest transition-all"
+                                            className="text-[11px] font-bold uppercase tracking-widest underline decoration-[#43302E]/20 hover:decoration-forest hover:text-forest transition-all text-left"
                                         >
                                             {selectedBooking.slots.studios?.name || 'Studio'} - {selectedBooking.slots.studios?.location || 'Studio Location'}
                                         </button>
+                                        {selectedBooking.slots.studios?.google_maps_url && (
+                                            <a
+                                                href={selectedBooking.slots.studios.google_maps_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="shrink-0 p-1.5 rounded-md bg-green-50 border border-green-200 text-forest hover:bg-forest hover:text-white transition-all"
+                                                title="Open in Google Maps"
+                                            >
+                                                <ArrowUpRight className="w-3 h-3" />
+                                            </a>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1332,7 +1339,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                 </div>
                             </div>
 
-                            <div className="flex gap-4 pt-4">
+                            <div className="flex gap-4 pt-4 px-6 pb-6">
                                 <button
                                     onClick={() => setActiveChat({
                                         id: selectedBooking.id,

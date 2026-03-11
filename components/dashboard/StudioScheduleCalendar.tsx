@@ -565,11 +565,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                 const type = current.equipment ? Object.keys(current.equipment)[0] : 'Open';
                                                 
                                                 // Calculate capacity for this specific equipment type
-                                                const total = current.equipment?.[type] || 0;
                                                 const booked = current.bookings?.filter(b => 
                                                     ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '') &&
                                                     (b.price_breakdown?.equipment?.toUpperCase() === type.toUpperCase() || b.equipment?.toUpperCase() === type.toUpperCase())
                                                 ).length || 0;
+                                                const total = Math.max(current.equipment?.[type] || 0, current.quantity || 1, booked);
 
                                                 const key = `${time}-${type}`;
                                                 if (!acc.some((s: any) => s.key === key)) {
@@ -601,11 +601,6 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                         )}>
                                                             {format(day, 'd')}
                                                         </span>
-                                                        {displaySlotsCount > 0 && (
-                                                            <span className="bg-buttermilk text-burgundy text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-widest shadow-sm">
-                                                                {displaySlotsCount} {displaySlotsCount === 1 ? 'Slot' : 'Slots'}
-                                                            </span>
-                                                        )}
                                                     </div>
                                                     <div className="space-y-1">
                                                         {uniqueDisplaySlots.slice(0, 3).map((s: any) => (
