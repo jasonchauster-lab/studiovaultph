@@ -189,7 +189,7 @@ export async function getPendingReviews() {
  *   a) The other party on the same booking has ALSO reviewed (mutual), OR
  *   b) The review was created more than 48 hours ago.
  */
-export async function getPublicReviews(profileId: string) {
+export async function getPublicReviews(profileId: string, viewerId?: string) {
     const supabase = await createClient()
 
     // Fetch all reviews where this profile is the reviewee
@@ -227,6 +227,9 @@ export async function getPublicReviews(profileId: string) {
     // For each review, check if the counterpart review exists (mutual) to apply double-blind
     const visibleReviews = await Promise.all(
         reviews.map(async (review) => {
+            // IF the current viewer is the reviewer, they can always see it
+            if (viewerId && review.reviewer_id === viewerId) return review
+
             const createdAt = new Date(review.created_at).getTime()
             const isExpired = now - createdAt >= cutoffMs
 

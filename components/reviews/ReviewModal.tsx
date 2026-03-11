@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, memo } from 'react'
 import { Star, X } from 'lucide-react'
 import { submitReview } from '@/app/(dashboard)/reviews/actions'
 import { CUSTOMER_TAGS, INSTRUCTOR_TAGS, ReviewRole } from '@/lib/reviews'
@@ -18,7 +18,10 @@ interface ReviewModalProps {
     onSuccess: () => void
 }
 
-function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+// Helper to handle potentially-arrayed Supabase joins
+const getFirst = <T,>(val: T | T[]): T | undefined => Array.isArray(val) ? val[0] : val
+
+const StarPicker = memo(function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
     const [hovered, setHovered] = useState(0)
     return (
         <div className="flex gap-1" role="group" aria-label="Rating">
@@ -42,7 +45,7 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
             ))}
         </div>
     )
-}
+})
 
 export default function ReviewModal({ booking, isInstructor, revieweeId: revieweeIdProp, revieweeName: revieweeNameProp, reviewContext, onClose, onSuccess }: ReviewModalProps) {
     const [rating, setRating] = useState(0)
@@ -64,23 +67,38 @@ export default function ReviewModal({ booking, isInstructor, revieweeId: reviewe
     const tags = isInstructor ? INSTRUCTOR_TAGS : CUSTOMER_TAGS
     const role: ReviewRole = isInstructor ? 'instructor' : 'customer'
 
-    // Helper to handle potentially-arrayed Supabase joins
-    const getFirst = <T,>(val: T | T[]): T | undefined => Array.isArray(val) ? val[0] : val
+    // Memoize static data derived from props and booking
+    const { studioName, sessionDate, revieweeId, displayName, contextLabel } = useMemo(() => {
+        const slots = getFirst(booking.slots)
+        const studioData = getFirst(booking.studios || slots?.studios)
+        const name = studioData?.name ?? 'Studio'
 
-    const slots = getFirst(booking.slots)
-    const studioData = getFirst(booking.studios || slots?.studios)
-    const studioName = studioData?.name ?? 'Studio'
-    const sessionDate = slots?.date && slots?.start_time
-        ? new Date(`${slots.date}T${slots.start_time}+08:00`).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })
-        : ''
+        let dateDisp = ''
+        if (slots?.date && slots?.start_time) {
+            try {
+                dateDisp = new Date(`${slots.date}T${slots.start_time}+08:00`).toLocaleDateString('en-PH', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                })
+            } catch (e) {
+                console.error("Date parsing error:", e)
+            }
+        }
 
-    // Use explicit props if provided, else derive from booking
-    const reviewee = isInstructor
-        ? getFirst(booking.client)
-        : getFirst(booking.instructor)
-    const revieweeId = revieweeIdProp ?? (isInstructor ? booking.client_id : booking.instructor_id)
-    const displayName = revieweeNameProp ?? reviewee?.full_name ?? (isInstructor ? 'Your Client' : 'Your Instructor')
-    const contextLabel = reviewContext ?? (isInstructor ? 'Instructor' : 'Instructor')
+        const person = isInstructor ? getFirst(booking.client) : getFirst(booking.instructor)
+        const rId = revieweeIdProp ?? (isInstructor ? booking.client_id : booking.instructor_id)
+        const dName = revieweeNameProp ?? person?.full_name ?? (isInstructor ? 'Your Client' : 'Your Instructor')
+        const cLabel = reviewContext ?? (isInstructor ? 'Instructor' : 'Instructor')
+
+        return {
+            studioName: name,
+            sessionDate: dateDisp,
+            revieweeId: rId,
+            displayName: dName,
+            contextLabel: cLabel
+        }
+    }, [booking, isInstructor, revieweeIdProp, revieweeNameProp, reviewContext])
 
     const toggleTag = (tag: string) => {
         setSelectedTags(prev =>
