@@ -146,11 +146,8 @@ export default async function CustomerDashboard({
 
     // 4. Fetch Slots (Browse Slots Mode)
     let slots: Slot[] = []
-    if (params.type === 'slot' || (!params.type && (params.date || params.time))) {
-        // If explicitly searching slots OR filtering by date/time without type preference, prioritize slots view?
-        // Actually adhering to explicit type is safer. Let's just do it if type === 'slot'
-        // If type is not 'instructor' or 'studio', and filters are set, we show slots
-        const shouldShowSlots = params.type === 'slot' || (!params.type && (params.date || params.time))
+        // If explicitly searching slots
+        const shouldShowSlots = params.type === 'slot'
 
         if (shouldShowSlots) {
             const nowManilaDate = getManilaTodayStr()
@@ -198,7 +195,6 @@ export default async function CustomerDashboard({
             const { data } = await slotQuery
             if (data) slots = data as unknown as Slot[]
         }
-    }
 
     // Fetch all reviews to calculate aggregated ratings
     const { data: reviews } = await supabase.from('reviews').select('reviewee_id, rating')
@@ -409,7 +405,7 @@ export default async function CustomerDashboard({
                     )}
 
                     {/* Slots Section (Browse Slots) */}
-                    {(params.type === 'slot' || (!params.type && (params.date || params.time))) && (
+                    {params.type === 'slot' && (
                         <section>
                             <div className="flex items-center justify-between mb-10">
                                 <div className="flex items-center gap-4">

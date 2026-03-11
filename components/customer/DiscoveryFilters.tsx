@@ -61,13 +61,11 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                     <option value="all">All Modes</option>
                     <option value="instructor">Instructors</option>
                     <option value="studio">Studios</option>
-                    <option value="slot">Browse Slots</option>
                 </select>
 
                 <LocationFilterDropdown
                     value={searchParams.get('location') || 'all'}
                     onChange={(val) => handleFilter('location', val)}
-                    availableLocations={availableLocations}
                 />
 
                 <MultiSelectFilter
@@ -86,7 +84,7 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
 
                 <MultiSelectFilter
                     label="Amenities"
-                    options={STUDIO_AMENITIES}
+                    options={[...STUDIO_AMENITIES]}
                     value={getMultiValue('amenity')}
                     onChange={(vals) => handleMultiFilter('amenity', vals)}
                 />
