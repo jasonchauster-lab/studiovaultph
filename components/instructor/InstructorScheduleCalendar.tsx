@@ -620,7 +620,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                         <div className={clsx("flex justify-between items-start w-full", duration < 45 && "items-center")}>
                                                                             <div className="flex flex-col min-w-0">
                                                                                 <span className="text-[10px] font-bold text-[#43302E] uppercase tracking-widest truncate">
-                                                                                    {booking.price_breakdown?.equipment || 'Standard session'}
+                                                                                    {booking.client?.full_name || booking.price_breakdown?.equipment || 'Standard session'}
                                                                                 </span>
                                                                                 {duration >= 45 && (
                                                                                     <span className="text-[8px] font-medium text-[#43302E]/60 uppercase tracking-tighter mt-0.5 truncate">
@@ -651,22 +651,68 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                         const dayStr = toManilaDateStr(day);
                                         const isCurrentMonth = day.getMonth() === currentDate.getMonth();
 
-                                        const daySessions = availability.filter(a => a.date === dayStr);
+                                        // 1. Get all availability entries ("The Plan")
+                                        const dayAvailability = availability.filter(a => a.date === dayStr);
                                         const dayRecurring = availability.filter(a => !a.date && a.day_of_week === getDay(day));
+                                        const allDayAvailability = [...dayAvailability, ...dayRecurring];
 
-                                        // Deduplicate sessions for display (one per time block/location)
-                                        const allDaySessions = [...daySessions, ...dayRecurring].sort((a, b) => a.start_time.localeCompare(b.start_time));
-                                        const uniqueSessions = allDaySessions.reduce((acc, current) => {
-                                            const time = current.start_time.slice(0, 5);
-                                            const loc = current.location_area.split(' - ')[0];
-                                            const key = `${time}-${loc}`;
-                                            if (!acc.some((s: any) => s.key === key)) {
-                                                acc.push({ ...current, key });
+                                        // 2. Get all active bookings ("The Reality")
+                                        const dayBookings = bookings.filter(b => {
+                                            const s = b.slots;
+                                            return s?.date === dayStr && ['approved', 'completed', 'pending'].includes(b.status);
+                                        });
+
+                                        // 3. Group everything by time and location/equipment
+                                        const groups: Record<string, {
+                                            time: string,
+                                            loc: string,
+                                            total: number,
+                                            booked: number,
+                                            equipment: string[]
+                                        }> = {};
+
+                                        // Process availability first to establish the base capacity
+                                        allDayAvailability.forEach(a => {
+                                            const time = a.start_time.slice(0, 5);
+                                            const shortLoc = a.location_area.split(' - ')[0];
+                                            const key = `${time}-${shortLoc}`;
+
+                                            if (!groups[key]) {
+                                                groups[key] = { time, loc: shortLoc, total: 0, booked: 0, equipment: a.equipment || [] };
                                             }
-                                            return acc;
-                                        }, [] as any[]);
+                                            groups[key].total += 1; // Each availability entry is 1 capacity unit
+                                        });
 
-                                        const displaySessionsCount = uniqueSessions.length;
+                                        // Process bookings to match groups or create missing ones
+                                        dayBookings.forEach(b => {
+                                            const s = b.slots;
+                                            const time = s.start_time.slice(0, 5);
+                                            const shortLoc = s.location_area?.split(' - ')[0] || (b.price_breakdown as any)?.equipment || 'Session';
+                                            const key = `${time}-${shortLoc}`;
+                                            const bQty = b.quantity || 1;
+
+                                            if (groups[key]) {
+                                                groups[key].booked += bQty;
+                                                // Ensure total capacity is at least as much as bookings
+                                                if ((s.quantity || 1) > groups[key].total) {
+                                                    groups[key].total = s.quantity || 1;
+                                                }
+                                                if (groups[key].booked > groups[key].total) {
+                                                    groups[key].total = groups[key].booked;
+                                                }
+                                            } else {
+                                                groups[key] = {
+                                                    time,
+                                                    loc: shortLoc,
+                                                    total: Math.max(s.quantity || 1, bQty),
+                                                    booked: bQty,
+                                                    equipment: [(b.price_breakdown as any)?.equipment].filter(Boolean)
+                                                };
+                                            }
+                                        });
+
+                                        const sortedSessions = Object.values(groups).sort((a, b) => a.time.localeCompare(b.time));
+                                        const totalCapacity = sortedSessions.reduce((sum, g) => sum + g.total, 0);
 
                                         return (
                                             <div
@@ -688,21 +734,27 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                     )}>
                                                         {format(day, 'd')}
                                                     </span>
-                                                    {displaySessionsCount > 0 && (
+                                                    {totalCapacity > 0 && (
                                                         <span className="bg-forest/10 text-forest text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-widest">
-                                                            {displaySessionsCount} {displaySessionsCount === 1 ? 'Slot' : 'Slots'}
+                                                            {totalCapacity} {totalCapacity === 1 ? 'Slot' : 'Slots'}
                                                         </span>
                                                     )}
                                                 </div>
                                                 <div className="space-y-1">
-                                                    {uniqueSessions.slice(0, 3).map((s: any) => (
-                                                        <div key={s.key} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter">
-                                                            • {s.start_time.slice(0, 5)} {s.location_area.split(' - ')[0]}
+                                                    {sortedSessions.slice(0, 4).map((s) => (
+                                                        <div key={`${s.time}-${s.loc}`} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter flex items-center justify-between">
+                                                            <span className="truncate mr-2">• {s.time} {s.loc}</span>
+                                                            <span className={clsx(
+                                                                "shrink-0 font-black px-1 rounded",
+                                                                s.booked >= s.total ? "text-forest bg-forest/5" : "text-slate/40"
+                                                            )}>
+                                                                {s.booked}/{s.total}
+                                                            </span>
                                                         </div>
                                                     ))}
-                                                    {displaySessionsCount > 3 && (
+                                                    {sortedSessions.length > 4 && (
                                                         <div className="text-[8px] font-black text-forest uppercase tracking-widest pt-1">
-                                                            + {displaySessionsCount - 3} more
+                                                            + {sortedSessions.length - 4} more
                                                         </div>
                                                     )}
                                                 </div>

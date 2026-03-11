@@ -46,6 +46,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
                 start_time,
                 end_time,
                 equipment,
+                quantity,
                 studios (
                     id,
                     name,
@@ -93,6 +94,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
                 start_time,
                 end_time,
                 equipment,
+                quantity,
                 studios (
                     id,
                     name,

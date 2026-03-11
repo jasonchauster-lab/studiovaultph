@@ -17,16 +17,22 @@ export default function ProfileForm({ profile }: { profile: any }) {
 
     const handleSubmit = async (formData: FormData) => {
         const contactNumber = formData.get('contactNumber') as string
-        const emergencyContact = formData.get('emergencyContact') as string
+        const emergencyContactName = formData.get('emergencyContactName') as string
+        const emergencyContactPhone = formData.get('emergencyContactPhone') as string
 
         if (contactNumber && !isValidPhone(contactNumber)) {
             setMessage(phoneErrorMessage)
             return
         }
 
-        // For emergency contact, we just check if it contains SOME digits if provided
-        if (emergencyContact && !/\d{7,}/.test(emergencyContact)) {
-            setMessage('Please include a phone number in your emergency contact.')
+        // For emergency contact phone, we check if it contains SOME digits if provided
+        if (emergencyContactPhone && !/\d{7,}/.test(emergencyContactPhone)) {
+            setMessage('Please include a valid phone number for your emergency contact.')
+            return
+        }
+
+        if (!emergencyContactName && emergencyContactPhone) {
+            setMessage('Please include a name for your emergency contact.')
             return
         }
 
@@ -103,9 +109,9 @@ export default function ProfileForm({ profile }: { profile: any }) {
                 </div>
 
                 <div className="text-center sm:text-left">
-                    <h3 className="text-2xl font-serif text-charcoal tracking-tighter mb-2">Profile Picture</h3>
-                    <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] max-w-xs leading-relaxed">
-                        Visual Identity Acquisition. This helps students and studios recognize your presence.
+                    <h3 className="text-2xl font-serif text-charcoal tracking-tight mb-2">Profile Picture</h3>
+                    <p className="text-sm font-medium text-charcoal/60 max-w-xs leading-relaxed">
+                        This helps students and studios recognize you.
                     </p>
                 </div>
             </div>
@@ -114,25 +120,25 @@ export default function ProfileForm({ profile }: { profile: any }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
                 <div className="space-y-8">
                     <div>
-                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Full Identity Name</label>
+                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Full Name</label>
                         <input
                             type="text"
                             name="fullName"
                             defaultValue={profile?.full_name || ''}
                             required
-                            className="w-full px-8 py-5 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm"
+                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
                         />
                     </div>
                     <div>
-                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Instagram Transmission</label>
+                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Instagram Handle</label>
                         <div className="relative">
-                            <span className="absolute left-8 top-1/2 -translate-y-1/2 text-gold font-black text-[10px]">@</span>
+                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gold font-bold text-sm">@</span>
                             <input
                                 type="text"
                                 name="instagram"
                                 defaultValue={profile?.instagram_handle || ''}
-                                className="w-full pl-14 pr-8 py-5 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm"
-                                placeholder="USERNAME"
+                                className="w-full pl-12 pr-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
+                                placeholder="username"
                             />
                         </div>
                     </div>
@@ -140,53 +146,63 @@ export default function ProfileForm({ profile }: { profile: any }) {
 
                 <div className="space-y-8">
                     <div>
-                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Communication Number</label>
+                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Phone Number</label>
                         <input
                             type="tel"
                             name="contactNumber"
                             defaultValue={profile?.contact_number || ''}
                             placeholder="09XXXXXXXXX"
                             maxLength={13}
-                            className="w-full px-8 py-5 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm"
+                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
                         />
                     </div>
                     <div>
-                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Emergency Node</label>
+                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Emergency Name</label>
                         <input
                             type="text"
-                            name="emergencyContact"
-                            defaultValue={profile?.emergency_contact || ''}
-                            placeholder="NAME AND POWER"
-                            className="w-full px-8 py-5 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm"
+                            name="emergencyContactName"
+                            defaultValue={profile?.emergency_contact_name || profile?.emergency_contact || ''}
+                            placeholder="Contact Name"
+                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Emergency Phone</label>
+                        <input
+                            type="tel"
+                            name="emergencyContactPhone"
+                            defaultValue={profile?.emergency_contact_phone || ''}
+                            placeholder="09XXXXXXXXX"
+                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
                         />
                     </div>
                 </div>
 
                 <div className="md:col-span-2">
-                    <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Temporal Birth / Manifestation</label>
+                    <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Date of Birth</label>
                     <input
                         type="date"
                         name="birthday"
                         defaultValue={profile?.date_of_birth || ''}
-                        className="w-64 px-8 py-5 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm cursor-pointer"
+                        className="w-64 px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm cursor-pointer"
                     />
                 </div>
 
                 <div className="md:col-span-2">
-                    <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Manifesto / Personal Bio</label>
+                    <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">About You</label>
                     <textarea
                         name="bio"
                         defaultValue={profile?.bio || ''}
                         rows={6}
-                        placeholder="Tell others about your movement journey, your teaching frequency, or your aesthetic philosophy..."
-                        className="w-full px-8 py-6 bg-white/40 border border-white/60 rounded-[2rem] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 resize-none transition-all uppercase tracking-[0.2em] leading-relaxed shadow-sm"
+                        placeholder="Tell others about your movement journey, teaching style, or philosophy..."
+                        className="w-full px-6 py-6 bg-white/40 border border-white/60 rounded-[2rem] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 resize-none transition-all leading-relaxed shadow-sm"
                     />
                 </div>
             </div>
 
             {/* Medical Conditions */}
             <div className="space-y-6">
-                <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Biological Status / Constraints</label>
+                <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Medical Conditions</label>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {['Scoliosis', 'Obesity', 'Herniated Disc', 'Post-partum', 'Chronic Back Pain', 'Hypertension', 'Diabetes', 'Asthma', 'Osteoporosis', 'Others'].map((condition) => (
                         <label key={condition} className="group flex items-center gap-4 p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-gold/30 cursor-pointer transition-all duration-500 shadow-sm relative overflow-hidden">
@@ -204,19 +220,19 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 }}
                                 className="w-5 h-5 text-gold border-white/60 bg-white/20 rounded-lg focus:ring-gold/20 focus:ring-offset-0 transition-all cursor-pointer"
                             />
-                            <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] group-hover:text-charcoal transition-colors">{condition}</span>
+                            <span className="text-xs font-semibold text-charcoal/60 uppercase tracking-wide group-hover:text-charcoal transition-colors">{condition}</span>
                         </label>
                     ))}
                 </div>
                 {selectedMedicalConditions.includes('Others') && (
                     <div className="mt-6 animate-in slide-in-from-top-4">
-                        <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">Specific Biological Definition</label>
+                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Other Medical Conditions</label>
                         <input
                             type="text"
                             name="otherMedicalCondition"
                             defaultValue={profile?.other_medical_condition || ''}
-                            placeholder="e.g. RECENT NEURAL MESH STABILIZATION..."
-                            className="w-full px-8 py-5 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm"
+                            placeholder="Please specify..."
+                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
                         />
                     </div>
                 )}
@@ -225,7 +241,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
             {/* Teaching Equipment (Instructors Only) */}
             {profile?.role === 'instructor' && (
                 <div className="space-y-6">
-                    <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Proprietary Equipment Proficiency</label>
+                    <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Equipment I can teach</label>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                         {['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
                             <label key={eq} className="group flex items-center gap-4 p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-gold/30 cursor-pointer transition-all duration-500 shadow-sm">
@@ -243,7 +259,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                     }}
                                     className="w-5 h-5 text-gold border-white/60 bg-white/20 rounded-lg focus:ring-gold/20 transition-all cursor-pointer"
                                 />
-                                <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] group-hover:text-charcoal transition-colors">{eq}</span>
+                                <span className="text-xs font-semibold text-charcoal/60 uppercase tracking-wide group-hover:text-charcoal transition-colors">{eq}</span>
                             </label>
                         ))}
                     </div>
@@ -253,13 +269,13 @@ export default function ProfileForm({ profile }: { profile: any }) {
             {/* Teaching Rates (Instructors Only) */}
             {profile?.role === 'instructor' && (
                 <div className="space-y-6">
-                    <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Financial Valorization per Session (PHP)</label>
+                    <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Rates per session (PHP)</label>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                         {['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
                             const isSelected = selectedEquipment.includes(eq);
                             return isSelected ? (
                                 <div key={eq} className="animate-in zoom-in-95 duration-500">
-                                    <label className="block text-[8px] font-black text-gold uppercase tracking-[0.3em] mb-2">{eq}</label>
+                                    <label className="block text-[10px] font-bold text-gold uppercase tracking-wider mb-2">{eq}</label>
                                     <div className="relative">
                                         <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-charcoal/20">₱</span>
                                         <input
@@ -269,7 +285,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                             placeholder="0"
                                             min="0"
                                             step="0.01"
-                                            className="w-full pl-10 pr-6 py-4 bg-white/40 border border-white/60 rounded-xl text-charcoal font-black text-[10px] outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] shadow-sm"
+                                            className="w-full pl-8 pr-6 py-4 bg-white/40 border border-white/60 rounded-xl text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
                                         />
                                     </div>
                                 </div>
@@ -281,7 +297,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
 
             {message && (
                 <div className={clsx(
-                    "p-5 rounded-[20px] text-[10px] font-black uppercase tracking-widest animate-in slide-in-from-top-2",
+                    "p-5 rounded-[20px] text-xs font-bold uppercase tracking-wider animate-in slide-in-from-top-2",
                     message.includes('success') ? 'bg-sage/10 text-sage border border-sage/20' : 'bg-red-50/20 text-red-600 border border-red-100'
                 )}>
                     {message}
@@ -294,8 +310,8 @@ export default function ProfileForm({ profile }: { profile: any }) {
                     disabled={isLoading}
                     className="w-full sm:w-auto px-16 py-6 bg-charcoal text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
                 >
-                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-gold" /> : <Camera className="w-5 h-5 text-gold stroke-[3px]" />}
-                    {isLoading ? 'SYNCHRONIZING...' : 'COMMIT PROFILE CHANGES'}
+                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-gold" /> : <Camera className="w-5 h-5 text-gold stroke-[2px]" />}
+                    {isLoading ? 'Saving...' : 'Save Changes'}
                 </button>
             </div>
         </form>

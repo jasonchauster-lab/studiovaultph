@@ -12,7 +12,8 @@ export async function updateProfile(formData: FormData) {
     const fullName = formData.get('fullName') as string
     const instagram = formData.get('instagram') as string
     const contactNumber = formData.get('contactNumber') as string
-    const emergencyContact = formData.get('emergencyContact') as string
+    const emergencyContactName = formData.get('emergencyContactName') as string
+    const emergencyContactPhone = formData.get('emergencyContactPhone') as string
     const bio = formData.get('bio') as string
     const birthday = formData.get('birthday') as string
     const avatarFile = formData.get('avatar') as File
@@ -27,7 +28,8 @@ export async function updateProfile(formData: FormData) {
         full_name: fullName,
         instagram_handle: instagram,
         contact_number: contactNumber,
-        emergency_contact: emergencyContact,
+        emergency_contact_name: emergencyContactName,
+        emergency_contact_phone: emergencyContactPhone,
         bio: bio,
         date_of_birth: birthday || null,
         teaching_equipment: teachingEquipment, // Save array

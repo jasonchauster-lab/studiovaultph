@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ExportCsvButton from '@/components/dashboard/ExportCsvButton'
 import DateRangeFilters from '@/components/dashboard/DateRangeFilters'
+import TopUpModal from '@/components/dashboard/TopUpModal'
 
 export default function InstructorEarningsClient({
     data
@@ -30,6 +31,11 @@ export default function InstructorEarningsClient({
 
     return (
         <div className="p-8 lg:p-12 max-w-7xl mx-auto space-y-16">
+            <TopUpModal
+                isOpen={showTopUpModal}
+                onClose={() => setShowTopUpModal(false)}
+            />
+
             {/* Info Modal */}
             {showInfoModal && (
                 <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/20 backdrop-blur-xl animate-in fade-in duration-700" onClick={() => setShowInfoModal(false)}>
@@ -312,6 +318,12 @@ export default function InstructorEarningsClient({
                     </table>
                 </div>
             </div>
+
+            {/* Top-Up Modal */}
+            <TopUpModal
+                isOpen={showTopUpModal}
+                onClose={() => setShowTopUpModal(false)}
+            />
         </div>
     )
 }

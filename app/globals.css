@@ -70,7 +70,7 @@ h2,
 h3,
 h4 {
   font-weight: 600;
-  color: var(--charcoal);
+  @apply text-burgundy;
   letter-spacing: -0.02em;
 }
 
@@ -84,8 +84,7 @@ h4 {
 
   .glass-card,
   .earth-card {
-    background: white;
-    border: 1px solid var(--border-grey);
+    @apply bg-white border border-border-grey;
     box-shadow: var(--shadow-tight);
     border-radius: var(--radius);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -96,6 +95,12 @@ h4 {
     box-shadow: var(--shadow-card);
     transform: translateY(-1px);
     border-color: rgba(31, 41, 55, 0.1);
+  }
+
+  /* Prevent hover transforms when a modal is open to avoid 'bouncing' fixed children */
+  body[style*="overflow: hidden"] .glass-card:hover,
+  body[style*="overflow: hidden"] .earth-card:hover {
+    transform: none !important;
   }
 
   .sticky-header-antigravity {

@@ -224,6 +224,19 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             <div className="lg:hidden">
                 <MobileScheduleCalendar
                     currentDate={currentDate}
+                    onAddSlot={() => setIsAddModalOpen(true)}
+                    onRecurringSchedule={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
+                    onSlotClick={(session) => {
+                        // Find the corresponding slot from the groups
+                        const targetSlot = slots.find(s => s.id === session.id);
+                        if (targetSlot) {
+                            onSlotClick(targetSlot);
+                        } else {
+                            // If it's a grouped key, we might need to handle it differently 
+                            // but based on how we mapped IDs, it should work for single slots.
+                            // For grouped slots in studio, it's a bit more complex.
+                        }
+                    }}
                     initialSessions={(() => {
                         const groups: Record<string, typeof slots> = {};
                         slots.forEach(s => {
@@ -269,9 +282,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                 totalQty += m.total;
                             });
 
-                            const displayTitle = Array.from(classNames).length > 2
-                                ? "Multiple Classes"
-                                : Array.from(classNames).join(' / ') || "Studio Session";
+                            const displayTitle = activeBookings.length === 0
+                                ? (Array.from(classNames).join(' / ') || "Studio Session")
+                                : activeBookings.length === 1
+                                    ? (activeBookings[0].client?.full_name || "Booked Session")
+                                    : `${activeBookings[0].client?.full_name || "Client"} + ${activeBookings.length - 1} more`;
 
                             const instructorNames = Array.from(instructors);
                             const footerText = instructorNames.length > 0
@@ -477,9 +492,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                 const isBooked = allActiveBookings.length > 0;
                                                                 const hasPending = allActiveBookings.some(b => b.status?.toLowerCase() === 'pending');
 
-                                                                const mainTitle = Array.from(classNames).length > 2
-                                                                    ? "Multiple Classes"
-                                                                    : Array.from(classNames).join(' / ') || "Studio Session";
+                                                                const displayTitle = allActiveBookings.length === 0
+                                                                    ? (Array.from(classNames).join(' / ') || "Studio Session")
+                                                                    : allActiveBookings.length === 1
+                                                                        ? (allActiveBookings[0].client?.full_name || "Booked Session")
+                                                                        : `${allActiveBookings[0].client?.full_name || "Client"} + ${allActiveBookings.length - 1} more`;
 
                                                                 return (
                                                                     <div
@@ -498,7 +515,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                         <div>
                                                                             <div className="flex justify-between items-start mb-2">
                                                                                 <h4 className="text-[11px] font-bold text-[#43302E] uppercase tracking-widest truncate max-w-[80%]">
-                                                                                    {mainTitle}
+                                                                                    {displayTitle}
                                                                                 </h4>
                                                                                 <Edit2 className="w-3 h-3 text-[#43302E]/40 opacity-0 group-hover/slot:opacity-100 transition-opacity" />
                                                                             </div>

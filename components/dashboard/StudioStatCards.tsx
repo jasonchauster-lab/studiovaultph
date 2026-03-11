@@ -50,7 +50,7 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
     ]
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {cardData.map((card, index) => (
                 <div key={index} className="earth-card p-6 group transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
                     <div className="flex justify-between items-start mb-6">

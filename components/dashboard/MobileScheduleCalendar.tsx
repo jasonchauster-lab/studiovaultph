@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { format, addDays, startOfWeek, isSameDay, eachDayOfInterval, startOfDay } from 'date-fns';
-import { MapPin, Clock, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { MapPin, Clock, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Sparkles, Plus } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface Session {
@@ -20,11 +20,17 @@ interface Session {
 interface MobileScheduleCalendarProps {
     initialSessions: Session[];
     currentDate?: Date;
+    onAddSlot?: (date: Date) => void;
+    onRecurringSchedule?: () => void;
+    onSlotClick?: (session: Session) => void;
 }
 
 export default function MobileScheduleCalendar({
     initialSessions = [],
-    currentDate = new Date()
+    currentDate = new Date(),
+    onAddSlot,
+    onRecurringSchedule,
+    onSlotClick
 }: MobileScheduleCalendarProps) {
     const [selectedDate, setSelectedDate] = useState(startOfDay(currentDate));
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -141,7 +147,7 @@ export default function MobileScheduleCalendar({
                         </h2>
                         <p className="text-[9px] font-black tracking-[0.3em] text-muted-burgundy uppercase mt-1">Schedule View</p>
                     </div>
-                    <div className="flex bg-[#FAFAFA] rounded-full p-1 border border-[#E5E7EB]">
+                <div className="flex bg-[#FAFAFA] rounded-full p-1 border border-[#E5E7EB]">
                         <button
                             onClick={() => setSelectedDate(addDays(selectedDate, -7))}
                             className="p-2 hover:bg-white rounded-full transition-all text-muted-burgundy border border-transparent hover:border-[#E5E7EB] hover:shadow-tight"
@@ -161,6 +167,24 @@ export default function MobileScheduleCalendar({
                             <ChevronRight className="w-4 h-4" />
                         </button>
                     </div>
+                </div>
+
+                {/* Mobile Action Buttons */}
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                    <button
+                        onClick={() => onAddSlot?.(selectedDate)}
+                        className="flex items-center justify-center gap-2 py-3 bg-burgundy text-buttermilk rounded-xl text-[10px] font-black uppercase tracking-widest shadow-tight active:scale-95 transition-all"
+                    >
+                        <Plus className="w-4 h-4" /> Add Slot
+                    </button>
+                    {onRecurringSchedule && (
+                        <button
+                            onClick={() => onRecurringSchedule()}
+                            className="flex items-center justify-center gap-2 py-3 bg-white text-burgundy border border-burgundy/20 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-tight active:scale-95 transition-all"
+                        >
+                            <CalendarIcon className="w-4 h-4" /> Recurring
+                        </button>
+                    )}
                 </div>
 
                 <div
@@ -232,7 +256,8 @@ export default function MobileScheduleCalendar({
                                 )}
                                 <div
                                     id={`session-${session.id}`}
-                                    className="w-full bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-tight active:scale-[0.99] transition-all duration-300 flex flex-col gap-6 relative overflow-hidden group"
+                                    onClick={() => onSlotClick?.(session)}
+                                    className="w-full bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-tight active:scale-[0.99] transition-all duration-300 flex flex-col gap-6 relative overflow-hidden group cursor-pointer"
                                 >
                                     <div className="flex justify-between items-start">
                                         <div className="space-y-2">

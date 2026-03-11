@@ -495,6 +495,7 @@ export async function submitTopUpPaymentProof(
 
     revalidatePath('/admin')
     revalidatePath('/customer/wallet')
+    revalidatePath('/instructor/earnings')
     return { success: true }
 }
 
@@ -1057,6 +1058,7 @@ export async function topUpWallet(amount: number) {
     console.log('[TopUpWallet] Created record successfully:', data.id)
 
     revalidatePath('/customer/wallet')
+    revalidatePath('/instructor/earnings')
     return { success: true, topUpId: data.id }
 }
 

@@ -132,6 +132,17 @@ export default function InstructorDashboardClient({
                     <div className="lg:hidden">
                         <MobileScheduleCalendar
                             currentDate={new Date(currentDateStr || getManilaTodayStr())}
+                            onAddSlot={() => {
+                                // Since InstructorScheduleCalendar handles its own add modal, 
+                                // we might need to expose it or handle it here if we want mobile parity.
+                                // For now, we can link it to the existing sidebar/stat cards context if applicable.
+                            }}
+                            onSlotClick={(session) => {
+                                if (session.is_booked) {
+                                    const booking = calendarBookings.find(b => b.id === session.id);
+                                    if (booking) setCancellingBooking(booking); // Using this as it shows a modal, but user wants info.
+                                }
+                            }}
                             initialSessions={[
                                 ...availability.map(a => ({
                                     id: a.id,
