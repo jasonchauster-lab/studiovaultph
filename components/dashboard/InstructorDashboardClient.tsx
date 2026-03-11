@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2 } from 'lucide-react'
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import ChatWindow from '@/components/dashboard/ChatWindow';
 import MessageCountBadge from '@/components/dashboard/MessageCountBadge';
 import { formatManilaDateStr, formatTo12Hour, getManilaTodayStr } from '@/lib/timezone';
@@ -22,6 +23,11 @@ interface InstructorDashboardClientProps {
     totalSessionsTaught: number;
     pendingEarnings: number;
     currentDateStr: string;
+    instructorProfile: {
+        id: string;
+        teaching_equipment?: string[];
+        rates?: Record<string, number>;
+    } | null;
 }
 
 export default function InstructorDashboardClient({
@@ -33,8 +39,10 @@ export default function InstructorDashboardClient({
     availability,
     totalSessionsTaught,
     pendingEarnings,
-    currentDateStr
+    currentDateStr,
+    instructorProfile
 }: InstructorDashboardClientProps) {
+    const router = useRouter();
     const [calendarBookings, setCalendarBookings] = useState<any[]>(initialCalendarBookings);
     const [upcomingBookings, setUpcomingBookings] = useState<any[]>(initialUpcomingBookings);
     const [isLoading, setIsLoading] = useState(false); // No longer loading initially
@@ -125,6 +133,7 @@ export default function InstructorDashboardClient({
                             bookings={calendarBookings}
                             currentUserId={userId || ''}
                             currentDate={new Date(currentDateStr || getManilaTodayStr())}
+                            instructorProfile={instructorProfile}
                         />
                     </div>
 
@@ -133,9 +142,10 @@ export default function InstructorDashboardClient({
                         <MobileScheduleCalendar
                             currentDate={new Date(currentDateStr || getManilaTodayStr())}
                             onAddSlot={() => {
-                                // Since InstructorScheduleCalendar handles its own add modal, 
-                                // we might need to expose it or handle it here if we want mobile parity.
-                                // For now, we can link it to the existing sidebar/stat cards context if applicable.
+                                router.push('/instructor/schedule');
+                            }}
+                            onRecurringSchedule={() => {
+                                router.push('/instructor/schedule');
                             }}
                             onSlotClick={(session) => {
                                 if (session.is_booked) {

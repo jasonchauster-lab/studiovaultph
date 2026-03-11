@@ -120,7 +120,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
     // 4. Fetch Available Balance (Static)
     const { data: profile } = await supabase
         .from('profiles')
-        .select('available_balance')
+        .select('id, available_balance, teaching_equipment, rates')
         .eq('id', user.id)
         .single();
 
@@ -173,6 +173,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
             totalSessionsTaught={sessionCount || 0}
             pendingEarnings={pendingEarnings}
             currentDateStr={dateParam}
+            instructorProfile={profile}
         />
     )
 }
