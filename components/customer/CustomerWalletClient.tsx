@@ -3,7 +3,6 @@
 import { Wallet, ArrowUpRight, History, Clock, Info, X, ShieldCheck, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
-import { topUpWallet } from '@/app/(dashboard)/customer/actions'
 import { useRouter } from 'next/navigation'
 
 interface CustomerWalletClientProps {
@@ -17,25 +16,8 @@ interface CustomerWalletClientProps {
 
 export default function CustomerWalletClient({ data }: CustomerWalletClientProps) {
     const [showInfoModal, setShowInfoModal] = useState(false)
-    const [showTopUpModal, setShowTopUpModal] = useState(false)
-    const [topUpAmount, setTopUpAmount] = useState('')
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const router = useRouter()
 
-    const handleTopUp = async () => {
-        const amount = parseFloat(topUpAmount)
-        if (isNaN(amount) || amount <= 0) return alert('Please enter a valid amount.')
-
-        setIsSubmitting(true)
-        const result = await topUpWallet(amount)
-        setIsSubmitting(false)
-
-        if (result.error) {
-            alert(result.error)
-        } else {
-            router.push(`/customer/payment/top-up/${result.topUpId}`)
-        }
-    }
 
     if (!data) return <div className="p-8">Loading wallet...</div>
     const { available, pending, transactions, error } = data
@@ -98,13 +80,6 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                     <p className="text-charcoal-600">Manage your balance for seamless bookings.</p>
                 </div>
                 <div className="flex gap-2">
-                    <button
-                        onClick={() => setShowTopUpModal(true)}
-                        className="bg-rose-gold text-white px-6 py-3 rounded-lg font-medium hover:bg-rose-gold/90 transition-colors flex items-center gap-2 shadow-sm"
-                    >
-                        <ArrowUpRight className="w-4 h-4" />
-                        Top-Up Wallet
-                    </button>
                     <Link
                         href="/customer/payout"
                         className="bg-charcoal-900 text-cream-50 px-6 py-3 rounded-lg font-medium hover:bg-charcoal-800 transition-colors flex items-center gap-2 shadow-sm"

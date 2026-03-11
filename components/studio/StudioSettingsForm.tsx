@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
 import { useRef } from 'react'
+import { isHeicFile, ensureJpegFile } from '@/lib/utils/image-utils'
 
 export default function StudioSettingsForm({ studio }: { studio: Studio }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -18,9 +19,24 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
     const [newSpacePhotos, setNewSpacePhotos] = useState<File[]>([])
     const spacePhotosInputRef = useRef<HTMLInputElement>(null)
 
-    const handleSpacePhotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSpacePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || [])
-        const validFiles = files.filter(f => f.type.startsWith('image/'))
+        const validFiles: File[] = []
+
+        for (const file of files) {
+            if (file.type.startsWith('image/') || isHeicFile(file)) {
+                try {
+                    let processedFile = file
+                    if (isHeicFile(file)) {
+                        processedFile = await ensureJpegFile(file)
+                    }
+                    validFiles.push(processedFile)
+                } catch (err) {
+                    console.error('HEIC processing error:', err)
+                }
+            }
+        }
+
         if (validFiles.length > 0) {
             setNewSpacePhotos(prev => [...prev, ...validFiles])
         }
@@ -54,8 +70,11 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
             const timestamp = Date.now()
 
             // 1. Upload Logo if changed
-            const logoFile = formData.get('logo') as File
+            let logoFile = formData.get('logo') as File
             if (logoFile && logoFile.size > 0) {
+                if (isHeicFile(logoFile)) {
+                    logoFile = await ensureJpegFile(logoFile)
+                }
                 const ext = logoFile.name.split('.').pop()
                 const path = `studios/${studio.id}/logo_${timestamp}.${ext}`
                 const { error: uploadError } = await supabase.storage.from('avatars').upload(path, logoFile)
@@ -113,11 +132,19 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(studio.logo_url || null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            const url = URL.createObjectURL(file)
-            setPreviewUrl(url)
+            try {
+                let previewFile = file
+                if (isHeicFile(file)) {
+                    previewFile = await ensureJpegFile(file)
+                }
+                const url = URL.createObjectURL(previewFile)
+                setPreviewUrl(url)
+            } catch (err) {
+                console.error('Logo HEIC preview error:', err)
+            }
         }
     }
 
@@ -151,7 +178,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                     <input
                         type="file"
                         name="logo"
-                        accept="image/*"
+                        accept="image/*,.heic,.heif"
                         ref={fileInputRef}
                         className="hidden"
                         onChange={handleLogoChange}
@@ -353,11 +380,11 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                     <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-rose-gold/30 rounded-lg hover:bg-rose-gold/5 transition-colors cursor-pointer group" onClick={() => spacePhotosInputRef.current?.click()}>
                         <Upload className="w-8 h-8 text-rose-gold mb-2 group-hover:scale-110 transition-transform" />
                         <p className="text-sm font-serif font-bold text-charcoal-900">Add Studio Photos</p>
-                        <p className="text-xs text-charcoal-500 mt-1">Images only (JPG, PNG)</p>
+                        <p className="text-xs text-charcoal-500 mt-1">Images only (JPG, PNG, HEIC)</p>
                         <input
                             type="file"
                             multiple
-                            accept="image/*"
+                            accept="image/*,.heic,.heif"
                             ref={spacePhotosInputRef}
                             className="hidden"
                             onChange={handleSpacePhotosChange}

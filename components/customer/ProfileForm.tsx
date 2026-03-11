@@ -298,7 +298,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
             {message && (
                 <div className={clsx(
                     "p-5 rounded-[20px] text-xs font-bold uppercase tracking-wider animate-in slide-in-from-top-2",
-                    message.includes('success') ? 'bg-sage/10 text-sage border border-sage/20' : 'bg-red-50/20 text-red-600 border border-red-100'
+                    message.includes('success') ? 'bg-sage/10 text-sage border border-sage/50 shadow-sm' : 'bg-red-50/20 text-red-600 border border-red-100'
                 )}>
                     {message}
                 </div>

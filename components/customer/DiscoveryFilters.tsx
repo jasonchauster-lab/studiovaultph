@@ -5,6 +5,7 @@ import { useCallback } from 'react'
 import { Filter } from 'lucide-react'
 import { STUDIO_AMENITIES } from '@/types'
 import LocationFilterDropdown from '@/components/shared/LocationFilterDropdown'
+import MultiSelectFilter from '@/components/shared/MultiSelectFilter'
 import { getManilaTodayStr } from '@/lib/timezone'
 
 interface DiscoveryFiltersProps {
@@ -33,8 +34,18 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
         router.push(`/customer?${createQueryString(name, value)}`)
     }
 
+    const handleMultiFilter = (name: string, values: string[]) => {
+        const val = values.join(',')
+        router.push(`/customer?${createQueryString(name, val)}`)
+    }
+
+    const getMultiValue = (name: string) => {
+        const val = searchParams.get(name)
+        return val ? val.split(',') : []
+    }
+
     return (
-        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 bg-white/40 backdrop-blur-md p-5 rounded-[24px] border border-white/60 shadow-cloud">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 bg-white p-5 rounded-[24px] border border-border-grey shadow-cloud">
             <div className="flex items-center gap-2.5 text-charcoal/40 mr-2">
                 <Filter className="w-4 h-4" />
                 <span className="text-[10px] font-bold uppercase tracking-widest">Filters</span>
@@ -45,7 +56,7 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                 <select
                     onChange={(e) => handleFilter('type', e.target.value)}
                     value={searchParams.get('type') || 'all'}
-                    className="w-full sm:w-auto px-4 py-2 bg-white/50 border border-white/60 rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all appearance-none cursor-pointer"
+                    className="w-full sm:w-auto px-4 py-2 bg-white border border-border-grey rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all appearance-none cursor-pointer"
                 >
                     <option value="all">All Modes</option>
                     <option value="instructor">Instructors</option>
@@ -59,49 +70,33 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                     availableLocations={availableLocations}
                 />
 
-                <select
-                    onChange={(e) => handleFilter('equipment', e.target.value)}
-                    value={searchParams.get('equipment') || 'all'}
-                    className="w-full sm:w-auto px-4 py-2 bg-white/50 border border-white/60 rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all appearance-none cursor-pointer"
-                >
-                    <option value="all">Equipment</option>
-                    <option value="Reformer">Reformer</option>
-                    <option value="Cadillac">Cadillac</option>
-                    <option value="Chair">Chair</option>
-                    <option value="Ladder Barrel">Barrel</option>
-                    <option value="Mat">Mat</option>
-                </select>
+                <MultiSelectFilter
+                    label="Equipment"
+                    options={['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat']}
+                    value={getMultiValue('equipment')}
+                    onChange={(vals) => handleMultiFilter('equipment', vals)}
+                />
 
-                <select
-                    onChange={(e) => handleFilter('certification', e.target.value)}
-                    value={searchParams.get('certification') || 'all'}
-                    className="w-full sm:w-auto px-4 py-2 bg-white/50 border border-white/60 rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all appearance-none cursor-pointer"
-                >
-                    <option value="all">Certification</option>
-                    <option value="STOTT">STOTT Pilates</option>
-                    <option value="BASI">BASI</option>
-                    <option value="Balanced Body">Balanced Body</option>
-                    <option value="Polestar">Polestar</option>
-                    <option value="Classical">Classical</option>
-                </select>
+                <MultiSelectFilter
+                    label="Certification"
+                    options={['STOTT', 'BASI', 'Balanced Body', 'Polestar', 'Classical']}
+                    value={getMultiValue('certification')}
+                    onChange={(vals) => handleMultiFilter('certification', vals)}
+                />
 
-                <select
-                    onChange={(e) => handleFilter('amenity', e.target.value)}
-                    value={searchParams.get('amenity') || 'all'}
-                    className="w-full sm:w-auto px-4 py-2 bg-white/50 border border-white/60 rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all appearance-none cursor-pointer"
-                >
-                    <option value="all">Amenities</option>
-                    {STUDIO_AMENITIES.map(amenity => (
-                        <option key={amenity} value={amenity}>{amenity}</option>
-                    ))}
-                </select>
+                <MultiSelectFilter
+                    label="Amenities"
+                    options={STUDIO_AMENITIES}
+                    value={getMultiValue('amenity')}
+                    onChange={(vals) => handleMultiFilter('amenity', vals)}
+                />
 
                 <input
                     type="date"
                     min={getManilaTodayStr()}
                     onChange={(e) => handleFilter('date', e.target.value)}
                     value={searchParams.get('date') || ''}
-                    className="w-full sm:w-auto px-4 py-2 bg-white/50 border border-white/60 rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all cursor-pointer"
+                    className="w-full sm:w-auto px-4 py-2 bg-white border border-border-grey rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all cursor-pointer"
                 />
 
                 <input
@@ -113,7 +108,7 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                     }
                     onChange={(e) => handleFilter('time', e.target.value)}
                     value={searchParams.get('time') || ''}
-                    className="w-full sm:w-auto px-4 py-2 bg-white/50 border border-white/60 rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all cursor-pointer"
+                    className="w-full sm:w-auto px-4 py-2 bg-white border border-border-grey rounded-xl text-[11px] font-bold text-charcoal shadow-sm focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage transition-all cursor-pointer"
                 />
             </div>
         </div>

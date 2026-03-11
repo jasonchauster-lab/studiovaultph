@@ -5,6 +5,7 @@ import { uploadGalleryImage, deleteGalleryImage } from '@/app/(dashboard)/custom
 import { Plus, X, Loader2, Image as ImageIcon, Camera } from 'lucide-react'
 import Image from 'next/image'
 import { clsx } from 'clsx'
+import { isHeicFile, ensureJpegFile } from '@/lib/utils/image-utils'
 
 interface InstructorGallerySectionProps {
     images: string[]
@@ -22,17 +23,27 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
         setIsUploading(true)
         setError(null)
 
-        const formData = new FormData()
-        formData.append('file', file)
+        try {
+            let processedFile = file
+            if (isHeicFile(file)) {
+                processedFile = await ensureJpegFile(file)
+            }
 
-        const result = await uploadGalleryImage(formData)
+            const formData = new FormData()
+            formData.append('file', processedFile)
 
-        if (!result.success) {
-            setError(result.error || 'Failed to upload image')
+            const result = await uploadGalleryImage(formData)
+
+            if (!result.success) {
+                setError(result.error || 'Failed to upload image')
+            }
+        } catch (err) {
+            console.error('File processing error:', err)
+            setError('Failed to process image. Please try a different format.')
+        } finally {
+            setIsUploading(false)
+            if (fileInputRef.current) fileInputRef.current.value = ''
         }
-
-        setIsUploading(false)
-        if (fileInputRef.current) fileInputRef.current.value = ''
     }
 
     const handleDelete = async (url: string) => {
@@ -75,7 +86,7 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
                         ref={fileInputRef}
                         onChange={handleFileUpload}
                         className="hidden"
-                        accept="image/*"
+                        accept="image/*,.heic,.heif"
                     />
                 </div>
 

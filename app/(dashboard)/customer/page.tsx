@@ -53,13 +53,14 @@ export default async function CustomerDashboard({
     }
 
     if (params.equipment && params.equipment !== 'all') {
-        // Studios must have this equipment
-        studioQuery = studioQuery.contains('equipment', [params.equipment])
+        // Studios must have ANY of these equipments
+        const equipmentList = params.equipment.split(',')
+        studioQuery = studioQuery.overlaps('equipment', equipmentList)
     }
 
     if (params.amenity && params.amenity !== 'all') {
-        // Studios must have this amenity
-        studioQuery = studioQuery.contains('amenities', [params.amenity])
+        const amenityList = params.amenity.split(',')
+        studioQuery = studioQuery.overlaps('amenities', amenityList)
     }
 
     // Fetch all verified studio locations for the smart location filter (no other filters applied)
@@ -97,8 +98,8 @@ export default async function CustomerDashboard({
         .eq('is_suspended', false)
 
     if (params.equipment && params.equipment !== 'all') {
-        // Instructors must teach this equipment
-        instructorQuery = instructorQuery.contains('teaching_equipment', [params.equipment])
+        const equipmentList = params.equipment.split(',')
+        instructorQuery = instructorQuery.overlaps('teaching_equipment', equipmentList)
     }
 
     // 3. Availability & Location Filter (Instructors)
@@ -174,11 +175,13 @@ export default async function CustomerDashboard({
             }
 
             if (params.equipment && params.equipment !== 'all') {
-                // Check both uppercase (standardized) and original casing for equipment keys
-                const eq = params.equipment.trim();
-                const eqUpper = eq.toUpperCase();
-                // Quote JSONB keys for PostgREST robustness (handles spaces/chars)
-                slotQuery = slotQuery.or(`equipment->>"${eq}".gte.1,equipment->>"${eqUpper}".gte.1`)
+                const equipmentList = params.equipment.split(',')
+                const conditions = equipmentList.flatMap(eq => {
+                    const eqTrimmed = eq.trim()
+                    const eqUpper = eqTrimmed.toUpperCase()
+                    return [`equipment->>"${eqTrimmed}".gte.1`, `equipment->>"${eqUpper}".gte.1`]
+                })
+                slotQuery = slotQuery.or(conditions.join(','))
             }
 
             if (params.date) {
@@ -221,10 +224,10 @@ export default async function CustomerDashboard({
         // If filter applied, check certs with case-insensitive, trimmed startsWith
         // This ensures "STOTT Pilates" (free-text entered) matches the filter token "STOTT"
         if (params.certification && params.certification !== 'all') {
-            const filterToken = params.certification.trim().toLowerCase()
+            const filterTokens = params.certification.split(',').map(c => c.trim().toLowerCase())
             return inst.certifications?.some((c: any) =>
                 c.verified &&
-                c.certification_body?.trim().toLowerCase().startsWith(filterToken)
+                filterTokens.some(token => c.certification_body?.trim().toLowerCase().startsWith(token))
             )
         }
         return true

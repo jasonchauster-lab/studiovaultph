@@ -194,13 +194,16 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
                                 <MessageCircle className="w-5 h-5 text-white" />
                             </div>
                             <div>
-                                <h3 className="text-white text-sm font-bold uppercase tracking-widest">Support Portal</h3>
-                                <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em]">Verified Response Team</p>
+                                <h3 className="text-white text-sm font-bold uppercase tracking-widest">Support Team</h3>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.5)] animate-pulse" />
+                                    <p className="text-[10px] text-white/80 font-bold uppercase tracking-[0.1em]">Online • Ask us any questions you have</p>
+                                </div>
                             </div>
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="p-2 text-white/40 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+                            className="p-2 text-white/80 hover:text-white transition-colors rounded-lg hover:bg-white/5"
                             aria-label="Close Support Portal"
                         >
                             <X className="w-5 h-5" />

@@ -119,8 +119,8 @@ export default function PayoutForm({ availableBalance }: { availableBalance: num
                             type="button"
                             onClick={() => setMethod('bank')}
                             className={`p-4 border rounded-xl flex flex-col items-center gap-2 transition-all ${method === 'bank'
-                                ? 'border-charcoal-900 bg-charcoal-50 text-charcoal-900'
-                                : 'border-cream-200 hover:border-charcoal-300 text-charcoal-500'
+                                ? 'border-burgundy bg-burgundy/5 text-burgundy shadow-sm'
+                                : 'border-cream-200 hover:border-burgundy/40 hover:bg-burgundy/5 text-charcoal-500'
                                 }`}
                         >
                             <span className="font-medium">Bank Transfer</span>
@@ -185,7 +185,7 @@ export default function PayoutForm({ availableBalance }: { availableBalance: num
                 <button
                     type="submit"
                     disabled={isLoading || !amount || parseFloat(amount) > availableBalance}
-                    className="w-full bg-charcoal-900 text-cream-50 py-4 rounded-lg font-medium hover:bg-charcoal-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                    className="w-full bg-burgundy text-buttermilk py-4 rounded-lg font-semibold shadow-sm hover:brightness-110 hover:shadow-card hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transition-all duration-200 flex items-center justify-center gap-2"
                 >
                     {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Request'}
                 </button>

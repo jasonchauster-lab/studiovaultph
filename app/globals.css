@@ -8,6 +8,8 @@
   --buttermilk: #FFF1B5;
   --pastel-blue: #C1DBE8;
   --border-grey: #E5E7EB;
+  --sage: #708669;
+  --forest: #2F5233;
 
   --background: var(--off-white);
   --foreground: var(--burgundy);
@@ -35,7 +37,8 @@
   /* Legacy Mappings (Maintained for compatibility but updated to new palette) */
   --color-charcoal: var(--burgundy);
   --color-slate: var(--muted-burgundy);
-  --color-forest: var(--burgundy);
+  --color-forest: var(--forest);
+  --color-sage: var(--sage);
 
   /* System Mappings */
   --color-primary: var(--burgundy);

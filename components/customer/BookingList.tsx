@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, MapPin, Clock, MessageCircle, XCircle, Box } from 'lucide-react'
+import { Calendar, MapPin, Clock, MessageCircle, XCircle, Box, Navigation } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import ChatWindow from '@/components/dashboard/ChatWindow'
@@ -206,6 +206,17 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                 <MessageCountBadge bookingId={booking.id} currentUserId={userId} partnerId={booking.instructor_id} isOpen={selectedBooking === booking.id} />
                                             </button>
                                         )}
+                                        {booking.status === 'approved' && getSlotDateTime(booking.slots?.date, booking.slots?.start_time) > now && (
+                                            <a
+                                                href={booking.studios?.google_maps_url || booking.slots?.studios?.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((booking.studios?.name || booking.slots?.studios?.name || "") + " " + (booking.location || ""))}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="px-3 py-2 bg-white text-forest border border-forest/20 rounded-lg hover:bg-forest hover:text-white transition-all flex items-center gap-2 shadow-tight"
+                                            >
+                                                <Navigation className="w-3.5 h-3.5" />
+                                                <span className="text-[11px] font-bold">Directions</span>
+                                            </a>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -243,7 +254,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                         if (!canReview) return null
 
                                         const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
-                                        const studio = getFirst(booking.slots?.studios)
+                                        const studio = getFirst(booking.studios || booking.slots?.studios)
                                         const instructor = getFirst(booking.instructor)
 
                                         const reviewedInstructor = booking.customer_reviewed_instructor || booking.customer_reviewed

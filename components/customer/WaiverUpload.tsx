@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { uploadWaiver } from '@/app/(dashboard)/customer/profile/actions'
 import { Upload, FileText, Check, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { isHeicFile, ensureJpegFile } from '@/lib/utils/image-utils'
 
 export default function WaiverUpload({ initialUrl, signedAt }: { initialUrl?: string, signedAt?: string }) {
     const [isUploading, setIsUploading] = useState(false)
@@ -16,10 +17,15 @@ export default function WaiverUpload({ initialUrl, signedAt }: { initialUrl?: st
         const file = e.target.files[0]
         setIsUploading(true)
 
-        const formData = new FormData()
-        formData.append('file', file)
-
         try {
+            let processedFile = file
+            if (isHeicFile(file)) {
+                processedFile = await ensureJpegFile(file)
+            }
+
+            const formData = new FormData()
+            formData.append('file', processedFile)
+
             const result = await uploadWaiver(formData)
             if (result.success && result.url) {
                 setFileUrl(result.url)
@@ -73,7 +79,7 @@ export default function WaiverUpload({ initialUrl, signedAt }: { initialUrl?: st
                     <div className="relative inline-block">
                         <input
                             type="file"
-                            accept=".pdf,image/*"
+                            accept=".pdf,image/*,.heic,.heif"
                             onChange={handleUpload}
                             disabled={isUploading}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"

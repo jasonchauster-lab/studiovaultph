@@ -31,7 +31,8 @@ export default async function CustomerBookingsPage() {
                 location,
                 address,
                 owner_id,
-                logo_url
+                logo_url,
+                google_maps_url
             ),
             instructor:profiles!instructor_id (
                 id,

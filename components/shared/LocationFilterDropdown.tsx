@@ -122,7 +122,7 @@ export default function LocationFilterDropdown({ value, onChange, availableLocat
                     'flex items-center gap-3 px-4 py-2 rounded-xl border text-[11px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-sm',
                     isActive
                         ? 'bg-sage text-white border-sage'
-                        : 'bg-white/50 text-charcoal border-white/60 hover:border-sage/40'
+                        : 'bg-white text-charcoal border-border-grey hover:border-sage/40 hover:bg-off-white'
                 )}
             >
                 <MapPin className="w-3.5 h-3.5 shrink-0" />
@@ -135,7 +135,7 @@ export default function LocationFilterDropdown({ value, onChange, availableLocat
 
             {/* Panel */}
             {open && (
-                <div className="absolute z-50 top-full mt-3 left-0 w-80 bg-white/60 backdrop-blur-xl rounded-[24px] border border-white/60 shadow-cloud overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="absolute z-50 top-full mt-3 left-0 w-80 bg-white rounded-[24px] border border-border-grey shadow-cloud overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
 
                     {/* City pills */}
                     <div className="p-4 border-b border-white/40 flex flex-wrap gap-2">
@@ -150,7 +150,7 @@ export default function LocationFilterDropdown({ value, onChange, availableLocat
                                         'px-3.5 py-1.5 rounded-full text-[10px] font-bold border uppercase tracking-widest transition-all',
                                         isCityActive
                                             ? 'bg-sage text-white border-sage shadow-sm'
-                                            : 'bg-white/40 text-charcoal/60 border-transparent hover:border-sage/40 hover:bg-white/60'
+                                            : 'bg-off-white text-charcoal/60 border-border-grey hover:border-sage/40 hover:bg-white'
                                     )}
                                 >
                                     {city.label}
@@ -160,8 +160,8 @@ export default function LocationFilterDropdown({ value, onChange, availableLocat
                     </div>
 
                     {/* Search */}
-                    <div className="p-4 border-b border-white/40">
-                        <div className="flex items-center gap-3 border border-white/60 focus-within:border-sage rounded-xl px-4 py-2.5 transition-all bg-white/40 shadow-inner">
+                    <div className="p-4 border-b border-border-grey/10">
+                        <div className="flex items-center gap-3 border border-border-grey focus-within:border-sage rounded-xl px-4 py-2.5 transition-all bg-off-white shadow-inner">
                             <Search className="w-3.5 h-3.5 text-charcoal/30 shrink-0" />
                             <input
                                 autoFocus
@@ -199,7 +199,7 @@ export default function LocationFilterDropdown({ value, onChange, availableLocat
                                                     'px-3 py-1.5 rounded-full text-[10px] font-bold border transition-all uppercase tracking-widest',
                                                     isSel
                                                         ? 'bg-gold text-white border-gold shadow-sm'
-                                                        : 'bg-white/80 text-charcoal/60 border-white/60 hover:bg-sage/10 hover:border-sage/40 hover:text-sage'
+                                                        : 'bg-white text-charcoal/60 border-border-grey hover:bg-sage/10 hover:border-sage/40 hover:text-sage'
                                                 )}
                                             >
                                                 {highlightMatch(shortLabel(loc), search)}

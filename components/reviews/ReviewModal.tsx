@@ -10,6 +10,7 @@ interface PendingBooking {
     client_id: string
     instructor_id: string
     slots: { date: string; start_time: string; studios: { name: string } | { name: string }[] } | null
+    studios: { name: string } | { name: string }[] | null
     client: { id: string; full_name: string } | null
     instructor: { id: string; full_name: string } | null
 }
@@ -75,7 +76,8 @@ export default function ReviewModal({ booking, isInstructor, revieweeId: reviewe
     const getFirst = <T,>(val: T | T[]): T | undefined => Array.isArray(val) ? val[0] : val
 
     const slots = getFirst(booking.slots)
-    const studioName = getFirst(slots?.studios)?.name ?? 'Studio'
+    const studioData = getFirst(booking.studios || slots?.studios)
+    const studioName = studioData?.name ?? 'Studio'
     const sessionDate = slots?.date && slots?.start_time
         ? new Date(`${slots.date}T${slots.start_time}+08:00`).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })
         : ''

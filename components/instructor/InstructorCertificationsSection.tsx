@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { addCertification, deleteCertification } from '@/app/(dashboard)/instructor/profile/actions'
 import { Award, Plus, Trash2, Loader2, FileText, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 import { clsx } from 'clsx'
+import { isHeicFile, ensureJpegFile } from '@/lib/utils/image-utils'
 
 interface Certification {
     id: string
@@ -39,6 +40,12 @@ export default function InstructorCertificationsSection({ certifications }: Inst
         setError(null)
 
         try {
+            const certificateFile = formData.get('certificateFile') as File
+            if (certificateFile && isHeicFile(certificateFile)) {
+                const processedFile = await ensureJpegFile(certificateFile)
+                formData.set('certificateFile', processedFile)
+            }
+
             const result = await addCertification(formData)
 
             if (result.success) {
@@ -119,12 +126,25 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                     name="certificateFile"
                                     ref={fileInputRef}
                                     required
-                                    accept=".pdf,image/*"
-                                    onChange={(e) => {
+                                    accept=".pdf,image/*,.heic,.heif"
+                                    onChange={async (e) => {
                                         const file = e.target.files?.[0]
-                                        if (file && file.type.startsWith('image/')) {
-                                            const url = URL.createObjectURL(file)
-                                            setPreviewUrl(url)
+                                        if (!file) {
+                                            setPreviewUrl(null)
+                                            return
+                                        }
+
+                                        if (file.type.startsWith('image/') || isHeicFile(file)) {
+                                            try {
+                                                let previewFile = file
+                                                if (isHeicFile(file)) {
+                                                    previewFile = await ensureJpegFile(file)
+                                                }
+                                                const url = URL.createObjectURL(previewFile)
+                                                setPreviewUrl(url)
+                                            } catch (err) {
+                                                console.error('HEIC preview error:', err)
+                                            }
                                         } else {
                                             setPreviewUrl(null)
                                         }

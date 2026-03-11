@@ -6,6 +6,7 @@ import { topUpWallet, submitTopUpPaymentProof } from '@/app/(dashboard)/customer
 import { useRouter } from 'next/navigation'
 
 import { createClient } from '@/lib/supabase/client'
+import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
 
 interface TopUpModalProps {
     isOpen: boolean
@@ -61,15 +62,28 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
         }
     }
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            // Clean up old preview URL if it exists
-            if (previewUrl && previewUrl.startsWith('blob:')) {
-                URL.revokeObjectURL(previewUrl)
+            let processedFile = file
+            setIsLoading(true)
+            try {
+                if (isHeicFile(file)) {
+                    processedFile = await ensureJpegFile(file)
+                }
+
+                // Clean up old preview URL if it exists
+                if (previewUrl && previewUrl.startsWith('blob:')) {
+                    URL.revokeObjectURL(previewUrl)
+                }
+                setProofFile(processedFile)
+                setPreviewUrl(URL.createObjectURL(processedFile))
+            } catch (err) {
+                console.error('File processing error:', err)
+                setError('Failed to process image. Please try a different format.')
+            } finally {
+                setIsLoading(false)
             }
-            setProofFile(file)
-            setPreviewUrl(URL.createObjectURL(file))
         }
     }
 
@@ -278,8 +292,8 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                                             <Upload className="w-8 h-8 text-burgundy/40" />
                                         </div>
                                         <p className="font-serif font-bold text-burgundy text-lg">Upload Transfer Receipt</p>
-                                        <p className="text-[10px] text-slate font-bold uppercase tracking-widest mt-2">PNG, JPG or JPEG (Max 5MB)</p>
-                                        <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                                        <p className="text-[10px] text-slate font-bold uppercase tracking-widest mt-2">PNG, JPG or iPhone (HEIC) (Max 5MB)</p>
+                                        <input type="file" className="hidden" accept="image/*,.heic,.heif" onChange={handleFileChange} />
                                     </label>
                                 )}
                             </div>

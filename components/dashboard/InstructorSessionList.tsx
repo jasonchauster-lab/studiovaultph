@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { Calendar, MapPin, Box, X, AlertCircle, Clock } from 'lucide-react'
+import { Calendar, MapPin, Box, X, AlertCircle, Clock, Navigation } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
@@ -229,6 +229,17 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             )}
                                             {studio && studio.owner_id && (
                                                 <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={studio.owner_id} partnerName={studio.name || 'Studio'} label="MESSAGE STUDIO" variant="antigravity-gold" />
+                                            )}
+                                            {booking.status === 'approved' && (
+                                                <a
+                                                    href={studio?.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((studio?.name || "") + " " + (studio?.location || ""))}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="h-10 px-5 bg-white text-forest border border-forest/20 rounded-lg hover:bg-forest hover:text-white transition-all flex items-center gap-2 shadow-tight text-[10px] font-black uppercase tracking-[0.2em]"
+                                                >
+                                                    <Navigation className="w-3.5 h-3.5" />
+                                                    Directions
+                                                </a>
                                             )}
                                         </div>
                                     </div>

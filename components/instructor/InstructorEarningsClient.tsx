@@ -80,7 +80,7 @@ export default function InstructorEarningsClient({
                 </div>
             )}
 
-            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-10">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
                 <div className="relative">
                     <Link
                         href="/instructor"
@@ -92,11 +92,11 @@ export default function InstructorEarningsClient({
                     <h1 className="text-5xl font-serif text-charcoal tracking-tighter mb-4">Earnings & Payouts</h1>
                     <p className="text-[10px] font-bold text-slate uppercase tracking-[0.4em]">Manage your earnings, payouts, and financial history.</p>
                 </div>
-                <div className="flex flex-wrap gap-4">
+                <div className="flex items-center gap-3">
                     {recentTransactions && <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />}
                     <button
                         onClick={() => setShowTopUpModal(true)}
-                        className="h-14 bg-white text-charcoal px-8 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] flex items-center gap-3 border border-border-grey hover:bg-off-white transition-all shadow-tight active:scale-95"
+                        className="h-14 bg-white text-charcoal px-8 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] flex items-center gap-3 border border-border-grey hover:bg-off-white transition-all shadow-tight active:scale-95 whitespace-nowrap"
                     >
                         <ArrowUpRight className="w-4 h-4 text-forest stroke-[3px]" />
                         ADD FUNDS
@@ -104,16 +104,16 @@ export default function InstructorEarningsClient({
                     {availableBalance < 0 ? (
                         <button
                             disabled
-                            className="h-14 bg-charcoal/10 text-charcoal/40 px-10 rounded-[12px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 cursor-not-allowed opacity-50"
+                            className="h-14 bg-[#43302E] text-white/40 px-10 rounded-lg text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 cursor-not-allowed opacity-50 whitespace-nowrap"
                             title="Payouts are restricted while balance is negative."
                         >
-                            <Wallet className="w-4 h-4" />
-                            PAYOUTS RESTRICTED
+                            <Wallet className="w-4 h-4 text-white/40" />
+                            RESTRICTED
                         </button>
                     ) : (
                         <Link
                             href="/instructor/payout"
-                            className="h-14 bg-forest text-white px-10 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-110 transition-all shadow-tight active:scale-95"
+                            className="h-14 bg-[#43302E] text-white px-10 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-125 transition-all shadow-tight active:scale-95 whitespace-nowrap"
                         >
                             <Wallet className="w-4 h-4 text-white" />
                             CASH OUT
@@ -121,6 +121,7 @@ export default function InstructorEarningsClient({
                     )}
                 </div>
             </div>
+ drum
 
             <div className="earth-card p-4 inline-block bg-white shadow-tight">
                 <DateRangeFilters />

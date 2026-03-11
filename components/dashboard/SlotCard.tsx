@@ -8,21 +8,27 @@ interface SlotCardProps {
 
 export default function SlotCard({ slot }: SlotCardProps) {
     const studio = slot.studios!;
-    const startDate = new Date(slot.start_time);
+    // Combine date and time correctly to avoid Invalid Date issues
+    const startDateStr = `${slot.date}T${slot.start_time}+08:00`;
+    const endDateStr = `${slot.date}T${slot.end_time}+08:00`;
+    
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+
     const startTime = startDate.toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true });
-    const endTime = new Date(slot.end_time).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true });
+    const endTime = endDate.toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true });
     const dateString = startDate.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', weekday: 'short', month: 'short', day: 'numeric' });
 
     return (
         <div className="earth-card p-6 h-full flex flex-col justify-between group hover:translate-y-[-4px] transition-all duration-300 shadow-tight relative">
             <div>
-                <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-serif font-bold text-charcoal tracking-tight leading-tight group-hover:text-forest transition-colors">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+                    <h3 className="text-xl font-serif font-bold text-charcoal tracking-tight leading-tight group-hover:text-forest transition-colors line-clamp-2">
                         {studio?.name || 'Unknown Studio'}
                     </h3>
-                    <div className="status-pill-earth status-pill-green shrink-0 flex items-center gap-1.5">
-                        <MapPin className="w-2.5 h-2.5" />
-                        {studio?.location || 'Unknown Location'}
+                    <div className="status-pill-earth status-pill-green shrink-0 flex items-center gap-1.5 max-w-full">
+                        <MapPin className="w-2.5 h-2.5 shrink-0" />
+                        <span className="truncate">{studio?.location || 'Unknown Location'}</span>
                     </div>
                 </div>
 

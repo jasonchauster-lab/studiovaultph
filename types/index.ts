@@ -75,8 +75,9 @@ export interface Profile {
 export interface Slot {
     id: string;
     studio_id: string;
-    start_time: string; // ISO string
-    end_time: string;   // ISO string
+    date: string;       // YYYY-MM-DD
+    start_time: string; // time string
+    end_time: string;   // time string
     is_available: boolean;
     equipment?: Record<string, number>; // JSONB object stores { "Reformer": 5 }
     quantity?: number;
