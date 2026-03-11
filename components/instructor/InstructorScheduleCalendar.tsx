@@ -1144,101 +1144,108 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500 border border-[#43302E]/5 relative"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            {/* Action Icons Proper Alignment */}
-                            <div className="absolute top-6 right-8 flex items-center gap-1">
-                                <button
-                                    onClick={() => {
-                                        setEditingSlot(selectedBooking.slots);
-                                        setIsEditModalOpen(true);
-                                        setSelectedBooking(null);
-                                    }}
-                                    className="p-2 hover:bg-[#FFF1B5]/30 rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
-                                    title="Edit Session"
-                                >
-                                    <Pencil className="w-4 h-4" />
-                                </button>
-                                <button
-                                    className="p-2 hover:bg-[#FFF1B5]/30 rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
-                                    title="Duplicate Session"
-                                >
-                                    <Copy className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        handleDelete(selectedBooking.slot_id);
-                                        setSelectedBooking(null);
-                                    }}
-                                    className="p-2 hover:bg-red-50 rounded-full text-[#43302E]/40 hover:text-red-600 transition-all"
-                                    title="Delete Session"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={() => setSelectedBooking(null)}
-                                    className="p-2 hover:bg-off-white rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
-                                    title="Close"
-                                >
-                                    <X className="w-5 h-5" />
-                                </button>
+                            {/* Header Cluster (Status + Actions) */}
+                            <div className="absolute top-6 right-8 flex items-center gap-4">
+                                {(() => {
+                                    const isPastStart = getSlotDateTime(selectedBooking.slots?.date, selectedBooking.slots?.start_time) < now
+                                    const isPastEnd = getSlotDateTime(selectedBooking.slots?.date, selectedBooking.slots?.end_time) < now
+
+                                    let statusLabel = selectedBooking.status === 'approved' ? 'Confirmed' :
+                                        selectedBooking.status === 'completed' ? 'Completed' : 'Pending'
+
+                                    if (selectedBooking.status === 'approved' && isPastEnd) statusLabel = 'Completed'
+                                    if (selectedBooking.status === 'pending' && isPastStart) statusLabel = 'Expired'
+
+                                    return (
+                                        <span className={clsx(
+                                            "text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm",
+                                            statusLabel === 'Completed' ? "bg-forest/10 text-forest" :
+                                                statusLabel === 'Expired' ? "bg-red-50 text-red-600" :
+                                                    "bg-[#FFF1B5] text-[#43302E]"
+                                        )}>
+                                            {statusLabel}
+                                        </span>
+                                    )
+                                })()}
+
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={() => {
+                                            setEditingSlot(selectedBooking.slots);
+                                            setIsEditModalOpen(true);
+                                            setSelectedBooking(null);
+                                        }}
+                                        className="p-2 hover:bg-[#FFF1B5]/30 rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
+                                        title="Edit Session"
+                                    >
+                                        <Pencil className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        className="p-2 hover:bg-[#FFF1B5]/30 rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
+                                        title="Duplicate Session"
+                                    >
+                                        <Copy className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            handleDelete(selectedBooking.slot_id);
+                                            setSelectedBooking(null);
+                                        }}
+                                        className="p-2 hover:bg-red-50 rounded-full text-[#43302E]/40 hover:text-red-600 transition-all"
+                                        title="Delete Session"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => setSelectedBooking(null)}
+                                        className="p-2 hover:bg-off-white rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
+                                        title="Close"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Actual Content */}
-                            <div className="space-y-4 px-8 pt-8">
-                                <div className="flex items-center justify-between pt-2">
-                                    <h3 className="text-3xl font-serif text-[#43302E] tracking-tighter">
+                            <div className="space-y-6 px-8 pt-10">
+                                <div className="flex items-center pt-2">
+                                    <h3 className="text-3xl font-serif text-[#43302E] tracking-tighter text-left">
                                         {selectedBooking.price_breakdown?.equipment || 'Standard Session'}
                                     </h3>
-                                    {(() => {
-                                        const isPastStart = getSlotDateTime(selectedBooking.slots?.date, selectedBooking.slots?.start_time) < now
-                                        const isPastEnd = getSlotDateTime(selectedBooking.slots?.date, selectedBooking.slots?.end_time) < now
-
-                                        let statusLabel = selectedBooking.status === 'approved' ? 'Confirmed' :
-                                            selectedBooking.status === 'completed' ? 'Completed' : 'Pending'
-
-                                        if (selectedBooking.status === 'approved' && isPastEnd) statusLabel = 'Completed'
-                                        if (selectedBooking.status === 'pending' && isPastStart) statusLabel = 'Expired'
-
-                                        return (
-                                            <span className={clsx(
-                                                "text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm",
-                                                statusLabel === 'Completed' ? "bg-forest/10 text-forest" :
-                                                    statusLabel === 'Expired' ? "bg-red-50 text-red-600" :
-                                                        "bg-[#FFF1B5] text-[#43302E]"
-                                            )}>
-                                                {statusLabel}
-                                            </span>
-                                        )
-                                    })()}
                                 </div>
 
-                                <div className="space-y-3">
+                                <div className="space-y-4">
                                     <div className="flex items-center gap-3 text-[#43302E]">
-                                        <Clock className="w-4 h-4 opacity-40" />
-                                        <span className="text-[11px] font-bold uppercase tracking-widest">
+                                        <Clock className="w-4 h-4 opacity-40 shrink-0" />
+                                        <span className="text-[11px] font-bold uppercase tracking-widest text-left">
                                             {format(new Date(selectedBooking.slots.date), 'EEEE, MMMM d')} • {selectedBooking.slots.start_time.slice(0, 5)} - {selectedBooking.slots.end_time.slice(0, 5)}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-3 text-[#43302E]">
                                         <MapPin className="w-4 h-4 opacity-40 shrink-0" />
-                                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                                            <button
-                                                onClick={() => setSelectedStudio(selectedBooking.slots.studios)}
-                                                className="text-[11px] font-bold uppercase tracking-widest underline decoration-[#43302E]/20 hover:decoration-forest hover:text-forest transition-all text-left truncate"
-                                            >
+                                        <div className="flex items-baseline gap-2 flex-1 min-w-0">
+                                            <span className="text-[11px] font-bold uppercase tracking-widest text-left truncate">
                                                 {selectedBooking.slots.studios?.name || 'Studio'} - {selectedBooking.slots.studios?.location || 'Studio Location'}
-                                            </button>
+                                            </span>
                                             <a
                                                 href={selectedBooking.slots.studios?.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selectedBooking.slots.studios?.name} ${selectedBooking.slots.studios?.location}`)}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="shrink-0 p-1.5 rounded-md bg-green-50 border border-green-200 text-forest hover:bg-forest hover:text-white transition-all flex items-center justify-center"
-                                                title="Open in Google Maps"
+                                                className="text-[10px] font-bold text-[#43302E] underline decoration-[#43302E]/20 hover:text-forest hover:decoration-forest transition-all shrink-0 whitespace-nowrap"
                                             >
-                                                <ArrowUpRight className="w-3 h-3" />
+                                                View on Maps
                                             </a>
                                         </div>
                                     </div>
+                                </div>
+
+                                {/* Attendance Row */}
+                                <div className="pt-6 border-t border-[#E5E7EB] flex items-center justify-between">
+                                    <span className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em]">1 BOOKED</span>
+                                    <span className="text-[10px] font-black text-[#6B5A58] uppercase tracking-widest">
+                                        {currentSlotHistory.length} CANCELLED
+                                    </span>
                                 </div>
                             </div>
 
@@ -1294,13 +1301,13 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                             </div>
 
                             {/* Event History Section */}
-                            <div className="pt-6 border-t border-[#43302E]/10 mt-6 px-8">
-                                <h4 className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
+                            <div className="pt-6 border-t border-[#43302E]/10 mt-10 px-8">
+                                <h4 className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em] mb-4 flex items-center gap-3 text-left">
                                     <Clock className="w-4 h-4 opacity-40" />
                                     Event History
                                 </h4>
                                 <div className="space-y-3">
-                                    <div className="text-[10px] space-y-1">
+                                    <div className="text-[10px] space-y-1 text-left">
                                         <div className="flex items-center justify-between font-bold text-[#43302E]/60">
                                             <span>Current Session</span>
                                             <span className="uppercase tracking-tighter text-[8px] bg-[#F5F2EB] px-2 py-0.5 rounded border border-[#43302E]/10">
@@ -1317,7 +1324,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                         </div>
                                     </div>
                                     {currentSlotHistory.map(h => (
-                                        <div key={h.id} className="text-[10px] space-y-1 opacity-60">
+                                        <div key={h.id} className="text-[10px] space-y-1 opacity-60 text-left">
                                             <div className="flex items-center justify-between font-bold text-[#43302E]/60">
                                                 <span>{h.client?.full_name || 'Previous Client'}</span>
                                                 <span className="uppercase tracking-tighter text-[8px] bg-red-50 text-red-600 px-2 py-0.5 rounded border border-red-100">
