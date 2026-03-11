@@ -1324,13 +1324,22 @@ export default function InstructorScheduleCalendar({
                                     </button>
                                     <button
                                         onClick={() => setSelectedBooking(null)}
-                                        className="p-2 hover:bg-slate-50 rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
+                                        className="p-2 hover:bg-off-white rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
                                         title="Close"
                                     >
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
                             </div>
+
+                            {(() => {
+                                const slot = selectedBooking.slots;
+                                const startH = slot?.start_time ? parseInt(slot.start_time.split(':')[0]) : -1;
+                                const key = slot?.date && startH !== -1 ? `${slot.date}-${startH}` : '';
+                                const currentSlotHistory = key ? (historyMap[key] || []) : [];
+                                
+                                return (
+                                    <>
 
                             {/* Actual Content */}
                             <div className="space-y-6 px-8 pt-10">
@@ -1510,6 +1519,9 @@ export default function InstructorScheduleCalendar({
                                     <MessageSquare className="w-4 h-4" /> Message Client
                                 </button>
                             </div>
+                                    </>
+                                );
+                            })()}
                         </div>
                     </div>
                 )

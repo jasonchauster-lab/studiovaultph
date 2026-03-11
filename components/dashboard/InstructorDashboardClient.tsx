@@ -324,7 +324,7 @@ export default function InstructorDashboardClient({
                                     start_time: a.start_time,
                                     end_time: a.end_time,
                                     date: a.date || getManilaTodayStr(),
-                                    type: `Availability: ${a.location_area?.split(' - ').pop() || a.location_area}`,
+                                    type: `Availability: ${a.location_area?.split(' - ').slice(-1)[0] || a.location_area}`,
                                     location: a.location_area,
                                     is_booked: false
                                 })),
