@@ -68,9 +68,9 @@ export default async function InstructorDashboardPage({ searchParams }: { search
             `)
             .eq('instructor_id', user.id)
             .eq('status', 'approved')
-            .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' })
-            .order('date', { foreignTable: 'slots', ascending: true })
-            .order('start_time', { foreignTable: 'slots', ascending: true })
+            .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { referencedTable: 'slots' })
+            .order('date', { referencedTable: 'slots', ascending: true })
+            .order('start_time', { referencedTable: 'slots', ascending: true })
             .limit(5);
 
         // 2. Determine visible week
@@ -119,11 +119,13 @@ export default async function InstructorDashboardPage({ searchParams }: { search
             .lte('slots.date', endDateStr);
 
         // 4. Fetch Available Balance (Static)
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('id, available_balance, teaching_equipment, rates')
             .eq('id', user.id)
-            .single();
+            .maybeSingle(); // Use maybeSingle to avoid error if not found
+
+        if (profileError) console.error('Profile fetch error:', profileError);
 
         // 5. Check for Pending Payouts (Static)
         const { data: pendingPayouts } = await supabase
@@ -153,10 +155,10 @@ export default async function InstructorDashboardPage({ searchParams }: { search
         // 8. Fetch Pending Earnings
         const { data: upcomingApproved } = await supabase
             .from('bookings')
-            .select('price_breakdown, slots!inner(id)')
+            .select('price_breakdown, slots!inner(id, date, start_time)')
             .eq('instructor_id', user.id)
             .eq('status', 'approved')
-            .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' });
+            .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { referencedTable: 'slots' });
 
         const pendingEarnings = upcomingApproved?.reduce((sum, b) => {
             const fee = (b.price_breakdown as any)?.instructor_fee || 0;

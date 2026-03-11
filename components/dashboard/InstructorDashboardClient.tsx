@@ -46,14 +46,19 @@ export default function InstructorDashboardClient({
     instructorProfile
 }: InstructorDashboardClientProps) {
     const router = useRouter();
-    const [calendarBookings, setCalendarBookings] = useState<any[]>(initialCalendarBookings);
-    const [upcomingBookings, setUpcomingBookings] = useState<any[]>(initialUpcomingBookings);
+    const normalizeBookings = (bookings: any[]) => bookings.map(b => ({
+        ...b,
+        slots: Array.isArray(b.slots) ? b.slots[0] : b.slots
+    }));
+
+    const [calendarBookings, setCalendarBookings] = useState<any[]>(() => normalizeBookings(initialCalendarBookings));
+    const [upcomingBookings, setUpcomingBookings] = useState<any[]>(() => normalizeBookings(initialUpcomingBookings));
     const [isLoading, setIsLoading] = useState(false); // No longer loading initially
 
     // Sync state when props change (e.g., when user navigates to a new week)
     useEffect(() => {
-        setCalendarBookings(initialCalendarBookings);
-        setUpcomingBookings(initialUpcomingBookings);
+        setCalendarBookings(normalizeBookings(initialCalendarBookings));
+        setUpcomingBookings(normalizeBookings(initialUpcomingBookings));
     }, [initialCalendarBookings, initialUpcomingBookings]);
 
     const [activeChat, setActiveChat] = useState<{ id: string, recipientId: string, name: string, isExpired: boolean } | null>(null);
@@ -378,11 +383,11 @@ export default function InstructorDashboardClient({
                                                     <div className="flex flex-col gap-1 w-full">
                                                         <div className="flex items-center gap-4">
                                                             <button
-                                                                onClick={() => setSelectedStudio(session.slots.studios)}
+                                                                onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
                                                                 className="w-12 h-12 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700"
                                                             >
                                                                 <img
-                                                                    src={session.slots.studios.logo_url || "/logo.png"}
+                                                                    src={session.slots?.studios?.logo_url || "/logo.png"}
                                                                     alt=""
                                                                     className="w-full h-full object-cover"
                                                                 />
@@ -390,10 +395,10 @@ export default function InstructorDashboardClient({
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-start justify-between gap-2">
                                                                     <button
-                                                                        onClick={() => setSelectedStudio(session.slots.studios)}
+                                                                        onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
                                                                         className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] truncate hover:text-forest transition-colors text-left"
                                                                     >
-                                                                        {session.slots.studios.name}
+                                                                        {session.slots?.studios?.name || 'Unknown Studio'}
                                                                     </button>
                                                                     <div className="flex items-center gap-2 bg-[#FFF1B5]/40 px-2 py-0.5 rounded border border-[#43302E]/5 whitespace-nowrap">
                                                                         <span className="text-[9px] font-black text-[#43302E]">1/1</span>
@@ -401,7 +406,7 @@ export default function InstructorDashboardClient({
                                                                 </div>
                                                                 <div className="flex items-center gap-2 text-[10px] text-slate font-black uppercase tracking-[0.1em] mt-1.5">
                                                                     <Calendar className="w-3.5 h-3.5 text-forest/40" />
-                                                                    <span>{formatManilaDateStr(session.slots.date)} • {formatTo12Hour(session.slots.start_time)}</span>
+                                                                    <span>{session.slots?.date ? formatManilaDateStr(session.slots.date) : 'No Date'} • {session.slots?.start_time ? formatTo12Hour(session.slots.start_time) : 'No Time'}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -440,13 +445,13 @@ export default function InstructorDashboardClient({
                                                                     setActiveChat({
                                                                         id: session.id,
                                                                         recipientId: session.client_id,
-                                                                        name: session.client.full_name,
+                                                                        name: session.client?.full_name || 'Client',
                                                                         isExpired: isChatExpired(session)
                                                                     })
                                                                 }}
                                                                 className="w-9 h-9 bg-white text-forest border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn"
                                                                 title="Message Client"
-                                                                aria-label={`Message client ${session.client.full_name}`}
+                                                                aria-label={`Message client ${session.client?.full_name || 'Client'}`}
                                                             >
                                                                 <MessageSquare className="w-3.5 h-3.5" />
                                                                 <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.client_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.client_id} />
@@ -457,17 +462,17 @@ export default function InstructorDashboardClient({
                                                                     e.preventDefault();
                                                                     setActiveChat({
                                                                         id: session.id,
-                                                                        recipientId: session.slots.studios.owner_id,
-                                                                        name: session.slots.studios.name,
+                                                                        recipientId: session.slots?.studios?.owner_id,
+                                                                        name: session.slots?.studios?.name || 'Studio',
                                                                         isExpired: isChatExpired(session)
                                                                     })
                                                                 }}
                                                                 className="w-9 h-9 bg-white text-charcoal border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn2"
                                                                 title="Message Studio"
-                                                                aria-label={`Message studio ${session.slots.studios.name}`}
+                                                                aria-label={`Message studio ${session.slots?.studios?.name || 'Studio'}`}
                                                             >
                                                                 <MessageSquare className="w-3.5 h-3.5" />
-                                                                <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.slots.studios.owner_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.slots.studios.owner_id} />
+                                                                <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.slots?.studios?.owner_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.slots?.studios?.owner_id} />
                                                             </button>
 
                                                             <button
