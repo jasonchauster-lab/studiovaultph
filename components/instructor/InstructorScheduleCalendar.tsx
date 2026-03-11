@@ -348,7 +348,7 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                     <div className={clsx("min-w-[900px]", view === 'month' && "min-w-0")}>
                         {view !== 'month' ? (
                             <div className={clsx("grid border-b border-border-grey bg-off-white", view === 'day' ? "grid-cols-[112px_1fr]" : "grid-cols-8")}>
-                                <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-28 text-center uppercase tracking-[0.3em] flex items-center justify-center">EPOCH</div>
+                                <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-28 text-center uppercase tracking-[0.3em] flex items-center justify-center"></div>
                                 {days.map(day => (
                                     <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 min-w-[120px] transition-all", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
                                         <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
@@ -483,7 +483,6 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
 
                                                                 const totalItems = siblings.length;
                                                                 const myIdx = siblings.findIndex(s => s.id === slot.id);
-                                                                const extraLocCount = locations.length - 1;
                                                                 const primaryEq = equipment.length > 0 ? equipment[0] : null;
                                                                 const extraEqCount = equipment.length > 1 ? equipment.length - 1 : 0;
 
@@ -515,13 +514,12 @@ export default function InstructorScheduleCalendar({ availability, bookings = []
                                                                             </div>
 
                                                                             <div className="flex flex-wrap items-center gap-2">
-                                                                                <div className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-[#F3F4F6] text-[#4B5563] px-3 py-1 rounded-md border border-gray-200">
-                                                                                    <MapPin className="w-3 h-3 text-[#4B5563]/40" />
-                                                                                    <span className="truncate max-w-[100px]">{locations[0].split(' - ')[0]}</span>
-                                                                                </div>
-                                                                                {extraLocCount > 0 && duration >= 45 && (
-                                                                                    <div className="text-[9px] font-bold text-[#4B5563] bg-[#F3F4F6] px-3 py-1 rounded-md border border-gray-200">+{extraLocCount} AREAS</div>
-                                                                                )}
+                                                                                {locations.map((loc, idx) => (
+                                                                                    <div key={loc + idx} className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-[#F3F4F6] text-[#4B5563] px-3 py-1 rounded-md border border-gray-200">
+                                                                                        <MapPin className="w-3 h-3 text-[#4B5563]/40" />
+                                                                                        <span className="truncate max-w-[100px]">{loc.split(' - ')[0]}</span>
+                                                                                    </div>
+                                                                                ))}
                                                                             </div>
 
                                                                             {primaryEq && duration >= 45 && (
