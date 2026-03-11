@@ -656,7 +656,7 @@ export default function InstructorScheduleCalendar({
                                                                     <div
                                                                         key={booking.id}
                                                                         className={clsx(
-                                                                            "absolute rounded-lg text-[10px] z-20 p-4 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-tight border border-[#43302E]/10 bg-white",
+                                                                            "absolute rounded-lg text-[10px] z-20 p-4 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-tight border border-burgundy/10 bg-white",
                                                                             duration < 45 && "flex-row items-center justify-between py-2 px-3"
                                                                         )}
                                                                         style={{
@@ -674,17 +674,33 @@ export default function InstructorScheduleCalendar({
                                                                         }}
                                                                     >
                                                                         <div className={clsx("flex justify-between items-start w-full", duration < 45 && "items-center")}>
-                                                                            <div className="flex flex-col min-w-0">
-                                                                                <span className="text-[10px] font-bold text-[#43302E] uppercase tracking-widest truncate">
+                                                                            <div className="flex flex-col min-w-0 flex-1">
+                                                                                <span className="text-[10px] font-bold text-burgundy uppercase tracking-widest truncate">
                                                                                     {booking.client?.full_name || 'Session'}
                                                                                 </span>
                                                                                 {duration >= 45 && (
-                                                                                    <span className="text-[8px] font-medium text-[#43302E]/60 uppercase tracking-tighter mt-0.5 truncate">
-                                                                                        {studioName}
-                                                                                    </span>
+                                                                                    <>
+                                                                                        <span className="text-[8px] font-medium text-burgundy/60 uppercase tracking-tighter mt-0.5 truncate">
+                                                                                            {studioName}
+                                                                                        </span>
+                                                                                        <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+                                                                                            {slotData.studios?.location && (
+                                                                                                <div className="text-[7px] font-black uppercase tracking-[0.1em] flex items-center gap-1 bg-burgundy/5 text-burgundy/60 px-2 py-0.5 rounded-md border border-burgundy/10">
+                                                                                                    <MapPin className="w-2 h-2 shrink-0" />
+                                                                                                    <span className="truncate max-w-[60px]">{slotData.studios.location.split(' - ')[0]}</span>
+                                                                                                </div>
+                                                                                            )}
+                                                                                            {slotData.equipment?.map((eq: string, idx: number) => (
+                                                                                                <div key={eq + idx} className="text-[7px] font-black uppercase tracking-[0.1em] flex items-center gap-1 bg-forest/5 text-forest/60 px-2 py-0.5 rounded-md border border-forest/10">
+                                                                                                    <Box className="w-2 h-2 shrink-0" />
+                                                                                                    <span className="truncate max-w-[60px]">{eq}</span>
+                                                                                                </div>
+                                                                                            ))}
+                                                                                        </div>
+                                                                                    </>
                                                                                 )}
                                                                             </div>
-                                                                            <div className="text-[9px] font-black text-[#43302E] bg-buttermilk/40 px-1.5 py-0.5 rounded border border-[#43302E]/5 whitespace-nowrap">
+                                                                            <div className="text-[9px] font-black text-burgundy bg-buttermilk/40 px-1.5 py-0.5 rounded border border-burgundy/5 whitespace-nowrap ml-2">
                                                                                 {Math.min(booking.quantity || 1, 1)}/1
                                                                             </div>
                                                                         </div>
@@ -1272,19 +1288,37 @@ export default function InstructorScheduleCalendar({
                                     </div>
                                 </div>
 
-                                {/* Attendance Row */}
-                                <div className="pt-6 border-t border-[#E5E7EB] flex items-center justify-between">
-                                    <span className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em]">1 BOOKED</span>
-                                    <span className="text-[10px] font-black text-[#6B5A58] uppercase tracking-widest">
-                                        {currentSlotHistory.length} CANCELLED
-                                    </span>
-                                </div>
+                                {(() => {
+                                    const qty = selectedBooking.quantity || 1;
+                                    const equipment = Array.isArray(selectedBooking.slots?.equipment) && selectedBooking.slots.equipment.length > 0
+                                        ? selectedBooking.slots.equipment[0]
+                                        : (selectedBooking.price_breakdown?.equipment || 'SESSION');
+                                    
+                                    return (
+                                        <div className="pt-6 border-t border-[#E5E7EB] flex items-center justify-between">
+                                            <span className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em]">
+                                                {qty} {equipment} BOOKED
+                                            </span>
+                                            <span className="text-[10px] font-black text-[#6B5A58] uppercase tracking-widest">
+                                                {currentSlotHistory.length} CANCELLED
+                                            </span>
+                                        </div>
+                                    );
+                                })()}
                             </div>
 
                             {/* Booked Section */}
                             <div className="space-y-6 px-8">
                                 <div className="flex items-center justify-between border-b border-[#43302E]/10 pb-4">
-                                    <h4 className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em]">Booked</h4>
+                                    <h4 className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em]">
+                                        {(() => {
+                                            const qty = selectedBooking.quantity || 1;
+                                            const equipment = Array.isArray(selectedBooking.slots?.equipment) && selectedBooking.slots.equipment.length > 0
+                                                ? selectedBooking.slots.equipment[0]
+                                                : (selectedBooking.price_breakdown?.equipment || 'SESSION');
+                                            return `${qty} ${equipment} Booked`;
+                                        })()}
+                                    </h4>
                                     <span className="text-[10px] font-black text-[#43302E]/40 uppercase tracking-widest">
                                         {currentSlotHistory.length} Cancelled
                                     </span>

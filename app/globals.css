@@ -1,12 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  /* Studio Vault PH Design System — Premium, Warm, Sophisticated */
-  --off-white: #FAFAFA;
-  --burgundy: #43302E;
-  --muted-burgundy: #6B5A58;
-  --buttermilk: #FFF1B5;
-  --pastel-blue: #C1DBE8;
+  /* Studio Vault PH Design System — Mother Earth Palette */
+  --off-white: #F4F1E2;      /* Lucky Dice */
+  --burgundy: #513229;       /* Mother Earth */
+  --muted-burgundy: #7C6B69;  /* Softened version of Mother Earth */
+  --buttermilk: #FCE6B7;     /* The Bay */
+  --pastel-blue: #D8EBF9;    /* Something Blue */
+  --walking-vinnie: #D7D4B1; /* Success / Completed */
   --border-grey: #E5E7EB;
   --sage: #708669;
   --forest: #2F5233;
@@ -19,7 +20,7 @@
 
   /* Refined shadows */
   --shadow-tight: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-  --shadow-card: 0 4px 6px -1px rgba(67, 48, 46, 0.05), 0 2px 4px -1px rgba(67, 48, 46, 0.03);
+  --shadow-card: 0 4px 6px -1px rgba(81, 50, 41, 0.05), 0 2px 4px -1px rgba(81, 50, 41, 0.03);
 }
 
 @theme inline {
@@ -32,6 +33,7 @@
   --color-muted-burgundy: var(--muted-burgundy);
   --color-buttermilk: var(--buttermilk);
   --color-pastel-blue: var(--pastel-blue);
+  --color-walking-vinnie: var(--walking-vinnie);
   --color-border-grey: var(--border-grey);
 
   /* Legacy Mappings (Maintained for compatibility but updated to new palette) */
@@ -56,7 +58,7 @@
   --radius-pill: var(--radius-pill);
 
   /* Selection color */
-  --color-selection: rgba(193, 219, 232, 0.3);
+  --color-selection: rgba(216, 235, 249, 0.3);
 }
 
 body {
@@ -150,7 +152,7 @@ h4 {
   }
 
   .status-pill-green {
-    @apply bg-buttermilk text-burgundy border-burgundy/10;
+    @apply bg-walking-vinnie text-burgundy border-burgundy/10;
   }
 
   .status-pill-yellow {
