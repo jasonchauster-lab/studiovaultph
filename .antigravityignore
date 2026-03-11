@@ -1,0 +1,7 @@
+# Files to be ignored by Antigravity during codebase searches and assistant operations
+tmp_*.js
+.next/
+node_modules/
+dist/
+build/
+.vercel
