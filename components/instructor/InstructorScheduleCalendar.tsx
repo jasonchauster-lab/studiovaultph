@@ -127,7 +127,9 @@ export default function InstructorScheduleCalendar({
         const bMap: Record<string, any[]> = {}
 
         availability.forEach(a => {
+            if (!a.start_time) return;
             const startH = parseInt(a.start_time.split(':')[0])
+            if (isNaN(startH)) return;
             if (a.date) {
                 const key = `${a.date}-${startH}`
                 if (!aMap[key]) aMap[key] = []
@@ -153,6 +155,7 @@ export default function InstructorScheduleCalendar({
             const slot = b.slots
             if (!slot?.date || !slot?.start_time) return
             const startH = parseInt(slot.start_time.split(':')[0])
+            if (isNaN(startH)) return;
             const key = `${slot.date}-${startH}`
             if (!bMap[key]) bMap[key] = []
             bMap[key].push(b)
@@ -163,6 +166,7 @@ export default function InstructorScheduleCalendar({
             const slot = b.slots
             if (!slot?.date || !slot?.start_time) return
             const startH = parseInt(slot.start_time.split(':')[0])
+            if (isNaN(startH)) return;
             const key = `${slot.date}-${startH}`
             if (!hMap[key]) hMap[key] = []
             hMap[key].push(b)
@@ -761,7 +765,7 @@ export default function InstructorScheduleCalendar({
                                                                                                     <span className="truncate max-w-[60px]">{slotData.studios.location.split(' - ')[0] || 'Studio'}</span>
                                                                                                 </div>
                                                                                             )}
-                                                                                            {slotData.equipment?.map((eq: string, idx: number) => (
+                                                                                            {Array.isArray(slotData.equipment) && slotData.equipment.map((eq: string, idx: number) => (
                                                                                                 <div key={eq + idx} className="text-[7px] font-black uppercase tracking-[0.1em] flex items-center gap-1 bg-forest/5 text-forest/60 px-2 py-0.5 rounded-md border border-forest/10">
                                                                                                     <Box className="w-2 h-2 shrink-0" />
                                                                                                     <span className="truncate max-w-[60px]">{eq}</span>
@@ -1556,17 +1560,21 @@ export default function InstructorScheduleCalendar({
                         )}
 
                         <div className="mb-8">
-                            {(() => {
-                                const conditions = typeof selectedProfile.medical_conditions === 'string'
-                                    ? selectedProfile.medical_conditions.split(',').map((c: string) => c.trim())
-                                    : Array.isArray(selectedProfile.medical_conditions)
-                                        ? selectedProfile.medical_conditions
-                                        : [];
+                             {(() => {
+                                 const conditions = Array.isArray(selectedProfile.medical_conditions)
+                                     ? selectedProfile.medical_conditions
+                                     : typeof selectedProfile.medical_conditions === 'string'
+                                         ? selectedProfile.medical_conditions.split(',').map((c: string) => c.trim())
+                                         : [];
 
-                                const displayConditions = conditions
-                                    .map((c: string) => c === 'Others' ? (selectedProfile.other_medical_condition || 'Other Conditions') : c)
-                                    .filter(Boolean)
-                                    .join(', ');
+                                 const displayConditions = conditions
+                                     .map((c: any) => {
+                                         if (!c) return null;
+                                         const conditionStr = String(c);
+                                         return conditionStr === 'Others' ? (selectedProfile.other_medical_condition || 'Other Conditions') : conditionStr;
+                                     })
+                                     .filter(Boolean)
+                                     .join(', ');
 
                                 return displayConditions ? (
                                     <div className="bg-red-50 p-8 rounded-lg border border-red-200 relative z-10">
