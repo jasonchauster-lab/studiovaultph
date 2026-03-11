@@ -36,7 +36,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
 
     try {
         // 1. Fetch Sidebar "Upcoming" (Global)
-        const { data: sidebarData } = await supabase
+        const { data: sidebarData, error: sidebarError } = await supabase
             .from('bookings')
             .select(`
                 *,
@@ -74,6 +74,8 @@ export default async function InstructorDashboardPage({ searchParams }: { search
             .order('start_time', { foreignTable: 'slots', ascending: true })
             .limit(5);
 
+        if (sidebarError) console.error('[Dashboard] Sidebar fetch error:', sidebarError);
+
         // 2. Determine visible week
         const dateParam = params.date || todayStr;
         const currentDate = new Date(dateParam + "T00:00:00+08:00");
@@ -83,7 +85,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
         const endDateStr = format(weekEnd, 'yyyy-MM-dd');
 
         // 3. Fetch Calendar Bookings (Range bound)
-        const { data: calendarData } = await supabase
+        const { data: calendarData, error: calendarError } = await supabase
             .from('bookings')
             .select(`
                 *,
@@ -119,6 +121,8 @@ export default async function InstructorDashboardPage({ searchParams }: { search
             .gte('slots.date', startDateStr)
             .lte('slots.date', endDateStr);
 
+        if (calendarError) console.error('[Dashboard] Calendar fetch error:', calendarError);
+
         // 4. Fetch Available Balance (Static)
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
@@ -138,13 +142,15 @@ export default async function InstructorDashboardPage({ searchParams }: { search
         const hasPendingPayout = !!(pendingPayouts && pendingPayouts.length > 0);
 
         // 6. Fetch Existing Availability for this week
-        const { data: availabilityData } = await supabase
+        const { data: availabilityData, error: availabilityError } = await supabase
             .from('instructor_availability')
             .select('*')
             .eq('instructor_id', user.id)
             .or(`date.is.null,and(date.gte.${startDateStr},date.lte.${endDateStr})`)
             .order('day_of_week', { ascending: true })
             .order('start_time', { ascending: true });
+
+        if (availabilityError) console.error('[Dashboard] Availability fetch error:', availabilityError);
 
         // 7. Fetch Total Sessions Taught (Historical)
         const { count: sessionCount } = await supabase
@@ -154,12 +160,14 @@ export default async function InstructorDashboardPage({ searchParams }: { search
             .in('status', ['approved', 'completed']);
 
         // 8. Fetch Pending Earnings
-        const { data: upcomingApproved } = await supabase
+        const { data: upcomingApproved, error: earningsError } = await supabase
             .from('bookings')
             .select('price_breakdown, slots!inner(id, date, start_time)')
             .eq('instructor_id', user.id)
             .eq('status', 'approved')
             .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' });
+
+        if (earningsError) console.error('[Dashboard] Earnings fetch error:', earningsError);
 
         const pendingEarnings = upcomingApproved?.reduce((sum, b) => {
             const fee = (b.price_breakdown as any)?.instructor_fee || 0;

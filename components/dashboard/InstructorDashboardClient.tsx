@@ -139,7 +139,7 @@ export default function InstructorDashboardClient({
     ];
 
     const GROUPED_AREAS = AREAS.reduce((acc: Record<string, string[]>, loc: string) => {
-        const city = loc.split(' - ')[0];
+        const city = loc?.split(' - ')[0] || 'Studio';
         if (!acc[city]) acc[city] = [];
         acc[city].push(loc);
         return acc;
@@ -921,7 +921,7 @@ export default function InstructorDashboardClient({
                                                                             : "text-slate bg-off-white/50 border-transparent hover:border-border-grey"
                                                                     )}
                                                                 >
-                                                                    {loc.split(' - ')[1] || loc}
+                                                                    {loc?.split(' - ')[1] || loc || 'Studio'}
                                                                     {locations.includes(loc) && <CheckCircle className="w-4 h-4 text-burgundy" />}
                                                                 </button>
                                                             ))}

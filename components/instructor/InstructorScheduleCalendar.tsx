@@ -570,7 +570,7 @@ export default function InstructorScheduleCalendar({
                                                 // 1. Group availability slots by time range (ignoring location differences for the card)
                                                 const groupedByTime = startingSlots.reduce((acc, slot) => {
                                                     const key = `${slot.start_time.slice(0, 5)}-${slot.end_time.slice(0, 5)}`
-                                                    const shortLoc = slot.location_area.split(' - ')[0]
+                                                    const shortLoc = slot.location_area?.split(' - ')[0] || slot.location_area || 'Studio'
 
                                                     if (!acc[key]) {
                                                         acc[key] = {
@@ -581,7 +581,7 @@ export default function InstructorScheduleCalendar({
                                                         }
                                                     } else {
                                                         acc[key].allSlots.push(slot)
-                                                        if (!acc[key].locations.some(l => l.split(' - ')[0] === shortLoc)) {
+                                                        if (!acc[key].locations.some(l => (l?.split(' - ')[0] || l) === shortLoc)) {
                                                             acc[key].locations.push(slot.location_area)
                                                         }
                                                         if (slot.equipment) {
@@ -1005,7 +1005,7 @@ export default function InstructorScheduleCalendar({
                                                             <div className="grid grid-cols-1 gap-y-4">
                                                                 {cityLocations.map(area => {
                                                                     const isSelected = locations.includes(area);
-                                                                    const displayName = area.split(' - ')[1] || area;
+                                                                    const displayName = area?.split(' - ')[1] || area || 'Studio';
                                                                     return (
                                                                         <div
                                                                             key={area}
@@ -1175,7 +1175,7 @@ export default function InstructorScheduleCalendar({
                                                             <div className="grid grid-cols-1 gap-y-4">
                                                                 {cityLocations.map(area => {
                                                                     const isSelected = locations.includes(area);
-                                                                    const displayName = area.split(' - ')[1] || area;
+                                                                    const displayName = area?.split(' - ')[1] || area || 'Studio';
                                                                     return (
                                                                         <div
                                                                             key={area}
