@@ -113,7 +113,7 @@ export default async function PaymentPage({
         .single()
 
     return (
-        <div className="min-h-screen bg-cream-50 p-8">
+        <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
             <div className="max-w-2xl mx-auto">
                 <Link href="/customer" className="inline-flex items-center text-charcoal-600 hover:text-charcoal-900 mb-6">
                     <ArrowLeft className="w-4 h-4 mr-2" />
@@ -163,7 +163,7 @@ export default async function PaymentPage({
                                     <ExpandableImage
                                         src="/gcash-qr.jpg"
                                         alt="GCash QR Code"
-                                        className="w-48 h-48"
+                                        className="w-32 h-32 sm:w-48 sm:h-48"
                                     />
                                     <p className="text-xs text-charcoal-500 mt-2">Scan to pay</p>
                                 </div>
@@ -174,7 +174,7 @@ export default async function PaymentPage({
                                     <ExpandableImage
                                         src="/bpi-qr.jpg"
                                         alt="BPI QR Code"
-                                        className="w-48 h-48"
+                                        className="w-32 h-32 sm:w-48 sm:h-48"
                                     />
                                     <p className="text-xs text-charcoal-500 mt-2">Scan to pay</p>
                                 </div>

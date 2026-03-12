@@ -184,7 +184,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                         type="date"
                         name="birthday"
                         defaultValue={profile?.date_of_birth || ''}
-                        className="w-64 px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm cursor-pointer"
+                        className="w-full sm:w-64 px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm cursor-pointer"
                     />
                 </div>
 

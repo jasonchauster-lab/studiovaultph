@@ -194,7 +194,7 @@ export default async function StudioDashboard(props: {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     <div>
-                        <h1 className="text-4xl font-serif font-bold text-charcoal tracking-tight mb-2">Studio Dashboard</h1>
+                        <h1 className="text-2xl sm:text-4xl font-serif font-bold text-charcoal tracking-tight mb-2">Studio Dashboard</h1>
                         {myStudio && (
                             <div className="flex items-center gap-4 mt-4">
                                 <div className="w-12 h-12 rounded-2xl overflow-hidden border border-white shadow-cloud scale-105">
@@ -243,7 +243,7 @@ export default async function StudioDashboard(props: {
                                         <span className="text-2xl font-serif font-bold text-charcoal tracking-tight -ml-3 whitespace-nowrap">StudioVaultPH</span>
                                     </Link>
                                     <h2 className="text-sage text-[10px] font-bold uppercase tracking-[0.3em] mb-3">Onboarding</h2>
-                                    <h1 className="text-4xl font-serif font-bold text-charcoal tracking-tight mb-4">Setup Your Studio</h1>
+                                    <h1 className="text-2xl sm:text-4xl font-serif font-bold text-charcoal tracking-tight mb-4">Setup Your Studio</h1>
                                     <p className="text-charcoal/60 text-base leading-relaxed">
                                         Create your studio profile to start accepting bookings and monetizing your reformers in style.
                                     </p>

@@ -210,7 +210,7 @@ export default async function CustomerDashboard({
                 {/* ─── Page Header & Filters ─── */}
                 <div className="flex flex-col gap-y-8">
                     <div className="max-w-2xl flex flex-col gap-y-3">
-                        <h1 className="text-5xl font-serif font-bold text-burgundy tracking-tight leading-tight">
+                        <h1 className="text-3xl sm:text-5xl font-serif font-bold text-burgundy tracking-tight leading-tight">
                             Find your flow.
                         </h1>
                         <p className="text-muted-burgundy text-lg leading-relaxed">

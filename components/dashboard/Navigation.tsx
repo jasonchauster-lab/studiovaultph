@@ -169,7 +169,7 @@ export default function Navigation({ role }: NavigationProps) {
 
             {/* Mobile hamburger button */}
             <button
-                className="md:hidden p-2.5 rounded-lg bg-white border border-border-grey text-burgundy shadow-tight hover:shadow-card hover:border-burgundy/20 transition-all active:scale-95"
+                className="md:hidden p-3 rounded-lg bg-white border border-border-grey text-burgundy shadow-tight hover:shadow-card hover:border-burgundy/20 transition-all active:scale-95"
                 onClick={() => setMobileOpen(prev => !prev)}
                 aria-label="Toggle menu"
             >

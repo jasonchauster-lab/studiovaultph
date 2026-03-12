@@ -107,7 +107,7 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
 
             <div className="space-y-6">
                 {/* Date Range */}
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Start Date</label>
                         <input
@@ -136,7 +136,7 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
                             <button
                                 key={day.id}
                                 onClick={() => toggleDay(day.id)}
-                                className={`w-12 h-12 rounded-lg text-[11px] font-bold transition-all border ${selectedDays.includes(day.id)
+                                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg text-[11px] font-bold transition-all border ${selectedDays.includes(day.id)
                                     ? 'bg-forest text-white border-forest shadow-tight'
                                     : 'bg-white text-slate border-border-grey hover:border-forest/50'
                                     }`}
@@ -148,7 +148,7 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
                 </div>
 
                 {/* Time Range */}
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Open Time</label>
                         <select

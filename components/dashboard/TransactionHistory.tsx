@@ -54,13 +54,13 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
 
             <div className="overflow-x-auto">
                 {activeTab === 'income' ? (
-                    <table className="w-full text-left text-sm text-charcoal-600">
+                    <table className="w-full text-left text-xs sm:text-sm text-charcoal-600">
                         <thead className="bg-cream-50 text-charcoal-900 font-medium border-b border-cream-200">
                             <tr>
-                                <th className="px-6 py-4">Date</th>
-                                <th className="px-6 py-4">Participant</th>
-                                <th className="px-6 py-4">Transaction Details</th>
-                                <th className="px-6 py-4 text-right">Amount</th>
+                                <th className="px-3 sm:px-6 py-4">Date</th>
+                                <th className="px-3 sm:px-6 py-4">Participant</th>
+                                <th className="px-3 sm:px-6 py-4">Transaction Details</th>
+                                <th className="px-3 sm:px-6 py-4 text-right">Amount</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -81,15 +81,15 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
 
                                     return (
                                         <tr key={idx} className="transition-colors hover:bg-[rgba(180,195,178,0.04)] rounded-lg">
-                                            <td className="px-6 py-4">
+                                            <td className="px-3 sm:px-6 py-4">
                                                 {txDate.toLocaleDateString()}
                                                 <span className="block text-[10px] text-charcoal-400">
                                                     {txDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-3 sm:px-6 py-4">
                                                 <div className="flex items-center gap-2">
-                                                    <User className="w-4 h-4 text-charcoal-400" />
+                                                    <User className="w-4 h-4 text-charcoal-400 shrink-0" />
                                                     <div className="flex flex-col">
                                                         <span className="font-medium text-charcoal-900">
                                                             {tx.client || tx.instructor || 'System'}
@@ -102,9 +102,9 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-3 sm:px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-2 flex-wrap">
                                                         <span className="font-medium text-charcoal-900">{tx.type}</span>
                                                         {isRefunded && (
                                                             <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-bold uppercase">
@@ -123,7 +123,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                 </div>
                                             </td>
                                             <td className={clsx(
-                                                "px-6 py-4 text-right font-bold transition-colors whitespace-nowrap",
+                                                "px-3 sm:px-6 py-4 text-right font-bold transition-colors whitespace-nowrap",
                                                 isRefunded ? "text-charcoal-400" :
                                                     isPenalty ? "text-red-600" :
                                                         isPositive ? "text-green-600" :
