@@ -71,6 +71,11 @@ npm run lint
 - ALWAYS batch ALL file reads/writes/edits in ONE message
 - ALWAYS batch ALL Bash commands in ONE message
 
+## Multi-User Personas (FOR SWARM TESTING)
+- **Customer:** login: `jchau199@gmail.com` | pass: `MakingMoney123` | Focus: wait for the studio and instructor to make the slot then book that slots and use any random image for the payment verification and ensure all other pages are functional and that the ui is good anvisible.
+- **Instructor:** login: `tracymeck35@gmail.com` | pass: `MakingMoney123` | Focus: wait for the studio to create a booking slot and create a slot that matches the location of the studio and time of the slot, and then check if all the other pages are functional and ui is good.
+- **Studio:** login: `clubpilatesph@gmail.com` | pass: `10Ponks25` | Focus: Create a booking slot on the calendar, and see if all the pages are functional and ui is good.
+
 ## Swarm Orchestration
 
 - MUST initialize the swarm using CLI tools when starting complex tasks

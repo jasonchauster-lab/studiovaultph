@@ -148,7 +148,7 @@ export default function SupportDashboardClient() {
                 .neq('sender_id', user.id)
 
             if (data) {
-                const unreadIds = new Set(data.map(m => m.ticket_id))
+                const unreadIds = new Set(data.map((m: { ticket_id: string }) => m.ticket_id))
                 setUnreadTickets(unreadIds)
             }
         }
