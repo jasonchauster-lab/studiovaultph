@@ -70,7 +70,7 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
                     table: 'messages',
                     filter: `booking_id=eq.${bookingId}`
                 },
-                (payload) => {
+                (payload: { new: unknown }) => {
                     const newMsg = payload.new as Message
 
                     // Filter realtime messages meant for this specific 1-on-1 chat
@@ -139,7 +139,7 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
             supabase.rpc('update_chat_presence', {
                 p_booking_id: bookingId,
                 p_partner_id: recipientId
-            }).then(({ error }) => {
+            }).then(({ error }: { error: unknown }) => {
                 if (error) console.error('Failed to update presence:', error)
             })
         }

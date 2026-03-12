@@ -81,7 +81,7 @@ export default function UserPresenceIndicator({
                     table: 'profiles',
                     filter: `id=eq.${userId}`
                 },
-                (payload) => {
+                (payload: { new: { is_online?: boolean; last_seen_at?: string } }) => {
                     const newProfile = payload.new
                     if (newProfile.is_online !== undefined) {
                         const recentlyActive = isRecentlyActive(newProfile.last_seen_at || null)

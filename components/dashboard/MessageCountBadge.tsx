@@ -53,7 +53,7 @@ export default function MessageCountBadge({ bookingId, currentUserId, partnerId,
                     table: 'messages',
                     filter: `booking_id=eq.${bookingId}`
                 },
-                (payload) => {
+                (payload: { new: { sender_id: string; recipient_id: string | null } }) => {
                     const newMsg = payload.new
                     if (newMsg.sender_id === partnerId &&
                         (newMsg.recipient_id === currentUserId || newMsg.recipient_id === null)) {

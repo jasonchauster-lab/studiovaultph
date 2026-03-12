@@ -100,7 +100,7 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
                     table: 'support_messages',
                     filter: `ticket_id=eq.${ticketId}`
                 },
-                (payload) => {
+                (payload: { new: unknown }) => {
                     const newMsg = payload.new as SupportMessage
                     setMessages((prev) => {
                         const exists = prev.find(m => m.id === newMsg.id)
