@@ -277,7 +277,6 @@ export default function BookingSection({
     const equipmentInventory = getEquipmentInventory(slotsInGroup || []);
     const equipmentTypes = Object.keys(equipmentInventory);
 
-    console.log("Selected Equipment:", selectedEquipment);
 
     // maxQuantity: actual inventory count for selected equipment (case-insensitive)
     const selectedEqKey = Object.keys(equipmentInventory).find(

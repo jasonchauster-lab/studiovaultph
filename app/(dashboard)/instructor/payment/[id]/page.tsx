@@ -112,7 +112,7 @@ export default async function InstructorPaymentPage({
                                 <ExpandableImage
                                     src="/gcash-qr.jpg"
                                     alt="GCash QR Code"
-                                    className="w-48 h-48"
+                                    className="w-32 h-32 sm:w-48 sm:h-48"
                                 />
                                 <p className="text-xs text-charcoal-500 mt-2">Scan to pay</p>
                             </div>
@@ -123,7 +123,7 @@ export default async function InstructorPaymentPage({
                                 <ExpandableImage
                                     src="/bpi-qr.jpg"
                                     alt="BPI QR Code"
-                                    className="w-48 h-48"
+                                    className="w-32 h-32 sm:w-48 sm:h-48"
                                 />
                                 <p className="text-xs text-charcoal-500 mt-2">Scan to pay</p>
                             </div>

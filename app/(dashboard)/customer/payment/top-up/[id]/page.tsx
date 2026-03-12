@@ -73,7 +73,7 @@ export default async function TopUpPaymentPage({
                                         <ExpandableImage
                                             src="/gcash-qr.jpg"
                                             alt="GCash QR Code"
-                                            className="w-48 h-48 rounded-lg"
+                                            className="w-32 h-32 sm:w-48 sm:h-48 rounded-lg"
                                         />
                                         <div className="mt-3 py-1 px-3 bg-blue-50 text-blue-700 rounded-full text-[10px] font-bold uppercase tracking-tighter">
                                             Scan with GCash App
@@ -86,7 +86,7 @@ export default async function TopUpPaymentPage({
                                         <ExpandableImage
                                             src="/bpi-qr.jpg"
                                             alt="BPI QR Code"
-                                            className="w-48 h-48 rounded-lg"
+                                            className="w-32 h-32 sm:w-48 sm:h-48 rounded-lg"
                                         />
                                         <div className="mt-3 py-1 px-3 bg-red-50 text-red-700 rounded-full text-[10px] font-bold uppercase tracking-tighter">
                                             Scan with BPI App

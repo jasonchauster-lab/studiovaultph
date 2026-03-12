@@ -87,7 +87,7 @@ export default async function InstructorOnboardingPage() {
                             <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight -ml-5 whitespace-nowrap">StudioVaultPH</span>
                         </Link>
                         <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Join the Vault</h2>
-                        <h1 className="text-4xl font-serif text-charcoal-900 mb-4 tracking-tight">Instructor Application</h1>
+                        <h1 className="text-2xl sm:text-4xl font-serif text-charcoal-900 mb-4 tracking-tight">Instructor Application</h1>
                         <p className="text-charcoal-600">The premium marketplace for Pilates professionals.</p>
                     </div>
 

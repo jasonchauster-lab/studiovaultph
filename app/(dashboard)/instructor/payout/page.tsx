@@ -27,6 +27,7 @@ export default async function PayoutPage() {
                 </h3>
 
                 <div className="bg-white border border-cream-200 rounded-xl overflow-hidden shadow-sm">
+                    <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-cream-50 text-charcoal-500 text-xs uppercase tracking-wider">
                             <tr>
@@ -77,6 +78,7 @@ export default async function PayoutPage() {
                             )}
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
