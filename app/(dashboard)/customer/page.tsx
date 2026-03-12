@@ -32,9 +32,10 @@ export default async function CustomerDashboard({
 
     if (!user) redirect('/login')
 
-    // Lazily expire any abandoned bookings to release their slots
-    const { expireAbandonedBookings } = await import('@/lib/wallet')
-    await expireAbandonedBookings().catch(() => { }) // Non-blocking
+    // Fire-and-forget: expire abandoned bookings to release slots.
+    import('@/lib/wallet').then(({ expireAbandonedBookings }) =>
+        expireAbandonedBookings().catch(() => {})
+    )
 
     // 1. Fetch Studios + all distinct verified locations (for smart filter)
     let studioQuery = supabase
@@ -46,14 +47,11 @@ export default async function CustomerDashboard({
         if (params.location.includes(' - ')) {
             studioQuery = studioQuery.eq('location', params.location)
         } else {
-            // Broad city prefix: match 'BGC - *' etc.
-            // 'QC' is the DB prefix for Quezon City
             studioQuery = studioQuery.like('location', params.location + ' - %')
         }
     }
 
     if (params.equipment && params.equipment !== 'all') {
-        // Studios must have ANY of these equipments
         const equipmentList = params.equipment.split(',')
         studioQuery = studioQuery.overlaps('equipment', equipmentList)
     }
@@ -63,7 +61,7 @@ export default async function CustomerDashboard({
         studioQuery = studioQuery.overlaps('amenities', amenityList)
     }
 
-    // Fetch all verified studio locations for the smart location filter (no other filters applied)
+    // Fetch all verified studio locations for the smart location filter
     const { data: allStudiosForLocations } = await supabase
         .from('studios')
         .select('location')
@@ -82,8 +80,6 @@ export default async function CustomerDashboard({
     }) || []
 
     // 2. Fetch Instructors (with certifications)
-    // Note: This is a simplified join. 
-    // Ideally we filter profiles where role = 'instructor'.
     let instructorQuery = supabase
         .from('profiles')
         .select(`
@@ -106,23 +102,17 @@ export default async function CustomerDashboard({
     if (params.date || params.time || (params.location && params.location !== 'all')) {
         let availQuery = supabase.from('instructor_availability').select('instructor_id')
 
-        // Filter by Location if set
         if (params.location && params.location !== 'all') {
             const trimmedLocation = params.location.trim();
-            // Match exactly or as a prefix (e.g., "BGC" matches "BGC - Studio")
             availQuery = availQuery.or(`location_area.eq."${trimmedLocation}",location_area.like."${trimmedLocation} - %"`)
         }
 
         if (params.date) {
-            // Use local PHT date to avoid day-shift issues
             const dayOfWeek = new Date(params.date + "T00:00:00+08:00").getDay()
-            // Match specific date OR recurring day_of_week (if date is null)
             availQuery = availQuery.or(`date.eq.${params.date},and(day_of_week.eq.${dayOfWeek},date.is.null)`)
         }
 
         if (params.time) {
-            // Find windows that cover this start time
-            // Normalize time to HH:mm:ss for consistent string comparison
             const timeStr = params.time.length === 5 ? params.time + ':00' : params.time;
             availQuery = availQuery.lte('start_time', timeStr).gt('end_time', timeStr)
         }
@@ -135,68 +125,58 @@ export default async function CustomerDashboard({
 
         if (availableIds && availableIds.length > 0) {
             const ids = availableIds.map((a: any) => a.instructor_id)
-            // Filter the main instructor query to only these IDs
             instructorQuery = instructorQuery.in('id', ids)
         } else {
-            // No instructors found for this time/location
-            // Force empty result
             instructorQuery = instructorQuery.eq('id', '00000000-0000-0000-0000-000000000000')
         }
     }
 
-    // 4. Fetch Slots (Browse Slots Mode)
+    // 4. Fetch Slots
     let slots: Slot[] = []
-        // If explicitly searching slots
-        const shouldShowSlots = params.type === 'slot'
+    const shouldShowSlots = params.type === 'slot'
 
-        if (shouldShowSlots) {
-            const nowManilaDate = getManilaTodayStr()
-            const nowManilaTime = toManilaTimeString(new Date())
+    if (shouldShowSlots) {
+        const nowManilaDate = getManilaTodayStr()
+        const nowManilaTime = toManilaTimeString(new Date())
 
-            let slotQuery = supabase
-                .from('slots')
-                .select(`
-                    *,
-                    studios!inner(*)
-                `)
-                .eq('is_available', true)
-                .eq('studios.verified', true)
-                .or(`date.gt.${nowManilaDate},and(date.eq.${nowManilaDate},start_time.gte.${nowManilaTime})`)
-                .order('date', { ascending: true })
-                .order('start_time', { ascending: true })
+        let slotQuery = supabase
+            .from('slots')
+            .select(`*, studios!inner(*)`)
+            .eq('is_available', true)
+            .eq('studios.verified', true)
+            .or(`date.gt.${nowManilaDate},and(date.eq.${nowManilaDate},start_time.gte.${nowManilaTime})`)
+            .order('date', { ascending: true })
+            .order('start_time', { ascending: true })
 
-            if (params.location && params.location !== 'all') {
-                const trimmedLocation = params.location.trim();
-                // Relaxed ilike match on joined studio location
-                slotQuery = slotQuery.ilike('studios.location', `%${trimmedLocation}%`)
-            }
-
-            if (params.equipment && params.equipment !== 'all') {
-                const equipmentList = params.equipment.split(',')
-                const conditions = equipmentList.flatMap(eq => {
-                    const eqTrimmed = eq.trim()
-                    const eqUpper = eqTrimmed.toUpperCase()
-                    return [`equipment->>"${eqTrimmed}".gte.1`, `equipment->>"${eqUpper}".gte.1`]
-                })
-                slotQuery = slotQuery.or(conditions.join(','))
-            }
-
-            if (params.date) {
-                slotQuery = slotQuery.eq('date', params.date)
-            }
-
-            if (params.time) {
-                // "Show me 10 AM slots" usually means slots starting around 10 AM.
-                const timeStr = params.time.length === 5 ? params.time + ':00' : params.time
-                slotQuery = slotQuery.gte('start_time', timeStr)
-            }
-
-
-            const { data } = await slotQuery
-            if (data) slots = data as unknown as Slot[]
+        if (params.location && params.location !== 'all') {
+            const trimmedLocation = params.location.trim();
+            slotQuery = slotQuery.ilike('studios.location', `%${trimmedLocation}%`)
         }
 
-    // Fetch all reviews to calculate aggregated ratings
+        if (params.equipment && params.equipment !== 'all') {
+            const equipmentList = params.equipment.split(',')
+            const conditions = equipmentList.flatMap(eq => {
+                const eqTrimmed = eq.trim()
+                const eqUpper = eqTrimmed.toUpperCase()
+                return [`equipment->>"${eqTrimmed}".gte.1`, `equipment->>"${eqUpper}".gte.1`]
+            })
+            slotQuery = slotQuery.or(conditions.join(','))
+        }
+
+        if (params.date) {
+            slotQuery = slotQuery.eq('date', params.date)
+        }
+
+        if (params.time) {
+            const timeStr = params.time.length === 5 ? params.time + ':00' : params.time
+            slotQuery = slotQuery.gte('start_time', timeStr)
+        }
+
+        const { data } = await slotQuery
+        if (data) slots = data as unknown as Slot[]
+    }
+
+    // Fetch all reviews for aggregated ratings
     const { data: reviews } = await supabase.from('reviews').select('reviewee_id, rating')
     const ratingsMap: Record<string, { total: number, count: number, average: number }> = {}
 
@@ -209,16 +189,10 @@ export default async function CustomerDashboard({
         ratingsMap[r.reviewee_id].average = ratingsMap[r.reviewee_id].total / ratingsMap[r.reviewee_id].count
     })
 
-    // We can't easy filter pure joins in Supabase helper without strict foreign keys or views,  
-    // but for now we'll fetch and filter in memory if needed or use post-filtering for MVP.
-    // If 'certification' param exists, we filter accordingly.
-
     const { data: instructorsRaw } = await instructorQuery
 
-    // Filter Instructors
+    // Filter Instructors by certification
     const instructors = instructorsRaw?.filter(inst => {
-        // If filter applied, check certs with case-insensitive, trimmed startsWith
-        // This ensures "STOTT Pilates" (free-text entered) matches the filter token "STOTT"
         if (params.certification && params.certification !== 'all') {
             const filterTokens = params.certification.split(',').map(c => c.trim().toLowerCase())
             return inst.certifications?.some((c: any) =>
@@ -230,97 +204,135 @@ export default async function CustomerDashboard({
     }) || []
 
     return (
-        <div className="space-y-16 pb-20">
+        <div className="space-y-16 pb-24">
             <div className="max-w-[1600px] mx-auto space-y-16">
 
-                {/* Header & Filters */}
-                <div className="space-y-10">
-                    <div className="max-w-2xl">
-                        <h1 className="text-5xl font-serif font-bold text-charcoal tracking-tight mb-4">Find your flow.</h1>
-                        <p className="text-slate text-lg font-medium leading-relaxed">Discover top studios and verified instructors in Metro Manila with ease.</p>
+                {/* ─── Page Header & Filters ─── */}
+                <div className="flex flex-col gap-y-8">
+                    <div className="max-w-2xl flex flex-col gap-y-3">
+                        <h1 className="text-5xl font-serif font-bold text-burgundy tracking-tight leading-tight">
+                            Find your flow.
+                        </h1>
+                        <p className="text-muted-burgundy text-lg leading-relaxed">
+                            Discover top studios and verified instructors in Metro Manila with ease.
+                        </p>
                     </div>
 
                     <DiscoveryFilters availableLocations={availableLocations} />
                 </div>
 
-                {/* Vertical Sections */}
-                <div className="space-y-24">
+                {/* ─── Sections ─── */}
+                <div className="flex flex-col gap-y-24">
 
-                    {/* Instructors Section */}
+                    {/* ══════════════════════════════════════
+                        INSTRUCTORS SECTION
+                    ══════════════════════════════════════ */}
                     {(!params.type || params.type === 'instructor') && (
                         <section>
                             <div className="flex items-center justify-between mb-10">
                                 <div className="flex items-center gap-4">
-                                    <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">Verified Instructors</h2>
-                                    <span className="status-pill-earth status-pill-green">
+                                    <h2 className="text-3xl font-serif font-bold text-burgundy tracking-tight">Verified Instructors</h2>
+                                    <span className="badge-verified">
                                         {instructors.length} Available
                                     </span>
                                 </div>
                             </div>
 
                             {instructors.length === 0 ? (
-                                <div className="earth-card py-20 text-center flex flex-col items-center justify-center">
-                                    <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6 shadow-tight">
-                                        <User className="w-10 h-10 text-forest/30" />
+                                <div className="earth-card py-20 text-center flex flex-col items-center justify-center gap-y-4">
+                                    <div className="w-20 h-20 bg-walking-vinnie/40 rounded-full flex items-center justify-center shadow-tight">
+                                        <User className="w-10 h-10 text-burgundy/30" />
                                     </div>
-                                    <h3 className="text-xl font-serif font-bold text-charcoal tracking-tight mb-2">No results for this search</h3>
-                                    <p className="text-slate max-w-sm mx-auto text-sm font-medium">Try adjusting your filters, location, or checking a different date.</p>
+                                    <h3 className="text-xl font-serif font-bold text-burgundy tracking-tight">No results for this search</h3>
+                                    <p className="text-muted-burgundy max-w-sm mx-auto text-sm leading-relaxed">Try adjusting your filters, location, or checking a different date.</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                                    {instructors.map(inst => (
-                                        <div key={inst.id} className="earth-card hover:translate-y-[-4px] transition-all duration-300 group">
-                                            <div className="p-8">
-                                                <div className="flex justify-between items-start mb-6">
-                                                    <div className="flex items-center gap-5">
-                                                        <Link href={`/instructors/${inst.id}`} className="shrink-0 w-16 h-16 rounded-2xl overflow-hidden bg-white border border-border-grey shadow-tight group-hover:scale-105 transition-transform">
-                                                            {inst.avatar_url ? (
-                                                                <Image
-                                                                    src={inst.avatar_url}
-                                                                    alt={inst.full_name}
-                                                                    width={64}
-                                                                    height={64}
-                                                                    className="w-full h-full object-cover"
-                                                                />
-                                                            ) : (
-                                                                <div className="w-full h-full flex items-center justify-center bg-alabaster">
-                                                                    <User className="w-8 h-8 text-charcoal/20" />
-                                                                </div>
-                                                            )}
-                                                        </Link>
-                                                        <div>
-                                                            <h3 className="text-lg font-bold text-charcoal tracking-tight mb-1">{inst.full_name}</h3>
-                                                            <div className="flex items-center gap-3">
-                                                                {inst.instagram_handle && (
-                                                                    <p className="text-[10px] font-bold text-forest uppercase tracking-widest">@{inst.instagram_handle}</p>
-                                                                )}
-                                                                <StarRating rating={ratingsMap[inst.id]?.average || null} count={ratingsMap[inst.id]?.count} size="xs" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    {inst.certifications?.some((c: any) => c.verified) && (
-                                                        <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center border border-gold/20">
-                                                            <Award className="w-4 h-4 text-gold" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {instructors.map(inst => {
+                                        const hasVerifiedCert = inst.certifications?.some((c: any) => c.verified)
+                                        return (
+                                            <div key={inst.id} className="marketplace-card earth-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 group">
+
+                                                {/* ── Banner: gradient lifestyle area ── */}
+                                                <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-off-white via-buttermilk/40 to-walking-vinnie/30">
+                                                    {/* decorative pattern */}
+                                                    <div
+                                                        className="absolute inset-0 opacity-20"
+                                                        style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(81,50,41,0.25) 0%, transparent 55%), radial-gradient(circle at 80% 20%, rgba(215,212,177,0.6) 0%, transparent 50%)' }}
+                                                        aria-hidden="true"
+                                                    />
+
+                                                    {/* Verified badge — top right */}
+                                                    {hasVerifiedCert && (
+                                                        <div className="absolute top-3 right-3 badge-verified flex items-center gap-1 z-10">
+                                                            <Award className="w-3 h-3" />
+                                                            Certified
                                                         </div>
                                                     )}
+
+                                                    {/* ── Circular instructor avatar overlapping bottom edge ── */}
+                                                    <div className="instructor-trust-avatar">
+                                                        {inst.avatar_url ? (
+                                                            <Image
+                                                                src={inst.avatar_url}
+                                                                alt={inst.full_name}
+                                                                width={48}
+                                                                height={48}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center bg-off-white">
+                                                                <User className="w-6 h-6 text-burgundy/30" />
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
 
-                                                <div className="flex flex-wrap gap-2 mb-8 min-h-[40px]">
-                                                    {(inst.certifications || []).filter((c: any) => c.verified).map((c: any) => (
-                                                        <span key={c.id} className="text-[9px] font-bold uppercase tracking-widest bg-green-50 text-forest px-3 py-1 rounded-full border border-green-200">
-                                                            {c.certification_body}
-                                                        </span>
-                                                    ))}
-                                                </div>
+                                                {/* ── Card Body — padded with room for overlapping avatar ── */}
+                                                <div className="p-6 pt-10 flex flex-col gap-y-4">
 
-                                                <div className="space-y-3">
-                                                    <Link href={`/instructors/${inst.id}`} className="block w-full text-center py-4 rounded-[20px] bg-white text-charcoal text-[11px] font-bold uppercase tracking-widest border border-white/60 hover:bg-alabaster transition-all shadow-sm">
-                                                        View Profile
-                                                    </Link>
+                                                    {/* Name + handle */}
+                                                    <div>
+                                                        <h3 className="text-lg font-bold text-burgundy tracking-tight leading-tight">{inst.full_name}</h3>
+                                                        {inst.instagram_handle && (
+                                                            <p className="text-[10px] font-bold text-muted-burgundy uppercase tracking-widest mt-0.5">
+                                                                @{inst.instagram_handle}
+                                                            </p>
+                                                        )}
+                                                    </div>
 
-                                                    {/* Book Button (Only if filters active) */}
-                                                    {
-                                                        params.date && params.time && params.location && params.location !== 'all' && params.equipment && params.equipment !== 'all' && (
+                                                    {/* Star rating */}
+                                                    <StarRating
+                                                        rating={ratingsMap[inst.id]?.average || null}
+                                                        count={ratingsMap[inst.id]?.count}
+                                                        size="xs"
+                                                    />
+
+                                                    {/* Certification badges — Walking Vinnie palette */}
+                                                    {(inst.certifications || []).filter((c: any) => c.verified).length > 0 && (
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            {(inst.certifications || []).filter((c: any) => c.verified).map((c: any) => (
+                                                                <span
+                                                                    key={c.id}
+                                                                    className="text-[9px] font-bold uppercase tracking-widest bg-walking-vinnie/50 text-burgundy px-2.5 py-1 rounded-full border border-walking-vinnie"
+                                                                >
+                                                                    {c.certification_body}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Actions */}
+                                                    <div className="flex flex-col gap-y-2.5 mt-auto pt-2">
+                                                        <Link
+                                                            href={`/instructors/${inst.id}`}
+                                                            className="block w-full text-center py-3 rounded-lg bg-white text-burgundy text-[11px] font-bold uppercase tracking-wider border-2 border-burgundy/20 hover:border-burgundy/50 hover:bg-off-white transition-all"
+                                                        >
+                                                            View Profile
+                                                        </Link>
+
+                                                        {/* Book Session — only when all required filters are active */}
+                                                        {params.date && params.time && params.location && params.location !== 'all' && params.equipment && params.equipment !== 'all' && (
                                                             <BookSessionButton
                                                                 instructorId={inst.id}
                                                                 date={params.date}
@@ -328,33 +340,37 @@ export default async function CustomerDashboard({
                                                                 location={params.location}
                                                                 equipment={params.equipment}
                                                             />
-                                                        )
-                                                    }
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        )
+                                    })}
                                 </div>
                             )}
                         </section>
                     )}
 
-                    {/* Studios Section */}
+                    {/* ══════════════════════════════════════
+                        STUDIOS SECTION — Marketplace Cards
+                    ══════════════════════════════════════ */}
                     {(!params.type || params.type === 'studio') && (
                         <section>
                             <div className="flex items-center justify-between mb-10">
                                 <div className="flex items-center gap-4">
-                                    <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">Partner Studios</h2>
+                                    <h2 className="text-3xl font-serif font-bold text-burgundy tracking-tight">Partner Studios</h2>
                                     <span className="status-pill-earth status-pill-yellow">
                                         {studios?.length || 0} Registered
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 {studios?.map(studio => (
-                                    <div key={studio.id} className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 group">
-                                        <Link href={`/studios/${studio.id}`} className="block h-52 relative overflow-hidden">
+                                    <div key={studio.id} className="marketplace-card earth-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 group">
+
+                                        {/* ── Banner Image — aspect-video, object-cover ── */}
+                                        <div className="relative aspect-video overflow-hidden bg-off-white">
                                             {studio.logo_url ? (
                                                 <Image
                                                     src={studio.logo_url}
@@ -363,38 +379,69 @@ export default async function CustomerDashboard({
                                                     className="object-cover group-hover:scale-110 transition-transform duration-700"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-sage/5">
-                                                    <span className="text-charcoal/20 font-serif italic text-6xl">
+                                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-off-white to-walking-vinnie/40">
+                                                    <span className="text-burgundy/15 font-serif italic" style={{ fontSize: '5rem' }}>
                                                         {studio.name.slice(0, 1)}
                                                     </span>
                                                 </div>
                                             )}
-                                            <div className="absolute top-4 right-4">
-                                                <div className="status-pill-earth status-pill-green flex items-center gap-1.5 px-3 py-1.5">
-                                                    <MapPin className="w-3 h-3 text-forest" />
-                                                    {studio.location}
+
+                                            {/* Location badge — top left */}
+                                            <div className="absolute top-3 left-3 z-10">
+                                                <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-tight border border-white/60">
+                                                    <MapPin className="w-3 h-3 text-burgundy shrink-0" />
+                                                    <span className="text-[10px] font-bold text-burgundy truncate max-w-[140px]">{studio.location}</span>
                                                 </div>
                                             </div>
-                                        </Link>
-                                        <div className="p-8">
-                                            <div className="flex justify-between items-center mb-3">
-                                                <h3 className="text-2xl font-serif font-bold text-charcoal tracking-tight">{studio.name}</h3>
-                                                <StarRating rating={ratingsMap[studio.owner_id]?.average || null} count={ratingsMap[studio.owner_id]?.count} size="xs" />
+
+                                            {/* ── Studio logo overlapping bottom edge of banner ── */}
+                                            <div className="instructor-trust-avatar">
+                                                {studio.logo_url ? (
+                                                    <Image
+                                                        src={studio.logo_url}
+                                                        alt={studio.name}
+                                                        width={48}
+                                                        height={48}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-off-white">
+                                                        <span className="text-burgundy font-bold text-base font-serif">{studio.name.slice(0, 1)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* ── Card Body ── */}
+                                        <div className="p-6 pt-10 flex flex-col gap-y-3">
+
+                                            {/* Studio name + rating */}
+                                            <div className="flex items-start justify-between gap-3">
+                                                <h3 className="text-xl font-serif font-bold text-burgundy tracking-tight leading-tight">{studio.name}</h3>
+                                                <StarRating
+                                                    rating={ratingsMap[studio.owner_id]?.average || null}
+                                                    count={ratingsMap[studio.owner_id]?.count}
+                                                    size="xs"
+                                                />
                                             </div>
 
-                                            <p className="text-sm text-slate font-medium mb-8 line-clamp-2 leading-relaxed">
+                                            {/* Description */}
+                                            <p className="text-sm text-muted-burgundy leading-relaxed line-clamp-2">
                                                 {studio.description || 'A premiere pilates studio dedicated to your well-being.'}
                                             </p>
 
-                                            <div className="flex justify-between items-center bg-off-white p-4 rounded-lg border border-border-grey shadow-tight">
-                                                <span className="text-[10px] font-bold text-forest uppercase tracking-[0.2em]">
-                                                    {studio.reformers_count} Reformers
-                                                </span>
+                                            {/* Equipment count + Book Now CTA */}
+                                            <div className="flex items-center justify-between pt-3 mt-auto">
+                                                <div className="flex items-center gap-1.5 bg-buttermilk/60 px-3 py-1.5 rounded-full border border-buttermilk">
+                                                    <span className="text-[11px] font-bold text-burgundy uppercase tracking-wide">
+                                                        {studio.reformers_count} Reformers
+                                                    </span>
+                                                </div>
                                                 <Link
                                                     href={`/studios/${studio.id}`}
-                                                    className="text-[10px] font-bold text-charcoal uppercase tracking-widest hover:text-forest transition-colors"
+                                                    className="btn-book-now"
                                                 >
-                                                    View Details &rarr;
+                                                    Book Now
                                                 </Link>
                                             </div>
                                         </div>
@@ -404,25 +451,27 @@ export default async function CustomerDashboard({
                         </section>
                     )}
 
-                    {/* Slots Section (Browse Slots) */}
+                    {/* ══════════════════════════════════════
+                        SLOTS SECTION
+                    ══════════════════════════════════════ */}
                     {params.type === 'slot' && (
                         <section>
                             <div className="flex items-center justify-between mb-10">
                                 <div className="flex items-center gap-4">
-                                    <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">Available Sessions</h2>
-                                    <span className="status-pill-earth status-pill-green">
+                                    <h2 className="text-3xl font-serif font-bold text-burgundy tracking-tight">Available Sessions</h2>
+                                    <span className="badge-verified">
                                         {slots.length} Ready
                                     </span>
                                 </div>
                             </div>
 
                             {slots.length === 0 ? (
-                                <div className="earth-card py-20 text-center flex flex-col items-center justify-center">
-                                    <div className="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center mb-6 shadow-tight">
-                                        <Clock className="w-10 h-10 text-yellow-600/30" />
+                                <div className="earth-card py-20 text-center flex flex-col items-center justify-center gap-y-4">
+                                    <div className="w-20 h-20 bg-buttermilk/60 rounded-full flex items-center justify-center shadow-tight">
+                                        <Clock className="w-10 h-10 text-burgundy/25" />
                                     </div>
-                                    <h3 className="text-xl font-serif font-bold text-charcoal tracking-tight mb-2">No slots available</h3>
-                                    <p className="text-slate max-w-sm mx-auto text-sm font-medium">Try adjusting your filters or checking a different date.</p>
+                                    <h3 className="text-xl font-serif font-bold text-burgundy tracking-tight">No slots available</h3>
+                                    <p className="text-muted-burgundy max-w-sm mx-auto text-sm leading-relaxed">Try adjusting your filters or checking a different date.</p>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -438,6 +487,6 @@ export default async function CustomerDashboard({
 
                 </div>
             </div>
-        </div >
+        </div>
     )
 }

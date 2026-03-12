@@ -48,7 +48,7 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                             />
                         </div>
                         <span className={clsx(
-                            "font-serif font-bold text-charcoal tracking-tighter -ml-8 whitespace-nowrap hidden lg:block transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] shrink-0 uppercase text-lg",
+                            "font-serif font-bold text-burgundy tracking-tight -ml-8 whitespace-nowrap hidden lg:block transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] shrink-0 uppercase text-lg",
                             isScrolled ? "opacity-90 scale-90 translate-x-2" : "opacity-100 scale-100"
                         )}>
                             Studio Vault PH
@@ -64,12 +64,12 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                         <Navigation role={profile?.role} />
                     </div>
 
-                    <div className="flex items-center gap-3 pl-4 border-l border-white/20 shrink-0">
+                    <div className="flex items-center gap-3 pl-4 border-l border-border-grey shrink-0">
                         <div className="hidden sm:flex flex-col items-end text-right">
-                            <p className="text-xs font-bold text-charcoal leading-tight mb-0.5 whitespace-nowrap">
+                            <p className="text-xs font-bold text-burgundy leading-tight mb-0.5 whitespace-nowrap">
                                 {profile?.role === 'studio' ? (studioData?.name || profile?.full_name || 'Studio') : (profile?.full_name || 'Partner')}
                             </p>
-                            <p className="text-[10px] text-forest font-bold uppercase tracking-widest leading-none">
+                            <p className="text-[10px] text-muted-burgundy font-bold uppercase tracking-widest leading-none">
                                 {profile?.role === 'instructor' ? 'INSTRUCTOR' :
                                     profile?.role === 'studio' ? 'STUDIO' :
                                         profile?.role || 'USER'}
@@ -84,7 +84,7 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                                                 '#'
                             }
                             aria-label="View and Edit Profile"
-                            className="w-10 h-10 rounded-lg overflow-hidden border border-border-grey shadow-tight transition-transform hover:scale-110 block"
+                            className="w-10 h-10 rounded-full overflow-hidden border-2 border-burgundy/20 shadow-tight transition-all hover:scale-110 hover:border-burgundy/40 block"
                         >
                             <Image
                                 src={avatarUrl}
@@ -96,7 +96,7 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                         </Link>
                         <form action={signOut} className="hidden sm:block">
                             <button
-                                className="p-2 text-slate hover:text-red-500 transition-colors"
+                                className="p-2 text-muted-burgundy hover:text-red-500 transition-colors"
                                 title="Log Out"
                                 aria-label="Log Out"
                             >

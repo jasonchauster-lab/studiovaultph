@@ -145,7 +145,7 @@ export default function MobileScheduleCalendar({
                         <h2 className="text-2xl font-serif font-black tracking-tighter text-burgundy">
                             {format(selectedDate, 'MMMM yyyy')}
                         </h2>
-                        <p className="text-[9px] font-black tracking-[0.3em] text-muted-burgundy uppercase mt-1">Schedule View</p>
+                        <p className="text-[9px] font-black tracking-[0.3em] text-burgundy uppercase mt-1">Schedule View</p>
                     </div>
                 <div className="flex bg-[#FAFAFA] rounded-full p-1 border border-[#E5E7EB]">
                         <button
@@ -237,7 +237,7 @@ export default function MobileScheduleCalendar({
             <div ref={agendaRef} className="flex-1 overflow-y-auto px-6 py-10 space-y-10 scroll-smooth">
                 <div className="flex items-center gap-4 mb-4">
                     <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-[#E5E7EB]" />
-                    <span className="text-[10px] font-black text-muted-burgundy uppercase tracking-[0.4em] px-4">
+                    <span className="text-[10px] font-black text-burgundy uppercase tracking-[0.4em] px-4">
                         {format(selectedDate, 'EEEE, MMM d')}
                     </span>
                     <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-[#E5E7EB]" />

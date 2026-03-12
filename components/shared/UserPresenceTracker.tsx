@@ -4,13 +4,16 @@ import { useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function UserPresenceTracker() {
-    const supabase = createClient()
+    // createClient() returns the singleton, but using a ref ensures the same
+    // reference is used across renders and avoids stale closure issues.
+    const supabaseRef = useRef(createClient())
     const isOnlineRef = useRef(false)
     const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
     useEffect(() => {
         // Only run for authenticated users
         const initPresence = async () => {
+            const supabase = supabaseRef.current
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return
 
@@ -20,7 +23,7 @@ export default function UserPresenceTracker() {
                 if (!isOnline && !isOnlineRef.current) return;
 
                 try {
-                    await supabase.rpc('update_user_presence', { is_online_status: isOnline })
+                    await supabaseRef.current.rpc('update_user_presence', { is_online_status: isOnline })
                     isOnlineRef.current = isOnline
                 } catch (err) {
                     console.error('Failed to update presence', err)
@@ -68,7 +71,7 @@ export default function UserPresenceTracker() {
 
         initPresence()
 
-    }, [supabase])
+    }, [])
 
     // This component renders nothing
     return null

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email';
 import DocumentExpiryEmail from '@/components/emails/DocumentExpiryEmail';
 import { getManilaTodayStr } from '@/lib/timezone';
@@ -12,11 +12,8 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const key = process.env.DASHBOARD_MASTER_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        key!
-    );
+    // Use the shared createAdminClient helper — keeps credential logic in one place.
+    const supabase = createAdminClient();
 
     const todayStr = getManilaTodayStr();
     const today = new Date(todayStr);

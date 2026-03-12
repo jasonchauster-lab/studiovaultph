@@ -58,11 +58,11 @@ export default async function DashboardLayout({
 
             <footer className="earth-card m-4 sm:m-8 p-10 bg-white border border-border-grey shadow-tight">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p className="text-[10px] font-bold text-slate uppercase tracking-widest">© 2026 STUDIO VAULT PH. ALL RIGHTS RESERVED.</p>
+                    <p className="text-[10px] font-bold text-burgundy uppercase tracking-widest">© 2026 STUDIO VAULT PH. ALL RIGHTS RESERVED.</p>
                     <div className="flex gap-8">
-                        <Link href="/terms-of-service" className="text-[10px] font-bold text-slate hover:text-forest transition-all uppercase tracking-widest underline decoration-forest/0 hover:decoration-forest underline-offset-8">Terms of Service</Link>
-                        <Link href="/privacy" className="text-[10px] font-bold text-slate hover:text-forest transition-all uppercase tracking-widest underline decoration-forest/0 hover:decoration-forest underline-offset-8">Privacy Policy</Link>
-                        <Link href="/support" className="text-[10px] font-bold text-slate hover:text-forest transition-all uppercase tracking-widest underline decoration-forest/0 hover:decoration-forest underline-offset-8">Support</Link>
+                        <Link href="/terms-of-service" className="text-[10px] font-bold text-burgundy hover:text-forest transition-all uppercase tracking-widest underline decoration-forest/0 hover:decoration-forest underline-offset-8">Terms of Service</Link>
+                        <Link href="/privacy" className="text-[10px] font-bold text-burgundy hover:text-forest transition-all uppercase tracking-widest underline decoration-forest/0 hover:decoration-forest underline-offset-8">Privacy Policy</Link>
+                        <Link href="/support" className="text-[10px] font-bold text-burgundy hover:text-forest transition-all uppercase tracking-widest underline decoration-forest/0 hover:decoration-forest underline-offset-8">Support</Link>
                     </div>
                 </div>
             </footer>

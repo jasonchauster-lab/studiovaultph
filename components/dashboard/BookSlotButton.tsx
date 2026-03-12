@@ -71,7 +71,7 @@ export default function BookSlotButton({ slotId, availableEquipment }: { slotId:
 
     if (status === 'success') {
         return (
-            <button disabled className="w-full mt-2 py-4 px-6 bg-sage/10 text-sage rounded-[20px] text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 border border-sage/20 cursor-default shadow-sm">
+            <button disabled className="w-full mt-2 py-3.5 px-6 bg-walking-vinnie text-burgundy rounded-lg text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 border border-walking-vinnie/60 cursor-default shadow-tight">
                 <Check className="w-4 h-4" />
                 Request Sent
             </button>
@@ -80,30 +80,30 @@ export default function BookSlotButton({ slotId, availableEquipment }: { slotId:
 
     if (status === 'selecting') {
         return (
-            <div className="w-full mt-4 space-y-4 animate-in fade-in zoom-in duration-300">
-                <div className="bg-white/40 backdrop-blur-md p-4 rounded-[20px] border border-white/60 shadow-cloud">
-                    <p className="text-[10px] font-bold text-charcoal/40 mb-3 uppercase tracking-widest px-1">Select Equipment</p>
+            <div className="w-full mt-3 flex flex-col gap-y-3 animate-in fade-in zoom-in duration-300">
+                <div className="bg-off-white p-4 rounded-xl border border-burgundy/10 shadow-tight">
+                    <p className="text-[10px] font-bold text-muted-burgundy mb-3 uppercase tracking-widest px-1">Select Equipment</p>
                     <select
                         value={selectedEquipment}
                         onChange={(e) => setSelectedEquipment(e.target.value)}
-                        className="w-full text-[11px] font-bold p-3 rounded-xl border border-white/60 bg-white/50 text-charcoal focus:ring-1 focus:ring-sage focus:border-sage outline-none transition-all appearance-none cursor-pointer"
+                        className="w-full text-[11px] font-bold p-3 rounded-lg border border-burgundy/15 bg-white text-burgundy focus:ring-2 focus:ring-burgundy/30 focus:border-burgundy/40 outline-none transition-all appearance-none cursor-pointer"
                     >
                         {availableEquipment.map(eq => (
                             <option key={eq} value={eq}>{eq}</option>
                         ))}
                     </select>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-2.5">
                     <button
                         onClick={() => setStatus('idle')}
-                        className="flex-1 py-4 px-4 bg-white/50 border border-white/60 text-charcoal/60 rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:bg-white/80 transition-all"
+                        className="flex-1 py-3 px-4 bg-white border-2 border-burgundy/20 text-muted-burgundy rounded-lg text-[11px] font-bold uppercase tracking-widest hover:border-burgundy/40 hover:bg-off-white transition-all"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleBook}
                         disabled={loading}
-                        className="flex-1 py-4 px-4 bg-sage text-white rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:bg-sage/90 disabled:opacity-50 transition-all shadow-cloud shadow-sage/20"
+                        className="flex-1 py-3 px-4 bg-burgundy text-white rounded-lg text-[11px] font-bold uppercase tracking-widest hover:brightness-110 disabled:opacity-50 transition-all shadow-tight"
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Confirm'}
                     </button>
@@ -113,19 +113,19 @@ export default function BookSlotButton({ slotId, availableEquipment }: { slotId:
     }
 
     return (
-        <div className="w-full mt-4">
+        <div className="w-full mt-3">
             <button
                 onClick={handleInitialClick}
                 disabled={loading}
-                className={`w-full py-4 px-6 rounded-[20px] text-[11px] font-bold uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center shadow-cloud ${status === 'error'
-                        ? 'bg-red-50 text-red-400 border border-red-100'
-                        : 'bg-charcoal text-white hover:opacity-90'
+                className={`w-full py-3.5 px-6 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center shadow-tight ${status === 'error'
+                        ? 'bg-red-50 text-red-500 border border-red-200'
+                        : 'bg-burgundy text-white hover:brightness-110'
                     }`}
             >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (status === 'error' ? 'Retry' : 'Request to Book')}
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (status === 'error' ? 'Retry' : 'Book Now')}
             </button>
             {status === 'error' && errorMessage && (
-                <p className="text-[10px] font-bold text-red-400 mt-2 text-center animate-in fade-in slide-in-from-top-1">
+                <p className="text-[10px] font-bold text-red-500 mt-2 text-center animate-in fade-in slide-in-from-top-1">
                     {errorMessage}
                 </p>
             )}

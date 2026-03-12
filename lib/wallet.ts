@@ -42,13 +42,13 @@ export async function unlockMaturedFunds() {
 
     if (error || !maturedBookings) return { count: 0 }
 
-    let count = 0;
-    for (const b of maturedBookings) {
-        const { data: success } = await supabase.rpc('unlock_booking_funds_atomic', {
-            target_booking_id: b.id
-        })
-        if (success) count++;
-    }
+    // Parallelize RPC calls — no ordering dependency between individual unlocks.
+    const results = await Promise.all(
+        maturedBookings.map(b =>
+            supabase.rpc('unlock_booking_funds_atomic', { target_booking_id: b.id })
+        )
+    )
+    const count = results.filter(r => r.data === true).length
 
     return { count }
 }

@@ -5,9 +5,9 @@
   --off-white: #F4F1E2;      /* Lucky Dice */
   --burgundy: #513229;       /* Mother Earth */
   --muted-burgundy: #7C6B69;  /* Softened version of Mother Earth */
-  --buttermilk: #FCE6B7;     /* The Bay */
+  --buttermilk: #FCE6B7;     /* The Bay — accents, highlighted prices, tags */
   --pastel-blue: #D8EBF9;    /* Something Blue */
-  --walking-vinnie: #D7D4B1; /* Success / Completed */
+  --walking-vinnie: #D7D4B1; /* Success / Completed / Verified badges */
   --border-grey: #E5E7EB;
   --sage: #708669;
   --forest: #2F5233;
@@ -20,7 +20,7 @@
 
   /* Refined shadows */
   --shadow-tight: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-  --shadow-card: 0 4px 6px -1px rgba(81, 50, 41, 0.05), 0 2px 4px -1px rgba(81, 50, 41, 0.03);
+  --shadow-card: 0 4px 6px -1px rgba(81, 50, 41, 0.07), 0 2px 4px -1px rgba(81, 50, 41, 0.04);
 }
 
 @theme inline {
@@ -36,7 +36,7 @@
   --color-walking-vinnie: var(--walking-vinnie);
   --color-border-grey: var(--border-grey);
 
-  /* Legacy Mappings (Maintained for compatibility but updated to new palette) */
+  /* Legacy Mappings */
   --color-charcoal: var(--burgundy);
   --color-slate: var(--muted-burgundy);
   --color-forest: var(--forest);
@@ -44,7 +44,7 @@
 
   /* System Mappings */
   --color-primary: var(--burgundy);
-  --color-primary-foreground: var(--buttermilk);
+  --color-primary-foreground: #ffffff;
   --color-secondary: var(--pastel-blue);
   --color-secondary-foreground: var(--burgundy);
 
@@ -58,35 +58,54 @@
   --radius-pill: var(--radius-pill);
 
   /* Selection color */
-  --color-selection: rgba(216, 235, 249, 0.3);
+  --color-selection: rgba(252, 230, 183, 0.35);
+
+  /* ─── Typography: Playfair Display (Serif) + Inter (Sans) ─── */
+  --font-serif: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), var(--font-lexend), system-ui, -apple-system, sans-serif;
 }
 
+/* ─────────────────────────────────────────
+   BASE STYLES
+───────────────────────────────────────── */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-lexend), sans-serif;
+  font-family: var(--font-inter), var(--font-lexend), system-ui, -apple-system, sans-serif;
   font-weight: 400;
+  line-height: 1.65;
   overflow-x: hidden;
   position: relative;
 }
 
+/* Headings — Playfair Display Serif for elegance and readability */
 h1,
 h2,
 h3,
 h4 {
-  font-weight: 600;
+  font-family: var(--font-playfair), "Playfair Display", Georgia, serif;
+  font-weight: 700;
   @apply text-burgundy;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
-/* Accessible Focus States — Premium Modern Earth Green Ring */
+h5,
+h6 {
+  font-family: var(--font-inter), var(--font-lexend), system-ui, sans-serif;
+  font-weight: 600;
+  @apply text-burgundy;
+}
+
+/* Accessible Focus States */
 :focus-visible {
-  outline: 2px solid var(--forest);
+  outline: 2px solid var(--burgundy);
   outline-offset: 2px;
 }
 
 @layer utilities {
 
+  /* ─── Card Surfaces ─── */
   .glass-card,
   .earth-card {
     @apply bg-white border border-border-grey;
@@ -99,20 +118,22 @@ h4 {
   .earth-card:hover {
     box-shadow: var(--shadow-card);
     transform: translateY(-1px);
-    border-color: rgba(31, 41, 55, 0.1);
+    border-color: rgba(81, 50, 41, 0.12);
   }
 
-  /* Prevent hover transforms when a modal is open to avoid 'bouncing' fixed children */
+  /* Prevent hover transforms when a modal is open */
   body[style*="overflow: hidden"] .glass-card:hover,
   body[style*="overflow: hidden"] .earth-card:hover {
     transform: none !important;
   }
 
+  /* ─── Sticky Header ─── */
   .sticky-header-antigravity {
     @apply sticky top-0 z-[60] bg-white border-b border-border-grey transition-all duration-300;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
   }
 
+  /* ─── Navbar ─── */
   .glass-navbar {
     background: white;
     border-bottom: 1px solid var(--border-grey);
@@ -121,13 +142,15 @@ h4 {
     transition: all 0.3s ease;
   }
 
+  /* ─── PRIMARY BUTTONS — Mother Earth with pure white text ─── */
   .btn-primary,
   .btn-forest,
   .btn-antigravity,
   .btn-sage-glow,
   .btn-rose {
     background: var(--burgundy);
-    color: var(--buttermilk);
+    color: #ffffff;
+    font-family: var(--font-inter), var(--font-lexend), system-ui, sans-serif;
     @apply rounded-lg font-semibold transition-all duration-200 shadow-sm px-6 py-2.5 inline-flex items-center justify-center gap-2;
   }
 
@@ -136,7 +159,7 @@ h4 {
   .btn-antigravity:hover,
   .btn-sage-glow:hover,
   .btn-rose:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.12);
     box-shadow: var(--shadow-card);
   }
 
@@ -145,14 +168,35 @@ h4 {
     transform: scale(0.98);
   }
 
-  /* Studio Vault Status Pills — Adjusted for new palette */
+  /* ─── Book Now CTA — high contrast, marketplace action ─── */
+  .btn-book-now {
+    background: var(--burgundy);
+    color: #ffffff;
+    font-family: var(--font-inter), var(--font-lexend), system-ui, sans-serif;
+    @apply rounded-lg font-bold transition-all duration-200 shadow-sm px-5 py-2.5 inline-flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider;
+  }
+
+  .btn-book-now:hover {
+    filter: brightness(1.12);
+    box-shadow: var(--shadow-card);
+    transform: translateY(-1px);
+  }
+
+  .btn-book-now:active {
+    transform: scale(0.98);
+  }
+
+  /* ─── Status Pills ─── */
   .status-pill-earth,
   .status-pill-frosted {
     @apply px-3 py-1 text-[10px] font-bold uppercase rounded-full tracking-widest border;
+    font-family: var(--font-inter), var(--font-lexend), system-ui, sans-serif;
   }
 
+  /* Walking Vinnie — Completed / Verified */
   .status-pill-green {
-    @apply bg-walking-vinnie text-burgundy border-burgundy/10;
+    background: var(--walking-vinnie);
+    @apply text-burgundy border-burgundy/10;
   }
 
   .status-pill-yellow {
@@ -163,11 +207,17 @@ h4 {
     @apply bg-red-50 text-red-700 border-red-100;
   }
 
+  /* The Bay — active/highlighted */
+  .status-pill-bay {
+    background: var(--buttermilk);
+    @apply text-burgundy border-burgundy/10;
+  }
+
   .status-pill-grey {
     @apply bg-pastel-blue text-burgundy border-pastel-blue/20;
   }
 
-  /* Session block: clean border and shadow */
+  /* ─── Session Block ─── */
   .session-block-earth {
     @apply border border-border-grey bg-white shadow-tight transition-all duration-200 rounded-lg;
   }
@@ -176,12 +226,56 @@ h4 {
     @apply shadow-card border-burgundy/10;
   }
 
-  /* Secondary details color detail link */
+  /* ─── Secondary link ─── */
   .link-secondary {
     color: var(--muted-burgundy);
     @apply hover:text-burgundy transition-colors duration-200 font-medium underline-offset-4 hover:underline;
   }
 
+  /* ─── Marketplace Banner Cards ─── */
+  /* The top image area for class/studio/instructor discovery cards */
+  .marketplace-card-banner {
+    @apply relative overflow-hidden;
+    aspect-ratio: 16 / 9;
+  }
+
+  .marketplace-card-banner img {
+    @apply w-full h-full object-cover transition-transform duration-700;
+  }
+
+  .marketplace-card:hover .marketplace-card-banner img {
+    transform: scale(1.05);
+  }
+
+  /* Circular instructor trust avatar overlapping banner */
+  .instructor-trust-avatar {
+    @apply absolute -bottom-6 left-5 w-12 h-12 rounded-full border-4 border-white overflow-hidden;
+    box-shadow: var(--shadow-card);
+    z-index: 10;
+  }
+
+  /* ─── Price Highlight — The Bay accent ─── */
+  .price-highlight {
+    background: var(--buttermilk);
+    color: var(--burgundy);
+    @apply px-3 py-1 rounded-full text-sm font-bold;
+  }
+
+  /* ─── Last Minute tag — The Bay accent ─── */
+  .tag-last-minute {
+    background: var(--buttermilk);
+    color: var(--burgundy);
+    @apply px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border border-burgundy/10;
+  }
+
+  /* ─── Verified / Completed badge — Walking Vinnie ─── */
+  .badge-verified {
+    background: var(--walking-vinnie);
+    color: var(--burgundy);
+    @apply px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border border-burgundy/10;
+  }
+
+  /* ─── No scrollbar ─── */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }

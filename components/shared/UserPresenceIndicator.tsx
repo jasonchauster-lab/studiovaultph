@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Clock } from 'lucide-react'
 
@@ -44,12 +44,15 @@ export default function UserPresenceIndicator({
     showText = true,
     className = ''
 }: UserPresenceIndicatorProps) {
-    const supabase = createClient()
+    // Stable ref to the singleton client — avoids re-running the effect every render
+    // because createClient() previously returned a new object each call.
+    const supabaseRef = useRef(createClient())
     const [isOnline, setIsOnline] = useState(initialIsOnline)
     const [lastSeenAt, setLastSeenAt] = useState<string | null>(initialLastSeenAt || null)
 
-    // Ensure we have correct initial data by fetching if needed
     useEffect(() => {
+        const supabase = supabaseRef.current
+
         const fetchInitialData = async () => {
             const { data, error } = await supabase
                 .from('profiles')
@@ -58,7 +61,6 @@ export default function UserPresenceIndicator({
                 .single()
 
             if (data && !error) {
-                // Only mark online if the DB flag is true AND last_seen_at is recent
                 const dbOnline = data.is_online || false
                 const recentlyActive = isRecentlyActive(data.last_seen_at)
                 setIsOnline(dbOnline && recentlyActive)
@@ -66,8 +68,6 @@ export default function UserPresenceIndicator({
             }
         }
 
-        // Only explicitly fetch if we wasn't passed valid initials from parent
-        // or just fetch always to be 100% up to date on mount
         fetchInitialData()
 
         // Subscribe to real-time updates for this user's profile
@@ -84,7 +84,6 @@ export default function UserPresenceIndicator({
                 (payload) => {
                     const newProfile = payload.new
                     if (newProfile.is_online !== undefined) {
-                        // Apply staleness check on realtime updates too
                         const recentlyActive = isRecentlyActive(newProfile.last_seen_at || null)
                         setIsOnline(newProfile.is_online && recentlyActive)
                     }
@@ -98,7 +97,7 @@ export default function UserPresenceIndicator({
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [userId, supabase])
+    }, [userId])
 
     return (
         <div className={`flex items-center gap-1.5 ${className}`}>

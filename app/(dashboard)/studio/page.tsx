@@ -12,7 +12,7 @@ import Image from 'next/image'
 import StudioStatCards from '@/components/dashboard/StudioStatCards'
 
 import StudioUpcomingBookings from '@/components/dashboard/StudioUpcomingBookings'
-import { toManilaTimeString, toManilaDateStr } from '@/lib/timezone'
+import { toManilaTimeString, toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
 import { format } from 'date-fns'
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
@@ -45,7 +45,9 @@ export default async function StudioDashboard(props: {
     let topInstructorName = 'N/A'
     let dayStrings: string[] = []
 
-    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' })
+    // Use getManilaTodayStr() — toLocaleDateString with a timeZone option is unreliable
+    // on Vercel/Docker runtimes that lack full ICU data (see lib/timezone.ts note).
+    const todayStr = getManilaTodayStr()
     const dateParam = typeof searchParams.date === 'string' ? searchParams.date : todayStr
 
     // Create local Date object for reliable calendar math without UTC offset shifting the day
@@ -289,7 +291,7 @@ export default async function StudioDashboard(props: {
                             <div className="space-y-8">
                                 <div className="earth-card overflow-hidden">
                                     <div className="bg-forest p-5 flex items-center justify-between">
-                                        <h2 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                                        <h2 className="text-[11px] font-bold !text-white uppercase tracking-[0.2em] flex items-center gap-2">
                                             <Calendar className="w-4 h-4" />
                                             Upcoming Bookings
                                         </h2>

@@ -1417,17 +1417,10 @@ export async function getPartnerBookings(id: string, type: 'profile' | 'studio')
 
 export async function suspendUser(userId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
-    // 1. Verify Admin
-    if (!user) return { error: 'Unauthorized' }
-    const { data: adminProfile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-    if (adminProfile?.role !== 'admin') return { error: 'Unauthorized' }
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
 
     // 2. Suspend
     const { error } = await supabase
@@ -1449,17 +1442,10 @@ export async function suspendUser(userId: string) {
 
 export async function reinstateStudio(profileId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
-    // 1. Verify Admin
-    if (!user) return { error: 'Unauthorized' }
-    const { data: adminProfile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-    if (adminProfile?.role !== 'admin') return { error: 'Unauthorized' }
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
 
     // 2. Clear strikes and suspension
     // Get the studio first to clear its strikes

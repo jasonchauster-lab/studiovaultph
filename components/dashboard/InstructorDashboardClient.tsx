@@ -1,5 +1,24 @@
 'use client';
 
+// Hoisted outside the component — these are static data that never change,
+// so defining them inside the function body would recreate them on every render.
+const AREAS = [
+    'Alabang - Madrigal/Ayala Alabang', 'Alabang - Filinvest City', 'Alabang - Alabang Town Center Area', 'Alabang - Others',
+    'BGC - High Street', 'BGC - Central Square/Uptown', 'BGC - Forbes Town', 'BGC - Others',
+    'Ortigas - Ortigas Center', 'Ortigas - Greenhills', 'Ortigas - San Juan', 'Ortigas - Others',
+    'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others',
+    'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer',
+    'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village',
+    'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others'
+]
+
+const GROUPED_AREAS = AREAS.reduce((acc: Record<string, string[]>, loc: string) => {
+    const city = loc?.split(' - ')[0] || 'Studio';
+    if (!acc[city]) acc[city] = [];
+    acc[city].push(loc);
+    return acc;
+}, {})
+
 import { useEffect, useState } from 'react';
 import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2, Pencil, Copy, Trash2, AlertTriangle, CheckCircle } from 'lucide-react'
 import Link from 'next/link';
@@ -128,23 +147,6 @@ export default function InstructorDashboardClient({
     };
 
     const now = new Date();
-    const AREAS = [
-        'Alabang - Madrigal/Ayala Alabang', 'Alabang - Filinvest City', 'Alabang - Alabang Town Center Area', 'Alabang - Others',
-        'BGC - High Street', 'BGC - Central Square/Uptown', 'BGC - Forbes Town', 'BGC - Others',
-        'Ortigas - Ortigas Center', 'Ortigas - Greenhills', 'Ortigas - San Juan', 'Ortigas - Others',
-        'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others',
-        'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer',
-        'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village',
-        'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others'
-    ];
-
-    const GROUPED_AREAS = AREAS.reduce((acc: Record<string, string[]>, loc: string) => {
-        const city = loc?.split(' - ')[0] || 'Studio';
-        if (!acc[city]) acc[city] = [];
-        acc[city].push(loc);
-        return acc;
-    }, {});
-
 
     const isChatExpired = (booking: any) => {
         const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
@@ -349,8 +351,8 @@ export default function InstructorDashboardClient({
                 <div className="space-y-10">
                     <div className="earth-card overflow-hidden">
                         <div className="bg-white p-6 border-b border-border-grey flex items-center justify-between">
-                            <h2 className="text-[10px] font-black text-slate uppercase tracking-[0.3em] flex items-center gap-3">
-                                <Calendar className="w-4 h-4 text-forest" />
+                            <h2 className="text-[10px] font-black text-burgundy uppercase tracking-[0.3em] flex items-center gap-3">
+                                <Calendar className="w-4 h-4 text-burgundy" />
                                 Upcoming Bookings
                             </h2>
                             <span className="text-[8px] font-black text-forest/60 border border-forest/20 px-3 py-1 rounded-full uppercase tracking-[0.2em]">Next 5 Sessions</span>
@@ -369,8 +371,8 @@ export default function InstructorDashboardClient({
                                     return (
                                         <div className="py-24 text-center bg-off-white/50 rounded-lg border-2 border-dashed border-buttermilk flex flex-col items-center justify-center">
                                             <Calendar className="w-12 h-12 text-muted-burgundy/20 mx-auto mb-6" />
-                                            <h3 className="text-[10px] font-black text-muted-burgundy uppercase tracking-[0.4em] mb-1">Quiet Week</h3>
-                                            <p className="text-[9px] text-muted-burgundy/60 font-black uppercase tracking-[0.2em] max-w-[200px] mx-auto">No bookings yet—your schedule is clear.</p>
+                                            <h3 className="text-[10px] font-black text-burgundy uppercase tracking-[0.4em] mb-1">Quiet Week</h3>
+                                            <p className="text-[9px] text-burgundy font-black uppercase tracking-[0.2em] max-w-[200px] mx-auto">No bookings yet—your schedule is clear.</p>
                                         </div>
                                     );
                                 }
