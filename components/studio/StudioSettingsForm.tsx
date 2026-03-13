@@ -5,11 +5,10 @@ import { updateStudio } from '@/app/(dashboard)/studio/actions'
 import { Loader2, Save, Camera, User, X, Upload } from 'lucide-react'
 import clsx from 'clsx'
 import { Studio, STUDIO_AMENITIES } from '@/types'
-import { createClient } from '@/lib/supabase/client'
 import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
 import { useRef } from 'react'
-import { normalizeImageFile, uploadContentType } from '@/lib/utils/image-utils'
+import { normalizeImageFile } from '@/lib/utils/image-utils'
 
 export default function StudioSettingsForm({ studio }: { studio: Studio }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -63,58 +62,20 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
         setMessage(null)
 
         try {
-            const supabase = createClient()
-            const timestamp = Date.now()
+            // Pass existing photos list so the server action knows what to keep
+            formData.set('existingPhotos', JSON.stringify(existingPhotos))
 
-            // 1. Upload Logo if changed
-            let logoFile = formData.get('logo') as File
-            if (logoFile && logoFile.size > 0) {
-                logoFile = await normalizeImageFile(logoFile)
-                const ext = logoFile.name.split('.').pop() || 'jpg'
-                const path = `studios/${studio.id}/logo_${timestamp}.${ext}`
-                const { error: uploadError } = await supabase.storage.from('avatars').upload(path, logoFile, {
-                    contentType: uploadContentType(logoFile),
-                })
-
-                if (uploadError) {
-                    throw new Error('Failed to upload logo: ' + uploadError.message)
-                }
-
-                const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-                formData.set('logoUrl', publicUrl)
-            }
-            formData.delete('logo') // Remove file object from payload
-
-            // 2. Upload New Space Photos
-            const additionalUrls: string[] = []
-            for (let i = 0; i < newSpacePhotos.length; i++) {
-                const file = newSpacePhotos[i]
-                if (file.size > 0) {
-                    const ext = file.name.split('.').pop() || 'jpg'
-                    const path = `studios/${studio.id}/space_${timestamp}_${i}.${ext}`
-                    const { error: photoErr } = await supabase.storage.from('avatars').upload(path, file, {
-                        contentType: uploadContentType(file),
-                    })
-
-                    if (photoErr) {
-                        throw new Error('Failed to upload new space photo: ' + photoErr.message)
-                    }
-
-                    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-                    additionalUrls.push(publicUrl)
-                }
+            // Append new photo files directly — server action uploads via admin client
+            for (const file of newSpacePhotos) {
+                formData.append('newSpacePhoto', file)
             }
 
-            // Combine old retained photos with newly uploaded ones
-            const finalPhotosUrls = [...existingPhotos, ...additionalUrls]
-            formData.set('spacePhotosUrls', JSON.stringify(finalPhotosUrls))
-            formData.delete('spacePhotos') // Not used anymore, but ensure clear
+            // logo file stays in formData as 'logo' — server action handles upload
 
             const result = await updateStudio(formData)
 
             if (result.success) {
                 setMessage('Settings updated successfully!')
-                // Reset file inputs explicitly on success
                 setNewSpacePhotos([])
             } else {
                 setMessage(result.error || 'Failed to update settings.')

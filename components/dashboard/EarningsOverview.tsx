@@ -78,7 +78,7 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
                 {/* Gross Earnings Card */}
-                <div className="bg-white p-4 sm:p-5 rounded-xl border border-cream-200 shadow-tight">
+                <div className="bg-white p-3 sm:p-4 rounded-xl border border-cream-200 shadow-tight">
                     <div className="flex justify-between items-start mb-2">
                         <div className="p-1.5 rounded-lg" style={{ background: 'rgba(188,146,110,0.1)' }}>
                             <TrendingUp className="w-4 h-4" style={{ color: '#BC926E' }} />
@@ -89,7 +89,7 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                 </div>
 
                 {/* Compensation Card */}
-                <div className="bg-white p-4 sm:p-5 rounded-xl border border-cream-200 shadow-tight">
+                <div className="bg-white p-3 sm:p-4 rounded-xl border border-cream-200 shadow-tight">
                     <div className="flex justify-between items-start mb-2">
                         <div className="p-1.5 rounded-lg" style={{ background: 'rgba(34,197,94,0.1)' }}>
                             <TrendingUp className="w-4 h-4 text-green-600" />
@@ -100,7 +100,7 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                 </div>
 
                 {/* Penalty Card */}
-                <div className="bg-white p-4 sm:p-5 rounded-xl border border-cream-200 shadow-tight">
+                <div className="bg-white p-3 sm:p-4 rounded-xl border border-cream-200 shadow-tight">
                     <div className="flex justify-between items-start mb-2">
                         <div className="p-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.1)' }}>
                             <TrendingUp className="w-4 h-4 text-red-600" transform="rotate(180)" />
@@ -111,7 +111,7 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                 </div>
 
                 {/* Net Earnings Card */}
-                <div className="bg-white p-4 sm:p-5 rounded-xl border border-cream-200 shadow-tight">
+                <div className="bg-white p-3 sm:p-4 rounded-xl border border-cream-200 shadow-tight">
                     <div className="flex justify-between items-start mb-2">
                         <div className="p-1.5 rounded-lg" style={{ background: 'rgba(188,146,110,0.1)' }}>
                             <TrendingUp className="w-4 h-4" style={{ color: '#BC926E' }} />
@@ -122,7 +122,7 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                 </div>
 
                 {/* Available Balance Card */}
-                <div className="p-4 sm:p-5 rounded-xl shadow-tight text-white flex flex-col justify-between" style={{ background: '#BC926E' }}>
+                <div className="p-3 sm:p-4 rounded-xl shadow-tight text-white flex flex-col justify-between" style={{ background: '#BC926E' }}>
                     <div>
                         <div className="flex justify-between items-start mb-2">
                             <div className="flex items-center gap-2">
@@ -158,7 +158,7 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                 </div>
 
                 {/* Paid Out Card */}
-                <div className="bg-white p-4 sm:p-5 rounded-xl border border-cream-200 shadow-tight">
+                <div className="bg-white p-3 sm:p-4 rounded-xl border border-cream-200 shadow-tight">
                     <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Paid Out</p>
                     <h3 className="text-lg sm:text-2xl font-bold text-charcoal">₱{summary.totalPaidOut.toLocaleString()}</h3>
                     {summary.pendingPayouts > 0 && (
@@ -169,7 +169,7 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                 </div>
 
                 {/* Security Hold Card */}
-                <div className="bg-white p-4 sm:p-5 rounded-xl border border-cream-200 shadow-tight border-l-4" style={{ borderLeftColor: '#BC926E' }}>
+                <div className="bg-white p-3 sm:p-4 rounded-xl border border-cream-200 shadow-tight border-l-4" style={{ borderLeftColor: '#BC926E' }}>
                     <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Security Hold</p>
                     <h3 className="text-lg sm:text-2xl font-bold text-charcoal">₱{summary.pendingBalance.toLocaleString()}</h3>
                     <p className="text-[9px] font-bold uppercase text-charcoal/30 mt-1">24h hold period</p>

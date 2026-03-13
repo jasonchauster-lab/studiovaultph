@@ -33,9 +33,6 @@ export default async function StudioSettingsPage() {
 
             <StudioSettingsForm studio={studio} />
 
-            {profile?.referral_code && (
-                <ReferralCard referralCode={profile.referral_code} origin={origin} />
-            )}
         </div>
     )
 }

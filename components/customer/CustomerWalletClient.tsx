@@ -91,133 +91,152 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+            <div className="grid grid-cols-2 gap-4 max-w-4xl">
                 {/* Available Balance */}
-                <div className="bg-charcoal-900 text-cream-50 p-6 rounded-xl shadow-lg relative overflow-hidden">
+                <div className="bg-charcoal-900 text-cream-50 p-4 sm:p-6 rounded-xl shadow-lg relative overflow-hidden h-full flex flex-col justify-between">
                     <div className="absolute -right-4 -top-4 text-white/5">
-                        <Wallet className="w-32 h-32" />
+                        <Wallet className="w-24 h-24 sm:w-32 sm:h-32" />
                     </div>
                     <div className="relative z-10">
                         <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-3 opacity-80">
-                                <Wallet className="w-5 h-5" />
-                                <span className="text-sm font-medium tracking-wide uppercase">Available Balance</span>
+                            <div className="flex items-center gap-2 opacity-80">
+                                <Wallet className="w-4 h-4" />
+                                <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase truncate">Balance</span>
                             </div>
                             <button
                                 onClick={() => setShowInfoModal(true)}
                                 className="text-rose-gold hover:text-white transition-colors p-1"
                                 title="Wallet Rules"
                             >
-                                <Info className="w-5 h-5" />
+                                <Info className="w-3.5 h-3.5" />
                             </button>
                         </div>
-                        <p className="text-4xl font-serif mt-4">₱{(available || 0).toLocaleString()}</p>
-                        <p className="text-xs mt-2 opacity-60">Applied to your next booking or withdrawable</p>
+                        <p className="text-2xl sm:text-4xl font-serif mt-2">₱{(available || 0).toLocaleString()}</p>
                     </div>
                 </div>
 
                 {/* Pending Balance */}
-                {pending > 0 && (
-                    <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm border-l-4 border-l-amber-400">
-                        <div className="flex items-center gap-3 mb-2 text-amber-600">
-                            <Clock className="w-5 h-5" />
-                            <span className="text-sm font-medium tracking-wide uppercase">Pending (Verification)</span>
-                        </div>
-                        <p className="text-4xl font-serif text-charcoal-900 mt-4">₱{(pending || 0).toLocaleString()}</p>
-                        <p className="text-xs mt-2 text-charcoal-400">Waiting for Admin to verify your top-up receipt</p>
+                <div className={`p-4 sm:p-6 rounded-xl border border-cream-200 shadow-sm border-l-4 h-full flex flex-col justify-between bg-white ${pending > 0 ? 'border-l-amber-400' : 'border-l-sage'}`}>
+                    <div className="flex items-center gap-2 mb-2 text-charcoal-500">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase truncate">Pending</span>
                     </div>
-                )}
+                    <div>
+                        <p className="text-2xl sm:text-4xl font-serif text-charcoal-900 mt-2">₱{(pending || 0).toLocaleString()}</p>
+                    </div>
+                </div>
 
-                {/* Quick Info */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm flex flex-col justify-center">
-                    <div className="flex items-center gap-3 mb-2 text-charcoal-500">
-                        <History className="w-5 h-5" />
-                        <span className="text-sm font-medium">How it works</span>
+                {/* Quick Info - Full width on small screens */}
+                <div className="col-span-2 bg-white p-4 sm:p-6 rounded-xl border border-cream-200 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2 text-charcoal-500">
+                        <History className="w-4 h-4" />
+                        <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase">Wallet Rules</span>
                     </div>
-                    <ul className="text-sm text-charcoal-600 space-y-2 mt-2">
-                        <li className="flex gap-2"><span className="text-charcoal-900">•</span> Early cancellations ({'>'}24h notice) are refunded instantly to your Available Balance.</li>
-                        <li className="flex gap-2"><span className="text-charcoal-900">•</span> Wallet credits are used automatically on any new booking.</li>
-                        <li className="flex gap-2"><span className="text-charcoal-900">•</span> You can withdraw your balance at any time.</li>
-                    </ul>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mt-2">
+                        <p className="text-[11px] sm:text-xs text-charcoal-600 flex gap-2"><span className="text-charcoal-900">•</span> Refunds ({'>'}24h notice) are instant.</p>
+                        <p className="text-[11px] sm:text-xs text-charcoal-600 flex gap-2"><span className="text-charcoal-900">•</span> Used automatically on new bookings.</p>
+                    </div>
                 </div>
             </div>
 
             {/* Recent Transactions */}
             <div className="bg-white border border-cream-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-cream-100">
+                <div className="p-4 sm:p-6 border-b border-cream-100 flex justify-between items-center">
                     <h3 className="font-serif text-xl text-charcoal-900">Transaction History</h3>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-[600px] text-left">
-                        <thead className="bg-cream-50 text-charcoal-500 text-xs uppercase tracking-wider">
+                <div className="w-full">
+                    {/* Desktop Table */}
+                    <table className="hidden sm:table w-full text-left">
+                        <thead className="bg-cream-50 text-charcoal-500 font-bold uppercase tracking-widest text-[10px] border-b border-cream-200">
                             <tr>
-                                <th className="px-6 py-4 font-medium">Date</th>
-                                <th className="px-6 py-4 font-medium">Type</th>
-                                <th className="px-6 py-4 font-medium">Status</th>
-                                <th className="px-6 py-4 font-medium text-right">Amount</th>
+                                <th className="px-6 py-4">Date</th>
+                                <th className="px-6 py-4">STUDIO / INSTRUCTOR</th>
+                                <th className="px-6 py-4">Activity</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4 text-right">Amount</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-cream-100">
                             {transactions && transactions.length > 0 ? (
                                 transactions.map((tx, i) => (
-                                    <tr key={i} className="hover:bg-cream-50/50 transition-colors">
-                                        <td className="px-6 py-4 text-sm text-charcoal-600 border-b border-cream-50">
-                                            {new Date(tx.date).toLocaleDateString()}
-                                            <span className="block text-xs text-charcoal-400">
-                                                {new Date(tx.date).toLocaleTimeString()}
+                                    <tr key={i} className="hover:bg-off-white/40 transition-colors">
+                                        <td className="px-6 py-5 whitespace-nowrap">
+                                            <div className="font-bold text-charcoal">{new Date(tx.date).toLocaleDateString()}</div>
+                                            <div className="text-[10px] text-charcoal/40 uppercase font-black">
+                                                {new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <span className="font-bold text-charcoal uppercase text-xs truncate">
+                                                {tx.studio || tx.instructor || 'System'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-sm font-medium text-charcoal-900 border-b border-cream-50">
-                                            {tx.type}
-                                            {tx.details && (
-                                                <span className="block text-xs text-charcoal-400 font-normal">
-                                                    {tx.details}
-                                                </span>
-                                            )}
+                                        <td className="px-6 py-5">
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="font-bold text-charcoal text-[11px] uppercase tracking-wide">{tx.type}</span>
+                                                {tx.details && <span className="text-[10px] text-charcoal/50 italic truncate">{tx.details}</span>}
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 border-b border-cream-50">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap
-                                                ${tx.status === 'completed' || tx.status === 'approved' || tx.status === 'processed'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : tx.status === 'pending'
-                                                        ? 'bg-yellow-100 text-yellow-800'
-                                                        : tx.status === 'cancelled_refunded'
-                                                            ? 'bg-blue-100 text-blue-800'
-                                                            : tx.status === 'cancelled_charged'
-                                                                ? 'bg-orange-100 text-orange-800'
-                                                                : tx.status === 'expired'
-                                                                    ? 'bg-red-100 text-red-800'
-                                                                    : tx.status === 'rejected'
-                                                                        ? 'bg-red-100 text-red-800'
-                                                                        : 'bg-gray-100 text-gray-800'
-                                                }
-                                            `}>
-                                                {tx.status === 'cancelled_refunded' ? 'Cancelled – Refunded'
-                                                    : tx.status === 'cancelled_charged' ? 'Cancelled – No Refund'
-                                                    : tx.status === 'completed' ? 'Completed'
-                                                    : tx.status === 'pending' ? 'Pending'
-                                                    : tx.status === 'approved' ? 'Approved'
-                                                    : tx.status === 'processed' ? 'Processed'
-                                                    : tx.status === 'expired' ? 'Expired'
-                                                    : tx.status === 'rejected' ? 'Rejected'
-                                                    : tx.status}
+                                        <td className="px-6 py-5">
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-charcoal/40 px-2 py-0.5 bg-cream-50 rounded-full">
+                                                {tx.status}
                                             </span>
                                         </td>
-                                        <td className={`px-6 py-4 text-sm font-medium text-right border-b border-cream-50 ${tx.amount > 0 ? 'text-green-600' : 'text-charcoal-900'}`}>
+                                        <td className={`px-6 py-5 text-right font-black whitespace-nowrap ${tx.amount > 0 ? 'text-green-600' : 'text-charcoal'}`}>
                                             {tx.amount > 0 ? '+' : ''}₱{Math.abs(tx.amount).toLocaleString()}
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-8 text-center text-charcoal-500 text-sm">
+                                    <td colSpan={5} className="px-6 py-12 text-center text-charcoal/40 font-serif italic text-lg">
                                         No transactions yet.
                                     </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
+
+                    {/* Mobile List View */}
+                    <div className="sm:hidden divide-y divide-cream-100">
+                        {transactions && transactions.length > 0 ? (
+                            transactions.map((tx, i) => (
+                                <div key={i} className="p-4 flex items-center justify-between gap-4 bg-white hover:bg-off-white transition-colors duration-300">
+                                    <div className="shrink-0 flex flex-col gap-1 min-w-[80px]">
+                                        <span className="text-[9px] font-black text-charcoal uppercase tracking-widest whitespace-nowrap">
+                                            {new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                        </span>
+                                        <span className="text-[8px] text-charcoal/40 font-bold uppercase tracking-tight">
+                                            {new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-black text-charcoal uppercase tracking-wide truncate">
+                                            {tx.studio || tx.instructor || 'System'}
+                                        </p>
+                                        <p className="text-[8px] text-charcoal/40 font-bold uppercase tracking-tighter truncate mt-0.5">
+                                            {tx.type} {tx.details ? `• ${tx.details}` : ''}
+                                        </p>
+                                    </div>
+                                    <div className="shrink-0 text-right">
+                                        <span className="text-[11px] font-bold text-[#43302E] tracking-tight">
+                                            {tx.amount > 0 ? '+' : ''}₱{Math.abs(tx.amount).toLocaleString()}
+                                        </span>
+                                        {tx.status && (
+                                            <span className="block text-[7px] font-black uppercase tracking-widest text-slate/40 mt-1">
+                                                {tx.status}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="p-8 text-center text-charcoal/40 font-serif italic">
+                                No transactions yet.
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

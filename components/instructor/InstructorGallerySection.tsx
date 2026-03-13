@@ -12,35 +12,40 @@ interface InstructorGallerySectionProps {
 }
 
 export default function InstructorGallerySection({ images }: InstructorGallerySectionProps) {
-    const [isUploading, setIsUploading] = useState(false)
+    const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null)
     const [error, setError] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
+    const isUploading = uploadProgress !== null
+
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
+        const files = Array.from(e.target.files || [])
+        if (files.length === 0) return
 
-        setIsUploading(true)
         setError(null)
+        setUploadProgress({ current: 0, total: files.length })
 
-        try {
-            const processedFile = await normalizeImageFile(file)
+        const errors: string[] = []
 
-            const formData = new FormData()
-            formData.append('file', processedFile)
-
-            const result = await uploadGalleryImage(formData)
-
-            if (!result.success) {
-                setError(result.error || 'Failed to upload image')
+        for (let i = 0; i < files.length; i++) {
+            setUploadProgress({ current: i + 1, total: files.length })
+            try {
+                const processedFile = await normalizeImageFile(files[i])
+                const formData = new FormData()
+                formData.append('file', processedFile)
+                const result = await uploadGalleryImage(formData)
+                if (!result.success) {
+                    errors.push(`${files[i].name}: ${result.error || 'Upload failed'}`)
+                }
+            } catch (err) {
+                console.error('File processing error:', err)
+                errors.push(`${files[i].name}: Failed to process image`)
             }
-        } catch (err) {
-            console.error('File processing error:', err)
-            setError('Failed to process image. Please try a different format.')
-        } finally {
-            setIsUploading(false)
-            if (fileInputRef.current) fileInputRef.current.value = ''
         }
+
+        setUploadProgress(null)
+        if (fileInputRef.current) fileInputRef.current.value = ''
+        if (errors.length > 0) setError(errors.join(' • '))
     }
 
     const handleDelete = async (url: string) => {
@@ -76,7 +81,9 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
                         ) : (
                             <Plus className="w-4 h-4 text-gold stroke-[3px]" />
                         )}
-                        {isUploading ? 'UPLOADING...' : 'ADD PHOTOGRAPH'}
+                        {uploadProgress
+                            ? `UPLOADING ${uploadProgress.current} / ${uploadProgress.total}...`
+                            : 'ADD PHOTOGRAPHS'}
                     </button>
                     <input
                         type="file"
@@ -84,6 +91,7 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
                         onChange={handleFileUpload}
                         className="hidden"
                         accept="image/*,.heic,.heif"
+                        multiple
                     />
                 </div>
 

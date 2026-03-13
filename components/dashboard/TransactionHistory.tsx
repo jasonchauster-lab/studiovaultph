@@ -6,6 +6,7 @@ import clsx from 'clsx'
 
 interface TransactionRecord {
     date: string;
+    booking_date?: string;
     type: string;
     client?: string;
     instructor?: string;
@@ -58,7 +59,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                             <thead className="bg-cream-50 text-charcoal font-bold uppercase tracking-widest text-[10px] border-b border-cream-200">
                                 <tr>
                                     <th className="px-6 py-4">Date</th>
-                                    <th className="px-6 py-4">Participant</th>
+                                    <th className="px-6 py-4">STUDENT / INSTRUCTOR</th>
                                     <th className="px-6 py-4">Transaction Details</th>
                                     <th className="px-6 py-4 text-right">Amount</th>
                                 </tr>
@@ -113,6 +114,11 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                                 </span>
                                                             )}
                                                         </div>
+                                                        {tx.booking_date && (
+                                                            <div className="text-[11px] font-bold text-charcoal/60 leading-tight">
+                                                                Session: {new Date(tx.booking_date).toLocaleDateString()} at {new Date(tx.booking_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </div>
+                                                        )}
                                                         <div className="text-[11px] text-charcoal/50 italic leading-tight">
                                                             {tx.details}
                                                         </div>
@@ -149,36 +155,33 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                     const isRefunded = tx.type === 'Booking (Refunded)'
 
                                     return (
-                                        <div key={idx} className="p-4 space-y-3">
-                                            {/* Mobile Header Row: Date & Status */}
-                                            <div className="flex justify-between items-center bg-cream-50/50 -mx-4 -mt-4 px-4 py-2 border-b border-cream-100">
-                                                <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest">
-                                                    {txDate.toLocaleDateString()} • {txDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        <div key={idx} className="p-4 flex items-center justify-between gap-4 bg-white hover:bg-off-white transition-colors duration-300">
+                                            <div className="shrink-0 flex flex-col gap-1 min-w-[80px]">
+                                                <span className="text-[9px] font-black text-charcoal uppercase tracking-widest whitespace-nowrap">
+                                                    {txDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                 </span>
-                                                <span className={clsx(
-                                                    "text-[10px] font-black uppercase tracking-widest",
-                                                    isRefunded ? "text-charcoal/40" :
-                                                        isPenalty ? "text-red-600" :
-                                                            isPositive ? "text-green-600" : "text-charcoal"
-                                                )}>
-                                                    {isRefunded ? "₱0" : (isPositive ? '+' : '') + `₱${tx.total_amount.toLocaleString()}`}
+                                                <span className="text-[8px] text-charcoal/40 font-bold uppercase tracking-tight">
+                                                    {txDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </div>
-
-                                            {/* Mobile Body: Participant & Details Side-by-Side */}
-                                            <div className="flex gap-4">
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.2em] mb-1">Participant</p>
-                                                    <p className="text-xs font-bold text-charcoal truncate">{tx.client || tx.instructor || 'System'}</p>
-                                                </div>
-                                                <div className="flex-[1.5] min-w-0">
-                                                    <p className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.2em] mb-1">Activity</p>
-                                                    <p className="text-xs font-bold text-charcoal truncate">{tx.type}</p>
-                                                </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-[10px] font-black text-charcoal uppercase tracking-wide truncate">
+                                                    {tx.client || tx.instructor || 'System'}
+                                                </p>
+                                                <p className="text-[8px] text-charcoal/40 font-bold uppercase tracking-tighter truncate mt-0.5">
+                                                    {tx.type} {tx.details ? `• ${tx.details}` : ''}
+                                                </p>
                                             </div>
-                                            {tx.details && (
-                                                <p className="text-[10px] text-charcoal/50 italic leading-tight truncate">{tx.details}</p>
-                                            )}
+                                            <div className="shrink-0 text-right">
+                                                <span className="text-[11px] font-bold text-[#43302E] tracking-tight">
+                                                    {isRefunded ? '₱0' : (isPositive ? '+' : '') + `₱${tx.total_amount.toLocaleString()}`}
+                                                </span>
+                                                {tx.status && (
+                                                    <span className="block text-[7px] font-black uppercase tracking-widest text-slate/40 mt-1">
+                                                        {tx.status}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     )
                                 })
@@ -248,31 +251,35 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                 payoutTransactions.map((tx, idx) => {
                                     const txDate = new Date(tx.date)
                                     return (
-                                        <div key={idx} className="p-4 space-y-3">
-                                            <div className="flex justify-between items-center bg-cream-50/50 -mx-4 -mt-4 px-4 py-2 border-b border-cream-100">
-                                                <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest">
-                                                    Requested: {txDate.toLocaleDateString()}
+                                        <div key={idx} className="p-4 flex items-center justify-between gap-4 bg-white hover:bg-off-white transition-colors duration-300">
+                                            <div className="shrink-0 flex flex-col gap-1 min-w-[80px]">
+                                                <span className="text-[9px] font-black text-charcoal uppercase tracking-widest whitespace-nowrap">
+                                                    {txDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                 </span>
-                                                <span className="text-[10px] font-black text-charcoal uppercase tracking-widest">
-                                                    -₱{Math.abs(tx.total_amount).toLocaleString()}
+                                                <span className="text-[8px] text-charcoal/40 font-bold uppercase tracking-tight">
+                                                    Requested
                                                 </span>
                                             </div>
-                                            <div className="flex justify-between items-start gap-4">
-                                                <div className="flex-1">
-                                                    <p className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.2em] mb-1">Details</p>
-                                                    <p className="text-xs font-bold text-charcoal leading-tight">{tx.details}</p>
-                                                </div>
-                                                <div className="shrink-0">
-                                                    <p className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.2em] mb-1 text-right">Status</p>
-                                                    <span className={clsx(
-                                                        "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full",
-                                                        tx.status === 'paid' ? 'bg-sage/10 text-sage' :
-                                                            tx.status === 'pending' ? 'bg-gold/10 text-gold-deep' :
-                                                                'bg-rose-gold/10 text-rose-gold-deep'
-                                                    )}>
-                                                        {tx.status || 'Unknown'}
-                                                    </span>
-                                                </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-[10px] font-black text-charcoal uppercase tracking-wide truncate">
+                                                    Withdrawal
+                                                </p>
+                                                <p className="text-[8px] text-charcoal/40 font-bold uppercase tracking-tighter truncate mt-0.5">
+                                                    {tx.details}
+                                                </p>
+                                            </div>
+                                            <div className="shrink-0 text-right">
+                                                <span className="text-[11px] font-bold text-[#43302E] tracking-tight">
+                                                    -₱{Math.abs(tx.total_amount).toLocaleString()}
+                                                </span>
+                                                <span className={clsx(
+                                                    "block text-[7px] font-black uppercase tracking-widest mt-1",
+                                                    tx.status === 'paid' ? 'text-sage' :
+                                                        tx.status === 'pending' ? 'text-gold-deep' :
+                                                            'text-rose-gold-deep'
+                                                )}>
+                                                    {tx.status || 'Unknown'}
+                                                </span>
                                             </div>
                                         </div>
                                     )

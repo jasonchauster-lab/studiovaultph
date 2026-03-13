@@ -23,20 +23,15 @@ export const convertHeicToJpeg = async (file: File): Promise<Blob | File> => {
         return file;
     }
 
-    try {
-        const result = await heic2any({
-            blob: file,
-            toType: 'image/jpeg',
-            quality: 0.8,
-        });
+    const result = await heic2any({
+        blob: file,
+        toType: 'image/jpeg',
+        quality: 0.8,
+    });
 
-        // heic2any can return an array if multiple images are in the container
-        const blob = Array.isArray(result) ? result[0] : result;
-        return blob;
-    } catch (error) {
-        console.error('HEIC conversion failed:', error);
-        return file; // Fallback to original
-    }
+    // heic2any can return an array if multiple images are in the container
+    const blob = Array.isArray(result) ? result[0] : result;
+    return blob;
 };
 
 /**
@@ -57,15 +52,56 @@ export const ensureJpegFile = async (file: File): Promise<File> => {
 };
 
 /**
+ * Canvas-based image conversion. Works natively on iOS Safari for HEIC files
+ * because iOS can decode HEIC without any library.
+ */
+const convertViaCanvas = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) { reject(new Error('No canvas context')); return; }
+            ctx.drawImage(img, 0, 0);
+            canvas.toBlob((blob) => {
+                if (!blob) { reject(new Error('Canvas toBlob failed')); return; }
+                const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+                resolve(new File([blob], newName, { type: 'image/jpeg', lastModified: Date.now() }));
+            }, 'image/jpeg', 0.85);
+        };
+        img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error('Image load failed'));
+        };
+        img.src = url;
+    });
+};
+
+/**
  * Normalizes any image file for upload across all platforms (iPhone, Android, desktop).
- * - Converts HEIC/HEIF to JPEG
+ * - Converts HEIC/HEIF to JPEG (tries heic2any first, canvas fallback for iOS Safari)
  * - Handles files with empty MIME types (common on some iOS/Android exports)
  * - Returns a File guaranteed to have a valid image MIME type
  */
 export const normalizeImageFile = async (file: File): Promise<File> => {
     // Explicit HEIC/HEIF by type or extension
     if (isHeicFile(file)) {
-        return ensureJpegFile(file);
+        // Try heic2any first (works on desktop browsers)
+        try {
+            return await ensureJpegFile(file);
+        } catch {
+            // heic2any failed — fall back to canvas (works on iOS Safari natively)
+        }
+        try {
+            return await convertViaCanvas(file);
+        } catch {
+            // Canvas also failed — return original and let the server handle it
+            return file;
+        }
     }
 
     // Empty MIME type — some iOS/Android versions omit the type entirely.
@@ -78,14 +114,23 @@ export const normalizeImageFile = async (file: File): Promise<File> => {
                     new File([file], file.name, { type: 'image/heic', lastModified: file.lastModified })
                 );
             } catch {
+                // fall through to canvas
+            }
+            try {
+                return await convertViaCanvas(file);
+            } catch {
                 // fall through
             }
         }
-        // Unknown extension with no type — treat as JPEG so browsers can display it
-        return new File([file], file.name || 'image.jpg', {
-            type: 'image/jpeg',
-            lastModified: file.lastModified,
-        });
+        // Unknown extension with no type — try canvas first, then stamp as jpeg
+        try {
+            return await convertViaCanvas(file);
+        } catch {
+            return new File([file], file.name || 'image.jpg', {
+                type: 'image/jpeg',
+                lastModified: file.lastModified,
+            });
+        }
     }
 
     return file;

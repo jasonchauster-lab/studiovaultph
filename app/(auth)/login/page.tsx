@@ -331,7 +331,7 @@ function LoginContent() {
                                 <label htmlFor="password" id="password-label" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest">Password</label>
                                 {!isSignUp && (
                                     <Link href="/forgot-password" gap-2 className="text-[10px] text-slate-600 hover:text-burgundy transition-all font-bold uppercase tracking-widest">
-                                        Recover Key
+                                        Forgot Password
                                     </Link>
                                 )}
                             </div>

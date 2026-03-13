@@ -185,7 +185,8 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
                 else if (b.payment_status === 'submitted' && b.status === 'pending') txType = 'Booking (Verification)'
 
                 transactions.push({
-                    date: slot?.date && slot?.start_time ? `${slot.date}T${slot.start_time}+08:00` : b.created_at,
+                    date: b.created_at,
+                    booking_date: slot?.date && slot?.start_time ? `${slot.date}T${slot.start_time}+08:00` : undefined,
                     type: txType,
                     client: clientName,
                     instructor: instructorName,

@@ -76,7 +76,7 @@ export default async function StudioHistoryPage() {
                 {/* Header */}
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div>
-                        <h1 className="text-3xl font-serif font-bold text-charcoal-900 mb-1">Rental History</h1>
+                        <h1 className="text-3xl sm:text-4xl font-serif font-bold text-charcoal-900 mb-1">Rental History</h1>
                         <p className="text-charcoal-600 text-sm">Past sessions and earnings for your studio.</p>
                     </div>
                     <Link

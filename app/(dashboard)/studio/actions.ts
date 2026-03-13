@@ -1,6 +1,7 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { uploadContentType, normalizeImageFile } from '@/lib/utils/image-utils'
 import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
@@ -575,6 +576,60 @@ export async function updateStudio(formData: FormData) {
         return { error: 'All fields are required (including Full Address and Google Maps Link)' }
     }
 
+    const adminSupabase = createAdminClient()
+    const timestamp = Date.now()
+
+    // Upload logo via admin client (bypasses RLS)
+    let newLogoUrl: string | null = null
+    const logoFile = formData.get('logo') as File
+    if (logoFile && logoFile.size > 0) {
+        try {
+            const normalizedLogo = await normalizeImageFile(logoFile)
+            const ext = normalizedLogo.name.split('.').pop() || 'jpg'
+            const path = `studios/${studioId}/logo_${timestamp}.${ext}`
+            const { error: logoErr } = await adminSupabase.storage.from('avatars').upload(path, normalizedLogo, {
+                contentType: uploadContentType(normalizedLogo),
+                upsert: true,
+            })
+            if (!logoErr) {
+                const { data: { publicUrl } } = adminSupabase.storage.from('avatars').getPublicUrl(path)
+                newLogoUrl = publicUrl
+            } else {
+                console.error('Logo upload error:', logoErr)
+            }
+        } catch (err) {
+            console.error('Logo normalisation error:', err)
+        }
+    }
+
+    // Upload new space photos via admin client
+    const existingPhotosJson = formData.get('existingPhotos') as string
+    const existingPhotos: string[] = existingPhotosJson ? JSON.parse(existingPhotosJson) : []
+    const newPhotoFiles = formData.getAll('newSpacePhoto') as File[]
+    const additionalPhotoUrls: string[] = []
+
+    for (let i = 0; i < newPhotoFiles.length; i++) {
+        const file = newPhotoFiles[i]
+        if (!file || file.size === 0) continue
+        try {
+            const normalizedPhoto = await normalizeImageFile(file)
+            const ext = normalizedPhoto.name.split('.').pop() || 'jpg'
+            const path = `studios/${studioId}/space_${timestamp}_${i}.${ext}`
+            const { error: photoErr } = await adminSupabase.storage.from('avatars').upload(path, normalizedPhoto, {
+                contentType: uploadContentType(normalizedPhoto),
+                upsert: true,
+            })
+            if (!photoErr) {
+                const { data: { publicUrl } } = adminSupabase.storage.from('avatars').getPublicUrl(path)
+                additionalPhotoUrls.push(publicUrl)
+            } else {
+                console.error('Space photo upload error:', photoErr)
+            }
+        } catch (err) {
+            console.error('Space photo normalisation error:', err)
+        }
+    }
+
     const updateData: any = {
         name,
         location,
@@ -590,15 +645,11 @@ export async function updateStudio(formData: FormData) {
         amenities: formData.getAll('amenities') as string[]
     }
 
-    const logoUrl = formData.get('logoUrl') as string
-    if (logoUrl) {
-        updateData.logo_url = logoUrl
+    if (newLogoUrl) {
+        updateData.logo_url = newLogoUrl
     }
 
-    const spacePhotosJson = formData.get('spacePhotosUrls') as string
-    if (spacePhotosJson) {
-        updateData.space_photos_urls = JSON.parse(spacePhotosJson)
-    }
+    updateData.space_photos_urls = [...existingPhotos, ...additionalPhotoUrls]
 
     const { error } = await supabase
         .from('studios')

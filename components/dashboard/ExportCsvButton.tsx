@@ -84,9 +84,9 @@ export default function ExportCsvButton({ data, filename = 'transactions' }: { d
     return (
         <button
             onClick={handleExport}
-            className="h-14 bg-white text-charcoal px-8 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] flex items-center gap-3 border border-border-grey hover:bg-off-white transition-all shadow-tight active:scale-95 whitespace-nowrap"
+            className="h-12 sm:h-14 w-full sm:w-auto bg-white text-charcoal px-8 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 border border-border-grey hover:bg-off-white transition-all shadow-tight active:scale-95 whitespace-nowrap"
         >
-            <Download className="w-4 h-4 text-charcoal/40" />
+            <Download className="w-3.5 h-3.5 sm:w-4 h-4 text-charcoal/40" />
             Export CSV
         </button>
     )

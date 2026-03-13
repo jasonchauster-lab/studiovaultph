@@ -68,7 +68,7 @@ export default function PayoutRequestModal({ studioId, availableBalance, payoutA
                 onClick={() => setIsOpen(true)}
                 disabled={availableBalance <= 0}
                 style={availableBalance > 0 ? { background: '#BC926E' } : {}}
-                className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${availableBalance > 0
+                className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-all text-sm ${availableBalance > 0
                     ? 'text-white hover:brightness-110'
                     : 'bg-white/20 text-white/50 cursor-not-allowed'
                     }`}
