@@ -149,7 +149,7 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                    <table className="w-full min-w-[600px] text-left">
                         <thead className="bg-cream-50 text-charcoal-500 text-xs uppercase tracking-wider">
                             <tr>
                                 <th className="px-6 py-4 font-medium">Date</th>
@@ -177,15 +177,31 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                                             )}
                                         </td>
                                         <td className="px-6 py-4 border-b border-cream-50">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap
                                                 ${tx.status === 'completed' || tx.status === 'approved' || tx.status === 'processed'
                                                     ? 'bg-green-100 text-green-800'
                                                     : tx.status === 'pending'
                                                         ? 'bg-yellow-100 text-yellow-800'
-                                                        : 'bg-gray-100 text-gray-800'
+                                                        : tx.status === 'cancelled_refunded'
+                                                            ? 'bg-blue-100 text-blue-800'
+                                                            : tx.status === 'cancelled_charged'
+                                                                ? 'bg-orange-100 text-orange-800'
+                                                                : tx.status === 'expired'
+                                                                    ? 'bg-red-100 text-red-800'
+                                                                    : tx.status === 'rejected'
+                                                                        ? 'bg-red-100 text-red-800'
+                                                                        : 'bg-gray-100 text-gray-800'
                                                 }
                                             `}>
-                                                {tx.status}
+                                                {tx.status === 'cancelled_refunded' ? 'Cancelled – Refunded'
+                                                    : tx.status === 'cancelled_charged' ? 'Cancelled – No Refund'
+                                                    : tx.status === 'completed' ? 'Completed'
+                                                    : tx.status === 'pending' ? 'Pending'
+                                                    : tx.status === 'approved' ? 'Approved'
+                                                    : tx.status === 'processed' ? 'Processed'
+                                                    : tx.status === 'expired' ? 'Expired'
+                                                    : tx.status === 'rejected' ? 'Rejected'
+                                                    : tx.status}
                                             </span>
                                         </td>
                                         <td className={`px-6 py-4 text-sm font-medium text-right border-b border-cream-50 ${tx.amount > 0 ? 'text-green-600' : 'text-charcoal-900'}`}>

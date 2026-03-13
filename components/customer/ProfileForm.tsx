@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { updateProfile } from '@/app/(dashboard)/customer/profile/actions'
-import { Loader2, Camera, User, FileText } from 'lucide-react'
+import { Loader2, Camera, Save, User, FileText } from 'lucide-react'
 import { isValidPhone, isValidEmail, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
 import WaiverUpload from '@/components/customer/WaiverUpload'
@@ -194,7 +194,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                         name="bio"
                         defaultValue={profile?.bio || ''}
                         rows={6}
-                        placeholder="Tell others about your movement journey, teaching style, or philosophy..."
+                        placeholder="Tell studios and instructors about your fitness journey, goals, or philosophy..."
                         className="w-full px-6 py-6 bg-white/40 border border-white/60 rounded-[2rem] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 resize-none transition-all leading-relaxed shadow-sm"
                     />
                 </div>
@@ -205,7 +205,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                 <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Medical Conditions</label>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {['Scoliosis', 'Obesity', 'Herniated Disc', 'Post-partum', 'Chronic Back Pain', 'Hypertension', 'Diabetes', 'Asthma', 'Osteoporosis', 'Others'].map((condition) => (
-                        <label key={condition} className="group flex items-center gap-4 p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-gold/30 cursor-pointer transition-all duration-500 shadow-sm relative overflow-hidden">
+                        <label key={condition} className="group flex items-center gap-4 p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-gold/30 cursor-pointer transition-all duration-500 shadow-sm relative">
                             <input
                                 type="checkbox"
                                 name="medical_conditions"
@@ -310,7 +310,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                     disabled={isLoading}
                     className="w-full sm:w-auto px-16 py-6 bg-charcoal text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
                 >
-                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-gold" /> : <Camera className="w-5 h-5 text-gold stroke-[2px]" />}
+                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-gold" /> : <Save className="w-5 h-5 text-gold stroke-[2px]" />}
                     {isLoading ? 'Saving...' : 'Save Changes'}
                 </button>
             </div>
