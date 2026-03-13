@@ -318,9 +318,9 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                     {existingPhotos.length > 0 && (
                         <div className="mb-6">
                             <h3 className="text-sm font-medium text-charcoal-700 mb-3">Current Photos</h3>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none no-scrollbar pb-4 sm:pb-0 sm:grid-cols-4 gap-4 -mx-2 px-2 sm:mx-0 sm:px-0">
                                 {existingPhotos.map((url, index) => (
-                                    <div key={'ext_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
+                                    <div key={'ext_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm shrink-0 w-[200px] sm:w-auto snap-center">
                                         <a href={url} target="_blank" rel="noopener noreferrer">
                                             <Image
                                                 src={url}
@@ -346,11 +346,11 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                     {newSpacePhotos.length > 0 && (
                         <div className="mb-6">
                             <h3 className="text-sm font-medium text-charcoal-700 mb-3">New Photos (Ready to Upload)</h3>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none no-scrollbar pb-4 sm:pb-0 sm:grid-cols-4 gap-4 -mx-2 px-2 sm:mx-0 sm:px-0">
                                 {newSpacePhotos.map((file, index) => {
                                     const objectUrl = URL.createObjectURL(file);
                                     return (
-                                        <div key={'new_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
+                                        <div key={'new_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm shrink-0 w-[200px] sm:w-auto snap-center">
                                             <a href={objectUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
                                                 <img
                                                     src={objectUrl}

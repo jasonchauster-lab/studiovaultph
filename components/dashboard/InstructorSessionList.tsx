@@ -113,19 +113,19 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     }), [filteredBookings, now]);
 
     return (
-        <div className="space-y-20">
-            <div className="earth-card p-4 inline-block bg-white">
+        <div className="space-y-12 sm:space-y-20">
+            <div className="sm:earth-card sm:p-4 w-full sm:inline-block bg-transparent sm:bg-white overflow-visible">
                 <BookingFilter onFilterChange={setFilters} />
             </div>
 
             {/* Active Sessions List */}
             <section>
-                <div className="flex items-center justify-between mb-10">
-                    <div className="flex items-center gap-4">
-                        <Calendar className="w-6 h-6 text-forest" />
-                        <h2 className="text-3xl font-serif text-charcoal tracking-tighter">My Sessions</h2>
+                <div className="px-6 sm:px-0 flex items-center justify-between mb-8 sm:mb-10">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest" />
+                        <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter">My Sessions</h2>
                     </div>
-                    <div className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em]">{activeBookings.length} SESSIONS FOUND</div>
+                    <div className="text-[8px] sm:text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em]">{activeBookings.length} SESSIONS FOUND</div>
                 </div>
 
                 {activeBookings.length === 0 ? (
@@ -140,107 +140,128 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             const client = getFirst(booking.client)
 
                             return (
-                                <div key={booking.id} className="earth-card p-8 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative">
-                                    <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
-                                        <div className="flex items-center gap-6 flex-1 min-w-0">
-                                            <Link href={`/studios/${studio?.id}`} className="w-16 h-16 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700">
-                                                <img
-                                                    src={studio?.logo_url || "/logo2.jpg"}
-                                                    alt={studio?.name || "Studio"}
-                                                    className="w-full h-full object-cover mix-blend-multiply"
-                                                />
-                                            </Link>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <Link href={`/studios/${studio?.id}`} className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] hover:text-gold transition-colors">
-                                                        {studio?.name || "Studio"}
+                                <div key={booking.id} className="earth-card p-4 sm:p-8 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative">
+                                    <div className="flex gap-4 sm:gap-8 overflow-hidden">
+                                        {/* Mobile Left-Rail Date */}
+                                        <div className="flex sm:hidden flex-col items-center justify-center bg-forest/5 rounded-lg w-16 shrink-0 py-3 border border-forest/10">
+                                            <span className="text-[8px] font-black text-forest uppercase tracking-widest mb-1">
+                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { month: 'short' })}
+                                            </span>
+                                            <span className="text-xl font-serif text-charcoal leading-none">
+                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { day: 'numeric' })}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex flex-col lg:flex-row justify-between items-start gap-4 lg:gap-8">
+                                                <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
+                                                    <Link href={`/studios/${studio?.id}`} className="w-12 h-12 sm:w-16 sm:h-16 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700">
+                                                        <img
+                                                            src={studio?.logo_url || "/logo2.jpg"}
+                                                            alt={studio?.name || "Studio"}
+                                                            className="w-full h-full object-cover mix-blend-multiply"
+                                                        />
                                                     </Link>
-                                                    <div className="flex items-center gap-2 bg-[#FFF1B5]/40 px-2 py-0.5 rounded border border-[#43302E]/5 whitespace-nowrap">
-                                                        <span className="text-[9px] font-black text-[#43302E]">1/1</span>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                                                            <Link href={`/studios/${studio?.id}`} className="text-[9px] sm:text-[11px] font-black text-charcoal uppercase tracking-[0.2em] hover:text-gold transition-colors truncate">
+                                                                {studio?.name || "Studio"}
+                                                            </Link>
+                                                            <div className="flex items-center gap-2 bg-[#FFF1B5]/40 px-1.5 py-0.5 rounded border border-[#43302E]/5 whitespace-nowrap">
+                                                                <span className="text-[8px] sm:text-[9px] font-black text-[#43302E]">1/1</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-forest shrink-0" />
+                                                            <span className="text-[8px] sm:text-[10px] text-slate font-black uppercase tracking-[0.2em] truncate">
+                                                                {studio?.location || "LOCATION UNKNOWN"}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <MapPin className="w-3 h-3 text-forest" />
-                                                    <span className="text-[10px] text-slate font-black uppercase tracking-[0.2em] truncate">
-                                                        {studio?.location || "LOCATION UNKNOWN"}
+
+                                                <div className="hidden sm:block text-right shrink-0 bg-off-white p-6 rounded-lg border border-border-grey min-w-[180px] shadow-tight group-hover:bg-white transition-all duration-300">
+                                                    <p className="text-xl font-serif text-charcoal tracking-tighter leading-tight">
+                                                        {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                                    </p>
+                                                    <p className="text-[10px] text-forest font-black mt-2 flex items-center justify-end gap-2 uppercase tracking-[0.2em]">
+                                                        <Clock className="w-3.5 h-3.5" />
+                                                        {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                    </p>
+                                                </div>
+
+                                                {/* Mobile Time */}
+                                                <div className="flex sm:hidden items-center gap-2 bg-off-white/50 px-3 py-1.5 rounded-full border border-border-grey shadow-sm">
+                                                    <Clock className="w-3 h-3 text-forest" />
+                                                    <span className="text-[9px] font-black text-charcoal uppercase tracking-widest">
+                                                        {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <div className="text-right shrink-0 bg-off-white p-6 rounded-lg border border-border-grey min-w-[180px] shadow-tight group-hover:bg-white transition-all duration-300">
-                                            <p className="text-xl font-serif text-charcoal tracking-tighter leading-tight">
-                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
-                                            </p>
-                                            <p className="text-[10px] text-forest font-black mt-2 flex items-center justify-end gap-2 uppercase tracking-[0.2em]">
-                                                <Clock className="w-3.5 h-3.5" />
-                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                            </p>
-                                        </div>
                                     </div>
 
-                                    {client && client.id !== currentUserId && (
-                                        <div className="mt-8 pt-8 border-t border-white/60">
+                                    {/* Mobile Details Stack (Student + Equipment) */}
+                                    <div className="mt-4 sm:mt-8 pt-4 sm:pt-8 border-t border-white/60 sm:border-t-0 sm:pt-0 sm:mt-0 flex flex-col gap-4">
+                                        {client && client.id !== currentUserId && (
                                             <button
                                                 onClick={() => setSelectedClient(client)}
-                                                className="flex items-center gap-4 group/student transition-all hover:-translate-y-0.5"
+                                                className="flex items-center gap-3 sm:gap-4 group/student transition-all hover:-translate-y-0.5"
                                             >
-                                                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 group-hover/student:scale-110 transition-transform duration-700">
+                                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 group-hover/student:scale-110 transition-transform duration-700">
                                                     <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
                                                 </div>
-                                                <div className="flex flex-col items-start">
-                                                    <span className="text-[9px] text-slate font-black uppercase tracking-[0.3em] mb-0.5">Client</span>
-                                                    <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] group-hover/student:text-forest transition-colors">{client.full_name || 'N/A'}</span>
+                                                <div className="flex flex-col items-start min-w-0">
+                                                    <span className="text-[7px] sm:text-[9px] text-slate font-black uppercase tracking-[0.3em] mb-0.5">Client</span>
+                                                    <span className="text-[9px] sm:text-[11px] font-black text-charcoal uppercase tracking-[0.2em] group-hover/student:text-forest transition-colors truncate w-full text-left">{client.full_name || 'N/A'}</span>
                                                 </div>
                                                 {client.medical_conditions && (
-                                                    <span className="ml-4 px-3 py-1 bg-red-50 text-red-600 text-[8px] font-black uppercase rounded-full border border-red-200 animate-pulse flex items-center gap-1.5 tracking-widest shadow-tight">
-                                                        <AlertCircle className="w-3 h-3" />
-                                                        MEDICAL CONDITIONS
+                                                    <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[6px] sm:text-[8px] font-black uppercase rounded-full border border-red-200 animate-pulse flex items-center gap-1 tracking-widest shadow-tight whitespace-nowrap">
+                                                        <AlertCircle className="w-2.5 h-2.5" />
+                                                        MEDICAL
                                                     </span>
                                                 )}
                                             </button>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-8 pt-8 border-t border-white/60 gap-6">
-                                        <div className="flex items-center gap-6">
-                                            <div className="flex items-center gap-2">
-                                                <Box className="w-3.5 h-3.5 text-forest" />
-                                                <span className="text-[10px] font-black text-slate uppercase tracking-[0.2em]">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:mt-8 sm:pt-8 sm:border-t sm:border-white/60">
+                                            <div className="flex items-center gap-3 bg-cream-50/50 sm:bg-transparent px-3 py-2 sm:p-0 rounded-lg sm:rounded-none border border-border-grey/20 sm:border-none">
+                                                <Box className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-forest shrink-0" />
+                                                <span className="text-[8px] sm:text-[10px] font-black text-slate uppercase tracking-[0.2em]">
                                                     {Array.isArray(slot?.equipment) && slot.equipment.length > 0
                                                         ? `${slot.equipment[0]} (${booking.quantity || 1})`
                                                         : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
                                                 </span>
                                             </div>
-                                        </div>
 
-                                        <div className="flex items-center gap-3">
-                                            {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
-                                                <button
-                                                    onClick={() => setCancellingBooking(booking)}
-                                                    className="w-10 h-10 bg-off-white text-red-600 border border-border-grey rounded-full hover:bg-red-600 hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight"
-                                                    title="Cancel Session"
-                                                >
-                                                    <X className="w-4 h-4" />
-                                                </button>
-                                            )}
-                                            {client && client.id !== currentUserId && (
-                                                <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="MESSAGE CLIENT" variant="antigravity" />
-                                            )}
-                                            {studio && studio.owner_id && (
-                                                <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={studio.owner_id} partnerName={studio.name || 'Studio'} label="MESSAGE STUDIO" variant="antigravity-gold" />
-                                            )}
-                                            {booking.status === 'approved' && (
-                                                <a
-                                                    href={studio?.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((studio?.name || "") + " " + (studio?.location || ""))}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="h-10 px-5 bg-white text-forest border border-forest/20 rounded-lg hover:bg-forest hover:text-white transition-all flex items-center gap-2 shadow-tight text-[10px] font-black uppercase tracking-[0.2em]"
-                                                >
-                                                    <Navigation className="w-3.5 h-3.5" />
-                                                    Directions
-                                                </a>
-                                            )}
+                                            <div className="flex items-center gap-2 sm:gap-3">
+                                                {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
+                                                    <button
+                                                        onClick={() => setCancellingBooking(booking)}
+                                                        className="w-8 h-8 sm:w-10 sm:h-10 bg-off-white text-red-600 border border-border-grey rounded-full hover:bg-red-600 hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight"
+                                                        title="Cancel Session"
+                                                    >
+                                                        <X className="w-3.5 h-3.5 sm:w-4 h-4" />
+                                                    </button>
+                                                )}
+                                                {client && client.id !== currentUserId && (
+                                                    <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="MESSAGE CLIENT" variant="antigravity" />
+                                                )}
+                                                {studio && studio.owner_id && (
+                                                    <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={studio.owner_id} partnerName={studio.name || 'Studio'} label="MESSAGE STUDIO" variant="antigravity-gold" />
+                                                )}
+                                                {booking.status === 'approved' && (
+                                                    <a
+                                                        href={studio?.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((studio?.name || "") + " " + (studio?.location || ""))}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="h-8 sm:h-10 px-3 sm:px-5 bg-white text-forest border border-forest/20 rounded-lg hover:bg-forest hover:text-white transition-all flex items-center gap-2 shadow-tight text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em]"
+                                                    >
+                                                        <Navigation className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
+                                                        Directions
+                                                    </a>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -253,10 +274,10 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             {/* Past Sessions List */}
             {historicalBookings.length > 0 && (
                 <section>
-                    <div className="flex items-center justify-between mb-10">
-                        <div className="flex items-center gap-4">
-                            <Clock className="w-6 h-6 text-charcoal/40" />
-                            <h2 className="text-3xl font-serif text-charcoal/80 tracking-tighter">Past Sessions</h2>
+                    <div className="px-6 sm:px-0 flex items-center justify-between mb-8 sm:mb-10">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                            <Clock className="w-5 h-5 sm:w-6 h-6 text-charcoal/40" />
+                            <h2 className="text-2xl sm:text-3xl font-serif text-charcoal/80 tracking-tighter">Past Sessions</h2>
                         </div>
                     </div>
 
@@ -267,72 +288,98 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             const client = getFirst(booking.client)
 
                             return (
-                                <div key={booking.id} className="glass-card p-8 border border-white/60 bg-white/20 hover:bg-white/40 transition-all duration-700 shadow-sm group relative">
-                                    <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
-                                        <div className="flex items-center gap-6 flex-1 min-w-0">
-                                            <Link href={`/studios/${studio?.id}`} className="w-16 h-16 rounded-[20px] overflow-hidden border border-white bg-white/40 shadow-sm shrink-0 grayscale group-hover:grayscale-0 transition-all duration-700">
-                                                <img
-                                                    src={studio?.logo_url || "/logo2.jpg"}
-                                                    alt={studio?.name || "Studio"}
-                                                    className="w-full h-full object-cover mix-blend-multiply"
-                                                />
-                                            </Link>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <Link href={`/studios/${studio?.id}`} className="text-[11px] font-black text-charcoal/60 uppercase tracking-[0.2em] group-hover:text-gold transition-colors">
-                                                        {studio?.name || "Studio"}
+                                <div key={booking.id} className="glass-card p-4 sm:p-8 border border-white/60 bg-white/20 hover:bg-white/40 transition-all duration-700 shadow-sm group relative">
+                                    <div className="flex gap-4 sm:gap-8 overflow-hidden">
+                                        {/* Mobile Left-Rail Date */}
+                                        <div className="flex sm:hidden flex-col items-center justify-center bg-charcoal/5 rounded-lg w-16 shrink-0 py-3 border border-charcoal/10">
+                                            <span className="text-[8px] font-black text-charcoal/40 uppercase tracking-widest mb-1">
+                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { month: 'short' })}
+                                            </span>
+                                            <span className="text-xl font-serif text-charcoal/80 leading-none">
+                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { day: 'numeric' })}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex flex-col lg:flex-row justify-between items-start gap-4 lg:gap-8">
+                                                <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
+                                                    <Link href={`/studios/${studio?.id}`} className="w-12 h-12 sm:w-16 sm:h-16 rounded-[12px] overflow-hidden border border-white bg-white/40 shadow-sm shrink-0 grayscale group-hover:grayscale-0 transition-all duration-700">
+                                                        <img
+                                                            src={studio?.logo_url || "/logo2.jpg"}
+                                                            alt={studio?.name || "Studio"}
+                                                            className="w-full h-full object-cover mix-blend-multiply"
+                                                        />
                                                     </Link>
-                                                    <div className="flex items-center gap-2 bg-[#43302E]/5 px-2 py-0.5 rounded border border-[#43302E]/10 whitespace-nowrap group-hover:bg-[#FFF1B5]/20 transition-all">
-                                                        <span className="text-[9px] font-black text-[#43302E]/60 group-hover:text-[#43302E]">1/1</span>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2 text-left">
+                                                            <Link href={`/studios/${studio?.id}`} className="text-[9px] sm:text-[11px] font-black text-charcoal/60 uppercase tracking-[0.2em] group-hover:text-gold transition-colors truncate">
+                                                                {studio?.name || "Studio"}
+                                                            </Link>
+                                                            <div className="flex items-center gap-2 bg-[#43302E]/5 px-1.5 py-0.5 rounded border border-[#43302E]/10 whitespace-nowrap group-hover:bg-[#FFF1B5]/20 transition-all">
+                                                                <span className="text-[8px] sm:text-[9px] font-black text-[#43302E]/60 group-hover:text-[#43302E]">1/1</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-charcoal/40 shrink-0" />
+                                                            <span className="text-[8px] sm:text-[10px] text-charcoal/60 font-black uppercase tracking-[0.2em] truncate">
+                                                                {studio?.location || "N/A"}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <MapPin className="w-3 h-3 text-charcoal/40" />
-                                                    <span className="text-[10px] text-charcoal/60 font-black uppercase tracking-[0.2em] truncate">
-                                                        {studio?.location || "N/A"}
+
+                                                <div className="hidden sm:block text-right shrink-0 bg-white/40 p-6 rounded-[12px] border border-[var(--airy-border)] min-w-[180px]">
+                                                    <p className="text-xl font-serif text-charcoal/60 tracking-tighter leading-tight">
+                                                        {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                                    </p>
+                                                    <p className="text-[10px] text-charcoal/40 font-black mt-2 flex items-center justify-end gap-2 uppercase tracking-[0.2em]">
+                                                        {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                    </p>
+                                                </div>
+
+                                                {/* Mobile Time */}
+                                                <div className="flex sm:hidden items-center gap-2 bg-charcoal/5 px-3 py-1.5 rounded-full border border-charcoal/10 shadow-tight">
+                                                    <Clock className="w-3 h-3 text-charcoal/40" />
+                                                    <span className="text-[9px] font-black text-charcoal/60 uppercase tracking-widest">
+                                                        {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <div className="text-right shrink-0 bg-white/40 p-6 rounded-[12px] border border-[var(--airy-border)] min-w-[180px]">
-                                            <p className="text-xl font-serif text-charcoal/60 tracking-tighter leading-tight">
-                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
-                                            </p>
-                                            <p className="text-[10px] text-charcoal/40 font-black mt-2 flex items-center justify-end gap-2 uppercase tracking-[0.2em]">
-                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                            </p>
-                                        </div>
                                     </div>
 
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-8 pt-8 border-t border-white/60 gap-6">
-                                        <div className="flex items-center gap-6">
-                                            <div className="flex items-center gap-2">
-                                                <Box className="w-3.5 h-3.5 text-charcoal/40" />
-                                                <span className="text-[10px] font-black text-charcoal/60 uppercase tracking-[0.2em]">
-                                                    {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                                                        ? `${slot.equipment[0]} (${booking.quantity || 1})`
-                                                        : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
-                                                </span>
-                                            </div>
-                                            {client && (
-                                                <div className="flex items-center gap-3">
-                                                    <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-6 h-6 rounded-full group-hover:grayscale-0 grayscale group-hover:opacity-100 opacity-60 transition-all duration-700" />
-                                                    <span className="text-[9px] font-black text-charcoal/60 uppercase tracking-[0.2em]">{client.full_name}</span>
+                                    {/* Mobile Details Stack */}
+                                    <div className="mt-4 sm:mt-8 pt-4 sm:pt-8 border-t border-white/60 sm:border-t-0 sm:pt-0 sm:mt-0 flex flex-col gap-4">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:mt-8 sm:pt-8 sm:border-t sm:border-white/60">
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                                                <div className="flex items-center gap-2 bg-charcoal/5 sm:bg-transparent px-3 py-2 sm:p-0 rounded-lg sm:rounded-none border border-charcoal/10 sm:border-none">
+                                                    <Box className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-charcoal/40 shrink-0" />
+                                                    <span className="text-[8px] sm:text-[10px] font-black text-charcoal/60 uppercase tracking-[0.2em]">
+                                                        {Array.isArray(slot?.equipment) && slot.equipment.length > 0
+                                                            ? `${slot.equipment[0]} (${booking.quantity || 1})`
+                                                            : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
+                                                    </span>
                                                 </div>
-                                            )}
-                                        </div>
+                                                {client && (
+                                                    <div className="flex items-center gap-3">
+                                                        <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-6 sm:w-7 h-6 sm:h-7 rounded-full group-hover:grayscale-0 grayscale group-hover:opacity-100 opacity-60 transition-all duration-700 border border-white" />
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[7px] sm:text-[8px] font-black text-charcoal/30 uppercase tracking-widest leading-none mb-0.5">Participant</span>
+                                                            <span className="text-[9px] sm:text-[10px] font-black text-charcoal/60 uppercase tracking-[0.2em] leading-none">{client.full_name}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
 
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex items-center gap-4">
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-3 items-end sm:items-center relative min-h-[40px] sm:min-h-0">
                                                 {booking.price_breakdown?.instructor_fee && (
-                                                    <div className="px-4 py-2 bg-forest/5 border border-forest/10 rounded-full flex items-center gap-2">
-                                                        <span className="text-[8px] font-black text-forest/40 uppercase tracking-widest">Earned</span>
-                                                        <span className="text-[11px] font-black text-forest tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                                                    <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-forest/5 border border-forest/10 rounded-full flex items-center gap-2">
+                                                        <span className="text-[7px] sm:text-[8px] font-black text-forest/40 uppercase tracking-widest">Earned</span>
+                                                        <span className="text-[10px] sm:text-[11px] font-black text-forest tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
                                                     </div>
                                                 )}
                                                 {booking.status === 'completed' && (
-                                                    <div className="flex items-center gap-3">
+                                                    <div className="sm:static absolute bottom-0 right-0">
                                                         {!booking.instructor_reviewed_studio ? (
                                                             <button
                                                                 onClick={() => setReviewTarget({
@@ -340,12 +387,12 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                     revieweeId: studio?.owner_id || '',
                                                                     revieweeName: studio?.name || 'Studio'
                                                                 })}
-                                                                className="h-10 bg-charcoal text-white px-6 rounded-full text-[9px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95"
+                                                                className="h-8 sm:h-10 bg-charcoal text-white px-4 sm:px-6 rounded-lg sm:rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 whitespace-nowrap"
                                                             >
                                                                 LEAVE FEEDBACK
                                                             </button>
                                                         ) : (
-                                                            <span className="text-[9px] text-sage font-black uppercase tracking-[0.3em] bg-sage/5 px-4 py-2 rounded-full border border-sage/20">FEEDBACK SUBMITTED</span>
+                                                            <span className="text-[8px] sm:text-[9px] text-sage font-black uppercase tracking-[0.3em] bg-sage/5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-sage/20 whitespace-nowrap">FEEDBACK SUBMITTED</span>
                                                         )}
                                                     </div>
                                                 )}

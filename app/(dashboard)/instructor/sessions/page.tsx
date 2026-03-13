@@ -29,7 +29,7 @@ export default async function InstructorSessionsPage() {
         .order('created_at', { ascending: false })
 
     return (
-        <div className="p-8 lg:p-12 max-w-7xl mx-auto space-y-16">
+        <div className="px-6 sm:p-8 lg:p-12 max-w-7xl mx-auto space-y-16">
             <div className="relative">
                 <Link
                     href="/instructor"

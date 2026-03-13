@@ -101,16 +101,16 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
                         <p className="text-charcoal/20 text-[10px] font-black uppercase tracking-[0.4em] italic">No visual records captured yet</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none no-scrollbar pb-4 sm:pb-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 -mx-4 px-4 sm:mx-0 sm:px-0">
                         {images.map((url, index) => (
-                            <div key={index} className="relative group aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-white/40 border border-white/60 shadow-sm transition-all duration-700 hover:shadow-cloud hover:-translate-y-1">
+                            <div key={index} className="relative group aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-white/40 border border-white/60 shadow-sm transition-all duration-700 hover:shadow-cloud hover:-translate-y-1 shrink-0 w-[280px] sm:w-auto snap-center">
                                 <Image
                                     src={url}
                                     alt={`Teaching photo ${index + 1}`}
                                     fill
                                     className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110"
                                 />
-                                <div className="absolute inset-0 bg-charcoal/20 opacity-0 group-hover:opacity-100 transition-all duration-700 backdrop-blur-[2px] flex items-center justify-center">
+                                <div className="absolute inset-0 bg-charcoal/20 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-700 backdrop-blur-[2px] flex items-center justify-center">
                                     <button
                                         onClick={() => handleDelete(url)}
                                         className="p-5 bg-white/40 hover:bg-white text-charcoal rounded-full transition-all duration-500 backdrop-blur-md shadow-lg scale-90 group-hover:scale-100"

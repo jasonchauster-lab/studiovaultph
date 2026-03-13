@@ -259,7 +259,7 @@ export default async function CustomerDashboard({
                                     <p className="text-muted-burgundy max-w-sm mx-auto text-sm leading-relaxed">Try adjusting your filters, location, or checking a different date.</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {instructors.map(inst => {
                                         const hasVerifiedCert = inst.certifications?.some((c: any) => c.verified)
                                         return (
@@ -368,12 +368,12 @@ export default async function CustomerDashboard({
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {studios?.map(studio => (
-                                    <div key={studio.id} className="marketplace-card earth-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 group">
+                                    <div key={studio.id} className="marketplace-card earth-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 group flex flex-col">
 
-                                        {/* ── Banner Image — aspect-video, object-cover ── */}
-                                        <div className="relative aspect-video overflow-hidden bg-off-white">
+                                        {/* ── Banner Image — aspect-[16/9] — object-cover ── */}
+                                        <div className="relative aspect-[16/9] overflow-hidden bg-off-white">
                                             {studio.logo_url ? (
                                                 <Image
                                                     src={studio.logo_url}
@@ -390,26 +390,28 @@ export default async function CustomerDashboard({
                                                 </div>
                                             )}
 
-                                            {/* Location badge — top left */}
+                                            {/* Location overlay — top left */}
                                             <div className="absolute top-3 left-3 z-10">
-                                                <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-tight border border-white/60">
-                                                    <MapPin className="w-3 h-3 text-burgundy shrink-0" />
-                                                    <span className="text-[10px] font-bold text-burgundy truncate max-w-[140px]">{studio.location}</span>
+                                                <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-tight border border-white/60">
+                                                    <MapPin className="w-2.5 h-2.5 text-burgundy shrink-0" />
+                                                    <span className="text-[9px] font-bold text-burgundy truncate max-w-[120px] uppercase tracking-wider">{studio.location}</span>
                                                 </div>
                                             </div>
 
-                                            {/* ── Studio logo overlapping bottom edge of banner ── */}
-                                            <div className="instructor-trust-avatar">
-                                                <AvatarWithFallback
-                                                    src={studio.logo_url}
-                                                    alt={studio.name}
-                                                    initials={studio.name.slice(0, 1)}
-                                                />
+                                            {/* Studio small logo overlay — bottom left circular */}
+                                            <div className="absolute bottom-3 left-3 z-10 hidden sm:block">
+                                                <div className="w-10 h-10 rounded-full border-2 border-white shadow-md overflow-hidden bg-white">
+                                                    <AvatarWithFallback
+                                                        src={studio.logo_url}
+                                                        alt={studio.name}
+                                                        initials={studio.name.slice(0, 1)}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 
                                         {/* ── Card Body ── */}
-                                        <div className="p-6 pt-10 flex flex-col gap-y-3">
+                                        <div className="p-5 flex flex-col flex-1 gap-y-3">
 
                                             {/* Studio name + rating */}
                                             <div className="flex items-start justify-between gap-3">
@@ -422,20 +424,24 @@ export default async function CustomerDashboard({
                                             </div>
 
                                             {/* Description */}
-                                            <p className="text-sm text-muted-burgundy leading-relaxed line-clamp-2">
+                                            <p className="text-xs sm:text-sm text-muted-burgundy leading-relaxed line-clamp-2 italic">
                                                 {studio.description || 'A premiere pilates studio dedicated to your well-being.'}
                                             </p>
 
-                                            {/* Equipment count + Book Now CTA */}
-                                            <div className="flex items-center justify-between pt-3 mt-auto">
-                                                <div className="flex items-center gap-1.5 bg-buttermilk/60 px-3 py-1.5 rounded-full border border-buttermilk">
-                                                    <span className="text-[11px] font-bold text-burgundy uppercase tracking-wide">
+                                            {/* Features/Equipment */}
+                                            <div className="flex flex-wrap gap-2 pt-1 mt-auto">
+                                                <div className="flex items-center gap-1.5 bg-buttermilk/40 px-2.5 py-1 rounded-full border border-buttermilk/50">
+                                                    <span className="text-[9px] font-bold text-burgundy uppercase tracking-widest leading-none">
                                                         {studio.reformers_count} Reformers
                                                     </span>
                                                 </div>
+                                            </div>
+
+                                            {/* Book Now Button — Full width at bottom */}
+                                            <div className="pt-2">
                                                 <Link
                                                     href={`/studios/${studio.id}`}
-                                                    className="btn-book-now"
+                                                    className="block w-full text-center py-3 rounded-xl bg-burgundy text-white text-[11px] font-bold uppercase tracking-widest hover:bg-burgundy/90 transition-all shadow-sm"
                                                 >
                                                     Book Now
                                                 </Link>
@@ -470,7 +476,7 @@ export default async function CustomerDashboard({
                                     <p className="text-muted-burgundy max-w-sm mx-auto text-sm leading-relaxed">Try adjusting your filters or checking a different date.</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                     {slots.map(slot => (
                                         <div key={slot.id} className="h-full">
                                             <SlotCard slot={slot} />
