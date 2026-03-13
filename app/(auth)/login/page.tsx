@@ -33,12 +33,10 @@ function LoginContent() {
         setLoading(true)
         setMessage(null)
 
-        // When the user is on the sign-up tab with a role already selected,
-        // pass it as `role_intent` so the callback can skip the welcome screen.
         const params = new URLSearchParams()
-        if (isSignUp && role) {
-            params.set('role_intent', role)
-        }
+        if (isSignUp && role) params.set('role_intent', role)
+        const ref = searchParams.get('ref')
+        if (ref) params.set('ref', ref)
         const callbackUrl = `${window.location.origin}/auth/callback${params.toString() ? '?' + params.toString() : ''}`
 
         const { error } = await supabase.auth.signInWithOAuth({
@@ -81,6 +79,7 @@ function LoginContent() {
             }
 
             // HANDLE SIGN UP
+            const refCode = searchParams.get('ref')
             const { error } = await supabase.auth.signUp({
                 email,
                 password,
@@ -89,9 +88,10 @@ function LoginContent() {
                         full_name: fullName,
                         email: email.toLowerCase(),
                         role: role,
-                        date_of_birth: birthday
+                        date_of_birth: birthday,
+                        ...(refCode ? { referred_by_code: refCode } : {}),
                     },
-                    emailRedirectTo: `${window.location.origin}/auth/callback?next=/verified`
+                    emailRedirectTo: `${window.location.origin}/auth/callback?next=/verified${refCode ? '&ref=' + refCode : ''}`
                 }
             })
 

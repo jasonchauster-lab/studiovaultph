@@ -10,6 +10,8 @@ import BookSessionButton from '@/components/customer/BookSessionButton'
 import AvatarWithFallback from '@/components/customer/AvatarWithFallback'
 import StarRating from '@/components/reviews/StarRating'
 import { getManilaTodayStr, toManilaTimeString } from '@/lib/timezone'
+import ReferralCard from '@/components/customer/ReferralCard'
+import { headers } from 'next/headers'
 
 interface SearchParams {
     q?: string;
@@ -35,7 +37,7 @@ export default async function CustomerDashboard({
 
     const { data: profile } = await supabase
         .from('profiles')
-        .select('date_of_birth, contact_number')
+        .select('date_of_birth, contact_number, referral_code')
         .eq('id', user.id)
         .single()
 
@@ -479,6 +481,19 @@ export default async function CustomerDashboard({
                     )}
 
                 </div>
+
+                {/* ══════════════════════════════════════
+                    REFERRAL CARD
+                ══════════════════════════════════════ */}
+                {profile?.referral_code && (
+                    <div className="mt-10">
+                        <ReferralCard
+                            referralCode={profile.referral_code}
+                            origin={(() => { const h = headers(); const host = h.get('host') ?? 'localhost:3000'; const proto = h.get('x-forwarded-proto') ?? 'http'; return `${proto}://${host}`; })()}
+                        />
+                    </div>
+                )}
+
             </div>
         </div>
     )

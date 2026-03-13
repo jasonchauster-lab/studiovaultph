@@ -1115,14 +1115,22 @@ export async function getCustomerWalletDetails() {
 
     // 1. Process Wallet Top-ups/Adjustments
     walletActions?.forEach(wa => {
-        if (wa.status === 'approved' || wa.type === 'admin_adjustment' || wa.type === 'refund') {
+        if (wa.status === 'approved' || wa.type === 'admin_adjustment' || wa.type === 'refund' || wa.type === 'referral_bonus') {
+            const typeLabel = wa.type === 'admin_adjustment' ? 'Direct Adjustment'
+                : wa.type === 'refund' ? 'Booking Refund'
+                : wa.type === 'referral_bonus' ? 'Referral Bonus'
+                : 'Wallet Top-Up'
+            const detailsFallback = wa.type === 'admin_adjustment' ? 'Manual balance adjustment'
+                : wa.type === 'refund' ? 'Refund for cancelled/declined booking'
+                : wa.type === 'referral_bonus' ? 'Your friend completed their first booking'
+                : 'Gcash/Bank Top-up'
             transactions.push({
                 id: wa.id,
                 date: wa.updated_at || wa.created_at,
-                type: wa.type === 'admin_adjustment' ? 'Direct Adjustment' : wa.type === 'refund' ? 'Booking Refund' : 'Wallet Top-Up',
-                amount: wa.amount, // Could be negative for deductions in admin_adjustment
+                type: typeLabel,
+                amount: wa.amount,
                 status: 'completed',
-                details: wa.admin_notes || (wa.type === 'admin_adjustment' ? 'Manual balance adjustment' : wa.type === 'refund' ? 'Refund for cancelled/declined booking' : 'Gcash/Bank Top-up')
+                details: wa.admin_notes || detailsFallback
             });
         }
     });

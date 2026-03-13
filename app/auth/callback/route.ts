@@ -12,6 +12,7 @@ export async function GET(request: Request) {
     // already selected a role on the sign-up tab before clicking "Continue with Google".
     // e.g.  /auth/callback?role_intent=instructor
     const roleIntent = searchParams.get('role_intent') as 'customer' | 'instructor' | 'studio' | null
+    const ref = searchParams.get('ref') ?? ''
 
     if (code) {
         const supabase = await createClient()
@@ -77,6 +78,19 @@ export async function GET(request: Request) {
                         user.user_metadata?.picture ||
                         null
 
+                    // Resolve referral code → referrer's user ID
+                    let referredById: string | null = null
+                    if (ref) {
+                        const { data: referrer } = await supabase
+                            .from('profiles')
+                            .select('id')
+                            .eq('referral_code', ref.toUpperCase())
+                            .maybeSingle()
+                        if (referrer && referrer.id !== user.id) {
+                            referredById = referrer.id
+                        }
+                    }
+
                     const { error: insertError } = await supabase
                         .from('profiles')
                         .insert({
@@ -84,8 +98,8 @@ export async function GET(request: Request) {
                             email: user.email,
                             full_name: fullName,
                             avatar_url: avatarUrl,
-                            // Pre-set role when the user had one selected on the sign-up tab
                             ...(roleIntent ? { role: roleIntent } : {}),
+                            ...(referredById ? { referred_by: referredById } : {}),
                         })
 
                     if (insertError) {
