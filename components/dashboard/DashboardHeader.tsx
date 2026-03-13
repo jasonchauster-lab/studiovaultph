@@ -35,15 +35,28 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                 <div className="flex items-center gap-8 h-full">
                     <Link href="/welcome" aria-label="Go to Welcome Dashboard" className="flex items-center gap-0 group h-full">
                         <div className="relative flex items-center">
+                            {/* Desktop Logo */}
                             <Image
-                                src="/logo.png"
+                                src="/logo1.jpg"
                                 alt="StudioVault Logo"
-                                width={120}
-                                height={120}
+                                width={160}
+                                height={160}
                                 priority
                                 className={clsx(
-                                    "object-contain transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]",
-                                    isScrolled ? "w-16 h-16" : "w-28 h-28"
+                                    "object-contain mix-blend-multiply transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hidden lg:block",
+                                    isScrolled ? "h-16 w-auto" : "h-28 w-auto"
+                                )}
+                            />
+                            {/* Mobile/Tablet Icon */}
+                            <Image
+                                src="/logo2.jpg"
+                                alt="StudioVault Logo"
+                                width={80}
+                                height={80}
+                                priority
+                                className={clsx(
+                                    "object-contain mix-blend-multiply transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] lg:hidden",
+                                    isScrolled ? "w-12 h-12" : "w-16 h-16"
                                 )}
                             />
                         </div>

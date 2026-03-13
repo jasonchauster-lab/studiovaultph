@@ -115,9 +115,9 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                             <div className="flex items-center gap-4 w-full">
                                                 <Link href={`/studios/${booking.studios?.id || booking.slots?.studios?.id}`} className="w-12 h-12 rounded-lg overflow-hidden border border-border-grey bg-white shadow-tight shrink-0 hover:scale-105 transition-transform">
                                                     <img
-                                                        src={booking.studios?.logo_url || booking.slots?.studios?.logo_url || "/logo.png"}
+                                                        src={booking.studios?.logo_url || booking.slots?.studios?.logo_url || "/logo2.jpg"}
                                                         alt={booking.studios?.name || booking.slots?.studios?.name || "Studio"}
-                                                        className="w-full h-full object-cover"
+                                                        className="w-full h-full object-cover mix-blend-multiply"
                                                     />
                                                 </Link>
                                                 <div className="flex-1 min-w-0">

@@ -1625,7 +1625,7 @@ export default function InstructorScheduleCalendar({
                         <button onClick={() => setSelectedStudio(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal"><X className="w-5 h-5" /></button>
                         <div className="flex flex-col items-center text-center mb-10">
                             <div className="w-24 h-24 rounded-2xl overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10 bg-white">
-                                <img src={selectedStudio.logo_url || "/logo.png"} className="w-full h-full object-contain p-2" />
+                                <img src={selectedStudio.logo_url || "/logo2.jpg"} className="w-full h-full object-contain p-2 mix-blend-multiply" />
                             </div>
                             <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedStudio.name}</h3>
                             <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedStudio.location}</p>

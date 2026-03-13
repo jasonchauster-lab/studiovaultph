@@ -145,9 +145,9 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                         <div className="flex items-center gap-6 flex-1 min-w-0">
                                             <Link href={`/studios/${studio?.id}`} className="w-16 h-16 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700">
                                                 <img
-                                                    src={studio?.logo_url || "/logo.png"}
+                                                    src={studio?.logo_url || "/logo2.jpg"}
                                                     alt={studio?.name || "Studio"}
-                                                    className="w-full h-full object-cover"
+                                                    className="w-full h-full object-cover mix-blend-multiply"
                                                 />
                                             </Link>
                                             <div className="flex-1 min-w-0">
@@ -272,9 +272,9 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                         <div className="flex items-center gap-6 flex-1 min-w-0">
                                             <Link href={`/studios/${studio?.id}`} className="w-16 h-16 rounded-[20px] overflow-hidden border border-white bg-white/40 shadow-sm shrink-0 grayscale group-hover:grayscale-0 transition-all duration-700">
                                                 <img
-                                                    src={studio?.logo_url || "/logo.png"}
+                                                    src={studio?.logo_url || "/logo2.jpg"}
                                                     alt={studio?.name || "Studio"}
-                                                    className="w-full h-full object-cover"
+                                                    className="w-full h-full object-cover mix-blend-multiply"
                                                 />
                                             </Link>
                                             <div className="flex-1 min-w-0">

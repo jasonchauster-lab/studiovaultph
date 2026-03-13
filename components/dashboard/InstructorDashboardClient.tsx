@@ -387,9 +387,9 @@ export default function InstructorDashboardClient({
                                                                 className="w-12 h-12 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700"
                                                             >
                                                                 <img
-                                                                    src={session.slots?.studios?.logo_url || "/logo.png"}
+                                                                    src={session.slots?.studios?.logo_url || "/logo2.jpg"}
                                                                     alt=""
-                                                                    className="w-full h-full object-cover"
+                                                                    className="w-full h-full object-cover mix-blend-multiply"
                                                                 />
                                                             </button>
                                                             <div className="flex-1 min-w-0">

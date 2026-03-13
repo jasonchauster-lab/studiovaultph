@@ -18,7 +18,26 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 w-full px-4 md:px-8 py-5">
         <nav className="max-w-7xl mx-auto bg-white rounded-xl px-4 sm:px-10 py-4 flex items-center justify-between shadow-tight border border-border-grey">
           <Link href="/" aria-label="Studio Vault PH Home" className="flex items-center gap-2 group">
-            <Image src="/logo.png" alt="" width={60} height={60} className="w-10 h-10 object-contain" />
+            {/* Desktop Logo */}
+            <div className="hidden sm:block">
+              <Image 
+                src="/logo1.jpg" 
+                alt="" 
+                width={120} 
+                height={48} 
+                className="h-10 md:h-12 w-auto object-contain mix-blend-multiply" 
+              />
+            </div>
+            {/* Mobile Logo */}
+            <div className="block sm:hidden">
+              <Image 
+                src="/logo2.jpg" 
+                alt="" 
+                width={40} 
+                height={40} 
+                className="w-10 h-10 object-contain mix-blend-multiply" 
+              />
+            </div>
             <span className="font-serif font-bold text-burgundy tracking-tight text-xl uppercase hidden sm:block">STUDIO VAULT PH</span>
           </Link>
           <div className="flex gap-4 sm:gap-6 items-center">
@@ -273,7 +292,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10 md:gap-16">
           <div className="flex flex-col items-center md:items-start gap-5">
             <div className="flex items-center gap-2">
-              <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-10 h-10 object-contain opacity-80" />
+              <Image src="/logo3.jpg" alt="StudioVault Logo" width={80} height={80} className="w-10 h-10 object-contain" />
               <span className="font-serif text-burgundy tracking-tight text-xl uppercase">STUDIO VAULT PH</span>
             </div>
             <p className="text-[10px] font-bold text-muted-burgundy uppercase tracking-[0.3em] text-center md:text-left">

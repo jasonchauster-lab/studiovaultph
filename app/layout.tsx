@@ -40,8 +40,8 @@ export const metadata: Metadata = {
     title: "Studio Vault",
   },
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: "/logo2.jpg",
+    apple: "/logo2.jpg",
   },
 };
 

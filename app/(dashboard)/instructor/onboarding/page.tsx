@@ -83,7 +83,7 @@ export default async function InstructorOnboardingPage() {
                 <div className="max-w-xl mx-auto">
                     <div className="mb-12">
                         <Link href="/" className="flex items-center justify-center gap-0 group mb-8">
-                            <Image src="/logo.png" alt="StudioVault Logo" width={80} height={80} className="w-20 h-20 object-contain" />
+                            <Image src="/logo2.jpg" alt="StudioVault Logo" width={80} height={80} className="w-20 h-20 object-contain mix-blend-multiply" />
                             <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight -ml-5 whitespace-nowrap">StudioVaultPH</span>
                         </Link>
                         <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Join the Vault</h2>

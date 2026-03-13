@@ -72,7 +72,7 @@ export default function RoleSelectionModal({ isOpen, onClose }: RoleSelectionMod
                     <div className="flex justify-between items-start mb-10">
                         <div className="space-y-2">
                             <div className="flex items-center gap-3">
-                                <Image src="/logo.png" alt="StudioVault Logo" width={40} height={40} className="w-10 h-10 object-contain" />
+                                <Image src="/logo2.jpg" alt="StudioVault Logo" width={40} height={40} className="w-10 h-10 object-contain mix-blend-multiply" />
                                 <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">Join StudioVaultPH</h2>
                             </div>
                             <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em]">Establish your professional presence</p>

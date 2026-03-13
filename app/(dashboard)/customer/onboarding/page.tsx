@@ -29,7 +29,7 @@ export default async function CustomerOnboardingPage() {
             <div className="w-full max-w-md mb-16 text-center">
                 <Link href="/" className="inline-flex items-center gap-1 group">
                     <div className="bg-white p-2 rounded-lg shadow-tight group-hover:rotate-2 transition-transform border border-border-grey">
-                        <Image src="/logo.png" alt="StudioVault Logo" width={40} height={40} className="w-10 h-10 object-contain" />
+                        <Image src="/logo2.jpg" alt="StudioVault Logo" width={40} height={40} className="w-10 h-10 object-contain mix-blend-multiply" />
                     </div>
                     <span className="text-xl font-serif font-bold text-charcoal tracking-tight ml-2">StudioVaultPH</span>
                 </Link>

@@ -38,7 +38,7 @@ export default function DocumentExpiryEmail({
             <Body style={{ fontFamily: 'system-ui, sans-serif', backgroundColor: '#f9f7f4', padding: '20px' }}>
                 <Container style={{ maxWidth: '520px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '12px', padding: '32px', border: '1px solid #e8e4df' }}>
                     <Section style={header}>
-                        <Img src="https://studiovaultph.com/logo.png" width="48" height="48" alt="StudioVaultPH Logo" style={logoImage} />
+                        <Img src="https://studiovaultph.com/logo1.jpg" width="48" height="48" alt="StudioVaultPH Logo" style={logoImage} />
                         <Text style={logoText}>StudioVaultPH</Text>
                     </Section>
                     <Text style={{ fontSize: '20px', fontWeight: 'bold', color: isSuspended ? '#b91c1c' : '#1a1a1a', marginBottom: '8px' }}>

@@ -66,10 +66,10 @@ export default function StudioAvailabilityGroup({ studio, date, slots }: StudioA
                             <div className="flex items-center gap-2">
                                 <div className="sm:hidden w-10 h-10 rounded-lg overflow-hidden bg-cream-50 border border-cream-200 flex-shrink-0">
                                     <img
-                                        src={studio.logo_url || "/logo.png"}
+                                        src={studio.logo_url || "/logo2.jpg"}
                                         alt={studio.name}
                                         onError={(e) => {
-                                            (e.target as HTMLImageElement).src = "/logo.png";
+                                            (e.target as HTMLImageElement).src = "/logo2.jpg";
                                         }}
                                         className="w-full h-full object-cover"
                                     />

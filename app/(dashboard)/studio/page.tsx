@@ -177,10 +177,11 @@ export default async function StudioDashboard(props: {
             weeklySlots = slots
         }
 
-        // Calc Occupancy and Total Spots for currently viewed week
-        if (weeklySlots.length > 0) {
-            const totalSpots = weeklySlots.reduce((sum, s) => sum + (s.quantity || 1), 0)
-            const bookedSpotsCount = weeklySlots.reduce((sum, s) => {
+        // Calc Occupancy and Total Spots for the current week only (stat card shows weekly numbers)
+        const thisWeekSlots = weeklySlots.filter((s: any) => s.date >= dayStrings[0] && s.date <= dayStrings[6])
+        if (thisWeekSlots.length > 0) {
+            const totalSpots = thisWeekSlots.reduce((sum: number, s: any) => sum + (s.quantity || 1), 0)
+            const bookedSpotsCount = thisWeekSlots.reduce((sum: number, s: any) => {
                 const activeBookings = s.bookings?.filter((b: any) =>
                     ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase())
                 ).length || 0
@@ -188,8 +189,8 @@ export default async function StudioDashboard(props: {
             }, 0)
 
             occupancyRate = Math.round((bookedSpotsCount / totalSpots) * 100)
-                // Use total spots for "Active Listings"
-                ; (weeklySlots as any).totalSpots = totalSpots
+            // Use total spots for "Active Listings"
+            ;(weeklySlots as any).totalSpots = totalSpots
         }
     }
 
@@ -204,11 +205,11 @@ export default async function StudioDashboard(props: {
                             <div className="flex items-center gap-4 mt-4">
                                 <div className="w-12 h-12 rounded-2xl overflow-hidden border border-white shadow-cloud scale-105">
                                     <Image
-                                        src={myStudio.logo_url || myStudio.space_photos_urls?.[0] || "/logo.png"}
+                                        src={myStudio.logo_url || myStudio.space_photos_urls?.[0] || "/logo2.jpg"}
                                         alt={myStudio.name}
                                         width={48}
                                         height={48}
-                                        className="object-cover w-full h-full"
+                                        className="object-cover w-full h-full mix-blend-multiply"
                                     />
                                 </div>
                                 <div className="space-y-0.5">
@@ -244,7 +245,7 @@ export default async function StudioDashboard(props: {
                             <div className="max-w-xl mx-auto">
                                 <div className="mb-12">
                                     <Link href="/" className="flex items-center justify-start gap-0 group mb-8">
-                                        <Image src="/logo.png" alt="Studio Vault Logo" width={60} height={60} className="w-15 h-15 object-contain" />
+                                        <Image src="/logo1.jpg" alt="Studio Vault Logo" width={60} height={60} className="w-15 h-15 object-contain mix-blend-multiply" />
                                         <span className="text-2xl font-serif font-bold text-charcoal tracking-tight -ml-3 whitespace-nowrap">StudioVaultPH</span>
                                     </Link>
                                     <h2 className="text-sage text-[10px] font-bold uppercase tracking-[0.3em] mb-3">Onboarding</h2>

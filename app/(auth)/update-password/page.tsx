@@ -117,7 +117,7 @@ export default function UpdatePasswordPage() {
                 <div className="w-full max-w-lg">
                     <div className="flex flex-col items-center mb-12">
                         <div className="mb-12">
-                            <Image src="/logo.png" alt="StudioVault Logo" width={320} height={320} className="w-80 h-80 object-contain" />
+                            <Image src="/logo1.jpg" alt="StudioVault Logo" width={320} height={320} className="w-80 h-80 object-contain mix-blend-multiply" />
                         </div>
 
                         <div className="text-center">
