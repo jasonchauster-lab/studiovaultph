@@ -20,8 +20,8 @@ export default function InstructorStatCards({ stats, hasPendingPayout }: Instruc
             icon: Wallet,
             trend: hasPendingPayout ? 'Payout Pending' : 'Verified',
             trendColor: hasPendingPayout ? 'text-gold' : 'text-burgundy',
-            bgIcon: hasPendingPayout ? 'bg-gold/10' : 'bg-burgundy/10',
-            iconColor: hasPendingPayout ? 'text-gold' : 'text-burgundy',
+            bgIcon: hasPendingPayout ? 'bg-[#FCE6B7]' : 'bg-burgundy/10',
+            iconColor: hasPendingPayout ? 'text-gold-deep' : 'text-burgundy',
             hasAction: true
         },
         {
@@ -38,9 +38,9 @@ export default function InstructorStatCards({ stats, hasPendingPayout }: Instruc
             value: `${stats.totalHours}`,
             icon: Clock,
             trend: 'Historical',
-            trendColor: 'text-gold',
-            bgIcon: 'bg-gold/10',
-            iconColor: 'text-gold'
+            trendColor: 'text-burgundy',
+            bgIcon: 'bg-[#FCE6B7]',
+            iconColor: 'text-gold-deep'
         },
         {
             label: 'Pending Earnings',
@@ -62,13 +62,13 @@ export default function InstructorStatCards({ stats, hasPendingPayout }: Instruc
                         <div className="flex justify-between items-start mb-4">
                             <div className={clsx(
                                 "p-2.5 rounded-lg group-hover:scale-110 transition-all duration-300 border border-border-grey shadow-tight",
-                                card.iconColor === 'text-gold' ? "bg-yellow-50" : "bg-red-50"
+                                card.iconColor === 'text-gold-deep' ? "bg-[#FCE6B7]" : "bg-red-50"
                             )}>
-                                <card.icon className={clsx("w-4 h-4", card.iconColor === 'text-gold' ? "text-yellow-600" : "text-burgundy")} />
+                                <card.icon className={clsx("w-4 h-4", card.iconColor === 'text-gold-deep' ? "text-[#B4941F]" : "text-burgundy")} />
                             </div>
                             <span className={clsx(
                                 "text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full border border-border-grey shadow-tight",
-                                card.iconColor === 'text-gold' ? "bg-yellow-50 text-yellow-800" : "bg-red-50 text-burgundy"
+                                card.iconColor === 'text-gold-deep' ? "bg-[#FCE6B7] text-[#43302E]" : "bg-red-50 text-burgundy"
                             )}>
                                 {card.trend}
                             </span>

@@ -350,12 +350,12 @@ export default function InstructorDashboardClient({
                 {/* Upcoming Bookings Sidebar */}
                 <div className="space-y-10">
                     <div className="earth-card overflow-hidden">
-                        <div className="bg-white p-6 border-b border-border-grey flex items-center justify-between">
-                            <h2 className="text-[10px] font-black text-burgundy uppercase tracking-[0.3em] flex items-center gap-3">
-                                <Calendar className="w-4 h-4 text-burgundy" />
+                        <div className="bg-burgundy p-5 flex items-center justify-between">
+                            <h2 className="text-[11px] font-bold !text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-white" />
                                 Upcoming Bookings
                             </h2>
-                            <span className="text-[8px] font-black text-forest/60 border border-forest/20 px-3 py-1 rounded-full uppercase tracking-[0.2em]">Next 5 Sessions</span>
+                            <span className="text-[9px] font-bold text-white/50 border border-white/20 px-3 py-1 rounded-full uppercase tracking-tighter">Next 5 Sessions</span>
                         </div>
                         <div className="p-6">
                             {(() => {

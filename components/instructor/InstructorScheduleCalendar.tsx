@@ -512,7 +512,7 @@ export default function InstructorScheduleCalendar({
                             <div className={clsx("grid border-b border-border-grey bg-off-white", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-8")}>
                                 <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-[100px] text-center uppercase tracking-[0.3em] flex items-center justify-center"></div>
                                 {days.map(day => (
-                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 min-w-[120px] transition-all relative", isSameDay(day, new Date()) ? "bg-buttermilk/30" : "")}>
+                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 min-w-[120px] transition-all relative", isSameDay(day, new Date()) ? "bg-buttermilk/20" : "")}>
                                         <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
                                         <div className={clsx("text-3xl font-serif font-black tracking-tighter", isSameDay(day, new Date()) ? "text-burgundy" : "text-charcoal")}>{format(day, 'd')}</div>
                                         {isSameDay(day, new Date()) && (
@@ -706,17 +706,15 @@ export default function InstructorScheduleCalendar({
                                                                             setCurrentSlotHistory(historyMap[`${dayStr}-${hour}`] || []);
                                                                             setIsEditModalOpen(true);
                                                                         }}
-                                                                    >
-                                                                        <div className={clsx("flex items-center gap-1.5", duration < 45 ? "flex-row" : "flex-col items-start")}>
-                                                                            <div className="flex items-center gap-1.5 font-black text-[9px] text-charcoal uppercase tracking-wider shrink-0">
-                                                                                <Clock className={clsx(duration < 45 ? "w-2.5 h-2.5" : "w-3 h-3", isPastCell ? "text-slate/30" : "text-forest")} />
-                                                                                <span className={isPastCell ? "text-slate" : "text-charcoal"}>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
+                                                                    >                                                                        <div className={clsx("flex items-center gap-1.5", duration < 45 ? "flex-row" : "flex-col items-start")}>
+                                                                            <div className="flex items-center gap-1 font-bold text-[8px] text-charcoal/60 uppercase tracking-tighter shrink-0">
+                                                                                <Clock className={clsx(duration < 45 ? "w-2 h-2" : "w-2.5 h-2.5", "text-burgundy/30")} />
+                                                                                <span>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                                             </div>
-
                                                                             <div className="flex flex-wrap items-center gap-1">
                                                                                 {locations.map((loc, idx) => (
-                                                                                    <div key={(loc || 'loc') + idx} className="text-[7px] font-black uppercase tracking-tight flex items-center gap-1 bg-pastel-blue text-burgundy px-1.5 py-0.5 rounded border border-pastel-blue/20">
-                                                                                        <MapPin className="w-2.5 h-2.5 text-burgundy/40" />
+                                                                                    <div key={(loc || 'loc') + idx} className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-slate px-1.5 py-0.5 rounded border border-border-grey bg-white/50">
+                                                                                        <MapPin className="w-2.5 h-2.5 text-slate/40" />
                                                                                         <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
                                                                                     </div>
                                                                                 ))}
@@ -765,13 +763,13 @@ export default function InstructorScheduleCalendar({
                                                                                         </span>
                                                                                         <div className="flex flex-wrap items-center gap-1 mt-1.5">
                                                                                             {slotData.studios?.location && (
-                                                                                                <div className="text-[7px] font-black uppercase tracking-tight flex items-center gap-1 bg-burgundy/5 text-burgundy/60 px-1.5 py-0.5 rounded border border-burgundy/10">
-                                                                                                    <MapPin className="w-2.5 h-2.5 shrink-0" />
+                                                                                                <div className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-slate px-1.5 py-0.5 rounded border border-border-grey bg-white/50">
+                                                                                                    <MapPin className="w-2.5 h-2.5 shrink-0 text-slate/40" />
                                                                                                     <span className="truncate max-w-[60px]">{slotData.studios.location.split(' - ')[0] || 'Studio'}</span>
                                                                                                 </div>
                                                                                             )}
                                                                                             {Array.isArray(slotData.equipment) && slotData.equipment.map((eq: string, idx: number) => (
-                                                                                                <div key={eq + idx} className="text-[7px] font-black uppercase tracking-tight flex items-center gap-1 bg-forest/5 text-forest/60 px-1.5 py-0.5 rounded border border-forest/10">
+                                                                                                <div key={eq + idx} className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-burgundy/60 px-1.5 py-0.5 rounded border border-burgundy/10 bg-buttermilk/10">
                                                                                                     <Box className="w-2.5 h-2.5 shrink-0" />
                                                                                                     <span className="truncate max-w-[60px]">{eq}</span>
                                                                                                 </div>
