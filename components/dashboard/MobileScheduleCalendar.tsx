@@ -211,9 +211,9 @@ export default function MobileScheduleCalendar({
                                 <div className={clsx(
                                     "w-10 h-10 flex items-center justify-center rounded-full text-[13px] font-black transition-all duration-300",
                                     isToday
-                                        ? "bg-burgundy text-white shadow-card scale-110"
+                                        ? "bg-buttermilk text-burgundy shadow-tight scale-110 border-2 border-burgundy/20"
                                         : isSelected
-                                            ? "border-2 border-burgundy text-burgundy bg-buttermilk/20 scale-110"
+                                            ? "border-2 border-burgundy text-burgundy bg-buttermilk/10 scale-110"
                                             : "text-burgundy hover:bg-[#FAFAFA] border border-transparent hover:border-[#E5E7EB]"
                                 )}>
                                     {format(day, 'd')}

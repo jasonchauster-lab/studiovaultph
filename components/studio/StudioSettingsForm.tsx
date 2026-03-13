@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
 import { useRef } from 'react'
-import { isHeicFile, ensureJpegFile } from '@/lib/utils/image-utils'
+import { normalizeImageFile, uploadContentType } from '@/lib/utils/image-utils'
 
 export default function StudioSettingsForm({ studio }: { studio: Studio }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -24,15 +24,12 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
         const validFiles: File[] = []
 
         for (const file of files) {
-            if (file.type.startsWith('image/') || isHeicFile(file)) {
+            // Accept any image type, HEIC, or files with no MIME type (common on iPhone/Android)
+            if (file.type.startsWith('image/') || !file.type || file.type === '') {
                 try {
-                    let processedFile = file
-                    if (isHeicFile(file)) {
-                        processedFile = await ensureJpegFile(file)
-                    }
-                    validFiles.push(processedFile)
+                    validFiles.push(await normalizeImageFile(file))
                 } catch (err) {
-                    console.error('HEIC processing error:', err)
+                    console.error('Image processing error:', err)
                 }
             }
         }
@@ -72,12 +69,12 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
             // 1. Upload Logo if changed
             let logoFile = formData.get('logo') as File
             if (logoFile && logoFile.size > 0) {
-                if (isHeicFile(logoFile)) {
-                    logoFile = await ensureJpegFile(logoFile)
-                }
-                const ext = logoFile.name.split('.').pop()
+                logoFile = await normalizeImageFile(logoFile)
+                const ext = logoFile.name.split('.').pop() || 'jpg'
                 const path = `studios/${studio.id}/logo_${timestamp}.${ext}`
-                const { error: uploadError } = await supabase.storage.from('avatars').upload(path, logoFile)
+                const { error: uploadError } = await supabase.storage.from('avatars').upload(path, logoFile, {
+                    contentType: uploadContentType(logoFile),
+                })
 
                 if (uploadError) {
                     throw new Error('Failed to upload logo: ' + uploadError.message)
@@ -93,9 +90,11 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
             for (let i = 0; i < newSpacePhotos.length; i++) {
                 const file = newSpacePhotos[i]
                 if (file.size > 0) {
-                    const ext = file.name.split('.').pop()
+                    const ext = file.name.split('.').pop() || 'jpg'
                     const path = `studios/${studio.id}/space_${timestamp}_${i}.${ext}`
-                    const { error: photoErr } = await supabase.storage.from('avatars').upload(path, file)
+                    const { error: photoErr } = await supabase.storage.from('avatars').upload(path, file, {
+                        contentType: uploadContentType(file),
+                    })
 
                     if (photoErr) {
                         throw new Error('Failed to upload new space photo: ' + photoErr.message)

@@ -512,9 +512,12 @@ export default function InstructorScheduleCalendar({
                             <div className={clsx("grid border-b border-border-grey bg-off-white", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-8")}>
                                 <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-[100px] text-center uppercase tracking-[0.3em] flex items-center justify-center"></div>
                                 {days.map(day => (
-                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 min-w-[120px] transition-all", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
+                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 min-w-[120px] transition-all relative", isSameDay(day, new Date()) ? "bg-buttermilk/30" : "")}>
                                         <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
-                                        <div className={clsx("text-3xl font-serif tracking-tighter", isSameDay(day, new Date()) ? "text-forest" : "text-charcoal")}>{format(day, 'd')}</div>
+                                        <div className={clsx("text-3xl font-serif font-black tracking-tighter", isSameDay(day, new Date()) ? "text-burgundy" : "text-charcoal")}>{format(day, 'd')}</div>
+                                        {isSameDay(day, new Date()) && (
+                                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-1 bg-burgundy rounded-t-full" />
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -630,8 +633,10 @@ export default function InstructorScheduleCalendar({
                                                     })
                                                 ];
 
+                                                const isToday = isSameDay(day, new Date())
+
                                                 return (
-                                                    <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-0", isPastCell && "bg-gray-50")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
+                                                    <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-1 min-h-[100px]", isPastCell ? "bg-gray-50" : isToday ? "bg-buttermilk/10" : "")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
                                                         <div
                                                             className={clsx(
                                                                 "absolute inset-0 transition-all duration-700 bg-forest/5 cursor-pointer z-0 flex items-center justify-center",
@@ -675,15 +680,14 @@ export default function InstructorScheduleCalendar({
 
                                                             if (item.type === 'slot') {
                                                                 const { primarySlot: slot, locations, equipment } = item.data;
-                                                                return (
-                                                                    <div
+                                                                return (                                                                    <div
                                                                         key={slot.id}
                                                                         className={clsx(
-                                                                            "absolute rounded-lg text-[10px] hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border z-10 p-4 group/slot flex flex-col gap-3 session-block-earth",
+                                                                            "absolute rounded-lg text-[10px] hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border z-10 p-3 group/slot flex flex-col justify-between session-block-earth",
                                                                             isPastCell
                                                                                 ? "bg-off-white border-border-grey text-slate"
                                                                                 : "bg-green-50/50 border-green-200 text-green-900",
-                                                                            duration < 45 && "py-2 px-4 justify-center"
+                                                                            duration < 45 && "py-2 px-3 justify-center"
                                                                         )}
                                                                         style={{
                                                                             top: `${topOffset}px`,
@@ -703,22 +707,23 @@ export default function InstructorScheduleCalendar({
                                                                             setIsEditModalOpen(true);
                                                                         }}
                                                                     >
-                                                                        <div className={clsx("flex items-center gap-2", duration < 45 ? "flex-row" : "flex-col items-start")}>
-                                                                            <div className="flex items-center gap-2 font-bold text-[10px] text-charcoal uppercase tracking-[0.2em] shrink-0">
-                                                                                <Clock className={clsx(duration < 45 ? "w-3 h-3" : "w-4 h-4", isPastCell ? "text-slate/30" : "text-forest")} />
+                                                                        <div className={clsx("flex items-center gap-1.5", duration < 45 ? "flex-row" : "flex-col items-start")}>
+                                                                            <div className="flex items-center gap-1.5 font-black text-[9px] text-charcoal uppercase tracking-wider shrink-0">
+                                                                                <Clock className={clsx(duration < 45 ? "w-2.5 h-2.5" : "w-3 h-3", isPastCell ? "text-slate/30" : "text-forest")} />
                                                                                 <span className={isPastCell ? "text-slate" : "text-charcoal"}>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                                             </div>
 
-                                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                            <div className="flex flex-wrap items-center gap-1">
                                                                                 {locations.map((loc, idx) => (
-                                                                                    <div key={(loc || 'loc') + idx} className="text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 bg-pastel-blue text-burgundy px-3 py-1 rounded-md border border-pastel-blue/20">
-                                                                                        <MapPin className="w-3 h-3 text-burgundy/40" />
-                                                                                        <span className="truncate max-w-[100px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
+                                                                                    <div key={(loc || 'loc') + idx} className="text-[7px] font-black uppercase tracking-tight flex items-center gap-1 bg-pastel-blue text-burgundy px-1.5 py-0.5 rounded border border-pastel-blue/20">
+                                                                                        <MapPin className="w-2.5 h-2.5 text-burgundy/40" />
+                                                                                        <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
                                                                                     </div>
                                                                                 ))}
                                                                             </div>
                                                                         </div>
                                                                     </div>
+
                                                                 )
                                                             } else {
                                                                 const booking = item.data;
@@ -729,7 +734,7 @@ export default function InstructorScheduleCalendar({
                                                                     <div
                                                                         key={booking.id}
                                                                         className={clsx(
-                                                                            "absolute rounded-lg text-[10px] z-20 p-4 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col shadow-tight border border-burgundy/10 bg-white",
+                                                                            "absolute rounded-lg text-[10px] z-20 p-3 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border border-burgundy/10 bg-white",
                                                                             duration < 45 && "flex-row items-center justify-between py-2 px-3"
                                                                         )}
                                                                         style={{
@@ -750,24 +755,24 @@ export default function InstructorScheduleCalendar({
                                                                     >
                                                                         <div className={clsx("flex justify-between items-start w-full", duration < 45 && "items-center")}>
                                                                             <div className="flex flex-col min-w-0 flex-1">
-                                                                                <span className="text-[10px] font-bold text-burgundy uppercase tracking-widest truncate">
+                                                                                <span className="text-[9px] font-black text-burgundy uppercase tracking-widest truncate">
                                                                                     {booking.client?.full_name || 'Session'}
                                                                                 </span>
                                                                                 {duration >= 45 && (
                                                                                     <>
-                                                                                        <span className="text-[8px] font-medium text-burgundy/60 uppercase tracking-tighter mt-0.5 truncate">
+                                                                                        <span className="text-[7px] font-black text-burgundy/60 uppercase tracking-tighter mt-0.5 truncate">
                                                                                             {studioName}
                                                                                         </span>
-                                                                                        <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+                                                                                        <div className="flex flex-wrap items-center gap-1 mt-1.5">
                                                                                             {slotData.studios?.location && (
-                                                                                                <div className="text-[7px] font-black uppercase tracking-[0.1em] flex items-center gap-1 bg-burgundy/5 text-burgundy/60 px-2 py-0.5 rounded-md border border-burgundy/10">
-                                                                                                    <MapPin className="w-2 h-2 shrink-0" />
+                                                                                                <div className="text-[7px] font-black uppercase tracking-tight flex items-center gap-1 bg-burgundy/5 text-burgundy/60 px-1.5 py-0.5 rounded border border-burgundy/10">
+                                                                                                    <MapPin className="w-2.5 h-2.5 shrink-0" />
                                                                                                     <span className="truncate max-w-[60px]">{slotData.studios.location.split(' - ')[0] || 'Studio'}</span>
                                                                                                 </div>
                                                                                             )}
                                                                                             {Array.isArray(slotData.equipment) && slotData.equipment.map((eq: string, idx: number) => (
-                                                                                                <div key={eq + idx} className="text-[7px] font-black uppercase tracking-[0.1em] flex items-center gap-1 bg-forest/5 text-forest/60 px-2 py-0.5 rounded-md border border-forest/10">
-                                                                                                    <Box className="w-2 h-2 shrink-0" />
+                                                                                                <div key={eq + idx} className="text-[7px] font-black uppercase tracking-tight flex items-center gap-1 bg-forest/5 text-forest/60 px-1.5 py-0.5 rounded border border-forest/10">
+                                                                                                    <Box className="w-2.5 h-2.5 shrink-0" />
                                                                                                     <span className="truncate max-w-[60px]">{eq}</span>
                                                                                                 </div>
                                                                                             ))}
@@ -775,7 +780,7 @@ export default function InstructorScheduleCalendar({
                                                                                     </>
                                                                                 )}
                                                                             </div>
-                                                                            <div className="text-[9px] font-black text-burgundy bg-buttermilk/40 px-1.5 py-0.5 rounded border border-burgundy/5 whitespace-nowrap ml-2">
+                                                                            <div className="text-[8px] font-black text-burgundy bg-buttermilk/40 px-1 py-0.5 rounded border border-burgundy/5 whitespace-nowrap ml-2">
                                                                                 {Math.min(booking.quantity || 1, 1)}/1
                                                                             </div>
                                                                         </div>

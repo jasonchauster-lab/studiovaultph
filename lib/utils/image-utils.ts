@@ -2,6 +2,7 @@ import heic2any from 'heic2any';
 
 /**
  * Validates if a file is an HEIC or HEIF image.
+ * Also catches files with empty MIME types that have HEIC/HEIF extensions.
  */
 export const isHeicFile = (file: File): boolean => {
     const name = file.name.toLowerCase();
@@ -54,3 +55,44 @@ export const ensureJpegFile = async (file: File): Promise<File> => {
         lastModified: Date.now(),
     });
 };
+
+/**
+ * Normalizes any image file for upload across all platforms (iPhone, Android, desktop).
+ * - Converts HEIC/HEIF to JPEG
+ * - Handles files with empty MIME types (common on some iOS/Android exports)
+ * - Returns a File guaranteed to have a valid image MIME type
+ */
+export const normalizeImageFile = async (file: File): Promise<File> => {
+    // Explicit HEIC/HEIF by type or extension
+    if (isHeicFile(file)) {
+        return ensureJpegFile(file);
+    }
+
+    // Empty MIME type — some iOS/Android versions omit the type entirely.
+    // If the extension hints at HEIC, try conversion. Otherwise stamp as image/jpeg.
+    if (!file.type) {
+        const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+        if (ext === 'heic' || ext === 'heif') {
+            try {
+                return await ensureJpegFile(
+                    new File([file], file.name, { type: 'image/heic', lastModified: file.lastModified })
+                );
+            } catch {
+                // fall through
+            }
+        }
+        // Unknown extension with no type — treat as JPEG so browsers can display it
+        return new File([file], file.name || 'image.jpg', {
+            type: 'image/jpeg',
+            lastModified: file.lastModified,
+        });
+    }
+
+    return file;
+};
+
+/**
+ * Returns the best content-type string to use when uploading to Supabase Storage.
+ * Falls back to 'image/jpeg' if the file has no type.
+ */
+export const uploadContentType = (file: File): string => file.type || 'image/jpeg';

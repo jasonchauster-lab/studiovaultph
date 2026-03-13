@@ -409,9 +409,12 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                 )}>
                                     <div className="p-4 text-[10px] font-bold tracking-[0.2em] text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 uppercase">TIME</div>
                                     {days.map((day: Date) => (
-                                        <div key={day.toString()} className={clsx("p-4 text-center border-r border-border-grey last:border-r-0 min-w-[100px] transition-colors", isSameDay(day, new Date()) ? "bg-buttermilk/20" : "")}>
-                                            <div className="text-[10px] text-muted-burgundy uppercase mb-2 font-bold tracking-[0.2em]">{format(day, 'EEE')}</div>
-                                            <div className={clsx("text-2xl font-serif font-bold", isSameDay(day, new Date()) ? "text-burgundy" : "text-burgundy")}>{format(day, 'd')}</div>
+                                        <div key={day.toString()} className={clsx("p-4 text-center border-r border-border-grey last:border-r-0 min-w-[100px] transition-colors relative", isSameDay(day, new Date()) ? "bg-buttermilk/30" : "")}>
+                                            <div className="text-[10px] text-muted-burgundy uppercase mb-2 font-black tracking-[0.2em]">{format(day, 'EEE')}</div>
+                                            <div className={clsx("text-2xl font-serif font-black", isSameDay(day, new Date()) ? "text-burgundy" : "text-burgundy")}>{format(day, 'd')}</div>
+                                            {isSameDay(day, new Date()) && (
+                                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-burgundy rounded-t-full" />
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -452,9 +455,10 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                     const dayStr = toManilaDateStr(day)
                                                     const cellSlots = slotMap[`${dayStr}-${hour}`] || []
                                                     const isPastCell = isPast(new Date(dayStr + "T" + hour.toString().padStart(2, '0') + ":59:59+08:00"))
+                                                    const isToday = isSameDay(day, new Date())
 
                                                     return (
-                                                        <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-2 min-h-[100px] transition-all", isPastCell && "bg-off-white")} style={{ colorScheme: 'light' }}>
+                                                        <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-1 min-h-[100px] transition-all", isPastCell ? "bg-off-white" : isToday ? "bg-buttermilk/10" : "")} style={{ colorScheme: 'light' }}>
                                                             <div className="absolute inset-0 opacity-0 group-hover:opacity-5 bg-burgundy pointer-events-none z-0" />
                                                             <button
                                                                 className="absolute top-2 right-2 p-1 rounded-full bg-burgundy/10 text-burgundy opacity-0 group-hover:opacity-100 transition-all hover:bg-burgundy hover:text-white z-20"
@@ -510,7 +514,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                 return (
                                                                     <div
                                                                         className={clsx(
-                                                                            "p-4 border session-block-earth transition-all group/slot relative overflow-hidden cursor-pointer rounded-lg h-full flex flex-col justify-between",
+                                                                            "p-3 border session-block-earth transition-all group/slot relative overflow-hidden cursor-pointer rounded-lg h-full flex flex-col justify-between",
                                                                             isPastCell ? "bg-off-white border-border-grey" :
                                                                                 hasPending ? "bg-orange-50/50 border-orange-200" :
                                                                                     isBooked ? "bg-buttermilk border-burgundy/20" : "bg-white border-border-grey shadow-tight"
@@ -522,34 +526,25 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                         }}
                                                                     >
                                                                         <div>
-                                                                            <div className="flex justify-between items-start mb-2">
-                                                                                <h4 className="text-[11px] font-bold text-[#43302E] uppercase tracking-widest truncate max-w-[80%]">
+                                                                            <div className="flex justify-between items-start mb-1.5">
+                                                                                <h4 className="text-[10px] font-black text-[#43302E] uppercase tracking-wider truncate max-w-[85%]">
                                                                                     {displayTitle}
                                                                                 </h4>
-                                                                                <Edit2 className="w-3 h-3 text-[#43302E]/40 opacity-0 group-hover/slot:opacity-100 transition-opacity" />
+                                                                                <Edit2 className="w-2.5 h-2.5 text-[#43302E]/40 opacity-0 group-hover/slot:opacity-100 transition-opacity" />
                                                                             </div>
-
-                                                                            <div className="flex flex-col gap-1 mt-1">
+                                                                            <div className="flex flex-wrap gap-1">
                                                                                 {Object.entries(equipmentCounts).map(([eq, counts]) => (
-                                                                                    <span key={eq} className="text-[8px] font-bold text-[#43302E]/60 uppercase tracking-tighter bg-[#43302E]/5 px-1.5 py-0.5 rounded w-fit">
-                                                                                        {counts.booked}/{counts.total} {eq}
+                                                                                    <span key={eq} className="text-[7px] font-black text-[#43302E] uppercase tracking-tight bg-[#43302E]/5 px-1.5 py-0.5 rounded border border-[#43302E]/10">
+                                                                                        {counts.booked}/{counts.total} {eq.split(' ')[0]}
                                                                                     </span>
                                                                                 ))}
                                                                             </div>
                                                                         </div>
-
-                                                                        <div className="mt-3 pt-2 border-t border-[#43302E]/5">
-                                                                            {instructors.size > 0 ? (
-                                                                                <p className="text-[9px] font-bold text-[#43302E] uppercase tracking-widest truncate flex items-center gap-1.5">
-                                                                                    <User className="w-2.5 h-2.5 opacity-50" />
-                                                                                    {Array.from(instructors).join(', ')}
-                                                                                </p>
-                                                                            ) : (
-                                                                                <p className="text-[9px] font-bold text-[#6B5A58] uppercase tracking-widest flex items-center gap-1.5">
-                                                                                    <User className="w-2.5 h-2.5 opacity-30" />
-                                                                                    Unassigned
-                                                                                </p>
-                                                                            )}
+                                                                        <div className="mt-2 pt-1.5 border-t border-[#43302E]/5">
+                                                                            <p className="text-[8px] font-black text-[#43302E]/70 uppercase tracking-widest truncate flex items-center gap-1">
+                                                                                <User className="w-2 h-2 opacity-50" />
+                                                                                {instructors.size > 0 ? Array.from(instructors).join(', ') : 'Unassigned'}
+                                                                            </p>
                                                                         </div>
                                                                     </div>
                                                                 );
