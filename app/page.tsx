@@ -124,7 +124,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Trust Blocks (Features) ─── */}
-        <section className="px-4 md:px-8 py-20 md:py-32 bg-white border-t border-burgundy/5">
+        <section className="px-4 md:px-8 py-24 md:py-40 bg-white border-t border-burgundy/5">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
               {[
@@ -175,7 +175,7 @@ export default function LandingPage() {
                   i !== 2 && "md:border-r md:border-border-grey"
                 )}>
                   <div className="w-40 h-40 md:w-52 md:h-52 rounded-2xl bg-white flex flex-col items-center justify-center shadow-tight border border-border-grey relative group-hover:-translate-y-2 transition-transform mb-8 md:mb-12">
-                    <span className="text-[10px] font-bold text-white absolute -top-4 left-1/2 -translate-x-1/2 bg-burgundy px-6 py-2 rounded-lg shadow-tight uppercase tracking-widest leading-none border border-burgundy/10">{step.step}</span>
+                    <span className="text-[10px] font-bold text-white absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-burgundy px-6 py-2 rounded-lg shadow-tight uppercase tracking-widest leading-none border border-burgundy/10">{step.step}</span>
                     <step.icon className="w-10 h-10 md:w-12 md:h-12 text-burgundy mb-4 md:mb-6 opacity-70" />
                     <span className="text-3xl md:text-4xl font-serif font-bold text-burgundy tracking-widest">{step.title}</span>
                   </div>
@@ -191,7 +191,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Philosophy Quote ─── */}
-        <section className="px-4 md:px-8 py-24 md:py-40 bg-buttermilk relative overflow-hidden border-t border-burgundy/8">
+        <section className="px-4 md:px-8 py-24 md:py-40 bg-[#F4F1E2] relative overflow-hidden border-t border-burgundy/8">
           <div className="max-w-5xl mx-auto text-center p-8 md:p-24 rounded-2xl relative overflow-hidden bg-white border border-burgundy/10 shadow-card">
             <div className="relative z-10 flex flex-col gap-y-8 md:gap-y-10 items-center">
               <p className="text-[10px] font-bold text-burgundy uppercase tracking-[0.5em]">The Philosophy</p>
@@ -232,37 +232,36 @@ export default function LandingPage() {
                 image: "/images/homepage/studio.png"
               }
             ].map((v, i) => (
-              <div key={i} className="flex flex-col gap-y-6 group">
-                {/* Portrait image */}
-                <div className="aspect-[4/5] relative rounded-xl overflow-hidden shadow-card group-hover:-translate-y-2 transition-all duration-500 border border-border-grey">
+              <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-card border border-border-grey group hover:-translate-y-1 transition-all duration-500">
+                {/* Portrait image — flush at top */}
+                <div className="aspect-[4/5] relative overflow-hidden rounded-t-2xl">
                   <Image
                     src={v.image}
                     alt={`Representative image for ${v.title}`}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
-                    className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                    className="object-cover transition-all duration-700"
                   />
-                  <div className="absolute inset-0 bg-burgundy/25 group-hover:bg-transparent transition-all duration-700" aria-hidden="true" />
                   <div className="absolute top-6 left-6 w-12 h-12 rounded-lg flex items-center justify-center bg-white border border-border-grey shadow-tight" aria-hidden="true">
                     <v.icon className="w-5 h-5 text-burgundy" />
                   </div>
                 </div>
 
-                {/* Labels */}
-                <div className="flex flex-col gap-y-1 px-1">
-                  <h2 className="text-2xl md:text-3xl font-serif text-burgundy tracking-tight">{v.title}</h2>
-                  <p className="text-[10px] font-bold text-muted-burgundy uppercase tracking-[0.3em]">{v.subtitle}</p>
+                {/* Text content */}
+                <div className="p-6 flex flex-col gap-y-5">
+                  <div className="flex flex-col gap-y-1">
+                    <h2 className="text-2xl md:text-3xl font-serif text-burgundy tracking-tight">{v.title}</h2>
+                    <p className="text-[10px] font-bold text-muted-burgundy uppercase tracking-[0.3em]">{v.subtitle}</p>
+                  </div>
+                  <ul className="flex flex-col gap-y-4">
+                    {v.items.map((item, idx) => (
+                      <li key={idx} className="flex items-center gap-3 text-muted-burgundy text-[15px] leading-relaxed">
+                        <div className="w-1.5 h-1.5 rounded-full bg-burgundy shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-
-                {/* Feature list */}
-                <ul className="flex flex-col gap-y-4 px-1">
-                  {v.items.map((item, idx) => (
-                    <li key={idx} className="flex items-center gap-3 text-muted-burgundy text-[14px] leading-relaxed">
-                      <div className="w-1.5 h-1.5 rounded-full bg-burgundy shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
               </div>
             ))}
           </div>
