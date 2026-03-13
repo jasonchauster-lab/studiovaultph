@@ -15,8 +15,8 @@ export default function PrivacyPolicy() {
               src="/logo4.png"
               alt="Studio Vault"
               width={120}
-              height={64}
-              className="h-12 md:h-16 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+              height={80}
+              className="h-16 md:h-20 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
               priority
             />
           </Link>

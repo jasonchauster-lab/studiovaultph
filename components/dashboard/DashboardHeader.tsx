@@ -38,11 +38,11 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                             src="/logo4.png"
                             alt="Studio Vault"
                             width={180}
-                            height={64}
+                            height={80}
                             priority
                             className={clsx(
                                 "w-auto object-contain transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-105",
-                                isScrolled ? "h-12" : "h-12 md:h-16"
+                                isScrolled ? "h-14" : "h-16 md:h-20"
                             )}
                         />
                     </Link>
