@@ -55,7 +55,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
     }
 
     // State for avatar preview
-    const [previewUrl, setPreviewUrl] = useState<string | null>(profile?.avatar_url || null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(profile?.avatar_url || '/default-avatar.svg')
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

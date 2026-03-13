@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Award, Instagram, CheckCircle, User } from 'lucide-react'
+import { Award, Instagram, CheckCircle } from 'lucide-react'
 import StarRating from '@/components/reviews/StarRating'
 
 interface InstructorProfileCardProps {
@@ -35,15 +35,14 @@ export default function InstructorProfileCard({
         <div className={`glass-card p-8 rounded-[32px] text-center border-border-grey shadow-cloud bg-white ${isSticky ? 'sticky top-24' : ''}`}>
             {/* Avatar Section */}
             <div className="w-32 h-32 bg-white/40 rounded-full flex items-center justify-center mx-auto mb-6 overflow-hidden border-2 border-white/80 shadow-cloud ring-1 ring-border-grey/10">
-                {instructor.avatar_url ? (
-                    <img
-                        src={instructor.avatar_url.startsWith('http') ? instructor.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${instructor.avatar_url}`}
-                        alt={instructor.full_name}
-                        className="w-full h-full object-cover"
-                    />
-                ) : (
-                    <User className="w-16 h-16 text-burgundy/10" />
-                )}
+                <img
+                    src={instructor.avatar_url
+                        ? (instructor.avatar_url.startsWith('http') ? instructor.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${instructor.avatar_url}`)
+                        : '/default-avatar.svg'}
+                    alt={instructor.full_name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/default-avatar.svg' }}
+                />
             </div>
 
             {/* Name and Instagram */}

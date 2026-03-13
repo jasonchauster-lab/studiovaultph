@@ -36,8 +36,8 @@ export default async function DashboardLayout({
     }
 
     const avatarUrl = profile?.role === 'studio'
-        ? (studioData?.logo_url || "/logo.png")
-        : (profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.full_name || user?.email || 'Partner'}`);
+        ? (studioData?.logo_url || "/default-avatar.svg")
+        : (profile?.avatar_url || "/default-avatar.svg");
 
     return (
         <div className="min-h-screen bg-off-white flex flex-col relative overflow-hidden">

@@ -16,7 +16,7 @@ export default function Navigation({ role }: NavigationProps) {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false)
 
-    const isCustomerMode = pathname?.startsWith('/customer') || pathname?.startsWith('/instructors') || pathname?.startsWith('/studios');
+    const isCustomerMode = role === 'customer' || pathname?.startsWith('/customer') || pathname?.startsWith('/instructors') || pathname?.startsWith('/studios');
 
     const linkClass = (isActive: boolean) =>
         clsx(

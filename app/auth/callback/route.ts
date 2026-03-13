@@ -125,6 +125,25 @@ export async function GET(request: Request) {
         }
 
         // ── Email-based auth (confirmation link, password reset, magic link) ──
+        // If a referral code was embedded in the confirmation link, apply it now
+        // — but only if the profile doesn't already have a referrer set.
+        if (ref && user) {
+            const { data: referrer } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('referral_code', ref.toUpperCase())
+                .maybeSingle()
+
+            if (referrer && referrer.id !== user.id) {
+                // Only update if referred_by is currently null (never overwrite)
+                await supabase
+                    .from('profiles')
+                    .update({ referred_by: referrer.id })
+                    .eq('id', user.id)
+                    .is('referred_by', null)
+            }
+        }
+
         // Honor the `next` query param that was embedded in the email link.
         return buildRedirect(origin, request, next)
     }
