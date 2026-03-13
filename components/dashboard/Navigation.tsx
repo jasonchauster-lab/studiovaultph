@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Search, Calendar, DollarSign, Box, History, ShieldCheck, User, LogOut, LayoutDashboard, Wallet, ArrowUpRight, Menu, X, Users } from 'lucide-react'
+import { Home, Search, Calendar, DollarSign, Box, History, ShieldCheck, User, LogOut, LayoutDashboard, Wallet, ArrowUpRight, Menu, X, Users, Gift } from 'lucide-react'
 import clsx from 'clsx'
 import SupportNotificationBadge from '@/components/admin/SupportNotificationBadge'
 import { signOut } from '@/app/auth/actions'
@@ -63,6 +63,15 @@ export default function Navigation({ role }: NavigationProps) {
                         My Profile
                         {pathname === '/customer/profile' && <span className="absolute -bottom-3 left-0 w-full h-0.5 bg-burgundy rounded-full" />}
                     </Link>
+                    <Link
+                        href="/referral"
+                        onClick={() => setMobileOpen(false)}
+                        className={linkClass(pathname === '/referral')}
+                    >
+                        <Gift className="w-3.5 h-3.5" />
+                        Referral
+                        {pathname === '/referral' && <span className="absolute -bottom-3 left-0 w-full h-0.5 bg-burgundy rounded-full" />}
+                    </Link>
 
                     {role && role !== 'customer' && (
                         <div className="h-px w-full md:h-4 md:w-px bg-white/20 my-1 md:my-0 md:mx-2" />
@@ -104,6 +113,11 @@ export default function Navigation({ role }: NavigationProps) {
                                 Profile
                                 {pathname.includes('/instructor/profile') && <span className="absolute -bottom-2 left-0 w-full h-0.5 bg-burgundy rounded-full" />}
                             </Link>
+                            <Link href="/referral" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/referral')}>
+                                <Gift className="w-3.5 h-3.5" />
+                                Referral
+                                {pathname === '/referral' && <span className="absolute -bottom-2 left-0 w-full h-0.5 bg-burgundy rounded-full" />}
+                            </Link>
                         </>
                     )}
 
@@ -128,6 +142,11 @@ export default function Navigation({ role }: NavigationProps) {
                                 <Box className="w-3.5 h-3.5" />
                                 Settings
                                 {pathname.startsWith('/studio/settings') && <span className="absolute -bottom-2 left-0 w-full h-0.5 bg-burgundy rounded-full" />}
+                            </Link>
+                            <Link href="/referral" onClick={() => setMobileOpen(false)} className={linkClass(pathname === '/referral')}>
+                                <Gift className="w-3.5 h-3.5" />
+                                Referral
+                                {pathname === '/referral' && <span className="absolute -bottom-2 left-0 w-full h-0.5 bg-burgundy rounded-full" />}
                             </Link>
                         </>
                     )}

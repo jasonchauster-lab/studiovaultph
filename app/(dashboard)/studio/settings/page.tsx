@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import StudioSettingsForm from '@/components/studio/StudioSettingsForm'
+import ReferralCard from '@/components/customer/ReferralCard'
 
 export default async function StudioSettingsPage() {
     const supabase = await createClient()
@@ -10,11 +12,13 @@ export default async function StudioSettingsPage() {
         redirect('/login')
     }
 
-    const { data: studio, error } = await supabase
-        .from('studios')
-        .select('*')
-        .eq('owner_id', user.id)
-        .single()
+    const headersList = await headers()
+    const origin = `${headersList.get('x-forwarded-proto') ?? 'http'}://${headersList.get('host') ?? 'localhost:3000'}`
+
+    const [{ data: studio, error }, { data: profile }] = await Promise.all([
+        supabase.from('studios').select('*').eq('owner_id', user.id).single(),
+        supabase.from('profiles').select('referral_code').eq('id', user.id).single(),
+    ])
 
     if (error || !studio) {
         // Handle case where studio doesn't exist yet (redirect to creation?)
@@ -30,6 +34,10 @@ export default async function StudioSettingsPage() {
             </div>
 
             <StudioSettingsForm studio={studio} />
+
+            {profile?.referral_code && (
+                <ReferralCard referralCode={profile.referral_code} origin={origin} />
+            )}
         </div>
     )
 }

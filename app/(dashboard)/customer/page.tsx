@@ -30,6 +30,11 @@ export default async function CustomerDashboard({
     searchParams: Promise<SearchParams>
 }) {
     const params = await searchParams
+    const headersList = await headers()
+    const host = headersList.get('host') ?? 'localhost:3000'
+    const proto = headersList.get('x-forwarded-proto') ?? 'http'
+    const origin = `${proto}://${host}`
+
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -487,10 +492,7 @@ export default async function CustomerDashboard({
                 ══════════════════════════════════════ */}
                 {profile?.referral_code && (
                     <div className="mt-10">
-                        <ReferralCard
-                            referralCode={profile.referral_code}
-                            origin={(() => { const h = headers(); const host = h.get('host') ?? 'localhost:3000'; const proto = h.get('x-forwarded-proto') ?? 'http'; return `${proto}://${host}`; })()}
-                        />
+                        <ReferralCard referralCode={profile.referral_code} origin={origin} />
                     </div>
                 )}
 

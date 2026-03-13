@@ -1,14 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import ProfileForm from '@/components/customer/ProfileForm'
 import InstructorGallerySection from '@/components/instructor/InstructorGallerySection'
 import InstructorCertificationsSection from '@/components/instructor/InstructorCertificationsSection'
+import ReferralCard from '@/components/customer/ReferralCard'
 import Link from 'next/link'
 import { ArrowLeft, User } from 'lucide-react'
 
 export default async function InstructorProfilePage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    const headersList = await headers()
+    const origin = `${headersList.get('x-forwarded-proto') ?? 'http'}://${headersList.get('host') ?? 'localhost:3000'}`
 
     if (!user) redirect('/login')
 
@@ -65,6 +69,11 @@ export default async function InstructorProfilePage() {
 
                 {/* Certifications Section */}
                 <InstructorCertificationsSection certifications={certifications || []} />
+
+                {/* Referral Card */}
+                {profile?.referral_code && (
+                    <ReferralCard referralCode={profile.referral_code} origin={origin} />
+                )}
             </div>
         </div>
     )
