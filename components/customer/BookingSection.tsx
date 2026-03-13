@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
 import { Loader2, CheckCircle, Calendar, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react'
+import InstructorProfileCard from '@/components/instructor/InstructorProfileCard'
 import clsx from 'clsx'
 import { formatTo12Hour, toManilaTimeString, normalizeTimeTo24h } from '@/lib/timezone'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -23,6 +24,13 @@ interface Instructor {
     full_name: string;
     rates?: Record<string, number>;
     avatar_url?: string | null;
+    bio?: string | null;
+    instagram_handle?: string | null;
+    certifications?: Array<{
+        certification_body: string
+        verified: boolean
+    }>;
+    teaching_equipment?: string[];
 }
 
 interface AvailabilityBlock {
@@ -689,34 +697,12 @@ export default function BookingSection({
                                 {selectedInstructor && (() => {
                                     const instructor = availableInstructors.find(i => i.id === selectedInstructor);
                                     if (!instructor) return null;
-                                    const initial = instructor.full_name ? instructor.full_name.charAt(0).toUpperCase() : 'I';
 
                                     return (
-                                        <div className="bg-white p-5 rounded-2xl border border-cream-200 shadow-sm sticky top-4 flex flex-col items-center text-center animate-in fade-in">
-                                            <div className="w-20 h-20 bg-cream-100 rounded-full flex items-center justify-center text-2xl font-serif text-charcoal-700 overflow-hidden mb-3 border-[3px] border-white shadow-sm ring-1 ring-cream-200">
-                                                {instructor.avatar_url ? (
-                                                    <img src={`https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${instructor.avatar_url}`} alt={instructor.full_name} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    initial
-                                                )}
-                                            </div>
-                                            <h4 className="font-serif text-lg text-charcoal-900 font-bold mb-1 flex items-center justify-center gap-1">
-                                                {instructor.full_name}
-                                                <CheckCircle className="w-4 h-4 text-green-500 fill-green-50" />
-                                            </h4>
-                                            <p className="text-xs text-charcoal-500 mb-4 bg-cream-50 px-2 py-1 rounded-md inline-block">Verified Instructor</p>
-
-                                            <div className="w-full border-t border-cream-100 pt-3 text-left">
-                                                <p className="text-xs text-charcoal-600 font-medium mb-2">Qualifications & Equipment</p>
-                                                <div className="flex flex-wrap gap-1">
-                                                    {Object.keys(instructor.rates || {}).map(eq => (
-                                                        <span key={eq} className="text-[10px] uppercase bg-cream-50 text-charcoal-600 px-2 py-1 rounded border border-cream-200">
-                                                            {eq}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <InstructorProfileCard 
+                                            instructor={instructor} 
+                                            isSticky={true} 
+                                        />
                                     );
                                 })()}
                             </div>

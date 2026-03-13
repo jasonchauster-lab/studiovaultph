@@ -6,6 +6,7 @@ import InstructorBookingWizard from '@/components/customer/InstructorBookingWiza
 import StarRating from '@/components/reviews/StarRating'
 import ReviewList from '@/components/reviews/ReviewList'
 import PublicInstructorGallery from '@/components/instructor/PublicInstructorGallery'
+import InstructorProfileCard from '@/components/instructor/InstructorProfileCard'
 import { getPublicReviews } from '@/app/(dashboard)/reviews/actions'
 
 
@@ -81,93 +82,27 @@ export default async function InstructorProfilePage(props: {
             <div className="fixed inset-0 bg-white/50 animate-mesh -z-10 pointer-events-none" />
 
             <div className="p-4 sm:p-8 md:p-12">
-                <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12">
 
                     {/* Sidebar: Profile Info */}
                     <div className="lg:col-span-1 space-y-6">
-                        <div className="glass-card p-8 rounded-[32px] text-center sticky top-24">
-                            <div className="w-32 h-32 bg-white/40 rounded-full flex items-center justify-center mx-auto mb-6 overflow-hidden border-2 border-white/80 shadow-cloud">
-                                {instructor.avatar_url ? (
-                                    <img
-                                        src={instructor.avatar_url}
-                                        alt={instructor.full_name}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <User className="w-16 h-16 text-charcoal/20" />
-                                )}
-                            </div>
-                            <h1 className="text-3xl font-serif font-bold text-charcoal mb-2 tracking-tight">{instructor.full_name}</h1>
-                            {instructor.instagram_handle && (
-                                <a
-                                    href={`https://instagram.com/${instructor.instagram_handle}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center gap-2 text-[10px] font-bold text-sage uppercase tracking-widest hover:text-charcoal transition-colors group"
-                                >
-                                    <Instagram className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                    @{instructor.instagram_handle}
-                                </a>
-                            )}
-
-                            {/* Average Rating */}
-                            <div className="mt-6 flex justify-center">
-                                <a href="#reviews" className="hover:opacity-80 transition-opacity">
-                                    <StarRating rating={averageRating} count={totalCount} size="sm" />
-                                </a>
-                            </div>
-
-                            {instructor.bio && (
-                                <div className="mt-6 text-[13px] font-medium text-charcoal/60 leading-relaxed italic px-4">
-                                    &ldquo;{instructor.bio}&rdquo;
-                                </div>
-                            )}
-
-                            <div className="mt-8 flex flex-wrap justify-center gap-2">
-                                {instructor.certifications?.map((c: any, i: number) => (
-                                    <span
-                                        key={i}
-                                        className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-1.5 border ${c.verified
-                                            ? "bg-sage/10 text-sage border-sage/20"
-                                            : "bg-white/40 text-charcoal/40 border-white/60"
-                                            }`}
-                                        title={c.verified ? 'Verified Certification' : 'Pending Verification'}
-                                    >
-                                        <Award className="w-3 h-3" />
-                                        {c.certification_body}
-                                        {!c.verified && <span className="opacity-50">(Pending)</span>}
-                                    </span>
-                                ))}
-                            </div>
-
-
-                            {/* Teaching Equipment */}
-                            {instructor.teaching_equipment && instructor.teaching_equipment.length > 0 && (
-                                <div className="mt-8 pt-8 border-t border-charcoal/5">
-                                    <h3 className="text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.2em] mb-4">
-                                        Certified Equipment
-                                    </h3>
-                                    <div className="flex flex-wrap justify-center gap-2">
-                                        {instructor.teaching_equipment.map((eq: string) => (
-                                            <span key={eq} className="bg-white/60 text-charcoal text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-[12px] border border-white">
-                                                {eq}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        <InstructorProfileCard 
+                            instructor={instructor as any} 
+                            averageRating={averageRating ?? undefined} 
+                            totalReviews={totalCount} 
+                            isSticky={true} 
+                        />
                     </div>
 
                     {/* Main Content Area */}
                     <div className="lg:col-span-2 space-y-8">
                         {/* Booking Wizard Section */}
                         <div className="glass-card p-8 rounded-[32px]">
-                            <h2 className="text-2xl font-serif font-bold text-charcoal mb-8 flex items-center gap-3">
+                            <h2 className="text-2xl font-serif font-bold text-burgundy mb-8 flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-2xl bg-sage/10 flex items-center justify-center">
                                     <Calendar className="w-5 h-5 text-sage" />
                                 </div>
-                                Book a Session
+                                Schedule a Session
                             </h2>
 
                             <InstructorBookingWizard
@@ -182,11 +117,11 @@ export default async function InstructorProfilePage(props: {
                         {/* Photo Gallery Section */}
                         {instructor.gallery_images && instructor.gallery_images.length > 0 && (
                             <div className="glass-card p-8 rounded-[32px]">
-                                <h2 className="text-2xl font-serif font-bold text-charcoal mb-8 flex items-center gap-3">
+                                <h2 className="text-2xl font-serif font-bold text-burgundy mb-8 flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
                                         <ImageIcon className="w-5 h-5 text-gold" />
                                     </div>
-                                    The Practice in Action
+                                    From my Classes
                                 </h2>
                                 <PublicInstructorGallery images={instructor.gallery_images} />
                             </div>
@@ -197,7 +132,7 @@ export default async function InstructorProfilePage(props: {
 
                         <div id="reviews" className="glass-card p-8 rounded-[32px] scroll-mt-24">
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-2xl font-serif font-bold text-charcoal flex items-center gap-3">
+                                <h2 className="text-2xl font-serif font-bold text-burgundy flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
                                         <Star className="w-5 h-5 text-gold" />
                                     </div>

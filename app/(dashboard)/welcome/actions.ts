@@ -50,7 +50,7 @@ export async function selectRole(role: 'customer' | 'instructor' | 'studio') {
         return { error: 'Failed to set role. Please try again.' }
     }
 
-    if (role === 'customer') redirect('/customer')
+    if (role === 'customer') redirect('/customer/onboarding')
     if (role === 'instructor') redirect('/instructor/onboarding')
     if (role === 'studio') redirect('/studio')
 }

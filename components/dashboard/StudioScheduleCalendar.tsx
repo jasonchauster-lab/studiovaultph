@@ -529,9 +529,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                                 <Edit2 className="w-3 h-3 text-[#43302E]/40 opacity-0 group-hover/slot:opacity-100 transition-opacity" />
                                                                             </div>
 
-                                                                            <div className="flex flex-wrap gap-1.5">
+                                                                            <div className="flex flex-col gap-1 mt-1">
                                                                                 {Object.entries(equipmentCounts).map(([eq, counts]) => (
-                                                                                    <span key={eq} className="text-[9px] font-bold text-[#43302E]/60 uppercase tracking-tighter bg-[#43302E]/5 px-1.5 py-0.5 rounded">
+                                                                                    <span key={eq} className="text-[8px] font-bold text-[#43302E]/60 uppercase tracking-tighter bg-[#43302E]/5 px-1.5 py-0.5 rounded w-fit">
                                                                                         {counts.booked}/{counts.total} {eq}
                                                                                     </span>
                                                                                 ))}
@@ -540,13 +540,14 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                                                                         <div className="mt-3 pt-2 border-t border-[#43302E]/5">
                                                                             {instructors.size > 0 ? (
-                                                                                <p className="text-[9px] font-bold text-[#43302E] uppercase tracking-widest truncate">
-                                                                                    {instructors.size === 1 ? 'Instructor: ' : 'Instructors: '}
+                                                                                <p className="text-[9px] font-bold text-[#43302E] uppercase tracking-widest truncate flex items-center gap-1.5">
+                                                                                    <User className="w-2.5 h-2.5 opacity-50" />
                                                                                     {Array.from(instructors).join(', ')}
                                                                                 </p>
                                                                             ) : (
-                                                                                <p className="text-[9px] font-bold text-[#6B5A58] uppercase tracking-widest italic">
-                                                                                    Instructor: Unassigned
+                                                                                <p className="text-[9px] font-bold text-[#6B5A58] uppercase tracking-widest flex items-center gap-1.5">
+                                                                                    <User className="w-2.5 h-2.5 opacity-30" />
+                                                                                    Unassigned
                                                                                 </p>
                                                                             )}
                                                                         </div>

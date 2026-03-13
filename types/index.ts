@@ -56,6 +56,9 @@ export interface Profile {
     avatar_url?: string;
     bio?: string;
     date_of_birth?: string;
+    contact_number?: string;
+    medical_conditions?: string[];
+    other_medical_condition?: string;
     role: 'customer' | 'instructor' | 'admin';
     instagram_handle?: string;
     emergency_contact?: string;

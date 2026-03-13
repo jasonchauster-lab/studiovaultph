@@ -94,13 +94,10 @@ export async function GET(request: Request) {
                         return buildRedirect(origin, request, '/welcome')
                     }
 
-                    // Role was pre-selected → skip the welcome screen
-                    if (roleIntent) {
-                        return buildRedirect(origin, request, getDashboard(roleIntent))
-                    }
-
-                    // No role yet → welcome page for role selection
-                    return buildRedirect(origin, request, '/welcome')
+                    // Send new user to onboarding to collect phone, DOB, etc.
+                    // If no roleIntent, go to /welcome to pick one.
+                    const onboardingPath = roleIntent ? `/${roleIntent}/onboarding` : '/welcome'
+                    return buildRedirect(origin, request, onboardingPath)
                 }
 
                 // ── Returning OAuth user: route to their dashboard ────────────
@@ -108,7 +105,7 @@ export async function GET(request: Request) {
                     return buildRedirect(origin, request, getDashboard(existingProfile.role))
                 }
 
-                // Profile exists but role was never set (edge case)
+                // Profile exists but role was never set (edge case) — pick a role
                 return buildRedirect(origin, request, '/welcome')
             }
         }

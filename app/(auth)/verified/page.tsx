@@ -22,18 +22,31 @@ export default async function VerifiedPage() {
                     nextRoute = '/admin'
                     break
                 case 'instructor':
-                    nextRoute = '/instructor'
+                    // Check if instructor has completed initial onboarding (at least one certification)
+                    const { data: certs } = await supabase
+                        .from('certifications')
+                        .select('id')
+                        .eq('instructor_id', user.id)
+                        .limit(1)
+                    nextRoute = (certs && certs.length > 0) ? '/instructor' : '/instructor/onboarding'
                     break
                 case 'studio':
                     nextRoute = '/studio'
                     break
                 case 'customer':
-                    nextRoute = '/customer'
+                    // Check if customer has completed onboarding (DOB and phone)
+                    const { data: custProfile } = await supabase
+                        .from('profiles')
+                        .select('date_of_birth, contact_number')
+                        .eq('id', user.id)
+                        .single()
+                    const isComplete = custProfile?.date_of_birth && custProfile?.contact_number
+                    nextRoute = isComplete ? '/customer' : '/customer/onboarding'
                     break
                 default:
                     nextRoute = '/welcome'
             }
-            buttonText = 'Go to Dashboard'
+            buttonText = nextRoute.includes('onboarding') ? 'Complete Onboarding' : 'Go to Dashboard'
         } else {
             nextRoute = '/welcome'
             buttonText = 'Complete Profile'

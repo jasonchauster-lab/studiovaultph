@@ -42,7 +42,11 @@ export default function ProfileForm({ profile }: { profile: any }) {
         const result = await updateProfile(formData)
 
         if (result.success) {
-            setMessage('Profile updated successfully!')
+            if (result.emailChangePending) {
+                setMessage('Profile updated. A verification email has been sent to your new email address. Please click the link in that email to confirm the change.')
+            } else {
+                setMessage('Profile updated successfully!')
+            }
         } else {
             setMessage('Failed to update profile. ' + (result.error || ''))
         }
@@ -124,10 +128,25 @@ export default function ProfileForm({ profile }: { profile: any }) {
                         <input
                             type="text"
                             name="fullName"
-                            defaultValue={profile?.full_name || ''}
+                            defaultValue={profile?.fullName || profile?.full_name || ''}
                             required
                             className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
                         />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Email Address</label>
+                        <input
+                            type="email"
+                            name="email"
+                            defaultValue={profile?.email || ''}
+                            required
+                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
+                        />
+                        {profile?.new_email && (
+                            <p className="mt-2 text-[10px] text-gold font-bold uppercase tracking-wider">
+                                Pending verification: {profile.new_email}
+                            </p>
+                        )}
                     </div>
                     <div>
                         <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Instagram Handle</label>

@@ -24,6 +24,13 @@ export default async function InstructorProfilePage() {
         .eq('instructor_id', user.id)
         .order('created_at', { ascending: false })
 
+    // Merge user email info from auth
+    const profileWithEmail = {
+        ...profile,
+        email: user.email,
+        new_email: user.new_email
+    }
+
     return (
         <div className="min-h-screen p-8 lg:p-12">
             <div className="max-w-4xl mx-auto space-y-16">
@@ -49,7 +56,7 @@ export default async function InstructorProfilePage() {
                             <User className="w-6 h-6 text-gold" />
                             <h2 className="text-3xl font-serif text-charcoal tracking-tighter">Profile Details</h2>
                         </div>
-                        <ProfileForm profile={profile} />
+                        <ProfileForm profile={profileWithEmail} />
                     </div>
                 </div>
 

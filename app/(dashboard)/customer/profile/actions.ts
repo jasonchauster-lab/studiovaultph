@@ -16,6 +16,7 @@ export async function updateProfile(formData: FormData) {
     const emergencyContactPhone = formData.get('emergencyContactPhone') as string
     const bio = formData.get('bio') as string
     const birthday = formData.get('birthday') as string
+    const email = formData.get('email') as string
     const avatarFile = formData.get('avatar') as File
     const otherMedicalCondition = formData.get('otherMedicalCondition') as string
 
@@ -80,6 +81,20 @@ export async function updateProfile(formData: FormData) {
     if (error) {
         console.error('Profile update error:', error)
         return { error: error.message }
+    }
+
+    // Handle Email Update
+    if (email && email !== user.email) {
+        const { error: emailError } = await supabase.auth.updateUser({ email })
+        if (emailError) {
+            console.error('Email update error:', emailError)
+            return { error: 'Failed to update email: ' + emailError.message }
+        }
+        // If successful, Supabase usually returns a "newEmail" field in the user object
+        // but we'll show a message to the user regardless.
+        revalidatePath('/customer/profile')
+        revalidatePath('/instructor/profile')
+        return { success: true, emailChangePending: true }
     }
 
     revalidatePath('/customer/profile')

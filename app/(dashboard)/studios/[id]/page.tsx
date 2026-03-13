@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { MapPin, Clock, Users, Star, ShowerHead, Droplets, Car, Wifi, Square, Lock, Shirt, CheckCircle2 } from 'lucide-react'
+import { MapPin, Clock, Users, Star, ShowerHead, Droplets, Car, Wifi, Square, Lock, Shirt, CheckCircle2, Image as ImageIcon } from 'lucide-react'
 import BookingSection from '@/components/customer/BookingSection'
 import StarRating from '@/components/reviews/StarRating'
 import ReviewList from '@/components/reviews/ReviewList'
 import { getPublicReviews } from '@/app/(dashboard)/reviews/actions'
+import PublicInstructorGallery from '@/components/instructor/PublicInstructorGallery'
 import NextImage from 'next/image'
 import { getManilaTodayStr, toManilaTimeString } from '@/lib/timezone'
 
@@ -25,7 +26,7 @@ export default async function StudioDetailsPage(props: {
     // 1. Fetch Studio Details
     const { data: studio } = await supabase
         .from('studios')
-        .select('*, profiles!owner_id(available_balance, is_suspended)')
+        .select('*, profiles!owner_id(available_balance, is_suspended, avatar_url, full_name)')
         .eq('id', id)
         .single()
 
@@ -96,7 +97,7 @@ export default async function StudioDetailsPage(props: {
     // 3. Fetch verified instructors and their availability
     const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, full_name, rates, avatar_url')
+        .select('id, full_name, rates, avatar_url, bio, instagram_handle, teaching_equipment')
         .eq('role', 'instructor')
         .not('rates', 'is', null)
 
@@ -106,7 +107,7 @@ export default async function StudioDetailsPage(props: {
     const [{ data: certsRaw }, { data: availabilityRaw }] = await Promise.all([
         supabase
             .from('certifications')
-            .select('instructor_id, verified')
+            .select('instructor_id, verified, certification_body, certification_name')
             .in('instructor_id', allInstructorIds)
             .eq('verified', true),
         supabase
@@ -146,14 +147,51 @@ export default async function StudioDetailsPage(props: {
 
     return (
         <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
-            <div className="max-w-5xl mx-auto">
-                {/* Header omitted for brevity */}
-                {/* ... existing header code ... */}
+            <div className="max-w-5xl mx-auto space-y-8">
+                {/* Studio Header */}
+                <div className="glass-card p-8 rounded-[32px] bg-white flex flex-col md:flex-row items-center gap-8 mb-8 border-border-grey shadow-cloud">
+                    <div className="w-32 h-32 bg-off-white rounded-[24px] flex items-center justify-center overflow-hidden border-2 border-white shadow-tight shrink-0">
+                        {studio.logo_url ? (
+                            <img src={studio.logo_url} alt={studio.name} className="w-full h-full object-cover" />
+                        ) : (studio.profiles as any)?.avatar_url ? (
+                            <img src={`https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${(studio.profiles as any).avatar_url}`} alt={studio.name} className="w-full h-full object-cover" />
+                        ) : (
+                            <Users className="w-12 h-12 text-burgundy/10" />
+                        )}
+                    </div>
+                    <div className="flex-1 text-center md:text-left">
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2">
+                            <h1 className="text-4xl font-serif font-bold text-burgundy tracking-tight">{studio.name}</h1>
+                            {studio.verified && (
+                                <div className="badge-verified flex items-center gap-1.5">
+                                    <CheckCircle2 className="w-3 h-3" />
+                                    Verified Studio
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-burgundy/60 font-medium whitespace-nowrap">
+                            <div className="flex items-center gap-1.5">
+                                <MapPin className="w-4 h-4 text-sage" />
+                                {studio.location}
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <StarRating rating={averageRating} count={totalCount} size="sm" />
+                            </div>
+                        </div>
+                        {studio.bio && (
+                            <p className="mt-4 text-burgundy/70 max-w-2xl leading-relaxed italic text-sm">
+                                &ldquo;{studio.bio}&rdquo;
+                            </p>
+                        )}
+                    </div>
+                </div>
 
                 {/* Booking Section */}
-                <div className="bg-white rounded-2xl border border-cream-200 shadow-sm p-8 mb-8">
-                    <h2 className="text-xl font-serif text-charcoal-900 mb-6 flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-charcoal-500" />
+                <div className="glass-card p-8 rounded-[32px] bg-white border-border-grey shadow-cloud">
+                    <h2 className="text-2xl font-serif font-bold text-burgundy mb-8 flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-sage/10 flex items-center justify-center">
+                            <Clock className="w-5 h-5 text-sage" />
+                        </div>
                         Available Slots
                     </h2>
                     {(() => {
@@ -186,15 +224,32 @@ export default async function StudioDetailsPage(props: {
                     })()}
                 </div>
 
+                {/* Studio Gallery Section */}
+                {studio.space_photos_urls && studio.space_photos_urls.length > 0 && (
+                    <div className="glass-card p-8 rounded-[32px] bg-white border-border-grey shadow-cloud">
+                        <h2 className="text-2xl font-serif font-bold text-burgundy mb-8 flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
+                                <ImageIcon className="w-5 h-5 text-gold" />
+                            </div>
+                            The Studio
+                        </h2>
+                        <PublicInstructorGallery images={studio.space_photos_urls} />
+                    </div>
+                )}
+
 
                 {/* Reviews Section */}
-                <div id="reviews" className="bg-white rounded-2xl border border-cream-200 shadow-sm p-8 scroll-mt-24">
-                    <h2 className="text-xl font-serif text-charcoal-900 mb-2 flex items-center gap-2">
-                        <Star className="w-5 h-5 text-charcoal-500" />
-                        Member Reviews
-                    </h2>
-                    <div className="mb-6">
-                        <StarRating rating={averageRating} count={totalCount} size="lg" />
+                <div id="reviews" className="glass-card p-8 rounded-[32px] bg-white border-border-grey shadow-cloud scroll-mt-24">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-2xl font-serif font-bold text-burgundy flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
+                                <Star className="w-5 h-5 text-gold" />
+                            </div>
+                            Member Reviews
+                        </h2>
+                        <div className="bg-white/40 px-4 py-2 rounded-2xl border border-white/60">
+                            <StarRating rating={averageRating} count={totalCount} size="sm" />
+                        </div>
                     </div>
                     <ReviewList reviews={reviews} />
                 </div>

@@ -35,16 +35,12 @@ export default function PublicInstructorGallery({ images }: PublicInstructorGall
     }
 
     return (
-        <div className="bg-white p-8 rounded-2xl border border-cream-200 shadow-sm">
-            <h2 className="text-xl font-serif text-charcoal-900 mb-6 flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-charcoal-500" />
-                From my Classes
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <>
+            <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x snap-mandatory">
                 {images.map((url: string, index: number) => (
                     <div
                         key={index}
-                        className="relative aspect-square rounded-xl overflow-hidden border border-cream-100 bg-cream-50 cursor-zoom-in group"
+                        className="relative flex-none w-64 aspect-square rounded-2xl overflow-hidden border border-cream-100 bg-cream-50 cursor-zoom-in group snap-start"
                         onClick={() => openLightbox(index)}
                     >
                         <img
@@ -118,6 +114,6 @@ export default function PublicInstructorGallery({ images }: PublicInstructorGall
                     </div>
                 </div>
             )}
-        </div>
+        </>
     )
 }

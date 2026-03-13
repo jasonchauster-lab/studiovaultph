@@ -33,6 +33,16 @@ export default async function CustomerDashboard({
 
     if (!user) redirect('/login')
 
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('date_of_birth, contact_number')
+        .eq('id', user.id)
+        .single()
+
+    if (!profile?.date_of_birth || !profile?.contact_number) {
+        redirect('/customer/onboarding')
+    }
+
     // Fire-and-forget: expire abandoned bookings to release slots.
     import('@/lib/wallet').then(({ expireAbandonedBookings }) =>
         expireAbandonedBookings().catch(() => {})
