@@ -295,10 +295,10 @@ function LoginContent() {
                         <div className="flex-1 h-px bg-border-grey" />
                     </div>
 
-                    <form onSubmit={handleAuth} className="space-y-6">
+                    <form onSubmit={handleAuth} className="w-full space-y-4">
                         {isSignUp && (
-                            <div className="space-y-3">
-                                <label htmlFor="full-name" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest px-1">Full Name</label>
+                            <div className="space-y-2">
+                                <label htmlFor="full-name" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest px-5">Full Name</label>
                                 <input
                                     id="full-name"
                                     type="text"
@@ -312,8 +312,8 @@ function LoginContent() {
                         )}
 
                         {isSignUp && (
-                            <div className="space-y-3">
-                                <label htmlFor="birthday" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest px-1">Date of Birth</label>
+                            <div className="space-y-2">
+                                <label htmlFor="birthday" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest px-5">Date of Birth</label>
                                 <input
                                     id="birthday"
                                     type="date"
@@ -325,8 +325,8 @@ function LoginContent() {
                             </div>
                         )}
 
-                        <div className="space-y-3">
-                            <label htmlFor="email" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest px-1">Email Address</label>
+                        <div className="space-y-2">
+                            <label htmlFor="email" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest px-5">Email Address</label>
                             <input
                                 id="email"
                                 type="email"
@@ -338,8 +338,8 @@ function LoginContent() {
                             />
                         </div>
 
-                        <div className="space-y-4 pb-4">
-                            <div className="flex items-center justify-between px-1">
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between px-5">
                                 <label htmlFor="password" id="password-label" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest">Password</label>
                                 {!isSignUp && (
                                     <Link href="/forgot-password" gap-2 className="text-[10px] text-slate-600 hover:text-burgundy transition-all font-bold uppercase tracking-widest">
