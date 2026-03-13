@@ -153,6 +153,7 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                                 <th className="px-6 py-4">Date</th>
                                 <th className="px-6 py-4">STUDIO / INSTRUCTOR</th>
                                 <th className="px-6 py-4">Activity</th>
+                                <th className="px-6 py-4">Schedule</th>
                                 <th className="px-6 py-4">Status</th>
                                 <th className="px-6 py-4 text-right">Amount</th>
                             </tr>
@@ -177,6 +178,20 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                                                 <span className="font-bold text-charcoal text-[11px] uppercase tracking-wide">{tx.type}</span>
                                                 {tx.details && <span className="text-[10px] text-charcoal/50 italic truncate">{tx.details}</span>}
                                             </div>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            {tx.session_date ? (
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-charcoal text-[11px] uppercase whitespace-nowrap">
+                                                        {new Date(tx.session_date).toLocaleDateString()}
+                                                    </span>
+                                                    <span className="text-[10px] text-charcoal/40 font-black uppercase whitespace-nowrap">
+                                                        {tx.session_time?.slice(0, 5)}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-[10px] text-charcoal/30 uppercase font-black italic">No session</span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-5">
                                             <span className="text-[9px] font-black uppercase tracking-widest text-charcoal/40 px-2 py-0.5 bg-cream-50 rounded-full">
@@ -218,6 +233,11 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                                         <p className="text-xs text-charcoal/40 font-bold uppercase tracking-tighter whitespace-normal break-words leading-tight mt-0.5">
                                             {tx.type} {tx.details ? `• ${tx.details}` : ''}
                                         </p>
+                                        {tx.session_date && (
+                                            <p className="text-[9px] text-charcoal/60 font-black uppercase tracking-tighter mt-1">
+                                                Slot: {new Date(tx.session_date).toLocaleDateString()} @ {tx.session_time?.slice(0, 5)}
+                                            </p>
+                                        )}
                                     </div>
                                     <div className="shrink-0 text-right">
                                         <span className="text-[11px] font-bold text-[#43302E] tracking-tight">

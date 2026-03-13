@@ -1,7 +1,8 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { uploadContentType } from '@/lib/utils/image-utils'
 import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import { formatManilaDate, formatManilaTime, roundToISOString, formatManilaDateStr, formatTo12Hour, toManilaDateStr, getManilaTodayStr, normalizeTimeTo24h, toManilaTimeString } from '@/lib/timezone'
@@ -455,6 +456,35 @@ export async function submitPaymentProof(
 
     revalidatePath(`/customer/payment/${bookingId}`)
     return { success: true }
+}
+
+export async function uploadTopUpProof(formData: FormData) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    const topUpId = formData.get('topUpId') as string
+    const file = formData.get('file') as File
+
+    if (!topUpId || !file) return { error: 'Missing required data' }
+
+    // Upload via Admin Client to bypass RLS
+    const adminSupabase = createAdminClient()
+    const fileExt = file.name.split('.').pop()
+    const fileName = `topup_${topUpId}_${Date.now()}.${fileExt}`
+    const filePath = `${fileName}`
+
+    const { error: uploadError } = await adminSupabase.storage
+        .from('payment-proofs')
+        .upload(filePath, file, { contentType: uploadContentType(file), upsert: false })
+
+    if (uploadError) {
+        console.error('[TopUpUpload] Storage Error:', uploadError)
+        return { error: `Upload failed: ${uploadError.message}` }
+    }
+
+    // Reuse existing submission logic to update DB
+    return await submitTopUpPaymentProof(topUpId, filePath)
 }
 
 export async function submitTopUpPaymentProof(
@@ -1153,6 +1183,8 @@ export async function getCustomerWalletDetails() {
             transactions.push({
                 id: b.id,
                 date: b.created_at,
+                session_date: slot?.date,
+                session_time: slot?.start_time,
                 type: 'Booking Payment',
                 amount: -deduction, // Negative for spending
                 status: displayStatus,

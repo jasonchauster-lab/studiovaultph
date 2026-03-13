@@ -163,13 +163,13 @@ export async function uploadGalleryImage(formData: FormData) {
 
     // 1. Upload to Storage using admin client to bypass RLS
     const adminSupabase = createAdminClient()
-    const { error: uploadError } = await adminSupabase.storage
+    const result = await adminSupabase.storage
         .from('avatars')
         .upload(filePath, file, { contentType: uploadContentType(file), upsert: false })
 
-    if (uploadError) {
-        console.error('Gallery upload error:', uploadError)
-        return { error: `Upload failed: ${uploadError.message}` }
+    if (result.error) {
+        console.error('Gallery upload error:', result.error)
+        return { error: `Upload failed: ${result.error.message}` }
     }
 
     // 2. Get Public URL

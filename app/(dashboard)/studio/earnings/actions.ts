@@ -187,6 +187,8 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
                 transactions.push({
                     date: b.created_at,
                     booking_date: slot?.date && slot?.start_time ? `${slot.date}T${slot.start_time}+08:00` : undefined,
+                    session_date: slot?.date,
+                    session_time: slot?.start_time,
                     type: txType,
                     client: clientName,
                     instructor: instructorName,
@@ -207,6 +209,8 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
                     instructor: instructorName,
                     studio: studioName,
                     total_amount: penaltyAmount,
+                    session_date: slot?.date,
+                    session_time: slot?.start_time,
                     details: 'Late cancellation by instructor'
                 })
             }
@@ -220,6 +224,8 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
                     instructor: instructorName,
                     studio: studioName,
                     total_amount: -penaltyAmount,
+                    session_date: slot?.date,
+                    session_time: slot?.start_time,
                     details: 'Late cancellation displacement fee'
                 })
             }

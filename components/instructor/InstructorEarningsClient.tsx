@@ -259,6 +259,7 @@ export default function InstructorEarningsClient({
                                 <th className="px-10 py-6 font-black">Date / Time</th>
                                 <th className="px-10 py-6 font-black">STUDENT</th>
                                 <th className="px-10 py-6 font-black">Type</th>
+                                <th className="px-10 py-6 font-black">SCHEDULE</th>
                                 <th className="px-10 py-6 font-black">Status</th>
                                 <th className="px-10 py-6 font-black text-right">Amount</th>
                             </tr>
@@ -291,6 +292,20 @@ export default function InstructorEarningsClient({
                                             </div>
                                         </td>
                                         <td className="px-10 py-8">
+                                            {tx.session_date ? (
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-charcoal text-[11px] uppercase whitespace-nowrap">
+                                                        {new Date(tx.session_date).toLocaleDateString()}
+                                                    </span>
+                                                    <span className="text-[10px] text-charcoal/40 font-black uppercase whitespace-nowrap">
+                                                        {tx.session_time?.slice(0, 5)}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-[10px] text-charcoal/30 uppercase font-black italic">No session</span>
+                                            )}
+                                        </td>
+                                        <td className="px-10 py-8">
                                             <span className={`status-pill-earth inline-flex items-center
                                                 ${tx.status === 'approved' || tx.status === 'processed'
                                                     ? 'status-pill-green'
@@ -312,7 +327,7 @@ export default function InstructorEarningsClient({
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={4} className="px-10 py-32 text-center">
+                                    <td colSpan={6} className="px-10 py-32 text-center">
                                         <div className="flex flex-col items-center justify-center">
                                             <div className="p-10 bg-white/40 rounded-full border border-white/60 mb-8 shadow-sm group-hover:scale-110 transition-transform duration-700">
                                                 <Wallet className="w-12 h-12 text-charcoal/5" />
@@ -345,6 +360,11 @@ export default function InstructorEarningsClient({
                                         <p className="text-xs text-charcoal/40 font-bold uppercase tracking-tighter whitespace-normal break-words leading-tight mt-0.5">
                                             {tx.type} {tx.details ? `• ${tx.details}` : ''}
                                         </p>
+                                        {tx.session_date && (
+                                            <p className="text-[9px] text-[#43302E]/60 font-black uppercase tracking-tighter mt-1">
+                                                Slot: {new Date(tx.session_date).toLocaleDateString()} @ {tx.session_time?.slice(0, 5)}
+                                            </p>
+                                        )}
                                     </div>
                                     <div className="shrink-0 text-right">
                                         <span className="text-[11px] font-bold text-[#43302E] tracking-tight">

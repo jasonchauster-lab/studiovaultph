@@ -2,11 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { X, Loader2, Upload, CheckCircle2, QrCode, CreditCard } from 'lucide-react'
-import { topUpWallet, submitTopUpPaymentProof } from '@/app/(dashboard)/customer/actions'
 import { useRouter } from 'next/navigation'
-
-import { createClient } from '@/lib/supabase/client'
-import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
+import { normalizeImageFile } from '@/lib/utils/image-utils'
+import { topUpWallet, uploadTopUpProof } from '@/app/(dashboard)/customer/actions'
 
 interface TopUpModalProps {
     isOpen: boolean
@@ -15,7 +13,6 @@ interface TopUpModalProps {
 
 export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
     const router = useRouter()
-    const supabase = useMemo(() => createClient(), [])
     const [step, setStep] = useState(1)
     const [amount, setAmount] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -25,15 +22,6 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [isSuccess, setIsSuccess] = useState(false)
     const [zoomedImage, setZoomedImage] = useState<string | null>(null)
-
-    useEffect(() => {
-        // Cleanup the object URL when the component unmounts or previewUrl changes
-        return () => {
-            if (previewUrl && previewUrl.startsWith('blob:')) {
-                URL.revokeObjectURL(previewUrl)
-            }
-        }
-    }, [previewUrl])
 
     if (!isOpen) return null
 
@@ -65,13 +53,11 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            let processedFile = file
             setIsLoading(true)
+            setError(null)
             try {
-                if (isHeicFile(file)) {
-                    processedFile = await ensureJpegFile(file)
-                }
-
+                const processedFile = await normalizeImageFile(file)
+                
                 // Clean up old preview URL if it exists
                 if (previewUrl && previewUrl.startsWith('blob:')) {
                     URL.revokeObjectURL(previewUrl)
@@ -80,7 +66,7 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                 setPreviewUrl(URL.createObjectURL(processedFile))
             } catch (err) {
                 console.error('File processing error:', err)
-                setError('Failed to process image. Please try a different format.')
+                setError('Failed to process image format.')
             } finally {
                 setIsLoading(false)
             }
@@ -97,19 +83,11 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
         setError(null)
 
         try {
-            // 1. Upload File to Storage
-            const fileExt = proofFile.name.split('.').pop()
-            const fileName = `topup_${topUpId}_${Date.now()}.${fileExt}`
-            const filePath = `${fileName}`
+            const formData = new FormData()
+            formData.append('topUpId', topUpId)
+            formData.append('file', proofFile)
 
-            const { error: uploadError } = await supabase.storage
-                .from('payment-proofs')
-                .upload(filePath, proofFile)
-
-            if (uploadError) throw uploadError
-
-            // 2. Submit Top-up proof via server action (saves the path to DB)
-            const result = await submitTopUpPaymentProof(topUpId!, filePath)
+            const result = await uploadTopUpProof(formData)
 
             if (result.error) {
                 setError(result.error)
@@ -120,7 +98,7 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
             }
         } catch (err: any) {
             console.error('Submission error:', err)
-            setError('Failed to process payment proof. Please try again.')
+            setError('Failed to submit payment proof. Please try again.')
         } finally {
             setIsLoading(false)
         }

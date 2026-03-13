@@ -138,7 +138,6 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                     </div>
                     <input
                         type="file"
-                        name="logo"
                         accept="image/*,.heic,.heif"
                         ref={logoInputRef}
                         className="hidden"

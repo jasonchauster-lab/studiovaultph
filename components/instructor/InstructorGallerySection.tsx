@@ -34,12 +34,12 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
                 const formData = new FormData()
                 formData.append('file', processedFile)
                 const result = await uploadGalleryImage(formData)
-                if (!result.success) {
-                    errors.push(`${files[i].name}: ${result.error || 'Upload failed'}`)
+                if (result.error) {
+                    errors.push(`${files[i].name}: ${result.error}`)
                 }
             } catch (err) {
                 console.error('File processing error:', err)
-                errors.push(`${files[i].name}: Failed to process image`)
+                errors.push(`${files[i].name}: Image processing failed. Please try another format.`)
             }
         }
 

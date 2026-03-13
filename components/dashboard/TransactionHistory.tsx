@@ -14,6 +14,8 @@ interface TransactionRecord {
     total_amount: number;
     details?: string;
     status?: string;
+    session_date?: string;
+    session_time?: string;
 }
 
 interface TransactionHistoryProps {
@@ -61,6 +63,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                     <th className="px-6 py-4">Date</th>
                                     <th className="px-6 py-4">STUDENT / INSTRUCTOR</th>
                                     <th className="px-6 py-4">Transaction Details</th>
+                                    <th className="px-6 py-4">Schedule</th>
                                     <th className="px-6 py-4 text-right">Amount</th>
                                 </tr>
                             </thead>
@@ -124,6 +127,20 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                         </div>
                                                     </div>
                                                 </td>
+                                                <td className="px-6 py-5">
+                                                    {tx.session_date ? (
+                                                        <div className="flex flex-col">
+                                                            <span className="font-bold text-charcoal text-[11px] uppercase whitespace-nowrap">
+                                                                {new Date(tx.session_date).toLocaleDateString()}
+                                                            </span>
+                                                            <span className="text-[10px] text-charcoal/40 font-black uppercase whitespace-nowrap">
+                                                                {tx.session_time?.slice(0, 5)}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[10px] text-charcoal/30 uppercase font-black italic">No session</span>
+                                                    )}
+                                                </td>
                                                 <td className={clsx(
                                                     "px-6 py-5 text-right font-black transition-colors whitespace-nowrap",
                                                     isRefunded ? "text-charcoal/40" :
@@ -165,12 +182,14 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                 </span>
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-[10px] font-black text-charcoal uppercase tracking-wide truncate">
-                                                    {tx.client || tx.instructor || 'System'}
-                                                </p>
                                                 <p className="text-xs text-charcoal/40 font-bold uppercase tracking-tighter whitespace-normal break-words leading-tight mt-0.5">
                                                     {tx.type} {tx.details ? `• ${tx.details}` : ''}
                                                 </p>
+                                                {tx.session_date && (
+                                                    <p className="text-[9px] text-charcoal/60 font-black uppercase tracking-tighter mt-1">
+                                                        Slot: {new Date(tx.session_date).toLocaleDateString()} @ {tx.session_time?.slice(0, 5)}
+                                                    </p>
+                                                )}
                                             </div>
                                             <div className="shrink-0 text-right">
                                                 <span className="text-[11px] font-bold text-[#43302E] tracking-tight">

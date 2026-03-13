@@ -55,14 +55,13 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
         const penaltyAmount = Number(breakdown?.penalty_amount || 0);
         const initiator = breakdown?.refund_initiator;
 
-        // 1. Gross Earnings (Approved/Completed/Charged sessions or status pending but payment submitted)
+        const slot = first(booking.slots);
         const isRefunded = booking.status === 'cancelled_refunded';
         const isRealized = ['approved', 'completed', 'cancelled_charged'].includes(booking.status) || (booking.status === 'pending' && booking.payment_status === 'submitted');
 
         if (isRealized || isRefunded) {
             if (isRealized) grossEarned += instructorFee;
 
-            const slot = first(booking.slots);
             const studioName = slot?.studios?.name;
             const txDate = slot?.date && slot?.start_time ? `${slot.date}T${slot.start_time}+08:00` : booking.created_at;
             const isLateCancel = booking.status === 'cancelled_charged';
@@ -79,6 +78,8 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
                 client: (booking.client as any)?.full_name,
                 studio: studioName,
                 total_amount: isRefunded ? 0 : instructorFee,
+                session_date: slot?.date,
+                session_time: slot?.start_time,
                 details: isRefunded ? `REFUNDED: ${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}` :
                     isLateCancel ? `CHARGED: ${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}` :
                         `${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}`
@@ -93,7 +94,9 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
                 type: 'Cancellation Compensation',
                 status: 'processed',
                 details: 'Displacement fee from studio',
-                total_amount: penaltyAmount
+                total_amount: penaltyAmount,
+                session_date: slot?.date,
+                session_time: slot?.start_time,
             });
         }
 
@@ -105,7 +108,9 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
                 type: 'Cancellation Penalty',
                 status: 'processed',
                 details: 'Late cancellation penalty',
-                total_amount: -penaltyAmount
+                total_amount: -penaltyAmount,
+                session_date: slot?.date,
+                session_time: slot?.start_time,
             });
         }
     });

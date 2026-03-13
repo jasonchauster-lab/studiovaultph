@@ -15,6 +15,29 @@ export default function ProfileForm({ profile }: { profile: any }) {
     const [selectedEquipment, setSelectedEquipment] = useState<string[]>(profile?.teaching_equipment || [])
     const [selectedMedicalConditions, setSelectedMedicalConditions] = useState<string[]>(profile?.medical_conditions || [])
 
+    // State for avatar preview and file
+    const [previewUrl, setPreviewUrl] = useState<string | null>(profile?.avatar_url || '/default-avatar.svg')
+    const [avatarFile, setAvatarFile] = useState<File | null>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            setIsLoading(true)
+            try {
+                const processedFile = await normalizeImageFile(file)
+                setAvatarFile(processedFile)
+                const url = URL.createObjectURL(processedFile)
+                setPreviewUrl(url)
+            } catch (err) {
+                console.error('Avatar processing failed', err)
+                setMessage('Failed to process image format. Please try another photo.')
+            } finally {
+                setIsLoading(false)
+            }
+        }
+    }
+
     const handleSubmit = async (formData: FormData) => {
         const contactNumber = formData.get('contactNumber') as string
         const emergencyContactName = formData.get('emergencyContactName') as string
@@ -36,6 +59,11 @@ export default function ProfileForm({ profile }: { profile: any }) {
             return
         }
 
+        // Overwrite avatar if we have a processed one
+        if (avatarFile) {
+            formData.set('avatar', avatarFile)
+        }
+
         setIsLoading(true)
         setMessage(null)
 
@@ -52,27 +80,6 @@ export default function ProfileForm({ profile }: { profile: any }) {
         }
 
         setIsLoading(false)
-    }
-
-    // State for avatar preview
-    const [previewUrl, setPreviewUrl] = useState<string | null>(profile?.avatar_url || '/default-avatar.svg')
-    const fileInputRef = useRef<HTMLInputElement>(null)
-
-    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (file) {
-            setIsLoading(true)
-            try {
-                const processedFile = await normalizeImageFile(file)
-                const url = URL.createObjectURL(processedFile)
-                setPreviewUrl(url)
-            } catch (err) {
-                console.error('Avatar processing failed', err)
-                setMessage('Failed to process image format.')
-            } finally {
-                setIsLoading(false)
-            }
-        }
     }
 
     return (
@@ -102,11 +109,10 @@ export default function ProfileForm({ profile }: { profile: any }) {
 
                     <input
                         type="file"
-                        name="avatar"
-                        accept="image/*,.heic,.heif"
                         ref={fileInputRef}
                         className="hidden"
                         onChange={handleAvatarChange}
+                        accept="image/*,.heic,.heif"
                     />
                 </div>
 
