@@ -227,14 +227,10 @@ function LoginContent() {
 
                 <div className="w-full max-w-md pt-10 sm:pt-0">
                     {/* Centered Mobile Logo */}
-                    <div className="flex flex-col items-center mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
-                        <Link href="/" className="flex flex-col items-center gap-4 group">
-                            <div className="bg-white p-4 rounded-2xl shadow-tight group-hover:rotate-3 transition-transform border border-border-grey/50">
-                                <Image src="/logo4.png" alt="StudioVault Logo" width={60} height={60} className="w-12 h-12 object-contain" />
-                            </div>
-                            <div className="flex flex-col items-center">
-                                <span className="text-xl font-serif font-bold text-charcoal tracking-[0.2em]">STUDIO VAULT</span>
-                                <span className="text-[8px] font-black text-burgundy uppercase tracking-[0.5em] mt-1">SANCTUARY PH</span>
+                    <div className="flex flex-col items-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+                        <Link href="/" className="flex flex-col items-center group">
+                            <div className="bg-white p-6 rounded-3xl shadow-tight group-hover:rotate-2 transition-transform border border-border-grey/50">
+                                <Image src="/logo4.png" alt="StudioVault Logo" width={180} height={60} className="w-[180px] h-auto object-contain" />
                             </div>
                         </Link>
                     </div>
