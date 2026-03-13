@@ -237,18 +237,12 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                         const groupSlots = slots.filter(s => `${s.date}-${s.start_time}` === key);
                         
                         if (groupSlots.length > 0) {
-                            if (groupSlots.length === 1) {
-                                // Single slot, open edit modal directly
-                                onSlotClick(groupSlots[0]);
-                            } else {
-                                // Multiple slots for this time, open bucket modal
-                                setBucketSlots(groupSlots);
-                                const first = groupSlots[0];
-                                // Parse hour from start_time (HH:mm:ss or HH:mm)
-                                const hour = parseInt(first.start_time.split(':')[0], 10);
-                                setBucketTime({ date: parseISO(first.date), hour });
-                                setIsBucketModalOpen(true);
-                            }
+                            // Always open bucket modal to show booking details (user can edit from there)
+                            setBucketSlots(groupSlots);
+                            const first = groupSlots[0];
+                            const hour = parseInt(first.start_time.split(':')[0], 10);
+                            setBucketTime({ date: parseISO(first.date), hour });
+                            setIsBucketModalOpen(true);
                         }
                     }}
                     initialSessions={(() => {
