@@ -64,42 +64,41 @@ export default async function StudioDashboard(props: {
         const studioSlotIds = studioSlots?.map((s: any) => s.id) ?? []
 
         if (studioSlotIds.length > 0) {
-            // STEP 2a: Fetch Upcoming Bookings using studio ID
             const nowTimeStr = toManilaTimeString(new Date());
-            const { data: studioBookings } = await supabase
-                .from('bookings')
-                .select(`
-                    *,
-                    client:profiles!client_id(full_name, avatar_url),
-                    instructor:profiles!instructor_id(full_name, avatar_url),
-                    slots!inner(*)
-                `)
-                .eq('studio_id', myStudio.id)
-                .in('status', ['approved'])
-                .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' })
-                .order('date', { foreignTable: 'slots', ascending: true })
-                .order('start_time', { foreignTable: 'slots', ascending: true })
-                .limit(10)
-
-            if (studioBookings) {
-                upcomingBookings = studioBookings
-            }
-
-            // STEP 2b: Stats Bookings (Last 30 Days) - Based on SESSION date
             const thirtyDaysAgo = new Date()
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
             const thirtyDaysAgoStr = format(thirtyDaysAgo, 'yyyy-MM-dd')
 
-            const { data: statsBookings } = await supabase
-                .from('bookings')
-                .select(`
-                    *,
-                    instructor:profiles!instructor_id(full_name, avatar_url),
-                    slots(*)
-                `)
-                .eq('studio_id', myStudio.id)
-                .in('status', ['approved', 'completed', 'cancelled_charged'])
-                .gte('slots.date', thirtyDaysAgoStr)
+            const [{ data: studioBookings }, { data: statsBookings }] = await Promise.all([
+                // STEP 2a: Upcoming Bookings
+                supabase
+                    .from('bookings')
+                    .select(`
+                        *,
+                        client:profiles!client_id(full_name, avatar_url),
+                        instructor:profiles!instructor_id(full_name, avatar_url),
+                        slots!inner(*)
+                    `)
+                    .eq('studio_id', myStudio.id)
+                    .in('status', ['approved'])
+                    .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' })
+                    .order('date', { foreignTable: 'slots', ascending: true })
+                    .order('start_time', { foreignTable: 'slots', ascending: true })
+                    .limit(10),
+                // STEP 2b: Stats Bookings (Last 30 Days)
+                supabase
+                    .from('bookings')
+                    .select(`
+                        *,
+                        instructor:profiles!instructor_id(full_name, avatar_url),
+                        slots(*)
+                    `)
+                    .eq('studio_id', myStudio.id)
+                    .in('status', ['approved', 'completed', 'cancelled_charged'])
+                    .gte('slots.date', thirtyDaysAgoStr),
+            ]);
+
+            if (studioBookings) upcomingBookings = studioBookings
 
             if (statsBookings && statsBookings.length > 0) {
                 // Calc Revenue

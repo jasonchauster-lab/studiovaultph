@@ -61,17 +61,15 @@ export default async function CustomerDashboard({
         studioQuery = studioQuery.overlaps('amenities', amenityList)
     }
 
-    // Fetch all verified studio locations for the smart location filter
-    const { data: allStudiosForLocations } = await supabase
-        .from('studios')
-        .select('location')
-        .eq('verified', true)
+    // Fetch studios + all verified locations in parallel
+    const [{ data: allStudiosForLocations }, { data: rawStudios }] = await Promise.all([
+        supabase.from('studios').select('location').eq('verified', true),
+        studioQuery
+    ])
 
     const availableLocations: string[] = [
         ...new Set((allStudiosForLocations || []).map((s: any) => s.location).filter(Boolean))
     ]
-
-    const { data: rawStudios } = await studioQuery
 
     // Filter out suspended or negative balance studios
     const studios = rawStudios?.filter((s: any) => {
@@ -176,8 +174,8 @@ export default async function CustomerDashboard({
         if (data) slots = data as unknown as Slot[]
     }
 
-    // Fetch all reviews for aggregated ratings
-    const { data: reviews } = await supabase.from('reviews').select('reviewee_id, rating')
+    // Fetch reviews for aggregated ratings (capped to prevent loading the entire table)
+    const { data: reviews } = await supabase.from('reviews').select('reviewee_id, rating').limit(2000)
     const ratingsMap: Record<string, { total: number, count: number, average: number }> = {}
 
     reviews?.forEach(r => {
@@ -376,6 +374,7 @@ export default async function CustomerDashboard({
                                                     src={studio.logo_url}
                                                     alt={studio.name}
                                                     fill
+                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                                     className="object-cover group-hover:scale-110 transition-transform duration-700"
                                                 />
                                             ) : (

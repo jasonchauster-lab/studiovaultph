@@ -432,11 +432,17 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
     let bookingRecordId: string | null = null;
     let fallbackError = 'Failed to process booking safely.';
 
+    // Pre-fetch all slot data in one query to avoid N+1
+    const { data: allSlotData } = await supabase
+        .from('slots')
+        .select('id, equipment, quantity')
+        .in('id', allocatedSlotIds);
+    const slotDataMap = Object.fromEntries((allSlotData || []).map(s => [s.id, s]));
+
     for (let i = 0; i < allocatedSlotIds.length; i++) {
         const currentId = allocatedSlotIds[i];
 
-        // Fetch current slot details for RPC Key resolution
-        const { data: currentSlotData } = await supabase.from('slots').select('equipment, quantity').eq('id', currentId).single();
+        const currentSlotData = slotDataMap[currentId];
         if (!currentSlotData) continue;
 
         const currentEquipment = (currentSlotData.equipment as Record<string, number>) || {};
