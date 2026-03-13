@@ -16,14 +16,14 @@ export default function LandingPage() {
 
       {/* Navigation */}
       <header className="sticky top-0 z-50 w-full px-4 md:px-8 py-5">
-        <nav className="max-w-7xl mx-auto bg-white rounded-xl px-4 sm:px-10 py-4 flex items-center justify-between shadow-tight border border-border-grey">
+        <nav className="max-w-7xl mx-auto bg-white rounded-xl px-4 sm:px-10 py-5 flex items-center justify-between shadow-tight border border-border-grey">
           <Link href="/" aria-label="Studio Vault Home" className="flex items-center pl-5 group">
             <Image
               src="/logo4.png"
               alt="Studio Vault"
-              width={160}
-              height={40}
-              className="h-10 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+              width={200}
+              height={50}
+              className="h-12 w-[140px] md:w-[190px] object-contain transition-transform duration-500 group-hover:scale-105"
               priority
             />
           </Link>

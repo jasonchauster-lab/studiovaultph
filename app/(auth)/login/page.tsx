@@ -189,13 +189,7 @@ function LoginContent() {
                     <div className="earth-card p-12 border-border-grey/50 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
                         <div className="space-y-12">
                             <div className="space-y-8">
-                                <Link href="/" aria-label="Studio Vault PH Home" className="flex items-center gap-0 group/logo">
-                                    <div className="bg-white p-3 rounded-xl shadow-tight group-hover/logo:rotate-3 transition-transform border border-border-grey/50">
-                                        <Image src="/logo4.png" alt="StudioVault Logo" width={80} height={80} className="w-12 h-12 object-contain" />
-                                    </div>
-                                    <span className="text-2xl font-serif font-bold text-charcoal tracking-tight ml-4">STUDIO VAULT</span>
-                                </Link>
-                                <h2 className="text-5xl lg:text-6xl font-serif font-bold text-charcoal leading-[1.1] tracking-tight">
+                                <h2 className="text-5xl lg:text-6xl font-serif font-bold text-charcoal leading-[1.1] tracking-tight pt-12">
                                     The Sanctuary <br />
                                     <span className="text-burgundy italic">of Movement.</span>
                                 </h2>
@@ -229,9 +223,7 @@ function LoginContent() {
                     {/* Centered Mobile Logo */}
                     <div className="flex flex-col items-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
                         <Link href="/" className="flex flex-col items-center group">
-                            <div className="bg-white p-6 rounded-3xl shadow-tight group-hover:rotate-2 transition-transform border border-border-grey/50">
-                                <Image src="/logo4.png" alt="StudioVault Logo" width={180} height={60} className="w-[180px] h-auto object-contain" />
-                            </div>
+                            <Image src="/logo-primary.png" alt="StudioVault Logo" width={240} height={80} className="h-20 w-auto object-contain" />
                         </Link>
                     </div>
 
