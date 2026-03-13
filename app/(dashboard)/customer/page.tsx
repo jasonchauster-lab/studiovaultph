@@ -7,6 +7,7 @@ import Image from 'next/image'
 import SlotCard from '@/components/dashboard/SlotCard'
 import { Slot } from '@/types'
 import BookSessionButton from '@/components/customer/BookSessionButton'
+import AvatarWithFallback from '@/components/customer/AvatarWithFallback'
 import StarRating from '@/components/reviews/StarRating'
 import { getManilaTodayStr, toManilaTimeString } from '@/lib/timezone'
 
@@ -252,7 +253,7 @@ export default async function CustomerDashboard({
                                             <div key={inst.id} className="marketplace-card earth-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 group">
 
                                                 {/* ── Banner: gradient lifestyle area ── */}
-                                                <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-off-white via-buttermilk/40 to-walking-vinnie/30">
+                                                <div className="relative h-28 overflow-hidden bg-gradient-to-br from-off-white via-buttermilk/40 to-walking-vinnie/30">
                                                     {/* decorative pattern */}
                                                     <div
                                                         className="absolute inset-0 opacity-20"
@@ -270,19 +271,10 @@ export default async function CustomerDashboard({
 
                                                     {/* ── Circular instructor avatar overlapping bottom edge ── */}
                                                     <div className="instructor-trust-avatar">
-                                                        {inst.avatar_url ? (
-                                                            <Image
-                                                                src={inst.avatar_url}
-                                                                alt={inst.full_name}
-                                                                width={48}
-                                                                height={48}
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center bg-off-white">
-                                                                <User className="w-6 h-6 text-burgundy/30" />
-                                                            </div>
-                                                        )}
+                                                        <AvatarWithFallback
+                                                            src={inst.avatar_url}
+                                                            alt={inst.full_name}
+                                                        />
                                                     </div>
                                                 </div>
 
@@ -395,19 +387,11 @@ export default async function CustomerDashboard({
 
                                             {/* ── Studio logo overlapping bottom edge of banner ── */}
                                             <div className="instructor-trust-avatar">
-                                                {studio.logo_url ? (
-                                                    <Image
-                                                        src={studio.logo_url}
-                                                        alt={studio.name}
-                                                        width={48}
-                                                        height={48}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-off-white">
-                                                        <span className="text-burgundy font-bold text-base font-serif">{studio.name.slice(0, 1)}</span>
-                                                    </div>
-                                                )}
+                                                <AvatarWithFallback
+                                                    src={studio.logo_url}
+                                                    alt={studio.name}
+                                                    initials={studio.name.slice(0, 1)}
+                                                />
                                             </div>
                                         </div>
 

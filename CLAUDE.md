@@ -172,7 +172,14 @@ npx @claude-flow/cli@latest memory list --namespace patterns --limit 10
 
 # Retrieve (REQUIRED: --key; OPTIONAL: --namespace)
 npx @claude-flow/cli@latest memory retrieve --key "pattern-auth" --namespace patterns
+
 ```
+
+# Studio Vault PH - Project Rules
+
+## Development Guidelines
+- **MCP Usage:** Do not use MCP tools (Playwright, SQL, etc.) unless I explicitly ask for a browser audit or a database check.
+- **Mobile First:** Always prioritize responsive design for 375x812 (iPhone) viewports.
 
 ## Quick Setup
 

@@ -20,9 +20,38 @@ function LoginContent() {
     const [role, setRole] = useState(initialRole)
     const [isSignUp, setIsSignUp] = useState(initialMode)
     const [loading, setLoading] = useState(false)
-    const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null)
+
+    // Pre-populate error message if redirected back from OAuth callback with an error
+    const oauthError = searchParams.get('error')
+    const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(
+        oauthError ? { type: 'error', text: decodeURIComponent(oauthError) } : null
+    )
     const router = useRouter()
     const supabase = createClient()
+
+    const handleGoogleAuth = async () => {
+        setLoading(true)
+        setMessage(null)
+
+        // When the user is on the sign-up tab with a role already selected,
+        // pass it as `role_intent` so the callback can skip the welcome screen.
+        const params = new URLSearchParams()
+        if (isSignUp && role) {
+            params.set('role_intent', role)
+        }
+        const callbackUrl = `${window.location.origin}/auth/callback${params.toString() ? '?' + params.toString() : ''}`
+
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: callbackUrl,
+            },
+        })
+        if (error) {
+            setMessage({ type: 'error', text: error.message })
+            setLoading(false)
+        }
+    }
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -168,16 +197,16 @@ function LoginContent() {
                                 </Link>
                                 <h2 className="text-5xl lg:text-6xl font-serif font-bold text-charcoal leading-[1.1] tracking-tight">
                                     The Sanctuary <br />
-                                    <span className="text-forest italic">of Movement.</span>
+                                    <span className="text-burgundy italic">of Movement.</span>
                                 </h2>
                             </div>
 
-                            <p className="text-xl text-charcoal-700 font-medium leading-relaxed italic border-l-4 border-forest/20 pl-6">
+                            <p className="text-xl text-charcoal-700 font-medium leading-relaxed italic border-l-4 border-burgundy/20 pl-6">
                                 &ldquo;Experience a platform designed with the precision and grace of Pilates itself.&rdquo;
                             </p>
 
                             <div className="flex items-center gap-4 text-[10px] font-bold text-slate-600 uppercase tracking-[0.4em] border-t border-border-grey pt-10 mt-12">
-                                <Award className="w-5 h-5 text-forest" />
+                                <Award className="w-5 h-5 text-burgundy" />
                                 A Foundation Built for Professionals
                             </div>
                         </div>
@@ -202,7 +231,7 @@ function LoginContent() {
                             {isSignUp ? 'Begin Your Journey' : 'Secure Access'}
                         </h1>
                         <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.4em]">
-                            {isSignUp ? 'Establish your digital legacy' : 'Return to your dashboard'}
+                            {isSignUp ? 'Join the community.' : 'Return to your dashboard'}
                         </p>
                     </div>
 
@@ -224,7 +253,7 @@ function LoginContent() {
                                     aria-checked={role === opt.id}
                                     onClick={() => setRole(opt.id)}
                                     className={`flex-1 py-3 px-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${role === opt.id
-                                        ? 'bg-forest text-white shadow-tight'
+                                        ? 'bg-burgundy text-white shadow-tight'
                                         : 'text-slate-600 hover:text-charcoal hover:bg-off-white'
                                         }`}
                                 >
@@ -233,6 +262,28 @@ function LoginContent() {
                             ))}
                         </div>
                     )}
+
+                    {/* Google OAuth */}
+                    <button
+                        type="button"
+                        onClick={handleGoogleAuth}
+                        disabled={loading}
+                        className="w-full flex items-center justify-center gap-3 px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-semibold text-charcoal hover:bg-off-white transition-all shadow-tight disabled:opacity-50 mb-6"
+                    >
+                        <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.658 14.013 17.64 11.706 17.64 9.2z" fill="#4285F4"/>
+                            <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+                            <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+                            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+                        </svg>
+                        Continue with Google
+                    </button>
+
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="flex-1 h-px bg-border-grey" />
+                        <span className="text-[10px] font-bold text-muted-burgundy uppercase tracking-widest">or</span>
+                        <div className="flex-1 h-px bg-border-grey" />
+                    </div>
 
                     <form onSubmit={handleAuth} className="space-y-6">
                         {isSignUp && (
@@ -245,7 +296,7 @@ function LoginContent() {
                                     onChange={(e) => setFullName(e.target.value)}
                                     required={isSignUp}
                                     placeholder="Jane Doe"
-                                    className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all placeholder:text-slate/30"
+                                    className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all placeholder:text-slate/30"
                                 />
                             </div>
                         )}
@@ -259,7 +310,7 @@ function LoginContent() {
                                     value={birthday}
                                     onChange={(e) => setBirthday(e.target.value)}
                                     required={isSignUp}
-                                    className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all"
+                                    className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all"
                                 />
                             </div>
                         )}
@@ -273,7 +324,7 @@ function LoginContent() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                                 placeholder="jane@studio-vault.ph"
-                                className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all placeholder:text-slate/30"
+                                className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all placeholder:text-slate/30"
                             />
                         </div>
 
@@ -281,7 +332,7 @@ function LoginContent() {
                             <div className="flex items-center justify-between px-1">
                                 <label htmlFor="password" id="password-label" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest">Password</label>
                                 {!isSignUp && (
-                                    <Link href="/forgot-password" gap-2 className="text-[10px] text-slate-600 hover:text-forest transition-all font-bold uppercase tracking-widest">
+                                    <Link href="/forgot-password" gap-2 className="text-[10px] text-slate-600 hover:text-burgundy transition-all font-bold uppercase tracking-widest">
                                         Recover Key
                                     </Link>
                                 )}
@@ -293,7 +344,7 @@ function LoginContent() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 placeholder="••••••••"
-                                className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all placeholder:text-slate/30"
+                                className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all placeholder:text-slate/30"
                             />
                         </div>
 
@@ -308,7 +359,7 @@ function LoginContent() {
                             disabled={loading}
                             className="btn-forest w-full py-5 rounded-lg text-[11px] font-bold uppercase tracking-[0.3em] shadow-tight disabled:opacity-50"
                         >
-                            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (isSignUp ? 'Initiate Account' : 'Authenticate')}
+                            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (isSignUp ? 'Create Account' : 'Log In')}
                         </button>
 
                         <div className="text-center pt-8">
@@ -324,9 +375,9 @@ function LoginContent() {
                                 className="text-slate-600 hover:text-charcoal text-[10px] font-bold uppercase tracking-[0.3em] transition-all group"
                             >
                                 {isSignUp ? (
-                                    <>Account exists? <span className="text-forest border-b border-forest/20 group-hover:border-forest transition-all pb-1">Authenticate</span></>
+                                    <>Already have an account? <span className="text-burgundy border-b border-burgundy/20 group-hover:border-burgundy transition-all pb-1">Log in.</span></>
                                 ) : (
-                                    <>No account? <span className="text-forest border-b border-forest/20 group-hover:border-forest transition-all pb-1">Begin Journey</span></>
+                                    <>Don&apos;t have an account? <span className="text-burgundy border-b border-burgundy/20 group-hover:border-burgundy transition-all pb-1">Sign up.</span></>
                                 )}
                             </button>
                         </div>
@@ -334,7 +385,7 @@ function LoginContent() {
 
                     <div className="mt-20 pt-10 border-t border-border-grey text-center">
                         <p className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.3em] leading-relaxed max-w-xs mx-auto">
-                            By proceeding, you adhere to our <Link href="/terms" className="text-slate-600 hover:text-forest">Terms</Link> and <Link href="/privacy" className="text-slate-600 hover:text-forest">Privacy Policy</Link>.
+                            By proceeding, you adhere to our <Link href="/terms" className="text-slate-600 hover:text-burgundy">Terms</Link> and <Link href="/privacy" className="text-slate-600 hover:text-burgundy">Privacy Policy</Link>.
                         </p>
                     </div>
                 </div>
