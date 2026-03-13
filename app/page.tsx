@@ -227,7 +227,7 @@ export default function LandingPage() {
                 title: "For Instructors",
                 subtitle: "PROFESSIONAL AUTONOMY",
                 icon: User,
-                items: ["Prime Booking Locations", "Transparent Pay-as-you-go", "Unified Session Controls"],
+                items: ["Book Premium Studio Spaces", "Keep 100% of Your Client Fees", "Manage Your Schedule on the Go"],
                 image: "/images/homepage/instructor.png"
               },
               {
@@ -261,7 +261,7 @@ export default function LandingPage() {
                   </div>
                   <ul className="flex flex-col gap-y-4">
                     {v.items.map((item, idx) => (
-                      <li key={idx} className="flex items-center gap-3 text-muted-burgundy text-[15px] leading-relaxed">
+                      <li key={idx} className="flex items-start gap-4 text-muted-burgundy text-[17px] leading-relaxed py-1">
                         <div className="w-1.5 h-1.5 rounded-full bg-burgundy shrink-0" />
                         {item}
                       </li>

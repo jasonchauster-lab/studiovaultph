@@ -215,7 +215,7 @@ function LoginContent() {
             </div>
 
             {/* Right Side: Form Content */}
-            <main className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-24 overflow-y-auto relative bg-off-white">
+            <main className="flex-1 flex flex-col items-center justify-center p-10 md:p-12 lg:p-24 overflow-y-auto relative bg-off-white">
                 {/* Back Button */}
                 <Link
                     href="/"
@@ -226,11 +226,11 @@ function LoginContent() {
                 </Link>
 
                 <div className="w-full max-w-md">
-                    <div className="text-center mb-16 space-y-4">
-                        <h1 className="text-4xl font-serif font-bold text-charcoal tracking-tight">
+                    <div className="text-center mb-16 space-y-6">
+                        <h1 className="text-3xl md:text-4xl font-serif font-bold text-charcoal tracking-tight">
                             {isSignUp ? 'Begin Your Journey' : 'Secure Access'}
                         </h1>
-                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.4em]">
+                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.5em] leading-relaxed">
                             {isSignUp ? 'Join the community.' : 'Return to your dashboard'}
                         </p>
                     </div>
@@ -268,7 +268,7 @@ function LoginContent() {
                         type="button"
                         onClick={handleGoogleAuth}
                         disabled={loading}
-                        className="w-full flex items-center justify-center gap-3 px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-semibold text-charcoal hover:bg-off-white transition-all shadow-tight disabled:opacity-50 mb-6"
+                        className="w-full flex items-center justify-center gap-3 px-5 h-14 border border-border-grey bg-white rounded-lg text-[13px] font-semibold text-charcoal hover:bg-off-white transition-all shadow-tight disabled:opacity-50 mb-10"
                     >
                         <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                             <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.658 14.013 17.64 11.706 17.64 9.2z" fill="#4285F4"/>
@@ -279,9 +279,9 @@ function LoginContent() {
                         Continue with Google
                     </button>
 
-                    <div className="flex items-center gap-4 mb-6">
+                    <div className="flex items-center gap-4 mb-10">
                         <div className="flex-1 h-px bg-border-grey" />
-                        <span className="text-[10px] font-bold text-muted-burgundy uppercase tracking-widest">or</span>
+                        <span className="text-[10px] font-bold text-muted-burgundy uppercase tracking-widest px-2">or</span>
                         <div className="flex-1 h-px bg-border-grey" />
                     </div>
 
@@ -296,7 +296,7 @@ function LoginContent() {
                                     onChange={(e) => setFullName(e.target.value)}
                                     required={isSignUp}
                                     placeholder="Jane Doe"
-                                    className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all placeholder:text-slate/30"
+                                    className="w-full px-5 h-14 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all placeholder:text-slate/30"
                                 />
                             </div>
                         )}
@@ -357,7 +357,7 @@ function LoginContent() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="btn-forest w-full py-5 rounded-lg text-[11px] font-bold uppercase tracking-[0.3em] shadow-tight disabled:opacity-50"
+                            className="btn-forest w-full h-14 rounded-lg text-[11px] font-bold uppercase tracking-[0.3em] shadow-tight disabled:opacity-50"
                         >
                             {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (isSignUp ? 'Create Account' : 'Log In')}
                         </button>
@@ -383,8 +383,8 @@ function LoginContent() {
                         </div>
                     </form>
 
-                    <div className="mt-20 pt-10 border-t border-border-grey text-center">
-                        <p className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.3em] leading-relaxed max-w-xs mx-auto">
+                    <div className="mt-40 pt-10 border-t border-border-grey text-center">
+                        <p className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.4em] leading-relaxed max-w-xs mx-auto">
                             By proceeding, you adhere to our <Link href="/terms" className="text-slate-600 hover:text-burgundy">Terms</Link> and <Link href="/privacy" className="text-slate-600 hover:text-burgundy">Privacy Policy</Link>.
                         </p>
                     </div>
