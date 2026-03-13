@@ -15,15 +15,15 @@ export default function LandingPage() {
       <RoleSelectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* Navigation */}
-      <header className="sticky top-0 z-50 w-full px-4 md:px-8 py-5">
-        <nav className="max-w-7xl mx-auto bg-white rounded-xl px-4 sm:px-10 py-5 flex items-center justify-between shadow-tight border border-border-grey">
-          <Link href="/" aria-label="Studio Vault Home" className="flex items-center pl-5 group">
+      <header className="sticky top-0 z-50 w-full px-4 md:px-8">
+        <nav className="max-w-7xl mx-auto mt-4 bg-white rounded-2xl px-4 sm:px-8 py-3 flex items-center justify-between shadow-tight border border-border-grey">
+          <Link href="/" aria-label="Studio Vault Home" className="flex items-center pl-2 group">
             <Image
               src="/logo4.png"
               alt="Studio Vault"
               width={320}
               height={80}
-              className="h-auto w-[180px] md:w-[280px] object-contain transition-transform duration-500 group-hover:scale-105"
+              className="h-10 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
               priority
             />
           </Link>
