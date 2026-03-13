@@ -139,14 +139,15 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
 
                         return (
                             <div key={booking.id} className="p-4 border border-[#F5F2E9] bg-cream-50/50 rounded-xl hover:border-rose-gold/30 hover:bg-white transition-all shadow-sm group">
-                                {/* Date/time — full width on mobile, inline on sm+ */}
-                                <div className="flex items-center justify-between mb-3 sm:hidden">
-                                    <div className="bg-[#F5F2E9]/60 px-3 py-2 rounded-xl border border-[#F5F2E9] w-full">
-                                        <p className="text-sm font-black text-[#513229] leading-tight">
+                                {/* Date/time — consolidated on mobile, inline on sm+ */}
+                                <div className="flex items-center justify-between mb-2 sm:hidden">
+                                    <div className="bg-gray-100/80 px-3 py-1.5 rounded-lg border border-gray-200 w-full flex items-center justify-center gap-2">
+                                        <p className="text-[11px] font-black text-[#513229]">
                                             {start.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                                         </p>
-                                        <p className="text-xs text-gray-600 font-bold mt-1 flex items-center gap-1">
-                                            <Clock className="w-3 h-3" />
+                                        <span className="text-gray-400">•</span>
+                                        <p className="text-[11px] text-gray-600 font-bold flex items-center gap-1">
+                                            <Clock className="w-2.5 h-2.5" />
                                             {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                         </p>
                                     </div>
@@ -162,39 +163,42 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                         />
                                     </Link>
 
-                                    {/* Instructor name + student + status */}
+                                    {/* Instructor + Student + Status row */}
                                     <div className="flex-1 min-w-0">
-                                        <Link href={`/instructors/${instructor?.id}`} className="text-sm font-bold text-[#513229] truncate hover:text-rose-gold transition-colors block">
-                                            Instructor: {instructor?.full_name || "Instructor"}
-                                        </Link>
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                                            <Link href={`/instructors/${instructor?.id}`} className="text-sm font-bold text-[#513229] truncate hover:text-rose-gold transition-colors">
+                                                {instructor?.full_name || "Instructor"}
+                                            </Link>
+                                            
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-gray-300 text-xs">•</span>
+                                                <button
+                                                    onClick={() => setSelectedClient(client)}
+                                                    className="flex items-center gap-1.5 group/student transition-all"
+                                                >
+                                                    <div className="w-5 h-5 rounded-full overflow-hidden border border-[#F5F2E9] bg-white shadow-sm shrink-0 group-hover/student:border-rose-gold transition-colors">
+                                                        <img
+                                                            src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`}
+                                                            alt={client.full_name || "Client"}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </div>
+                                                    <span className="text-[11px] font-bold text-gray-600 group-hover/student:text-rose-gold transition-colors">{client.full_name}</span>
+                                                </button>
+                                            </div>
 
-                                        {/* Student row */}
-                                        <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                                            <button
-                                                onClick={() => setSelectedClient(client)}
-                                                className="flex items-center gap-1.5 group/student transition-all"
-                                            >
-                                                <div className="w-6 h-6 rounded-full overflow-hidden border border-[#F5F2E9] bg-white shadow-sm shrink-0 group-hover/student:border-rose-gold transition-colors">
-                                                    <img
-                                                        src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`}
-                                                        alt={client.full_name || "Client"}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                                <span className="text-[11px] font-bold text-gray-600 group-hover/student:text-rose-gold transition-colors">{client.full_name}</span>
-                                            </button>
                                             {client.medical_conditions && (
-                                                <span className="px-2 py-0.5 bg-red-100 text-red-700 text-[9px] font-bold uppercase rounded border border-red-200 animate-pulse flex items-center gap-1">
-                                                    <AlertCircle className="w-2.5 h-2.5" />
+                                                <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-[8px] font-bold uppercase rounded border border-red-200 animate-pulse flex items-center gap-1">
+                                                    <AlertCircle className="w-2 h-2" />
                                                     Medical
                                                 </span>
                                             )}
                                         </div>
 
-                                        {/* Status badge — own line */}
-                                        <div className="mt-1.5">
+                                        {/* Status badge */}
+                                        <div className="mt-1">
                                             <span className={clsx(
-                                                'px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border inline-block',
+                                                'px-1.5 py-0.5 text-[8.5px] font-bold uppercase rounded-md tracking-wider border inline-block',
                                                 booking.status === 'completed'
                                                     ? (booking.funds_unlocked
                                                         ? 'border-[#b8d49a]'
@@ -227,18 +231,18 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row sm:items-end justify-between text-xs mt-3 pt-3 border-t border-[#F5F2E9] gap-3">
-                                    <div className="flex flex-col gap-2">
-                                        <div className="flex items-start gap-2">
-                                            <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
+                                <div className="flex flex-col sm:flex-row sm:items-end justify-between text-[11px] mt-2 pt-2 border-t border-[#F5F2E9] gap-2">
+                                    <div className="flex flex-col gap-1.5">
+                                        <div className="flex items-start gap-1.5">
+                                            <MapPin className="w-3 h-3 text-gray-400 shrink-0 mt-0.5" />
                                             <span className="font-semibold text-gray-600 leading-tight">
                                                 {studioData?.location || "N/A"}
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <Box className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                        <div className="flex items-center gap-1.5">
+                                            <Box className="w-3 h-3 text-gray-400 shrink-0" />
                                             <span
-                                                className="font-bold text-[12px] px-2 py-0.5 rounded border"
+                                                className="font-bold text-[11px] px-1.5 py-0.5 rounded border"
                                                 style={{ backgroundColor: '#EADED7', color: '#513229', borderColor: '#d4c8c0' }}
                                             >
                                                 {Array.isArray(slot?.equipment) && slot.equipment.length > 0
@@ -246,9 +250,9 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                     : (`${booking.price_breakdown?.equipment || booking.equipment || 'Standard Space'} (${booking.quantity || 1})`)}
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-2 mt-1">
+                                        <div className="flex items-center gap-1.5 mt-0.5">
                                             <span className={clsx(
-                                                "font-bold text-[13px] px-2 py-0.5 rounded border",
+                                                "font-bold text-[12px] px-1.5 py-0.5 rounded border",
                                                 ['completed', 'approved'].includes(booking.status)
                                                     ? "text-green-700 border-green-200 bg-green-50"
                                                     : "text-gray-500 border-[#F5F2E9] bg-[#F5F2E9]/50"

@@ -683,11 +683,11 @@ export default function InstructorScheduleCalendar({
                                                                 return (                                                                    <div
                                                                         key={slot.id}
                                                                         className={clsx(
-                                                                            "absolute rounded-lg text-[10px] hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border z-10 p-2 group/slot flex flex-col justify-between session-block-earth",
+                                                                            "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-2 py-1 group/slot flex flex-col justify-center session-block-earth",
                                                                             isPastCell
                                                                                 ? "bg-off-white border-border-grey text-slate"
-                                                                                : "bg-green-50/50 border-green-200 text-green-900",
-                                                                            duration < 45 && "py-2 px-3 justify-center"
+                                                                                : "bg-[#43302E] border-[#2C1F1D] text-white",
+                                                                            duration < 45 && "py-1 px-2 justify-center"
                                                                         )}
                                                                         style={{
                                                                             top: `${topOffset}px`,
@@ -707,19 +707,20 @@ export default function InstructorScheduleCalendar({
                                                                             setIsEditModalOpen(true);
                                                                         }}
                                                                     >                                                                        <div className={clsx("flex items-center gap-1.5", duration < 45 ? "flex-row" : "flex-col items-start")}>
-                                                                            <div className="flex items-center gap-1 font-bold text-[8px] text-charcoal/60 uppercase tracking-tighter shrink-0">
-                                                                                <Clock className={clsx(duration < 45 ? "w-2 h-2" : "w-2.5 h-2.5", "text-burgundy/30")} />
+                                                                            <div className={clsx("flex items-center gap-1 font-bold text-[10px] uppercase tracking-tighter shrink-0", isPastCell ? "text-charcoal/60" : "text-white/80")}>
+                                                                                <Clock className={clsx(duration < 45 ? "w-2.5 h-2.5" : "w-3 h-3", isPastCell ? "text-burgundy/30" : "text-buttermilk/40")} />
                                                                                 <span>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                                             </div>
                                                                             <div className="flex flex-wrap items-center gap-1">
                                                                                 {locations.map((loc, idx) => (
-                                                                                    <div key={(loc || 'loc') + idx} className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-slate px-1.5 py-0.5 rounded border border-border-grey bg-white/50">
-                                                                                        <MapPin className="w-2.5 h-2.5 text-slate/40" />
+                                                                                    <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border", isPastCell ? "text-slate border-border-grey bg-white/50" : "text-white/90 border-white/20 bg-white/10")}>
+                                                                                        <MapPin className={clsx("w-2.5 h-2.5", isPastCell ? "text-slate/40" : "text-white/40")} />
                                                                                         <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
                                                                                     </div>
                                                                                 ))}
                                                                             </div>
                                                                         </div>
+
                                                                     </div>
 
                                                                 )

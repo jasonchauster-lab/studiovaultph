@@ -438,14 +438,14 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                 </div>
             )}
 
-            <div className="pt-4 border-t border-cream-200 flex justify-end">
+            <div className="pt-10 border-t border-cream-200">
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="bg-rose-gold text-white px-8 py-3 rounded-lg font-bold hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2 shadow-md hover:shadow-lg active:scale-95"
+                    className="w-full sm:w-auto px-16 py-6 bg-charcoal text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
                 >
-                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    Save Settings
+                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-gold" /> : <Save className="w-5 h-5 text-gold stroke-[2px]" />}
+                    {isLoading ? 'SAVING...' : 'SAVE SETTINGS'}
                 </button>
             </div>
         </form>
