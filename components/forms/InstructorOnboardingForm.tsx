@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { submitInstructorOnboarding } from '@/app/(dashboard)/instructor/onboarding/actions'
 import Link from 'next/link'
 import { Upload, CheckCircle, AlertCircle, Loader2, ShieldCheck, ArrowRight } from 'lucide-react'
+import { normalizeImageFile } from '@/lib/utils/image-utils'
 import clsx from 'clsx'
 import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
 
@@ -33,6 +34,20 @@ export default function InstructorOnboardingForm() {
         }
 
         try {
+            // Normalize all files before submission
+            const certFile = formData.get('certificateFile') as File
+            if (certFile && certFile.size > 0) {
+                formData.set('certificateFile', await normalizeImageFile(certFile))
+            }
+            const govIdFile = formData.get('govIdFile') as File
+            if (govIdFile && govIdFile.size > 0) {
+                formData.set('govIdFile', await normalizeImageFile(govIdFile))
+            }
+            const birFile = formData.get('birFile') as File
+            if (birFile && birFile.size > 0) {
+                formData.set('birFile', await normalizeImageFile(birFile))
+            }
+
             const result = await submitInstructorOnboarding(formData)
             if (result?.error) {
                 setMessage({ type: 'error', text: result.error })

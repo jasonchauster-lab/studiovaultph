@@ -169,7 +169,7 @@ export async function uploadGalleryImage(formData: FormData) {
 
     if (uploadError) {
         console.error('Gallery upload error:', uploadError)
-        return { error: 'Upload failed' }
+        return { error: `Upload failed: ${uploadError.message}` }
     }
 
     // 2. Get Public URL

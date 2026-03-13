@@ -172,8 +172,8 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
             date: wa.processed_at || wa.updated_at || wa.created_at,
             type: isAdjustment ? 'Direct Adjustment' : 'Wallet Top-Up',
             status: 'completed',
-            total_amount: wa.amount, // Signed amount
-            details: wa.admin_notes || (isAdjustment ? 'Manual balance adjustment' : 'Gcash/Bank Top-up')
+            total_amount: wa.amount,
+            details: isAdjustment ? (wa.admin_notes || 'Manual balance adjustment') : 'Gcash/Bank Top-up'
         });
     });
 

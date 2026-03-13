@@ -583,22 +583,18 @@ export async function updateStudio(formData: FormData) {
     let newLogoUrl: string | null = null
     const logoFile = formData.get('logo') as File
     if (logoFile && logoFile.size > 0) {
-        try {
-            const normalizedLogo = await normalizeImageFile(logoFile)
-            const ext = normalizedLogo.name.split('.').pop() || 'jpg'
-            const path = `studios/${studioId}/logo_${timestamp}.${ext}`
-            const { error: logoErr } = await adminSupabase.storage.from('avatars').upload(path, normalizedLogo, {
-                contentType: uploadContentType(normalizedLogo),
-                upsert: true,
-            })
-            if (!logoErr) {
-                const { data: { publicUrl } } = adminSupabase.storage.from('avatars').getPublicUrl(path)
-                newLogoUrl = publicUrl
-            } else {
-                console.error('Logo upload error:', logoErr)
-            }
-        } catch (err) {
-            console.error('Logo normalisation error:', err)
+        const ext = logoFile.name.split('.').pop() || 'jpg'
+        const path = `studios/${studioId}/logo_${timestamp}.${ext}`
+        const { error: logoErr } = await adminSupabase.storage.from('avatars').upload(path, logoFile, {
+            contentType: uploadContentType(logoFile),
+            upsert: true,
+        })
+        if (!logoErr) {
+            const { data: { publicUrl } } = adminSupabase.storage.from('avatars').getPublicUrl(path)
+            newLogoUrl = publicUrl
+        } else {
+            console.error('Logo upload error:', logoErr)
+            return { error: `Logo upload failed: ${logoErr.message}` }
         }
     }
 
@@ -611,22 +607,18 @@ export async function updateStudio(formData: FormData) {
     for (let i = 0; i < newPhotoFiles.length; i++) {
         const file = newPhotoFiles[i]
         if (!file || file.size === 0) continue
-        try {
-            const normalizedPhoto = await normalizeImageFile(file)
-            const ext = normalizedPhoto.name.split('.').pop() || 'jpg'
-            const path = `studios/${studioId}/space_${timestamp}_${i}.${ext}`
-            const { error: photoErr } = await adminSupabase.storage.from('avatars').upload(path, normalizedPhoto, {
-                contentType: uploadContentType(normalizedPhoto),
-                upsert: true,
-            })
-            if (!photoErr) {
-                const { data: { publicUrl } } = adminSupabase.storage.from('avatars').getPublicUrl(path)
-                additionalPhotoUrls.push(publicUrl)
-            } else {
-                console.error('Space photo upload error:', photoErr)
-            }
-        } catch (err) {
-            console.error('Space photo normalisation error:', err)
+        const ext = file.name.split('.').pop() || 'jpg'
+        const path = `studios/${studioId}/space_${timestamp}_${i}.${ext}`
+        const { error: photoErr } = await adminSupabase.storage.from('avatars').upload(path, file, {
+            contentType: uploadContentType(file),
+            upsert: true,
+        })
+        if (!photoErr) {
+            const { data: { publicUrl } } = adminSupabase.storage.from('avatars').getPublicUrl(path)
+            additionalPhotoUrls.push(publicUrl)
+        } else {
+            console.error('Space photo upload error:', photoErr)
+            return { error: `Photo upload failed: ${photoErr.message}` }
         }
     }
 

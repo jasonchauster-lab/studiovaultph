@@ -1,35 +1,52 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { updateStudio } from '@/app/(dashboard)/studio/actions'
-import { Loader2, Save, Camera, User, X, Upload } from 'lucide-react'
+import { Loader2, Save, Camera, User, X, Upload, CheckCircle, AlertCircle } from 'lucide-react'
 import clsx from 'clsx'
-import { Studio, STUDIO_AMENITIES } from '@/types'
+import { STUDIO_AMENITIES } from '@/types'
 import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
-import { useRef } from 'react'
-import { normalizeImageFile } from '@/lib/utils/image-utils'
+import { normalizeImageFile, uploadContentType } from '@/lib/utils/image-utils'
 
-export default function StudioSettingsForm({ studio }: { studio: Studio }) {
+export default function StudioSettingsForm({ studio }: { studio: any }) {
     const [isLoading, setIsLoading] = useState(false)
-    const [message, setMessage] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
+    const [success, setSuccess] = useState(false)
 
-    const [existingPhotos, setExistingPhotos] = useState<string[]>(studio.space_photos_urls || [])
-    const [newSpacePhotos, setNewSpacePhotos] = useState<File[]>([])
+    const logoInputRef = useRef<HTMLInputElement>(null)
     const spacePhotosInputRef = useRef<HTMLInputElement>(null)
 
-    const handleSpacePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const [logo, setLogo] = useState<File | null>(null)
+    const [logoPreview, setLogoPreview] = useState<string | null>(studio.logo_url)
+
+    const [existingPhotos, setExistingPhotos] = useState<string[]>(studio.space_photos || [])
+    const [newSpacePhotos, setNewSpacePhotos] = useState<File[]>([])
+
+    const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            try {
+                const normalized = await normalizeImageFile(file)
+                setLogo(normalized)
+                setLogoPreview(URL.createObjectURL(normalized))
+            } catch (err) {
+                console.error('Logo processing error:', err)
+                setError('Failed to process logo image.')
+            }
+        }
+    }
+
+    const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || [])
         const validFiles: File[] = []
 
         for (const file of files) {
-            // Accept any image type, HEIC, or files with no MIME type (common on iPhone/Android)
-            if (file.type.startsWith('image/') || !file.type || file.type === '') {
-                try {
-                    validFiles.push(await normalizeImageFile(file))
-                } catch (err) {
-                    console.error('Image processing error:', err)
-                }
+            try {
+                const normalized = await normalizeImageFile(file)
+                validFiles.push(normalized)
+            } catch (err) {
+                console.error('Image processing error:', err)
             }
         }
 
@@ -54,12 +71,13 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
     const handleSubmit = async (formData: FormData) => {
         const contactNumber = formData.get('contactNumber') as string
         if (contactNumber && !isValidPhone(contactNumber)) {
-            setMessage(phoneErrorMessage)
+            setError(phoneErrorMessage)
             return
         }
 
         setIsLoading(true)
-        setMessage(null)
+        setError(null)
+        setSuccess(false)
 
         try {
             // Pass existing photos list so the server action knows what to keep
@@ -70,38 +88,24 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                 formData.append('newSpacePhoto', file)
             }
 
-            // logo file stays in formData as 'logo' — server action handles upload
+            // Append logo if changed
+            if (logo) {
+                formData.set('logo', logo)
+            }
 
             const result = await updateStudio(formData)
-
-            if (result.success) {
-                setMessage('Settings updated successfully!')
-                setNewSpacePhotos([])
+            if (result?.error) {
+                setError(result.error)
             } else {
-                setMessage(result.error || 'Failed to update settings.')
+                setSuccess(true)
+                setNewSpacePhotos([])
+                setLogo(null)
             }
         } catch (err: any) {
             console.error('Settings update error:', err)
-            setMessage(err.message || 'An unexpected error occurred.')
+            setError(err.message || 'An unexpected error occurred.')
         } finally {
             setIsLoading(false)
-        }
-    }
-
-    // State for logo preview
-    const [previewUrl, setPreviewUrl] = useState<string | null>(studio.logo_url || null)
-    const fileInputRef = useRef<HTMLInputElement>(null)
-
-    const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (file) {
-            try {
-                const previewFile = await normalizeImageFile(file)
-                const url = URL.createObjectURL(previewFile)
-                setPreviewUrl(url)
-            } catch (err) {
-                console.error('Logo preview error:', err)
-            }
         }
     }
 
@@ -112,11 +116,11 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
 
             {/* Logo Upload */}
             <div className="flex flex-col items-center gap-4 border-b border-cream-200 pb-8">
-                <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                <div className="relative group cursor-pointer" onClick={() => logoInputRef.current?.click()}>
                     <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-white shadow-md bg-cream-100 flex items-center justify-center">
-                        {previewUrl ? (
+                        {logoPreview ? (
                             <Image
-                                src={previewUrl}
+                                src={logoPreview}
                                 alt="Studio Logo"
                                 width={128}
                                 height={128}
@@ -136,7 +140,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                         type="file"
                         name="logo"
                         accept="image/*,.heic,.heif"
-                        ref={fileInputRef}
+                        ref={logoInputRef}
                         className="hidden"
                         onChange={handleLogoChange}
                     />
@@ -247,7 +251,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                             name="bio"
                             defaultValue={studio.bio || studio.description || ''}
                             rows={3}
-                            placeholder="Describe your vibe and nearby BGC/Makati landmarks — e.g. 'Bright reformer studio steps from Waltermart Makati. Street parking available on Chino Roces.'"
+                            placeholder="Describe your vibe and nearby BGC/Makati landmarks..."
                             className="w-full px-4 py-2 bg-cream-50 border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/50 resize-none"
                         />
                         <p className="text-[10px] text-charcoal-400 mt-1 italic">Help clients find you — mention landmarks, parking, and what makes your studio unique.</p>
@@ -279,10 +283,10 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                     {existingPhotos.length > 0 && (
                         <div className="mb-6">
                             <h3 className="text-sm font-medium text-charcoal-700 mb-3">Current Photos</h3>
-                            <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none no-scrollbar pb-4 sm:pb-0 sm:grid-cols-4 gap-4 -mx-2 px-2 sm:mx-0 sm:px-0">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                 {existingPhotos.map((url, index) => (
-                                    <div key={'ext_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm shrink-0 w-[200px] sm:w-auto snap-center">
-                                        <a href={url} target="_blank" rel="noopener noreferrer">
+                                    <div key={'ext_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
+                                        <a href={url} target="_blank" rel="noopener noreferrer" className="block w-full h-full relative">
                                             <Image
                                                 src={url}
                                                 alt={`Space Photo ${index + 1}`}
@@ -307,18 +311,18 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                     {newSpacePhotos.length > 0 && (
                         <div className="mb-6">
                             <h3 className="text-sm font-medium text-charcoal-700 mb-3">New Photos (Ready to Upload)</h3>
-                            <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none no-scrollbar pb-4 sm:pb-0 sm:grid-cols-4 gap-4 -mx-2 px-2 sm:mx-0 sm:px-0">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                 {newSpacePhotos.map((file, index) => {
                                     const objectUrl = URL.createObjectURL(file);
                                     return (
-                                        <div key={'new_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm shrink-0 w-[200px] sm:w-auto snap-center">
-                                            <a href={objectUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                                        <div key={'new_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
+                                            <div className="w-full h-full relative">
                                                 <img
                                                     src={objectUrl}
                                                     alt={`New Photo ${index + 1}`}
-                                                    className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                                    className="w-full h-full object-cover"
                                                 />
-                                            </a>
+                                            </div>
                                             <button
                                                 onClick={(e) => removeNewPhoto(e, index)}
                                                 className="absolute top-2 right-2 p-1.5 bg-red-500/90 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm z-10"
@@ -344,7 +348,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                             accept="image/*,.heic,.heif"
                             ref={spacePhotosInputRef}
                             className="hidden"
-                            onChange={handleSpacePhotosChange}
+                            onChange={handlePhotosChange}
                         />
                     </div>
                 </div>
@@ -353,10 +357,6 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
             {/* Equipment & Inventory */}
             <div className="space-y-4">
                 <h2 className="text-xl font-serif font-bold text-charcoal-900 border-b border-cream-200 pb-2">Equipment, Inventory &amp; Pricing</h2>
-                <p className="text-sm text-charcoal-600 mb-4">
-                    Select the equipment available in your studio, enter the quantity, and set the hourly rental rate (if applicable).
-                </p>
-
                 <div className="space-y-3">
                     {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
                         return (
@@ -393,8 +393,6 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
                                                 placeholder="0"
                                                 min="0"
                                                 step="1"
-                                                inputMode="numeric"
-                                                onKeyDown={(e) => { if (['.', 'e', '-', '+'].includes(e.key)) e.preventDefault() }}
                                                 className="w-28 pl-7 pr-3 py-1.5 bg-white border border-cream-200 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-rose-gold/50 text-sm"
                                             />
                                         </div>
@@ -426,9 +424,16 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
             </div>
 
             {/* Status Message */}
-            {message && (
-                <div className={`p-4 rounded-lg text-sm font-medium flex items-center gap-2 ${message.toLowerCase().includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                    {message}
+            {success && (
+                <div className="p-4 rounded-lg text-sm font-medium flex items-center gap-2 bg-green-50 text-green-700 border border-green-200">
+                    <CheckCircle className="w-4 h-4" />
+                    Settings updated successfully!
+                </div>
+            )}
+            {error && (
+                <div className="p-4 rounded-lg text-sm font-medium flex items-center gap-2 bg-red-50 text-red-700 border border-red-200">
+                    <AlertCircle className="w-4 h-4" />
+                    {error}
                 </div>
             )}
 

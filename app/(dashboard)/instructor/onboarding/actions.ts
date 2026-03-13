@@ -85,7 +85,7 @@ export async function submitInstructorOnboarding(formData: FormData) {
 
     if (certUploadError) {
         console.error('Cert upload error:', certUploadError)
-        return { error: 'Failed to upload certificate' }
+        return { error: `Failed to upload certificate: ${certUploadError.message}` }
     }
 
     // Upload Gov ID
@@ -95,7 +95,7 @@ export async function submitInstructorOnboarding(formData: FormData) {
 
     if (govIdUploadError) {
         console.error('Gov ID upload error:', govIdUploadError)
-        return { error: 'Failed to upload Government ID' }
+        return { error: `Failed to upload Government ID: ${govIdUploadError.message}` }
     }
 
     // Upload BIR (Optional)
@@ -107,8 +107,7 @@ export async function submitInstructorOnboarding(formData: FormData) {
 
         if (birUploadError) {
             console.error('BIR upload error:', birUploadError)
-            // We might allow proceeding without BIR if upload fails but maybe better to error
-            return { error: 'Failed to upload BIR document' }
+            return { error: `Failed to upload BIR document: ${birUploadError.message}` }
         }
     }
 

@@ -4,10 +4,10 @@ import { useState, useRef } from 'react'
 import { createStudio } from '@/app/(dashboard)/studio/actions'
 import { Loader2, Upload, CheckCircle, X, ShieldCheck, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { normalizeImageFile, uploadContentType } from '@/lib/utils/image-utils'
 import clsx from 'clsx'
 import { createClient } from '@/lib/supabase/client'
 import { STUDIO_AMENITIES } from '@/types'
-import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
 
 function FileUploadBox({ name, label, required, fileName, previewUrl, accept, setFileState }: any) {
     return (
@@ -17,8 +17,8 @@ function FileUploadBox({ name, label, required, fileName, previewUrl, accept, se
                 <input type="file" name={name} accept={accept} required={required}
                     onChange={async (e) => {
                         let file = e.target.files?.[0]
-                        if (file && isHeicFile(file)) {
-                            file = await ensureJpegFile(file)
+                        if (file) {
+                            file = await normalizeImageFile(file)
                         }
                         const url = file && file.type.startsWith('image/') ? URL.createObjectURL(file) : null
                         setFileState(file ? file.name : null, url, file)
@@ -86,15 +86,11 @@ export default function StudioApplicationForm() {
         const processedFiles: File[] = []
 
         for (const file of files) {
-            if (isHeicFile(file)) {
-                try {
-                    const jpeg = await ensureJpegFile(file)
-                    processedFiles.push(jpeg)
-                } catch (err) {
-                    console.error('HEIC conversion failed for space photo', err)
-                    processedFiles.push(file)
-                }
-            } else if (file.type.startsWith('image/')) {
+            try {
+                const processed = await normalizeImageFile(file)
+                processedFiles.push(processed)
+            } catch (err) {
+                console.error('Photo normalization failed', err)
                 processedFiles.push(file)
             }
         }
@@ -189,7 +185,9 @@ export default function StudioApplicationForm() {
                 if (file.size > 0) {
                     const ext = file.name.split('.').pop()
                     const path = `studios/${user.id}/space_${timestamp}_${i}.${ext}`
-                    const { error: photoErr } = await supabase.storage.from('avatars').upload(path, file)
+                    const { error: photoErr } = await supabase.storage.from('avatars').upload(path, file, {
+                        contentType: uploadContentType(file)
+                    })
                     if (photoErr) throw new Error('Failed to upload space photo: ' + photoErr.message)
 
                     const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
