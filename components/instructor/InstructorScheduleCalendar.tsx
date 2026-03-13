@@ -854,6 +854,8 @@ export default function InstructorScheduleCalendar({
                                                 groups[key].booked = Math.max(groups[key].booked, bQty);
                                                 // Always cap at 1 for instructor perspective
                                                 groups[key].total = 1;
+                                                // Update ref to the booking so clicking shows booking details, not edit form
+                                                groups[key].ref = b;
                                             } else {
                                                 groups[key] = {
                                                     time,

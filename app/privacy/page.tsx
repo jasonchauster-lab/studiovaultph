@@ -10,28 +10,15 @@ export default function PrivacyPolicy() {
       {/* Navigation */}
       <header className="sticky top-0 z-50 w-full px-4 md:px-8 py-6">
         <nav className="max-w-7xl mx-auto bg-white rounded-xl px-4 sm:px-10 py-5 flex items-center justify-between shadow-tight border border-border-grey">
-          <Link href="/" aria-label="Studio Vault Home" className="flex items-center gap-3 group">
-            {/* Desktop Logo */}
-            <div className="hidden sm:block">
-              <Image 
-                src="/logo4.png" 
-                alt="" 
-                width={120} 
-                height={48} 
-                className="h-12 md:h-14 w-auto object-contain" 
-              />
-            </div>
-            {/* Mobile Logo */}
-            <div className="block sm:hidden">
-              <Image 
-                src="/logo2.jpg" 
-                alt="" 
-                width={40} 
-                height={40} 
-                className="w-10 h-10 object-contain mix-blend-multiply" 
-              />
-            </div>
-            <span className="font-serif font-bold text-burgundy tracking-tight text-xl uppercase hidden sm:block">STUDIO VAULT</span>
+          <Link href="/" aria-label="Studio Vault Home" className="flex items-center pl-4 group">
+            <Image
+              src="/logo4.png"
+              alt="Studio Vault"
+              width={120}
+              height={64}
+              className="h-12 md:h-16 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+              priority
+            />
           </Link>
           <Link 
             href="/" 

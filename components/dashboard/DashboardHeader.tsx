@@ -33,36 +33,18 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
         )}>
             <div className="max-w-7xl mx-auto h-full flex items-center justify-between gap-4">
                 <div className="flex items-center gap-8 h-full">
-                    <Link href="/welcome" aria-label="Go to Welcome Dashboard" className="flex items-center gap-3 group h-full">
-                        <div className="relative flex items-center">
-                            {/* Desktop Logo */}
-                            <Image
-                                src="/logo4.png"
-                                alt="StudioVault Logo"
-                                width={180}
-                                height={48}
-                                priority
-                                className="h-12 md:h-14 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
-                            />
-                            {/* Mobile/Tablet Icon */}
-                            <Image
-                                src="/logo2.jpg"
-                                alt="StudioVault Logo"
-                                width={80}
-                                height={80}
-                                priority
-                                className={clsx(
-                                    "object-contain mix-blend-multiply transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] lg:hidden",
-                                    isScrolled ? "w-12 h-12" : "w-16 h-16"
-                                )}
-                            />
-                        </div>
-                        <span className={clsx(
-                            "font-serif font-bold text-burgundy tracking-tight whitespace-nowrap hidden lg:block transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] shrink-0 uppercase text-lg",
-                            isScrolled ? "opacity-90 scale-90 translate-x-2" : "opacity-100 scale-100"
-                        )}>
-                            Studio Vault
-                        </span>
+                    <Link href="/welcome" aria-label="Go to Welcome Dashboard" className="flex items-center pl-6 group h-full">
+                        <Image
+                            src="/logo4.png"
+                            alt="Studio Vault"
+                            width={180}
+                            height={64}
+                            priority
+                            className={clsx(
+                                "w-auto object-contain transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-105",
+                                isScrolled ? "h-12" : "h-12 md:h-16"
+                            )}
+                        />
                     </Link>
                     <nav className="hidden md:block">
                         <Navigation role={profile?.role} />
