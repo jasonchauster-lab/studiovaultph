@@ -277,13 +277,16 @@ export default function LandingPage() {
       {/* ─── Footer ─── */}
       <footer className="px-4 md:px-8 py-16 md:py-24 border-t border-border-grey bg-white">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10 md:gap-16">
-          <div className="flex flex-col items-center md:items-start gap-5">
-            <div className="flex items-center gap-2">
-              <Image src="/logo3.jpg" alt="StudioVault Logo" width={80} height={80} className="w-10 h-10 object-contain" />
-              <span className="font-serif text-burgundy tracking-tight text-xl uppercase">STUDIO VAULT PH</span>
-            </div>
+          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+            <Image 
+              src="/logo4.png" 
+              alt="Studio Vault" 
+              width={160} 
+              height={48} 
+              className="h-10 md:h-12 w-auto object-contain" 
+            />
             <p className="text-[10px] font-bold text-muted-burgundy uppercase tracking-[0.3em] text-center md:text-left">
-              &copy; {new Date().getFullYear()} STUDIO VAULT PH. ALL RIGHTS RESERVED.
+              &copy; {new Date().getFullYear()} STUDIO VAULT. ALL RIGHTS RESERVED.
             </p>
           </div>
           <div className="flex flex-wrap justify-center md:justify-end gap-6 md:gap-10 text-[10px] font-bold text-muted-burgundy uppercase tracking-[0.4em]">

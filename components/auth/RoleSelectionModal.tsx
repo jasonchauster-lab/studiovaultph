@@ -10,6 +10,39 @@ interface RoleSelectionModalProps {
     onClose: () => void
 }
 
+const OPTIONS = [
+    {
+        role: 'customer',
+        title: "Client",
+        description: "Find top-tier instructors and book your favorite Pilates sessions in just a few taps.",
+        icon: <Sparkles className="w-6 h-6 text-forest" />,
+        bgColor: "bg-off-white",
+        hoverBorder: "hover:border-forest/30",
+        buttonColor: "bg-forest text-white hover:brightness-110",
+        target: "/login?role=customer&mode=signup"
+    },
+    {
+        role: 'instructor',
+        title: "Instructor",
+        description: "Manage your schedule, book premium studios, and grow your client base effortlessly.",
+        icon: <User className="w-6 h-6 text-charcoal" />,
+        bgColor: "bg-off-white",
+        hoverBorder: "hover:border-forest/30",
+        buttonColor: "bg-charcoal text-white hover:brightness-110",
+        target: "/login?role=instructor&mode=signup"
+    },
+    {
+        role: 'studio',
+        title: "Studio",
+        description: "Optimize your space, manage equipment, and connect with the best local instructors.",
+        icon: <DollarSign className="w-6 h-6 text-forest" />,
+        bgColor: "bg-white",
+        hoverBorder: "hover:border-forest/30",
+        buttonColor: "bg-white text-charcoal border border-border-grey hover:bg-off-white",
+        target: "/login?role=studio&mode=signup"
+    }
+]
+
 export default function RoleSelectionModal({ isOpen, onClose }: RoleSelectionModalProps) {
     // Prevent scrolling when modal is open
     useEffect(() => {
@@ -25,54 +58,21 @@ export default function RoleSelectionModal({ isOpen, onClose }: RoleSelectionMod
 
     if (!isOpen) return null
 
-    const options = [
-        {
-            role: 'customer',
-            title: "Client",
-            description: "Find top-tier instructors and book your favorite Pilates sessions in just a few taps.",
-            icon: <Sparkles className="w-6 h-6 text-forest" />,
-            bgColor: "bg-off-white",
-            hoverBorder: "hover:border-forest/30",
-            buttonColor: "bg-forest text-white hover:brightness-110",
-            target: "/login?role=customer&mode=signup"
-        },
-        {
-            role: 'instructor',
-            title: "Instructor",
-            description: "Manage your schedule, book premium studios, and grow your client base effortlessly.",
-            icon: <User className="w-6 h-6 text-charcoal" />,
-            bgColor: "bg-off-white",
-            hoverBorder: "hover:border-forest/30",
-            buttonColor: "bg-charcoal text-white hover:brightness-110",
-            target: "/login?role=instructor&mode=signup"
-        },
-        {
-            role: 'studio',
-            title: "Studio",
-            description: "Optimize your space, manage equipment, and connect with the best local instructors.",
-            icon: <DollarSign className="w-6 h-6 text-forest" />,
-            bgColor: "bg-white",
-            hoverBorder: "hover:border-forest/30",
-            buttonColor: "bg-white text-charcoal border border-border-grey hover:bg-off-white",
-            target: "/login?role=studio&mode=signup"
-        }
-    ]
-
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            {/* Backdrop */}
+            {/* Backdrop - Removed blur for performance */}
             <div
-                className="absolute inset-0 bg-charcoal/60 backdrop-blur-sm animate-in fade-in duration-300 cursor-pointer"
+                className="absolute inset-0 bg-charcoal/60 animate-in fade-in duration-200 cursor-pointer"
                 onClick={onClose}
             />
 
-            {/* Modal Content */}
-            <div className="relative w-full max-w-5xl max-h-[95vh] overflow-y-auto bg-white rounded-xl shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-border-grey overflow-x-hidden">
+            {/* Modal Content - Added will-change and reduced durations */}
+            <div className="relative w-full max-w-5xl max-h-[95vh] overflow-y-auto bg-white rounded-xl shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-200 border border-border-grey overflow-x-hidden will-change-transform">
                 <div className="p-8 sm:p-12">
                     <div className="flex justify-between items-start mb-10">
                         <div className="space-y-2">
                             <div className="flex items-center gap-3">
-                                <Image src="/logo2.jpg" alt="StudioVault Logo" width={40} height={40} className="w-10 h-10 object-contain mix-blend-multiply" />
+                                <Image src="/logo2.jpg" alt="StudioVault Logo" width={40} height={40} className="w-10 h-10 object-contain" />
                                 <h2 className="text-3xl font-serif font-bold text-charcoal tracking-tight">Join StudioVaultPH</h2>
                             </div>
                             <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">Establish your professional presence</p>
@@ -88,7 +88,7 @@ export default function RoleSelectionModal({ isOpen, onClose }: RoleSelectionMod
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-                        {options.map((opt) => (
+                        {OPTIONS.map((opt) => (
                             <Link
                                 key={opt.role}
                                 href={opt.target}

@@ -58,7 +58,16 @@ export default async function DashboardLayout({
 
             <footer className="earth-card m-4 sm:m-8 p-10 bg-white border border-border-grey shadow-tight">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p className="text-[10px] font-bold text-burgundy uppercase tracking-widest">© 2026 STUDIO VAULT PH. ALL RIGHTS RESERVED.</p>
+                <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+                    <Image 
+                        src="/logo4.png" 
+                        alt="Studio Vault" 
+                        width={160} 
+                        height={48} 
+                        className="h-10 md:h-12 w-auto object-contain" 
+                    />
+                    <p className="text-[10px] font-bold text-burgundy uppercase tracking-widest">© {new Date().getFullYear()} STUDIO VAULT. ALL RIGHTS RESERVED.</p>
+                </div>
                     <div className="flex gap-8">
                         <Link href="/terms-of-service" className="text-[10px] font-bold text-burgundy hover:text-forest transition-all uppercase tracking-widest underline decoration-forest/0 hover:decoration-forest underline-offset-8">Terms of Service</Link>
                         <Link href="/privacy" className="text-[10px] font-bold text-burgundy hover:text-forest transition-all uppercase tracking-widest underline decoration-forest/0 hover:decoration-forest underline-offset-8">Privacy Policy</Link>

@@ -64,7 +64,7 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
                         </div>
                         <div>
                             <p className="text-[9px] font-bold text-slate uppercase tracking-[0.15em] mb-1.5">{card.label}</p>
-                            <h3 className="text-2xl font-serif font-bold text-charcoal tracking-tight">{card.value}</h3>
+                            <h3 className="text-2xl font-serif font-bold text-charcoal tracking-tight truncate whitespace-nowrap" title={card.value}>{card.value}</h3>
                         </div>
                     </div>
                 ))}
