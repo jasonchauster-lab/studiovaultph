@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import StudioSettingsForm from '@/components/studio/StudioSettingsForm'
+import ReferralCard from '@/components/customer/ReferralCard'
 
 export default async function StudioSettingsPage() {
     const supabase = await createClient()
@@ -15,12 +17,10 @@ export default async function StudioSettingsPage() {
 
     const [{ data: studio, error }, { data: profile }] = await Promise.all([
         supabase.from('studios').select('*').eq('owner_id', user.id).single(),
-        supabase.from('profiles').select('id').eq('id', user.id).single(),
+        supabase.from('profiles').select('referral_code').eq('id', user.id).single(),
     ])
 
     if (error || !studio) {
-        // Handle case where studio doesn't exist yet (redirect to creation?)
-        // Or show error
         return <div className="p-8 text-charcoal-500">Studio not found. Please contact support.</div>
     }
 

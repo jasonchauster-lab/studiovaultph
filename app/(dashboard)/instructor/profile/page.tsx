@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import ProfileForm from '@/components/customer/ProfileForm'
 import InstructorGallerySection from '@/components/instructor/InstructorGallerySection'
 import InstructorCertificationsSection from '@/components/instructor/InstructorCertificationsSection'
+import ReferralCard from '@/components/customer/ReferralCard'
 import Link from 'next/link'
 import { ArrowLeft, User } from 'lucide-react'
 
@@ -12,6 +13,9 @@ export default async function InstructorProfilePage() {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) redirect('/login')
+
+    const headersList = await headers()
+    const origin = `${headersList.get('x-forwarded-proto') ?? 'http'}://${headersList.get('host') ?? 'localhost:3000'}`
 
     const { data: profile } = await supabase
         .from('profiles')
@@ -25,7 +29,6 @@ export default async function InstructorProfilePage() {
         .eq('instructor_id', user.id)
         .order('created_at', { ascending: false })
 
-    // Merge user email info from auth
     const profileWithEmail = {
         ...profile,
         email: user.email,
@@ -49,9 +52,7 @@ export default async function InstructorProfilePage() {
 
                 {/* Contact Info & Bio Section */}
                 <div className="glass-card p-12 relative overflow-hidden">
-                    {/* Soft Bloom */}
                     <div className="absolute top-0 right-0 w-80 h-80 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] pointer-events-none" />
-
                     <div className="relative z-10">
                         <div className="flex items-center gap-4 mb-10 border-b border-white/60 pb-8">
                             <User className="w-6 h-6 text-gold" />
@@ -67,8 +68,11 @@ export default async function InstructorProfilePage() {
                 {/* Certifications Section */}
                 <InstructorCertificationsSection certifications={certifications || []} />
 
+                {/* Referral Card */}
+                {profile?.referral_code && (
+                    <ReferralCard referralCode={profile.referral_code} origin={origin} />
+                )}
             </div>
         </div>
     )
 }
-
