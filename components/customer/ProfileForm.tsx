@@ -76,10 +76,10 @@ export default function ProfileForm({ profile }: { profile: any }) {
     }
 
     return (
-        <form action={handleSubmit} className="space-y-12">
+        <form action={handleSubmit} className="space-y-8">
 
             {/* Avatar Upload */}
-            <div className="flex flex-col items-center sm:flex-row gap-6 sm:gap-10 pb-8 sm:pb-12 border-b border-white/60">
+            <div className="flex flex-col items-center sm:flex-row gap-6 sm:gap-10 pb-6 sm:pb-10 border-b border-white/60">
                 <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                     <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-cloud bg-white/40 flex items-center justify-center relative z-10">
                         {previewUrl ? (
@@ -98,7 +98,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                         </div>
                     </div>
                     {/* Decorative Ring */}
-                    <div className="absolute inset-0 rounded-full border border-gold/20 scale-110 opacity-0 group-hover:opacity-100 transition-all duration-700 group-hover:scale-125 pointer-events-none" />
+                    <div className="absolute inset-0 rounded-full border border-burgundy/20 scale-110 opacity-0 group-hover:opacity-100 transition-all duration-700 group-hover:scale-125 pointer-events-none" />
 
                     <input
                         type="file"
@@ -138,7 +138,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                             name="email"
                             defaultValue={profile?.email || ''}
                             required
-                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
+                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-base sm:text-sm outline-none focus:ring-4 focus:ring-burgundy/10 focus:border-burgundy/30 transition-all shadow-sm"
                         />
                         {profile?.new_email && (
                             <p className="mt-2 text-[10px] text-gold font-bold uppercase tracking-wider">
@@ -235,7 +235,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                         setSelectedMedicalConditions(selectedMedicalConditions.filter((item) => item !== condition))
                                     }
                                 }}
-                                className="w-5 h-5 text-gold border-white/60 bg-white/20 rounded-lg focus:ring-gold/20 focus:ring-offset-0 transition-all cursor-pointer"
+                                className="w-5 h-5 text-burgundy border-white/60 bg-white/20 rounded-lg focus:ring-burgundy/20 focus:ring-offset-0 transition-all cursor-pointer"
                             />
                             <span className="text-xs font-semibold text-charcoal/60 uppercase tracking-wide group-hover:text-charcoal transition-colors">{condition}</span>
                         </label>
@@ -259,9 +259,9 @@ export default function ProfileForm({ profile }: { profile: any }) {
             {profile?.role === 'instructor' && (
                 <div className="space-y-6">
                     <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Equipment I can teach</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
                         {['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
-                            <label key={eq} className="group flex items-center gap-4 p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-gold/30 cursor-pointer transition-all duration-500 shadow-sm">
+                            <label key={eq} className="group flex items-center gap-4 p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-burgundy/30 cursor-pointer transition-all duration-500 shadow-sm">
                                 <input
                                     type="checkbox"
                                     name="teaching_equipment"
@@ -274,7 +274,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                             setSelectedEquipment(selectedEquipment.filter((item) => item !== eq))
                                         }
                                     }}
-                                    className="w-5 h-5 text-gold border-white/60 bg-white/20 rounded-lg focus:ring-gold/20 transition-all cursor-pointer"
+                                    className="w-5 h-5 text-burgundy border-white/60 bg-white/20 rounded-lg focus:ring-burgundy/20 transition-all cursor-pointer"
                                 />
                                 <span className="text-xs font-semibold text-charcoal/60 uppercase tracking-wide group-hover:text-charcoal transition-colors">{eq}</span>
                             </label>
@@ -287,12 +287,12 @@ export default function ProfileForm({ profile }: { profile: any }) {
             {profile?.role === 'instructor' && (
                 <div className="space-y-6">
                     <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Rates per session (PHP)</label>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
                         {['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
                             const isSelected = selectedEquipment.includes(eq);
                             return isSelected ? (
                                 <div key={eq} className="animate-in zoom-in-95 duration-500">
-                                    <label className="block text-[10px] font-bold text-gold uppercase tracking-wider mb-2">{eq}</label>
+                                    <label className="block text-[10px] font-bold text-burgundy uppercase tracking-wider mb-2">{eq}</label>
                                     <div className="relative">
                                         <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-charcoal/20">₱</span>
                                         <input
@@ -302,7 +302,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                             placeholder="0"
                                             min="0"
                                             step="0.01"
-                                            className="w-full pl-8 pr-6 py-4 bg-white/40 border border-white/60 rounded-xl text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
+                                            className="w-full pl-8 pr-6 py-4 bg-white/40 border border-white/60 rounded-xl text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-burgundy/10 focus:border-burgundy/30 transition-all shadow-sm"
                                         />
                                     </div>
                                 </div>

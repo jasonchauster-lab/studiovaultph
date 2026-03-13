@@ -58,7 +58,7 @@ export default function LocationFilterDropdown({ value, onChange, className }: L
                 type="button"
                 onClick={() => setOpen(o => !o)}
                 className={clsx(
-                    'flex items-center gap-3 px-4 py-2 rounded-xl border text-[11px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-sm',
+                    'flex items-center gap-3 px-4 py-1.5 rounded-xl border text-[11px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-sm',
                     isActive
                         ? 'bg-sage text-white border-sage'
                         : 'bg-white text-charcoal border-border-grey hover:border-sage/40 hover:bg-off-white'

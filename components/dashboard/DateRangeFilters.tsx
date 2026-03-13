@@ -36,14 +36,14 @@ export default function DateRangeFilters() {
                 <span className="text-sm font-medium">Time Range:</span>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-nowrap overflow-x-auto pb-1 -mb-1 hide-scrollbar gap-2 w-full lg:w-auto">
                 {RANGES.map((r) => (
                     <button
                         key={r.value}
                         onClick={() => handleRangeChange(r.value)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currentRange === r.value
-                                ? 'bg-charcoal-900 text-cream-50'
-                                : 'bg-white text-charcoal-600 border border-cream-200 hover:border-charcoal-300'
+                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all whitespace-nowrap shadow-sm border ${currentRange === r.value
+                                ? 'bg-charcoal text-white border-charcoal shadow-tight'
+                                : 'bg-white text-charcoal/60 border-border-grey hover:border-charcoal/40 hover:bg-off-white'
                             }`}
                     >
                         {r.label}

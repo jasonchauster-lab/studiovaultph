@@ -4,7 +4,6 @@ import { headers } from 'next/headers'
 import ProfileForm from '@/components/customer/ProfileForm'
 import InstructorGallerySection from '@/components/instructor/InstructorGallerySection'
 import InstructorCertificationsSection from '@/components/instructor/InstructorCertificationsSection'
-import ReferralCard from '@/components/customer/ReferralCard'
 import Link from 'next/link'
 import { ArrowLeft, User } from 'lucide-react'
 
@@ -36,8 +35,8 @@ export default async function InstructorProfilePage() {
     }
 
     return (
-        <div className="min-h-screen py-6 sm:py-10 px-0">
-            <div className="max-w-4xl mx-auto space-y-8 md:space-y-16">
+        <div className="min-h-screen py-6 sm:py-10 px-4 sm:px-0">
+            <div className="max-w-4xl mx-auto space-y-6 md:space-y-12">
                 <div>
                     <Link
                         href="/instructor"
@@ -68,10 +67,6 @@ export default async function InstructorProfilePage() {
                 {/* Certifications Section */}
                 <InstructorCertificationsSection certifications={certifications || []} />
 
-                {/* Referral Card */}
-                {profile?.referral_code && (
-                    <ReferralCard referralCode={profile.referral_code} origin={origin} />
-                )}
             </div>
         </div>
     )

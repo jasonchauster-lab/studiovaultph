@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
-import { Filter } from 'lucide-react'
+import { Filter, Calendar, Clock } from 'lucide-react'
 import { STUDIO_AMENITIES } from '@/types'
 import LocationFilterDropdown from '@/components/shared/LocationFilterDropdown'
 import MultiSelectFilter from '@/components/shared/MultiSelectFilter'
@@ -52,12 +52,12 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                 <span className="text-[10px] font-bold uppercase tracking-widest">Filters</span>
             </div>
 
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-3">
                 {/* Type Filter */}
                 <select
                     onChange={(e) => handleFilter('type', e.target.value)}
                     value={searchParams.get('type') || 'all'}
-                    className="w-full sm:w-auto px-4 py-2 bg-off-white border border-burgundy/15 rounded-xl text-[11px] font-bold text-burgundy shadow-tight focus:outline-none focus:ring-2 focus:ring-burgundy/30 focus:border-burgundy/40 transition-all appearance-none cursor-pointer hover:border-burgundy/25"
+                    className="w-full sm:w-auto px-4 py-1.5 bg-off-white border border-burgundy/15 rounded-xl text-[11px] font-bold text-burgundy shadow-tight focus:outline-none focus:ring-2 focus:ring-burgundy/30 focus:border-burgundy/40 transition-all appearance-none cursor-pointer hover:border-burgundy/25"
                 >
                     <option value="all">All Modes</option>
                     <option value="instructor">Instructors</option>
@@ -69,19 +69,23 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                     onChange={(val) => handleFilter('location', val)}
                 />
 
-                <MultiSelectFilter
-                    label="Equipment"
-                    options={['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat']}
-                    value={getMultiValue('equipment')}
-                    onChange={(vals) => handleMultiFilter('equipment', vals)}
-                />
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 w-full sm:w-auto">
+                    <MultiSelectFilter
+                        label="Equipment"
+                        options={['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat']}
+                        value={getMultiValue('equipment')}
+                        onChange={(vals) => handleMultiFilter('equipment', vals)}
+                        className="w-full sm:w-auto"
+                    />
 
-                <MultiSelectFilter
-                    label="Certification"
-                    options={['STOTT', 'BASI', 'Balanced Body', 'Polestar', 'Classical']}
-                    value={getMultiValue('certification')}
-                    onChange={(vals) => handleMultiFilter('certification', vals)}
-                />
+                    <MultiSelectFilter
+                        label="Certification"
+                        options={['STOTT', 'BASI', 'Balanced Body', 'Polestar', 'Classical']}
+                        value={getMultiValue('certification')}
+                        onChange={(vals) => handleMultiFilter('certification', vals)}
+                        className="w-full sm:w-auto"
+                    />
+                </div>
 
                 <MultiSelectFilter
                     label="Amenities"
@@ -90,25 +94,39 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                     onChange={(vals) => handleMultiFilter('amenity', vals)}
                 />
 
-                <input
-                    type="date"
-                    min={getManilaTodayStr()}
-                    onChange={(e) => handleFilter('date', e.target.value)}
-                    value={searchParams.get('date') || ''}
-                    className="w-full sm:w-auto px-4 py-2 bg-off-white border border-burgundy/15 rounded-xl text-[11px] font-bold text-burgundy shadow-tight focus:outline-none focus:ring-2 focus:ring-burgundy/30 focus:border-burgundy/40 transition-all cursor-pointer hover:border-burgundy/25"
-                />
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 w-full sm:w-auto items-end">
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] font-black text-muted-burgundy uppercase tracking-[0.2em] ml-1">Select Date</label>
+                        <div className="relative">
+                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-burgundy/40 pointer-events-none" />
+                            <input
+                                type="date"
+                                min={getManilaTodayStr()}
+                                onChange={(e) => handleFilter('date', e.target.value)}
+                                value={searchParams.get('date') || ''}
+                                className="w-full sm:w-auto pl-10 pr-4 py-1.5 bg-off-white border border-burgundy/15 rounded-xl text-[11px] font-bold text-burgundy shadow-tight focus:outline-none focus:ring-2 focus:ring-burgundy/30 focus:border-burgundy/40 transition-all cursor-pointer hover:border-burgundy/25"
+                            />
+                        </div>
+                    </div>
 
-                <input
-                    type="time"
-                    min={
-                        searchParams.get('date') === getManilaTodayStr()
-                            ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-                            : undefined
-                    }
-                    onChange={(e) => handleFilter('time', e.target.value)}
-                    value={searchParams.get('time') || ''}
-                    className="w-full sm:w-auto px-4 py-2 bg-off-white border border-burgundy/15 rounded-xl text-[11px] font-bold text-burgundy shadow-tight focus:outline-none focus:ring-2 focus:ring-burgundy/30 focus:border-burgundy/40 transition-all cursor-pointer hover:border-burgundy/25"
-                />
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] font-black text-muted-burgundy uppercase tracking-[0.2em] ml-1">Start Time</label>
+                        <div className="relative">
+                            <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-burgundy/40 pointer-events-none" />
+                            <input
+                                type="time"
+                                min={
+                                    searchParams.get('date') === getManilaTodayStr()
+                                        ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+                                        : undefined
+                                }
+                                onChange={(e) => handleFilter('time', e.target.value)}
+                                value={searchParams.get('time') || ''}
+                                className="w-full sm:w-auto pl-10 pr-4 py-1.5 bg-off-white border border-burgundy/15 rounded-xl text-[11px] font-bold text-burgundy shadow-tight focus:outline-none focus:ring-2 focus:ring-burgundy/30 focus:border-burgundy/40 transition-all cursor-pointer hover:border-burgundy/25"
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     )

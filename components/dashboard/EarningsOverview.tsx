@@ -75,72 +75,69 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
                 {/* Gross Earnings Card */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 rounded-lg" style={{ background: 'rgba(188,146,110,0.1)' }}>
-                            <TrendingUp className="w-6 h-6" style={{ color: '#BC926E' }} />
+                <div className="bg-white p-4 sm:p-5 rounded-xl border border-cream-200 shadow-tight">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="p-1.5 rounded-lg" style={{ background: 'rgba(188,146,110,0.1)' }}>
+                            <TrendingUp className="w-4 h-4" style={{ color: '#BC926E' }} />
                         </div>
                     </div>
-                    <p className="text-sm text-charcoal-500 mb-1">Gross Earnings</p>
-                    <h3 className="text-2xl font-bold text-charcoal-900"><strong>₱</strong>{summary.totalEarnings.toLocaleString()}</h3>
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Gross Earnings</p>
+                    <h3 className="text-lg sm:text-2xl font-bold text-charcoal">₱{summary.totalEarnings.toLocaleString()}</h3>
                 </div>
 
                 {/* Compensation Card */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 rounded-lg" style={{ background: 'rgba(34,197,94,0.1)' }}>
-                            <TrendingUp className="w-6 h-6 text-green-600" />
+                <div className="bg-white p-4 sm:p-5 rounded-xl border border-cream-200 shadow-tight">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="p-1.5 rounded-lg" style={{ background: 'rgba(34,197,94,0.1)' }}>
+                            <TrendingUp className="w-4 h-4 text-green-600" />
                         </div>
                     </div>
-                    <p className="text-sm text-charcoal-500 mb-1">Cancellation Compensation</p>
-                    <h3 className="text-2xl font-bold text-green-600"><strong>₱</strong>{summary.totalCompensation.toLocaleString()}</h3>
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1 leading-tight">Cancellation Comp.</p>
+                    <h3 className="text-lg sm:text-2xl font-bold text-green-600">₱{summary.totalCompensation.toLocaleString()}</h3>
                 </div>
 
                 {/* Penalty Card */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 rounded-lg" style={{ background: 'rgba(239,68,68,0.1)' }}>
-                            <TrendingUp className="w-6 h-6 text-red-600" transform="rotate(180)" />
+                <div className="bg-white p-4 sm:p-5 rounded-xl border border-cream-200 shadow-tight">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="p-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.1)' }}>
+                            <TrendingUp className="w-4 h-4 text-red-600" transform="rotate(180)" />
                         </div>
                     </div>
-                    <p className="text-sm text-charcoal-500 mb-1">Cancellation Penalty</p>
-                    <h3 className="text-2xl font-bold text-red-600"><strong>- ₱</strong>{summary.totalPenalty.toLocaleString()}</h3>
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1 leading-tight">Penalty</p>
+                    <h3 className="text-lg sm:text-2xl font-bold text-red-600">-₱{summary.totalPenalty.toLocaleString()}</h3>
                 </div>
 
                 {/* Net Earnings Card */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 rounded-lg" style={{ background: 'rgba(188,146,110,0.1)' }}>
-                            <TrendingUp className="w-6 h-6" style={{ color: '#BC926E' }} />
+                <div className="bg-white p-4 sm:p-5 rounded-xl border border-cream-200 shadow-tight">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="p-1.5 rounded-lg" style={{ background: 'rgba(188,146,110,0.1)' }}>
+                            <TrendingUp className="w-4 h-4" style={{ color: '#BC926E' }} />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-tighter text-charcoal-400 px-2 py-1 rounded bg-cream-50 border border-cream-100 italic">
-                            Calculation: Gross + Comp - Penalty
-                        </span>
                     </div>
-                    <p className="text-sm text-charcoal-500 mb-1">Net Earnings</p>
-                    <h3 className="text-2xl font-bold text-charcoal-900"><strong>₱</strong>{summary.netEarnings.toLocaleString()}</h3>
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Net Earnings</p>
+                    <h3 className="text-lg sm:text-2xl font-bold text-charcoal">₱{summary.netEarnings.toLocaleString()}</h3>
                 </div>
 
                 {/* Available Balance Card */}
-                <div className="p-6 rounded-xl shadow-sm text-white flex flex-col justify-between" style={{ background: '#BC926E' }}>
+                <div className="p-4 sm:p-5 rounded-xl shadow-tight text-white flex flex-col justify-between" style={{ background: '#BC926E' }}>
                     <div>
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.2)' }}>
-                                    <Wallet className="w-6 h-6 text-white" />
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.2)' }}>
+                                    <Wallet className="w-4 h-4 text-white" />
                                 </div>
                                 <button
                                     onClick={() => setShowInfoModal(true)}
                                     className="text-white/80 hover:text-white transition-colors p-1"
                                     title="Wallet Rules"
                                 >
-                                    <Info className="w-5 h-5" />
+                                    <Info className="w-4 h-4" />
                                 </button>
                             </div>
-                            <div className="flex flex-col gap-2 items-end">
+                            <div className="flex flex-col gap-1.5 items-end overflow-hidden">
                                 <PayoutRequestModal
                                     studioId={studioId}
                                     availableBalance={summary.availableBalance}
@@ -148,34 +145,34 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                                 />
                                 <button
                                     onClick={() => setShowTopUpModal(true)}
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-lg text-xs font-bold transition-colors whitespace-nowrap"
+                                    className="inline-flex items-center gap-1.5 px-2 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg text-[9px] font-bold transition-colors whitespace-nowrap"
                                 >
                                     <ArrowUpRight className="w-3 h-3" />
-                                    Top-Up Wallet
+                                    Top-Up
                                 </button>
                             </div>
                         </div>
-                        <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.8)' }}>Available Balance</p>
-                        <h3 className="text-2xl font-bold text-white"><strong>₱</strong>{summary.availableBalance.toLocaleString()}</h3>
+                        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/70 mb-1">Available</p>
+                        <h3 className="text-lg sm:text-2xl font-bold text-white">₱{summary.availableBalance.toLocaleString()}</h3>
                     </div>
                 </div>
 
                 {/* Paid Out Card */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm">
-                    <p className="text-sm text-charcoal-500 mb-1">Total Paid Out</p>
-                    <h3 className="text-2xl font-bold text-charcoal-900"><strong>₱</strong>{summary.totalPaidOut.toLocaleString()}</h3>
+                <div className="bg-white p-4 sm:p-5 rounded-xl border border-cream-200 shadow-tight">
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Paid Out</p>
+                    <h3 className="text-lg sm:text-2xl font-bold text-charcoal">₱{summary.totalPaidOut.toLocaleString()}</h3>
                     {summary.pendingPayouts > 0 && (
-                        <p className="text-xs text-orange-500 mt-1">
-                            + <strong>₱</strong>{summary.pendingPayouts.toLocaleString()} pending
+                        <p className="text-[9px] font-bold uppercase text-orange-500 mt-1">
+                            ₱{summary.pendingPayouts.toLocaleString()} pending
                         </p>
                     )}
                 </div>
 
                 {/* Security Hold Card */}
-                <div className="bg-white p-6 rounded-xl border border-cream-200 shadow-sm border-l-4" style={{ borderLeftColor: '#BC926E' }}>
-                    <p className="text-sm text-charcoal-500 mb-1">Security Hold & Upcoming</p>
-                    <h3 className="text-2xl font-bold text-charcoal-900"><strong>₱</strong>{summary.pendingBalance.toLocaleString()}</h3>
-                    <p className="text-xs text-charcoal-400 mt-1">Upcoming earnings + 24h hold</p>
+                <div className="bg-white p-4 sm:p-5 rounded-xl border border-cream-200 shadow-tight border-l-4" style={{ borderLeftColor: '#BC926E' }}>
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Security Hold</p>
+                    <h3 className="text-lg sm:text-2xl font-bold text-charcoal">₱{summary.pendingBalance.toLocaleString()}</h3>
+                    <p className="text-[9px] font-bold uppercase text-charcoal/30 mt-1">24h hold period</p>
                 </div>
             </div>
             {/* Top-Up Modal */}

@@ -73,25 +73,25 @@ export default function InstructorCertificationsSection({ certifications }: Inst
     }
 
     return (
-        <div className="glass-card p-12 relative overflow-hidden">
+        <div className="glass-card p-6 sm:p-12 relative overflow-hidden">
             {/* Decorative background bloom */}
             <div className="absolute top-0 right-0 w-80 h-80 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] pointer-events-none" />
 
             <div className="relative z-10">
-                <div className="flex items-center justify-between border-b border-white/60 pb-8 mb-8">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-white/60 pb-6 mb-8 gap-4">
                     <div>
                         <div className="flex items-center gap-4 mb-2">
-                            <Award className="w-6 h-6 text-gold" />
-                            <h2 className="text-3xl font-serif text-charcoal tracking-tighter">Accreditations</h2>
+                            <Award className="w-5 h-5 sm:w-6 sm:h-6 text-gold" />
+                            <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter">Accreditations</h2>
                         </div>
                         <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Verified Teaching Credentials & Lineage</p>
                     </div>
                     {!showForm && (
                         <button
                             onClick={() => setShowForm(true)}
-                            className="bg-charcoal text-white px-8 py-4 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95"
+                            className="bg-charcoal text-white px-8 py-4 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 w-full sm:w-auto"
                         >
-                            <span className="flex items-center gap-3">
+                            <span className="flex items-center justify-center gap-3">
                                 <Plus className="w-4 h-4 text-gold stroke-[3px]" />
                                 MANIFEST NEW
                             </span>
@@ -205,15 +205,15 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                         </div>
                     ) : (
                         certifications.map((cert) => (
-                            <div key={cert.id} className="group relative glass-card p-10 border-white/60 hover:shadow-cloud transition-all duration-700 overflow-hidden">
-                                <div className="flex items-center gap-8">
+                            <div key={cert.id} className="group relative glass-card p-6 sm:p-10 border-white/60 hover:shadow-cloud transition-all duration-700 overflow-hidden">
+                                <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
                                     <div className="p-5 bg-white/40 rounded-[20px] group-hover:bg-white transition-all duration-700 border border-white/60 shadow-sm relative overflow-hidden shrink-0">
-                                        <Award className="w-8 h-8 text-gold relative z-10" />
+                                        <Award className="w-6 h-6 sm:w-8 sm:h-8 text-gold relative z-10" />
                                         <div className="absolute top-0 right-0 w-10 h-10 bg-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-lg" />
                                     </div>
-                                    <div className="flex-1">
-                                        <h4 className="font-serif text-charcoal text-2xl tracking-tighter mb-2">{cert.certification_body}</h4>
-                                        <div className="flex items-center gap-6">
+                                    <div className="flex-1 text-center sm:text-left">
+                                        <h4 className="font-serif text-charcoal text-xl sm:text-2xl tracking-tighter mb-2">{cert.certification_body}</h4>
+                                        <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 sm:gap-6">
                                             <div className="flex items-center gap-2 text-[10px] font-black text-charcoal/20 uppercase tracking-[0.25em]">
                                                 <FileText className="w-4 h-4 opacity-30" />
                                                 SUBMITTED
@@ -234,7 +234,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                     </div>
                                     <button
                                         onClick={() => handleDelete(cert.id)}
-                                        className="p-4 text-charcoal/10 hover:text-red-600 hover:bg-red-50/50 rounded-[20px] transition-all duration-500 opacity-0 group-hover:opacity-100 border border-transparent hover:border-red-100"
+                                        className="p-4 text-charcoal/10 hover:text-red-600 hover:bg-red-50/50 rounded-[20px] transition-all duration-500 opacity-100 sm:opacity-0 group-hover:opacity-100 border border-transparent sm:border-transparent hover:border-red-100"
                                         title="Purge Accreditation"
                                     >
                                         <Trash2 className="w-5 h-5 stroke-[2.5px]" />
