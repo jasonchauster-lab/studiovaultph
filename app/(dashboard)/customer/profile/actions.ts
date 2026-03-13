@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { uploadContentType } from '@/lib/utils/image-utils'
 
@@ -158,13 +158,14 @@ export async function uploadGalleryImage(formData: FormData) {
     const file = formData.get('file') as File
     if (!file || file.size === 0) return { error: 'No file' }
 
-    const fileExt = file.name.split('.').pop()
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const filePath = `${user.id}/gallery_${Date.now()}.${fileExt}`
 
-    // 1. Upload to Storage
-    const { error: uploadError } = await supabase.storage
+    // 1. Upload to Storage using admin client to bypass RLS
+    const adminSupabase = createAdminClient()
+    const { error: uploadError } = await adminSupabase.storage
         .from('avatars')
-        .upload(filePath, file, { contentType: uploadContentType(file) })
+        .upload(filePath, file, { contentType: uploadContentType(file), upsert: false })
 
     if (uploadError) {
         console.error('Gallery upload error:', uploadError)
@@ -172,7 +173,7 @@ export async function uploadGalleryImage(formData: FormData) {
     }
 
     // 2. Get Public URL
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = adminSupabase.storage
         .from('avatars')
         .getPublicUrl(filePath)
 

@@ -55,7 +55,7 @@ export default async function PayoutPage() {
                                                 {payout.status}
                                             </span>
                                         </div>
-                                        <p className="text-[10px] text-charcoal-400 uppercase tracking-widest">
+                                        <p className="text-xs text-charcoal-400 uppercase tracking-widest whitespace-normal break-words leading-tight mt-1">
                                             {payout.payment_method === 'bank'
                                                 ? payout.payment_details?.bankName
                                                 : payout.payment_details?.accountNumber}

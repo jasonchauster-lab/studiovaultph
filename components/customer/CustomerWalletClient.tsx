@@ -215,7 +215,7 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                                         <p className="text-[10px] font-black text-charcoal uppercase tracking-wide truncate">
                                             {tx.studio || tx.instructor || 'System'}
                                         </p>
-                                        <p className="text-[8px] text-charcoal/40 font-bold uppercase tracking-tighter truncate mt-0.5">
+                                        <p className="text-xs text-charcoal/40 font-bold uppercase tracking-tighter whitespace-normal break-words leading-tight mt-0.5">
                                             {tx.type} {tx.details ? `• ${tx.details}` : ''}
                                         </p>
                                     </div>

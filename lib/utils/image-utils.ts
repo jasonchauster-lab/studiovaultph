@@ -81,59 +81,51 @@ const convertViaCanvas = (file: File): Promise<File> => {
     });
 };
 
+const isIOS = (): boolean =>
+    typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+
 /**
  * Normalizes any image file for upload across all platforms (iPhone, Android, desktop).
- * - Converts HEIC/HEIF to JPEG (tries heic2any first, canvas fallback for iOS Safari)
- * - Handles files with empty MIME types (common on some iOS/Android exports)
- * - Returns a File guaranteed to have a valid image MIME type
+ * - On iOS: uses canvas first (iOS Safari decodes HEIC natively, no WASM needed)
+ * - On desktop: tries heic2any first, then canvas fallback
+ * - Handles files with empty MIME types
+ * - Never throws — returns original file as last resort
  */
 export const normalizeImageFile = async (file: File): Promise<File> => {
-    // Explicit HEIC/HEIF by type or extension
-    if (isHeicFile(file)) {
-        // Try heic2any first (works on desktop browsers)
-        try {
-            return await ensureJpegFile(file);
-        } catch {
-            // heic2any failed — fall back to canvas (works on iOS Safari natively)
-        }
-        try {
-            return await convertViaCanvas(file);
-        } catch {
-            // Canvas also failed — return original and let the server handle it
-            return file;
-        }
-    }
+    try {
+        const needsConversion = isHeicFile(file) || !file.type;
 
-    // Empty MIME type — some iOS/Android versions omit the type entirely.
-    // If the extension hints at HEIC, try conversion. Otherwise stamp as image/jpeg.
-    if (!file.type) {
-        const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-        if (ext === 'heic' || ext === 'heif') {
-            try {
-                return await ensureJpegFile(
-                    new File([file], file.name, { type: 'image/heic', lastModified: file.lastModified })
-                );
-            } catch {
-                // fall through to canvas
-            }
-            try {
-                return await convertViaCanvas(file);
-            } catch {
-                // fall through
-            }
-        }
-        // Unknown extension with no type — try canvas first, then stamp as jpeg
-        try {
-            return await convertViaCanvas(file);
-        } catch {
-            return new File([file], file.name || 'image.jpg', {
-                type: 'image/jpeg',
-                lastModified: file.lastModified,
-            });
-        }
-    }
+        if (!needsConversion) return file;
 
-    return file;
+        // Normalise file type for downstream checks
+        const heicFile = !file.type && (file.name.split('.').pop()?.toLowerCase() ?? '').match(/heic|heif/)
+            ? new File([file], file.name, { type: 'image/heic', lastModified: file.lastModified })
+            : file;
+
+        // iOS Safari: go straight to canvas — it decodes HEIC natively, no WASM required
+        if (isIOS()) {
+            try { return await convertViaCanvas(heicFile); } catch { /* fall through */ }
+            // Canvas failed (e.g. corrupted file) — return with at least a valid MIME type
+            return new File([file], file.name || 'image.jpg', { type: 'image/jpeg', lastModified: file.lastModified });
+        }
+
+        // Desktop: try heic2any (handles HEIC on Chrome/Firefox which lack native support)
+        if (isHeicFile(heicFile)) {
+            try { return await ensureJpegFile(heicFile); } catch { /* fall through to canvas */ }
+        }
+
+        // Canvas fallback (Safari on macOS supports HEIC natively, or for empty-type files)
+        try { return await convertViaCanvas(heicFile); } catch { /* fall through */ }
+
+        // Last resort: stamp a MIME type so the browser can at least attempt the upload
+        return new File([file], file.name || 'image.jpg', {
+            type: 'image/jpeg',
+            lastModified: file.lastModified,
+        });
+    } catch {
+        // Absolute safety net — never throw
+        return file;
+    }
 };
 
 /**
