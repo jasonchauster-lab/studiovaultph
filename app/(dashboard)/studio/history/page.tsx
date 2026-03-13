@@ -81,7 +81,7 @@ export default async function StudioHistoryPage() {
                     </div>
                     <Link
                         href="/studio"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-rose-gold text-white text-sm font-semibold rounded-lg shadow-sm hover:brightness-110 active:scale-95 transition-all"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-indigo-700 active:scale-95 transition-all"
                     >
                         <PlusCircle className="w-4 h-4" />
                         Add Availability Slot
