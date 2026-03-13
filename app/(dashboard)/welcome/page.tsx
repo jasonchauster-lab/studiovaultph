@@ -27,7 +27,7 @@ export default async function WelcomePage() {
                 {/* Eyebrow */}
                 <div className="flex flex-col items-center gap-y-3">
                     <h1 className="text-4xl md:text-5xl font-serif text-burgundy tracking-tight">
-                        Welcome to Studio Vault PH
+                        Welcome to Studio Vault
                     </h1>
                     <p className="text-muted-burgundy text-lg leading-relaxed max-w-md">
                         How will you be using the platform today?

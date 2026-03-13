@@ -17,7 +17,7 @@ export default function LandingPage() {
       {/* Navigation */}
       <header className="sticky top-0 z-50 w-full px-4 md:px-8 py-5">
         <nav className="max-w-7xl mx-auto bg-white rounded-xl px-4 sm:px-10 py-4 flex items-center justify-between shadow-tight border border-border-grey">
-          <Link href="/" aria-label="Studio Vault PH Home" className="flex items-center gap-2 group">
+          <Link href="/" aria-label="Studio Vault Home" className="flex items-center gap-3 group">
             {/* Desktop Logo */}
             <div className="hidden sm:block">
               <Image
@@ -25,7 +25,7 @@ export default function LandingPage() {
                 alt="Studio Vault Primary Logo"
                 width={200}
                 height={50}
-                className="h-10 md:h-12 w-auto object-contain"
+                className="h-12 md:h-14 w-auto object-contain"
                 priority
               />
             </div>
@@ -39,7 +39,7 @@ export default function LandingPage() {
                 className="w-10 h-10 object-contain mix-blend-multiply" 
               />
             </div>
-            <span className="font-serif font-bold text-burgundy tracking-tight text-xl uppercase hidden sm:block">STUDIO VAULT PH</span>
+            <span className="font-serif font-bold text-burgundy tracking-tight text-xl uppercase hidden sm:block">STUDIO VAULT</span>
           </Link>
           <div className="flex gap-4 sm:gap-6 items-center">
             <Link href="/login" className="text-muted-burgundy hover:text-burgundy text-[10px] font-bold uppercase tracking-[0.3em] transition-all">

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Search, Calendar, DollarSign, Box, History, ShieldCheck, User, LogOut, LayoutDashboard, Wallet, ArrowUpRight, Menu, X, Users, Gift } from 'lucide-react'
+import { Home, Search, Calendar, DollarSign, Box, History, ShieldCheck, User, LogOut, LayoutDashboard, Wallet, ArrowUpRight, Menu, X, Users, Gift, Building2 } from 'lucide-react'
 import clsx from 'clsx'
 import SupportNotificationBadge from '@/components/admin/SupportNotificationBadge'
 import { signOut } from '@/app/auth/actions'
@@ -117,6 +117,11 @@ export default function Navigation({ role }: NavigationProps) {
                                 <Gift className="w-3.5 h-3.5" />
                                 Referral
                                 {pathname === '/referral' && <span className="absolute -bottom-2 left-0 w-full h-0.5 bg-burgundy rounded-full" />}
+                            </Link>
+                            <div className="h-px w-full md:h-4 md:w-px bg-border-grey my-1 md:my-0 md:mx-2" />
+                            <Link href="/customer?type=studio" onClick={() => setMobileOpen(false)} className="text-[10px] uppercase tracking-widest font-bold text-forest hover:brightness-110 flex items-center gap-1.5 border-2 border-forest/30 bg-forest/5 hover:bg-forest/10 px-4 py-1.5 rounded-lg transition-all shadow-tight">
+                                <Building2 className="w-3 h-3" />
+                                Rent a Studio
                             </Link>
                         </>
                     )}

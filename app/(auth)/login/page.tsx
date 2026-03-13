@@ -193,7 +193,7 @@ function LoginContent() {
                                     <div className="bg-white p-3 rounded-xl shadow-tight group-hover/logo:rotate-3 transition-transform border border-border-grey/50">
                                         <Image src="/logo4.png" alt="StudioVault Logo" width={80} height={80} className="w-12 h-12 object-contain" />
                                     </div>
-                                    <span className="text-2xl font-serif font-bold text-charcoal tracking-tight ml-4">StudioVaultPH</span>
+                                    <span className="text-2xl font-serif font-bold text-charcoal tracking-tight ml-4">STUDIO VAULT</span>
                                 </Link>
                                 <h2 className="text-5xl lg:text-6xl font-serif font-bold text-charcoal leading-[1.1] tracking-tight">
                                     The Sanctuary <br />
