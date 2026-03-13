@@ -123,15 +123,19 @@ export default async function StudioDashboard(props: {
             }
         }
 
-        // STEP 2c: Fetch Weekly Slots for the calendar (always, regardless of bookings)
+        // STEP 2c: Fetch Slots for the calendar — full month grid so the month view is complete
         const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
 
-        // Generate the 7 day strings for this week locally
+        // Generate the 7 day strings for this week (used by week/day view)
         for (let i = 0; i < 7; i++) {
             const d = new Date(weekStart)
             d.setDate(d.getDate() + i)
             dayStrings.push(format(d, 'yyyy-MM-dd'))
         }
+
+        // Fetch the full month grid: from the first Monday on/before the 1st to the last Sunday on/after the last day
+        const monthGridStart = format(startOfWeek(startOfMonth(currentDate), { weekStartsOn: 1 }), 'yyyy-MM-dd')
+        const monthGridEnd = format(endOfWeek(endOfMonth(currentDate), { weekStartsOn: 1 }), 'yyyy-MM-dd')
 
         const { data: slots } = await supabase
             .from('slots')
@@ -142,9 +146,11 @@ export default async function StudioDashboard(props: {
                     status,
                     created_at,
                     updated_at,
+                    equipment,
+                    quantity,
                     price_breakdown,
                     client:profiles!client_id(
-                        full_name, 
+                        full_name,
                         avatar_url,
                         bio,
                         email,
@@ -153,7 +159,7 @@ export default async function StudioDashboard(props: {
                         date_of_birth
                     ),
                     instructor:profiles!instructor_id(
-                        full_name, 
+                        full_name,
                         avatar_url,
                         bio,
                         email,
@@ -164,8 +170,8 @@ export default async function StudioDashboard(props: {
                 )
             `)
             .eq('studio_id', myStudio.id)
-            .gte('date', dayStrings[0])
-            .lte('date', dayStrings[6])
+            .gte('date', monthGridStart)
+            .lte('date', monthGridEnd)
 
         if (slots) {
             weeklySlots = slots

@@ -26,6 +26,7 @@ interface Slot {
         created_at: string;
         updated_at: string;
         equipment?: string;
+        quantity?: number;
         price_breakdown?: any;
         client?: { full_name: string; avatar_url: string };
         instructor?: { full_name: string; avatar_url: string };
@@ -574,12 +575,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                 const time = current.start_time.slice(0, 5);
                                                 const type = current.equipment ? Object.keys(current.equipment)[0] : 'Open';
                                                 
-                                                // Calculate capacity for this specific equipment type
-                                                const booked = current.bookings?.filter(b => 
-                                                    ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '') &&
-                                                    (b.price_breakdown?.equipment?.toUpperCase() === type.toUpperCase() || b.equipment?.toUpperCase() === type.toUpperCase())
+                                                // Count all active bookings for this slot (equipment-agnostic for monthly overview)
+                                                const booked = current.bookings?.filter(b =>
+                                                    ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '')
                                                 ).length || 0;
-                                                const total = Math.max(current.equipment?.[type] || 0, current.quantity || 1, booked);
+                                                const total = Math.max(current.quantity || 1, booked);
 
                                                 const key = `${time}-${type}`;
                                                 if (!acc.some((s: any) => s.key === key)) {
@@ -819,6 +819,15 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                     </div>
                                                 </div>
                                             )}
+                                            <div className="space-y-3">
+                                                <p className="text-[10px] text-slate font-bold uppercase tracking-widest">Booked Equipment</p>
+                                                <div className="flex items-center gap-2">
+                                                    <Box className="w-4 h-4 text-forest/40" />
+                                                    <span className="text-sm font-bold text-charcoal">
+                                                        {activeBooking.equipment || activeBooking.price_breakdown?.equipment || 'Standard'} ({activeBooking.quantity || 1})
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 );
@@ -991,7 +1000,14 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                             </div>
                                                             <div>
                                                                 <p className="text-[13px] font-bold text-[#43302E]">{b.client?.full_name || 'Anonymous Client'}</p>
-                                                                <p className="text-[9px] font-bold text-[#43302E]/40 uppercase tracking-widest">{b.status}</p>
+                                                                <div className="flex items-center gap-2 mt-0.5">
+                                                                    <p className="text-[9px] font-bold text-[#43302E]/40 uppercase tracking-widest">{b.status}</p>
+                                                                    <span className="text-[#43302E]/20 text-[8px]">•</span>
+                                                                    <div className="flex items-center gap-1 text-[9px] font-bold text-forest/60 uppercase tracking-widest">
+                                                                        <Box className="w-2.5 h-2.5 opacity-40" />
+                                                                        {b.equipment || b.price_breakdown?.equipment || 'Standard'} ({b.quantity || 1})
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
