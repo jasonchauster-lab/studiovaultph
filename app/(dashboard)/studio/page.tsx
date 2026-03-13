@@ -245,7 +245,7 @@ export default async function StudioDashboard(props: {
                             <div className="max-w-xl mx-auto">
                                 <div className="mb-12">
                                     <Link href="/" className="flex items-center justify-start gap-0 group mb-8">
-                                        <Image src="/logo1.jpg" alt="Studio Vault Logo" width={60} height={60} className="w-15 h-15 object-contain mix-blend-multiply" />
+                                        <Image src="/logo4.png" alt="Studio Vault Logo" width={60} height={60} className="w-15 h-15 object-contain" />
                                         <span className="text-2xl font-serif font-bold text-charcoal tracking-tight -ml-3 whitespace-nowrap">StudioVaultPH</span>
                                     </Link>
                                     <h2 className="text-sage text-[10px] font-bold uppercase tracking-[0.3em] mb-3">Onboarding</h2>

@@ -14,23 +14,22 @@ export default function PrivacyPolicy() {
             {/* Desktop Logo */}
             <div className="hidden sm:block">
               <Image 
-                src="/logo1.jpg" 
+                src="/logo4.png" 
                 alt="" 
                 width={120} 
                 height={48} 
-                className="h-10 md:h-12 w-auto object-contain mix-blend-multiply" 
+                className="h-10 md:h-12 w-auto object-contain" 
               />
             </div>
             {/* Mobile Logo */}
             <div className="block sm:hidden">
-              <Image 
-                src="/logo2.jpg" 
-                alt="" 
-                width={40} 
-                height={40} 
-                className="w-10 h-10 object-contain mix-blend-multiply" 
-              />
-            </div>
+                        <Image
+                            src="/logo4.png"
+                            alt="Studio Vault Logo"
+                            width={160}
+                            height={40}
+                            className="h-10 w-auto object-contain hidden md:block"
+                        />     </div>
             <span className="text-xl font-serif font-bold text-charcoal tracking-tighter uppercase hidden sm:block">STUDIO VAULT PH</span>
           </Link>
           <Link 

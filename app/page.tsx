@@ -20,12 +20,13 @@ export default function LandingPage() {
           <Link href="/" aria-label="Studio Vault PH Home" className="flex items-center gap-2 group">
             {/* Desktop Logo */}
             <div className="hidden sm:block">
-              <Image 
-                src="/logo1.jpg" 
-                alt="" 
-                width={120} 
-                height={48} 
-                className="h-10 md:h-12 w-auto object-contain mix-blend-multiply" 
+              <Image
+                src="/logo4.png"
+                alt="Studio Vault Primary Logo"
+                width={200}
+                height={50}
+                className="h-10 md:h-12 w-auto object-contain"
+                priority
               />
             </div>
             {/* Mobile Logo */}

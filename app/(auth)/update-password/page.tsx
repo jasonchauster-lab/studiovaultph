@@ -115,18 +115,22 @@ export default function UpdatePasswordPage() {
                 </Link>
 
                 <div className="w-full max-w-lg">
-                    <div className="flex flex-col items-center mb-12">
-                        <div className="mb-12">
-                            <Image src="/logo1.jpg" alt="StudioVault Logo" width={320} height={320} className="w-80 h-80 object-contain mix-blend-multiply" />
-                        </div>
-
-                        <div className="text-center">
-                            <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Welcome to the Vault</h2>
-                            <h1 className="text-4xl font-serif text-charcoal-900 mb-4">Update Password</h1>
-                            <p className="text-charcoal-800 text-base max-w-sm mx-auto font-medium">
-                                Please enter your new password below to secure your account.
-                            </p>
-                        </div>
+                    <div className="flex justify-center mb-8">
+                        <Image
+                            src="/logo4.png"
+                            alt="StudioVault Logo"
+                            width={180}
+                            height={60}
+                            className="h-12 w-auto object-contain"
+                            priority
+                        />
+                    </div>
+                    <div className="text-center">
+                        <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Welcome to the Vault</h2>
+                        <h1 className="text-4xl font-serif text-charcoal-900 mb-4">Update Password</h1>
+                        <p className="text-charcoal-800 text-base max-w-sm mx-auto font-medium">
+                            Please enter your new password below to secure your account.
+                        </p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">

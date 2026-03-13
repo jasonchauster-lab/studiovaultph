@@ -37,15 +37,12 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                         <div className="relative flex items-center">
                             {/* Desktop Logo */}
                             <Image
-                                src="/logo1.jpg"
+                                src="/logo4.png"
                                 alt="StudioVault Logo"
-                                width={160}
-                                height={160}
+                                width={180}
+                                height={48}
                                 priority
-                                className={clsx(
-                                    "object-contain mix-blend-multiply transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hidden lg:block",
-                                    isScrolled ? "h-16 w-auto" : "h-28 w-auto"
-                                )}
+                                className="h-10 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
                             />
                             {/* Mobile/Tablet Icon */}
                             <Image

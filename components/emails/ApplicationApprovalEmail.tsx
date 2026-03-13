@@ -36,7 +36,7 @@ export const ApplicationApprovalEmail = ({
             <Body style={main}>
                 <Container style={container}>
                     <Section style={header}>
-                        <Img src="https://studiovaultph.com/logo1.jpg" width="48" height="48" alt="StudioVaultPH Logo" style={logoImage} />
+                        <Img src="https://studiovaultph.com/logo4.png" width="48" height="48" alt="StudioVaultPH Logo" style={logoImage} />
                         <Text style={logoText}>StudioVaultPH</Text>
                     </Section>
                     <Heading style={heading}>Congratulations!</Heading>
