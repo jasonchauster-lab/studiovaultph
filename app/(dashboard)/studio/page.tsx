@@ -4,7 +4,7 @@ import { Calendar, DollarSign, Clock, User, Users, MapPin, TrendingUp, Sparkles 
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import StudioScheduleCalendar from '@/components/dashboard/StudioScheduleCalendar'
-import { startOfWeek, endOfWeek } from 'date-fns'
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
 import StudioApplicationForm from '@/components/studio/StudioApplicationForm'
 import clsx from 'clsx'
@@ -188,7 +188,7 @@ export default async function StudioDashboard(props: {
     }
 
     return (
-        <div className="space-y-12 pb-20">
+        <div className="pt-24 md:pt-12 space-y-12 pb-20">
             <div className="max-w-7xl mx-auto space-y-12">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">

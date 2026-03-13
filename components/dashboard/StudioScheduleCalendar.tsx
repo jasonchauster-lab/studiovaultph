@@ -883,19 +883,19 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                     </div>
                                 )}
 
-                                <div className="flex gap-6 pt-12 border-t border-border-grey">
-                                    <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 flex items-center justify-center gap-4">
-                                        <Edit2 className="w-5 h-5" /> {isSubmitting ? 'PROCESSING...' : 'UPDATE SLOT'}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleDelete}
-                                        disabled={isSubmitting}
-                                        className="px-10 py-5 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-red-100 transition-all flex items-center justify-center gap-4 border border-red-200"
-                                    >
-                                        <Trash2 className="w-5 h-5" /> DELETE
-                                    </button>
-                                </div>
+                                    <div className="flex flex-col sm:flex-row gap-4 pt-10 border-t border-border-grey">
+                                        <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal text-white py-4 md:py-5 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 flex items-center justify-center gap-3">
+                                            <Edit2 className="w-4 h-4" /> {isSubmitting ? 'PROCESSING...' : 'UPDATE SLOT'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleDelete}
+                                            disabled={isSubmitting}
+                                            className="flex-1 px-8 py-4 md:py-5 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-red-100 transition-all flex items-center justify-center gap-3 border border-red-200"
+                                        >
+                                            <Trash2 className="w-4 h-4" /> DELETE
+                                        </button>
+                                    </div>
                             </form>
                         </div>
                     </div>
