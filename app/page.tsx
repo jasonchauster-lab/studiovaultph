@@ -21,9 +21,9 @@ export default function LandingPage() {
             <Image
               src="/logo4.png"
               alt="Studio Vault"
-              width={200}
-              height={50}
-              className="h-12 w-[140px] md:w-[190px] object-contain transition-transform duration-500 group-hover:scale-105"
+              width={320}
+              height={80}
+              className="h-auto w-[180px] md:w-[280px] object-contain transition-transform duration-500 group-hover:scale-105"
               priority
             />
           </Link>
