@@ -36,21 +36,35 @@ export default function PublicInstructorGallery({ images }: PublicInstructorGall
 
     return (
         <>
-            <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x snap-mandatory">
-                {images.map((url: string, index: number) => (
-                    <div
-                        key={index}
-                        className="relative flex-none w-64 aspect-square rounded-2xl overflow-hidden border border-cream-100 bg-cream-50 cursor-zoom-in group snap-start"
-                        onClick={() => openLightbox(index)}
-                    >
-                        <img
-                            src={url}
-                            alt={`Gallery photo ${index + 1}`}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-charcoal-900/0 group-hover:bg-charcoal-900/10 transition-colors" />
+            <div className="relative">
+                <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x snap-mandatory">
+                    {images.map((url: string, index: number) => (
+                        <div
+                            key={index}
+                            className="relative flex-none w-64 aspect-square rounded-2xl overflow-hidden border border-cream-100 bg-cream-50 cursor-zoom-in group snap-start"
+                            onClick={() => openLightbox(index)}
+                        >
+                            <img
+                                src={url}
+                                alt={`Gallery photo ${index + 1}`}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                            <div className="absolute inset-0 bg-charcoal-900/0 group-hover:bg-charcoal-900/10 transition-colors" />
+                        </div>
+                    ))}
+                </div>
+                
+                {/* Mobile scroll indicators */}
+                <div className="sm:hidden flex flex-col items-center gap-2 mt-2">
+                    <div className="flex gap-1.5">
+                        {images.map((_, i) => (
+                            <div key={i} className="w-1.5 h-1.5 rounded-full bg-gold/20" />
+                        ))}
                     </div>
-                ))}
+                    <span className="text-[8px] font-black text-gold/40 uppercase tracking-[0.3em] animate-pulse">
+                        Swipe to explore
+                    </span>
+                </div>
             </div>
 
             {/* Lightbox Modal */}

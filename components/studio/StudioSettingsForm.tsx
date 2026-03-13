@@ -290,6 +290,8 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                                                 src={url}
                                                 alt={`Space Photo ${index + 1}`}
                                                 fill
+                                                quality={92}
+                                                sizes="(max-width: 640px) 50vw, 25vw"
                                                 className="object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                             />
                                         </a>

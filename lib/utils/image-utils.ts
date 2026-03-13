@@ -55,7 +55,7 @@ const convertViaCanvas = (file: File): Promise<File> => {
                     type: 'image/jpeg', 
                     lastModified: Date.now() 
                 }));
-            }, 'image/jpeg', 0.85);
+            }, 'image/jpeg', 0.92);
         };
         img.onerror = () => {
             URL.revokeObjectURL(url);
