@@ -121,7 +121,6 @@ export default function InstructorEarningsClient({
                     )}
                 </div>
             </div>
- drum
 
             <div className="earth-card p-4 inline-block bg-white shadow-tight">
                 <DateRangeFilters />

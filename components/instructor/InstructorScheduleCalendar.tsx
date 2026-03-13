@@ -683,7 +683,7 @@ export default function InstructorScheduleCalendar({
                                                                 return (                                                                    <div
                                                                         key={slot.id}
                                                                         className={clsx(
-                                                                            "absolute rounded-lg text-[10px] hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border z-10 p-3 group/slot flex flex-col justify-between session-block-earth",
+                                                                            "absolute rounded-lg text-[10px] hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border z-10 p-2 group/slot flex flex-col justify-between session-block-earth",
                                                                             isPastCell
                                                                                 ? "bg-off-white border-border-grey text-slate"
                                                                                 : "bg-green-50/50 border-green-200 text-green-900",
@@ -732,7 +732,7 @@ export default function InstructorScheduleCalendar({
                                                                     <div
                                                                         key={booking.id}
                                                                         className={clsx(
-                                                                            "absolute rounded-lg text-[10px] z-20 p-3 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border border-burgundy/10 bg-white",
+                                                                            "absolute rounded-lg text-[10px] z-20 p-2 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border border-burgundy/10 bg-white",
                                                                             duration < 45 && "flex-row items-center justify-between py-2 px-3"
                                                                         )}
                                                                         style={{
@@ -753,7 +753,7 @@ export default function InstructorScheduleCalendar({
                                                                     >
                                                                         <div className={clsx("flex justify-between items-start w-full", duration < 45 && "items-center")}>
                                                                             <div className="flex flex-col min-w-0 flex-1">
-                                                                                <span className="text-[9px] font-black text-burgundy uppercase tracking-widest truncate">
+                                                                                <span className="text-[8.5px] font-black text-burgundy uppercase tracking-tight truncate">
                                                                                     {booking.client?.full_name || 'Session'}
                                                                                 </span>
                                                                                 {duration >= 45 && (

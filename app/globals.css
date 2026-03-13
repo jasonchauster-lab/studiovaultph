@@ -145,8 +145,7 @@ h6 {
 
   /* ─── Sticky Header ─── */
   .sticky-header-antigravity {
-    @apply sticky top-0 z-[60] bg-white border-b border-border-grey transition-all duration-300;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    @apply sticky top-0 z-[60] transition-all duration-300;
   }
 
   /* ─── Navbar ─── */

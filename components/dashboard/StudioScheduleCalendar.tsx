@@ -514,7 +514,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                 return (
                                                                     <div
                                                                         className={clsx(
-                                                                            "p-3 border session-block-earth transition-all group/slot relative overflow-hidden cursor-pointer rounded-lg h-full flex flex-col justify-between",
+                                                                            "p-2 border session-block-earth transition-all group/slot relative overflow-hidden cursor-pointer rounded-lg h-full flex flex-col justify-between",
                                                                             isPastCell ? "bg-off-white border-border-grey" :
                                                                                 hasPending ? "bg-orange-50/50 border-orange-200" :
                                                                                     isBooked ? "bg-buttermilk border-burgundy/20" : "bg-white border-border-grey shadow-tight"
@@ -526,22 +526,23 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                         }}
                                                                     >
                                                                         <div>
-                                                                            <div className="flex justify-between items-start mb-1.5">
-                                                                                <h4 className="text-[10px] font-black text-[#43302E] uppercase tracking-wider truncate max-w-[85%]">
+                                                                            <div className="flex justify-between items-start mb-1">
+                                                                                <h4 className="text-[9.5px] font-black text-[#43302E] uppercase tracking-tight truncate max-w-[85%]">
                                                                                     {displayTitle}
                                                                                 </h4>
                                                                                 <Edit2 className="w-2.5 h-2.5 text-[#43302E]/40 opacity-0 group-hover/slot:opacity-100 transition-opacity" />
                                                                             </div>
                                                                             <div className="flex flex-wrap gap-1">
                                                                                 {Object.entries(equipmentCounts).map(([eq, counts]) => (
-                                                                                    <span key={eq} className="text-[7px] font-black text-[#43302E] uppercase tracking-tight bg-[#43302E]/5 px-1.5 py-0.5 rounded border border-[#43302E]/10">
-                                                                                        {counts.booked}/{counts.total} {eq.split(' ')[0]}
+                                                                                    <span key={eq} className="text-[7.5px] font-bold text-[#43302E]/80 uppercase tracking-tighter flex items-center gap-1 px-1.5 py-0.5 rounded border border-border-grey bg-white/50">
+                                                                                        <Box className="w-2 h-2 opacity-40 shrink-0" />
+                                                                                        <span>{counts.booked}/{counts.total} {eq.split(' ')[0]}</span>
                                                                                     </span>
                                                                                 ))}
                                                                             </div>
                                                                         </div>
-                                                                        <div className="mt-2 pt-1.5 border-t border-[#43302E]/5">
-                                                                            <p className="text-[8px] font-black text-[#43302E]/70 uppercase tracking-widest truncate flex items-center gap-1">
+                                                                        <div className="mt-1 pt-1 border-t border-[#43302E]/5">
+                                                                            <p className="text-[8px] font-black text-[#43302E]/70 uppercase tracking-tight truncate flex items-center gap-1">
                                                                                 <User className="w-2 h-2 opacity-50" />
                                                                                 {instructors.size > 0 ? Array.from(instructors).join(', ') : 'Unassigned'}
                                                                             </p>

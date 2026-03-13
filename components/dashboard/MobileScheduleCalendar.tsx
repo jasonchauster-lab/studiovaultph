@@ -224,7 +224,7 @@ export default function MobileScheduleCalendar({
                                         <div className="w-1.5 h-1.5 rounded-full bg-burgundy shadow-[0_0_8px_rgba(67,48,46,0.3)]" />
                                     )}
                                     {status?.hasAvailable && (
-                                        <div className="w-1.5 h-1.5 rounded-full bg-pastel-blue" />
+                                        <div className="w-1.5 h-1.5 rounded-full bg-burgundy/10 border border-burgundy/20" />
                                     )}
                                 </div>
                             </button>
@@ -295,7 +295,7 @@ export default function MobileScheduleCalendar({
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     onClick={(e) => e.stopPropagation()}
-                                                    className="flex items-center gap-2 text-muted-burgundy bg-pastel-blue/20 px-3 py-1.5 rounded-lg border border-pastel-blue/40 hover:bg-forest hover:text-white hover:border-forest transition-all"
+                                                    className="flex items-center gap-2 text-muted-burgundy bg-white/50 px-3 py-1.5 rounded-lg border border-border-grey hover:bg-forest hover:text-white hover:border-forest transition-all"
                                                 >
                                                     <MapPin className="w-3.5 h-3.5 text-burgundy/40 group-hover:text-white" />
                                                     <span className="font-bold uppercase tracking-wider text-[9px]">{loc}</span>
