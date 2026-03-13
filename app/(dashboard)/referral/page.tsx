@@ -118,31 +118,45 @@ export default async function ReferralPage() {
                     <ul className="space-y-2.5 text-xs text-muted-burgundy leading-relaxed">
                         <li className="flex gap-2">
                             <span className="text-burgundy font-bold mt-0.5">·</span>
-                            The ₱50 reward is credited <span className="font-semibold text-burgundy">&nbsp;only after your referred friend's first booking is marked Completed</span> by their instructor or studio. Sign-ups alone do not trigger the reward.
+                            <span>
+                                The ₱50 reward is credited <span className="font-semibold text-burgundy">only after your referred friend's first booking is marked Completed</span> by their instructor or studio. Sign-ups alone do not trigger the reward.
+                            </span>
                         </li>
                         <li className="flex gap-2">
                             <span className="text-burgundy font-bold mt-0.5">·</span>
-                            There is no limit to how many friends you can refer. Each successful referral earns you ₱50.
+                            <span>
+                                There is no limit to how many friends you can refer. Each successful referral earns you ₱50.
+                            </span>
                         </li>
                         <li className="flex gap-2">
                             <span className="text-burgundy font-bold mt-0.5">·</span>
-                            Each referred friend can only be credited to one referrer. The referral is attributed to the link used at sign-up — it cannot be changed retroactively.
+                            <span>
+                                Each referred friend can only be credited to one referrer. The referral is attributed to the link used at sign-up — it cannot be changed retroactively.
+                            </span>
                         </li>
                         <li className="flex gap-2">
                             <span className="text-burgundy font-bold mt-0.5">·</span>
-                            Self-referrals are not permitted. You cannot refer yourself using your own code.
+                            <span>
+                                Self-referrals are not permitted. You cannot refer yourself using your own code.
+                            </span>
                         </li>
                         <li className="flex gap-2">
                             <span className="text-burgundy font-bold mt-0.5">·</span>
-                            Referral bonuses are credited to your PilatesBridge wallet and can be used to pay for any session bookings on the platform.
+                            <span>
+                                Referral bonuses are credited to your PilatesBridge wallet and can be used to pay for any session bookings on the platform.
+                            </span>
                         </li>
                         <li className="flex gap-2">
                             <span className="text-burgundy font-bold mt-0.5">·</span>
-                            PilatesBridge reserves the right to withhold or reverse referral bonuses if fraudulent activity is detected (e.g., fake accounts, coordinated abuse).
+                            <span>
+                                PilatesBridge reserves the right to withhold or reverse referral bonuses if fraudulent activity is detected (e.g., fake accounts, coordinated abuse).
+                            </span>
                         </li>
                         <li className="flex gap-2">
                             <span className="text-burgundy font-bold mt-0.5">·</span>
-                            These terms may be updated at any time. Continued use of the referral program constitutes acceptance of the current terms.
+                            <span>
+                                These terms may be updated at any time. Continued use of the referral program constitutes acceptance of the current terms.
+                            </span>
                         </li>
                     </ul>
                 </div>
