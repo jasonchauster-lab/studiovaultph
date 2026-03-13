@@ -145,7 +145,7 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
     }
 
     return (
-        <form action={handleSubmit} className="space-y-8 bg-white p-8 rounded-2xl border border-cream-200 shadow-sm">
+        <form action={handleSubmit} className="space-y-8 bg-white p-4 sm:p-8 rounded-2xl border border-cream-200 shadow-sm">
 
             <input type="hidden" name="studioId" value={studio.id} />
 

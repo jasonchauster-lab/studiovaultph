@@ -253,14 +253,12 @@ export default function InstructorDashboardClient({
     return (
         <div className="space-y-16 pb-20">
             {/* Sticky Header */}
-            <div className="sticky-header-antigravity -mx-8 lg:-mx-12 mb-12">
+            <div className="sticky-header-antigravity -mx-4 sm:-mx-8 lg:-mx-12 mb-12 px-4 sm:px-8 lg:px-12">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8">
                     <div>
-                        <h1 className="text-5xl font-serif text-charcoal tracking-tighter mb-3">Instructor Dashboard</h1>
-                        <p className="text-[10px] font-bold text-slate uppercase tracking-[0.4em]">Manage your professional schedule and earnings with grounded precision.</p>
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-charcoal tracking-tighter mb-3">Instructor Dashboard</h1>
+                        <p className="text-[10px] font-bold text-slate uppercase tracking-[0.4em] max-w-[90%] sm:max-w-none">Manage your professional schedule and earnings with grounded precision.</p>
                     </div>
-
-
                 </div>
             </div>
 
@@ -697,7 +695,7 @@ export default function InstructorDashboardClient({
                                     </h4>
                                     <div className="space-y-4">
                                         {(selectedBooking.booking_history as any[]).map((entry, idx) => (
-                                            <div key={idx} className="flex gap-4 items-start pb-4 border-b border-border-grey/30 last:border-0 last:pb-0">
+                                            <div key={idx} className="flex gap-4 items-start pb-4 mb-4 border-b border-border-grey/30 last:border-0 last:pb-0 last:mb-0">
                                                 <div className="w-2 h-2 rounded-full bg-forest mt-1.5 shrink-0 shadow-sm" />
                                                 <div className="min-w-0 flex-1">
                                                     <p className="text-xs text-charcoal font-bold uppercase tracking-tight leading-snug">{entry.action_description || entry.status}</p>

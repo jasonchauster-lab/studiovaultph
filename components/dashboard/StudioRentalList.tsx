@@ -138,91 +138,109 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                         const fullTotal = booking.total_price ?? ((studioFee + instructorFee + serviceFee) || 0)
 
                         return (
-                            <div key={booking.id} className="p-4 border border-cream-200 bg-cream-50/50 rounded-xl hover:border-rose-gold/30 hover:bg-white transition-all shadow-sm group">
-                                <div className="flex justify-between items-start mb-3">
-                                    <div className="flex flex-col gap-1 w-full">
-                                        <div className="flex items-center justify-between w-full">
-                                            <div className="flex items-center gap-3 w-full">
-                                                <Link href={`/instructors/${instructor?.id}`} className="w-10 h-10 rounded-full overflow-hidden border border-cream-200 bg-white shadow-sm shrink-0 hover:opacity-80 transition-opacity">
-                                                    <img
-                                                        src={instructor?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(instructor?.full_name || 'I')}&background=F5F2EB&color=2C3230`}
-                                                        alt={instructor?.full_name || "Instructor"}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </Link>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-start justify-between gap-2">
-                                                        <div className="flex flex-col gap-1 items-start min-w-0">
-                                                            <div className="flex items-center gap-2">
-                                                                <Link href={`/instructors/${instructor?.id}`} className="text-sm font-bold text-charcoal-900 truncate hover:text-rose-gold transition-colors">
-                                                                    Instructor: {instructor?.full_name || "Instructor"}
-                                                                </Link>
-                                                                <div className="flex items-center gap-2 ml-2 pl-3 border-l border-cream-200">
-                                                                    <button
-                                                                        onClick={() => setSelectedClient(client)}
-                                                                        className="flex items-center gap-2 group/student transition-all"
-                                                                    >
-                                                                        <div className="w-8 h-8 rounded-full overflow-hidden border border-cream-200 bg-white shadow-sm shrink-0 group-hover/student:border-rose-gold transition-colors">
-                                                                            <img
-                                                                                src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`}
-                                                                                alt={client.full_name || "Client"}
-                                                                                className="w-full h-full object-cover"
-                                                                            />
-                                                                        </div>
-                                                                        <div className="flex flex-col items-start leading-tight">
-                                                                            <span className="text-[10px] text-charcoal-400 font-medium uppercase tracking-wider">Student</span>
-                                                                            <span className="text-[13px] font-bold text-charcoal-900 group-hover/student:text-rose-gold transition-colors">{client.full_name}</span>
-                                                                        </div>
-                                                                    </button>
-                                                                    {client.medical_conditions && (
-                                                                        <span className="ml-1 px-2 py-1 bg-red-100 text-red-700 text-[10px] font-bold uppercase rounded border border-red-200 animate-pulse flex items-center gap-1">
-                                                                            <AlertCircle className="w-3 h-3" />
-                                                                            Customer has medical condition
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            <span className={clsx(
-                                                                'px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border shrink-0',
-                                                                booking.status === 'completed'
-                                                                    ? (booking.funds_unlocked ? 'bg-green-100/50 text-green-700 border-green-200' : 'bg-amber-100/50 text-amber-700 border-amber-200') :
-                                                                    booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
-                                                                        'bg-red-100/50 text-red-700 border-red-200'
-                                                            )}>
-                                                                {['completed', 'approved'].includes(booking.status)
-                                                                    ? (booking.status === 'completed'
-                                                                        ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)')
-                                                                        : 'Approved')
-                                                                    : 'Cancelled'}
-                                                            </span>
-                                                        </div>
-                                                        <div className="text-right shrink-0 bg-cream-100/30 p-3 rounded-xl border border-cream-200/50 min-w-[140px]">
-                                                            <p className="text-lg font-black text-charcoal-900 leading-tight">
-                                                                {start.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
-                                                            </p>
-                                                            <p className="text-sm text-rose-gold font-bold mt-1.5 flex items-center justify-end gap-1">
-                                                                <Clock className="w-3.5 h-3.5" />
-                                                                {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div key={booking.id} className="p-4 border border-[#F5F2E9] bg-cream-50/50 rounded-xl hover:border-rose-gold/30 hover:bg-white transition-all shadow-sm group">
+                                {/* Date/time — full width on mobile, inline on sm+ */}
+                                <div className="flex items-center justify-between mb-3 sm:hidden">
+                                    <div className="bg-[#F5F2E9]/60 px-3 py-2 rounded-xl border border-[#F5F2E9] w-full">
+                                        <p className="text-sm font-black text-[#513229] leading-tight">
+                                            {start.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                        </p>
+                                        <p className="text-xs text-gray-600 font-bold mt-1 flex items-center gap-1">
+                                            <Clock className="w-3 h-3" />
+                                            {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                        </p>
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row sm:items-end justify-between text-xs mt-3 pt-3 border-t border-cream-200/50 gap-3">
+                                <div className="flex items-start gap-3 mb-3">
+                                    {/* Instructor avatar */}
+                                    <Link href={`/instructors/${instructor?.id}`} className="w-10 h-10 rounded-full overflow-hidden border border-[#F5F2E9] bg-white shadow-sm shrink-0 hover:opacity-80 transition-opacity">
+                                        <img
+                                            src={instructor?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(instructor?.full_name || 'I')}&background=F5F2EB&color=2C3230`}
+                                            alt={instructor?.full_name || "Instructor"}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </Link>
+
+                                    {/* Instructor name + student + status */}
+                                    <div className="flex-1 min-w-0">
+                                        <Link href={`/instructors/${instructor?.id}`} className="text-sm font-bold text-[#513229] truncate hover:text-rose-gold transition-colors block">
+                                            Instructor: {instructor?.full_name || "Instructor"}
+                                        </Link>
+
+                                        {/* Student row */}
+                                        <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                                            <button
+                                                onClick={() => setSelectedClient(client)}
+                                                className="flex items-center gap-1.5 group/student transition-all"
+                                            >
+                                                <div className="w-6 h-6 rounded-full overflow-hidden border border-[#F5F2E9] bg-white shadow-sm shrink-0 group-hover/student:border-rose-gold transition-colors">
+                                                    <img
+                                                        src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`}
+                                                        alt={client.full_name || "Client"}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                                <span className="text-[11px] font-bold text-gray-600 group-hover/student:text-rose-gold transition-colors">{client.full_name}</span>
+                                            </button>
+                                            {client.medical_conditions && (
+                                                <span className="px-2 py-0.5 bg-red-100 text-red-700 text-[9px] font-bold uppercase rounded border border-red-200 animate-pulse flex items-center gap-1">
+                                                    <AlertCircle className="w-2.5 h-2.5" />
+                                                    Medical
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Status badge — own line */}
+                                        <div className="mt-1.5">
+                                            <span className={clsx(
+                                                'px-2 py-0.5 text-[9px] font-bold uppercase rounded-md tracking-wider border inline-block',
+                                                booking.status === 'completed'
+                                                    ? (booking.funds_unlocked
+                                                        ? 'border-[#b8d49a]'
+                                                        : 'bg-amber-100/50 text-amber-700 border-amber-200')
+                                                    : booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
+                                                        'bg-red-100/50 text-red-700 border-red-200'
+                                            )}
+                                            style={booking.status === 'completed' && booking.funds_unlocked
+                                                ? { backgroundColor: '#D4E4BC', color: '#2D4F1E' }
+                                                : undefined}
+                                            >
+                                                {['completed', 'approved'].includes(booking.status)
+                                                    ? (booking.status === 'completed'
+                                                        ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)')
+                                                        : 'Approved')
+                                                    : 'Cancelled'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Date/time — hidden on mobile, shown on sm+ */}
+                                    <div className="hidden sm:block text-right shrink-0 bg-[#F5F2E9]/60 p-3 rounded-xl border border-[#F5F2E9] min-w-[140px]">
+                                        <p className="text-base font-black text-[#513229] leading-tight">
+                                            {start.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                                        </p>
+                                        <p className="text-sm text-gray-600 font-bold mt-1.5 flex items-center justify-end gap-1">
+                                            <Clock className="w-3.5 h-3.5" />
+                                            {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col sm:flex-row sm:items-end justify-between text-xs mt-3 pt-3 border-t border-[#F5F2E9] gap-3">
                                     <div className="flex flex-col gap-2">
                                         <div className="flex items-start gap-2">
-                                            <MapPin className="w-3.5 h-3.5 text-charcoal-400 shrink-0 mt-0.5" />
-                                            <span className="font-semibold text-charcoal-700 leading-tight">
+                                            <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
+                                            <span className="font-semibold text-gray-600 leading-tight">
                                                 {studioData?.location || "N/A"}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <Box className="w-3.5 h-3.5 text-charcoal-400 shrink-0" />
-                                            <span className="font-semibold text-charcoal-700">
+                                            <Box className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                            <span
+                                                className="font-bold text-[12px] px-2 py-0.5 rounded border"
+                                                style={{ backgroundColor: '#EADED7', color: '#513229', borderColor: '#d4c8c0' }}
+                                            >
                                                 {Array.isArray(slot?.equipment) && slot.equipment.length > 0
                                                     ? `${slot.equipment[0]} (${booking.quantity || 1})`
                                                     : (`${booking.price_breakdown?.equipment || booking.equipment || 'Standard Space'} (${booking.quantity || 1})`)}
@@ -233,7 +251,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                 "font-bold text-[13px] px-2 py-0.5 rounded border",
                                                 ['completed', 'approved'].includes(booking.status)
                                                     ? "text-green-700 border-green-200 bg-green-50"
-                                                    : "text-charcoal-500 border-cream-200 bg-cream-100"
+                                                    : "text-gray-500 border-[#F5F2E9] bg-[#F5F2E9]/50"
                                             )}>
                                                 Earnings: ₱{['completed', 'approved'].includes(booking.status) ? Number(studioFee || booking.total_price || 0).toLocaleString() : '0'}
                                             </span>

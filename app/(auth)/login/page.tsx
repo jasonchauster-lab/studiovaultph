@@ -223,7 +223,7 @@ function LoginContent() {
                     {/* Centered Mobile Logo */}
                     <div className="flex flex-col items-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
                         <Link href="/" className="flex flex-col items-center group">
-                            <Image src="/logo-primary.png" alt="StudioVault Logo" width={240} height={80} className="h-20 w-auto object-contain" />
+                            <Image src="/logo4.png" alt="StudioVault Logo" width={240} height={80} className="h-20 w-auto object-contain" />
                         </Link>
                     </div>
 

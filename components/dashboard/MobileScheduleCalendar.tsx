@@ -257,30 +257,30 @@ export default function MobileScheduleCalendar({
                                 <div
                                     id={`session-${session.id}`}
                                     onClick={() => onSlotClick?.(session)}
-                                    className="w-full bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-tight active:scale-[0.99] transition-all duration-300 flex flex-col gap-6 relative overflow-hidden group cursor-pointer"
+                                    className="w-full bg-white border border-[#E5E7EB] rounded-2xl p-6 sm:p-8 shadow-tight active:scale-[0.99] transition-all duration-300 flex flex-col gap-6 sm:gap-8 relative overflow-hidden group cursor-pointer"
                                 >
-                                    <div className="flex justify-between items-start">
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-3 text-burgundy text-[10px] font-black uppercase tracking-[0.2em]">
-                                                <div className="p-1.5 bg-buttermilk/20 rounded-lg border border-buttermilk/40">
-                                                    <Clock className="w-3.5 h-3.5" />
+                                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                        <div className="space-y-4 w-full">
+                                            <div className="flex items-center gap-3 text-burgundy text-[10px] font-black uppercase tracking-[0.2em] w-full">
+                                                <div className="px-3 py-1.5 bg-buttermilk/10 rounded-lg border border-buttermilk/40 flex items-center gap-3 w-full sm:w-auto">
+                                                    <Clock className="w-3.5 h-3.5 shrink-0" />
+                                                    <span className="truncate">{formatTo12Hour(session.start_time)} — {formatTo12Hour(session.end_time)}</span>
                                                 </div>
-                                                <span>{formatTo12Hour(session.start_time)} — {formatTo12Hour(session.end_time)}</span>
                                             </div>
-                                            <h3 className="text-xl font-serif font-black text-burgundy tracking-tight pt-2">
+                                            <h3 className="text-xl font-serif font-black text-burgundy tracking-tight pt-1">
                                                 {session.displayTitle || (session.is_booked ? session.type : 'Availability')}
                                             </h3>
                                         </div>
                                         {session.displayRatio ? (
-                                            <div className="bg-[#FFF1B5] text-[#43302E] px-3 py-1 rounded-full text-[9px] font-black tracking-widest shadow-sm">
+                                            <div className="bg-[#FFF1B5] text-[#43302E] px-3 py-1 rounded-full text-[9px] font-black tracking-widest shadow-sm w-fit">
                                                 {session.displayRatio}
                                             </div>
                                         ) : session.is_booked ? (
-                                            <div className="bg-[#FFF1B5] text-[#43302E] px-3 py-1 rounded-full text-[9px] font-black tracking-widest shadow-sm">
+                                            <div className="bg-[#FFF1B5] text-[#43302E] px-3 py-1 rounded-full text-[9px] font-black tracking-widest shadow-sm w-fit">
                                                 1/1
                                             </div>
                                         ) : (
-                                            <div className="bg-white text-muted-burgundy border border-[#E5E7EB] px-3 py-1 rounded-full text-[9px] font-black tracking-[0.1em]">
+                                            <div className="bg-white text-muted-burgundy border border-[#E5E7EB] px-3 py-1 rounded-full text-[9px] font-black tracking-[0.1em] w-fit">
                                                 OPEN
                                             </div>
                                         )}

@@ -79,7 +79,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
         <form action={handleSubmit} className="space-y-12">
 
             {/* Avatar Upload */}
-            <div className="flex flex-col items-center sm:flex-row gap-10 pb-12 border-b border-white/60">
+            <div className="flex flex-col items-center sm:flex-row gap-6 sm:gap-10 pb-8 sm:pb-12 border-b border-white/60">
                 <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                     <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-cloud bg-white/40 flex items-center justify-center relative z-10">
                         {previewUrl ? (
@@ -119,8 +119,8 @@ export default function ProfileForm({ profile }: { profile: any }) {
             </div>
 
             {/* Form Fields Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-                <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 sm:gap-x-12 sm:gap-y-10">
+                <div className="space-y-5 sm:space-y-8">
                     <div>
                         <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Full Name</label>
                         <input
@@ -161,7 +161,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                     </div>
                 </div>
 
-                <div className="space-y-8">
+                <div className="space-y-5 sm:space-y-8">
                     <div>
                         <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Phone Number</label>
                         <input
@@ -220,9 +220,9 @@ export default function ProfileForm({ profile }: { profile: any }) {
             {/* Medical Conditions */}
             <div className="space-y-6">
                 <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Medical Conditions</label>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     {['Scoliosis', 'Obesity', 'Herniated Disc', 'Post-partum', 'Chronic Back Pain', 'Hypertension', 'Diabetes', 'Asthma', 'Osteoporosis', 'Others'].map((condition) => (
-                        <label key={condition} className="group flex items-center gap-4 p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-gold/30 cursor-pointer transition-all duration-500 shadow-sm relative">
+                        <label key={condition} className="group flex items-center gap-3 p-3 sm:p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-gold/30 cursor-pointer transition-all duration-500 shadow-sm relative">
                             <input
                                 type="checkbox"
                                 name="medical_conditions"

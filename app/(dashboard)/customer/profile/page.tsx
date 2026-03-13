@@ -32,16 +32,16 @@ export default async function CustomerProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
-            <div className="max-w-2xl mx-auto space-y-8">
+        <div className="min-h-screen bg-cream-50 py-6 sm:py-10">
+            <div className="max-w-2xl mx-auto space-y-6">
                 <div>
-                    <h1 className="text-3xl font-serif text-charcoal-900 mb-2">My Profile</h1>
-                    <p className="text-charcoal-600">Manage your personal information.</p>
+                    <h1 className="text-2xl sm:text-3xl font-serif text-charcoal-900 mb-1">My Profile</h1>
+                    <p className="text-charcoal-600 text-sm">Manage your personal information.</p>
                 </div>
- 
+
                 {/* Contact Info Section */}
-                <div className="bg-white p-8 rounded-2xl border border-cream-200 shadow-sm">
-                    <h2 className="text-xl font-serif text-charcoal-900 mb-6">Contact Information</h2>
+                <div className="bg-white p-5 sm:p-8 rounded-2xl border border-cream-200 shadow-sm">
+                    <h2 className="text-lg sm:text-xl font-serif text-charcoal-900 mb-5">Contact Information</h2>
                     <ProfileForm profile={profileWithEmail} />
                 </div>
             </div>

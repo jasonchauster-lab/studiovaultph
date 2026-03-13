@@ -36,27 +36,27 @@ export default async function InstructorProfilePage() {
     }
 
     return (
-        <div className="min-h-screen p-8 lg:p-12">
-            <div className="max-w-4xl mx-auto space-y-16">
+        <div className="min-h-screen py-6 sm:py-10 px-0">
+            <div className="max-w-4xl mx-auto space-y-8 md:space-y-16">
                 <div>
                     <Link
                         href="/instructor"
-                        className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/20 hover:text-gold uppercase tracking-[0.3em] transition-all mb-8 group"
+                        className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/20 hover:text-gold uppercase tracking-[0.3em] transition-all mb-6 group"
                     >
                         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                         BACK TO DASHBOARD
                     </Link>
-                    <h1 className="text-2xl sm:text-5xl font-serif text-charcoal tracking-tighter mb-4">My Profile</h1>
+                    <h1 className="text-2xl sm:text-4xl font-serif text-charcoal tracking-tighter mb-2">My Profile</h1>
                     <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Manage your public instructor profile, gallery, and credentials.</p>
                 </div>
 
                 {/* Contact Info & Bio Section */}
-                <div className="glass-card p-12 relative overflow-hidden">
+                <div className="glass-card p-5 sm:p-10 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-80 h-80 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] pointer-events-none" />
                     <div className="relative z-10">
-                        <div className="flex items-center gap-4 mb-10 border-b border-white/60 pb-8">
-                            <User className="w-6 h-6 text-gold" />
-                            <h2 className="text-3xl font-serif text-charcoal tracking-tighter">Profile Details</h2>
+                        <div className="flex items-center gap-3 mb-6 sm:mb-10 border-b border-white/60 pb-5 sm:pb-8">
+                            <User className="w-5 h-5 text-gold shrink-0" />
+                            <h2 className="text-xl sm:text-3xl font-serif text-charcoal tracking-tighter">Profile Details</h2>
                         </div>
                         <ProfileForm profile={profileWithEmail} />
                     </div>
