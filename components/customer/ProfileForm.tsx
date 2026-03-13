@@ -6,7 +6,7 @@ import { Loader2, Camera, Save, User, FileText } from 'lucide-react'
 import { isValidPhone, isValidEmail, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
 import WaiverUpload from '@/components/customer/WaiverUpload'
-import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
+import { normalizeImageFile } from '@/lib/utils/image-utils'
 import { clsx } from 'clsx'
 
 export default function ProfileForm({ profile }: { profile: any }) {
@@ -59,14 +59,12 @@ export default function ProfileForm({ profile }: { profile: any }) {
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        let file = e.target.files?.[0]
+        const file = e.target.files?.[0]
         if (file) {
             setIsLoading(true)
             try {
-                if (isHeicFile(file)) {
-                    file = await ensureJpegFile(file)
-                }
-                const url = URL.createObjectURL(file)
+                const processedFile = await normalizeImageFile(file)
+                const url = URL.createObjectURL(processedFile)
                 setPreviewUrl(url)
             } catch (err) {
                 console.error('Avatar processing failed', err)

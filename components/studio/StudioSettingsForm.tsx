@@ -135,14 +135,11 @@ export default function StudioSettingsForm({ studio }: { studio: Studio }) {
         const file = e.target.files?.[0]
         if (file) {
             try {
-                let previewFile = file
-                if (isHeicFile(file)) {
-                    previewFile = await ensureJpegFile(file)
-                }
+                const previewFile = await normalizeImageFile(file)
                 const url = URL.createObjectURL(previewFile)
                 setPreviewUrl(url)
             } catch (err) {
-                console.error('Logo HEIC preview error:', err)
+                console.error('Logo preview error:', err)
             }
         }
     }

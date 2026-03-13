@@ -5,7 +5,7 @@ import { uploadGalleryImage, deleteGalleryImage } from '@/app/(dashboard)/custom
 import { Plus, X, Loader2, Image as ImageIcon, Camera } from 'lucide-react'
 import Image from 'next/image'
 import { clsx } from 'clsx'
-import { isHeicFile, ensureJpegFile } from '@/lib/utils/image-utils'
+import { normalizeImageFile } from '@/lib/utils/image-utils'
 
 interface InstructorGallerySectionProps {
     images: string[]
@@ -24,10 +24,7 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
         setError(null)
 
         try {
-            let processedFile = file
-            if (isHeicFile(file)) {
-                processedFile = await ensureJpegFile(file)
-            }
+            const processedFile = await normalizeImageFile(file)
 
             const formData = new FormData()
             formData.append('file', processedFile)

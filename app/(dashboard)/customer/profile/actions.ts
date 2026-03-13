@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { uploadContentType } from '@/lib/utils/image-utils'
 
 export async function updateProfile(formData: FormData) {
     const supabase = await createClient()
@@ -59,7 +60,7 @@ export async function updateProfile(formData: FormData) {
 
         const { error: uploadError } = await supabase.storage
             .from('avatars')
-            .upload(filePath, avatarFile)
+            .upload(filePath, avatarFile, { contentType: uploadContentType(avatarFile) })
 
         if (uploadError) {
             console.error('Avatar upload error:', uploadError)
@@ -163,7 +164,7 @@ export async function uploadGalleryImage(formData: FormData) {
     // 1. Upload to Storage
     const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file)
+        .upload(filePath, file, { contentType: uploadContentType(file) })
 
     if (uploadError) {
         console.error('Gallery upload error:', uploadError)
