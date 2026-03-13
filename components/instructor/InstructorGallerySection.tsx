@@ -35,11 +35,15 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
                 formData.append('file', processedFile)
                 const result = await uploadGalleryImage(formData)
                 if (result.error) {
-                    errors.push(`${files[i].name}: ${result.error}`)
+                    // Check for specific common errors
+                    const simpleError = result.error.includes('Payload Too Large') 
+                        ? 'Image is too large. Even after resizing, it exceeds the limit.'
+                        : result.error;
+                    errors.push(`${files[i].name}: ${simpleError}`)
                 }
             } catch (err) {
                 console.error('File processing error:', err)
-                errors.push(`${files[i].name}: Image processing failed. Please try another format.`)
+                errors.push(`${files[i].name}: Failed to process image. Please try another photo.`)
             }
         }
 

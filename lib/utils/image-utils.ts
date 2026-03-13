@@ -1,5 +1,3 @@
-import heic2any from 'heic2any';
-
 /**
  * Validates if a file is an HEIC or HEIF image.
  * Also catches files with empty MIME types that have HEIC/HEIF extensions.
@@ -12,43 +10,6 @@ export const isHeicFile = (file: File): boolean => {
         name.endsWith('.heic') ||
         name.endsWith('.heif')
     );
-};
-
-/**
- * Converts an HEIC/HEIF file to a JPEG Blob.
- * If the file is not HEIC, it returns the original file.
- */
-export const convertHeicToJpeg = async (file: File): Promise<Blob | File> => {
-    if (!isHeicFile(file)) {
-        return file;
-    }
-
-    const result = await heic2any({
-        blob: file,
-        toType: 'image/jpeg',
-        quality: 0.8,
-    });
-
-    // heic2any can return an array if multiple images are in the container
-    const blob = Array.isArray(result) ? result[0] : result;
-    return blob;
-};
-
-/**
- * Helper to create a new File object from a Blob (with .jpg extension).
- */
-export const ensureJpegFile = async (file: File): Promise<File> => {
-    if (!isHeicFile(file)) return file;
-
-    const convertedBlob = await convertHeicToJpeg(file);
-
-    // Replace extension with .jpg
-    const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
-
-    return new File([convertedBlob], newName, {
-        type: 'image/jpeg',
-        lastModified: Date.now(),
-    });
 };
 
 /**
@@ -83,10 +44,8 @@ const convertViaCanvas = (file: File): Promise<File> => {
             const ctx = canvas.getContext('2d');
             if (!ctx) { reject(new Error('No canvas context')); return; }
             
-            // Use better image smoothing
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
-            
             ctx.drawImage(img, 0, 0, width, height);
             
             canvas.toBlob((blob) => {
@@ -96,11 +55,11 @@ const convertViaCanvas = (file: File): Promise<File> => {
                     type: 'image/jpeg', 
                     lastModified: Date.now() 
                 }));
-            }, 'image/jpeg', 0.85); // 0.85 quality is a good balance for web
+            }, 'image/jpeg', 0.85);
         };
         img.onerror = () => {
             URL.revokeObjectURL(url);
-            reject(new Error('Image load failed'));
+            reject(new Error('Image decode failed'));
         };
         img.src = url;
     });
@@ -111,41 +70,61 @@ const isMobile = (): boolean =>
 
 /**
  * Normalizes any image file for upload across all platforms (iPhone, Android, desktop).
- * - On Mobile/Safari: uses canvas first (decodes HEIC natively, no WASM needed)
- * - On Desktop: tries heic2any first, then canvas fallback
- * - Automatically resizes images larger than 2560px
- * - Never throws — returns original file as last resort
+ * Multi-stage Fallback: Canvas (Fast/Native) -> heic2any (Chrome Desktop) -> Original with faked type
  */
 export const normalizeImageFile = async (file: File): Promise<File> => {
+    const logPrefix = `[ImageNormalization:${file.name}]`;
+    console.log(`${logPrefix} Starting... Type: ${file.type || 'unknown'}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+
     try {
-        // We always normalize if it's HEIC, or if it might be a very large photo
-        const isPhoto = file.type.startsWith('image/') || !file.type;
-        const needsNormalization = isHeicFile(file) || !file.type || (isPhoto && file.size > 2 * 1024 * 1024);
+        const isHeic = isHeicFile(file);
+        const needsNormalization = isHeic || !file.type || file.size > 1 * 1024 * 1024;
 
-        if (!needsNormalization) return file;
-
-        // Normalise file metadata for downstream checks
-        const normalizedFile = !file.type && (file.name.split('.').pop()?.toLowerCase() ?? '').match(/heic|heif/)
-            ? new File([file], file.name, { type: 'image/heic', lastModified: file.lastModified })
-            : file;
-
-        // Mobile/Safari/Chrome on Mobile: go straight to canvas for performance and native HEIC support
-        if (isMobile()) {
-            try { return await convertViaCanvas(normalizedFile); } catch { /* fall through */ }
-            // If canvas failed, return original with a generic type
-            return new File([file], file.name || 'image.jpg', { type: 'image/jpeg', lastModified: file.lastModified });
+        if (!needsNormalization) {
+            console.log(`${logPrefix} Normalization skipped (small/standard file)`);
+            return file;
         }
 
-        // Desktop: try heic2any (handles HEIC on Chrome/Firefox which lack native support)
-        if (isHeicFile(normalizedFile)) {
-            try { return await ensureJpegFile(normalizedFile); } catch { /* fall through to canvas */ }
+        // --- STAGE 1: CANVAS (Fast, handles Native HEIC on iOS/Safari and Resizing) ---
+        if (typeof document !== 'undefined') {
+            try {
+                const result = await convertViaCanvas(file);
+                console.log(`${logPrefix} Success via Canvas`);
+                return result;
+            } catch (err) {
+                console.warn(`${logPrefix} Canvas failed, trying fallback...`, err);
+            }
         }
 
-        // Canvas fallback (Safari on macOS supports HEIC natively, also handles resizing)
-        try { return await convertViaCanvas(normalizedFile); } catch { /* fall through */ }
+        // --- STAGE 2: DYNAMIC HEIC2ANY (For HEIC on Chrome/Firefox desktop) ---
+        if (isHeic) {
+            try {
+                console.log(`${logPrefix} Attempting heic2any...`);
+                const heic2any = (await import('heic2any')).default;
+                const result = await heic2any({
+                    blob: file,
+                    toType: 'image/jpeg',
+                    quality: 0.8,
+                });
+                const blob = Array.isArray(result) ? result[0] : result;
+                const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+                console.log(`${logPrefix} Success via heic2any`);
+                return new File([blob], newName, { type: 'image/jpeg', lastModified: Date.now() });
+            } catch (err) {
+                console.error(`${logPrefix} heic2any failed`, err);
+            }
+        }
 
-        return file;
-    } catch {
+        // --- STAGE 3: LAST RESORT (Faked Content Type) ---
+        console.log(`${logPrefix} Returning original as JPEG fallback`);
+        const finalName = file.name.match(/\.(jpg|jpeg|png)$/i) ? file.name : `${file.name.split('.')[0]}.jpg`;
+        return new File([file], finalName, { 
+            type: 'image/jpeg', 
+            lastModified: file.lastModified 
+        });
+
+    } catch (err) {
+        console.error(`${logPrefix} Critical catch-all error`, err);
         return file;
     }
 };
@@ -154,9 +133,10 @@ export const normalizeImageFile = async (file: File): Promise<File> => {
  * Returns the best content-type string to use when uploading to Supabase Storage.
  */
 export const uploadContentType = (file: File): string => {
-    if (file.type) return file.type;
-    const ext = file.name.split('.').pop()?.toLowerCase();
-    if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
-    if (ext === 'png') return 'image/png';
+    if (file.type && file.type !== 'application/octet-stream') return file.type;
+    const name = file.name.toLowerCase();
+    if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'image/jpeg';
+    if (name.endsWith('.png')) return 'image/png';
+    if (name.endsWith('.heic') || name.endsWith('.heif')) return 'image/heic';
     return 'application/octet-stream';
 };

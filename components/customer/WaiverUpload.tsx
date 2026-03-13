@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { uploadWaiver } from '@/app/(dashboard)/customer/profile/actions'
 import { Upload, FileText, Check, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import { isHeicFile, ensureJpegFile } from '@/lib/utils/image-utils'
+import { normalizeImageFile } from '@/lib/utils/image-utils'
 
 export default function WaiverUpload({ initialUrl, signedAt }: { initialUrl?: string, signedAt?: string }) {
     const [isUploading, setIsUploading] = useState(false)
@@ -18,10 +18,7 @@ export default function WaiverUpload({ initialUrl, signedAt }: { initialUrl?: st
         setIsUploading(true)
 
         try {
-            let processedFile = file
-            if (isHeicFile(file)) {
-                processedFile = await ensureJpegFile(file)
-            }
+            const processedFile = await normalizeImageFile(file)
 
             const formData = new FormData()
             formData.append('file', processedFile)

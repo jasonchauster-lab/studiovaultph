@@ -5,7 +5,7 @@ import { Upload, CheckCircle, Loader2, AlertCircle, X, FileText, ShieldAlert, He
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { submitPaymentProof } from '@/app/(dashboard)/customer/actions'
-import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
+import { normalizeImageFile } from '@/lib/utils/image-utils'
 import Image from 'next/image'
 
 // ─── Health Waiver Text ───────────────────────────────────────────────────────
@@ -375,31 +375,17 @@ export default function PaymentForm({
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            let selectedFile = e.target.files[0]
+            setIsUploading(true)
             setError(null)
-
-            // Auto-convert HEIC/HEIF
-            if (isHeicFile(selectedFile)) {
-                setIsUploading(true) // Show loader during conversion
-                try {
-                    selectedFile = await ensureJpegFile(selectedFile)
-                } catch (err) {
-                    setError('Failed to process iPhone photo. Please try a different format.')
-                    setIsUploading(false)
-                    return
-                } finally {
-                    setIsUploading(false)
-                }
-            }
-
-            setFile(selectedFile)
-
-            // Create preview URL for images
-            if (selectedFile.type.startsWith('image/')) {
-                const url = URL.createObjectURL(selectedFile)
+            try {
+                const processedFile = await normalizeImageFile(e.target.files[0])
+                setFile(processedFile)
+                const url = URL.createObjectURL(processedFile)
                 setPreviewUrl(url)
-            } else {
-                setPreviewUrl(null)
+            } catch (err) {
+                setError('Failed to process image. Please try a different photo.')
+            } finally {
+                setIsUploading(false)
             }
         }
     }

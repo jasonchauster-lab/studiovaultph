@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { requestPayout, submitPayoutApplication } from '@/app/(dashboard)/studio/earnings/actions'
 import { X, Loader2, Clock } from 'lucide-react'
-import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
+import { normalizeImageFile } from '@/lib/utils/image-utils'
 
 interface PayoutRequestModalProps {
     studioId: string
@@ -35,11 +35,11 @@ export default function PayoutRequestModal({ studioId, availableBalance, payoutA
                 const mayorsPermit = formData.get('mayorsPermit') as File;
                 const secretaryCert = formData.get('secretaryCertificate') as File;
 
-                if (mayorsPermit && isHeicFile(mayorsPermit)) {
-                    formData.set('mayorsPermit', await ensureJpegFile(mayorsPermit));
+                if (mayorsPermit) {
+                    formData.set('mayorsPermit', await normalizeImageFile(mayorsPermit));
                 }
-                if (secretaryCert && isHeicFile(secretaryCert)) {
-                    formData.set('secretaryCertificate', await ensureJpegFile(secretaryCert));
+                if (secretaryCert) {
+                    formData.set('secretaryCertificate', await normalizeImageFile(secretaryCert));
                 }
 
                 result = await submitPayoutApplication(null, formData)

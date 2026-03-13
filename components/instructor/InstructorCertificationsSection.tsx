@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { addCertification, deleteCertification } from '@/app/(dashboard)/instructor/profile/actions'
 import { Award, Plus, Trash2, Loader2, FileText, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 import { clsx } from 'clsx'
-import { isHeicFile, ensureJpegFile } from '@/lib/utils/image-utils'
+import { normalizeImageFile } from '@/lib/utils/image-utils'
 
 interface Certification {
     id: string
@@ -41,8 +41,8 @@ export default function InstructorCertificationsSection({ certifications }: Inst
 
         try {
             const certificateFile = formData.get('certificateFile') as File
-            if (certificateFile && isHeicFile(certificateFile)) {
-                const processedFile = await ensureJpegFile(certificateFile)
+            if (certificateFile) {
+                const processedFile = await normalizeImageFile(certificateFile)
                 formData.set('certificateFile', processedFile)
             }
 
@@ -134,18 +134,16 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                             return
                                         }
 
-                                        if (file.type.startsWith('image/') || isHeicFile(file)) {
-                                            try {
-                                                let previewFile = file
-                                                if (isHeicFile(file)) {
-                                                    previewFile = await ensureJpegFile(file)
-                                                }
+                                        try {
+                                            const previewFile = await normalizeImageFile(file)
+                                            if (previewFile.type.startsWith('image/')) {
                                                 const url = URL.createObjectURL(previewFile)
                                                 setPreviewUrl(url)
-                                            } catch (err) {
-                                                console.error('HEIC preview error:', err)
+                                            } else {
+                                                setPreviewUrl(null)
                                             }
-                                        } else {
+                                        } catch (err) {
+                                            console.error('Preview error:', err)
                                             setPreviewUrl(null)
                                         }
                                     }}

@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { Upload, CheckCircle, AlertCircle, Eye, Loader2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { submitTopUpPaymentProof } from '@/app/(dashboard)/customer/actions'
-import { ensureJpegFile, isHeicFile } from '@/lib/utils/image-utils'
+import { uploadTopUpProof } from '@/app/(dashboard)/customer/actions'
+import { normalizeImageFile } from '@/lib/utils/image-utils'
 
 interface TopUpPaymentFormProps {
     topUpId: string
@@ -20,7 +19,6 @@ export default function TopUpPaymentForm({ topUpId, amount }: TopUpPaymentFormPr
     const [success, setSuccess] = useState(false)
 
     const router = useRouter()
-    const supabase = createClient()
 
     useEffect(() => {
         return () => {
@@ -32,30 +30,17 @@ export default function TopUpPaymentForm({ topUpId, amount }: TopUpPaymentFormPr
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            let selectedFile = e.target.files[0]
+            setIsUploading(true)
             setError(null)
-
-            // Auto-convert HEIC/HEIF
-            if (isHeicFile(selectedFile)) {
-                setIsUploading(true)
-                try {
-                    selectedFile = await ensureJpegFile(selectedFile)
-                } catch (err) {
-                    setError('Failed to process iPhone photo. Please try a different format.')
-                    setIsUploading(false)
-                    return
-                } finally {
-                    setIsUploading(false)
-                }
-            }
-
-            setFile(selectedFile)
-
-            if (selectedFile.type.startsWith('image/')) {
-                const url = URL.createObjectURL(selectedFile)
+            try {
+                const processedFile = await normalizeImageFile(e.target.files[0])
+                setFile(processedFile)
+                const url = URL.createObjectURL(processedFile)
                 setPreviewUrl(url)
-            } else {
-                setPreviewUrl(null)
+            } catch (err) {
+                setError('Failed to process image. Please try a different photo.')
+            } finally {
+                setIsUploading(false)
             }
         }
     }
@@ -71,20 +56,11 @@ export default function TopUpPaymentForm({ topUpId, amount }: TopUpPaymentFormPr
         setError(null)
 
         try {
-            // 1. Upload File
-            const fileExt = file.name.split('.').pop()
-            const fileName = `topup_${topUpId}_${Date.now()}.${fileExt}`
-            const filePath = `${fileName}`
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('topUpId', topUpId)
 
-            const { error: uploadError } = await supabase.storage
-                .from('payment-proofs')
-                .upload(filePath, file)
-
-            if (uploadError) throw uploadError
-
-            // 2. Clear Public URL usage - we use paths now for security
-            // 3. Submit Top-up proof
-            const result = await submitTopUpPaymentProof(topUpId, filePath)
+            const result = await uploadTopUpProof(formData)
 
             if (result.error) {
                 throw new Error(result.error)
