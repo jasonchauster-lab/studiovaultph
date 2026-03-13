@@ -215,24 +215,34 @@ function LoginContent() {
             </div>
 
             {/* Right Side: Form Content */}
-            <main className="flex-1 flex flex-col items-center justify-center p-10 md:p-12 lg:p-24 overflow-y-auto relative bg-off-white">
-                {/* Back Button */}
+            <main className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 md:p-12 lg:p-24 overflow-y-auto relative bg-off-white pb-16 md:pb-24">
+                {/* Desktop Back Button - Hidden on mobile */}
                 <Link
                     href="/"
-                    className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-3 text-slate-600 hover:text-charcoal transition-all group"
+                    className="hidden md:flex absolute top-12 left-12 items-center gap-3 text-slate-600 hover:text-charcoal transition-all group"
                 >
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                     <span className="text-[10px] font-bold uppercase tracking-[0.4em]">Return Home</span>
                 </Link>
 
-                <div className="w-full max-w-md">
-                    <div className="text-center mb-16 space-y-6">
+                <div className="w-full max-w-md pt-10 sm:pt-0">
+                    {/* Centered Mobile Logo */}
+                    <div className="flex flex-col items-center mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
+                        <Link href="/" className="flex flex-col items-center gap-4 group">
+                            <div className="bg-white p-4 rounded-2xl shadow-tight group-hover:rotate-3 transition-transform border border-border-grey/50">
+                                <Image src="/logo4.png" alt="StudioVault Logo" width={60} height={60} className="w-12 h-12 object-contain" />
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <span className="text-xl font-serif font-bold text-charcoal tracking-[0.2em]">STUDIO VAULT</span>
+                                <span className="text-[8px] font-black text-burgundy uppercase tracking-[0.5em] mt-1">SANCTUARY PH</span>
+                            </div>
+                        </Link>
+                    </div>
+
+                    <div className="text-center mb-12">
                         <h1 className="text-3xl md:text-4xl font-serif font-bold text-charcoal tracking-tight">
                             {isSignUp ? 'Begin Your Journey' : 'Secure Access'}
                         </h1>
-                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.5em] leading-relaxed">
-                            {isSignUp ? 'Join the community.' : 'Return to your dashboard'}
-                        </p>
                     </div>
 
                     {isSignUp && (
@@ -268,7 +278,7 @@ function LoginContent() {
                         type="button"
                         onClick={handleGoogleAuth}
                         disabled={loading}
-                        className="w-full flex items-center justify-center gap-3 px-5 h-14 border border-border-grey bg-white rounded-lg text-[13px] font-semibold text-charcoal hover:bg-off-white transition-all shadow-tight disabled:opacity-50 mb-10"
+                        className="w-full flex items-center justify-center gap-3 px-5 h-14 border border-border-grey bg-white rounded-xl text-[13px] font-bold uppercase tracking-widest text-charcoal hover:bg-off-white transition-all shadow-tight disabled:opacity-50 mb-12"
                     >
                         <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                             <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.658 14.013 17.64 11.706 17.64 9.2z" fill="#4285F4"/>
@@ -279,9 +289,9 @@ function LoginContent() {
                         Continue with Google
                     </button>
 
-                    <div className="flex items-center gap-4 mb-10">
+                    <div className="flex items-center gap-4 mb-12">
                         <div className="flex-1 h-px bg-border-grey" />
-                        <span className="text-[10px] font-bold text-muted-burgundy uppercase tracking-widest px-2">or</span>
+                        <span className="text-[10px] font-black text-muted-burgundy uppercase tracking-[0.3em] px-4">or</span>
                         <div className="flex-1 h-px bg-border-grey" />
                     </div>
 
@@ -328,7 +338,7 @@ function LoginContent() {
                             />
                         </div>
 
-                        <div className="space-y-3">
+                        <div className="space-y-4 pb-4">
                             <div className="flex items-center justify-between px-1">
                                 <label htmlFor="password" id="password-label" className="block text-[10px] font-bold text-slate-600 uppercase tracking-widest">Password</label>
                                 {!isSignUp && (
@@ -383,9 +393,9 @@ function LoginContent() {
                         </div>
                     </form>
 
-                    <div className="mt-40 pt-10 border-t border-border-grey text-center">
-                        <p className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.4em] leading-relaxed max-w-xs mx-auto">
-                            By proceeding, you adhere to our <Link href="/terms" className="text-slate-600 hover:text-burgundy">Terms</Link> and <Link href="/privacy" className="text-slate-600 hover:text-burgundy">Privacy Policy</Link>.
+                    <div className="mt-32 pt-10 border-t border-border-grey text-center pb-10">
+                        <p className="text-[9px] font-black text-slate uppercase tracking-[0.4em] leading-relaxed max-w-xs mx-auto">
+                            By proceeding, you adhere to our <Link href="/terms" className="text-slate hover:text-burgundy">Terms</Link> and <Link href="/privacy" className="text-slate hover:text-burgundy">Privacy Policy</Link>.
                         </p>
                     </div>
                 </div>

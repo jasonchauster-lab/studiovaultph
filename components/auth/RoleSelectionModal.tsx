@@ -16,7 +16,7 @@ const OPTIONS = [
         title: "Client",
         description: "Find top-tier instructors and book your favorite Pilates sessions in just a few taps.",
         icon: <Sparkles className="w-6 h-6 text-forest" />,
-        bgColor: "bg-off-white",
+        bgColor: "bg-[#fdf9f4]",
         hoverBorder: "hover:border-forest/30",
         buttonColor: "bg-forest text-white hover:brightness-110",
         target: "/login?role=customer&mode=signup"
@@ -26,7 +26,7 @@ const OPTIONS = [
         title: "Instructor",
         description: "Manage your schedule, book premium studios, and grow your client base effortlessly.",
         icon: <User className="w-6 h-6 text-charcoal" />,
-        bgColor: "bg-off-white",
+        bgColor: "bg-[#fdf9f4]",
         hoverBorder: "hover:border-forest/30",
         buttonColor: "bg-charcoal text-white hover:brightness-110",
         target: "/login?role=instructor&mode=signup"
@@ -36,9 +36,9 @@ const OPTIONS = [
         title: "Studio",
         description: "Optimize your space, manage equipment, and connect with the best local instructors.",
         icon: <DollarSign className="w-6 h-6 text-forest" />,
-        bgColor: "bg-white",
+        bgColor: "bg-[#fdf9f4]",
         hoverBorder: "hover:border-forest/30",
-        buttonColor: "bg-white text-charcoal border border-border-grey hover:bg-off-white",
+        buttonColor: "bg-white text-charcoal border border-[#ebd3cf] hover:bg-off-white",
         target: "/login?role=studio&mode=signup"
     }
 ]
@@ -59,15 +59,15 @@ export default function RoleSelectionModal({ isOpen, onClose }: RoleSelectionMod
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            {/* Backdrop - Removed blur for performance */}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+            {/* Backdrop - Increased opacity and added blur */}
             <div
-                className="absolute inset-0 bg-charcoal/60 animate-in fade-in duration-200 cursor-pointer"
+                className="absolute inset-0 bg-charcoal/80 backdrop-blur-md animate-in fade-in duration-300 cursor-pointer"
                 onClick={onClose}
             />
 
-            {/* Modal Content - Added will-change and reduced durations */}
-            <div className="relative w-full max-w-5xl max-h-[95vh] overflow-y-auto bg-white rounded-xl shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-200 border border-border-grey overflow-x-hidden will-change-transform">
+            {/* Modal Content - Mathematically centered with h-auto and max-h-90vh */}
+            <div className="relative w-full max-w-5xl h-auto max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-border-grey overflow-x-hidden will-change-transform">
                 <div className="p-8 sm:p-12">
                     <div className="flex justify-between items-start mb-10">
                         <div className="space-y-2">
@@ -92,23 +92,25 @@ export default function RoleSelectionModal({ isOpen, onClose }: RoleSelectionMod
                             <Link
                                 key={opt.role}
                                 href={opt.target}
-                                className={`group flex flex-col items-center text-center p-8 rounded-xl border border-border-grey transition-all h-full ${opt.bgColor} ${opt.hoverBorder} hover:shadow-card hover:-translate-y-1`}
+                                className={`group flex flex-col items-center text-center p-8 rounded-xl border border-[#ebd3cf] transition-all h-full ${opt.bgColor} ${opt.hoverBorder} shadow-card hover:shadow-xl hover:-translate-y-1 justify-between`}
                             >
-                                <div className="w-16 h-16 shrink-0 rounded-2xl bg-white shadow-tight flex items-center justify-center border border-border-grey group-hover:border-forest/20 transition-all mb-6">
-                                    {opt.icon}
+                                <div className="flex flex-col items-center">
+                                    <div className="w-16 h-16 shrink-0 rounded-2xl bg-white shadow-tight flex items-center justify-center border border-border-grey group-hover:border-forest/20 transition-all mb-6">
+                                        {opt.icon}
+                                    </div>
+                                    <div className="space-y-4">
+                                        <h3 className="text-2xl font-serif font-bold text-charcoal leading-tight">
+                                            {opt.title}
+                                        </h3>
+                                        <p className="text-charcoal/70 text-[14px] font-medium leading-[1.6] md:min-h-[80px]">
+                                            {opt.description}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex-1 flex flex-col items-center space-y-4 h-full">
-                                    <h3 className="text-2xl font-serif font-bold text-charcoal leading-tight">
-                                        {opt.title}
-                                    </h3>
-                                    <p className="text-charcoal/70 text-[14px] font-medium leading-[1.6] md:min-h-[80px]">
-                                        {opt.description}
-                                    </p>
-                                    <div className="pt-4 mt-auto w-full">
-                                        <div className={`w-full py-3.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${opt.buttonColor}`}>
-                                            Get Started
-                                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                        </div>
+                                <div className="pt-8 w-full">
+                                    <div className={`w-full py-3.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${opt.buttonColor}`}>
+                                        Get Started
+                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                     </div>
                                 </div>
                             </Link>
