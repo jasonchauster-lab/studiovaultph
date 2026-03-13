@@ -306,7 +306,7 @@ function LoginContent() {
                                     onChange={(e) => setFullName(e.target.value)}
                                     required={isSignUp}
                                     placeholder="Jane Doe"
-                                    className="w-full px-5 h-14 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all placeholder:text-slate/30"
+                                    className="w-full px-5 h-14 border border-border-grey bg-white rounded-lg text-base font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all placeholder:text-slate/30"
                                 />
                             </div>
                         )}
@@ -320,7 +320,7 @@ function LoginContent() {
                                     value={birthday}
                                     onChange={(e) => setBirthday(e.target.value)}
                                     required={isSignUp}
-                                    className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all"
+                                    className="w-full px-5 h-14 border border-border-grey bg-white rounded-lg text-base font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all"
                                 />
                             </div>
                         )}
@@ -334,7 +334,7 @@ function LoginContent() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                                 placeholder="jane@studio-vault.ph"
-                                className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all placeholder:text-slate/30"
+                                className="w-full px-5 h-14 border border-border-grey bg-white rounded-lg text-base font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all placeholder:text-slate/30"
                             />
                         </div>
 
@@ -354,7 +354,7 @@ function LoginContent() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 placeholder="••••••••"
-                                className="w-full px-5 py-4 border border-border-grey bg-white rounded-lg text-[13px] font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all placeholder:text-slate/30"
+                                className="w-full px-5 h-14 border border-border-grey bg-white rounded-lg text-base font-medium text-charcoal focus:ring-1 focus:ring-burgundy outline-none transition-all placeholder:text-slate/30"
                             />
                         </div>
 

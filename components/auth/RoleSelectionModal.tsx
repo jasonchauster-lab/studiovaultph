@@ -38,7 +38,7 @@ const OPTIONS = [
         icon: <DollarSign className="w-6 h-6 text-forest" />,
         bgColor: "bg-[#fdf9f4]",
         hoverBorder: "hover:border-forest/30",
-        buttonColor: "bg-white text-charcoal border border-[#ebd3cf] hover:bg-off-white",
+        buttonColor: "bg-[#ebd3cf] text-charcoal border border-charcoal/30 hover:bg-[#d9c1bd]",
         target: "/login?role=studio&mode=signup"
     }
 ]
