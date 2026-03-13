@@ -42,6 +42,30 @@ export async function GET(request: Request) {
                     .maybeSingle()
 
                 if (!existingProfile) {
+                    // ── Check for email collision with an existing email/password account ──
+                    // This happens when Supabase auto-linking is disabled and a user who
+                    // signed up with email/password tries to sign in with Google using the
+                    // same email. Without linking, Supabase creates a new auth user with a
+                    // different UUID, causing a duplicate profile.
+                    if (user.email) {
+                        const { data: emailCollision } = await supabase
+                            .from('profiles')
+                            .select('id, role')
+                            .eq('email', user.email.toLowerCase())
+                            .maybeSingle()
+
+                        if (emailCollision) {
+                            // An account already exists with this email — block the duplicate.
+                            // Sign the OAuth user out to avoid a dangling session, then send
+                            // them to login with a clear error message.
+                            await supabase.auth.signOut()
+                            const msg = encodeURIComponent(
+                                'An account with this email already exists. Please sign in with your email and password instead.'
+                            )
+                            return buildRedirect(origin, request, `/login?error=${msg}`)
+                        }
+                    }
+
                     // ── New OAuth user: create their profile ─────────────────
                     const fullName =
                         user.user_metadata?.full_name ||
