@@ -224,7 +224,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             <div className="lg:hidden">
                 <MobileScheduleCalendar
                     currentDate={currentDate}
-                    onAddSlot={() => setIsAddModalOpen(true)}
+                    onAddSlot={(date) => { 
+                        setSingleDate(format(date, 'yyyy-MM-dd'));
+                        setAddMode('single'); 
+                        setIsAddModalOpen(true); 
+                    }}
                     onRecurringSchedule={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
                     onSlotClick={(session) => {
                         // In mobile view, session.id is the group key (date-time)
@@ -405,11 +409,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                             {view !== 'month' && (
                                 <div className={clsx(
                                     "grid border-b border-border-grey bg-off-white",
-                                    view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-8"
+                                    view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]"
                                 )}>
                                     <div className="p-4 text-[10px] font-bold tracking-[0.2em] text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 uppercase">TIME</div>
                                     {days.map((day: Date) => (
-                                        <div key={day.toString()} className={clsx("p-4 text-center border-r border-border-grey last:border-r-0 min-w-[100px] transition-colors relative", isSameDay(day, new Date()) ? "bg-buttermilk/30" : "")}>
+                                        <div key={day.toString()} className={clsx("p-4 text-center border-r border-border-grey last:border-r-0 transition-colors relative", isSameDay(day, new Date()) ? "bg-buttermilk/30" : "")}>
                                             <div className="text-[10px] text-muted-burgundy uppercase mb-2 font-black tracking-[0.2em]">{format(day, 'EEE')}</div>
                                             <div className={clsx("text-2xl font-serif font-black", isSameDay(day, new Date()) ? "text-burgundy" : "text-burgundy")}>{format(day, 'd')}</div>
                                             {isSameDay(day, new Date()) && (
@@ -431,7 +435,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                     top: `${currentTimePosition}%`,
                                                     left: view === 'day'
                                                         ? '100px'
-                                                        : `calc(100px + ${(days.findIndex(d => isSameDay(d, new Date()))) * (100 / 8)}%)`,
+                                                        : `calc(100px + ${days.findIndex(d => isSameDay(d, new Date()))} * (100% - 100px) / 7)`,
                                                     width: view === 'day'
                                                         ? 'calc(100% - 100px)'
                                                         : `calc((100% - 100px) / 7)`
@@ -445,7 +449,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                         {hours.map(hour => (
                                             <div key={hour} className={clsx(
                                                 "grid min-h-[80px]",
-                                                view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-8"
+                                                view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]"
                                             )}>
                                                 <div className="p-4 text-[10px] text-muted-burgundy font-bold border-r border-border-grey text-center sticky left-0 bg-white z-20 uppercase tracking-tighter">
                                                     {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
@@ -610,7 +614,20 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                     </div>
                                                     <div className="space-y-1">
                                                         {uniqueDisplaySlots.slice(0, 3).map((s: any) => (
-                                                            <div key={s.key} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter flex items-center justify-between gap-1">
+                                                            <div 
+                                                                key={s.key} 
+                                                                className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter flex items-center justify-between gap-1 hover:bg-burgundy/10 p-0.5 rounded transition-colors cursor-pointer"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    const matchingSlots = daySlotsData.filter(slot => 
+                                                                        slot.start_time.slice(0, 5) === s.start_time.slice(0, 5) && 
+                                                                        (slot.equipment ? Object.keys(slot.equipment)[0] : 'Open') === s.displayType
+                                                                    );
+                                                                    setBucketSlots(matchingSlots);
+                                                                    setBucketTime({ date: day, hour: parseInt(s.start_time.split(':')[0], 10) });
+                                                                    setIsBucketModalOpen(true);
+                                                                }}
+                                                            >
                                                                 <span className="truncate">• {s.start_time.slice(0, 5)} {s.displayType}</span>
                                                                 <span className="shrink-0 font-bold text-[#43302E]/60 uppercase tracking-tighter bg-[#43302E]/5 px-1 rounded">
                                                                     {s.booked}/{s.total}

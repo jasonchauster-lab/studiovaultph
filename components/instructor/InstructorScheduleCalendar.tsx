@@ -509,10 +509,10 @@ export default function InstructorScheduleCalendar({
                 <div className="overflow-x-auto">
                     <div className={clsx("min-w-[800px] xl:min-w-full", view === 'month' && "min-w-0")}>
                         {view !== 'month' ? (
-                            <div className={clsx("grid border-b border-border-grey bg-off-white", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-8")}>
+                            <div className={clsx("grid border-b border-border-grey bg-off-white", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>
                                 <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-[100px] text-center uppercase tracking-[0.3em] flex items-center justify-center"></div>
                                 {days.map(day => (
-                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 min-w-[120px] transition-all relative", isSameDay(day, new Date()) ? "bg-buttermilk/20" : "")}>
+                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 transition-all relative", isSameDay(day, new Date()) ? "bg-buttermilk/20" : "")}>
                                         <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
                                         <div className={clsx("text-3xl font-serif font-black tracking-tighter", isSameDay(day, new Date()) ? "text-burgundy" : "text-charcoal")}>{format(day, 'd')}</div>
                                         {isSameDay(day, new Date()) && (
@@ -545,8 +545,8 @@ export default function InstructorScheduleCalendar({
                                                 className="absolute z-30 pointer-events-none flex items-center transition-all duration-1000"
                                                 style={{
                                                     top: `${currentTimePosition}%`,
-                                                    left: view === 'day' ? '100px' : `${(todayIdx + 1) * 12.5}%`,
-                                                    width: view === 'day' ? 'calc(100% - 100px)' : '12.5%'
+                                                    left: view === 'day' ? '100px' : `calc(100px + ${todayIdx} * (100% - 100px) / 7)`,
+                                                    width: view === 'day' ? 'calc(100% - 100px)' : 'calc((100% - 100px) / 7)'
                                                 }}
                                             >
                                                 <div className="w-[12px] h-[12px] bg-burgundy rounded-full -ml-[6px] ring-2 ring-white shadow-sm" />
@@ -556,7 +556,7 @@ export default function InstructorScheduleCalendar({
                                     })()}
 
                                     {hours.map(hour => (
-                                        <div key={hour} className={clsx("grid", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-8")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
+                                        <div key={hour} className={clsx("grid", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
                                             <div className="p-4 text-[10px] text-slate font-black border-r border-border-grey text-center sticky left-0 bg-white z-20 w-[100px] flex items-center justify-center tracking-[0.2em]">
                                                 {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                             </div>
@@ -818,7 +818,8 @@ export default function InstructorScheduleCalendar({
                                             total: number,
                                             booked: number,
                                             equipment: string[],
-                                            processedSlotIds: Set<string>
+                                            processedSlotIds: Set<string>,
+                                            ref?: any
                                         }> = {};
                                         
                                         const getShortEquipment = (eqs: string[] | undefined) => (eqs && eqs.length > 0) ? eqs[0] : 'Session';
@@ -829,7 +830,14 @@ export default function InstructorScheduleCalendar({
                                             const key = time;
 
                                             if (!groups[key]) {
-                                                groups[key] = { time, total: 1, booked: 0, equipment: ['Session'], processedSlotIds: new Set() };
+                                                groups[key] = { 
+                                                    time, 
+                                                    total: 1, 
+                                                    booked: 0, 
+                                                    equipment: ['Session'], 
+                                                    processedSlotIds: new Set(),
+                                                    ref: a // Store reference to availability
+                                                };
                                             }
                                             
                                             // Ensure total is capped at 1 for instructor-only view
@@ -852,7 +860,8 @@ export default function InstructorScheduleCalendar({
                                                     total: 1,
                                                     booked: bQty,
                                                     equipment: ['Session'],
-                                                    processedSlotIds: new Set()
+                                                    processedSlotIds: new Set(),
+                                                    ref: b // Store reference to booking
                                                 };
                                             }
                                         });
@@ -871,6 +880,7 @@ export default function InstructorScheduleCalendar({
                                                 onClick={() => {
                                                     setSingleDate(dayStr);
                                                     setView('day');
+                                                    router.push(`?date=${dayStr}`);
                                                 }}
                                             >
                                                 <div className="flex justify-between items-start mb-4">
@@ -883,7 +893,18 @@ export default function InstructorScheduleCalendar({
                                                 </div>
                                                 <div className="space-y-1">
                                                     {sortedSessions.slice(0, 4).map((s) => (
-                                                        <div key={`${s.time}`} className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter flex items-center justify-between">
+                                                        <div 
+                                                            key={`${s.time}`} 
+                                                            className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter flex items-center justify-between hover:bg-forest/10 p-0.5 rounded transition-colors cursor-pointer"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if (s.booked > 0 && s.ref?.client) {
+                                                                    setSelectedBooking(s.ref);
+                                                                } else if (s.ref) {
+                                                                    openEditModal(s.ref);
+                                                                }
+                                                            }}
+                                                        >
                                                             <span className="truncate mr-2">• {s.time} SESSION</span>
                                                             <span className="shrink-0 font-bold text-[#43302E]/60 uppercase tracking-tighter bg-[#43302E]/5 px-1 rounded">
                                                                 {Math.min(s.booked, 1)}/1

@@ -293,11 +293,9 @@ export default function InstructorDashboardClient({
                     <div className="lg:hidden">
                         <MobileScheduleCalendar
                             currentDate={new Date(currentDateStr || getManilaTodayStr())}
-                            onAddSlot={() => {
-                                setSingleDate(getManilaTodayStr());
-                                setSingleTime('09:00');
-                                setSingleEndTime('10:00');
-                                setLocations([]);
+                            onAddSlot={(date) => {
+                                setSingleDate(format(date, 'yyyy-MM-dd'));
+                                setAddMode('single');
                                 setIsAddModalOpen(true);
                             }}
                             onRecurringSchedule={() => {
