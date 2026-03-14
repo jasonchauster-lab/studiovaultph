@@ -2,6 +2,52 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { normalizeTimeTo24h } from '@/lib/timezone'
+import { getPublicReviews } from '@/app/(dashboard)/reviews/actions'
+
+export async function getInstructorProfile(instructorId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const [profileRes, certsRes] = await Promise.all([
+        supabase
+            .from('profiles')
+            .select('id, full_name, avatar_url, bio, instagram_handle, gallery_images, rates, teaching_equipment')
+            .eq('id', instructorId)
+            .maybeSingle(),
+        supabase
+            .from('certifications')
+            .select('certification_name, certification_body, verified')
+            .eq('instructor_id', instructorId)
+            .eq('verified', true)
+    ])
+
+    const { reviews, averageRating, totalCount } = await getPublicReviews(instructorId, user?.id)
+
+    return {
+        instructor: profileRes.data,
+        certifications: certsRes.data || [],
+        reviews,
+        averageRating,
+        totalCount
+    }
+}
+
+export async function getStudioProfile(studioId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const { data: studio } = await supabase
+        .from('studios')
+        .select('id, name, bio, logo_url, location, address, verified, owner_id, space_photos_urls')
+        .eq('id', studioId)
+        .maybeSingle()
+
+    if (!studio) return { studio: null, reviews: [], averageRating: 0, totalCount: 0 }
+
+    const { reviews, averageRating, totalCount } = await getPublicReviews(studio.owner_id, user?.id)
+
+    return { studio, reviews, averageRating, totalCount }
+}
 
 export async function findMatchingStudios(
     dateStr: string, // YYYY-MM-DD
