@@ -419,7 +419,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                 </div>
                             )}
 
-                            <div className="divide-y divide-border-grey relative">
+                            <div className="divide-y divide-border-grey relative overflow-hidden">
                                 {view !== 'month' && (
                                     <>
                                         {/* Current Time Indicator — Improved to show only on today */}
@@ -516,7 +516,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                             "p-2 border-l-4 border-solid transition-all group/slot relative overflow-hidden cursor-pointer rounded-lg h-full flex flex-col justify-between",
                                                                             isPastCell ? "bg-off-white border-border-grey" :
                                                                                 hasPending ? "bg-orange-50/50 border-orange-200" :
-                                                                                    isBooked ? "bg-buttermilk border-burgundy/20" : "bg-[#43302E] border-[#2C1F1D] shadow-tight"
+                                                                                    isBooked ? "bg-[#43302E] border-[#2C1F1D] shadow-tight" : "bg-[#FDFBF7] border-[#EADED7]"
                                                                         )}
                                                                         onClick={() => {
                                                                             setBucketSlots(cellSlots);
@@ -526,22 +526,22 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     >
                                                                         <div>
                                                                             <div className="flex justify-between items-start mb-1">
-                                                                                <h4 className={clsx("text-[9.5px] font-black uppercase tracking-tight truncate max-w-[85%]", isBooked || hasPending || isPastCell ? "text-[#43302E]" : "text-white")}>
+                                                                                <h4 className={clsx("text-[9.5px] font-semibold uppercase tracking-tight truncate max-w-[85%]", isPastCell || (!isBooked && !hasPending) ? "text-[#43302E]" : "text-[#F5F2E9]")}>
                                                                                     {displayTitle}
                                                                                 </h4>
-                                                                                <Edit2 className={clsx("w-2.5 h-2.5 opacity-0 group-hover/slot:opacity-100 transition-opacity", isBooked || hasPending || isPastCell ? "text-[#43302E]/40" : "text-white/40")} />
+                                                                                <Edit2 className={clsx("w-2.5 h-2.5 opacity-0 group-hover/slot:opacity-100 transition-opacity", isPastCell || (!isBooked && !hasPending) ? "text-[#43302E]/40" : "text-[#F5F2E9]/40")} />
                                                                             </div>
                                                                             <div className="flex flex-wrap gap-1">
                                                                                 {Object.entries(equipmentCounts).map(([eq, counts]) => (
-                                                                                    <span key={eq} className={clsx("text-[7.5px] font-bold uppercase tracking-tighter flex items-center gap-1 px-1.5 py-0.5 rounded border", isBooked || hasPending || isPastCell ? "text-[#43302E]/80 border-border-grey bg-white/50" : "text-white/90 border-white/20 bg-white/10")}>
+                                                                                    <span key={eq} className={clsx("text-[7.5px] font-bold uppercase tracking-tighter flex items-center gap-1 px-1.5 py-0.5 rounded border", isPastCell || (!isBooked && !hasPending) ? "text-[#43302E]/80 border-border-grey bg-white/50" : "text-white/90 border-white/20 bg-white/10")}>
                                                                                         <Box className="w-2 h-2 opacity-40 shrink-0" />
                                                                                         <span>{counts.booked}/{counts.total} {eq.split(' ')[0]}</span>
                                                                                     </span>
                                                                                 ))}
                                                                             </div>
                                                                         </div>
-                                                                        <div className={clsx("mt-1 pt-1 border-t", isBooked || hasPending || isPastCell ? "border-[#43302E]/5" : "border-white/10")}>
-                                                                            <p className={clsx("text-[8px] font-black uppercase tracking-tight truncate flex items-center gap-1", isBooked || hasPending || isPastCell ? "text-[#43302E]/70" : "text-white/80")}>
+                                                                        <div className={clsx("mt-1 pt-1 border-t", isPastCell || (!isBooked && !hasPending) ? "border-[#43302E]/5" : "border-white/10")}>
+                                                                            <p className={clsx("text-[8px] font-black uppercase tracking-tight truncate flex items-center gap-1", isPastCell || (!isBooked && !hasPending) ? "text-[#43302E]/70" : "text-[#F5F2E9]/80")}>
                                                                                 <User className="w-2 h-2 opacity-50" />
                                                                                 {instructors.size > 0 ? Array.from(instructors).join(', ') : 'Unassigned'}
                                                                             </p>

@@ -114,7 +114,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
     return (
         <div className="space-y-12 sm:space-y-20">
-            <div className="sm:earth-card sm:p-4 w-full sm:inline-block bg-transparent sm:bg-white overflow-visible">
+            <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible">
                 <BookingFilter onFilterChange={setFilters} />
             </div>
 
@@ -129,7 +129,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 </div>
 
                 {activeBookings.length === 0 ? (
-                    <div className="py-8 sm:py-24 text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0">
+                    <div className="min-h-[120px] flex items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0">
                         <p className="text-[10px] font-black text-slate uppercase tracking-[0.4em]">No active sessions found.</p>
                     </div>
                 ) : (
@@ -154,12 +154,20 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
                                         {/* Consolidated Session Info */}
                                         <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5">
-                                            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-black uppercase text-charcoal/60 tracking-widest">
+                                            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-black uppercase text-charcoal/60 tracking-widest flex-wrap">
                                                 <span>{getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
                                                 <span className="text-charcoal/20">•</span>
-                                                <Link href={`/studios/${studio?.id}`} className="text-sm font-bold text-charcoal/80 truncate hover:text-charcoal transition-colors">
+                                                <Link href={`/studios/${studio?.id}`} className="text-sm font-bold text-charcoal/90 truncate hover:text-charcoal transition-colors">
                                                     {studio?.name || "Studio"}
                                                 </Link>
+                                                {studio?.location && (
+                                                    <>
+                                                        <span className="text-charcoal/20 hidden sm:inline">•</span>
+                                                        <span className="text-[9px] sm:text-[10px] font-black text-slate uppercase tracking-wider truncate hidden sm:inline">
+                                                            {studio.location}
+                                                        </span>
+                                                    </>
+                                                )}
                                             </div>
                                             
                                             {client && (
@@ -202,10 +210,10 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                     </div>
 
                                     {/* Mobile Equipment Tag (if hidden above) & Location */}
-                                    <div className="mt-3 pt-3 border-t border-border-grey flex items-center justify-between gap-2.5">
+                                    <div className="mt-3 pt-3 border-t border-border-grey flex items-center justify-between gap-2.5 sm:hidden">
                                         <div className="flex items-center gap-1.5 min-w-0">
                                             <MapPin className="w-3 h-3 text-forest shrink-0" />
-                                            <span className="text-[9px] sm:text-[10px] font-black text-slate uppercase tracking-wider truncate">{studio?.location || "N/A"}</span>
+                                            <span className="text-[9px] font-black text-slate uppercase tracking-wider truncate">{studio?.location || "N/A"}</span>
                                             
                                             {booking.status === 'approved' && (
                                                 <a
@@ -265,12 +273,20 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
                                         {/* Consolidated Session Info */}
                                         <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5">
-                                            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-black uppercase text-charcoal/60 tracking-widest">
+                                            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-black uppercase text-charcoal/60 tracking-widest flex-wrap">
                                                 <span>{getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
                                                 <span className="text-charcoal/20">•</span>
-                                                <Link href={`/studios/${studio?.id}`} className="text-sm font-bold text-charcoal/80 truncate hover:text-charcoal transition-colors">
+                                                <Link href={`/studios/${studio?.id}`} className="text-sm font-bold text-charcoal/90 truncate hover:text-charcoal transition-colors">
                                                     {studio?.name || "Studio"}
                                                 </Link>
+                                                {studio?.location && (
+                                                    <>
+                                                        <span className="text-charcoal/20 hidden sm:inline">•</span>
+                                                        <span className="text-[9px] sm:text-[10px] font-black text-charcoal/60 uppercase tracking-wider truncate hidden sm:inline">
+                                                            {studio.location}
+                                                        </span>
+                                                    </>
+                                                )}
                                             </div>
                                             
                                             {client && (
@@ -316,7 +332,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                     </div>
 
                                     {/* Mobile Equipment Tag (if hidden above) & Location */}
-                                    <div className="mt-3 pt-3 border-t border-white/60 flex items-center justify-between gap-2.5">
+                                    <div className="mt-3 pt-3 border-t border-white/60 flex items-center justify-between gap-2.5 sm:hidden">
                                         <div className="flex items-center gap-1.5 min-w-0">
                                             <MapPin className="w-3 h-3 text-charcoal/40 shrink-0" />
                                             <span className="text-[9px] sm:text-[10px] font-black text-charcoal/50 uppercase tracking-wider truncate">{studio?.location || "N/A"}</span>

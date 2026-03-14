@@ -531,7 +531,7 @@ export default function InstructorScheduleCalendar({
                             </div>
                         )}
 
-                        <div className="divide-y divide-border-grey relative">
+                        <div className="divide-y divide-border-grey relative overflow-hidden">
                             {view !== 'month' && (
                                 <>
                                     {/* Current Time Indicator */}
@@ -683,17 +683,17 @@ export default function InstructorScheduleCalendar({
                                                                 return (                                                                    <div
                                                                         key={slot.id}
                                                                         className={clsx(
-                                                                            "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-2 py-1 group/slot flex flex-col justify-center session-block-earth",
+                                                                            "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-2 py-1 group/slot flex flex-col justify-center shadow-tight",
                                                                             isPastCell
                                                                                 ? "bg-off-white border-border-grey text-slate"
-                                                                                : "bg-[#43302E] border-[#2C1F1D] text-white",
+                                                                                : "bg-[#FDFBF7] border-[#EADED7] text-charcoal",
                                                                             duration < 45 && "py-1 px-2 justify-center"
                                                                         )}
                                                                         style={{
                                                                             top: `${topOffset}px`,
                                                                             height: `${heightPx}px`,
-                                                                            width: `${widthPercent - 2}%`,
-                                                                            left: `${leftPercent + 1}%`
+                                                                            width: `calc(${widthPercent}% - 8px)`,
+                                                                            left: `calc(${leftPercent}% + 4px)`
                                                                         }}
                                                                         onClick={(e) => {
                                                                             e.stopPropagation()
@@ -707,14 +707,14 @@ export default function InstructorScheduleCalendar({
                                                                             setIsEditModalOpen(true);
                                                                         }}
                                                                     >                                                                        <div className={clsx("flex items-center gap-1.5", duration < 45 ? "flex-row" : "flex-col items-start")}>
-                                                                            <div className={clsx("flex items-center gap-1 font-bold text-[10px] uppercase tracking-tighter shrink-0", isPastCell ? "text-charcoal/60" : "text-white/80")}>
-                                                                                <Clock className={clsx(duration < 45 ? "w-2.5 h-2.5" : "w-3 h-3", isPastCell ? "text-burgundy/30" : "text-buttermilk/40")} />
+                                                                            <div className={clsx("flex items-center gap-1 font-bold text-[10px] uppercase tracking-tighter shrink-0", isPastCell ? "text-charcoal/60" : "text-charcoal")}>
+                                                                                <Clock className={clsx(duration < 45 ? "w-2.5 h-2.5" : "w-3 h-3", isPastCell ? "text-burgundy/30" : "text-burgundy/60")} />
                                                                                 <span>{slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}</span>
                                                                             </div>
                                                                             <div className="flex flex-wrap items-center gap-1">
                                                                                 {locations.map((loc, idx) => (
-                                                                                    <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border", isPastCell ? "text-slate border-border-grey bg-white/50" : "text-white/90 border-white/20 bg-white/10")}>
-                                                                                        <MapPin className={clsx("w-2.5 h-2.5", isPastCell ? "text-slate/40" : "text-white/40")} />
+                                                                                    <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border", isPastCell ? "text-slate border-border-grey bg-white/50" : "text-burgundy border-burgundy/20 bg-buttermilk/10")}>
+                                                                                        <MapPin className={clsx("w-2.5 h-2.5", isPastCell ? "text-slate/40" : "text-burgundy/40")} />
                                                                                         <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
                                                                                     </div>
                                                                                 ))}
@@ -733,14 +733,14 @@ export default function InstructorScheduleCalendar({
                                                                     <div
                                                                         key={booking.id}
                                                                         className={clsx(
-                                                                            "absolute rounded-lg text-[10px] z-20 p-2 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border border-burgundy/10 bg-white",
+                                                                            "absolute rounded-lg text-[10px] z-20 p-2 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border-l-4 bg-[#43302E] border-[#2C1F1D]",
                                                                             duration < 45 && "flex-row items-center justify-between py-2 px-3"
                                                                         )}
                                                                         style={{
                                                                             top: `${topOffset}px`,
                                                                             height: `${heightPx}px`,
-                                                                            width: `${widthPercent - 2}%`,
-                                                                            left: `${leftPercent + 1}%`
+                                                                            width: `calc(${widthPercent}% - 8px)`,
+                                                                            left: `calc(${leftPercent}% + 4px)`
                                                                         }}
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
@@ -754,24 +754,24 @@ export default function InstructorScheduleCalendar({
                                                                     >
                                                                         <div className={clsx("flex justify-between items-start w-full", duration < 45 && "items-center")}>
                                                                             <div className="flex flex-col min-w-0 flex-1">
-                                                                                <span className="text-[8.5px] font-black text-burgundy uppercase tracking-tight truncate">
+                                                                                <span className="text-[8.5px] font-semibold text-[#F5F2E9] uppercase tracking-tight truncate">
                                                                                     {booking.client?.full_name || 'Session'}
                                                                                 </span>
                                                                                 {duration >= 45 && (
                                                                                     <>
-                                                                                        <span className="text-[7px] font-black text-burgundy/60 uppercase tracking-tighter mt-0.5 truncate">
+                                                                                        <span className="text-[7px] font-black text-white/60 uppercase tracking-tighter mt-0.5 truncate">
                                                                                             {studioName}
                                                                                         </span>
                                                                                         <div className="flex flex-wrap items-center gap-1 mt-1.5">
                                                                                             {slotData.studios?.location && (
-                                                                                                <div className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-slate px-1.5 py-0.5 rounded border border-border-grey bg-white/50">
-                                                                                                    <MapPin className="w-2.5 h-2.5 shrink-0 text-slate/40" />
+                                                                                                <div className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-white/90 px-1.5 py-0.5 rounded border border-white/20 bg-white/10">
+                                                                                                    <MapPin className="w-2.5 h-2.5 shrink-0 text-white/40" />
                                                                                                     <span className="truncate max-w-[60px]">{slotData.studios.location.split(' - ')[0] || 'Studio'}</span>
                                                                                                 </div>
                                                                                             )}
                                                                                             {Array.isArray(slotData.equipment) && slotData.equipment.map((eq: string, idx: number) => (
-                                                                                                <div key={eq + idx} className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-burgundy/60 px-1.5 py-0.5 rounded border border-burgundy/10 bg-buttermilk/10">
-                                                                                                    <Box className="w-2.5 h-2.5 shrink-0" />
+                                                                                                <div key={eq + idx} className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-white/90 px-1.5 py-0.5 rounded border border-white/20 bg-white/10">
+                                                                                                    <Box className="w-2.5 h-2.5 shrink-0 text-white/40" />
                                                                                                     <span className="truncate max-w-[60px]">{eq}</span>
                                                                                                 </div>
                                                                                             ))}

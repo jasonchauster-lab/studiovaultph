@@ -141,12 +141,12 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                             <div key={booking.id} className="p-4 border border-[#F5F2E9] bg-cream-50/50 rounded-xl hover:border-rose-gold/30 hover:bg-white transition-all shadow-sm group">
                                 {/* Date/time — consolidated on mobile, inline on sm+ */}
                                 <div className="flex items-center justify-between mb-2 sm:hidden">
-                                    <div className="bg-gray-100/80 px-3 py-1.5 rounded-lg border border-gray-200 w-full flex items-center justify-center gap-2">
+                                    <div className="bg-[#FDFBF7] px-3 py-1.5 rounded-xl border border-[#EADED7] w-full flex items-center justify-center gap-2 shadow-sm">
                                         <p className="text-[11px] font-black text-[#513229]">
                                             {start.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                                         </p>
-                                        <span className="text-gray-400">•</span>
-                                        <p className="text-[11px] text-gray-600 font-bold flex items-center gap-1">
+                                        <span className="text-[#D4C8C0]">•</span>
+                                        <p className="text-[11px] text-[#513229]/80 font-bold flex items-center gap-1">
                                             <Clock className="w-2.5 h-2.5" />
                                             {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                         </p>
@@ -165,34 +165,33 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
 
                                     {/* Instructor + Student + Status row */}
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                                            <Link href={`/instructors/${instructor?.id}`} className="text-sm font-bold text-[#513229] truncate hover:text-rose-gold transition-colors">
+                                        <div className="flex flex-col items-start gap-1">
+                                            <Link href={`/instructors/${instructor?.id}`} className="text-sm font-bold text-[#513229] truncate hover:text-rose-gold transition-colors w-full">
                                                 {instructor?.full_name || "Instructor"}
                                             </Link>
                                             
                                             <div className="flex items-center gap-2">
-                                                <span className="text-gray-300 text-xs">•</span>
                                                 <button
                                                     onClick={() => setSelectedClient(client)}
                                                     className="flex items-center gap-1.5 group/student transition-all"
                                                 >
-                                                    <div className="w-5 h-5 rounded-full overflow-hidden border border-[#F5F2E9] bg-white shadow-sm shrink-0 group-hover/student:border-rose-gold transition-colors">
+                                                    <div className="w-4 h-4 rounded-full overflow-hidden border border-[#F5F2E9] bg-white shadow-sm shrink-0 group-hover/student:border-rose-gold transition-colors">
                                                         <img
                                                             src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=F5F2EB&color=2C3230`}
                                                             alt={client.full_name || "Client"}
                                                             className="w-full h-full object-cover"
                                                         />
                                                     </div>
-                                                    <span className="text-[11px] font-bold text-gray-600 group-hover/student:text-rose-gold transition-colors">{client.full_name}</span>
+                                                    <span className="text-[11px] font-bold text-gray-500 group-hover/student:text-rose-gold transition-colors">{client.full_name}</span>
                                                 </button>
-                                            </div>
 
-                                            {client.medical_conditions && (
-                                                <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-[8px] font-bold uppercase rounded border border-red-200 animate-pulse flex items-center gap-1">
-                                                    <AlertCircle className="w-2 h-2" />
-                                                    Medical
-                                                </span>
-                                            )}
+                                                {client.medical_conditions && (
+                                                    <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-[8px] font-bold uppercase rounded border border-red-200 animate-pulse flex items-center gap-1 translate-y-[0.5px]">
+                                                        <AlertCircle className="w-2 h-2" />
+                                                        Medical
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
 
                                         {/* Status badge */}

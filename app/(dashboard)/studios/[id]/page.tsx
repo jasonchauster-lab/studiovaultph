@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { MapPin, Clock, Users, Star, ShowerHead, Droplets, Car, Wifi, Square, Lock, Shirt, CheckCircle2, Image as ImageIcon } from 'lucide-react'
+import { MapPin, Clock, Users, Star, ShowerHead, Droplets, Car, Wifi, Square, Lock, Shirt, CheckCircle2, Image as ImageIcon, ExternalLink } from 'lucide-react'
 import BookingSection from '@/components/customer/BookingSection'
 import StarRating from '@/components/reviews/StarRating'
 import ReviewList from '@/components/reviews/ReviewList'
@@ -174,6 +174,15 @@ export default async function StudioDetailsPage(props: {
                                 <MapPin className="w-4 h-4 text-sage" />
                                 {studio.location}
                             </div>
+                            <a
+                                href={`https://maps.google.com/?q=${encodeURIComponent((studio.address || studio.location) + ', Philippines')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 text-xs font-bold text-sage hover:text-sage/80 border border-sage/30 hover:border-sage/60 px-3 py-1 rounded-full transition-all duration-200 bg-sage/5 hover:bg-sage/10"
+                            >
+                                <ExternalLink className="w-3 h-3" />
+                                Maps
+                            </a>
                             <div className="flex items-center gap-1.5">
                                 <StarRating rating={averageRating} count={totalCount} size="sm" />
                             </div>
