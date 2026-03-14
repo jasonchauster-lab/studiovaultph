@@ -386,10 +386,12 @@ export default function InstructorScheduleCalendar({
                                 items.push({
                                     id: b.id,
                                     title: b.client?.full_name || 'Booking',
+                                    displayTitle: b.client?.full_name || 'Booking',
                                     date: b.slots.date,
                                     start_time: b.slots.start_time,
                                     end_time: b.slots.end_time,
-                                    type: 'booking',
+                                    type: b.type || 'Session',
+                                    is_booked: true,
                                     status: b.status
                                 });
                             }

@@ -266,13 +266,13 @@ export default function MobileScheduleCalendar({
                                 >
                                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                                         <div className="space-y-4 w-full">
-                                            <div className={clsx("flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] w-full", session.is_booked ? "text-white/80" : "text-burgundy")}>
+                                            <div className={clsx("flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] w-full", session.is_booked ? "text-white" : "text-burgundy")}>
                                                 <div className={clsx("px-3 py-1.5 rounded-lg border flex items-center gap-3 w-full sm:w-auto", session.is_booked ? "bg-white/20 border-white/40" : "bg-buttermilk/10 border-buttermilk/40")}>
                                                     <Clock className="w-3.5 h-3.5 shrink-0" />
                                                     <span className="truncate">{formatTo12Hour(session.start_time)} — {formatTo12Hour(session.end_time)}</span>
                                                 </div>
                                             </div>
-                                            <h3 className={clsx("text-xl font-serif font-bold tracking-tight pt-1", session.is_booked ? "text-[#F5F2E9]" : "text-burgundy")}>
+                                            <h3 className={clsx("text-xl font-serif font-black tracking-tight pt-1", session.is_booked ? "text-[#F5F2E9]" : "text-burgundy")}>
                                                 {session.displayTitle || (session.is_booked ? session.type : 'Availability')}
                                             </h3>
                                         </div>
@@ -303,11 +303,11 @@ export default function MobileScheduleCalendar({
                                                     className={clsx(
                                                         "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all",
                                                         session.is_booked 
-                                                            ? "text-white/90 bg-white/20 border-white/40 hover:bg-white hover:text-[#43302E]"
+                                                            ? "text-white bg-white/20 border-white/40 hover:bg-white hover:text-[#43302E]"
                                                             : "text-muted-burgundy bg-white/50 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
                                                     )}
                                                 >
-                                                    <MapPin className={clsx("w-3.5 h-3.5", session.is_booked ? "text-white/40" : "text-burgundy/40")} />
+                                                    <MapPin className={clsx("w-3.5 h-3.5", session.is_booked ? "text-white" : "text-burgundy/40")} />
                                                     <span className="font-bold uppercase tracking-wider text-[9px]">{loc}</span>
                                                 </a>
                                             ))
@@ -320,11 +320,11 @@ export default function MobileScheduleCalendar({
                                                 className={clsx(
                                                     "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all",
                                                     session.is_booked 
-                                                        ? "text-white/90 bg-white/20 border-white/40 hover:bg-white hover:text-[#43302E]" 
+                                                        ? "text-white bg-white/20 border-white/40 hover:bg-white hover:text-[#43302E]" 
                                                         : "text-muted-burgundy bg-white/50 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
                                                 )}
                                             >
-                                                <MapPin className={clsx("w-3.5 h-3.5", session.is_booked ? "text-white/40" : "text-burgundy/40")} />
+                                                <MapPin className={clsx("w-3.5 h-3.5", session.is_booked ? "text-white" : "text-burgundy/40")} />
                                                 <span className="font-bold uppercase tracking-wider text-[9px]">{session.location?.split(' - ')[0] || session.location || 'Studio'}</span>
                                             </a>
                                         )}

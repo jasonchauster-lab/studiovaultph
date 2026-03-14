@@ -19,8 +19,8 @@ export default async function InstructorSchedulePage(props: {
     const dateParam = typeof searchParams.date === 'string' ? searchParams.date : getManilaTodayStr()
     const currentDate = new Date(dateParam)
 
-    // Fetch existing availability
-    const [availabilityRes, profileRes] = await Promise.all([
+    // Fetch existing availability, profile, and bookings
+    const [availabilityRes, profileRes, bookingsRes] = await Promise.all([
         supabase
             .from('instructor_availability')
             .select('*')
@@ -31,11 +31,22 @@ export default async function InstructorSchedulePage(props: {
             .from('profiles')
             .select('id, teaching_equipment, rates')
             .eq('id', user.id)
-            .single()
+            .single(),
+        supabase
+            .from('bookings')
+            .select(`
+                *,
+                slots!inner (date, start_time, end_time, studios (id, name, location, address, logo_url, google_maps_url)),
+                client:profiles!client_id (id, full_name, avatar_url, email, date_of_birth, medical_conditions, other_medical_condition, bio)
+            `)
+            .eq('instructor_id', user.id)
+            .in('status', ['approved', 'completed', 'pending', 'cancelled_refunded', 'cancelled_charged', 'rejected'])
+            .order('created_at', { ascending: false })
     ])
 
     const availability = availabilityRes.data
     const profile = profileRes.data
+    const bookings = bookingsRes.data || []
 
     return (
         <div className="min-h-screen p-8 lg:p-12">
@@ -55,7 +66,7 @@ export default async function InstructorSchedulePage(props: {
                 <div className="overflow-hidden rounded-[2.5rem] shadow-cloud border border-white/60">
                     <InstructorScheduleCalendar
                         availability={availability || []}
-                        bookings={[]} // Bookings will be fetched/passed if needed, but for now we need the ID for chat
+                        bookings={bookings}
                         currentUserId={user.id}
                         currentDate={currentDate}
                         instructorProfile={profile}

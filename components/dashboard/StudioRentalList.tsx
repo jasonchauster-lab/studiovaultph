@@ -138,87 +138,121 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
 
                         return (
                             <div key={booking.id} className="earth-card p-4 sm:p-6 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0">
-                                <div className="flex items-center gap-3 sm:gap-4">
-                                    {/* Date Block */}
-                                    <div className="flex flex-col items-center justify-center bg-forest/5 rounded-lg w-12 sm:w-16 shrink-0 py-1.5 sm:py-2 border border-forest/10">
-                                        <span className="text-[7px] sm:text-[9px] font-black text-forest uppercase tracking-widest leading-none mb-0.5 sm:mb-1">
-                                            {start.toLocaleDateString(undefined, { month: 'short' })}
-                                        </span>
-                                        <span className="text-sm sm:text-lg font-serif text-charcoal leading-none">
-                                            {start.toLocaleDateString(undefined, { day: 'numeric' })}
-                                        </span>
-                                    </div>
-
-                                    {/* Consolidated Session Info */}
-                                    <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5">
-                                        <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-black uppercase text-charcoal/60 tracking-widest flex-wrap">
-                                            <span>{start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
-                                            <span className="text-charcoal/20">•</span>
-                                            <button onClick={() => handleInstructorClick(instructor)} className="text-sm font-bold text-charcoal/90 truncate hover:text-charcoal transition-colors hover:underline underline-offset-2">
-                                                {instructor?.full_name || "Instructor"}
-                                            </button>
-                                            
-                                            <span className={clsx(
-                                                'px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold uppercase rounded-md tracking-widest border inline-block whitespace-nowrap',
-                                                booking.status === 'completed'
-                                                    ? (booking.funds_unlocked
-                                                        ? 'border-[#b8d49a] text-[#2D4F1E] bg-[#D4E4BC]'
-                                                        : 'bg-amber-100/50 text-amber-700 border-amber-200')
-                                                    : booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
-                                                        'bg-red-100/50 text-red-700 border-red-200'
-                                            )}>
-                                                {['completed', 'approved'].includes(booking.status)
-                                                    ? (booking.status === 'completed'
-                                                        ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)')
-                                                        : 'Approved')
-                                                    : 'Cancelled'}
+                                <div className="flex flex-col gap-4">
+                                    {/* Row 1: Date & Time Header (Mobile) / Desktop Sidebar */}
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                        {/* Mobile Header: JAN 12 • 9:00 AM */}
+                                        <div className="block sm:hidden w-full bg-forest/5 px-3 py-2 rounded-lg border border-forest/10">
+                                            <span className="text-[10px] font-black text-forest uppercase tracking-widest leading-none">
+                                                {start.toLocaleDateString(undefined, { month: 'short' })} {start.toLocaleDateString(undefined, { day: 'numeric' })}
+                                                <span className="mx-2 text-forest/30">•</span>
+                                                {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                             </span>
                                         </div>
-                                        
-                                        {client && (
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                                <button onClick={() => setSelectedClient(client)} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity min-w-0">
-                                                    <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-border-grey shrink-0 object-cover" />
-                                                    <span className="text-sm font-bold text-charcoal/90 truncate">{client.full_name}</span>
-                                                </button>
-                                                
-                                                <span className="text-charcoal/20 hidden sm:inline">•</span>
 
-                                                <span className="text-[7.5px] sm:text-[8.5px] font-black text-charcoal/50 uppercase tracking-widest bg-charcoal/5 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap hidden sm:inline-block">
-                                                    {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                                                        ? `${slot.equipment[0]} (${booking.quantity || 1})`
-                                                        : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
-                                                </span>
+                                        {/* Desktop Date Block */}
+                                        <div className="hidden sm:flex flex-col items-center justify-center bg-forest/5 rounded-lg w-16 shrink-0 py-2 border border-forest/10">
+                                            <span className="text-[9px] font-black text-forest uppercase tracking-widest leading-none mb-1">
+                                                {start.toLocaleDateString(undefined, { month: 'short' })}
+                                            </span>
+                                            <span className="text-lg font-serif text-charcoal leading-none">
+                                                {start.toLocaleDateString(undefined, { day: 'numeric' })}
+                                            </span>
+                                        </div>
 
-                                                {client.medical_conditions && (
-                                                    <>
-                                                        <span className="text-charcoal/20 hidden sm:inline">•</span>
-                                                        <span className="px-1.5 py-0.5 bg-red-50 text-red-600 text-[6px] sm:text-[7px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-1 tracking-widest shrink-0">
-                                                            <AlertCircle className="w-2.5 h-2.5" /> <span className="hidden sm:inline">MED</span>
+                                        {/* Row 2 (Mobile) / Session Info (Desktop) */}
+                                        <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6">
+                                            <div className="flex flex-col gap-2">
+                                                {/* Stacked Names */}
+                                                <div className="flex flex-col gap-0.5">
+                                                    <div className="flex items-center gap-2">
+                                                        <button onClick={() => handleInstructorClick(instructor)} className="text-sm font-bold text-charcoal/90 hover:text-charcoal transition-colors hover:underline underline-offset-2 whitespace-normal break-words text-left">
+                                                            {instructor?.full_name || "Instructor"}
+                                                        </button>
+                                                        <span className="hidden sm:flex items-center">
+                                                            <span className={clsx(
+                                                                'px-1.5 py-0.5 text-[8px] font-bold uppercase rounded-md tracking-widest border inline-block whitespace-nowrap',
+                                                                booking.status === 'completed'
+                                                                    ? (booking.funds_unlocked
+                                                                        ? 'border-[#b8d49a] text-[#2D4F1E] bg-[#D4E4BC]'
+                                                                        : 'bg-amber-100/50 text-amber-700 border-amber-200')
+                                                                    : booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
+                                                                        'bg-red-100/50 text-red-700 border-red-200'
+                                                            )}>
+                                                                {['completed', 'approved'].includes(booking.status)
+                                                                    ? (booking.status === 'completed'
+                                                                        ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)')
+                                                                        : 'Approved')
+                                                                    : 'Cancelled'}
+                                                            </span>
                                                         </span>
-                                                    </>
-                                                )}
+                                                    </div>
+
+                                                    {client && (
+                                                        <button onClick={() => setSelectedClient(client)} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity min-w-0">
+                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-5 h-5 rounded-full border border-border-grey shrink-0 object-cover" />
+                                                            <span className="text-xs font-bold text-charcoal/70 truncate">{client.full_name}</span>
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                {/* Tags (Flex Wrap) */}
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    {/* Status Box (Mobile only inside Row 2) */}
+                                                    <span className={clsx(
+                                                        'sm:hidden px-1.5 py-0.5 text-[7px] font-bold uppercase rounded-md tracking-widest border inline-block whitespace-nowrap',
+                                                        booking.status === 'completed'
+                                                            ? (booking.funds_unlocked
+                                                                ? 'border-[#b8d49a] text-[#2D4F1E] bg-[#D4E4BC]'
+                                                                : 'bg-amber-100/50 text-amber-700 border-amber-200')
+                                                            : booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
+                                                                'bg-red-100/50 text-red-700 border-red-200'
+                                                    )}>
+                                                        {['completed', 'approved'].includes(booking.status)
+                                                            ? (booking.status === 'completed'
+                                                                ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)')
+                                                                : 'Approved')
+                                                            : 'Cancelled'}
+                                                    </span>
+
+                                                    {client?.medical_conditions && (
+                                                        <span className="px-1.5 py-0.5 bg-red-50 text-red-600 text-[6.5px] sm:text-[7px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-1 tracking-widest shrink-0">
+                                                            <AlertCircle className="w-2.5 h-2.5" /> MEDICAL
+                                                        </span>
+                                                    )}
+
+                                                    <span className="text-[7.5px] sm:text-[8.5px] font-black text-charcoal/50 uppercase tracking-widest bg-charcoal/5 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap">
+                                                        {Array.isArray(slot?.equipment) && slot.equipment.length > 0
+                                                            ? `${slot.equipment[0]} (${booking.quantity || 1})`
+                                                            : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
+                                                    </span>
+                                                </div>
                                             </div>
-                                        )}
+
+                                            {/* Time for Desktop only in Row 2 */}
+                                            <span className="hidden sm:inline text-[11px] font-black uppercase text-charcoal/60 tracking-widest">
+                                                {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                            </span>
+                                        </div>
                                     </div>
 
-                                    {/* Action Buttons Right-Aligned */}
-                                    <div className="flex flex-col items-end justify-center gap-1.5 shrink-0 ml-auto pl-2">
-                                        {['completed', 'approved'].includes(booking.status) && (
-                                            <div className="px-2 sm:px-3 py-1 bg-forest/5 border border-forest/10 rounded flex items-center gap-1.5 mb-1 w-full sm:w-auto justify-center sm:justify-start">
+                                    {/* Row 3: Earnings & Action */}
+                                    <div className="flex items-center justify-between gap-4 pt-3 border-t border-border-grey sm:border-t-0 sm:pt-0">
+                                        {['completed', 'approved'].includes(booking.status) ? (
+                                            <div className="px-3 py-1 bg-forest/5 border border-forest/10 rounded flex items-center gap-1.5">
                                                 <span className="text-[7px] sm:text-[8px] font-black text-forest/50 uppercase tracking-widest hidden sm:inline-block">Earned</span>
                                                 <span className="text-[10px] sm:text-[12px] font-black text-forest tracking-tighter">₱{Number(studioFee || booking.total_price || 0).toLocaleString()}</span>
                                             </div>
-                                        )}
+                                        ) : <div />}
 
-                                        <div className="flex flex-col items-end gap-1.5 w-full">
+                                        <div className="flex items-center gap-2">
                                             {instructor && instructor.id !== currentUserId && (
                                                 <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={instructor.id} partnerName={instructor.full_name || 'Instructor'} label="MESSAGE" variant="antigravity" />
                                             )}
                                             {booking.status === 'approved' && start > now && (
                                                 <button
                                                     onClick={() => setCancellingBooking(booking)}
-                                                    className="w-full sm:w-auto h-7 sm:h-8 px-2 sm:px-3 bg-off-white text-red-600 border border-border-grey rounded text-[7.5px] sm:text-[8px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-tight group/cancel"
+                                                    className="h-7 sm:h-8 px-2 sm:px-3 bg-off-white text-red-600 border border-border-grey rounded text-[7.5px] sm:text-[8px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-tight group/cancel"
                                                     title="Cancel Session"
                                                 >
                                                     <X className="w-3.5 h-3.5 mr-1 hidden sm:inline" />
@@ -227,15 +261,6 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                             )}
                                         </div>
                                     </div>
-                                </div>
-
-                                {/* Mobile Equipment Tag (if hidden above) */}
-                                <div className="mt-3 pt-3 border-t border-border-grey flex items-center justify-between gap-2.5 sm:hidden">
-                                    <span className="text-[7.5px] shrink-0 font-black text-charcoal/50 uppercase tracking-widest bg-charcoal/5 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap">
-                                        {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                                            ? `${slot.equipment[0]} (${booking.quantity || 1})`
-                                            : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
-                                    </span>
                                 </div>
                             </div>
                         )
