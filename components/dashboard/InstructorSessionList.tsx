@@ -129,7 +129,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 </div>
 
                 {activeBookings.length === 0 ? (
-                    <div className="min-h-[120px] flex items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0">
+                    <div className="min-h-[80px] py-4 flex items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0">
                         <p className="text-[10px] font-black text-slate uppercase tracking-[0.4em]">No active sessions found.</p>
                     </div>
                 ) : (

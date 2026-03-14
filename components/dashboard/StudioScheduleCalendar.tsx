@@ -568,7 +568,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                             const uniqueDisplaySlots = daySlotsData.reduce((acc, current) => {
                                                 const time = current.start_time.slice(0, 5);
                                                 const type = current.equipment ? Object.keys(current.equipment)[0] : 'Open';
-                                                
+
                                                 // Count all active bookings for this slot (equipment-agnostic for monthly overview)
                                                 const booked = current.bookings?.filter(b =>
                                                     ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '')
@@ -576,7 +576,12 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                 const total = Math.max(current.quantity || 1, booked);
 
                                                 const key = `${time}-${type}`;
-                                                if (!acc.some((s: any) => s.key === key)) {
+                                                const existing = acc.find((s: any) => s.key === key);
+                                                if (existing) {
+                                                    // Accumulate counts from duplicate-key slots so no bookings are lost
+                                                    existing.booked += booked;
+                                                    existing.total += total;
+                                                } else {
                                                     acc.push({ ...current, key, displayType: type, booked, total });
                                                 }
                                                 return acc;
