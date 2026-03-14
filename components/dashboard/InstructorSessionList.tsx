@@ -28,6 +28,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     const [selectedStudio, setSelectedStudio] = useState<any>(null)
     const [studioDetails, setStudioDetails] = useState<any>(null)
     const [loadingStudio, setLoadingStudio] = useState(false)
+    const [resetKey, setResetKey] = useState(0)
 
     const handleStudioClick = async (studio: any) => {
         if (!studio?.id) return
@@ -132,7 +133,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     return (
         <div className="space-y-12 sm:space-y-20">
             <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible">
-                <BookingFilter onFilterChange={setFilters} />
+                <BookingFilter key={resetKey} onFilterChange={setFilters} />
             </div>
 
             {/* Active Sessions List */}
@@ -146,8 +147,29 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 </div>
 
                 {activeBookings.length === 0 ? (
-                    <div className="min-h-[80px] py-4 flex items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0">
-                        <p className="text-[10px] font-semibold text-[#43302E] uppercase tracking-[0.4em]">No active sessions found.</p>
+                    <div className="min-h-[200px] py-12 flex flex-col items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0 px-4">
+                        <div className="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mb-4">
+                            <Calendar className="w-6 h-6 text-charcoal/30" />
+                        </div>
+                        <h3 className="text-sm font-bold text-charcoal mb-1">No active sessions found.</h3>
+                        <p className="text-[11px] text-charcoal/50 max-w-[240px] mb-6">Try adjusting your filters or find a studio to book a new session.</p>
+                        
+                        <div className="flex flex-col sm:flex-row items-center gap-3">
+                            {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
+                                <button 
+                                    onClick={() => setResetKey(prev => prev + 1)}
+                                    className="px-4 py-2 bg-charcoal text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-charcoal/80 transition-all shadow-sm"
+                                >
+                                    Clear Filters
+                                </button>
+                            )}
+                            <Link
+                                href="/instructors"
+                                className="px-4 py-2 bg-forest/10 text-forest text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-forest/20 transition-all border border-forest/20"
+                            >
+                                Find a Studio
+                            </Link>
+                        </div>
                     </div>
                 ) : (
                     <div className="space-y-4 sm:space-y-6">

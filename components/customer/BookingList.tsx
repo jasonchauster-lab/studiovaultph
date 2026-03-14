@@ -32,6 +32,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
     } | null>(null)
     const [cancellingId, setCancellingId] = useState<string | null>(null)
     const [cancellingBooking, setCancellingBooking] = useState<any>(null)
+    const [resetKey, setResetKey] = useState(0)
 
     // Instructor modal state
     const [selectedInstructor, setSelectedInstructor] = useState<any>(null)
@@ -125,13 +126,34 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
 
     return (
         <div className="space-y-8">
-            <BookingFilter onFilterChange={setFilters} />
+            <BookingFilter key={resetKey} onFilterChange={setFilters} />
 
             <section>
                 <div className="space-y-4">
                     {upcomingBookings.length === 0 ? (
-                        <div className="earth-card py-12 text-center">
-                            <p className="text-slate">No upcoming sessions booked.</p>
+                        <div className="min-h-[200px] py-12 flex flex-col items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0 px-4">
+                            <div className="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mb-4">
+                                <Calendar className="w-6 h-6 text-charcoal/30" />
+                            </div>
+                            <h3 className="text-sm font-bold text-charcoal mb-1">No upcoming sessions booked.</h3>
+                            <p className="text-[11px] text-charcoal/50 max-w-[240px] mb-6">Try adjusting your filters or browse instructors to book your next class.</p>
+                            
+                            <div className="flex flex-col sm:flex-row items-center gap-3">
+                                {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
+                                    <button 
+                                        onClick={() => setResetKey(prev => prev + 1)}
+                                        className="px-4 py-2 bg-charcoal text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-charcoal/80 transition-all shadow-sm"
+                                    >
+                                        Clear Filters
+                                    </button>
+                                )}
+                                <Link
+                                    href="/instructors"
+                                    className="px-4 py-2 bg-forest/10 text-forest text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-forest/20 transition-all border border-forest/20"
+                                >
+                                    Browse Instructors
+                                </Link>
+                            </div>
                         </div>
                     ) : (
                         upcomingBookings.map((booking) => {

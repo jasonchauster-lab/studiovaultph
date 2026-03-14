@@ -296,12 +296,12 @@ export default async function StudioDashboard(props: {
 
                             <div className="space-y-8">
                                 <div className="earth-card overflow-hidden">
-                                    <div className="bg-burgundy p-5 flex items-center justify-between">
-                                        <h2 className="text-[11px] font-bold !text-white uppercase tracking-[0.2em] flex items-center gap-2">
-                                            <Calendar className="w-4 h-4" />
+                                    <div className="bg-buttermilk p-5 flex items-center justify-between border-b border-burgundy/10">
+                                        <h2 className="text-[11px] font-bold !text-burgundy uppercase tracking-[0.2em] flex items-center gap-2">
+                                            <Calendar className="w-4 h-4 text-burgundy" />
                                             Upcoming Bookings
                                         </h2>
-                                        <span className="text-[9px] font-bold text-white/50 border border-white/20 px-3 py-1 rounded-full uppercase tracking-tighter">Next 7 Days</span>
+                                        <span className="text-[9px] font-bold text-burgundy/50 border border-burgundy/20 px-3 py-1 rounded-full uppercase tracking-tighter">Next 7 Days</span>
                                     </div>
                                     <div className="p-6">
                                         <StudioUpcomingBookings

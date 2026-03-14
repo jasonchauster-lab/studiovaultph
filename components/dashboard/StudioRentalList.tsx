@@ -26,6 +26,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
     const [selectedInstructor, setSelectedInstructor] = useState<any>(null)
     const [instructorDetails, setInstructorDetails] = useState<any>(null)
     const [loadingInstructor, setLoadingInstructor] = useState(false)
+    const [resetKey, setResetKey] = useState(0)
 
     const handleInstructorClick = async (instructor: any) => {
         if (!instructor?.id) return
@@ -115,12 +116,33 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
 
     return (
         <div className="space-y-6">
-            <BookingFilter onFilterChange={setFilters} />
+            <BookingFilter key={resetKey} onFilterChange={setFilters} />
 
             <div className="space-y-4">
                 {filteredBookings.length === 0 ? (
-                    <div className="min-h-[80px] py-4 flex items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0">
-                        <p className="text-[10px] font-black text-slate uppercase tracking-[0.4em]">No rental history found.</p>
+                    <div className="min-h-[200px] py-12 flex flex-col items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0 px-4">
+                        <div className="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mb-4">
+                            <CalendarX2 className="w-6 h-6 text-charcoal/30" />
+                        </div>
+                        <h3 className="text-sm font-bold text-charcoal mb-1">No sessions found for this period.</h3>
+                        <p className="text-[11px] text-charcoal/50 max-w-[240px] mb-6">Try adjusting your filters or adding a new availability slot.</p>
+                        
+                        <div className="flex flex-col sm:flex-row items-center gap-3">
+                            {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
+                                <button 
+                                    onClick={() => setResetKey(prev => prev + 1)}
+                                    className="px-4 py-2 bg-charcoal text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-charcoal/80 transition-all shadow-sm"
+                                >
+                                    Clear Filters
+                                </button>
+                            )}
+                            <Link
+                                href="/studio"
+                                className="px-4 py-2 bg-forest/10 text-forest text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-forest/20 transition-all border border-forest/20"
+                            >
+                                Add Availability Slot
+                            </Link>
+                        </div>
                     </div>
                 ) : (
                     filteredBookings.map((booking: any) => {

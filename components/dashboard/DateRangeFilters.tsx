@@ -30,19 +30,14 @@ export default function DateRangeFilters() {
     }
 
     return (
-        <div className="flex flex-wrap items-center gap-4 mb-6">
-            <div className="flex items-center gap-2 text-charcoal-600">
-                <Calendar className="w-4 h-4" />
-                <span className="text-sm font-medium">Time Range:</span>
-            </div>
-
-            <div className="flex flex-nowrap overflow-x-auto pb-1 -mb-1 hide-scrollbar gap-2 w-full lg:w-auto">
+        <div className="flex flex-col gap-3 mb-6">
+            <div className="flex flex-nowrap overflow-x-auto snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 hide-scrollbar gap-2 w-full lg:w-auto pb-2">
                 {RANGES.map((r) => (
                     <button
                         key={r.value}
                         onClick={() => handleRangeChange(r.value)}
-                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all whitespace-nowrap shadow-sm border ${currentRange === r.value
-                                ? 'bg-charcoal text-white border-charcoal shadow-tight'
+                        className={`snap-start px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all whitespace-nowrap shadow-sm border-2 ${currentRange === r.value
+                                ? 'bg-[#43302E] text-white border-[#43302E] shadow-tight'
                                 : 'bg-white text-charcoal/60 border-border-grey hover:border-charcoal/40 hover:bg-off-white'
                             }`}
                     >
@@ -50,8 +45,6 @@ export default function DateRangeFilters() {
                     </button>
                 ))}
             </div>
-
-            <div className="flex-1"></div>
         </div>
     )
 }

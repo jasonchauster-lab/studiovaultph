@@ -61,7 +61,7 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                 const qty = booking.price_breakdown?.quantity || 1
 
                 return (
-                    <div key={booking.id} className="p-4 border border-border-grey bg-white rounded-[8px] hover:bg-off-white transition-all shadow-tight group relative">
+                    <div key={booking.id} className="p-4 border border-border-grey/40 bg-white rounded-xl hover:bg-off-white transition-all shadow-tight group relative">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex flex-col gap-1 w-full">
                                 <div className="flex items-center gap-3">

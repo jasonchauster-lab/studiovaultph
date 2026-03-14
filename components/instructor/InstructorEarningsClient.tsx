@@ -126,7 +126,7 @@ export default function InstructorEarningsClient({
                 </div>
             </div>
 
-            <div className="earth-card p-4 inline-block bg-white shadow-tight">
+            <div className="earth-card p-4 sm:p-4 inline-block bg-white shadow-tight w-full sm:w-auto overflow-hidden">
                 <DateRangeFilters />
             </div>
 

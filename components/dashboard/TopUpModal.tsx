@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { X, Loader2, Upload, CheckCircle2, QrCode, CreditCard } from 'lucide-react'
+import { X, Loader2, Upload, CheckCircle2, QrCode, CreditCard, Copy, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { normalizeImageFile } from '@/lib/utils/image-utils'
 import { topUpWallet, uploadTopUpProof } from '@/app/(dashboard)/customer/actions'
@@ -22,6 +22,17 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [isSuccess, setIsSuccess] = useState(false)
     const [zoomedImage, setZoomedImage] = useState<string | null>(null)
+    const [copiedAccount, setCopiedAccount] = useState<string | null>(null)
+
+    const handleCopy = async (text: string, accountName: string) => {
+        try {
+            await navigator.clipboard.writeText(text.replace(/\s|-/g, ''))
+            setCopiedAccount(accountName)
+            setTimeout(() => setCopiedAccount(null), 2000)
+        } catch (err) {
+            console.error('Failed to copy:', err)
+        }
+    }
 
     if (!isOpen) return null
 
@@ -142,7 +153,7 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                 </div>
             )}
 
-            <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
                 {/* Header */}
                 <div className="flex justify-between items-center p-8 border-b border-border-grey bg-off-white">
                     <h3 className="text-2xl font-serif font-bold text-burgundy tracking-tight">
@@ -156,7 +167,8 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                     </button>
                 </div>
 
-                <div className="p-8">
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="p-8 pb-16">
                     {error && (
                         <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-700 text-xs font-bold uppercase tracking-wider rounded-xl">
                             {error}
@@ -205,12 +217,18 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                                         className="bg-white p-2 rounded-xl shadow-md mb-4 inline-block transform group-hover:scale-105 transition-transform duration-300 cursor-zoom-in"
                                         onClick={() => setZoomedImage('/gcash-qr.jpg')}
                                     >
-                                        <img src="/gcash-qr.jpg" alt="GCash QR" className="w-40 h-40 object-contain mx-auto rounded-lg" onError={(e) => { e.currentTarget.src = 'https://placehold.co/400x400?text=GCash+QR' }} />
+                                        <img src="/gcash-qr.jpg" alt="GCash QR" className="w-32 h-32 md:w-40 md:h-40 object-contain mx-auto rounded-lg" onError={(e) => { e.currentTarget.src = 'https://placehold.co/400x400?text=GCash+QR' }} />
                                     </div>
-                                    <h4 className="font-bold text-[#007DFF] flex items-center justify-center gap-2 mb-1 text-xs uppercase tracking-wider">
+                                    <h4 className="font-bold text-[#007DFF] flex items-center justify-center gap-2 mb-2 text-xs uppercase tracking-wider">
                                         <QrCode className="w-4 h-4" /> GCash
                                     </h4>
-                                    <p className="text-[10px] text-blue-800 font-bold bg-white/50 py-1 px-3 rounded-full inline-block text-center border border-blue-100">0917 500 0000</p>
+                                    <button
+                                        onClick={() => handleCopy('0917 500 0000', 'GCash')}
+                                        className="text-[10px] text-blue-800 font-bold bg-white/50 py-1.5 px-3 rounded-full flex items-center justify-center gap-2 mx-auto border border-blue-100 hover:bg-white transition-colors active:scale-95"
+                                    >
+                                        {copiedAccount === 'GCash' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                        {copiedAccount === 'GCash' ? 'Copied' : '0917 500 0000'}
+                                    </button>
                                 </div>
 
                                 {/* BPI */}
@@ -219,12 +237,18 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                                         className="bg-white p-2 rounded-xl shadow-md mb-4 inline-block transform group-hover:scale-105 transition-transform duration-300 cursor-zoom-in"
                                         onClick={() => setZoomedImage('/bpi-qr.jpg')}
                                     >
-                                        <img src="/bpi-qr.jpg" alt="BPI QR" className="w-40 h-40 object-contain mx-auto rounded-lg" onError={(e) => { e.currentTarget.src = 'https://placehold.co/400x400?text=BPI+QR' }} />
+                                        <img src="/bpi-qr.jpg" alt="BPI QR" className="w-32 h-32 md:w-40 md:h-40 object-contain mx-auto rounded-lg" onError={(e) => { e.currentTarget.src = 'https://placehold.co/400x400?text=BPI+QR' }} />
                                     </div>
-                                    <h4 className="font-bold text-red-900 flex items-center justify-center gap-2 mb-1 text-xs uppercase tracking-wider">
+                                    <h4 className="font-bold text-red-900 flex items-center justify-center gap-2 mb-2 text-xs uppercase tracking-wider">
                                         <CreditCard className="w-4 h-4" /> BPI
                                     </h4>
-                                    <p className="text-[10px] text-red-800 font-bold bg-white/50 py-1 px-3 rounded-full inline-block text-center border border-red-100">1234-5678-90</p>
+                                    <button
+                                        onClick={() => handleCopy('1234-5678-90', 'BPI')}
+                                        className="text-[10px] text-red-800 font-bold bg-white/50 py-1.5 px-3 rounded-full flex items-center justify-center gap-2 mx-auto border border-red-100 hover:bg-white transition-colors active:scale-95"
+                                    >
+                                        {copiedAccount === 'BPI' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                        {copiedAccount === 'BPI' ? 'Copied' : '1234-5678-90'}
+                                    </button>
                                 </div>
                             </div>
 
@@ -314,6 +338,7 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                             </button>
                         </div>
                     )}
+                    </div>
                 </div>
 
                 {/* Footer / Progress Indicator */}

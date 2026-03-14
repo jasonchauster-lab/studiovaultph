@@ -272,7 +272,7 @@ export default function MobileScheduleCalendar({
                                                     <span className="truncate">{formatTo12Hour(session.start_time)} — {formatTo12Hour(session.end_time)}</span>
                                                 </div>
                                             </div>
-                                            <h3 className={clsx("text-xl font-serif font-black tracking-tight pt-1", session.is_booked ? "text-[#F5F2E9]" : "text-burgundy")}>
+                                            <h3 className={clsx("text-xl font-serif font-bold tracking-tight pt-1", session.is_booked ? "text-[#F5F2E9]" : "text-burgundy")}>
                                                 {session.displayTitle || (session.is_booked ? session.type : 'Availability')}
                                             </h3>
                                         </div>
@@ -303,11 +303,11 @@ export default function MobileScheduleCalendar({
                                                     className={clsx(
                                                         "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all",
                                                         session.is_booked 
-                                                            ? "text-white bg-white/20 border-white/40 hover:bg-white hover:text-[#43302E]"
+                                                            ? "text-burgundy bg-[#D6C4B0] border-[#BFA38E] hover:bg-[#F5F2E9]"
                                                             : "text-muted-burgundy bg-white/50 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
                                                     )}
                                                 >
-                                                    <MapPin className={clsx("w-3.5 h-3.5", session.is_booked ? "text-white" : "text-burgundy/40")} />
+                                                    <MapPin className={clsx("w-3.5 h-3.5", session.is_booked ? "text-burgundy/60" : "text-burgundy/40")} />
                                                     <span className="font-bold uppercase tracking-wider text-[9px]">{loc}</span>
                                                 </a>
                                             ))
@@ -320,11 +320,11 @@ export default function MobileScheduleCalendar({
                                                 className={clsx(
                                                     "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all",
                                                     session.is_booked 
-                                                        ? "text-white bg-white/20 border-white/40 hover:bg-white hover:text-[#43302E]" 
+                                                        ? "text-burgundy bg-[#D6C4B0] border-[#BFA38E] hover:bg-[#F5F2E9]" 
                                                         : "text-muted-burgundy bg-white/50 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
                                                 )}
                                             >
-                                                <MapPin className={clsx("w-3.5 h-3.5", session.is_booked ? "text-white" : "text-burgundy/40")} />
+                                                <MapPin className={clsx("w-3.5 h-3.5", session.is_booked ? "text-burgundy/60" : "text-burgundy/40")} />
                                                 <span className="font-bold uppercase tracking-wider text-[9px]">{session.location?.split(' - ')[0] || session.location || 'Studio'}</span>
                                             </a>
                                         )}

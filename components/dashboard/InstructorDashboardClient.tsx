@@ -346,12 +346,12 @@ export default function InstructorDashboardClient({
                 {/* Upcoming Bookings Sidebar */}
                 <div className="space-y-10">
                     <div className="earth-card overflow-hidden">
-                        <div className="bg-burgundy p-5 flex items-center justify-between">
-                            <h2 className="text-[11px] font-bold !text-white uppercase tracking-[0.2em] flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-white" />
+                        <div className="bg-buttermilk p-5 flex items-center justify-between border-b border-burgundy/10">
+                            <h2 className="text-[11px] font-bold !text-burgundy uppercase tracking-[0.2em] flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-burgundy" />
                                 Upcoming Bookings
                             </h2>
-                            <span className="text-[9px] font-bold text-white/50 border border-white/20 px-3 py-1 rounded-full uppercase tracking-tighter">Next 5 Sessions</span>
+                            <span className="text-[9px] font-bold text-burgundy/50 border border-burgundy/20 px-3 py-1 rounded-full uppercase tracking-tighter">Next 5 Sessions</span>
                         </div>
                         <div className="p-6">
                             {(() => {
@@ -376,7 +376,7 @@ export default function InstructorDashboardClient({
                                 return (
                                     <div className="space-y-6">
                                         {upcomingBookings.map(session => (
-                                            <div key={session.id} className="p-6 border border-border-grey bg-white rounded-lg hover:bg-off-white transition-all duration-300 shadow-tight group relative">
+                                            <div key={session.id} className="p-6 border border-border-grey/40 bg-white rounded-xl hover:bg-off-white transition-all duration-300 shadow-tight group relative">
                                                 <div className="flex justify-between items-start mb-6">
                                                     <div className="flex flex-col gap-1 w-full">
                                                         <div className="flex items-center gap-4">

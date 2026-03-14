@@ -75,23 +75,43 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                 </div>
 
                 {/* Date Range Group */}
-                <div className="flex items-center justify-between gap-1 sm:gap-2 bg-white sm:bg-cream-50 border border-cream-200 rounded-lg px-2 sm:px-2 py-2 sm:py-1 shrink-0 shadow-sm sm:shadow-none overflow-hidden sm:min-w-0">
-                    <CalendarIcon className="hidden sm:block w-3.5 h-3.5 text-charcoal-400 shrink-0" />
-                    <input
-                        type="date"
-                        value={fromDate}
-                        onChange={(e) => setFromDate(e.target.value)}
-                        className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none py-0.5 w-[45%] sm:w-auto"
-                        aria-label="From Date"
-                    />
+                <div className={clsx(
+                    "flex items-center justify-between gap-1 sm:gap-2 border rounded-lg px-2 sm:px-2 py-2 sm:py-1 shrink-0 transition-all duration-300 overflow-hidden sm:min-w-0",
+                    (fromDate || toDate) ? "bg-forest/5 border-forest/20 ring-1 ring-forest/10" : "bg-white sm:bg-cream-50 border-cream-200 shadow-sm sm:shadow-none"
+                )}>
+                    <CalendarIcon className={clsx("hidden sm:block w-3.5 h-3.5 shrink-0 transition-colors", (fromDate || toDate) ? "text-forest" : "text-charcoal-400")} />
+                    
+                    <div className="flex items-center gap-0.5 flex-1 min-w-0">
+                        <input
+                            type="date"
+                            value={fromDate}
+                            onChange={(e) => setFromDate(e.target.value)}
+                            className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none py-0.5 w-full"
+                            aria-label="From Date"
+                        />
+                        {fromDate && (
+                            <button onClick={() => setFromDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors">
+                                <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                            </button>
+                        )}
+                    </div>
+
                     <span className="text-charcoal-300 font-black px-0.5">-</span>
-                    <input
-                        type="date"
-                        value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
-                        className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none py-0.5 w-[45%] sm:w-auto text-right sm:text-left"
-                        aria-label="To Date"
-                    />
+
+                    <div className="flex items-center gap-0.5 flex-1 min-w-0 justify-end">
+                        <input
+                            type="date"
+                            value={toDate}
+                            onChange={(e) => setToDate(e.target.value)}
+                            className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none py-0.5 w-full text-right sm:text-left"
+                            aria-label="To Date"
+                        />
+                        {toDate && (
+                            <button onClick={() => setToDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors">
+                                <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 
