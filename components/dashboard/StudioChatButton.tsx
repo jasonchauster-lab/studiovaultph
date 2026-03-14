@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { MessageSquare } from 'lucide-react'
+import clsx from 'clsx'
 import ChatWindow from './ChatWindow'
 import MessageCountBadge from './MessageCountBadge'
 
@@ -12,9 +13,10 @@ interface DashboardChatButtonProps {
     partnerName: string
     label: string
     variant?: 'default' | 'antigravity' | 'antigravity-gold'
+    className?: string
 }
 
-export default function StudioChatButton({ bookingId, currentUserId, partnerId, partnerName, label, variant = 'default' }: DashboardChatButtonProps) {
+export default function StudioChatButton({ bookingId, currentUserId, partnerId, partnerName, label, variant = 'default', className }: DashboardChatButtonProps) {
     const [isOpen, setIsOpen] = useState(false)
 
     const getStyles = () => {
@@ -31,7 +33,7 @@ export default function StudioChatButton({ bookingId, currentUserId, partnerId, 
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className={getStyles()}
+                className={clsx(getStyles(), className)}
                 title={label}
             >
                 <MessageSquare className="w-4 h-4 shrink-0" />

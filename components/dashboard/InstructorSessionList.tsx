@@ -131,8 +131,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     }), [filteredBookings, now]);
 
     return (
-        <div className="space-y-12 sm:space-y-20">
-            <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible">
+        <div className="space-y-16 sm:space-y-24">
+            <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible mb-6">
                 <BookingFilter key={resetKey} onFilterChange={setFilters} />
             </div>
 
@@ -147,27 +147,30 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 </div>
 
                 {activeBookings.length === 0 ? (
-                    <div className="min-h-[200px] py-12 flex flex-col items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0 px-4">
-                        <div className="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mb-4">
+                    <div className="py-16 sm:py-24 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-border-grey/50 mx-6 sm:mx-0 px-6 shadow-tight relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-32 h-32 bg-forest/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl pointer-events-none" />
+                        <div className="absolute bottom-0 right-0 w-32 h-32 bg-gold/5 rounded-full translate-x-1/2 translate-y-1/2 blur-2xl pointer-events-none" />
+                        
+                        <div className="w-14 h-14 bg-charcoal/5 rounded-full flex items-center justify-center mb-6 relative">
                             <Calendar className="w-6 h-6 text-charcoal/30" />
                         </div>
-                        <h3 className="text-sm font-bold text-charcoal mb-1">No active sessions found.</h3>
-                        <p className="text-[11px] text-charcoal/50 max-w-[240px] mb-6">Try adjusting your filters or find a studio to book a new session.</p>
+                        <h3 className="text-lg sm:text-xl font-serif text-charcoal mb-2 tracking-tight">No sessions found for this period.</h3>
+                        <p className="text-[11px] sm:text-xs text-charcoal/50 max-w-[280px] mb-8 leading-relaxed uppercase tracking-widest font-bold">Try adjusting your filters or find a studio to book a new availability slot.</p>
                         
-                        <div className="flex flex-col sm:flex-row items-center gap-3">
+                        <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10 w-full sm:w-auto">
                             {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
                                 <button 
                                     onClick={() => setResetKey(prev => prev + 1)}
-                                    className="px-4 py-2 bg-charcoal text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-charcoal/80 transition-all shadow-sm"
+                                    className="w-full sm:w-auto px-8 py-3 bg-charcoal text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-125 transition-all shadow-md active:scale-95"
                                 >
                                     Clear Filters
                                 </button>
                             )}
                             <Link
                                 href="/instructors"
-                                className="px-4 py-2 bg-forest/10 text-forest text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-forest/20 transition-all border border-forest/20"
+                                className="w-full sm:w-auto px-8 py-3 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-md active:scale-95 text-center"
                             >
-                                Find a Studio
+                                Find a Studio / Add Slot
                             </Link>
                         </div>
                     </div>
@@ -179,7 +182,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             const client = getFirst(booking.client)
 
                             return (
-                                <div key={booking.id} className="earth-card p-4 sm:p-6 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0">
+                                <div key={booking.id} className="earth-card p-4 pb-6 sm:p-6 sm:pb-8 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0">
                                     {/* Row 1: Date & Time Header (Mobile) */}
                                     <div className="flex items-center gap-2 mb-3 sm:hidden">
                                         <div className="flex items-center gap-2 px-2 py-1 bg-forest/5 rounded border border-forest/10 w-full">
@@ -230,15 +233,15 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     </button>
                                                     <div className="flex items-center gap-1.5">
                                                         <MapPin className="w-3 h-3 text-forest" />
-                                                        <span className="text-[9px] font-black text-slate uppercase tracking-wider">{studio?.location || "N/A"}</span>
+                                                        <span className="text-[9px] font-black text-charcoal/70 uppercase tracking-wider">{studio?.location || "N/A"}</span>
                                                     </div>
                                                 </div>
                                                 
                                                 {client && (
                                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-1 sm:mt-0.5">
                                                         <button onClick={() => setSelectedClient(client)} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity min-w-0">
-                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-border-grey shrink-0 object-cover" />
-                                                            <span className="text-sm font-bold text-charcoal/90 sm:truncate">{client.full_name}</span>
+                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="hidden sm:block w-6 h-6 rounded-full border border-border-grey shrink-0 object-cover" />
+                                                            <span className="text-sm font-bold text-charcoal sm:truncate">{client.full_name}</span>
                                                         </button>
                                                         
                                                         <div className="flex items-center gap-2">
@@ -324,7 +327,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             const client = getFirst(booking.client)
 
                             return (
-                                <div key={booking.id} className="glass-card p-4 sm:p-6 border border-white/60 bg-white/20 hover:bg-white/40 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0">
+                                <div key={booking.id} className="glass-card p-4 pb-6 sm:p-6 sm:pb-8 border border-white/60 bg-white/20 hover:bg-white/40 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0">
                                     {/* Row 1: Date & Time Header (Mobile) */}
                                     <div className="flex items-center gap-2 mb-3 sm:hidden">
                                         <div className="flex items-center gap-2 px-2 py-1 bg-charcoal/5 rounded border border-charcoal/10 w-full">
@@ -375,15 +378,15 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     </button>
                                                     <div className="flex items-center gap-1.5">
                                                         <MapPin className="w-3 h-3 text-charcoal/40" />
-                                                        <span className="text-[9px] font-black text-charcoal/50 uppercase tracking-wider">{studio?.location || "N/A"}</span>
+                                                        <span className="text-[9px] font-black text-charcoal/80 uppercase tracking-wider">{studio?.location || "N/A"}</span>
                                                     </div>
                                                 </div>
                                                 
                                                 {client && (
                                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-1 sm:mt-0.5">
                                                         <button onClick={() => setSelectedClient(client)} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity min-w-0">
-                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-white shrink-0 object-cover opacity-80" />
-                                                            <span className="text-sm font-bold text-charcoal/90 sm:truncate">{client.full_name}</span>
+                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="hidden sm:block w-6 h-6 rounded-full border border-white shrink-0 object-cover opacity-80" />
+                                                            <span className="text-sm font-bold text-charcoal sm:truncate">{client.full_name}</span>
                                                         </button>
 
                                                         <span className="hidden sm:inline-block text-[8.5px] font-black text-charcoal/50 uppercase tracking-widest bg-charcoal/5 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap">
@@ -424,36 +427,42 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                         </div>
 
                                         {/* Row 3: Earnings & Action (Mobile) */}
-                                        <div className="flex sm:hidden items-center justify-between pt-3 mt-1 border-t border-white/60">
-                                            <div className="flex flex-wrap gap-2">
-                                                <span className="text-[7.5px] font-black text-charcoal/50 uppercase tracking-widest bg-charcoal/5 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap">
-                                                    {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                                                        ? `${slot.equipment[0]} (${booking.quantity || 1})`
-                                                        : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
-                                                </span>
+                                        <div className="flex sm:hidden items-stretch justify-between gap-3 pt-4 mt-2 border-t border-white/60">
+                                            <div className="flex flex-col gap-1.5">
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-[7.5px] font-black text-charcoal/40 uppercase tracking-widest">Equip:</span>
+                                                    <span className="text-[7.5px] font-bold text-charcoal/70 uppercase tracking-widest px-1.5 py-0.5 bg-charcoal/5 rounded border border-charcoal/10 whitespace-nowrap">
+                                                        {Array.isArray(slot?.equipment) && slot.equipment.length > 0
+                                                            ? `${slot.equipment[0]} (${booking.quantity || 1})`
+                                                            : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
+                                                    </span>
+                                                </div>
                                                 {booking.price_breakdown?.instructor_fee && (
-                                                    <div className="px-1.5 py-0.5 bg-forest/5 border border-forest/10 rounded flex items-center">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-[7.5px] font-black text-forest/40 uppercase tracking-widest">Earnings:</span>
                                                         <span className="text-[9px] font-black text-forest tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
                                                     </div>
                                                 )}
                                             </div>
 
-                                            {booking.status === 'completed' && (
-                                                !booking.instructor_reviewed_studio ? (
-                                                    <button
-                                                        onClick={() => setReviewTarget({
-                                                            booking,
-                                                            revieweeId: studio?.owner_id || '',
-                                                            revieweeName: studio?.name || 'Studio'
-                                                        })}
-                                                        className="h-7 bg-charcoal text-white px-3 rounded text-[7.5px] font-black uppercase tracking-widest hover:brightness-[1.2] transition-all shadow-sm active:scale-95"
-                                                    >
-                                                        LEAVE FEEDBACK
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-[7.5px] text-sage font-black uppercase tracking-widest bg-sage/5 px-2 py-1 rounded border border-sage/10">SUBMITTED</span>
-                                                )
-                                            )}
+                                            <div className="flex flex-col items-end justify-end flex-1">
+                                                {booking.status === 'completed' && (
+                                                    !booking.instructor_reviewed_studio ? (
+                                                        <button
+                                                            onClick={() => setReviewTarget({
+                                                                booking,
+                                                                revieweeId: studio?.owner_id || '',
+                                                                revieweeName: studio?.name || 'Studio'
+                                                            })}
+                                                            className="w-full h-8 bg-charcoal text-white px-4 rounded text-[8px] font-black uppercase tracking-widest hover:brightness-[1.2] transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                                                        >
+                                                            LEAVE FEEDBACK
+                                                        </button>
+                                                    ) : (
+                                                        <span className="text-[7.5px] text-sage font-black uppercase tracking-widest bg-sage/5 px-3 py-1.5 rounded border border-sage/10 whitespace-nowrap">SUBMITTED</span>
+                                                    )
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

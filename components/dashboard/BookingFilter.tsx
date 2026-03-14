@@ -81,36 +81,42 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                 )}>
                     <CalendarIcon className={clsx("hidden sm:block w-3.5 h-3.5 shrink-0 transition-colors", (fromDate || toDate) ? "text-forest" : "text-charcoal-400")} />
                     
-                    <div className="flex items-center gap-0.5 flex-1 min-w-0">
-                        <input
-                            type="date"
-                            value={fromDate}
-                            onChange={(e) => setFromDate(e.target.value)}
-                            className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none py-0.5 w-full"
-                            aria-label="From Date"
-                        />
-                        {fromDate && (
-                            <button onClick={() => setFromDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors">
-                                <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                            </button>
-                        )}
+                    <div className="flex flex-col flex-1 min-w-0">
+                        {!fromDate && <span className="absolute left-8 sm:left-10 text-[8px] sm:text-[9px] font-black uppercase text-charcoal/30 tracking-widest pointer-events-none">Start</span>}
+                        <div className="flex items-center gap-0.5 w-full">
+                            <input
+                                type="date"
+                                value={fromDate}
+                                onChange={(e) => setFromDate(e.target.value)}
+                                className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none py-0.5 w-full"
+                                aria-label="From Date"
+                            />
+                            {fromDate && (
+                                <button onClick={() => setFromDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors">
+                                    <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <span className="text-charcoal-300 font-black px-0.5">-</span>
 
-                    <div className="flex items-center gap-0.5 flex-1 min-w-0 justify-end">
-                        <input
-                            type="date"
-                            value={toDate}
-                            onChange={(e) => setToDate(e.target.value)}
-                            className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none py-0.5 w-full text-right sm:text-left"
-                            aria-label="To Date"
-                        />
-                        {toDate && (
-                            <button onClick={() => setToDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors">
-                                <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                            </button>
-                        )}
+                    <div className="flex flex-col flex-1 min-w-0 relative">
+                        {!toDate && <span className="absolute right-2 text-[8px] sm:text-[9px] font-black uppercase text-charcoal/30 tracking-widest pointer-events-none">End</span>}
+                        <div className="flex items-center gap-0.5 w-full justify-end">
+                            <input
+                                type="date"
+                                value={toDate}
+                                onChange={(e) => setToDate(e.target.value)}
+                                className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none py-0.5 w-full text-right sm:text-left"
+                                aria-label="To Date"
+                            />
+                            {toDate && (
+                                <button onClick={() => setToDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors">
+                                    <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -124,6 +130,23 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                     <X className="w-3 h-3" />
                     Clear
                 </button>
+            )}
+
+            {/* Mobile/Tablet View: Active Date Pill Indicator */}
+            {(fromDate || toDate) && (
+                <div className="w-full flex sm:hidden mt-2">
+                    <div className="flex items-center gap-2 bg-forest/10 border border-forest/20 px-3 py-1.5 rounded-full">
+                        <CalendarIcon className="w-3 h-3 text-forest" />
+                        <span className="text-[10px] font-bold text-forest uppercase tracking-widest leading-none">
+                            {fromDate && new Date(fromDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            {fromDate && toDate && ' - '}
+                            {toDate && new Date(toDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </span>
+                        <button onClick={() => { setFromDate(''); setToDate(''); }} className="p-0.5 hover:bg-forest/20 rounded-full transition-colors ml-1">
+                            <X className="w-3 h-3 text-forest" />
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     )

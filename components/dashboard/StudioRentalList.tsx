@@ -188,9 +188,12 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                 {/* Stacked Names */}
                                                 <div className="flex flex-col gap-0.5">
                                                     <div className="flex items-center gap-2">
-                                                        <button onClick={() => handleInstructorClick(instructor)} className="text-sm font-bold text-charcoal/90 hover:text-charcoal transition-colors hover:underline underline-offset-2 whitespace-normal break-words text-left">
-                                                            {instructor?.full_name || "Instructor"}
-                                                        </button>
+                                                        {client && (
+                                                            <button onClick={() => setSelectedClient(client)} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity min-w-0">
+                                                                <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-5 h-5 rounded-full border border-border-grey shrink-0 object-cover" />
+                                                                <span className="text-sm font-bold text-charcoal/90 truncate">{client.full_name}</span>
+                                                            </button>
+                                                        )}
                                                         <span className="hidden sm:flex items-center">
                                                             <span className={clsx(
                                                                 'px-1.5 py-0.5 text-[8px] font-bold uppercase rounded-md tracking-widest border inline-block whitespace-nowrap',
@@ -210,12 +213,10 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                         </span>
                                                     </div>
 
-                                                    {client && (
-                                                        <button onClick={() => setSelectedClient(client)} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity min-w-0">
-                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-5 h-5 rounded-full border border-border-grey shrink-0 object-cover" />
-                                                            <span className="text-xs font-bold text-charcoal/70 truncate">{client.full_name}</span>
-                                                        </button>
-                                                    )}
+                                                    <button onClick={() => handleInstructorClick(instructor)} className="text-[11px] font-bold text-charcoal/60 hover:text-charcoal transition-colors hover:underline underline-offset-2 whitespace-normal break-words text-left flex items-center gap-1.5">
+                                                        <span className="text-[9px] font-black uppercase tracking-widest opacity-40">Instructor:</span>
+                                                        {instructor?.full_name || "Instructor"}
+                                                    </button>
                                                 </div>
 
                                                 {/* Tags (Flex Wrap) */}
@@ -238,12 +239,12 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                     </span>
 
                                                     {client?.medical_conditions && (
-                                                        <span className="px-1.5 py-0.5 bg-red-50 text-red-600 text-[6.5px] sm:text-[7px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-1 tracking-widest shrink-0">
-                                                            <AlertCircle className="w-2.5 h-2.5" /> MEDICAL
+                                                        <span className="px-1.5 py-1 bg-red-50 text-red-600 text-[6.5px] sm:text-[7px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-1 tracking-widest shrink-0">
+                                                            <AlertCircle className="w-2.5 h-2.5 -mt-px" /> MEDICAL
                                                         </span>
                                                     )}
 
-                                                    <span className="text-[7.5px] sm:text-[8.5px] font-black text-charcoal/50 uppercase tracking-widest bg-charcoal/5 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap">
+                                                    <span className="text-[7.5px] sm:text-[8.5px] font-black text-charcoal/50 uppercase tracking-widest bg-charcoal/5 px-1.5 py-1 rounded border border-charcoal/10 whitespace-nowrap">
                                                         {Array.isArray(slot?.equipment) && slot.equipment.length > 0
                                                             ? `${slot.equipment[0]} (${booking.quantity || 1})`
                                                             : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
@@ -259,22 +260,24 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                     </div>
 
                                     {/* Row 3: Earnings & Action */}
-                                    <div className="flex items-center justify-between gap-4 pt-3 border-t border-border-grey sm:border-t-0 sm:pt-0">
+                                    <div className="flex items-stretch justify-between gap-2 pt-5 border-t border-border-grey sm:border-t-0 sm:pt-0">
                                         {['completed', 'approved'].includes(booking.status) ? (
-                                            <div className="px-3 py-1 bg-forest/5 border border-forest/10 rounded flex items-center gap-1.5">
-                                                <span className="text-[7px] sm:text-[8px] font-black text-forest/50 uppercase tracking-widest hidden sm:inline-block">Earned</span>
+                                            <div className="flex-1 px-3 py-2 bg-forest/5 border border-forest/10 rounded flex items-center justify-center gap-2">
+                                                <span className="text-[7px] sm:text-[8px] font-black text-forest/50 uppercase tracking-widest">Earned</span>
                                                 <span className="text-[10px] sm:text-[12px] font-black text-forest tracking-tighter">₱{Number(studioFee || booking.total_price || 0).toLocaleString()}</span>
                                             </div>
-                                        ) : <div />}
+                                        ) : <div className="flex-1" />}
 
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex-1 flex items-center gap-2">
                                             {instructor && instructor.id !== currentUserId && (
-                                                <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={instructor.id} partnerName={instructor.full_name || 'Instructor'} label="MESSAGE" variant="antigravity" />
+                                                <div className="flex-1 h-full">
+                                                    <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={instructor.id} partnerName={instructor.full_name || 'Instructor'} label="MESSAGE" variant="antigravity" className="h-full w-full bg-charcoal/5 hover:bg-charcoal/10 border-none justify-center" />
+                                                </div>
                                             )}
                                             {booking.status === 'approved' && start > now && (
                                                 <button
                                                     onClick={() => setCancellingBooking(booking)}
-                                                    className="h-7 sm:h-8 px-2 sm:px-3 bg-off-white text-red-600 border border-border-grey rounded text-[7.5px] sm:text-[8px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-tight group/cancel"
+                                                    className="h-full px-2 sm:px-3 bg-off-white text-red-600 border border-border-grey rounded text-[7.5px] sm:text-[8px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-tight group/cancel flex-1"
                                                     title="Cancel Session"
                                                 >
                                                     <X className="w-3.5 h-3.5 mr-1 hidden sm:inline" />
