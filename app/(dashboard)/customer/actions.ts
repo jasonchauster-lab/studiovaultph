@@ -498,8 +498,25 @@ export async function submitTopUpPaymentProof(
 
     console.log('[TopUpSubmission] Received proof path:', proofPath)
 
-    // 3. Update the wallet_top_ups record
-    const { data: updatedData, error: updateError, count } = await supabase
+    // Verify ownership first using user client (RLS-gated read)
+    const { data: existing } = await supabase
+        .from('wallet_top_ups')
+        .select('id, status')
+        .eq('id', topUpId)
+        .eq('user_id', user.id)
+        .single()
+
+    if (!existing) {
+        return { error: 'Top-up record not found or you do not have permission to update it.' }
+    }
+
+    if (existing.status !== 'pending') {
+        return { error: 'This top-up has already been processed.' }
+    }
+
+    // Use admin client to bypass RLS for the update
+    const adminSupabase = createAdminClient()
+    const { data: updatedData, error: updateError } = await adminSupabase
         .from('wallet_top_ups')
         .update({
             payment_proof_url: proofPath,
@@ -508,7 +525,6 @@ export async function submitTopUpPaymentProof(
         })
         .eq('id', topUpId)
         .eq('user_id', user.id)
-        .eq('status', 'pending') // Security Fix: Prevent overwriting completed top-ups
         .select()
 
     if (updateError) {

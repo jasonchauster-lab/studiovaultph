@@ -81,38 +81,38 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                 )}>
                     <CalendarIcon className={clsx("hidden sm:block w-3.5 h-3.5 shrink-0 transition-colors", (fromDate || toDate) ? "text-forest" : "text-charcoal-400")} />
                     
-                    <div className="flex flex-col flex-1 min-w-0">
-                        {!fromDate && <span className="absolute left-8 sm:left-10 text-[8px] sm:text-[9px] font-black uppercase text-charcoal/30 tracking-widest pointer-events-none">Start</span>}
+                    <div className="flex flex-col flex-1 min-w-0 relative">
+                        {!fromDate && <span className="absolute left-0 top-1/2 -translate-y-1/2 text-[7px] sm:text-[8px] font-black uppercase text-charcoal/20 tracking-[0.2em] pointer-events-none">Start</span>}
                         <div className="flex items-center gap-0.5 w-full">
                             <input
                                 type="date"
                                 value={fromDate}
                                 onChange={(e) => setFromDate(e.target.value)}
-                                className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none py-0.5 w-full"
+                                className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none py-1 w-full"
                                 aria-label="From Date"
                             />
                             {fromDate && (
-                                <button onClick={() => setFromDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors">
+                                <button onClick={() => setFromDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors shrink-0">
                                     <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                                 </button>
                             )}
                         </div>
                     </div>
 
-                    <span className="text-charcoal-300 font-black px-0.5">-</span>
+                    <span className="text-charcoal-200 font-black px-1 scale-y-150 opacity-30 select-none">|</span>
 
                     <div className="flex flex-col flex-1 min-w-0 relative">
-                        {!toDate && <span className="absolute right-2 text-[8px] sm:text-[9px] font-black uppercase text-charcoal/30 tracking-widest pointer-events-none">End</span>}
+                        {!toDate && <span className="absolute right-0 top-1/2 -translate-y-1/2 text-[7px] sm:text-[8px] font-black uppercase text-charcoal/20 tracking-[0.2em] pointer-events-none">End</span>}
                         <div className="flex items-center gap-0.5 w-full justify-end">
                             <input
                                 type="date"
                                 value={toDate}
                                 onChange={(e) => setToDate(e.target.value)}
-                                className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none py-0.5 w-full text-right sm:text-left"
+                                className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none py-1 w-full text-right sm:text-left"
                                 aria-label="To Date"
                             />
                             {toDate && (
-                                <button onClick={() => setToDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors">
+                                <button onClick={() => setToDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors shrink-0">
                                     <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                                 </button>
                             )}

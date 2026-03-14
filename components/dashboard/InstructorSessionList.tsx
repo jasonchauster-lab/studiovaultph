@@ -131,19 +131,21 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     }), [filteredBookings, now]);
 
     return (
-        <div className="space-y-16 sm:space-y-24">
+        <div className="space-y-16 sm:space-y-24 pb-32">
             <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible mb-6">
                 <BookingFilter key={resetKey} onFilterChange={setFilters} />
             </div>
 
             {/* Active Sessions List */}
             <section>
-                <div className="px-6 sm:px-0 flex items-center justify-between mb-8 sm:mb-10">
+                <div className="px-6 sm:px-0 flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-2">
                     <div className="flex items-center gap-3 sm:gap-4">
-                        <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest" />
-                        <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter">My Sessions</h2>
+                        <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest shrink-0" />
+                        <div className="flex flex-col">
+                            <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter leading-none">My Sessions</h2>
+                            <div className="text-[8px] sm:text-[9px] font-black text-[#43302E]/40 uppercase tracking-[0.3em] mt-1.5">{activeBookings.length} SESSIONS FOUND</div>
+                        </div>
                     </div>
-                    <div className="text-[8px] sm:text-[9px] font-black text-[#43302E] uppercase tracking-[0.4em]">{activeBookings.length} SESSIONS FOUND</div>
                 </div>
 
                 {activeBookings.length === 0 ? (
@@ -155,7 +157,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             <Calendar className="w-6 h-6 text-charcoal/30" />
                         </div>
                         <h3 className="text-lg sm:text-xl font-serif text-charcoal mb-2 tracking-tight">No sessions found for this period.</h3>
-                        <p className="text-[11px] sm:text-xs text-charcoal/50 max-w-[280px] mb-8 leading-relaxed uppercase tracking-widest font-bold">Try adjusting your filters or find a studio to book a new availability slot.</p>
+                        <p className="text-[11px] sm:text-xs text-charcoal/50 max-w-[280px] mb-8 leading-relaxed font-bold">Try adjusting your filters or find a studio to book a new availability slot.</p>
                         
                         <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10 w-full sm:w-auto">
                             {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
