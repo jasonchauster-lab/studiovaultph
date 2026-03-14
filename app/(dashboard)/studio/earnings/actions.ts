@@ -122,20 +122,28 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             const penaltyAmount = Number(breakdown?.penalty_amount || 0)
             const initiator = breakdown?.refund_initiator
 
+            // Client cancelled late → studio keeps studio_fee as compensation, not a regular booking earn
+            const isClientLateCancel = b.status === 'cancelled_charged' && initiator === 'client'
+
             // Scenario A: Successful or Pending Booking (awaiting approval)
-            const isRealized = ['approved', 'completed', 'cancelled_charged'].includes(b.status) || (b.status === 'pending' && b.payment_status === 'submitted')
+            const isRealized = (['approved', 'completed'].includes(b.status) || (b.status === 'pending' && b.payment_status === 'submitted') || (b.status === 'cancelled_charged' && !isClientLateCancel))
 
             if (isRealized) {
                 grossEarnings += studioFee
 
-                // BUSINESS LOGIC: If it's not yet completed and funds aren't unlocked, 
+                // BUSINESS LOGIC: If it's not yet completed and funds aren't unlocked,
                 // it's "Upcoming" (not yet in profile.pending_balance)
                 if (b.status !== 'completed' && !b.funds_unlocked) {
                     upcomingEarnings += studioFee
                 }
             }
 
-            // Scenario B: Compensation (Instructor cancelled late)
+            // Scenario B: Compensation — client cancelled late (studio keeps studio_fee)
+            if (isClientLateCancel) {
+                totalCompensation += studioFee
+            }
+
+            // Scenario B2: Compensation — instructor cancelled late (studio gets penalty)
             if (penaltyProcessed && initiator === 'instructor') {
                 totalCompensation += penaltyAmount
             }

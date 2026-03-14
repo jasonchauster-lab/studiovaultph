@@ -125,12 +125,12 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest" />
                         <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter">My Sessions</h2>
                     </div>
-                    <div className="text-[8px] sm:text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em]">{activeBookings.length} SESSIONS FOUND</div>
+                    <div className="text-[8px] sm:text-[9px] font-black text-[#43302E] uppercase tracking-[0.4em]">{activeBookings.length} SESSIONS FOUND</div>
                 </div>
 
                 {activeBookings.length === 0 ? (
                     <div className="min-h-[80px] py-4 flex items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0">
-                        <p className="text-[10px] font-black text-slate uppercase tracking-[0.4em]">No active sessions found.</p>
+                        <p className="text-[10px] font-semibold text-[#43302E] uppercase tracking-[0.4em]">No active sessions found.</p>
                     </div>
                 ) : (
                     <div className="space-y-4 sm:space-y-6">

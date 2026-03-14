@@ -33,9 +33,9 @@ export default async function InstructorSessionsPage() {
             <div className="relative">
                 <Link
                     href="/instructor"
-                    className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/20 hover:text-gold uppercase tracking-[0.3em] transition-all mb-8 group"
+                    className="inline-flex items-center gap-3 px-6 py-3 bg-[#43302E] text-white text-[10px] font-bold uppercase tracking-[0.3em] rounded-lg transition-all mb-8 shadow-tight hover:brightness-110 active:scale-95"
                 >
-                    <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                    <ArrowLeft className="w-4 h-4" />
                     BACK TO DASHBOARD
                 </Link>
                 <h1 className="text-2xl sm:text-5xl font-serif text-charcoal tracking-tighter mb-4">My Sessions</h1>
