@@ -139,8 +139,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             {/* Active Sessions List */}
             <section>
                 <div className="px-6 sm:px-0 flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-2">
-                    <div className="flex items-center gap-3 sm:gap-4 h-full self-center">
-                        <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest shrink-0 self-center" />
+                    <div className="flex items-start gap-3 sm:gap-4 h-full">
+                        <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest shrink-0 mt-1 sm:mt-1.5" />
                         <div className="flex flex-col justify-center">
                             <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter leading-tight">My Sessions</h2>
                             <div className="text-[8px] sm:text-[9px] font-black text-[#43302E]/40 uppercase tracking-[0.3em] mt-1">{activeBookings.length} SESSIONS FOUND</div>
@@ -184,7 +184,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             const client = getFirst(booking.client)
 
                             return (
-                                <div key={booking.id} className="earth-card p-4 pb-6 sm:p-6 sm:pb-8 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0">
+                                <div key={booking.id} className="earth-card p-4 pb-10 sm:p-6 sm:pb-12 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0">
                                     {/* Row 1: Date & Time Header (Mobile) */}
                                     <div className="flex items-center gap-2 mb-3 sm:hidden">
                                         <div className="flex items-center gap-2 px-2 py-1 bg-forest/5 rounded border border-forest/10 w-full">
@@ -235,7 +235,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     </button>
                                                     <div className="flex items-center gap-1.5 -ml-0.5">
                                                         <MapPin className="w-3 h-3 text-forest shrink-0" />
-                                                        <span className="text-[9px] font-black text-charcoal/70 uppercase tracking-wider">{studio?.location || "N/A"}</span>
+                                                        <span className="text-[9px] font-black text-charcoal/80 uppercase tracking-wider">{studio?.location || "N/A"}</span>
                                                     </div>
                                                 </div>
                                                 
@@ -329,7 +329,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             const client = getFirst(booking.client)
 
                             return (
-                                <div key={booking.id} className="glass-card p-4 pb-6 sm:p-6 sm:pb-8 border border-white/60 bg-white/20 hover:bg-white/40 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0">
+                                <div key={booking.id} className="glass-card p-4 pb-10 sm:p-6 sm:pb-12 border border-white/60 bg-white/20 hover:bg-white/40 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0">
                                     {/* Row 1: Date & Time Header (Mobile) */}
                                     <div className="flex items-center gap-2 mb-3 sm:hidden">
                                         <div className="flex items-center gap-2 px-2 py-1 bg-charcoal/5 rounded border border-charcoal/10 w-full">
@@ -430,8 +430,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
                                         {/* Row 3: Earnings & Action (Mobile) */}
                                         <div className="flex sm:hidden flex-col gap-3 pt-4 mt-2 border-t border-white/60">
-                                            <div className="flex items-center justify-between gap-2">
-                                                <div className="flex items-center gap-1.5">
+                                            <div className="flex items-end justify-between gap-2">
+                                                <div className="flex items-baseline gap-1.5">
                                                     <span className="text-[7.5px] font-black text-charcoal/40 uppercase tracking-widest">Equip:</span>
                                                     <span className="text-[7.5px] font-bold text-charcoal/70 uppercase tracking-widest px-1.5 py-0.5 bg-charcoal/5 rounded border border-charcoal/10 whitespace-nowrap">
                                                         {Array.isArray(slot?.equipment) && slot.equipment.length > 0
@@ -440,7 +440,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     </span>
                                                 </div>
                                                 {booking.price_breakdown?.instructor_fee && (
-                                                    <div className="flex items-center gap-1.5">
+                                                    <div className="flex items-baseline gap-1.5">
                                                         <span className="text-[7.5px] font-black text-forest/40 uppercase tracking-widest">Earnings:</span>
                                                         <span className="text-[9px] font-black text-forest tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
                                                     </div>
