@@ -131,19 +131,19 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     }), [filteredBookings, now]);
 
     return (
-        <div className="space-y-16 sm:space-y-24 pb-32">
-            <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible mb-6">
+        <div className="space-y-16 sm:space-y-24 pb-48">
+            <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible mb-12 sm:mb-16">
                 <BookingFilter key={resetKey} onFilterChange={setFilters} />
             </div>
 
             {/* Active Sessions List */}
             <section>
                 <div className="px-6 sm:px-0 flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-2">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                        <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest shrink-0" />
-                        <div className="flex flex-col">
-                            <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter leading-none">My Sessions</h2>
-                            <div className="text-[8px] sm:text-[9px] font-black text-[#43302E]/40 uppercase tracking-[0.3em] mt-1.5">{activeBookings.length} SESSIONS FOUND</div>
+                    <div className="flex items-center gap-3 sm:gap-4 h-full self-center">
+                        <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest shrink-0 self-center" />
+                        <div className="flex flex-col justify-center">
+                            <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter leading-tight">My Sessions</h2>
+                            <div className="text-[8px] sm:text-[9px] font-black text-[#43302E]/40 uppercase tracking-[0.3em] mt-1">{activeBookings.length} SESSIONS FOUND</div>
                         </div>
                     </div>
                 </div>
@@ -233,8 +233,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     <button onClick={() => handleStudioClick(studio)} className="text-sm font-bold text-charcoal/90 text-left hover:text-charcoal transition-colors">
                                                         {studio?.name || "Studio"}
                                                     </button>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <MapPin className="w-3 h-3 text-forest" />
+                                                    <div className="flex items-center gap-1.5 -ml-0.5">
+                                                        <MapPin className="w-3 h-3 text-forest shrink-0" />
                                                         <span className="text-[9px] font-black text-charcoal/70 uppercase tracking-wider">{studio?.location || "N/A"}</span>
                                                     </div>
                                                 </div>
@@ -429,8 +429,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                         </div>
 
                                         {/* Row 3: Earnings & Action (Mobile) */}
-                                        <div className="flex sm:hidden items-stretch justify-between gap-3 pt-4 mt-2 border-t border-white/60">
-                                            <div className="flex flex-col gap-1.5">
+                                        <div className="flex sm:hidden flex-col gap-3 pt-4 mt-2 border-t border-white/60">
+                                            <div className="flex items-center justify-between gap-2">
                                                 <div className="flex items-center gap-1.5">
                                                     <span className="text-[7.5px] font-black text-charcoal/40 uppercase tracking-widest">Equip:</span>
                                                     <span className="text-[7.5px] font-bold text-charcoal/70 uppercase tracking-widest px-1.5 py-0.5 bg-charcoal/5 rounded border border-charcoal/10 whitespace-nowrap">
@@ -447,7 +447,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                 )}
                                             </div>
 
-                                            <div className="flex flex-col items-end justify-end flex-1">
+                                            <div className="w-full">
                                                 {booking.status === 'completed' && (
                                                     !booking.instructor_reviewed_studio ? (
                                                         <button
@@ -456,12 +456,14 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                 revieweeId: studio?.owner_id || '',
                                                                 revieweeName: studio?.name || 'Studio'
                                                             })}
-                                                            className="w-full h-8 bg-charcoal text-white px-4 rounded text-[8px] font-black uppercase tracking-widest hover:brightness-[1.2] transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                                                            className="w-full h-9 bg-charcoal text-white px-4 rounded-xl text-[8px] font-black uppercase tracking-widest hover:brightness-[1.2] transition-all shadow-sm active:scale-95 whitespace-nowrap"
                                                         >
                                                             LEAVE FEEDBACK
                                                         </button>
                                                     ) : (
-                                                        <span className="text-[7.5px] text-sage font-black uppercase tracking-widest bg-sage/5 px-3 py-1.5 rounded border border-sage/10 whitespace-nowrap">SUBMITTED</span>
+                                                        <div className="w-full h-9 flex items-center justify-center bg-sage/5 rounded-xl border border-sage/10">
+                                                            <span className="text-[7.5px] text-sage font-black uppercase tracking-widest">SUBMITTED</span>
+                                                        </div>
                                                     )
                                                 )}
                                             </div>
