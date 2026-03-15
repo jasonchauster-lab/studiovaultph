@@ -44,7 +44,7 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
 
     if (bookings.length === 0) {
         return (
-            <div className="py-12 text-center bg-off-white rounded-[8px] border border-dashed border-border-grey flex flex-col items-center justify-center">
+            <div className="py-8 text-center bg-off-white rounded-[8px] border border-dashed border-border-grey flex flex-col items-center justify-center">
                 <Calendar className="w-10 h-10 text-slate/20 mx-auto mb-4" />
                 <h3 className="text-sm font-bold text-charcoal mb-1">Quiet Week</h3>
                 <p className="text-xs text-slate max-w-[200px] mx-auto">No upcoming bookings for the next 7 days.</p>

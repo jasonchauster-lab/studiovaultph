@@ -365,7 +365,7 @@ export default function InstructorDashboardClient({
 
                                 if (upcomingBookings.length === 0) {
                                     return (
-                                        <div className="py-24 text-center bg-off-white/50 rounded-lg border-2 border-dashed border-buttermilk flex flex-col items-center justify-center">
+                                        <div className="py-10 text-center bg-off-white/50 rounded-lg border-2 border-dashed border-buttermilk flex flex-col items-center justify-center">
                                             <Calendar className="w-12 h-12 text-muted-burgundy/20 mx-auto mb-6" />
                                             <h3 className="text-[10px] font-black text-burgundy uppercase tracking-[0.4em] mb-1">Quiet Week</h3>
                                             <p className="text-[9px] text-burgundy font-black uppercase tracking-[0.2em] max-w-[200px] mx-auto">No bookings yet—your schedule is clear.</p>

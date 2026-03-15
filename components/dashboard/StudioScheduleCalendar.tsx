@@ -506,7 +506,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                 return (
                                                                     <div
                                                                         className={clsx(
-                                                                            "p-2 border-l-4 border-solid transition-all duration-300 hover:shadow-card hover:scale-[1.01] shadow-tight group/slot relative overflow-hidden cursor-pointer rounded-lg h-full flex flex-col justify-between z-10",
+                                                                            "p-1 border-l-4 border-solid transition-all duration-300 hover:shadow-card hover:scale-[1.01] shadow-tight group/slot relative overflow-hidden cursor-pointer rounded-lg h-full flex flex-col justify-between z-10",
                                                                             isPastCell ? "bg-off-white border-border-grey" :
                                                                                 hasPending ? "bg-orange-50/50 border-orange-200" :
                                                                                     isBooked ? "bg-[#43302E] border-[#2C1F1D]" : "bg-[#FDFBF7] border-[#EADED7]"

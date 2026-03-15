@@ -149,7 +149,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 </div>
 
                 {activeBookings.length === 0 ? (
-                    <div className="py-16 sm:py-24 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-border-grey/50 mx-6 sm:mx-0 px-6 shadow-tight relative overflow-hidden">
+                    <div className="py-16 sm:py-10 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-border-grey/50 mx-6 sm:mx-0 px-6 shadow-tight relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-32 h-32 bg-forest/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl pointer-events-none" />
                         <div className="absolute bottom-0 right-0 w-32 h-32 bg-gold/5 rounded-full translate-x-1/2 translate-y-1/2 blur-2xl pointer-events-none" />
                         

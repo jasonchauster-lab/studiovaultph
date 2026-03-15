@@ -59,7 +59,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                 <span className="text-[9px] font-black uppercase tracking-widest inline-block">FILTER</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-2 flex-1 w-full sm:items-center">
+            <div className="grid grid-cols-2 gap-3 sm:gap-2 flex-1 w-full sm:items-center sm:max-w-xl">
                 {/* Status Dropdown */}
                 <div className="w-full relative group min-w-0">
                     <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/30 uppercase tracking-[0.2em] z-10">Status</span>
