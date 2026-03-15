@@ -277,7 +277,7 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
                 aria-label={isOpen ? "Close Support Chat" : "Open Support Chat"}
                 aria-expanded={isOpen}
                 aria-haspopup="true"
-                className="w-16 h-16 bg-forest text-white rounded-lg shadow-card hover:brightness-110 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center pointer-events-auto relative border border-white/10"
+                className="w-16 h-16 bg-forest text-white rounded-lg shadow-card hover:brightness-110 transition-all active:scale-95 flex items-center justify-center pointer-events-auto relative border border-white/10"
             >
                 {isOpen ? <X className="w-7 h-7" /> : <MessageCircle className="w-7 h-7" />}
                 {!isOpen && unreadCount > 0 && (

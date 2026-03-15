@@ -102,7 +102,11 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
     const pastBookings = filteredBookings.filter(b =>
         ['completed', 'cancelled_refunded', 'cancelled_charged', 'rejected', 'expired'].includes(b.status) ||
         (['approved', 'pending', 'submitted', 'cancelled'].includes(b.status) && getSlotDateTime(b.slots?.date, b.slots?.start_time) <= now)
-    )
+    ).sort((a: any, b: any) => {
+        const dateA = getSlotDateTime(a.slots?.date, a.slots?.start_time).getTime()
+        const dateB = getSlotDateTime(b.slots?.date, b.slots?.start_time).getTime()
+        return dateB - dateA // Sort descending
+    })
 
     const isChatExpired = (booking: any) => {
         const endTime = getSlotDateTime(booking.slots?.date, booking.slots?.end_time)
@@ -149,7 +153,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                 )}
                                 <Link
                                     href="/customer"
-                                    className="px-4 py-2 bg-forest/10 text-forest text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-forest/20 transition-all border border-forest/20"
+                                    className="px-4 py-2 bg-charcoal text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-tight"
                                 >
                                     Browse Instructors
                                 </Link>

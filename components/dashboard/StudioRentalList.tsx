@@ -138,7 +138,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                             )}
                             <Link
                                 href="/studio"
-                                className="px-4 py-2 bg-forest/10 text-forest text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-forest/20 transition-all border border-forest/20"
+                                className="px-4 py-2 bg-charcoal text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-tight"
                             >
                                 Add Availability Slot
                             </Link>

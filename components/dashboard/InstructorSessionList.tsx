@@ -128,6 +128,13 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
         if (!slot) return false
         const endDateTime = getSlotEndDateTime(slot.date, slot.end_time || slot.start_time)
         return (b.status !== 'approved' || endDateTime <= now)
+    }).sort((a: any, b: any) => {
+        const slotA = getFirst(a.slots)
+        const slotB = getFirst(b.slots)
+        if (!slotA || !slotB) return 0
+        const dateA = getSlotDateTime(slotA.date, slotA.start_time).getTime()
+        const dateB = getSlotDateTime(slotB.date, slotB.start_time).getTime()
+        return dateB - dateA // Date descending
     }), [filteredBookings, now]);
 
     return (
@@ -149,7 +156,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 </div>
 
                 {activeBookings.length === 0 ? (
-                    <div className="py-8 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-border-grey/50 mx-6 sm:mx-0 px-6 shadow-tight relative overflow-hidden">
+                    <div className="py-6 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-border-grey/50 mx-6 sm:mx-0 px-6 shadow-tight relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-32 h-32 bg-forest/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl pointer-events-none" />
                         <div className="absolute bottom-0 right-0 w-32 h-32 bg-gold/5 rounded-full translate-x-1/2 translate-y-1/2 blur-2xl pointer-events-none" />
                         
@@ -171,7 +178,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             )}
                             <Link
                                 href="/instructor/schedule"
-                                className="w-full sm:w-auto px-8 py-3 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-md active:scale-95 text-center"
+                                className="w-full sm:w-auto px-8 py-3 bg-charcoal text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-md active:scale-95 text-center"
                             >
                                 Find a Studio / Add Slot
                             </Link>
@@ -404,9 +411,9 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             {/* Action Buttons (Desktop Only) */}
                                             <div className="hidden sm:flex flex-col items-end justify-center gap-1.5 shrink-0 ml-auto pl-2 h-full">
                                                 {booking.price_breakdown?.instructor_fee && (
-                                                    <div className="px-3 py-1 bg-forest/5 border border-forest/10 rounded flex items-center gap-1.5">
-                                                        <span className="text-[8px] font-black text-forest/50 uppercase tracking-widest">Earned</span>
-                                                        <span className="text-[12px] font-black text-forest tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                                                    <div className="px-3 py-1.5 bg-burgundy/5 border border-burgundy/10 rounded-lg flex items-center gap-2 shadow-sm">
+                                                        <span className="text-[9px] font-black text-burgundy/50 uppercase tracking-[0.2em]">Earned</span>
+                                                        <span className="text-[14px] font-black text-burgundy tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
                                                     </div>
                                                 )}
                                                 
@@ -442,8 +449,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                 </div>
                                                 {booking.price_breakdown?.instructor_fee && (
                                                     <div className="flex items-baseline gap-1.5">
-                                                        <span className="text-[7.5px] font-black text-forest/40 uppercase tracking-widest">Earnings:</span>
-                                                        <span className="text-[9px] font-black text-forest tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                                                        <span className="text-[7.5px] font-black text-burgundy/40 uppercase tracking-widest">Earnings:</span>
+                                                        <span className="text-[11px] font-black text-burgundy tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
                                                     </div>
                                                 )}
                                             </div>

@@ -710,13 +710,14 @@ export default function InstructorScheduleCalendar({
                                                                                 setIsEditModalOpen(true);
                                                                             }}
                                                                         >
-                                                                                <div className={clsx("flex flex-col items-start gap-1 overflow-hidden", duration < 45 && "justify-center")}>
-                                                                                    <div className={clsx("text-[10px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
-                                                                                        {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
-                                                                                    </div>
-                                                                                    
-                                                                                    <div className="text-[10px] font-black text-burgundy bg-white px-2 py-0.5 rounded-full border border-burgundy/5 whitespace-nowrap shadow-sm">
-                                                                                        0/1
+                                                                                <div className={clsx("flex flex-col items-start gap-1 overflow-hidden w-full", duration < 45 && "justify-center")}>
+                                                                                    <div className="flex justify-between items-start w-full gap-2">
+                                                                                        <div className={clsx("text-[10px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
+                                                                                            {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
+                                                                                        </div>
+                                                                                        <div className="text-[10px] font-black text-burgundy bg-white px-2 py-0.5 rounded-full border border-burgundy/5 whitespace-nowrap shadow-sm shrink-0">
+                                                                                            0/1
+                                                                                        </div>
                                                                                     </div>
 
                                                                                     <div className="flex flex-wrap items-center gap-1 overflow-hidden">

@@ -79,7 +79,7 @@ export default function MessageCountBadge({ bookingId, currentUserId, partnerId,
     if (unreadCount === 0) return null
 
     return (
-        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full animate-bounce shadow-sm font-bold">
+        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full shadow-sm font-bold">
             {unreadCount > 9 ? '9+' : unreadCount}
         </span>
     )
