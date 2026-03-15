@@ -375,7 +375,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                 type="date"
                                 value={dateFrom}
                                 onChange={e => { setDateFrom(e.target.value); resetPage() }}
-                                className="w-full px-4 py-3 text-[10px] font-black border border-cream-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer"
+                                className="w-full px-4 py-3 text-[10px] font-black border border-cream-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer pr-12"
                             />
                         </div>
                         <span className="text-charcoal/20 font-black">/</span>
@@ -384,7 +384,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                 type="date"
                                 value={dateTo}
                                 onChange={e => { setDateTo(e.target.value); resetPage() }}
-                                className="w-full px-4 py-3 text-[10px] font-black border border-cream-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer"
+                                className="w-full px-4 py-3 text-[10px] font-black border border-cream-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer pr-12"
                             />
                         </div>
                     </div>

@@ -286,7 +286,7 @@ export default function MobileScheduleCalendar({
                                             </div>
                                         ) : (
                                             <div className="bg-white text-muted-burgundy border border-[#E5E7EB] px-3 py-1 rounded-full text-[9px] font-black tracking-[0.1em] w-fit shadow-sm">
-                                                OPEN
+                                                0/1
                                             </div>
                                         )}
                                     </div>

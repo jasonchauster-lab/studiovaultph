@@ -118,7 +118,7 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                             min={getManilaTodayStr()}
                             onChange={(e) => handleFilter('date', e.target.value)}
                             value={searchParams.get('date') || ''}
-                            className="w-full sm:w-auto pl-8 pr-10 py-1.5 bg-off-white border border-burgundy/15 rounded-xl text-[10px] sm:text-[11px] font-bold text-burgundy shadow-tight focus:outline-none transition-all cursor-pointer hover:border-burgundy/25"
+                            className="w-full sm:w-auto pl-8 pr-12 py-1.5 bg-off-white border border-burgundy/15 rounded-xl text-[10px] sm:text-[11px] font-bold text-burgundy shadow-tight focus:outline-none transition-all cursor-pointer hover:border-burgundy/25"
                         />
                     </div>
                 </div>
@@ -136,7 +136,7 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                             }
                             onChange={(e) => handleFilter('time', e.target.value)}
                             value={searchParams.get('time') || ''}
-                            className="w-full sm:w-auto pl-8 pr-10 py-1.5 bg-off-white border border-burgundy/15 rounded-xl text-[10px] sm:text-[11px] font-bold text-burgundy shadow-tight focus:outline-none transition-all cursor-pointer hover:border-burgundy/25"
+                            className="w-full sm:w-auto pl-8 pr-12 py-1.5 bg-off-white border border-burgundy/15 rounded-xl text-[10px] sm:text-[11px] font-bold text-burgundy shadow-tight focus:outline-none transition-all cursor-pointer hover:border-burgundy/25"
                         />
                     </div>
                 </div>

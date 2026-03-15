@@ -92,7 +92,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                                     type="date"
                                     value={fromDate}
                                     onChange={(e) => setFromDate(e.target.value)}
-                                    className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none w-full pr-10"
+                                    className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none w-full pr-14"
                                     aria-label="From Date"
                                 />
                                 {fromDate && (
@@ -111,7 +111,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                                     type="date"
                                     value={toDate}
                                     onChange={(e) => setToDate(e.target.value)}
-                                    className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none w-full text-right sm:text-left pr-10"
+                                    className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none w-full text-right sm:text-left pr-14"
                                     aria-label="To Date"
                                 />
                                 {toDate && (

@@ -710,19 +710,24 @@ export default function InstructorScheduleCalendar({
                                                                                 setIsEditModalOpen(true);
                                                                             }}
                                                                         >
-                                                                            <div className={clsx("flex items-center gap-1 overflow-hidden", duration < 45 ? "flex-row" : "flex-col items-start")}>
-                                                                                <div className={clsx("text-[10px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
-                                                                                    {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
+                                                                                <div className={clsx("flex flex-col items-start gap-1 overflow-hidden", duration < 45 && "justify-center")}>
+                                                                                    <div className={clsx("text-[10px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
+                                                                                        {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
+                                                                                    </div>
+                                                                                    
+                                                                                    <div className="text-[10px] font-black text-burgundy bg-white px-2 py-0.5 rounded-full border border-burgundy/5 whitespace-nowrap shadow-sm">
+                                                                                        0/1
+                                                                                    </div>
+
+                                                                                    <div className="flex flex-wrap items-center gap-1 overflow-hidden">
+                                                                                        {locations.map((loc, idx) => (
+                                                                                            <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell ? "text-slate border-border-grey bg-white/50" : "text-burgundy border-burgundy/20 bg-buttermilk/10")}>
+                                                                                                <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-slate/40" : "text-burgundy/40")} />
+                                                                                                <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
+                                                                                            </div>
+                                                                                        ))}
+                                                                                    </div>
                                                                                 </div>
-                                                                                <div className="flex flex-wrap items-center gap-1 overflow-hidden">
-                                                                                    {locations.map((loc, idx) => (
-                                                                                        <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell ? "text-slate border-border-grey bg-white/50" : "text-burgundy border-burgundy/20 bg-buttermilk/10")}>
-                                                                                            <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-slate/40" : "text-burgundy/40")} />
-                                                                                            <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
-                                                                                        </div>
-                                                                                    ))}
-                                                                                </div>
-                                                                            </div>
 
                                                                         </div>
 
