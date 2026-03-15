@@ -1,4 +1,5 @@
 import { TrendingUp, Calendar, Zap, Star } from 'lucide-react'
+import { clsx } from 'clsx'
 
 interface StudioStatCardsProps {
     stats: {
@@ -16,27 +17,27 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             value: `₱${stats.revenue.toLocaleString()}`,
             icon: TrendingUp,
             trend: 'Last 30 Days',
-            trendColor: 'text-burgundy',
-            bgIcon: 'bg-burgundy/10',
-            iconColor: 'text-burgundy'
+            trendColor: 'text-sage',
+            bgIcon: 'bg-sage/10',
+            iconColor: 'text-sage'
         },
         {
             label: 'Active Listings',
             value: `${stats.activeListings} slots`,
             icon: Calendar,
             trend: 'This week',
-            trendColor: 'text-gold',
-            bgIcon: 'bg-gold/10',
-            iconColor: 'text-gold'
+            trendColor: 'text-burgundy',
+            bgIcon: 'bg-burgundy/5',
+            iconColor: 'text-burgundy'
         },
         {
             label: 'Average Occupancy',
             value: `${stats.occupancy}%`,
             icon: Zap,
             trend: 'Current Week',
-            trendColor: 'text-gold',
-            bgIcon: 'bg-gold/10',
-            iconColor: 'text-gold'
+            trendColor: 'text-burgundy',
+            bgIcon: 'bg-burgundy/5',
+            iconColor: 'text-burgundy'
         },
         {
             label: 'Top Instructor',
@@ -55,10 +56,16 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
                 {cardData.map((card, index) => (
                     <div key={index} className="earth-card p-4 group transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
                         <div className="flex justify-between items-start mb-4">
-                            <div className={`p-2.5 ${card.bgIcon.replace('bg-burgundy/10', 'bg-red-50').replace('bg-gold/10', 'bg-yellow-50')} rounded-lg group-hover:scale-110 transition-transform duration-300 shadow-tight border border-border-grey`}>
-                                <card.icon className={`w-4 h-4 ${card.iconColor.replace('text-burgundy', 'text-burgundy').replace('text-gold', 'text-yellow-600')}`} />
+                            <div className={clsx(
+                                "p-2.5 rounded-lg group-hover:scale-110 transition-transform duration-300 shadow-tight border border-border-grey bg-white",
+                                card.bgIcon
+                            )}>
+                                <card.icon className={clsx("w-4 h-4", card.iconColor)} />
                             </div>
-                            <span className="text-[8px] font-bold uppercase tracking-[0.1em] px-2.5 py-1 rounded-full border border-border-grey bg-buttermilk text-burgundy shadow-tight">
+                            <span className={clsx(
+                                "text-[8px] font-bold uppercase tracking-[0.1em] px-2.5 py-1 rounded-full border border-border-grey bg-white shadow-tight",
+                                card.trendColor
+                            )}>
                                 {card.trend}
                             </span>
                         </div>

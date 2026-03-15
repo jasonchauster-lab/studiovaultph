@@ -411,9 +411,9 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             {/* Action Buttons (Desktop Only) */}
                                             <div className="hidden sm:flex flex-col items-end justify-center gap-1.5 shrink-0 ml-auto pl-2 h-full">
                                                 {booking.price_breakdown?.instructor_fee && (
-                                                    <div className="px-3 py-1.5 bg-burgundy/5 border border-burgundy/10 rounded-lg flex items-center gap-2 shadow-sm">
-                                                        <span className="text-[9px] font-black text-burgundy/50 uppercase tracking-[0.2em]">Earned</span>
-                                                        <span className="text-[14px] font-black text-burgundy tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                                                    <div className="px-3 py-1.5 bg-sage/10 border border-sage/20 rounded-lg flex items-center gap-2 shadow-sm">
+                                                        <span className="text-[9px] font-black text-sage/70 uppercase tracking-[0.2em]">Earned</span>
+                                                        <span className="text-[14px] font-black text-sage tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
                                                     </div>
                                                 )}
                                                 
@@ -449,8 +449,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                 </div>
                                                 {booking.price_breakdown?.instructor_fee && (
                                                     <div className="flex items-baseline gap-1.5">
-                                                        <span className="text-[7.5px] font-black text-burgundy/40 uppercase tracking-widest">Earnings:</span>
-                                                        <span className="text-[11px] font-black text-burgundy tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                                                        <span className="text-[7.5px] font-black text-sage/60 uppercase tracking-widest">Earnings:</span>
+                                                        <span className="text-[11px] font-black text-sage tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
                                                     </div>
                                                 )}
                                             </div>

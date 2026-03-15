@@ -39,7 +39,7 @@ export default function StarRating({ rating, count, size = 'md' }: StarRatingPro
                             key={star}
                             className={starClass}
                             fill={fill === 1 ? '#D4AF37' : 'none'}
-                            stroke={fill > 0 ? '#D4AF37' : '#E5D1B8'}
+                            stroke={fill > 0 ? '#D4AF37' : '#E8E8E1'}
                             strokeWidth={1.5}
                         />
                     )

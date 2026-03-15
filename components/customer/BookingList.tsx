@@ -136,11 +136,11 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                 <div className="space-y-4">
                     {upcomingBookings.length === 0 ? (
                         <div className="min-h-[200px] py-12 flex flex-col items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0 px-4">
-                            <div className="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mb-4">
-                                <Calendar className="w-6 h-6 text-charcoal/30" />
+                            <div className="w-12 h-12 bg-burgundy/5 rounded-full flex items-center justify-center mb-4">
+                                <Calendar className="w-6 h-6 text-burgundy/30" />
                             </div>
-                            <h3 className="text-sm font-bold text-charcoal mb-1">No upcoming sessions booked.</h3>
-                            <p className="text-[11px] text-charcoal/50 max-w-[240px] mb-6">Try adjusting your filters or browse instructors to book your next class.</p>
+                            <h3 className="text-sm font-bold text-burgundy mb-1">No upcoming sessions booked.</h3>
+                            <p className="text-[11px] text-slate max-w-[240px] mb-6">Try adjusting your filters or browse instructors to book your next class.</p>
                             
                             <div className="flex flex-col sm:flex-row items-center gap-3">
                                 {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
@@ -153,7 +153,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                 )}
                                 <Link
                                     href="/customer"
-                                    className="px-4 py-2 bg-charcoal text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-tight"
+                                    className="px-4 py-2 bg-burgundy text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-tight"
                                 >
                                     Browse Instructors
                                 </Link>
@@ -179,7 +179,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-start justify-between gap-3">
                                                             <div className="flex flex-col gap-1 items-start min-w-0">
-                                                                <button onClick={() => handleStudioClick(studio)} className="text-base font-bold text-charcoal truncate w-full hover:text-forest transition-colors text-left">
+                                                                <button onClick={() => handleStudioClick(studio)} className="text-base font-bold text-burgundy truncate w-full hover:text-sage transition-colors text-left">
                                                                     {studio?.name || "Studio"}
                                                                 </button>
                                                                 <span className={clsx(
@@ -209,11 +209,11 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
 
                                     <div className="pt-4 border-t border-border-grey/50 space-y-3">
                                         <div className="flex items-center gap-3 group/inst">
-                                            <button onClick={() => handleInstructorClick(instructor)} className="w-7 h-7 rounded-full overflow-hidden bg-off-white shrink-0 border border-border-grey group-hover/inst:border-forest transition-colors">
-                                                <img src={instructor?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(instructor?.full_name || 'I')}&background=FAFAFA&color=1F2937`} className="w-full h-full object-cover" />
+                                            <button onClick={() => handleInstructorClick(instructor)} className="w-7 h-7 rounded-full overflow-hidden bg-off-white shrink-0 border border-border-grey group-hover/inst:border-sage transition-colors">
+                                                <img src={instructor?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(instructor?.full_name || 'I')}&background=FAFAFA&color=3C2F2F`} className="w-full h-full object-cover" />
                                             </button>
                                             <div className="text-sm text-slate truncate flex-1">
-                                                Instructor: <button onClick={() => handleInstructorClick(instructor)} className="font-bold text-charcoal hover:text-forest transition-colors hover:underline underline-offset-2">{instructor?.full_name || 'N/A'}</button>
+                                                Instructor: <button onClick={() => handleInstructorClick(instructor)} className="font-bold text-burgundy hover:text-sage transition-colors hover:underline underline-offset-2">{instructor?.full_name || 'N/A'}</button>
                                             </div>
                                         </div>
                                         {booking.status === 'rejected' && booking.rejection_reason && (
@@ -226,13 +226,13 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     <div className="flex flex-col sm:flex-row sm:items-end justify-between text-sm mt-4 pt-4 border-t border-border-grey/50 gap-4">
                                         <div className="flex flex-col gap-2.5">
                                             <div className="flex items-start gap-2.5">
-                                                <MapPin className="w-4 h-4 text-forest shrink-0 mt-0.5" />
-                                                <span className="font-bold text-charcoal leading-tight">
+                                                <MapPin className="w-4 h-4 text-sage shrink-0 mt-0.5" />
+                                                <span className="font-bold text-burgundy leading-tight">
                                                     {studio?.location || "N/A"}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2.5">
-                                                <Box className="w-4 h-4 text-forest shrink-0" />
+                                                <Box className="w-4 h-4 text-sage shrink-0" />
                                                 <span className="font-bold text-slate">
                                                     {Array.isArray(booking.slots?.equipment) && booking.slots.equipment.length > 0
                                                         ? `${booking.slots.equipment[0]} (${booking.quantity || 1})`
@@ -255,7 +255,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                             {booking.status !== 'rejected' && (
                                                 <button
                                                     onClick={() => setSelectedBooking(booking.id)}
-                                                    className="px-3 py-2 bg-white text-charcoal border border-border-grey rounded-lg hover:bg-forest hover:text-white hover:border-forest transition-all flex items-center gap-2 shadow-tight relative group/btn"
+                                                    className="px-3 py-2 bg-white text-burgundy border border-border-grey rounded-lg hover:bg-sage hover:text-white hover:border-sage transition-all flex items-center gap-2 shadow-tight relative group/btn"
                                                 >
                                                     <MessageCircle className="w-3.5 h-3.5" />
                                                     <span className="text-[11px] font-bold">Chat</span>
@@ -267,7 +267,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                     href={studio?.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((studio?.name || "") + " " + (studio?.location || ""))}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="px-3 py-2 bg-white text-forest border border-forest/20 rounded-lg hover:bg-forest hover:text-white transition-all flex items-center gap-2 shadow-tight"
+                                                    className="px-3 py-2 bg-white text-sage border border-sage/20 rounded-lg hover:bg-sage hover:text-white transition-all flex items-center gap-2 shadow-tight"
                                                 >
                                                     <Navigation className="w-3.5 h-3.5" />
                                                     <span className="text-[11px] font-bold">Directions</span>
@@ -296,8 +296,8 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                         <div className="text-slate text-sm shrink-0 font-medium">
                                             {getSlotDateTime(booking.slots?.date, booking.slots?.start_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </div>
-                                        <div className="font-bold text-charcoal">
-                                            <button onClick={() => handleStudioClick(studio)} className="hover:text-forest transition-colors hover:underline underline-offset-2">
+                                        <div className="font-bold text-burgundy">
+                                            <button onClick={() => handleStudioClick(studio)} className="hover:text-sage transition-colors hover:underline underline-offset-2">
                                                 {studio?.name || "Studio"}
                                             </button>
                                             <span className="mx-2 text-border-grey font-normal">•</span>
@@ -329,14 +329,13 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                                 revieweeName: instructor?.full_name || 'Instructor',
                                                                 context: 'Instructor'
                                                             })}
-                                                            className="px-3 py-1 bg-off-white text-charcoal text-[10px] font-bold rounded-full border border-border-grey hover:bg-forest hover:text-white hover:border-forest transition-all shadow-tight"
+                                                            className="px-3 py-1 bg-off-white text-burgundy text-[10px] font-bold rounded-full border border-border-grey hover:bg-sage hover:text-white hover:border-sage transition-all shadow-tight"
                                                         >
                                                             Review Instructor
                                                         </button>
                                                     ) : (
                                                         <span className="status-pill-earth status-pill-green">Instructor ✓</span>
                                                     )}
-
                                                     {hasStudioOwner && (!reviewedStudio ? (
                                                         <button
                                                             onClick={() => setReviewTarget({
@@ -346,7 +345,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                                 revieweeName: studio.name || 'Studio',
                                                                 context: 'Studio'
                                                             })}
-                                                            className="px-3 py-1 bg-off-white text-charcoal text-[10px] font-bold rounded-full border border-border-grey hover:bg-forest hover:text-white hover:border-forest transition-all shadow-tight"
+                                                            className="px-3 py-1 bg-off-white text-burgundy text-[10px] font-bold rounded-full border border-border-grey hover:bg-sage hover:text-white hover:border-sage transition-all shadow-tight"
                                                         >
                                                             Review Studio
                                                         </button>
@@ -407,9 +406,9 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
 
             {/* Instructor Profile Modal */}
             {selectedInstructor && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }}>
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-burgundy/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }}>
                     <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }} className="absolute top-4 right-4 z-10 text-charcoal/40 hover:text-charcoal transition-colors"><X className="w-5 h-5" /></button>
+                        <button onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }} className="absolute top-4 right-4 z-10 text-burgundy/40 hover:text-burgundy transition-colors"><X className="w-5 h-5" /></button>
 
                         <div className="overflow-y-auto flex-1 p-6">
                             <div className="flex flex-col items-center mt-2 mb-5 text-center">
@@ -425,7 +424,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                 </div>
                                 <h3 className="text-xl font-serif text-charcoal-900">{selectedInstructor.full_name}</h3>
                                 {instructorDetails?.instructor?.instagram_handle && (
-                                    <a href={`https://instagram.com/${instructorDetails.instructor.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 mt-1 text-xs text-charcoal/40 hover:text-charcoal/70 transition-colors">
+                                    <a href={`https://instagram.com/${instructorDetails.instructor.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 mt-1 text-xs text-burgundy/40 hover:text-burgundy/70 transition-colors">
                                         <Instagram className="w-3 h-3" />
                                         @{instructorDetails.instructor.instagram_handle}
                                     </a>
@@ -433,9 +432,9 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                 {!loadingInstructor && instructorDetails && (
                                     <div className="flex items-center gap-1 mt-2">
                                         {Array.from({ length: 5 }).map((_, i) => (
-                                            <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(instructorDetails.averageRating || 0) ? 'fill-amber-400 text-amber-400' : 'text-charcoal/20'}`} />
+                                            <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(instructorDetails.averageRating || 0) ? 'fill-gold text-gold' : 'text-burgundy/20'}`} />
                                         ))}
-                                        {instructorDetails.totalCount > 0 && <span className="text-xs text-charcoal/40 ml-1">({instructorDetails.totalCount})</span>}
+                                        {instructorDetails.totalCount > 0 && <span className="text-xs text-burgundy/40 ml-1">({instructorDetails.totalCount})</span>}
                                     </div>
                                 )}
                             </div>
@@ -445,9 +444,9 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                             {!loadingInstructor && instructorDetails && (
                                 <>
                                     {instructorDetails.instructor?.bio && (
-                                        <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50 mb-3">
-                                            <h4 className="text-sm font-bold text-charcoal/70 mb-1">About</h4>
-                                            <p className="text-sm text-charcoal/60 leading-relaxed italic">"{instructorDetails.instructor.bio}"</p>
+                                        <div className="bg-pastel-blue p-4 rounded-xl border border-border-grey mb-3">
+                                            <h4 className="text-sm font-bold text-burgundy/70 mb-1">About</h4>
+                                            <p className="text-sm text-slate leading-relaxed italic">"{instructorDetails.instructor.bio}"</p>
                                         </div>
                                     )}
                                     {instructorDetails.certifications.length > 0 && (
@@ -519,9 +518,9 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
 
             {/* Studio Profile Modal */}
             {selectedStudio && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => { setSelectedStudio(null); setStudioDetails(null) }}>
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-burgundy/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => { setSelectedStudio(null); setStudioDetails(null) }}>
                     <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => { setSelectedStudio(null); setStudioDetails(null) }} className="absolute top-4 right-4 z-10 text-charcoal/40 hover:text-charcoal transition-colors"><X className="w-5 h-5" /></button>
+                        <button onClick={() => { setSelectedStudio(null); setStudioDetails(null) }} className="absolute top-4 right-4 z-10 text-burgundy/40 hover:text-burgundy transition-colors"><X className="w-5 h-5" /></button>
 
                         <div className="overflow-y-auto flex-1 p-6">
                             <div className="flex flex-col items-center mt-2 mb-5 text-center">
@@ -559,9 +558,9 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                             {!loadingStudio && studioDetails && (
                                 <>
                                     {studioDetails.studio?.bio && (
-                                        <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50 mb-3">
-                                            <h4 className="text-sm font-bold text-charcoal/70 mb-1">About</h4>
-                                            <p className="text-sm text-charcoal/60 leading-relaxed italic">"{studioDetails.studio.bio}"</p>
+                                        <div className="bg-pastel-blue p-4 rounded-xl border border-border-grey mb-3">
+                                            <h4 className="text-sm font-bold text-burgundy/70 mb-1">About</h4>
+                                            <p className="text-sm text-slate leading-relaxed italic">"{studioDetails.studio.bio}"</p>
                                         </div>
                                     )}
                                     {studioDetails.studio?.space_photos_urls?.length > 0 && (
@@ -607,11 +606,11 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                             )}
                         </div>
 
-                        <div className="p-4 border-t border-cream-100 flex gap-2">
-                            <Link href={`/studios/${selectedStudio.id}`} target="_blank" className="flex-1 py-2.5 text-center bg-charcoal/5 text-charcoal/70 rounded-xl font-bold text-sm hover:bg-charcoal/10 transition-colors">
+                        <div className="p-4 border-t border-border-grey flex gap-2">
+                            <Link href={`/studios/${selectedStudio.id}`} target="_blank" className="flex-1 py-2.5 text-center bg-burgundy/5 text-burgundy/70 rounded-xl font-bold text-sm hover:bg-burgundy/10 transition-colors">
                                 View Full Profile
                             </Link>
-                            <button onClick={() => { setSelectedStudio(null); setStudioDetails(null) }} className="flex-1 py-2.5 bg-charcoal-900 text-white rounded-xl font-bold text-sm hover:bg-charcoal-800 transition-colors">
+                            <button onClick={() => { setSelectedStudio(null); setStudioDetails(null) }} className="flex-1 py-2.5 bg-burgundy text-white rounded-xl font-bold text-sm hover:brightness-110 transition-colors">
                                 Close
                             </button>
                         </div>

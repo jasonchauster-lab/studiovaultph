@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  /* Studio Vault PH Design System — Mother Earth Palette */
-  --off-white: #F4F1E2;      /* Lucky Dice */
-  --burgundy: #513229;       /* Mother Earth */
-  --muted-burgundy: #7C6B69;  /* Softened version of Mother Earth */
-  --buttermilk: #FCE6B7;     /* The Bay — accents, highlighted prices, tags */
-  --pastel-blue: #D8EBF9;    /* Something Blue */
-  --walking-vinnie: #D7D4B1; /* Success / Completed / Verified badges */
-  --border-grey: #E5E7EB;
-  --sage: #708669;
-  --forest: #2F5233;
+  /* Studio Vault PH Design System — Minimalist Luxury Palette */
+  --off-white: #FAF9F6;      /* Bone / Cooler Linen */
+  --burgundy: #3C2F2F;       /* Espresso */
+  --muted-burgundy: #666666;  /* Slate Grey (slightly darkened for accessibility) */
+  --buttermilk: #D4AF37;     /* Gold — incentives, special highlights */
+  --pastel-blue: #F0F2F5;    /* Soft Neutral */
+  --walking-vinnie: #8BA889; /* Sage Green — Positive indicators */
+  --border-grey: #E8E8E1;
+  --sage: #8BA889;
+  --gold: #D4AF37;
 
   --background: var(--off-white);
   --foreground: var(--burgundy);
@@ -18,9 +18,9 @@
   --radius: 8px;
   --radius-pill: 9999px;
 
-  /* Refined shadows */
-  --shadow-tight: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-  --shadow-card: 0 4px 6px -1px rgba(81, 50, 41, 0.07), 0 2px 4px -1px rgba(81, 50, 41, 0.04);
+  /* Refined shadows for Minimalist Luxury — "feel rather than see" */
+  --shadow-tight: 0 1px 2px 0 rgba(60, 47, 47, 0.03);
+  --shadow-card: 0 10px 15px -3px rgba(60, 47, 47, 0.04), 0 4px 6px -2px rgba(60, 47, 47, 0.02);
 }
 
 @theme inline {
@@ -39,7 +39,7 @@
   /* Legacy Mappings */
   --color-charcoal: var(--burgundy);
   --color-slate: var(--muted-burgundy);
-  --color-forest: var(--forest);
+  --color-forest: var(--sage);
   --color-sage: var(--sage);
 
   /* System Mappings */
@@ -76,8 +76,8 @@ input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
   box-shadow: 0 0 0 1000px #ffffff inset !important;
-  -webkit-text-fill-color: #513229 !important;
-  caret-color: #513229;
+  -webkit-text-fill-color: #3C2F2F !important;
+  caret-color: #3C2F2F;
   transition: background-color 9999s ease-in-out 0s;
 }
 

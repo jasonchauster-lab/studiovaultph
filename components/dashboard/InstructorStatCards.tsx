@@ -19,9 +19,9 @@ export default function InstructorStatCards({ stats, hasPendingPayout }: Instruc
             value: `₱${stats.balance.toLocaleString()}`,
             icon: Wallet,
             trend: hasPendingPayout ? 'Payout Pending' : 'Verified',
-            trendColor: hasPendingPayout ? 'text-gold' : 'text-burgundy',
-            bgIcon: hasPendingPayout ? 'bg-[#FCE6B7]' : 'bg-burgundy/10',
-            iconColor: hasPendingPayout ? 'text-gold-deep' : 'text-burgundy',
+            trendColor: hasPendingPayout ? 'text-gold' : 'text-sage',
+            bgIcon: hasPendingPayout ? 'bg-gold/10' : 'bg-sage/10',
+            iconColor: hasPendingPayout ? 'text-gold' : 'text-sage',
             hasAction: true
         },
         {
@@ -39,17 +39,17 @@ export default function InstructorStatCards({ stats, hasPendingPayout }: Instruc
             icon: Clock,
             trend: 'Historical',
             trendColor: 'text-burgundy',
-            bgIcon: 'bg-[#FCE6B7]',
-            iconColor: 'text-gold-deep'
+            bgIcon: 'bg-burgundy/5',
+            iconColor: 'text-burgundy'
         },
         {
             label: 'Pending Earnings',
             value: `₱${stats.pendingEarnings.toLocaleString()}`,
             icon: Banknote,
             trend: 'Est. Future',
-            trendColor: 'text-burgundy',
-            bgIcon: 'bg-burgundy/10',
-            iconColor: 'text-burgundy'
+            trendColor: 'text-sage',
+            bgIcon: 'bg-sage/10',
+            iconColor: 'text-sage'
         }
     ]
 
@@ -61,14 +61,14 @@ export default function InstructorStatCards({ stats, hasPendingPayout }: Instruc
     
                         <div className="flex justify-between items-start mb-4">
                             <div className={clsx(
-                                "p-2.5 rounded-lg group-hover:scale-110 transition-all duration-300 border border-border-grey shadow-tight",
-                                card.iconColor === 'text-gold-deep' ? "bg-[#FCE6B7]" : "bg-red-50"
+                                "p-2.5 rounded-lg group-hover:scale-110 transition-all duration-300 border border-border-grey shadow-tight bg-white",
+                                card.bgIcon
                             )}>
-                                <card.icon className={clsx("w-4 h-4", card.iconColor === 'text-gold-deep' ? "text-[#B4941F]" : "text-burgundy")} />
+                                <card.icon className={clsx("w-4 h-4", card.iconColor)} />
                             </div>
                             <span className={clsx(
-                                "text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full border border-border-grey shadow-tight",
-                                card.iconColor === 'text-gold-deep' ? "bg-[#FCE6B7] text-[#43302E]" : "bg-red-50 text-burgundy"
+                                "text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full border border-border-grey shadow-tight bg-white",
+                                card.trendColor
                             )}>
                                 {card.trend}
                             </span>
