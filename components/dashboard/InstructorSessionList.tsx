@@ -169,7 +169,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                 </button>
                             )}
                             <Link
-                                href="/instructors"
+                                href="/instructor/schedule"
                                 className="w-full sm:w-auto px-8 py-3 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-md active:scale-95 text-center"
                             >
                                 Find a Studio / Add Slot

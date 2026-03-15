@@ -148,7 +148,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     </button>
                                 )}
                                 <Link
-                                    href="/instructors"
+                                    href="/customer"
                                     className="px-4 py-2 bg-forest/10 text-forest text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-forest/20 transition-all border border-forest/20"
                                 >
                                     Browse Instructors

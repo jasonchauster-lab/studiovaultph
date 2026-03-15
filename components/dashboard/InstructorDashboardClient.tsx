@@ -843,7 +843,7 @@ export default function InstructorDashboardClient({
                                     </div>
                                     <h4 className="text-xl font-serif text-charcoal tracking-tight">Setup Required</h4>
                                     <p className="text-xs text-slate leading-relaxed uppercase tracking-widest font-medium">Please define your teaching equipment and rates in settings first.</p>
-                                    <Link href="/instructor/settings" className="block w-full py-4 bg-burgundy text-white rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-tight active:scale-95">Go to Settings</Link>
+                                    <Link href="/instructor/profile" className="block w-full py-4 bg-burgundy text-white rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-tight active:scale-95">Go to Settings</Link>
                                 </div>
                             ) : (
                                 <form onSubmit={handleCreateSingle} className="space-y-8">
