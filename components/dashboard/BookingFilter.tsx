@@ -61,13 +61,13 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
 
             <div className="grid grid-cols-2 gap-3 sm:gap-2 flex-1 w-full sm:items-center">
                 {/* Status Dropdown */}
-                <div className="w-full shrink-0 relative group min-w-0">
+                <div className="w-full relative group min-w-0">
                     <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/30 uppercase tracking-[0.2em] z-10">Status</span>
-                    <div className="relative h-10 sm:h-auto">
+                    <div className="relative h-11">
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value as FilterStatus)}
-                            className="bg-white sm:bg-cream-50 border border-cream-200 text-charcoal-700 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg focus:ring-forest focus:border-forest block w-full py-2.5 sm:py-1.5 px-3 sm:px-2 outline-none transition-colors shadow-sm sm:shadow-none appearance-none"
+                            className="w-full h-full pl-3 pr-8 bg-white sm:bg-cream-50 border border-cream-200 text-charcoal-700 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg focus:ring-forest focus:border-forest block py-2.5 sm:py-1.5 outline-none transition-colors shadow-sm sm:shadow-none appearance-none"
                         >
                             <option value="all">ANY STATUS</option>
                             <option value="approved">Approved</option>
@@ -78,48 +78,48 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                     </div>
                 </div>
 
-                {/* Date Range Group */}
-                <div className={clsx(
-                    "flex items-center justify-between gap-1 sm:gap-2 border rounded-lg px-2 sm:px-2 py-2 sm:py-1 shrink-0 sm:shrink transition-all duration-300 overflow-hidden sm:min-w-0 w-full",
-                    (fromDate || toDate) ? "bg-forest/5 border-forest/20 ring-1 ring-forest/10" : "bg-white sm:bg-cream-50 border-cream-200 shadow-sm sm:shadow-none"
-                )}>
-                    <CalendarIcon className={clsx("hidden sm:block w-3.5 h-3.5 shrink-0 transition-colors", (fromDate || toDate) ? "text-forest" : "text-charcoal-400")} />
-                    
-                    <div className="flex flex-col flex-1 min-w-0 relative h-9 justify-center">
-                        {!fromDate && <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] sm:text-[8px] font-black uppercase text-charcoal/30 tracking-[0.2em] pointer-events-none z-10">Start</span>}
-                        <div className="flex items-center gap-0.5 w-full">
-                            <input
-                                type="date"
-                                value={fromDate}
-                                onChange={(e) => setFromDate(e.target.value)}
-                                className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none w-full"
-                                aria-label="From Date"
-                            />
-                            {fromDate && (
-                                <button onClick={() => setFromDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors shrink-0">
-                                    <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                                </button>
-                            )}
+                <div className="w-full relative group min-w-0">
+                    <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/30 uppercase tracking-[0.2em] z-10">Date</span>
+                    <div className={clsx(
+                        "flex items-center justify-between gap-1 sm:gap-2 border rounded-lg px-2 sm:px-2 py-0 shrink-0 sm:shrink transition-all duration-300 overflow-hidden sm:min-w-0 w-full h-11",
+                        (fromDate || toDate) ? "bg-forest/5 border-forest/20 ring-1 ring-forest/10" : "bg-white sm:bg-cream-50 border-cream-200 shadow-sm sm:shadow-none"
+                    )}>
+                        <CalendarIcon className={clsx("hidden sm:block w-3.5 h-3.5 shrink-0 transition-colors", (fromDate || toDate) ? "text-forest" : "text-charcoal-400")} />
+                        
+                        <div className="flex flex-col flex-1 min-w-0 relative h-full justify-center">
+                            <div className="flex items-center gap-0.5 w-full">
+                                <input
+                                    type="date"
+                                    value={fromDate}
+                                    onChange={(e) => setFromDate(e.target.value)}
+                                    className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none w-full"
+                                    aria-label="From Date"
+                                />
+                                {fromDate && (
+                                    <button onClick={() => setFromDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors shrink-0">
+                                        <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                    </button>
+                                )}
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="w-[1px] h-4 bg-charcoal/10 self-center mx-2" />
+                        <div className="w-[1px] h-4 bg-charcoal/10 self-center mx-2" />
 
-                    <div className="flex flex-col flex-1 min-w-0 relative h-9 justify-center">
-                        {!toDate && <span className="absolute -top-2 right-2 px-1 bg-white text-[7px] sm:text-[8px] font-black uppercase text-charcoal/30 tracking-[0.2em] pointer-events-none z-10">End</span>}
-                        <div className="flex items-center gap-0.5 w-full justify-end">
-                            <input
-                                type="date"
-                                value={toDate}
-                                onChange={(e) => setToDate(e.target.value)}
-                                className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none w-full text-right sm:text-left"
-                                aria-label="To Date"
-                            />
-                            {toDate && (
-                                <button onClick={() => setToDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors shrink-0">
-                                    <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                                </button>
-                            )}
+                        <div className="flex flex-col flex-1 min-w-0 relative h-full justify-center">
+                            <div className="flex items-center gap-0.5 w-full justify-end">
+                                <input
+                                    type="date"
+                                    value={toDate}
+                                    onChange={(e) => setToDate(e.target.value)}
+                                    className="bg-transparent text-charcoal-700 text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none w-full text-right sm:text-left"
+                                    aria-label="To Date"
+                                />
+                                {toDate && (
+                                    <button onClick={() => setToDate('')} className="p-0.5 hover:text-rose-gold text-charcoal-300 transition-colors shrink-0">
+                                        <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
