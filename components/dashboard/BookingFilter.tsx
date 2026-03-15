@@ -59,9 +59,9 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                 <span className="text-[9px] font-black uppercase tracking-widest inline-block">FILTER</span>
             </div>
 
-            <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 sm:gap-2 flex-1 w-full">
+            <div className="grid grid-cols-2 gap-3 sm:gap-2 flex-1 w-full sm:items-center">
                 {/* Status Dropdown */}
-                <div className="w-full sm:w-[130px] shrink-0 relative group">
+                <div className="w-full shrink-0 relative group min-w-0">
                     <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/30 uppercase tracking-[0.2em] z-10">Status</span>
                     <div className="relative h-10 sm:h-auto">
                         <select
@@ -80,7 +80,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
 
                 {/* Date Range Group */}
                 <div className={clsx(
-                    "flex items-center justify-between gap-1 sm:gap-2 border rounded-lg px-2 sm:px-2 py-2 sm:py-1 shrink-0 transition-all duration-300 overflow-hidden sm:min-w-0",
+                    "flex items-center justify-between gap-1 sm:gap-2 border rounded-lg px-2 sm:px-2 py-2 sm:py-1 shrink-0 sm:shrink transition-all duration-300 overflow-hidden sm:min-w-0 w-full",
                     (fromDate || toDate) ? "bg-forest/5 border-forest/20 ring-1 ring-forest/10" : "bg-white sm:bg-cream-50 border-cream-200 shadow-sm sm:shadow-none"
                 )}>
                     <CalendarIcon className={clsx("hidden sm:block w-3.5 h-3.5 shrink-0 transition-colors", (fromDate || toDate) ? "text-forest" : "text-charcoal-400")} />

@@ -215,9 +215,9 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                         </span>
                                                     </div>
 
-                                                    <button onClick={() => handleInstructorClick(instructor)} className="text-[11px] font-bold text-charcoal/70 hover:text-charcoal transition-colors hover:underline underline-offset-2 whitespace-normal break-words text-left flex items-center gap-1.5">
-                                                        <span className="text-[9px] font-bold uppercase tracking-widest text-[#43302E]">Instructor:</span>
-                                                        {instructor?.full_name || "Instructor"}
+                                                    <button onClick={() => handleInstructorClick(instructor)} className="text-[11px] font-bold text-charcoal/70 hover:text-charcoal transition-colors hover:underline underline-offset-2 whitespace-normal break-words text-left flex items-center gap-1.5 py-0.5">
+                                                        <span className="text-[10px] font-normal text-charcoal/50 lowercase tracking-tight">instructor:</span>
+                                                        <span className="font-bold text-charcoal/90">{instructor?.full_name || "Instructor"}</span>
                                                     </button>
                                                 </div>
 
@@ -262,11 +262,11 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                     </div>
 
                                     {/* Row 3: Earnings & Action */}
-                                    <div className="flex items-stretch justify-between gap-2 pt-5 border-t border-border-grey sm:border-t-0 sm:pt-0">
+                                    <div className="flex items-center justify-between gap-4 pt-5 border-t border-border-grey sm:border-t-0 sm:pt-0 w-full mt-auto">
                                         {['completed', 'approved'].includes(booking.status) ? (
-                                            <div className="flex-1 px-3 py-2 bg-forest/5 border border-forest/10 rounded flex flex-col items-center justify-center gap-0.5">
-                                                <span className="text-[7px] sm:text-[8px] font-black text-forest/50 uppercase tracking-widest">Earned</span>
-                                                <span className="text-[10px] sm:text-[12px] font-black text-forest tracking-tighter">₱{Number(studioFee || booking.total_price || 0).toLocaleString()}</span>
+                                            <div className="flex items-baseline gap-1.5">
+                                                <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.2em]">EARNED</span>
+                                                <span className="text-sm font-black text-charcoal tracking-tighter">₱{Number(studioFee || booking.total_price || 0).toLocaleString()}</span>
                                             </div>
                                         ) : <div className="flex-1" />}
 
@@ -338,11 +338,12 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                             <div className="flex flex-col items-center mt-2 mb-5 text-center">
                                 <div className="w-20 h-20 rounded-full overflow-hidden mb-3 border border-cream-200 bg-cream-50">
                                     <img
-                                        src={instructorDetails?.instructor?.avatar_url
-                                            ? `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${instructorDetails.instructor.avatar_url}`
-                                            : selectedInstructor?.avatar_url
-                                                ? `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${selectedInstructor.avatar_url}`
-                                                : `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedInstructor.full_name || 'I')}&background=F5F2EB&color=2C3230`}
+                                        src={(() => {
+                                            const url = instructorDetails?.instructor?.avatar_url || selectedInstructor?.avatar_url
+                                            if (!url) return `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedInstructor.full_name || 'I')}&background=F5F2EB&color=2C3230`
+                                            if (url.startsWith('http')) return url
+                                            return `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${url}`
+                                        })()}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
@@ -446,17 +447,10 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                             )}
                         </div>
 
-                        <div className="p-4 border-t border-cream-100 flex gap-2">
-                            <Link
-                                href={`/instructors/${selectedInstructor.id}`}
-                                target="_blank"
-                                className="flex-1 py-2.5 text-center bg-charcoal-100 text-charcoal-700 rounded-xl font-bold text-sm hover:bg-charcoal-200 transition-colors"
-                            >
-                                View Full Profile
-                            </Link>
+                        <div className="p-4 border-t border-cream-100">
                             <button
                                 onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }}
-                                className="flex-1 py-2.5 bg-charcoal-900 text-white rounded-xl font-bold text-sm hover:bg-charcoal-800 transition-colors"
+                                className="w-full py-2.5 bg-charcoal-900 text-white rounded-xl font-bold text-sm hover:bg-charcoal-800 transition-colors"
                             >
                                 Close
                             </button>
@@ -486,12 +480,13 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                     )}
                                 </div>
                             </div>
-                            {selectedClient.bio && (
-                                <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50 mb-3">
-                                    <h4 className="text-sm font-bold text-charcoal-700 mb-1">About</h4>
-                                    <p className="text-sm text-charcoal-600 leading-relaxed italic">"{selectedClient.bio}"</p>
-                                </div>
-                            )}
+                            <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50 mb-3">
+                                <h4 className="text-sm font-bold text-charcoal-700 mb-1">About</h4>
+                                {selectedClient.bio
+                                    ? <p className="text-sm text-charcoal-600 leading-relaxed italic">"{selectedClient.bio}"</p>
+                                    : <p className="text-sm text-charcoal-500 italic">No bio provided.</p>
+                                }
+                            </div>
                             {(() => {
                                 const conditions = typeof selectedClient.medical_conditions === 'string'
                                     ? selectedClient.medical_conditions.split(',').map((c: string) => c.trim())
