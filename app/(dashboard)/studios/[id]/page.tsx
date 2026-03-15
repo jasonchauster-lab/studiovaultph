@@ -195,6 +195,19 @@ export default async function StudioDetailsPage(props: {
                     </div>
                 </div>
 
+                {/* Studio Gallery Section */}
+                {studio.space_photos_urls && studio.space_photos_urls.length > 0 && (
+                    <div className="glass-card p-8 rounded-[32px] bg-white border-border-grey shadow-cloud">
+                        <h2 className="text-2xl font-serif font-bold text-burgundy mb-8 flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
+                                <ImageIcon className="w-5 h-5 text-gold" />
+                            </div>
+                            The Studio
+                        </h2>
+                        <PublicInstructorGallery images={studio.space_photos_urls} />
+                    </div>
+                )}
+
                 {/* Booking Section */}
                 <div className="glass-card p-8 rounded-[32px] bg-white border-border-grey shadow-cloud">
                     <h2 className="text-2xl font-serif font-bold text-burgundy mb-8 flex items-center gap-3">
@@ -232,20 +245,6 @@ export default async function StudioDetailsPage(props: {
                         );
                     })()}
                 </div>
-
-                {/* Studio Gallery Section */}
-                {studio.space_photos_urls && studio.space_photos_urls.length > 0 && (
-                    <div className="glass-card p-8 rounded-[32px] bg-white border-border-grey shadow-cloud">
-                        <h2 className="text-2xl font-serif font-bold text-burgundy mb-8 flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
-                                <ImageIcon className="w-5 h-5 text-gold" />
-                            </div>
-                            The Studio
-                        </h2>
-                        <PublicInstructorGallery images={studio.space_photos_urls} />
-                    </div>
-                )}
-
 
                 {/* Reviews Section */}
                 <div id="reviews" className="glass-card p-8 rounded-[32px] bg-white border-border-grey shadow-cloud scroll-mt-24">

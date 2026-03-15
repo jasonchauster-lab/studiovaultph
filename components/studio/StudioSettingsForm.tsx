@@ -20,7 +20,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
     const [logo, setLogo] = useState<File | null>(null)
     const [logoPreview, setLogoPreview] = useState<string | null>(studio.logo_url)
 
-    const [existingPhotos, setExistingPhotos] = useState<string[]>(studio.space_photos || [])
+    const [existingPhotos, setExistingPhotos] = useState<string[]>(studio.space_photos_urls || studio.space_photos || [])
     const [newSpacePhotos, setNewSpacePhotos] = useState<File[]>([])
 
     const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
