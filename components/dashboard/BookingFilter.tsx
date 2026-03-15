@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Filter, Calendar as CalendarIcon, X } from 'lucide-react'
+import { Filter, Calendar as CalendarIcon, X, ChevronDown } from 'lucide-react'
 import clsx from 'clsx'
 
 export type FilterStatus = 'all' | 'approved' | 'completed' | 'cancelled'
@@ -61,17 +61,21 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
 
             <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 sm:gap-2 flex-1 w-full">
                 {/* Status Dropdown */}
-                <div className="w-full sm:w-[130px] shrink-0">
-                    <select
-                        value={status}
-                        onChange={(e) => setStatus(e.target.value as FilterStatus)}
-                        className="bg-white sm:bg-cream-50 border border-cream-200 text-charcoal-700 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg focus:ring-forest focus:border-forest block w-full py-2.5 sm:py-1.5 px-3 sm:px-2 outline-none transition-colors shadow-sm sm:shadow-none"
-                    >
-                        <option value="all">Status</option>
-                        <option value="approved">Approved</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
+                <div className="w-full sm:w-[130px] shrink-0 relative group">
+                    <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/30 uppercase tracking-[0.2em] z-10">Status</span>
+                    <div className="relative h-10 sm:h-auto">
+                        <select
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value as FilterStatus)}
+                            className="bg-white sm:bg-cream-50 border border-cream-200 text-charcoal-700 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg focus:ring-forest focus:border-forest block w-full py-2.5 sm:py-1.5 px-3 sm:px-2 outline-none transition-colors shadow-sm sm:shadow-none appearance-none"
+                        >
+                            <option value="all">ANY STATUS</option>
+                            <option value="approved">Approved</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-charcoal/30 pointer-events-none sm:hidden" />
+                    </div>
                 </div>
 
                 {/* Date Range Group */}
@@ -81,8 +85,8 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                 )}>
                     <CalendarIcon className={clsx("hidden sm:block w-3.5 h-3.5 shrink-0 transition-colors", (fromDate || toDate) ? "text-forest" : "text-charcoal-400")} />
                     
-                    <div className="flex flex-col flex-1 min-w-0 relative h-7 justify-center">
-                        {!fromDate && <span className="absolute left-0 top-[55%] -translate-y-1/2 text-[7px] sm:text-[8px] font-black uppercase text-charcoal/20 tracking-[0.2em] pointer-events-none">Start</span>}
+                    <div className="flex flex-col flex-1 min-w-0 relative h-9 justify-center">
+                        {!fromDate && <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] sm:text-[8px] font-black uppercase text-charcoal/30 tracking-[0.2em] pointer-events-none z-10">Start</span>}
                         <div className="flex items-center gap-0.5 w-full">
                             <input
                                 type="date"
@@ -99,10 +103,10 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                         </div>
                     </div>
 
-                    <div className="w-[1px] h-4 bg-charcoal/10 self-center mx-1" />
+                    <div className="w-[1px] h-4 bg-charcoal/10 self-center mx-2" />
 
-                    <div className="flex flex-col flex-1 min-w-0 relative h-7 justify-center">
-                        {!toDate && <span className="absolute right-0 top-[55%] -translate-y-1/2 text-[7px] sm:text-[8px] font-black uppercase text-charcoal/20 tracking-[0.2em] pointer-events-none">End</span>}
+                    <div className="flex flex-col flex-1 min-w-0 relative h-9 justify-center">
+                        {!toDate && <span className="absolute -top-2 right-2 px-1 bg-white text-[7px] sm:text-[8px] font-black uppercase text-charcoal/30 tracking-[0.2em] pointer-events-none z-10">End</span>}
                         <div className="flex items-center gap-0.5 w-full justify-end">
                             <input
                                 type="date"

@@ -115,7 +115,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
     })
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-48">
             <BookingFilter key={resetKey} onFilterChange={setFilters} />
 
             <div className="space-y-4">
@@ -189,10 +189,12 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                 <div className="flex flex-col gap-0.5">
                                                     <div className="flex items-center gap-2">
                                                         {client && (
-                                                            <button onClick={() => setSelectedClient(client)} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity min-w-0">
-                                                                <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-5 h-5 rounded-full border border-border-grey shrink-0 object-cover" />
-                                                                <span className="text-sm font-bold text-charcoal/90 truncate">{client.full_name}</span>
-                                                            </button>
+                                                        <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 py-0.5">
+                                                            <div className="w-6 h-6 rounded-full bg-forest/10 border border-border-grey flex items-center justify-center shrink-0 overflow-hidden">
+                                                                <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
+                                                            </div>
+                                                            <span className="text-sm font-bold text-charcoal/90 truncate mt-0.5">{client.full_name}</span>
+                                                        </button>
                                                         )}
                                                         <span className="hidden sm:flex items-center">
                                                             <span className={clsx(
@@ -213,8 +215,8 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                         </span>
                                                     </div>
 
-                                                    <button onClick={() => handleInstructorClick(instructor)} className="text-[11px] font-bold text-charcoal/60 hover:text-charcoal transition-colors hover:underline underline-offset-2 whitespace-normal break-words text-left flex items-center gap-1.5">
-                                                        <span className="text-[9px] font-black uppercase tracking-widest opacity-40">Instructor:</span>
+                                                    <button onClick={() => handleInstructorClick(instructor)} className="text-[11px] font-bold text-charcoal/70 hover:text-charcoal transition-colors hover:underline underline-offset-2 whitespace-normal break-words text-left flex items-center gap-1.5">
+                                                        <span className="text-[9px] font-bold uppercase tracking-widest text-[#43302E]">Instructor:</span>
                                                         {instructor?.full_name || "Instructor"}
                                                     </button>
                                                 </div>
@@ -262,7 +264,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                     {/* Row 3: Earnings & Action */}
                                     <div className="flex items-stretch justify-between gap-2 pt-5 border-t border-border-grey sm:border-t-0 sm:pt-0">
                                         {['completed', 'approved'].includes(booking.status) ? (
-                                            <div className="flex-1 px-3 py-2 bg-forest/5 border border-forest/10 rounded flex items-center justify-center gap-2">
+                                            <div className="flex-1 px-3 py-2 bg-forest/5 border border-forest/10 rounded flex flex-col items-center justify-center gap-0.5">
                                                 <span className="text-[7px] sm:text-[8px] font-black text-forest/50 uppercase tracking-widest">Earned</span>
                                                 <span className="text-[10px] sm:text-[12px] font-black text-forest tracking-tighter">₱{Number(studioFee || booking.total_price || 0).toLocaleString()}</span>
                                             </div>
@@ -271,7 +273,15 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                         <div className="flex-1 flex items-center gap-2">
                                             {instructor && instructor.id !== currentUserId && (
                                                 <div className="flex-1 h-full">
-                                                    <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={instructor.id} partnerName={instructor.full_name || 'Instructor'} label="MESSAGE" variant="antigravity" className="h-full w-full bg-charcoal/5 hover:bg-charcoal/10 border-none justify-center" />
+                                                    <StudioChatButton
+                                                        bookingId={booking.id}
+                                                        currentUserId={currentUserId}
+                                                        partnerId={instructor.id}
+                                                        partnerName={instructor.full_name || 'Instructor'}
+                                                        label="MESSAGE"
+                                                        variant="antigravity"
+                                                        className="h-full w-full bg-white sm:bg-off-white/50 hover:bg-off-white border border-border-grey/50 hover:border-border-grey transition-all flex items-center justify-center rounded-xl font-black text-[8px] tracking-widest text-charcoal/60"
+                                                    />
                                                 </div>
                                             )}
                                             {booking.status === 'approved' && start > now && (

@@ -97,7 +97,7 @@ export default async function ReferralPage() {
                             </div>
                             <div>
                                 <p className="text-sm font-semibold text-burgundy">Friend signs up</p>
-                                <p className="text-xs text-muted-burgundy mt-1 leading-relaxed">Your friend clicks your link and creates a new PilatesBridge account. Their account is automatically linked to you.</p>
+                                <p className="text-xs text-muted-burgundy mt-1 leading-relaxed">Your friend clicks your link and creates a new StudioVaultPH account. Their account is automatically linked to you.</p>
                             </div>
                         </div>
                         <div className="flex gap-4">
@@ -106,7 +106,7 @@ export default async function ReferralPage() {
                             </div>
                             <div>
                                 <p className="text-sm font-semibold text-burgundy">They complete their first booking</p>
-                                <p className="text-xs text-muted-burgundy mt-1 leading-relaxed">Once their first session is marked <span className="font-semibold text-burgundy">Completed</span>, ₱50 is instantly credited to your PilatesBridge wallet — no waiting, no forms.</p>
+                                <p className="text-xs text-muted-burgundy mt-1 leading-relaxed">Once their first session is marked <span className="font-semibold text-burgundy">Completed</span>, ₱50 is instantly credited to your StudioVaultPH wallet — no waiting, no forms.</p>
                             </div>
                         </div>
                     </div>
@@ -143,13 +143,13 @@ export default async function ReferralPage() {
                         <li className="flex gap-2">
                             <span className="text-burgundy font-bold mt-0.5">·</span>
                             <span>
-                                Referral bonuses are credited to your PilatesBridge wallet and can be used to pay for any session bookings on the platform.
+                                Referral bonuses are credited to your StudioVaultPH wallet and can be used to pay for any session bookings on the platform.
                             </span>
                         </li>
                         <li className="flex gap-2">
                             <span className="text-burgundy font-bold mt-0.5">·</span>
                             <span>
-                                PilatesBridge reserves the right to withhold or reverse referral bonuses if fraudulent activity is detected (e.g., fake accounts, coordinated abuse).
+                                StudioVaultPH reserves the right to withhold or reverse referral bonuses if fraudulent activity is detected (e.g., fake accounts, coordinated abuse).
                             </span>
                         </li>
                         <li className="flex gap-2">

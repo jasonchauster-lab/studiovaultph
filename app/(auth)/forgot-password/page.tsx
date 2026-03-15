@@ -108,7 +108,7 @@ export default function ForgotPasswordPage() {
                     </form>
 
                     <div className="mt-16 pt-12 border-t border-cream-100 text-center text-xs text-charcoal-400">
-                        Need help? Contact our <Link href="/support" className="underline hover:text-charcoal-900">Support Team</Link>
+                        Have questions? Check our <Link href="/support" className="underline hover:text-charcoal-900">FAQ</Link> or log in to chat with us.
                     </div>
                 </div>
             </div>

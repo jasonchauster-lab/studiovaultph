@@ -383,7 +383,7 @@ function LoginContent() {
 
                     <div className="mt-32 pt-10 border-t border-border-grey text-center pb-10">
                         <p className="text-[9px] font-black text-slate uppercase tracking-[0.4em] leading-relaxed max-w-xs mx-auto">
-                            By proceeding, you adhere to our <Link href="/terms" className="text-slate hover:text-burgundy">Terms</Link> and <Link href="/privacy" className="text-slate hover:text-burgundy">Privacy Policy</Link>.
+                            By proceeding, you adhere to our <Link href="/terms-of-service" className="text-slate hover:text-burgundy">Terms</Link> and <Link href="/privacy" className="text-slate hover:text-burgundy">Privacy Policy</Link>.
                         </p>
                     </div>
                 </div>
