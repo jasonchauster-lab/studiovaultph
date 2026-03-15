@@ -275,83 +275,102 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
             </div>
 
             {/* Space Photos */}
-            <div className="space-y-4">
-                <h2 className="text-xl font-serif font-bold text-charcoal-900 border-b border-cream-200 pb-2">Photos of the Space</h2>
-                <div className="bg-cream-50 p-6 rounded-lg border border-cream-200">
-                    {/* Existing Photos Grid */}
-                    {existingPhotos.length > 0 && (
-                        <div className="mb-6">
-                            <h3 className="text-sm font-medium text-charcoal-700 mb-3">Current Photos</h3>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                {existingPhotos.map((url, index) => (
-                                    <div key={'ext_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
-                                        <a href={url} target="_blank" rel="noopener noreferrer" className="block w-full h-full relative">
-                                            <Image
-                                                src={url}
-                                                alt={`Space Photo ${index + 1}`}
-                                                fill
-                                                quality={92}
-                                                sizes="(max-width: 640px) 50vw, 25vw"
-                                                className="object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                            />
-                                        </a>
-                                        <button
-                                            onClick={(e) => removeExistingPhoto(e, url)}
-                                            className="absolute top-2 right-2 p-1.5 bg-red-500/90 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm z-10"
-                                            title="Remove Photo"
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </button>
+            <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <h2 className="text-xl font-serif font-bold text-charcoal-900 border-b border-cream-200 pb-2">Photos of the Space</h2>
+                    <button
+                        type="button"
+                        onClick={() => spacePhotosInputRef.current?.click()}
+                        className="flex items-center gap-2 bg-charcoal text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-sm active:scale-95"
+                    >
+                        <Upload className="w-4 h-4 text-gold" />
+                        Add New Photos
+                    </button>
+                    <input
+                        type="file"
+                        multiple
+                        accept="image/*,.heic,.heif"
+                        ref={spacePhotosInputRef}
+                        className="hidden"
+                        onChange={handlePhotosChange}
+                    />
+                </div>
+
+                <div className="relative group/gallery">
+                    <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar pb-6 gap-6 -mx-4 px-4 sm:mx-0 sm:px-0">
+                        {/* New Photos (Ready to Upload) */}
+                        {newSpacePhotos.map((file, index) => {
+                            const objectUrl = URL.createObjectURL(file);
+                            return (
+                                <div key={'new_' + index} className="relative flex-none w-[280px] aspect-[4/5] rounded-[2rem] overflow-hidden bg-white/40 border-2 border-dashed border-rose-gold/30 shadow-sm snap-center group">
+                                    <div className="absolute top-2 left-2 z-20 bg-rose-gold text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-full shadow-sm">
+                                        Pending Upload
                                     </div>
+                                    <img
+                                        src={objectUrl}
+                                        alt={`New Photo ${index + 1}`}
+                                        className="w-full h-full object-cover opacity-60"
+                                    />
+                                    <button
+                                        onClick={(e) => removeNewPhoto(e, index)}
+                                        className="absolute top-3 right-3 p-2 bg-red-500/90 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg z-20"
+                                        title="Remove Photo"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            )
+                        })}
+
+                        {/* Existing Photos */}
+                        {existingPhotos.map((url, index) => (
+                            <div key={'ext_' + index} className="relative flex-none w-[280px] aspect-[4/5] rounded-[2rem] overflow-hidden bg-white/40 border border-cream-200 shadow-sm snap-center group">
+                                <Image
+                                    src={url}
+                                    alt={`Space Photo ${index + 1}`}
+                                    fill
+                                    quality={92}
+                                    sizes="280px"
+                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                                <button
+                                    onClick={(e) => removeExistingPhoto(e, url)}
+                                    className="absolute top-3 right-3 p-2 bg-red-500/90 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg z-20 opacity-0 group-hover:opacity-100 transition-all"
+                                    title="Remove Photo"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                                <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-charcoal-900/20 to-transparent pointer-events-none" />
+                            </div>
+                        ))}
+
+                        {/* Empty State / Add Placeholder if none */}
+                        {existingPhotos.length === 0 && newSpacePhotos.length === 0 && (
+                            <div 
+                                onClick={() => spacePhotosInputRef.current?.click()}
+                                className="flex-none w-[280px] aspect-[4/5] rounded-[2rem] border-2 border-dashed border-cream-300 flex flex-col items-center justify-center gap-4 bg-cream-50/30 cursor-pointer hover:bg-cream-50 hover:border-rose-gold/30 transition-all"
+                            >
+                                <div className="p-4 bg-white rounded-full shadow-sm">
+                                    <Camera className="w-8 h-8 text-charcoal-300" />
+                                </div>
+                                <p className="text-[10px] font-black text-charcoal-400 uppercase tracking-widest">No Photos Added Yet</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Scroll Indicators */}
+                    {(existingPhotos.length + newSpacePhotos.length) > 1 && (
+                        <>
+                            <div className="flex items-center justify-center gap-1.5 mt-2 sm:hidden">
+                                {[...Array(existingPhotos.length + newSpacePhotos.length)].map((_, i) => (
+                                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-rose-gold/20" />
                                 ))}
                             </div>
-                        </div>
-                    )}
-
-                    {/* New Photos Grid */}
-                    {newSpacePhotos.length > 0 && (
-                        <div className="mb-6">
-                            <h3 className="text-sm font-medium text-charcoal-700 mb-3">New Photos (Ready to Upload)</h3>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                {newSpacePhotos.map((file, index) => {
-                                    const objectUrl = URL.createObjectURL(file);
-                                    return (
-                                        <div key={'new_' + index} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm">
-                                            <div className="w-full h-full relative">
-                                                <img
-                                                    src={objectUrl}
-                                                    alt={`New Photo ${index + 1}`}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                            <button
-                                                onClick={(e) => removeNewPhoto(e, index)}
-                                                className="absolute top-2 right-2 p-1.5 bg-red-500/90 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm z-10"
-                                                title="Remove Photo"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    )
-                                })}
+                            <div className="sm:hidden flex items-center justify-center gap-2 mt-2 text-[8px] font-black text-rose-gold/40 uppercase tracking-[0.3em] animate-pulse">
+                                <span>Swipe to explore the space</span>
                             </div>
-                        </div>
+                        </>
                     )}
-
-                    {/* Add Photo Button */}
-                    <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-rose-gold/30 rounded-lg hover:bg-rose-gold/5 transition-colors cursor-pointer group" onClick={() => spacePhotosInputRef.current?.click()}>
-                        <Upload className="w-8 h-8 text-rose-gold mb-2 group-hover:scale-110 transition-transform" />
-                        <p className="text-sm font-serif font-bold text-charcoal-900">Add Studio Photos</p>
-                        <p className="text-xs text-charcoal-500 mt-1">Images only (JPG, PNG, HEIC)</p>
-                        <input
-                            type="file"
-                            multiple
-                            accept="image/*,.heic,.heif"
-                            ref={spacePhotosInputRef}
-                            className="hidden"
-                            onChange={handlePhotosChange}
-                        />
-                    </div>
                 </div>
             </div>
 

@@ -463,13 +463,18 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     )}
                                     {instructorDetails.instructor?.gallery_images?.length > 0 && (
                                         <div className="mb-3">
-                                            <h4 className="text-sm font-bold text-charcoal/70 mb-2">Photos</h4>
-                                            <div className="grid grid-cols-3 gap-1.5">
-                                                {instructorDetails.instructor.gallery_images.slice(0, 6).map((img: string, i: number) => (
-                                                    <div key={i} className="aspect-square bg-cream-100 overflow-hidden rounded-lg">
+                                            <h4 className="text-sm font-bold text-charcoal/70 mb-2">Teaching Gallery</h4>
+                                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory -mx-1 px-1">
+                                                {instructorDetails.instructor.gallery_images.map((img: string, i: number) => (
+                                                    <div key={i} className="flex-none w-32 aspect-[4/5] bg-cream-100 overflow-hidden rounded-lg snap-start border border-cream-200">
                                                         <img src={img} className="w-full h-full object-cover" alt="" />
                                                     </div>
                                                 ))}
+                                            </div>
+                                            <div className="flex items-center justify-center gap-1.5 mt-1">
+                                                {instructorDetails.instructor.gallery_images.length > 1 && (
+                                                    <span className="text-[8px] font-black text-gold/40 uppercase tracking-[0.2em] animate-pulse">Swipe to see more</span>
+                                                )}
                                             </div>
                                         </div>
                                     )}
@@ -565,13 +570,18 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     )}
                                     {studioDetails.studio?.space_photos_urls?.length > 0 && (
                                         <div className="mb-3">
-                                            <h4 className="text-sm font-bold text-charcoal/70 mb-2">The Studio</h4>
-                                            <div className="grid grid-cols-3 gap-1.5">
-                                                {studioDetails.studio.space_photos_urls.slice(0, 6).map((img: string, i: number) => (
-                                                    <div key={i} className="aspect-square bg-cream-100 overflow-hidden rounded-lg">
+                                            <h4 className="text-sm font-bold text-charcoal/70 mb-2">The Space</h4>
+                                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory -mx-1 px-1">
+                                                {studioDetails.studio.space_photos_urls.map((img: string, i: number) => (
+                                                    <div key={i} className="flex-none w-32 aspect-square bg-cream-100 overflow-hidden rounded-lg snap-start border border-cream-200">
                                                         <img src={img} className="w-full h-full object-cover" alt="" />
                                                     </div>
                                                 ))}
+                                            </div>
+                                            <div className="flex items-center justify-center gap-1.5 mt-1">
+                                                {studioDetails.studio.space_photos_urls.length > 1 && (
+                                                    <span className="text-[8px] font-black text-gold/40 uppercase tracking-[0.2em] animate-pulse">Swipe to see more</span>
+                                                )}
                                             </div>
                                         </div>
                                     )}

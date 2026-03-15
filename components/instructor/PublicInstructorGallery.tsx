@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Image as ImageIcon, X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface PublicInstructorGalleryProps {
@@ -9,6 +9,7 @@ interface PublicInstructorGalleryProps {
 
 export default function PublicInstructorGallery({ images }: PublicInstructorGalleryProps) {
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
+    const scrollContainerRef = useRef<HTMLDivElement>(null)
 
     if (!images || images.length === 0) return null
 
@@ -34,10 +35,36 @@ export default function PublicInstructorGallery({ images }: PublicInstructorGall
         setActiveIndex((activeIndex - 1 + images.length) % images.length)
     }
 
+    const scroll = (direction: 'left' | 'right') => {
+        if (!scrollContainerRef.current) return
+        const scrollAmount = 300
+        scrollContainerRef.current.scrollBy({
+            left: direction === 'left' ? -scrollAmount : scrollAmount,
+            behavior: 'smooth'
+        })
+    }
+
     return (
         <>
-            <div className="relative">
-                <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x snap-mandatory">
+            <div className="relative group">
+                {/* Desktop Navigation Arrows */}
+                <button
+                    onClick={() => scroll('left')}
+                    className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-cloud border border-border-grey text-burgundy opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex items-center justify-center hover:bg-off-white"
+                >
+                    <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                    onClick={() => scroll('right')}
+                    className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-cloud border border-border-grey text-burgundy opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex items-center justify-center hover:bg-off-white"
+                >
+                    <ChevronRight className="w-5 h-5" />
+                </button>
+
+                <div 
+                    ref={scrollContainerRef}
+                    className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x snap-mandatory"
+                >
                     {images.map((url: string, index: number) => (
                         <div
                             key={index}
@@ -84,13 +111,13 @@ export default function PublicInstructorGallery({ images }: PublicInstructorGall
                         <>
                             <button
                                 className="absolute left-4 top-1/2 -translate-y-1/2 text-cream-50/70 hover:text-cream-50 p-2 transition-colors hidden sm:block"
-                                onClick={nextImage}
+                                onClick={prevImage}
                             >
                                 <ChevronLeft className="w-10 h-10" />
                             </button>
                             <button
                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-cream-50/70 hover:text-cream-50 p-2 transition-colors hidden sm:block"
-                                onClick={prevImage}
+                                onClick={nextImage}
                             >
                                 <ChevronRight className="w-10 h-10" />
                             </button>
