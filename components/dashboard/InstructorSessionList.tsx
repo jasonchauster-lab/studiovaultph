@@ -402,7 +402,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             </div>
 
                                             {/* Action Buttons (Desktop Only) */}
-                                            <div className="hidden sm:flex flex-col items-end justify-center gap-1.5 shrink-0 ml-auto pl-2">
+                                            <div className="hidden sm:flex flex-col items-end justify-center gap-1.5 shrink-0 ml-auto pl-2 h-full">
                                                 {booking.price_breakdown?.instructor_fee && (
                                                     <div className="px-3 py-1 bg-forest/5 border border-forest/10 rounded flex items-center gap-1.5">
                                                         <span className="text-[8px] font-black text-forest/50 uppercase tracking-widest">Earned</span>

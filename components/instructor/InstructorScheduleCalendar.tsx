@@ -637,159 +637,161 @@ export default function InstructorScheduleCalendar({
 
                                                 const isToday = isSameDay(day, new Date())
 
-                                                return (
-                                                    <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-1 min-h-[100px]", isPastCell ? "bg-gray-50" : isToday ? "bg-buttermilk/10" : "")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
-                                                        <div
-                                                            className={clsx(
-                                                                "absolute inset-0 transition-all duration-700 bg-forest/5 cursor-pointer z-0 flex items-center justify-center",
-                                                                "opacity-0 lg:group-hover:opacity-100", // Hidden on large, shown on hover
-                                                                "md:opacity-10 md:hover:opacity-100" // Always slightly visible on small/tablet
-                                                            )}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation()
-                                                                setSingleDate(format(day, 'yyyy-MM-dd'))
-                                                                setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
-                                                                setSingleEndTime(`${(hour + 1).toString().padStart(2, '0')}:00`)
-                                                                setAddMode('single')
-                                                                setIsAddModalOpen(true)
-                                                            }}
-                                                        >
-                                                            <Plus className="w-5 h-5 text-forest/20 lg:hidden" />
-                                                        </div>
+                                                    return (
+                                                        <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-1 overflow-hidden", isPastCell ? "bg-gray-50" : isToday ? "bg-buttermilk/10" : "")} style={{ height: `${ROW_HEIGHT}px` }}>
+                                                            <div
+                                                                className={clsx(
+                                                                    "absolute inset-0 transition-all duration-700 bg-forest/5 cursor-pointer z-0 flex items-center justify-center",
+                                                                    "opacity-0 lg:group-hover:opacity-100", // Hidden on large, shown on hover
+                                                                    "md:opacity-10 md:hover:opacity-100" // Always slightly visible on small/tablet
+                                                                )}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    setSingleDate(format(day, 'yyyy-MM-dd'))
+                                                                    setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
+                                                                    setSingleEndTime(`${(hour + 1).toString().padStart(2, '0')}:00`)
+                                                                    setAddMode('single')
+                                                                    setIsAddModalOpen(true)
+                                                                }}
+                                                            >
+                                                                <Plus className="w-5 h-5 text-forest/20 lg:hidden" />
+                                                            </div>
 
-                                                        {allVisibleItems.map((item) => {
-                                                            const [sh, sm] = item.start.split(':').map(Number);
-                                                            const [eh, em] = item.end.split(':').map(Number);
-                                                            const startTotal = sh * 60 + sm;
-                                                            const endTotal = eh * 60 + em;
-                                                            const duration = endTotal - startTotal;
-                                                            const topOffset = ((sh % 24 === hour ? sm : 0) / 60) * ROW_HEIGHT;
-                                                            const heightPx = (duration / 60) * ROW_HEIGHT;
+                                                            {allVisibleItems.map((item) => {
+                                                                const [sh, sm] = item.start.split(':').map(Number);
+                                                                const [eh, em] = item.end.split(':').map(Number);
+                                                                const startTotal = sh * 60 + sm;
+                                                                const endTotal = eh * 60 + em;
+                                                                const duration = endTotal - startTotal;
+                                                                const topOffset = ((sh % 24 === hour ? sm : 0) / 60) * ROW_HEIGHT;
+                                                                const heightPx = (duration / 60) * ROW_HEIGHT;
 
-                                                            // Find items that visibly overlap with THIS block to determine width/split
-                                                            const siblings = allVisibleItems.filter(other => {
-                                                                const [osh, osm] = other.start.split(':').map(Number);
-                                                                const [oeh, oem] = other.end.split(':').map(Number);
-                                                                const oStart = osh * 60 + osm;
-                                                                const oEnd = oeh * 60 + oem;
-                                                                return (startTotal < oEnd && endTotal > oStart);
-                                                            });
+                                                                // Find items that visibly overlap with THIS block to determine width/split
+                                                                const siblings = allVisibleItems.filter(other => {
+                                                                    const [osh, osm] = other.start.split(':').map(Number);
+                                                                    const [oeh, oem] = other.end.split(':').map(Number);
+                                                                    const oStart = osh * 60 + osm;
+                                                                    const oEnd = oeh * 60 + oem;
+                                                                    return (startTotal < oEnd && endTotal > oStart);
+                                                                });
 
-                                                            const totalItems = siblings.length;
-                                                            const myIdx = siblings.findIndex(s => s.id === item.id);
-                                                            const widthPercent = totalItems > 1 ? (100 / totalItems) : 100;
-                                                            const leftPercent = totalItems > 1 ? (myIdx * 100 / totalItems) : 0;
+                                                                const totalItems = siblings.length;
+                                                                const myIdx = siblings.findIndex(s => s.id === item.id);
+                                                                const widthPercent = totalItems > 1 ? (100 / totalItems) : 100;
+                                                                const leftPercent = totalItems > 1 ? (myIdx * 100 / totalItems) : 0;
 
-                                                            if (item.type === 'slot') {
-                                                                const { primarySlot: slot, locations, equipment } = item.data;
-                                                                return (                                                                    <div
-                                                                        key={slot.id}
-                                                                        className={clsx(
-                                                                            "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-2 py-1 group/slot flex flex-col justify-center shadow-tight",
-                                                                            isPastCell
-                                                                                ? "bg-off-white border-border-grey text-slate"
-                                                                                : "bg-[#FDFBF7] border-[#EADED7] text-charcoal",
-                                                                            duration < 45 && "py-1 px-2 justify-center"
-                                                                        )}
-                                                                        style={{
-                                                                            top: `${topOffset}px`,
-                                                                            height: `${heightPx}px`,
-                                                                            width: `calc(${widthPercent}% - 8px)`,
-                                                                            left: `calc(${leftPercent}% + 4px)`
-                                                                        }}
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation()
-                                                                            setEditingSlot(slot);
-                                                                            setSingleDate(slot.date || format(day, 'yyyy-MM-dd'));
-                                                                            setSingleTime(slot.start_time);
-                                                                            setSingleEndTime(slot.end_time);
-                                                                            setLocations(locations);
-                                                                            setEquipment(equipment.length > 0 ? equipment : ['Reformer']);
-                                                                            setCurrentSlotHistory(historyMap[`${dayStr}-${hour}`] || []);
-                                                                            setIsEditModalOpen(true);
-                                                                        }}
-                                                                    >                                                                        <div className={clsx("flex items-center gap-1", duration < 45 ? "flex-row" : "flex-col items-start")}>
-                                                                            <div className={clsx("text-[10px] font-medium text-slate/60", isPastCell && "opacity-50")}>
-                                                                                {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
-                                                                            </div>
-                                                                            <div className="flex flex-wrap items-center gap-1">
-                                                                                {locations.map((loc, idx) => (
-                                                                                    <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border", isPastCell ? "text-slate border-border-grey bg-white/50" : "text-burgundy border-burgundy/20 bg-buttermilk/10")}>
-                                                                                        <MapPin className={clsx("w-2.5 h-2.5", isPastCell ? "text-slate/40" : "text-burgundy/40")} />
-                                                                                        <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
-                                                                                    </div>
-                                                                                ))}
-                                                                            </div>
-                                                                        </div>
-
-                                                                    </div>
-
-                                                                )
-                                                            } else {
-                                                                const booking = item.data;
-                                                                const slotData = booking.slots;
-                                                                const studioName = slotData.studios?.name || 'Partner Studio';
-
-                                                                return (
-                                                                    <div
-                                                                        key={booking.id}
-                                                                        className={clsx(
-                                                                            "absolute rounded-lg text-[10px] z-20 p-2 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border-l-4 bg-[#43302E] border-[#2C1F1D]",
-                                                                            duration < 45 && "flex-row items-center justify-between py-2 px-3"
-                                                                        )}
-                                                                        style={{
-                                                                            top: `${topOffset}px`,
-                                                                            height: `${heightPx}px`,
-                                                                            width: `calc(${widthPercent}% - 8px)`,
-                                                                            left: `calc(${leftPercent}% + 4px)`
-                                                                        }}
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
-                                                                            if (slot?.start_time && slot?.date) {
-                                                                                const startH = parseInt(slot.start_time.split(':')[0]);
-                                                                                setCurrentSlotHistory(historyMap[`${slot.date}-${startH}`] || []);
-                                                                            }
-                                                                            setSelectedBooking(booking);
-                                                                        }}
-                                                                    >
-                                                                        <div className={clsx("flex justify-between items-start w-full", duration < 45 && "items-center")}>
-                                                                            <div className="flex flex-col min-w-0 flex-1">
-                                                                                <span className="text-[8.5px] font-semibold text-[#F5F2E9] uppercase tracking-tight truncate">
-                                                                                    {booking.client?.full_name || 'Session'}
-                                                                                </span>
-                                                                                {duration >= 45 && (
-                                                                                    <>
-                                                                                        <span className="text-[7px] font-black text-white/60 uppercase tracking-tighter mt-0.5 truncate">
-                                                                                            {studioName}
-                                                                                        </span>
-                                                                                        <div className="flex flex-wrap items-center gap-1 mt-1.5">
-                                                                                            {slotData.studios?.location && (
-                                                                                                <div className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-white/90 px-1.5 py-0.5 rounded border border-white/20 bg-white/10">
-                                                                                                    <MapPin className="w-2.5 h-2.5 shrink-0 text-white/40" />
-                                                                                                    <span className="truncate max-w-[60px]">{slotData.studios.location.split(' - ')[0] || 'Studio'}</span>
-                                                                                                </div>
-                                                                                            )}
-                                                                                            {Array.isArray(slotData.equipment) && slotData.equipment.map((eq: string, idx: number) => (
-                                                                                                <div key={eq + idx} className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-white/90 px-1.5 py-0.5 rounded border border-white/20 bg-white/10">
-                                                                                                    <Box className="w-2.5 h-2.5 shrink-0 text-white/40" />
-                                                                                                    <span className="truncate max-w-[60px]">{eq}</span>
-                                                                                                </div>
-                                                                                            ))}
+                                                                if (item.type === 'slot') {
+                                                                    const { primarySlot: slot, locations, equipment } = item.data;
+                                                                    return (
+                                                                        <div
+                                                                            key={slot.id}
+                                                                            className={clsx(
+                                                                                "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-2 py-1 group/slot flex flex-col justify-center shadow-tight",
+                                                                                isPastCell
+                                                                                    ? "bg-off-white border-border-grey text-slate"
+                                                                                    : "bg-[#FDFBF7] border-[#EADED7] text-charcoal",
+                                                                                duration < 45 && "py-1 px-2 justify-center"
+                                                                            )}
+                                                                            style={{
+                                                                                top: `${topOffset}px`,
+                                                                                height: `${heightPx}px`,
+                                                                                width: `calc(${widthPercent}% - 8px)`,
+                                                                                left: `calc(${leftPercent}% + 4px)`
+                                                                            }}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation()
+                                                                                setEditingSlot(slot);
+                                                                                setSingleDate(slot.date || format(day, 'yyyy-MM-dd'));
+                                                                                setSingleTime(slot.start_time);
+                                                                                setSingleEndTime(slot.end_time);
+                                                                                setLocations(locations);
+                                                                                setEquipment(equipment.length > 0 ? equipment : ['Reformer']);
+                                                                                setCurrentSlotHistory(historyMap[`${dayStr}-${hour}`] || []);
+                                                                                setIsEditModalOpen(true);
+                                                                            }}
+                                                                        >
+                                                                            <div className={clsx("flex items-center gap-1 overflow-hidden", duration < 45 ? "flex-row" : "flex-col items-start")}>
+                                                                                <div className={clsx("text-[10px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
+                                                                                    {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
+                                                                                </div>
+                                                                                <div className="flex flex-wrap items-center gap-1 overflow-hidden">
+                                                                                    {locations.map((loc, idx) => (
+                                                                                        <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell ? "text-slate border-border-grey bg-white/50" : "text-burgundy border-burgundy/20 bg-buttermilk/10")}>
+                                                                                            <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-slate/40" : "text-burgundy/40")} />
+                                                                                            <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
                                                                                         </div>
-                                                                                    </>
-                                                                                )}
+                                                                                    ))}
+                                                                                </div>
                                                                             </div>
-                                                                            <div className="text-[8px] font-black text-burgundy bg-buttermilk/40 px-1 py-0.5 rounded border border-burgundy/5 whitespace-nowrap ml-2">
-                                                                                {Math.min(booking.quantity || 1, 1)}/1
+
+                                                                        </div>
+
+                                                                    )
+                                                                } else {
+                                                                    const booking = item.data;
+                                                                    const slotData = booking.slots;
+                                                                    const studioName = slotData.studios?.name || 'Partner Studio';
+
+                                                                    return (
+                                                                        <div
+                                                                            key={booking.id}
+                                                                            className={clsx(
+                                                                                "absolute rounded-lg text-[10px] z-20 p-2 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border-l-4 bg-[#43302E] border-[#2C1F1D]",
+                                                                                duration < 45 && "flex-row items-center justify-between py-2 px-3"
+                                                                            )}
+                                                                            style={{
+                                                                                top: `${topOffset}px`,
+                                                                                height: `${heightPx}px`,
+                                                                                width: `calc(${widthPercent}% - 8px)`,
+                                                                                left: `calc(${leftPercent}% + 4px)`
+                                                                            }}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
+                                                                                if (slot?.start_time && slot?.date) {
+                                                                                    const startH = parseInt(slot.start_time.split(':')[0]);
+                                                                                    setCurrentSlotHistory(historyMap[`${slot.date}-${startH}`] || []);
+                                                                                }
+                                                                                setSelectedBooking(booking);
+                                                                            }}
+                                                                        >
+                                                                            <div className={clsx("flex justify-between items-start w-full overflow-hidden", duration < 45 && "items-center")}>
+                                                                                <div className="flex flex-col min-w-0 flex-1 overflow-hidden">
+                                                                                    <span className="text-[8.5px] font-semibold text-[#F5F2E9] uppercase tracking-tight truncate">
+                                                                                        {booking.client?.full_name || 'Session'}
+                                                                                    </span>
+                                                                                    {duration >= 45 && (
+                                                                                        <>
+                                                                                            <span className="text-[7px] font-black text-white/60 uppercase tracking-tighter mt-0.5 truncate">
+                                                                                                {studioName}
+                                                                                            </span>
+                                                                                            <div className="flex flex-wrap items-center gap-1 mt-1.5 overflow-hidden">
+                                                                                                {slotData.studios?.location && (
+                                                                                                    <div className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-white/90 px-1.5 py-0.5 rounded border border-white/20 bg-white/10 truncate">
+                                                                                                        <MapPin className="w-2.5 h-2.5 shrink-0 text-white/40" />
+                                                                                                        <span className="truncate max-w-[60px]">{slotData.studios.location.split(' - ')[0] || 'Studio'}</span>
+                                                                                                    </div>
+                                                                                                )}
+                                                                                                {Array.isArray(slotData.equipment) && slotData.equipment.map((eq: string, idx: number) => (
+                                                                                                    <div key={eq + idx} className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-white/90 px-1.5 py-0.5 rounded border border-white/20 bg-white/10 truncate">
+                                                                                                        <Box className="w-2.5 h-2.5 shrink-0 text-white/40" />
+                                                                                                        <span className="truncate max-w-[60px]">{eq}</span>
+                                                                                                    </div>
+                                                                                                ))}
+                                                                                            </div>
+                                                                                        </>
+                                                                                    )}
+                                                                                </div>
+                                                                                <div className="text-[8px] font-black text-burgundy bg-buttermilk/40 px-1 py-0.5 rounded border border-burgundy/5 whitespace-nowrap ml-2 shrink-0">
+                                                                                    {Math.min(booking.quantity || 1, 1)}/1
+                                                                                </div>
                                                                             </div>
                                                                         </div>
-                                                                    </div>
-                                                                )
-                                                            }
-                                                        })}
-                                                    </div>
-                                                )
+                                                                    )
+                                                                }
+                                                            })}
+                                                        </div>
+                                                    )
 
                                             })}
                                         </div>
