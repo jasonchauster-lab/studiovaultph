@@ -506,7 +506,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                 return (
                                                                     <div
                                                                         className={clsx(
-                                                                            "p-1 border-l-4 border-solid transition-all duration-300 hover:shadow-card hover:scale-[1.01] shadow-tight group/slot relative overflow-hidden cursor-pointer rounded-lg h-full flex flex-col justify-between z-10",
+                                                                            "p-2 border-l-4 border-solid transition-all duration-300 hover:shadow-card hover:scale-[1.01] shadow-tight group/slot relative overflow-hidden cursor-pointer rounded-lg h-full flex flex-col justify-between z-10",
                                                                             isPastCell ? "bg-off-white border-border-grey" :
                                                                                 hasPending ? "bg-orange-50/50 border-orange-200" :
                                                                                     isBooked ? "bg-[#43302E] border-[#2C1F1D]" : "bg-[#FDFBF7] border-[#EADED7]"
@@ -518,6 +518,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                         }}
                                                                     >
                                                                         <div>
+                                                                            {!isBooked && !hasPending && (
+                                                                                <div className="text-[10px] font-medium text-slate/60 mb-1">
+                                                                                    {hour.toString().padStart(2, '0')}:00 - {(hour + 1).toString().padStart(2, '0')}:00
+                                                                                </div>
+                                                                            )}
                                                                             <div className="flex justify-between items-start mb-1">
                                                                                 <h4 className={clsx("text-[9.5px] font-semibold uppercase tracking-tight truncate max-w-[85%]", isPastCell || (!isBooked && !hasPending) ? "text-[#43302E]" : "text-[#F5F2E9]")}>
                                                                                     {displayTitle}

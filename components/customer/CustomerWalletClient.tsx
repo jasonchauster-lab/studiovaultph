@@ -148,9 +148,9 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                 <div className="w-full">
                     {/* Desktop Table */}
                     <table className="hidden sm:table w-full text-left">
-                        <thead className="bg-cream-50 text-charcoal-500 font-bold uppercase tracking-widest text-[10px] border-b border-cream-200">
+                        <thead className="bg-cream-50 text-slate font-bold uppercase tracking-widest text-[10px] border-b border-cream-200">
                             <tr>
-                                <th className="px-6 py-4">Date</th>
+                                <th className="px-6 py-4 min-w-[140px]">Date / Time</th>
                                 <th className="px-6 py-4">STUDIO / INSTRUCTOR</th>
                                 <th className="px-6 py-4">Activity</th>
                                 <th className="px-6 py-4">Schedule</th>
@@ -162,43 +162,42 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                             {transactions && transactions.length > 0 ? (
                                 transactions.map((tx, i) => (
                                     <tr key={i} className="hover:bg-off-white/40 transition-colors">
-                                        <td className="px-6 py-5 whitespace-nowrap">
-                                            <div className="font-bold text-charcoal">{new Date(tx.date).toLocaleDateString()}</div>
-                                            <div className="text-[10px] text-charcoal/40 uppercase font-black">
-                                                {new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        <td className="px-6 py-3 whitespace-nowrap">
+                                            <div className="text-[10px] font-bold text-charcoal uppercase tracking-tight">
+                                                {new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            </div>
+                                            <div className="text-[9px] text-slate font-medium uppercase tracking-tight mt-0.5">
+                                                {new Date(tx.date).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5">
+                                        <td className="px-6 py-3">
                                             <span className="font-bold text-charcoal uppercase text-xs truncate">
                                                 {tx.studio || tx.instructor || 'System'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex flex-col gap-0.5">
-                                                <span className="font-bold text-charcoal text-[11px] uppercase tracking-wide">{tx.type}</span>
+                                        <td className="px-6 py-3">
+                                            <div className="flex flex-col gap-1 items-start">
+                                                <span className="font-black text-charcoal text-[9px] uppercase tracking-widest px-2 py-1 bg-charcoal/5 rounded">{tx.type}</span>
                                                 {tx.details && <span className="text-[10px] text-charcoal/50 italic truncate">{tx.details}</span>}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5">
+                                        <td className="px-6 py-3">
                                             {tx.session_date ? (
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-charcoal text-[11px] uppercase whitespace-nowrap">
-                                                        {new Date(tx.session_date).toLocaleDateString()}
-                                                    </span>
-                                                    <span className="text-[10px] text-charcoal/40 font-black uppercase whitespace-nowrap">
-                                                        {tx.session_time?.slice(0, 5)}
+                                                    <span className="font-black text-charcoal/60 text-[9px] uppercase whitespace-nowrap px-2 py-0.5 bg-off-white rounded w-fit">
+                                                        {new Date(tx.session_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} / {tx.session_time?.slice(0, 5)}
                                                     </span>
                                                 </div>
                                             ) : (
-                                                <span className="text-[10px] text-charcoal/30 uppercase font-black italic">No session</span>
+                                                <span className="text-[9px] text-charcoal/20 uppercase font-black italic">System</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-5">
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-charcoal/40 px-2 py-0.5 bg-cream-50 rounded-full">
+                                        <td className="px-6 py-3">
+                                            <span className="text-[8px] font-black uppercase tracking-widest text-slate font-medium px-2 py-1 bg-cream-50 rounded">
                                                 {tx.status}
                                             </span>
                                         </td>
-                                        <td className={`px-6 py-5 text-right font-black whitespace-nowrap ${tx.amount > 0 ? 'text-green-600' : 'text-charcoal'}`}>
+                                        <td className={`px-6 py-3 text-right font-black whitespace-nowrap text-[11px] ${tx.amount > 0 ? 'text-green-600' : 'text-charcoal'}`}>
                                             {tx.amount > 0 ? '+' : ''}₱{Math.abs(tx.amount).toLocaleString()}
                                         </td>
                                     </tr>

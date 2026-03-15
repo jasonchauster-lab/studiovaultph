@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes, isPast, addDays, subDays, startOfMonth, endOfMonth, startOfDay } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle, ChevronDown, ChevronUp, CheckCircle, Check, Pencil, Copy } from 'lucide-react'
 import clsx from 'clsx'
-import { toManilaDateStr, getManilaTodayStr, toManilaDate, getSlotDateTime } from '@/lib/timezone'
+import { toManilaDateStr, getManilaTodayStr, toManilaDate, getSlotDateTime, formatTo12Hour } from '@/lib/timezone'
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
 import InstructorScheduleGenerator from './InstructorScheduleGenerator'
 import ChatWindow from '@/components/dashboard/ChatWindow'
@@ -708,7 +708,10 @@ export default function InstructorScheduleCalendar({
                                                                             setCurrentSlotHistory(historyMap[`${dayStr}-${hour}`] || []);
                                                                             setIsEditModalOpen(true);
                                                                         }}
-                                                                    >                                                                        <div className={clsx("flex items-center gap-1.5", duration < 45 ? "flex-row" : "flex-col items-start")}>
+                                                                    >                                                                        <div className={clsx("flex items-center gap-1", duration < 45 ? "flex-row" : "flex-col items-start")}>
+                                                                            <div className={clsx("text-[10px] font-medium text-slate/60", isPastCell && "opacity-50")}>
+                                                                                {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
+                                                                            </div>
                                                                             <div className="flex flex-wrap items-center gap-1">
                                                                                 {locations.map((loc, idx) => (
                                                                                     <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border", isPastCell ? "text-slate border-border-grey bg-white/50" : "text-burgundy border-burgundy/20 bg-buttermilk/10")}>
@@ -731,8 +734,8 @@ export default function InstructorScheduleCalendar({
                                                                     <div
                                                                         key={booking.id}
                                                                         className={clsx(
-                                                                            "absolute rounded-lg text-[10px] z-20 p-1 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border-l-4 bg-[#43302E] border-[#2C1F1D]",
-                                                                            duration < 45 && "flex-row items-center justify-between py-1 px-2"
+                                                                            "absolute rounded-lg text-[10px] z-20 p-2 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border-l-4 bg-[#43302E] border-[#2C1F1D]",
+                                                                            duration < 45 && "flex-row items-center justify-between py-2 px-3"
                                                                         )}
                                                                         style={{
                                                                             top: `${topOffset}px`,

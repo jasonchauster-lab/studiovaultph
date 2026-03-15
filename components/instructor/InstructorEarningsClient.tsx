@@ -126,7 +126,7 @@ export default function InstructorEarningsClient({
                 </div>
             </div>
 
-            <div className="earth-card p-4 sm:p-4 inline-block bg-white shadow-tight w-full sm:w-auto overflow-hidden">
+            <div className="py-2 inline-block w-full sm:w-auto overflow-hidden">
                 <DateRangeFilters />
             </div>
 
@@ -255,58 +255,55 @@ export default function InstructorEarningsClient({
                 <div className="w-full">
                     <table className="hidden sm:table w-full text-left">
                         <thead>
-                            <tr className="bg-white/40 text-charcoal/50 text-[10px] font-black uppercase tracking-[0.4em]">
-                                <th className="px-10 py-6 font-black">Date / Time</th>
-                                <th className="px-10 py-6 font-black">STUDENT</th>
-                                <th className="px-10 py-6 font-black">Type</th>
-                                <th className="px-10 py-6 font-black">SCHEDULE</th>
-                                <th className="px-10 py-6 font-black">Status</th>
-                                <th className="px-10 py-6 font-black text-right">Amount</th>
+                            <tr className="bg-white/40 text-slate text-[10px] font-black uppercase tracking-[0.4em]">
+                                <th className="px-6 py-4 font-black min-w-[140px]">Date / Time</th>
+                                <th className="px-6 py-4 font-black">STUDENT</th>
+                                <th className="px-6 py-4 font-black">Type</th>
+                                <th className="px-6 py-4 font-black">SCHEDULE</th>
+                                <th className="px-6 py-4 font-black">Status</th>
+                                <th className="px-6 py-4 font-black text-right">Amount</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/60 bg-white/20">
                             {recentTransactions && recentTransactions.length > 0 ? (
                                 recentTransactions.map((tx: any, i: number) => (
                                     <tr key={i} className="hover:bg-white transition-all duration-500 group">
-                                        <td className="px-10 py-8">
-                                            <div className="text-[10px] font-black text-charcoal uppercase tracking-[0.2em]">
+                                        <td className="px-6 py-3">
+                                            <div className="text-[10px] font-bold text-charcoal uppercase tracking-tight">
                                                 {new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                             </div>
-                                            <span className="block text-[9px] text-charcoal/20 font-black uppercase tracking-[0.2em] mt-1.5">
-                                                {new Date(tx.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                                            <span className="block text-[9px] text-slate font-medium uppercase tracking-tight mt-0.5">
+                                                {new Date(tx.date).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                             </span>
                                         </td>
-                                        <td className="px-10 py-8">
+                                        <td className="px-6 py-3">
                                             <div className="text-[10px] font-black text-charcoal uppercase tracking-[0.2em]">
                                                 {tx.client || 'System'}
                                             </div>
                                         </td>
-                                        <td className="px-10 py-8">
-                                            <div className="text-[10px] font-black text-charcoal uppercase tracking-[0.22em] flex items-center gap-3">
-                                                {tx.type}
+                                        <td className="px-6 py-3">
+                                            <div className="text-[10px] font-bold text-charcoal uppercase tracking-tighter flex items-center gap-2">
+                                                <span className="px-2 py-1 bg-charcoal/5 rounded font-black tracking-widest text-[9px]">{tx.type}</span>
                                                 {tx.details && (
-                                                    <span className="text-[8px] text-gold border border-gold/20 px-2 py-0.5 rounded-md tracking-tighter">
+                                                    <span className="text-[8px] text-gold/80 font-black px-2 py-1 bg-gold/5 rounded tracking-tighter uppercase">
                                                         {tx.details}
                                                     </span>
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-10 py-8">
+                                        <td className="px-6 py-3">
                                             {tx.session_date ? (
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-charcoal text-[11px] uppercase whitespace-nowrap">
-                                                        {new Date(tx.session_date).toLocaleDateString()}
-                                                    </span>
-                                                    <span className="text-[10px] text-charcoal/40 font-black uppercase whitespace-nowrap">
-                                                        {tx.session_time?.slice(0, 5)}
+                                                    <span className="font-black text-charcoal/60 text-[9px] uppercase whitespace-nowrap px-2 py-0.5 bg-off-white rounded w-fit">
+                                                        {new Date(tx.session_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} / {tx.session_time?.slice(0, 5)}
                                                     </span>
                                                 </div>
                                             ) : (
-                                                <span className="text-[10px] text-charcoal/30 uppercase font-black italic">No session</span>
+                                                <span className="text-[9px] text-charcoal/20 uppercase font-black italic">System</span>
                                             )}
                                         </td>
-                                        <td className="px-10 py-8">
-                                            <span className={`status-pill-earth inline-flex items-center
+                                        <td className="px-6 py-3">
+                                            <span className={`status-pill-earth scale-90 origin-left inline-flex items-center
                                                 ${tx.status === 'approved' || tx.status === 'processed'
                                                     ? 'status-pill-green'
                                                     : tx.status === 'pending'
@@ -317,7 +314,7 @@ export default function InstructorEarningsClient({
                                                 {tx.status}
                                             </span>
                                         </td>
-                                        <td className={`px-10 py-8 text-[11px] font-bold uppercase tracking-[0.1em] text-right ${tx.total_amount > 0 ? 'text-forest' : tx.total_amount < 0 ? 'text-red-600' : 'text-charcoal'}`}>
+                                        <td className={`px-6 py-3 text-[11px] font-bold uppercase tracking-[0.1em] text-right ${tx.total_amount > 0 ? 'text-forest' : tx.total_amount < 0 ? 'text-red-600' : 'text-charcoal'}`}>
                                             <div className="flex items-center justify-end gap-2">
                                                 {tx.total_amount > 0 ? <Plus className="w-3 h-3 stroke-[4px]" /> : tx.total_amount < 0 ? <Minus className="w-3 h-3 stroke-[4px]" /> : null}
                                                 ₱{Math.abs(tx.total_amount).toLocaleString()}

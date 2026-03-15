@@ -131,8 +131,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     }), [filteredBookings, now]);
 
     return (
-        <div className="space-y-16 sm:space-y-24 pb-48">
-            <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible mb-12 sm:mb-16">
+        <div className="space-y-10 pb-48">
+            <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible mb-8">
                 <BookingFilter key={resetKey} onFilterChange={setFilters} />
             </div>
 
@@ -149,15 +149,16 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 </div>
 
                 {activeBookings.length === 0 ? (
-                    <div className="py-16 sm:py-10 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-border-grey/50 mx-6 sm:mx-0 px-6 shadow-tight relative overflow-hidden">
+                    <div className="py-8 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-border-grey/50 mx-6 sm:mx-0 px-6 shadow-tight relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-32 h-32 bg-forest/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl pointer-events-none" />
                         <div className="absolute bottom-0 right-0 w-32 h-32 bg-gold/5 rounded-full translate-x-1/2 translate-y-1/2 blur-2xl pointer-events-none" />
                         
-                        <div className="w-14 h-14 bg-charcoal/5 rounded-full flex items-center justify-center mb-6 relative">
+                        <div className="w-14 h-14 bg-charcoal/5 rounded-full flex items-center justify-center mb-4 relative">
                             <Calendar className="w-6 h-6 text-charcoal/30" />
                         </div>
                         <h3 className="text-lg sm:text-xl font-serif text-charcoal mb-2 tracking-tight">No sessions found for this period.</h3>
-                        <p className="text-[11px] sm:text-xs text-charcoal/50 max-w-[280px] mb-8 leading-relaxed font-bold">Try adjusting your filters or find a studio to book a new availability slot.</p>
+                        <p className="text-[11px] sm:text-xs text-charcoal/50 max-w-[280px] mb-6 leading-relaxed font-bold">Try adjusting your filters or find a studio to book a new availability slot.</p>
+
                         
                         <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10 w-full sm:w-auto">
                             {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
