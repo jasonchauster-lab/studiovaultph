@@ -222,38 +222,10 @@ export default async function CustomerDashboard({
                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23513229' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }} 
             />
 
-            <div className="relative z-10 max-w-[1600px] mx-auto space-y-16">
-
-                {/* ─── Page Header & Hero ─── */}
-                <div className="relative overflow-hidden rounded-[3rem] bg-burgundy px-8 py-20 sm:px-16 sm:py-32 text-white shadow-[0_30px_100px_rgba(81,50,41,0.25)] border border-white/5">
-                    {/* Decorative Background Elements */}
-                    <div className="absolute top-0 right-0 w-full h-full opacity-20 pointer-events-none">
-                        <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-white via-buttermilk to-transparent blur-3xl opacity-30 animate-pulse" />
-                        <div className="absolute bottom-[-20%] right-[10%] w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-forest to-transparent blur-3xl opacity-20" />
-                    </div>
-                    
-                    <div className="relative z-10 max-w-4xl flex flex-col gap-y-8">
-                        <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 w-fit shadow-lg">
-                            <span className="relative flex h-2.5 w-2.5">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-buttermilk opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-buttermilk shadow-[0_0_10px_rgba(255,247,212,0.8)]"></span>
-                            </span>
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-buttermilk">Discovery Mode Active</span>
-                        </div>
-                        
-                        <div className="space-y-6">
-                            <h1 className="text-5xl sm:text-7xl font-serif font-bold tracking-tight leading-[1.05]">
-                                Find your <span className="italic text-buttermilk underline decoration-buttermilk/20 underline-offset-8">flow.</span>
-                            </h1>
-                            <p className="text-xl sm:text-2xl text-white/60 leading-relaxed font-medium max-w-2xl">
-                                Curating the finest pilates studios and world-class instructors in Metro Manila.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+            <div className="relative z-10 max-w-[1600px] mx-auto pt-10 px-4 sm:px-8 space-y-16">
 
                 {/* ─── Filters Row ─── */}
-                <div className="relative z-20 -mt-16 px-4 sm:px-0">
+                <div className="relative z-20">
                     <DiscoveryFilters availableLocations={availableLocations} />
                 </div>
 
