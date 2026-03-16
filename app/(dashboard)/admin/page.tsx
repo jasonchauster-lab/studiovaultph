@@ -141,10 +141,11 @@ export default async function AdminDashboard({
                 .order('created_at', { ascending: false })
                 .limit(500),
 
-            // 13. All users
+            // 13. All users (capped at 1000 — prevents unbounded fetch on large platforms)
             supabase.from('profiles')
                 .select('id, full_name, email, role, created_at, available_balance, is_suspended, contact_number, waiver_url, waiver_signed_at')
-                .order('created_at', { ascending: false }),
+                .order('created_at', { ascending: false })
+                .limit(1000),
         ])
 
         const [

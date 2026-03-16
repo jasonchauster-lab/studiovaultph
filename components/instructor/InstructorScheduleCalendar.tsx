@@ -59,7 +59,7 @@ export default function InstructorScheduleCalendar({
     const [singleEndTime, setSingleEndTime] = useState('10:00')
     const [locations, setLocations] = useState<string[]>([])
     const [equipment, setEquipment] = useState<string[]>([])
-    const [expandedCities, setExpandedCities] = useState<string[]>(['BGC', 'Makati'])
+    const [expandedCities, setExpandedCities] = useState<string[]>([])
 
     const isProfileComplete = !!(
         instructorProfile?.teaching_equipment && 

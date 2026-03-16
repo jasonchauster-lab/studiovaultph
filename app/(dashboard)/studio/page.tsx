@@ -55,126 +55,110 @@ export default async function StudioDashboard(props: {
     const currentDate = new Date(year, month - 1, day)
 
     if (myStudio) {
-        // STEP 1: Fetch slot IDs for this studio (reliable, same approach as admin's getPartnerBookings)
-        const { data: studioSlots } = await supabase
-            .from('slots')
-            .select('id')
-            .eq('studio_id', myStudio.id)
+        const nowTimeStr = toManilaTimeString(new Date());
+        const thirtyDaysAgo = new Date()
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+        const thirtyDaysAgoStr = format(thirtyDaysAgo, 'yyyy-MM-dd')
 
-        const studioSlotIds = studioSlots?.map((s: any) => s.id) ?? []
-
-        if (studioSlotIds.length > 0) {
-            const nowTimeStr = toManilaTimeString(new Date());
-            const thirtyDaysAgo = new Date()
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-            const thirtyDaysAgoStr = format(thirtyDaysAgo, 'yyyy-MM-dd')
-
-            const [{ data: studioBookings }, { data: statsBookings }] = await Promise.all([
-                // STEP 2a: Upcoming Bookings
-                supabase
-                    .from('bookings')
-                    .select(`
-                        *,
-                        client:profiles!client_id(full_name, avatar_url),
-                        instructor:profiles!instructor_id(full_name, avatar_url),
-                        slots!inner(*)
-                    `)
-                    .eq('studio_id', myStudio.id)
-                    .in('status', ['approved'])
-                    .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' })
-                    .order('date', { foreignTable: 'slots', ascending: true })
-                    .order('start_time', { foreignTable: 'slots', ascending: true })
-                    .limit(10),
-                // STEP 2b: Stats Bookings (Last 30 Days)
-                supabase
-                    .from('bookings')
-                    .select(`
-                        *,
-                        instructor:profiles!instructor_id(full_name, avatar_url),
-                        slots(*)
-                    `)
-                    .eq('studio_id', myStudio.id)
-                    .in('status', ['approved', 'completed', 'cancelled_charged'])
-                    .gte('slots.date', thirtyDaysAgoStr),
-            ]);
-
-            if (studioBookings) upcomingBookings = studioBookings
-
-            if (statsBookings && statsBookings.length > 0) {
-                // Calc Revenue
-                monthlyRevenue = statsBookings.reduce((sum, b) => {
-                    const breakdown = b.price_breakdown as any;
-                    const studioFee = Number(breakdown?.studio_fee || 0);
-
-                    if (studioFee > 0) return sum + studioFee;
-
-                    // Fallback for legacy bookings without breakdown
-                    const fallbackFee = b.total_price ? Math.max(0, b.total_price - 100) : 0;
-                    return sum + fallbackFee;
-                }, 0)
-
-                // Calc Top Instructor
-                const instructorCounts: Record<string, number> = {}
-                statsBookings.forEach(b => {
-                    const name = b.instructor?.full_name || 'Unknown'
-                    instructorCounts[name] = (instructorCounts[name] || 0) + 1
-                })
-                topInstructorName = Object.entries(instructorCounts).sort((a, b) => b[1] - a[1])[0][0]
-            }
-        }
-
-        // STEP 2c: Fetch Slots for the calendar — full month grid so the month view is complete
+        // Compute date strings (sync) before the parallel fetch
         const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
-
-        // Generate the 7 day strings for this week (used by week/day view)
         for (let i = 0; i < 7; i++) {
             const d = new Date(weekStart)
             d.setDate(d.getDate() + i)
             dayStrings.push(format(d, 'yyyy-MM-dd'))
         }
-
-        // Fetch the full month grid: from the first Monday on/before the 1st to the last Sunday on/after the last day
         const monthGridStart = format(startOfWeek(startOfMonth(currentDate), { weekStartsOn: 1 }), 'yyyy-MM-dd')
         const monthGridEnd = format(endOfWeek(endOfMonth(currentDate), { weekStartsOn: 1 }), 'yyyy-MM-dd')
 
-        const { data: slots } = await supabase
-            .from('slots')
-            .select(`
-                *,
-                bookings (
-                    id,
-                    status,
-                    created_at,
-                    updated_at,
-                    equipment,
-                    quantity,
-                    price_breakdown,
-                    client:profiles!client_id(
-                        full_name,
-                        avatar_url,
-                        bio,
-                        email,
-                        medical_conditions,
-                        other_medical_condition,
-                        date_of_birth
-                    ),
-                    instructor:profiles!instructor_id(
-                        full_name,
-                        avatar_url,
-                        bio,
-                        email,
-                        medical_conditions,
-                        other_medical_condition,
-                        date_of_birth
+        // Fetch bookings + calendar slots in one parallel round (eliminates 2 sequential round trips)
+        const [{ data: studioBookings }, { data: statsBookings }, { data: slots }] = await Promise.all([
+            // Upcoming Bookings
+            supabase
+                .from('bookings')
+                .select(`
+                    *,
+                    client:profiles!client_id(full_name, avatar_url),
+                    instructor:profiles!instructor_id(full_name, avatar_url),
+                    slots!inner(*)
+                `)
+                .eq('studio_id', myStudio.id)
+                .in('status', ['approved'])
+                .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' })
+                .order('date', { foreignTable: 'slots', ascending: true })
+                .order('start_time', { foreignTable: 'slots', ascending: true })
+                .limit(10),
+            // Stats Bookings (Last 30 Days)
+            supabase
+                .from('bookings')
+                .select(`
+                    *,
+                    instructor:profiles!instructor_id(full_name, avatar_url),
+                    slots(*)
+                `)
+                .eq('studio_id', myStudio.id)
+                .in('status', ['approved', 'completed', 'cancelled_charged'])
+                .gte('slots.date', thirtyDaysAgoStr),
+            // Calendar Slots (full month grid)
+            supabase
+                .from('slots')
+                .select(`
+                    *,
+                    bookings (
+                        id,
+                        status,
+                        created_at,
+                        updated_at,
+                        equipment,
+                        quantity,
+                        price_breakdown,
+                        client:profiles!client_id(
+                            full_name,
+                            avatar_url,
+                            bio,
+                            email,
+                            medical_conditions,
+                            other_medical_condition,
+                            date_of_birth
+                        ),
+                        instructor:profiles!instructor_id(
+                            full_name,
+                            avatar_url,
+                            bio,
+                            email,
+                            medical_conditions,
+                            other_medical_condition,
+                            date_of_birth
+                        )
                     )
-                )
-            `)
-            .eq('studio_id', myStudio.id)
-            .gte('date', monthGridStart)
-            .lte('date', monthGridEnd)
+                `)
+                .eq('studio_id', myStudio.id)
+                .gte('date', monthGridStart)
+                .lte('date', monthGridEnd),
+        ]);
 
-        if (slots) {
-            weeklySlots = slots
+        if (studioBookings) upcomingBookings = studioBookings
+        if (slots) weeklySlots = slots
+
+        if (statsBookings && statsBookings.length > 0) {
+            // Calc Revenue
+            monthlyRevenue = statsBookings.reduce((sum, b) => {
+                const breakdown = b.price_breakdown as any;
+                const studioFee = Number(breakdown?.studio_fee || 0);
+
+                if (studioFee > 0) return sum + studioFee;
+
+                // Fallback for legacy bookings without breakdown
+                const fallbackFee = b.total_price ? Math.max(0, b.total_price - 100) : 0;
+                return sum + fallbackFee;
+            }, 0)
+
+            // Calc Top Instructor
+            const instructorCounts: Record<string, number> = {}
+            statsBookings.forEach(b => {
+                const name = b.instructor?.full_name || 'Unknown'
+                instructorCounts[name] = (instructorCounts[name] || 0) + 1
+            })
+            topInstructorName = Object.entries(instructorCounts).sort((a, b) => b[1] - a[1])[0][0]
         }
 
         // Calc Occupancy and Total Spots for the current week only (stat card shows weekly numbers)

@@ -36,16 +36,6 @@ export default async function CustomerDashboard({
 
     if (!user) redirect('/login')
 
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('date_of_birth, contact_number')
-        .eq('id', user.id)
-        .single()
-
-    if (!profile?.date_of_birth || !profile?.contact_number) {
-        redirect('/customer/onboarding')
-    }
-
     // Fire-and-forget: expire abandoned bookings to release slots.
     import('@/lib/wallet').then(({ expireAbandonedBookings }) =>
         expireAbandonedBookings().catch(() => {})
@@ -75,11 +65,16 @@ export default async function CustomerDashboard({
         studioQuery = studioQuery.overlaps('amenities', amenityList)
     }
 
-    // Fetch studios + all verified locations in parallel
-    const [{ data: allStudiosForLocations }, { data: rawStudios }] = await Promise.all([
+    // Fetch profile + studios + locations in parallel (saves 1 sequential round trip)
+    const [{ data: profile }, { data: allStudiosForLocations }, { data: rawStudios }] = await Promise.all([
+        supabase.from('profiles').select('date_of_birth, contact_number').eq('id', user.id).single(),
         supabase.from('studios').select('location').eq('verified', true),
         studioQuery
     ])
+
+    if (!profile?.date_of_birth || !profile?.contact_number) {
+        redirect('/customer/onboarding')
+    }
 
     const availableLocations: string[] = [
         ...new Set((allStudiosForLocations || []).map((s: any) => s.location).filter(Boolean))
@@ -188,20 +183,21 @@ export default async function CustomerDashboard({
         if (data) slots = data as unknown as Slot[]
     }
 
-    // Fetch reviews for aggregated ratings (capped to prevent loading the entire table)
-    const { data: reviews } = await supabase.from('reviews').select('reviewee_id, rating').limit(2000)
+    // Fetch aggregated ratings + instructors in parallel
+    // reviewer_ratings is a DB view (GROUP BY reviewee_id) — no more loading 2000 raw rows
+    const [{ data: ratingsRows }, { data: instructorsRaw }] = await Promise.all([
+        supabase.from('reviewer_ratings').select('reviewee_id, average, count'),
+        instructorQuery,
+    ])
+
     const ratingsMap: Record<string, { total: number, count: number, average: number }> = {}
-
-    reviews?.forEach(r => {
-        if (!ratingsMap[r.reviewee_id]) {
-            ratingsMap[r.reviewee_id] = { total: 0, count: 0, average: 0 }
+    ratingsRows?.forEach((r: any) => {
+        ratingsMap[r.reviewee_id] = {
+            average: Number(r.average),
+            count: Number(r.count),
+            total: Number(r.average) * Number(r.count),
         }
-        ratingsMap[r.reviewee_id].total += r.rating
-        ratingsMap[r.reviewee_id].count += 1
-        ratingsMap[r.reviewee_id].average = ratingsMap[r.reviewee_id].total / ratingsMap[r.reviewee_id].count
     })
-
-    const { data: instructorsRaw } = await instructorQuery
 
     // Filter Instructors by certification
     const instructors = instructorsRaw?.filter(inst => {

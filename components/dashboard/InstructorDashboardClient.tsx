@@ -106,7 +106,7 @@ export default function InstructorDashboardClient({
         Object.keys(instructorProfile.rates).length > 0
     );
 
-    const [expandedCities, setExpandedCities] = useState<string[]>(['BGC', 'Makati']);
+    const [expandedCities, setExpandedCities] = useState<string[]>([]);
 
     const toggleCityAccordion = (city: string) => {
         setExpandedCities(prev =>
@@ -248,7 +248,7 @@ export default function InstructorDashboardClient({
         return () => {
             document.body.style.overflow = 'unset';
         };
-    }, [cancellingBooking, selectedProfile, selectedStudio, activeChat]);
+    }, [cancellingBooking, selectedProfile, selectedStudio, activeChat, selectedBooking, isEditModalOpen, isAddModalOpen]);
 
     return (
         <div className="space-y-16 pb-20">

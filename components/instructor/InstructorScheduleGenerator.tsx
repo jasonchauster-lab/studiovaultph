@@ -41,7 +41,7 @@ export default function InstructorScheduleGenerator({ initialAvailability, teach
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('17:00');
     const [locations, setLocations] = useState<string[]>([]);
-    const [expandedCities, setExpandedCities] = useState<string[]>(['BGC', 'Makati']);
+    const [expandedCities, setExpandedCities] = useState<string[]>([]);
 
     const toggleCityAccordion = (city: string) => {
         setExpandedCities(prev =>
