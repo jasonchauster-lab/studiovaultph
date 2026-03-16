@@ -45,9 +45,8 @@ function LoginContent() {
             .eq('id', userId)
             .single()
 
-        const dest = profile?.role
-            ? ({ admin: '/admin', instructor: '/instructor', studio: '/studio', customer: '/customer' }[profile.role] ?? '/welcome')
-            : '/welcome'
+        const roleMap: Record<string, string> = { admin: '/admin', instructor: '/instructor', studio: '/studio', customer: '/customer' }
+        const dest = profile?.role ? (roleMap[profile.role] ?? '/welcome') : '/welcome'
 
         router.push(dest)
         router.refresh()
