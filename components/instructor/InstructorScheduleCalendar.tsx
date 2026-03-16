@@ -798,16 +798,15 @@ export default function InstructorScheduleCalendar({
                                                   </div>
                                                                             </div>
                                                                         </div>
-                                                                    );
+                                                                    )
                                                                 }
-                                                                return null;
+                                                                return null
                                                             })}
                                                         </div>
-                                                    );
+                                                    )
                                                 })}
                                             </div>
-                                        );
-                                    })}
+                                        )) }
                                 </>
                             )}
 
