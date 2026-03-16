@@ -214,7 +214,7 @@ export default function MobileScheduleCalendar({
                                         ? "bg-buttermilk text-charcoal shadow-tight scale-110 border-2 border-charcoal/20"
                                         : isSelected
                                             ? "border-2 border-charcoal text-charcoal bg-buttermilk/10 scale-110"
-                                            : "text-charcoal hover:bg-off-white border border-transparent hover:border-border-grey"
+                                            : "text-charcoal/60 hover:bg-off-white border border-transparent hover:border-border-grey"
                                 )}>
                                     {format(day, 'd')}
                                 </div>
@@ -260,8 +260,8 @@ export default function MobileScheduleCalendar({
                                     className={clsx(
                                         "w-full rounded-2xl p-6 sm:p-8 shadow-tight active:scale-[0.99] transition-all duration-300 flex flex-col gap-6 sm:gap-8 relative overflow-hidden group cursor-pointer border-l-4",
                                         session.is_booked
-                                            ? "bg-forest border-forest/20"
-                                            : "bg-warm-stone border-border-grey"
+                                            ? "bg-forest border-forest/20 text-white"
+                                            : "bg-white border-border-grey/50 text-charcoal"
                                     )}
                                 >
                                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -341,12 +341,13 @@ export default function MobileScheduleCalendar({
                         )}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-24 text-center opacity-40">
-                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center border border-[#E5E7EB] shadow-tight mb-8">
-                            <CalendarIcon className="w-8 h-8 text-muted-burgundy" />
+                    <div className="flex flex-col items-center justify-center py-24 text-center bg-white rounded-3xl border border-border-grey/50 shadow-tight relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-b from-buttermilk/5 to-transparent pointer-events-none" />
+                        <div className="w-20 h-20 bg-off-white rounded-full flex items-center justify-center border border-border-grey/50 shadow-tight mb-8 relative z-10 group-hover:scale-110 transition-transform duration-700">
+                            <CalendarIcon className="w-8 h-8 text-burgundy/40" />
                         </div>
-                        <h3 className="text-[10px] font-black text-muted-burgundy uppercase tracking-[0.4em] mb-2">Rest Day</h3>
-                        <p className="text-[8px] font-black text-muted-burgundy/60 uppercase tracking-[0.2em]">No sessions scheduled for this epoch.</p>
+                        <h3 className="text-[11px] font-black text-burgundy uppercase tracking-[0.4em] mb-3 relative z-10">Rest Day</h3>
+                        <p className="text-[9px] font-black text-charcoal/50 uppercase tracking-[0.2em] max-w-[200px] relative z-10">No sessions scheduled for this epoch.</p>
                     </div>
                 )}
             </div>

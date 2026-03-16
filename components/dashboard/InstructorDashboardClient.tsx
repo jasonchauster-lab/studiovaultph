@@ -365,15 +365,18 @@ export default function InstructorDashboardClient({
 
                                 if (upcomingBookings.length === 0) {
                                     return (
-                                        <div className="py-10 text-center bg-off-white/50 rounded-lg border-2 border-dashed border-buttermilk flex flex-col items-center justify-center">
-                                            <Calendar className="w-12 h-12 text-muted-burgundy/20 mx-auto mb-6" />
-                                            <h3 className="text-[10px] font-black text-burgundy uppercase tracking-[0.4em] mb-1">Quiet Week</h3>
-                                            <p className="text-[9px] text-burgundy font-black uppercase tracking-[0.2em] max-w-[200px] mx-auto mb-6">No bookings yet—your schedule is clear.</p>
+                                        <div className="py-16 text-center bg-off-white shadow-inner rounded-2xl border border-border-grey/50 flex flex-col items-center justify-center relative overflow-hidden group/empty">
+                                            <div className="absolute inset-0 bg-gradient-to-b from-buttermilk/10 to-transparent pointer-events-none" />
+                                            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-tight border border-border-grey/50 mb-8 relative z-10 group-hover/empty:scale-110 transition-transform duration-700">
+                                                <Calendar className="w-8 h-8 text-burgundy/40" />
+                                            </div>
+                                            <h3 className="text-[11px] font-black text-burgundy uppercase tracking-[0.4em] mb-3 relative z-10">Quiet Week</h3>
+                                            <p className="text-[10px] text-charcoal/50 font-bold uppercase tracking-[0.2em] max-w-[220px] mx-auto mb-8 relative z-10 leading-relaxed">No bookings yet—your schedule is clear.</p>
                                             <button 
                                                 onClick={() => setIsAddModalOpen(true)}
-                                                className="px-4 py-2 bg-forest text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-tight flex items-center gap-2"
+                                                className="px-8 py-3.5 bg-forest text-white text-[9px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-tight flex items-center gap-2.5 relative z-10 active:scale-95"
                                             >
-                                                <Plus className="w-3.5 h-3.5" /> Quick Add Availability
+                                                <Plus className="w-4 h-4" /> Quick Add Availability
                                             </button>
                                         </div>
                                     );
@@ -408,7 +411,7 @@ export default function InstructorDashboardClient({
                                                                         <span className="text-[9px] font-black text-charcoal">1/1</span>
                                                                     </div>
                                                                 </div>
-                                                                <div className="flex items-center gap-2 text-[10px] text-slate font-black uppercase tracking-[0.1em] mt-1.5">
+                                                                <div className="flex items-center gap-2 text-[10px] text-charcoal/50 font-black uppercase tracking-[0.1em] mt-1.5">
                                                                     <Calendar className="w-3.5 h-3.5 text-forest/40" />
                                                                     <span>{session.slots?.date ? formatManilaDateStr(session.slots.date) : 'No Date'} • {session.slots?.start_time ? formatTo12Hour(session.slots.start_time) : 'No Time'}</span>
                                                                 </div>
@@ -426,7 +429,7 @@ export default function InstructorDashboardClient({
                                                         <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shrink-0 border border-border-grey shadow-tight group-hover/client:scale-110 transition-transform duration-300">
                                                             <img alt="" src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                                         </div>
-                                                        <div className="text-[10px] text-slate uppercase tracking-[0.2em] truncate flex-1 group-hover/client:text-forest transition-colors">
+                                                        <div className="text-[10px] text-charcoal/50 uppercase tracking-[0.2em] truncate flex-1 group-hover/client:text-forest transition-colors">
                                                             CLIENT: <span className="font-black text-charcoal">{session.client?.full_name}</span>
                                                         </div>
                                                     </button>

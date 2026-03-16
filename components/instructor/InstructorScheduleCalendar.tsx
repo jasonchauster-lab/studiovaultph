@@ -718,16 +718,18 @@ export default function InstructorScheduleCalendar({
                                                                                         <div className={clsx("text-[10px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
                                                                                             {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
                                                                                         </div>
-                                                                                        <div className="text-[10px] font-black text-slate bg-white px-2 py-0.5 rounded-full border border-charcoal/10 whitespace-nowrap shadow-sm shrink-0">
-                                                                                            0/1
-                                                                                        </div>
+                                                                                      <div className="text-[10px] font-black text-charcoal/60 bg-white px-2.5 py-1 rounded-lg border border-charcoal/10 whitespace-nowrap shadow-sm shrink-0">
+                                                              0/1
+                                                          </div>
+
                                                                                     </div>
 
                                                                                     <div className="flex flex-wrap items-center gap-1 overflow-hidden">
                                                                                         {locations.map((loc, idx) => (
                                                                                             <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell ? "text-slate border-border-grey bg-off-white" : "text-charcoal border-charcoal/20 bg-buttermilk/10")}>
-                                                                                                <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-slate/40" : "text-charcoal/40")} />
-                                                                                                <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
+                                                                                              <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-charcoal/30" : "text-charcoal/40")} />
+                                                                  <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || 'Studio'}</span>
+
                                                                                             </div>
                                                                                         ))}
                                                                                     </div>
@@ -791,20 +793,21 @@ export default function InstructorScheduleCalendar({
                                                                                         </>
                                                                                     )}
                                                                                 </div>
-                                                                                <div className="text-[8px] font-black text-burgundy bg-buttermilk/40 px-1 py-0.5 rounded border border-burgundy/5 whitespace-nowrap ml-2 shrink-0">
-                                                                                    {Math.min(booking.quantity || 1, 1)}/1
-                                                                                </div>
+                                                                              <div className="text-[8px] font-black text-burgundy bg-buttermilk/60 px-1.5 py-0.5 rounded border border-burgundy/10 whitespace-nowrap ml-2 shrink-0">
+                                                      {Math.min(booking.quantity || 1, 1)}/1
+                                                  </div>
                                                                             </div>
                                                                         </div>
-                                                                    )
+                                                                    );
                                                                 }
+                                                                return null;
                                                             })}
                                                         </div>
-                                                    )
-
-                                            })}
-                                        </div>
-                                    ))}
+                                                    );
+                                                })}
+                                            </div>
+                                        );
+                                    })}
                                 </>
                             )}
 
