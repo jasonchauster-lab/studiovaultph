@@ -509,9 +509,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     <div
                                                                         className={clsx(
                                                                             "absolute top-1 left-1 right-1 bottom-1 p-2 border-l-4 border-solid transition-all duration-300 hover:shadow-card hover:scale-[1.01] shadow-tight group/slot z-10 overflow-hidden cursor-pointer rounded-lg flex flex-col justify-between",
-                                                                            isPastCell ? "bg-off-white border-border-grey" :
-                                                                                hasPending ? "bg-orange-50/50 border-orange-200" :
-                                                                                    isBooked ? "bg-[#43302E] border-[#2C1F1D]" : "bg-[#FDFBF7] border-[#EADED7]"
+                                                                                isPastCell ? "bg-off-white border-border-grey" :
+                                                                                    hasPending ? "bg-orange-50/50 border-orange-200" :
+                                                                                        isBooked ? "bg-forest border-forest/20" : "bg-warm-stone border-border-grey"
                                                                         )}
                                                                         onClick={() => {
                                                                             setBucketSlots(cellSlots);
@@ -521,27 +521,27 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     >
                                                                         <div>
                                                                             {!isBooked && !hasPending && (
-                                                                                <div className="text-[10px] font-bold text-[#43302E] mb-1 truncate">
+                                                                                <div className="text-[10px] font-bold text-charcoal mb-1 truncate">
                                                                                     {hour.toString().padStart(2, '0')}:00 - {(hour + 1).toString().padStart(2, '0')}:00
                                                                                 </div>
                                                                             )}
                                                                             <div className="flex justify-between items-start mb-1 overflow-hidden">
-                                                                                <h4 className={clsx("text-[9.5px] font-semibold uppercase tracking-tight truncate max-w-[85%]", isPastCell || (!isBooked && !hasPending) ? "text-[#43302E]" : "text-[#F5F2E9]")}>
+                                                                                <h4 className={clsx("text-[9.5px] font-semibold uppercase tracking-tight truncate max-w-[85%]", isPastCell || (!isBooked && !hasPending) ? "text-charcoal" : "text-white")}>
                                                                                     {displayTitle}
                                                                                 </h4>
-                                                                                <Edit2 className={clsx("w-2.5 h-2.5 opacity-0 group-hover/slot:opacity-100 transition-opacity shrink-0", isPastCell || (!isBooked && !hasPending) ? "text-[#43302E]/40" : "text-[#F5F2E9]/40")} />
+                                                                                <Edit2 className={clsx("w-2.5 h-2.5 opacity-0 group-hover/slot:opacity-100 transition-opacity shrink-0", isPastCell || (!isBooked && !hasPending) ? "text-charcoal/40" : "text-white/40")} />
                                                                             </div>
                                                                             <div className="flex flex-wrap gap-1 overflow-hidden">
                                                                                 {Object.entries(equipmentCounts).map(([eq, counts]) => (
-                                                                                    <span key={eq} className={clsx("text-[7.5px] font-bold uppercase tracking-tighter flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell || (!isBooked && !hasPending) ? "text-[#43302E]/80 border-border-grey bg-white/50" : "text-white/90 border-white/20 bg-white/10")}>
+                                                                                    <span key={eq} className={clsx("text-[7.5px] font-bold uppercase tracking-tighter flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell || (!isBooked && !hasPending) ? "text-charcoal/80 border-border-grey bg-white/50" : "text-white/90 border-white/20 bg-white/10")}>
                                                                                         <Box className="w-2 h-2 opacity-40 shrink-0" />
                                                                                         <span className="truncate">{counts.booked}/{counts.total} {eq.split(' ')[0]}</span>
                                                                                     </span>
                                                                                 ))}
                                                                             </div>
                                                                         </div>
-                                                                        <div className={clsx("mt-1 pt-1 border-t overflow-hidden", isPastCell || (!isBooked && !hasPending) ? "border-[#43302E]/5" : "border-white/10")}>
-                                                                            <p className={clsx("text-[8px] font-black uppercase tracking-tight truncate flex items-center gap-1", isPastCell || (!isBooked && !hasPending) ? "text-[#43302E]/70" : "text-[#F5F2E9]/80")}>
+                                                                        <div className={clsx("mt-1 pt-1 border-t overflow-hidden", isPastCell || (!isBooked && !hasPending) ? "border-charcoal/5" : "border-white/10")}>
+                                                                            <p className={clsx("text-[8px] font-black uppercase tracking-tight truncate flex items-center gap-1", isPastCell || (!isBooked && !hasPending) ? "text-charcoal/70" : "text-white/80")}>
                                                                                 <User className="w-2 h-2 opacity-50 shrink-0" />
                                                                                 <span className="truncate">{instructors.size > 0 ? Array.from(instructors).join(', ') : 'Unassigned'}</span>
                                                                             </p>
@@ -641,7 +641,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                 }}
                                                             >
                                                                 <span className="truncate">• {s.start_time.slice(0, 5)} {s.displayType}</span>
-                                                                <span className="shrink-0 font-bold text-[#43302E]/60 uppercase tracking-tighter bg-[#43302E]/5 px-1 rounded">
+                                                                <span className="shrink-0 font-bold text-charcoal/60 uppercase tracking-tighter bg-charcoal/5 px-1 rounded">
                                                                     {s.booked}/{s.total}
                                                                 </span>
                                                             </div>
@@ -946,28 +946,28 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                             <div className="bg-white rounded-xl p-8 md:p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 max-h-[90vh] overflow-y-auto will-change-transform" onClick={e => e.stopPropagation()}>
                                 <div className="flex justify-between items-start mb-10">
                                     <div>
-                                        <h3 className="text-3xl font-serif text-[#43302E] tracking-tighter">
+                                        <h3 className="text-3xl font-serif text-charcoal tracking-tighter">
                                             {format(bucketTime.date, 'EEEE, MMM d')} &bull; {bucketTime.hour > 12 ? `${bucketTime.hour - 12} PM` : bucketTime.hour === 12 ? '12 PM' : `${bucketTime.hour} AM`}
                                         </h3>
                                         <div className="flex items-center gap-3 mt-4">
-                                            <div className="bg-off-white p-2.5 rounded-lg border border-border-grey shadow-tight text-[#43302E]">
+                                            <div className="bg-off-white p-2.5 rounded-lg border border-border-grey shadow-tight text-charcoal">
                                                 <User className="w-5 h-5" />
                                             </div>
                                             <div className="space-y-0.5">
-                                                <p className="text-[10px] text-[#43302E]/60 font-bold uppercase tracking-[0.2em]">Staffing</p>
+                                                <p className="text-[10px] text-charcoal/60 font-bold uppercase tracking-[0.2em]">Staffing</p>
                                                 <div className="flex flex-wrap gap-x-2">
                                                     {instructorsMap.size > 0 ? (
                                                         Array.from(instructorsMap.values()).map((instructor, idx) => (
                                                             <button
                                                                 key={instructor.full_name + idx}
                                                                 onClick={() => setSelectedProfile(instructor)}
-                                                                className="text-[14px] font-bold text-[#43302E] tracking-tight hover:text-forest transition-colors flex items-center gap-1"
+                                                                className="text-[14px] font-bold text-charcoal tracking-tight hover:text-forest transition-colors flex items-center gap-1"
                                                             >
                                                                 {instructor.full_name}{idx < instructorsMap.size - 1 ? ',' : ''}
                                                             </button>
                                                         ))
                                                     ) : (
-                                                        <p className="text-[14px] font-bold text-[#43302E] tracking-tight">Unassigned</p>
+                                                        <p className="text-[14px] font-bold text-charcoal tracking-tight">Unassigned</p>
                                                     )}
                                                 </div>
                                             </div>
@@ -975,10 +975,10 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <button onClick={() => { if (primarySlot) { setIsBucketModalOpen(false); onSlotClick(primarySlot); } }} className="p-3 bg-white hover:bg-off-white rounded-lg text-[#43302E] transition-all border border-border-grey shadow-tight" title="Edit">
+                                        <button onClick={() => { if (primarySlot) { setIsBucketModalOpen(false); onSlotClick(primarySlot); } }} className="p-3 bg-white hover:bg-off-white rounded-lg text-charcoal transition-all border border-border-grey shadow-tight" title="Edit">
                                             <Pencil className="w-5 h-5" />
                                         </button>
-                                        <button onClick={() => { if (primarySlot) { setIsBucketModalOpen(false); setSingleDate(primarySlot.date); setSingleTime(primarySlot.start_time); setSingleEndTime(primarySlot.end_time); const newEq: Record<string, number> = {}; if (primarySlot.equipment) Object.assign(newEq, primarySlot.equipment); setAddMode('single'); setIsAddModalOpen(true); } }} className="p-3 bg-white hover:bg-off-white rounded-lg text-[#43302E] transition-all border border-border-grey shadow-tight" title="Duplicate">
+                                        <button onClick={() => { if (primarySlot) { setIsBucketModalOpen(false); setSingleDate(primarySlot.date); setSingleTime(primarySlot.start_time); setSingleEndTime(primarySlot.end_time); const newEq: Record<string, number> = {}; if (primarySlot.equipment) Object.assign(newEq, primarySlot.equipment); setAddMode('single'); setIsAddModalOpen(true); } }} className="p-3 bg-white hover:bg-off-white rounded-lg text-charcoal transition-all border border-border-grey shadow-tight" title="Duplicate">
                                             <Copy className="w-5 h-5" />
                                         </button>
                                         <button onClick={() => setIsBucketModalOpen(false)} className="p-3 bg-off-white hover:bg-white rounded-lg text-slate hover:text-charcoal transition-all border border-border-grey shadow-tight">
@@ -990,8 +990,8 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                 <div className="space-y-10">
                                     {Object.entries(bookingsByEquipment).map(([eqType, bookings]) => (
                                         <div key={eqType} className="space-y-4">
-                                            <h4 className="text-[11px] font-bold text-[#43302E]/60 uppercase tracking-[0.3em] flex items-center gap-3">
-                                                <Box className="w-4 h-4 text-[#43302E]/30" />
+                                            <h4 className="text-[11px] font-bold text-charcoal/60 uppercase tracking-[0.3em] flex items-center gap-3">
+                                                <Box className="w-4 h-4 text-charcoal/30" />
                                                 {eqType}S
                                                 <span className="h-px flex-1 bg-border-grey" />
                                             </h4>
@@ -1012,10 +1012,10 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                 )}
                                                             </div>
                                                             <div>
-                                                                <p className="text-[13px] font-bold text-[#43302E]">{b.client?.full_name || 'Anonymous Client'}</p>
+                                                                <p className="text-[13px] font-bold text-charcoal">{b.client?.full_name || 'Anonymous Client'}</p>
                                                                 <div className="flex items-center gap-2 mt-0.5">
-                                                                    <p className="text-[9px] font-bold text-[#43302E]/40 uppercase tracking-widest">{b.status}</p>
-                                                                    <span className="text-[#43302E]/20 text-[8px]">•</span>
+                                                                    <p className="text-[9px] font-bold text-charcoal/40 uppercase tracking-widest">{b.status}</p>
+                                                                    <span className="text-charcoal/20 text-[8px]">•</span>
                                                                     <div className="flex items-center gap-1 text-[9px] font-bold text-forest/60 uppercase tracking-widest">
                                                                         <Box className="w-2.5 h-2.5 opacity-40" />
                                                                         {b.equipment || b.price_breakdown?.equipment || 'Standard'} ({b.quantity || 1})
@@ -1024,7 +1024,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                             </div>
                                                         </div>
                                                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <ArrowUpRight className="w-4 h-4 text-[#43302E]/20" />
+                                                            <ArrowUpRight className="w-4 h-4 text-charcoal/20" />
                                                         </div>
                                                     </div>
                                                 ))}
@@ -1034,20 +1034,20 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                                     {/* Event History Section */}
                                     <div className="pt-6 border-t border-border-grey/50">
-                                        <h4 className="text-[11px] font-bold text-[#43302E]/40 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
+                                        <h4 className="text-[11px] font-bold text-charcoal/40 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
                                             <Clock className="w-4 h-4" />
                                             Event History
                                         </h4>
                                         <div className="space-y-3">
                                             {allBookings.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map(b => (
                                                 <div key={b.id} className="text-[10px] space-y-1">
-                                                    <div className="flex items-center justify-between font-bold text-[#43302E]/60">
+                                                    <div className="flex items-center justify-between font-bold text-charcoal/60">
                                                         <span>{b.client?.full_name || 'Client'}</span>
                                                         <span className="uppercase tracking-tighter text-[8px] bg-off-white px-2 py-0.5 rounded border border-border-grey/50">
                                                             {b.status}
                                                         </span>
                                                     </div>
-                                                    <div className="flex flex-col gap-0.5 text-[#43302E]/40 font-medium">
+                                                    <div className="flex flex-col gap-0.5 text-charcoal/40 font-medium">
                                                         <p>Booked on {format(new Date(b.created_at), 'MMM d, h:mm a')}</p>
                                                         {['cancelled_refunded', 'cancelled_charged', 'rejected'].includes(b.status?.toLowerCase()) && (
                                                             <p className="text-red-900/40 italic">
@@ -1074,7 +1074,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                             setAddMode('single');
                                             setIsAddModalOpen(true);
                                         }}
-                                        className="bg-[#43302E] text-white px-8 py-4 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 flex items-center gap-3"
+                                        className="bg-forest text-white px-8 py-4 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 flex items-center gap-3"
                                     >
                                         <Plus className="w-4 h-4" /> Add Slot
                                     </button>

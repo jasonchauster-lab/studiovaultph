@@ -437,7 +437,7 @@ export default function InstructorBookingWizard({
                         <div className="flex items-center justify-between mb-8">
                             <button
                                 onClick={() => handleMonthChange(-1)}
-                                className="p-3 hover:bg-white/60 rounded-full transition-all text-charcoal/40 hover:text-charcoal disabled:opacity-10"
+                                className="p-3 hover:bg-white rounded-full transition-all text-charcoal/40 hover:text-charcoal disabled:opacity-10"
                                 disabled={isPast(subMonths(monthStart, 0)) && !isSameMonth(monthStart, new Date())}
                             >
                                 <ChevronLeft className="w-5 h-5" />
@@ -445,7 +445,7 @@ export default function InstructorBookingWizard({
                             <h3 className="font-serif text-lg font-bold text-charcoal">
                                 {format(monthStart, 'MMMM yyyy')}
                             </h3>
-                            <button onClick={() => handleMonthChange(1)} className="p-3 hover:bg-white/60 rounded-full transition-all text-charcoal/40 hover:text-charcoal">
+                            <button onClick={() => handleMonthChange(1)} className="p-3 hover:bg-white rounded-full transition-all text-charcoal/40 hover:text-charcoal">
                                 <ChevronRight className="w-5 h-5" />
                             </button>
                         </div>
@@ -592,7 +592,7 @@ export default function InstructorBookingWizard({
 
                                                     return (
                                                         <div
-                                                            className="absolute top-full left-0 mt-2 z-50 bg-white/95 backdrop-blur-xl rounded-[24px] border border-white/60 shadow-cloud flex overflow-hidden animate-in fade-in slide-in-from-top-2"
+                                                            className="absolute top-full left-0 mt-2 z-50 bg-white rounded-[24px] border border-border-grey shadow-cloud flex overflow-hidden animate-in fade-in slide-in-from-top-2"
                                                             style={{ minWidth: cities.length > 1 ? '450px' : '280px' }}
                                                             onMouseLeave={() => setActiveCity(null)}
                                                         >
@@ -629,7 +629,7 @@ export default function InstructorBookingWizard({
 
                                                             {/* Right Panel: Sub-Locations */}
                                                             {cities.length > 1 && (
-                                                                <div className="w-1/2 flex flex-col py-3 bg-white/40">
+                                                                <div className="w-1/2 flex flex-col py-3 bg-off-white">
                                                                     <div className="px-4 py-1.5 flex items-center gap-2 mb-2">
                                                                         <div className="w-1 h-3 bg-gold/30 rounded-full" />
                                                                         <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.15em]">Select Area</span>
@@ -700,7 +700,7 @@ export default function InstructorBookingWizard({
                     </div>
 
                     <div className="bg-sage/5 border border-sage/10 p-6 rounded-[24px] flex items-start gap-4 shadow-sm">
-                        <div className="w-10 h-10 rounded-xl bg-white/60 flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0">
                             <Info className="w-5 h-5 text-sage" />
                         </div>
                         <div className="text-[11px] font-medium text-charcoal/60 leading-relaxed uppercase tracking-widest pt-1">
@@ -714,13 +714,13 @@ export default function InstructorBookingWizard({
                             <p className="text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.3em] mt-6">Consulting the Vault...</p>
                         </div>
                     ) : matchingStudios.length === 0 ? (
-                        <div className="text-center py-20 bg-white/20 rounded-[32px] border border-dashed border-white/60">
+                        <div className="text-center py-20 bg-off-white rounded-[32px] border border-dashed border-border-grey">
                             <p className="text-[11px] font-bold text-charcoal/30 uppercase tracking-widest italic font-serif">No studios available for this specific criteria.</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-8">
                             {matchingStudios.map(result => (
-                                <div key={result.studio.id} className="bg-white/40 backdrop-blur-md p-8 rounded-[32px] border border-white/80 shadow-cloud space-y-8">
+                                <div key={result.studio.id} className="bg-white p-8 rounded-[32px] border border-border-grey shadow-cloud space-y-8">
                                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                                         <div className="space-y-1">
                                             <h4 className="font-serif text-2xl font-bold text-charcoal">{result.studio.name}</h4>
@@ -749,7 +749,7 @@ export default function InstructorBookingWizard({
                                                                 "px-6 py-3 rounded-[16px] text-xs font-bold uppercase tracking-widest transition-all border",
                                                                 isSelected
                                                                     ? "bg-sage text-white border-sage shadow-md scale-105"
-                                                                    : "bg-white/60 text-charcoal/60 border-white/80 hover:bg-white hover:text-charcoal"
+                                                                    : "bg-off-white text-charcoal/60 border-border-grey hover:bg-white hover:text-charcoal"
                                                             )}
                                                         >
                                                             {formatTo12Hour(startTime)}
@@ -800,7 +800,7 @@ export default function InstructorBookingWizard({
                                                         <label className="text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.2em]">Select Equipment</label>
                                                         <div className="flex flex-col gap-3">
                                                             {allEq.length === 0 ? (
-                                                                <div className="bg-white/40 text-charcoal/30 px-6 py-4 rounded-[20px] text-[11px] font-medium italic border border-white/60">
+                                                                <div className="bg-off-white text-charcoal/30 px-6 py-4 rounded-[20px] text-[11px] font-medium italic border border-border-grey">
                                                                     No specialized equipment listed.
                                                                 </div>
                                                             ) : (
@@ -816,7 +816,7 @@ export default function InstructorBookingWizard({
                                                                                 "px-6 py-4 rounded-[20px] border transition-all flex items-center justify-between group",
                                                                                 isSelected
                                                                                     ? "bg-forest text-white border-forest shadow-cloud-lg scale-[1.02]"
-                                                                                    : "bg-white/40 border-white/60 text-charcoal/60 hover:bg-white/60 hover:text-charcoal"
+                                                                                    : "bg-off-white border-border-grey text-charcoal/60 hover:bg-white hover:text-charcoal"
                                                                             )}
                                                                         >
                                                                             <div className="text-left">
@@ -835,7 +835,7 @@ export default function InstructorBookingWizard({
 
                                                     <div className="space-y-5">
                                                         <label className="text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.2em]">Number of Attendees</label>
-                                                        <div className="bg-white/40 p-6 rounded-[28px] border border-white/60 space-y-6">
+                                                        <div className="bg-off-white p-6 rounded-[28px] border border-border-grey space-y-6">
                                                             <div className="flex items-center justify-between">
                                                                 <div className="flex items-center gap-4">
                                                                     <button

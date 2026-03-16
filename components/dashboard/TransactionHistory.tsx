@@ -192,7 +192,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                 )}
                                             </div>
                                             <div className="shrink-0 text-right">
-                                                <span className="text-[11px] font-bold text-[#43302E] tracking-tight">
+                                                <span className="text-[11px] font-bold text-charcoal tracking-tight">
                                                     {isRefunded ? '₱0' : (isPositive ? '+' : '') + `₱${tx.total_amount.toLocaleString()}`}
                                                 </span>
                                                 {tx.status && (
@@ -288,7 +288,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                 </p>
                                             </div>
                                             <div className="shrink-0 text-right">
-                                                <span className="text-[11px] font-bold text-[#43302E] tracking-tight">
+                                                <span className="text-[11px] font-bold text-charcoal tracking-tight">
                                                     -₱{Math.abs(tx.total_amount).toLocaleString()}
                                                 </span>
                                                 <span className={clsx(

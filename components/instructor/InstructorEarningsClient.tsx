@@ -107,7 +107,7 @@ export default function InstructorEarningsClient({
                         {availableBalance < 0 ? (
                             <button
                                 disabled
-                                className="h-12 sm:h-14 w-full sm:w-[180px] bg-[#43302E] text-white/40 px-10 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 cursor-not-allowed opacity-50 whitespace-nowrap"
+                                className="h-12 sm:h-14 w-full sm:w-[180px] bg-charcoal text-white/40 px-10 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 cursor-not-allowed opacity-50 whitespace-nowrap"
                                 title="Payouts are restricted while balance is negative."
                             >
                                 <Wallet className="w-4 h-4 text-white/40" />
@@ -116,7 +116,7 @@ export default function InstructorEarningsClient({
                         ) : (
                             <Link
                                 href="/instructor/payout"
-                                className="h-12 sm:h-14 w-full sm:w-[180px] bg-[#43302E] text-white px-10 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-125 transition-all shadow-tight active:scale-95 whitespace-nowrap"
+                                className="h-12 sm:h-14 w-full sm:w-[180px] bg-charcoal text-white px-10 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-125 transition-all shadow-tight active:scale-95 whitespace-nowrap"
                             >
                                 <Wallet className="w-4 h-4 text-white" />
                                 CASH OUT
@@ -358,13 +358,13 @@ export default function InstructorEarningsClient({
                                             {tx.type} {tx.details ? `• ${tx.details}` : ''}
                                         </p>
                                         {tx.session_date && (
-                                            <p className="text-[9px] text-[#43302E]/60 font-black uppercase tracking-tighter mt-1">
+                                            <p className="text-[9px] text-charcoal/60 font-black uppercase tracking-tighter mt-1">
                                                 Slot: {new Date(tx.session_date).toLocaleDateString()} @ {tx.session_time?.slice(0, 5)}
                                             </p>
                                         )}
                                     </div>
                                     <div className="shrink-0 text-right">
-                                        <span className="text-[11px] font-bold text-[#43302E] tracking-tight">
+                                        <span className="text-[11px] font-bold text-charcoal tracking-tight">
                                             {tx.total_amount > 0 ? '+' : tx.total_amount < 0 ? '-' : ''}
                                             ₱{Math.abs(tx.total_amount).toLocaleString()}
                                         </span>

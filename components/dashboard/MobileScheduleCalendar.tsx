@@ -137,32 +137,32 @@ export default function MobileScheduleCalendar({
     }, [selectedDate, agendaSessions]);
 
     return (
-        <div className="flex flex-col h-full bg-[#FAFAFA] font-sans antialiased text-burgundy">
+        <div className="flex flex-col h-full bg-off-white font-sans antialiased text-charcoal">
             {/* Sticky Top Section: Weekly Strip */}
-            <div className="sticky top-0 z-50 bg-white border-b border-[#E5E7EB] px-6 pt-8 pb-4 shadow-tight">
+            <div className="sticky top-0 z-50 bg-white border-b border-border-grey px-6 pt-8 pb-4 shadow-tight">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex flex-col">
-                        <h2 className="text-2xl font-serif font-black tracking-tighter text-burgundy">
+                        <h2 className="text-2xl font-serif font-black tracking-tighter text-charcoal">
                             {format(selectedDate, 'MMMM yyyy')}
                         </h2>
-                        <p className="text-[9px] font-black tracking-[0.3em] text-burgundy uppercase mt-1">Schedule View</p>
+                        <p className="text-[9px] font-black tracking-[0.3em] text-charcoal uppercase mt-1">Schedule View</p>
                     </div>
-                <div className="flex bg-[#FAFAFA] rounded-full p-1 border border-[#E5E7EB]">
+                <div className="flex bg-off-white rounded-full p-1 border border-border-grey">
                         <button
                             onClick={() => setSelectedDate(addDays(selectedDate, -7))}
-                            className="p-2 hover:bg-white rounded-full transition-all text-muted-burgundy border border-transparent hover:border-[#E5E7EB] hover:shadow-tight"
+                            className="p-2 hover:bg-white rounded-full transition-all text-slate border border-transparent hover:border-border-grey hover:shadow-tight"
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => setSelectedDate(startOfDay(new Date()))}
-                            className="px-4 py-1.5 text-[9px] font-black text-burgundy uppercase tracking-widest"
+                            className="px-4 py-1.5 text-[9px] font-black text-charcoal uppercase tracking-widest"
                         >
                             Today
                         </button>
                         <button
                             onClick={() => setSelectedDate(addDays(selectedDate, 7))}
-                            className="p-2 hover:bg-white rounded-full transition-all text-muted-burgundy border border-transparent hover:border-[#E5E7EB] hover:shadow-tight"
+                            className="p-2 hover:bg-white rounded-full transition-all text-slate border border-transparent hover:border-border-grey hover:shadow-tight"
                         >
                             <ChevronRight className="w-4 h-4" />
                         </button>
@@ -180,7 +180,7 @@ export default function MobileScheduleCalendar({
                     {onRecurringSchedule && (
                         <button
                             onClick={() => onRecurringSchedule()}
-                            className="flex items-center justify-center gap-2 py-3 bg-white text-burgundy border border-burgundy/20 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-tight active:scale-95 transition-all"
+                            className="flex items-center justify-center gap-2 py-3 bg-white text-charcoal border border-charcoal/20 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-tight active:scale-95 transition-all"
                         >
                             <CalendarIcon className="w-4 h-4" /> Recurring
                         </button>
@@ -204,27 +204,27 @@ export default function MobileScheduleCalendar({
                             >
                                 <span className={clsx(
                                     "text-[9px] font-black uppercase tracking-[0.2em] mb-4 transition-colors",
-                                    isSelected ? "text-burgundy" : "text-muted-burgundy"
+                                    isSelected ? "text-charcoal" : "text-slate"
                                 )}>
                                     {format(day, 'EEE')}
                                 </span>
                                 <div className={clsx(
                                     "w-10 h-10 flex items-center justify-center rounded-full text-[13px] font-black transition-all duration-300",
                                     isToday
-                                        ? "bg-buttermilk text-burgundy shadow-tight scale-110 border-2 border-burgundy/20"
+                                        ? "bg-buttermilk text-charcoal shadow-tight scale-110 border-2 border-charcoal/20"
                                         : isSelected
-                                            ? "border-2 border-burgundy text-burgundy bg-buttermilk/10 scale-110"
-                                            : "text-burgundy hover:bg-[#FAFAFA] border border-transparent hover:border-[#E5E7EB]"
+                                            ? "border-2 border-charcoal text-charcoal bg-buttermilk/10 scale-110"
+                                            : "text-charcoal hover:bg-off-white border border-transparent hover:border-border-grey"
                                 )}>
                                     {format(day, 'd')}
                                 </div>
                                 {/* Indicator Dots */}
                                 <div className="flex gap-1 mt-3 h-1">
                                     {status?.hasBooked && (
-                                        <div className="w-1.5 h-1.5 rounded-full bg-burgundy shadow-[0_0_8px_rgba(67,48,46,0.3)]" />
+                                        <div className="w-1.5 h-1.5 rounded-full bg-charcoal shadow-[0_0_8px_rgba(26,28,30,0.3)]" />
                                     )}
                                     {status?.hasAvailable && (
-                                        <div className="w-1.5 h-1.5 rounded-full bg-burgundy/10 border border-burgundy/20" />
+                                        <div className="w-1.5 h-1.5 rounded-full bg-charcoal/10 border border-charcoal/20" />
                                     )}
                                 </div>
                             </button>
@@ -251,7 +251,7 @@ export default function MobileScheduleCalendar({
                                     <div className="flex items-center gap-4 py-2 animate-in fade-in slide-in-from-left duration-700">
                                         <div className="w-3 h-3 rounded-full bg-burgundy shadow-[0_0_12px_rgba(67,48,46,0.4)] flex-shrink-0" />
                                         <div className="h-[3px] flex-1 bg-forest opacity-30" />
-                                        <span className="text-[9px] font-black text-burgundy uppercase tracking-widest whitespace-nowrap">Now</span>
+                                        <span className="text-[9px] font-black text-charcoal uppercase tracking-widest whitespace-nowrap">Now</span>
                                     </div>
                                 )}
                                 <div
@@ -260,32 +260,32 @@ export default function MobileScheduleCalendar({
                                     className={clsx(
                                         "w-full rounded-2xl p-6 sm:p-8 shadow-tight active:scale-[0.99] transition-all duration-300 flex flex-col gap-6 sm:gap-8 relative overflow-hidden group cursor-pointer border-l-4",
                                         session.is_booked
-                                            ? "bg-[#43302E] border-[#2C1F1D]"
-                                            : "bg-[#FDFBF7] border border-[#EADED7]"
+                                            ? "bg-forest border-forest/20"
+                                            : "bg-warm-stone border-border-grey"
                                     )}
                                 >
                                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                                         <div className="space-y-4 w-full">
-                                            <div className={clsx("flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] w-full", session.is_booked ? "text-white" : "text-burgundy")}>
+                                            <div className={clsx("flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] w-full", session.is_booked ? "text-white" : "text-charcoal")}>
                                                 <div className={clsx("px-3 py-1.5 rounded-lg border flex items-center gap-3 w-full sm:w-auto", session.is_booked ? "bg-white/20 border-white/40" : "bg-buttermilk/10 border-buttermilk/40")}>
                                                     <Clock className="w-3.5 h-3.5 shrink-0" />
                                                     <span className="truncate">{formatTo12Hour(session.start_time)} — {formatTo12Hour(session.end_time)}</span>
                                                 </div>
                                             </div>
-                                            <h3 className={clsx("text-xl font-serif font-bold tracking-tight pt-1", session.is_booked ? "text-[#F5F2E9]" : "text-burgundy")}>
+                                            <h3 className={clsx("text-xl font-serif font-bold tracking-tight pt-1", session.is_booked ? "text-white" : "text-charcoal")}>
                                                 {session.displayTitle || (session.is_booked ? session.type : 'Availability')}
                                             </h3>
                                         </div>
                                         {session.displayRatio ? (
-                                            <div className="bg-[#FFF1B5] text-[#43302E] px-3 py-1 rounded-full text-[9px] font-black tracking-widest shadow-sm w-fit">
+                                            <div className="bg-buttermilk text-charcoal px-3 py-1 rounded-full text-[9px] font-black tracking-widest shadow-sm w-fit">
                                                 {session.displayRatio}
                                             </div>
                                         ) : session.is_booked ? (
-                                            <div className="bg-[#FFF1B5] text-[#43302E] px-3 py-1 rounded-full text-[9px] font-black tracking-widest shadow-sm w-fit">
+                                            <div className="bg-buttermilk text-charcoal px-3 py-1 rounded-full text-[9px] font-black tracking-widest shadow-sm w-fit">
                                                 1/1
                                             </div>
                                         ) : (
-                                            <div className="bg-white text-muted-burgundy border border-[#E5E7EB] px-3 py-1 rounded-full text-[9px] font-black tracking-[0.1em] w-fit shadow-sm">
+                                            <div className="bg-white text-slate border border-border-grey px-3 py-1 rounded-full text-[9px] font-black tracking-[0.1em] w-fit shadow-sm">
                                                 0/1
                                             </div>
                                         )}
@@ -303,11 +303,11 @@ export default function MobileScheduleCalendar({
                                                     className={clsx(
                                                         "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all",
                                                         session.is_booked 
-                                                            ? "text-burgundy bg-[#D6C4B0] border-[#BFA38E] hover:bg-[#F5F2E9]"
-                                                            : "text-muted-burgundy bg-white/50 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
+                                                            ? "text-charcoal bg-charcoal/10 border-charcoal/20 hover:bg-forest hover:text-white"
+                                                            : "text-slate bg-white/50 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
                                                     )}
                                                 >
-                                                    <MapPin className={clsx("w-3.5 h-3.5", session.is_booked ? "text-burgundy/60" : "text-burgundy/40")} />
+                                                    <MapPin className={clsx("w-3.5 h-3.5", session.is_booked ? "text-charcoal/60" : "text-charcoal/40")} />
                                                     <span className="font-bold uppercase tracking-wider text-[9px]">{loc}</span>
                                                 </a>
                                             ))
@@ -324,7 +324,7 @@ export default function MobileScheduleCalendar({
                                                         : "text-muted-burgundy bg-white/50 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
                                                 )}
                                             >
-                                                <MapPin className={clsx("w-3.5 h-3.5", session.is_booked ? "text-burgundy/60" : "text-burgundy/40")} />
+                                                <MapPin className={clsx("w-3.5 h-3.5", session.is_booked ? "text-charcoal/60" : "text-charcoal/40")} />
                                                 <span className="font-bold uppercase tracking-wider text-[9px]">{session.location?.split(' - ')[0] || session.location || 'Studio'}</span>
                                             </a>
                                         )}
@@ -336,7 +336,7 @@ export default function MobileScheduleCalendar({
                             <div className="flex items-center gap-4 py-2 animate-in fade-in slide-in-from-left duration-700">
                                 <div className="w-3 h-3 rounded-full bg-burgundy shadow-[0_0_12px_rgba(67,48,46,0.4)] flex-shrink-0" />
                                 <div className="h-[3px] flex-1 bg-forest opacity-30" />
-                                <span className="text-[9px] font-black text-burgundy uppercase tracking-widest whitespace-nowrap">Now</span>
+                                <span className="text-[9px] font-black text-charcoal uppercase tracking-widest whitespace-nowrap">Now</span>
                             </div>
                         )}
                     </div>

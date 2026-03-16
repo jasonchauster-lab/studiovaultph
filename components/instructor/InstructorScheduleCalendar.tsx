@@ -689,7 +689,7 @@ export default function InstructorScheduleCalendar({
                                                                                 "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-2 py-1 group/slot flex flex-col justify-center shadow-tight",
                                                                                 isPastCell
                                                                                     ? "bg-off-white border-border-grey text-slate"
-                                                                                    : "bg-[#FDFBF7] border-[#EADED7] text-charcoal",
+                                                                                    : "bg-warm-stone border-border-grey text-charcoal",
                                                                                 duration < 45 && "py-1 px-2 justify-center"
                                                                             )}
                                                                             style={{
@@ -715,15 +715,15 @@ export default function InstructorScheduleCalendar({
                                                                                         <div className={clsx("text-[10px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
                                                                                             {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
                                                                                         </div>
-                                                                                        <div className="text-[10px] font-black text-burgundy bg-white px-2 py-0.5 rounded-full border border-burgundy/5 whitespace-nowrap shadow-sm shrink-0">
+                                                                                        <div className="text-[10px] font-black text-slate bg-white px-2 py-0.5 rounded-full border border-charcoal/10 whitespace-nowrap shadow-sm shrink-0">
                                                                                             0/1
                                                                                         </div>
                                                                                     </div>
 
                                                                                     <div className="flex flex-wrap items-center gap-1 overflow-hidden">
                                                                                         {locations.map((loc, idx) => (
-                                                                                            <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell ? "text-slate border-border-grey bg-white/50" : "text-burgundy border-burgundy/20 bg-buttermilk/10")}>
-                                                                                                <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-slate/40" : "text-burgundy/40")} />
+                                                                                            <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell ? "text-slate border-border-grey bg-white/50" : "text-charcoal border-charcoal/20 bg-buttermilk/10")}>
+                                                                                                <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-slate/40" : "text-charcoal/40")} />
                                                                                                 <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
                                                                                             </div>
                                                                                         ))}
@@ -742,7 +742,7 @@ export default function InstructorScheduleCalendar({
                                                                         <div
                                                                             key={booking.id}
                                                                             className={clsx(
-                                                                                "absolute rounded-lg text-[10px] z-20 p-2 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border-l-4 bg-[#43302E] border-[#2C1F1D]",
+                                                                                "absolute rounded-lg text-[10px] z-20 p-2 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border-l-4 bg-forest border-forest/20",
                                                                                 duration < 45 && "flex-row items-center justify-between py-2 px-3"
                                                                             )}
                                                                             style={{
@@ -763,7 +763,7 @@ export default function InstructorScheduleCalendar({
                                                                         >
                                                                             <div className={clsx("flex justify-between items-start w-full overflow-hidden", duration < 45 && "items-center")}>
                                                                                 <div className="flex flex-col min-w-0 flex-1 overflow-hidden">
-                                                                                    <span className="text-[8.5px] font-semibold text-[#F5F2E9] uppercase tracking-tight truncate">
+                                                                                    <span className="text-[8.5px] font-semibold text-white uppercase tracking-tight truncate">
                                                                                         {booking.client?.full_name || 'Session'}
                                                                                     </span>
                                                                                     {duration >= 45 && (
@@ -918,7 +918,7 @@ export default function InstructorScheduleCalendar({
                                                             }}
                                                         >
                                                             <span className="truncate mr-2">• {s.time} SESSION</span>
-                                                            <span className="shrink-0 font-bold text-[#43302E]/60 uppercase tracking-tighter bg-[#43302E]/5 px-1 rounded">
+                                                            <span className="shrink-0 font-bold text-charcoal/60 uppercase tracking-tighter bg-charcoal/5 px-1 rounded">
                                                                 {Math.min(s.booked, 1)}/1
                                                             </span>
                                                         </div>
@@ -1303,11 +1303,11 @@ export default function InstructorScheduleCalendar({
             {
                 selectedBooking && (
                     <div
-                        className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-[#43302E]/40 backdrop-blur-sm animate-in fade-in duration-300"
+                        className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setSelectedBooking(null)}
                     >
                         <div
-                            className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500 border border-[#43302E]/5 relative"
+                            className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500 border border-charcoal/5 relative"
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* Header Cluster (Status + Actions) */}
@@ -1327,7 +1327,7 @@ export default function InstructorScheduleCalendar({
                                             "text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm",
                                             statusLabel === 'Completed' ? "bg-forest/10 text-forest" :
                                                 statusLabel === 'Expired' ? "bg-red-50 text-red-600" :
-                                                    "bg-[#FFF1B5] text-[#43302E]"
+                                                    "bg-[#FFF1B5] text-charcoal"
                                         )}>
                                             {statusLabel}
                                         </span>
@@ -1341,13 +1341,13 @@ export default function InstructorScheduleCalendar({
                                             setIsEditModalOpen(true);
                                             setSelectedBooking(null);
                                         }}
-                                        className="p-2 hover:bg-[#FFF1B5]/30 rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
+                                        className="p-2 hover:bg-[#FFF1B5]/30 rounded-full text-charcoal/40 hover:text-charcoal transition-all"
                                         title="Edit Session"
                                     >
                                         <Pencil className="w-4 h-4" />
                                     </button>
                                     <button
-                                        className="p-2 hover:bg-[#FFF1B5]/30 rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
+                                        className="p-2 hover:bg-[#FFF1B5]/30 rounded-full text-charcoal/40 hover:text-charcoal transition-all"
                                         title="Duplicate Session"
                                     >
                                         <Copy className="w-4 h-4" />
@@ -1357,14 +1357,14 @@ export default function InstructorScheduleCalendar({
                                             handleDelete(selectedBooking.slot_id);
                                             setSelectedBooking(null);
                                         }}
-                                        className="p-2 hover:bg-red-50 rounded-full text-[#43302E]/40 hover:text-red-600 transition-all"
+                                        className="p-2 hover:bg-red-50 rounded-full text-charcoal/40 hover:text-red-600 transition-all"
                                         title="Delete Session"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                     <button
                                         onClick={() => setSelectedBooking(null)}
-                                        className="p-2 hover:bg-off-white rounded-full text-[#43302E]/40 hover:text-[#43302E] transition-all"
+                                        className="p-2 hover:bg-off-white rounded-full text-charcoal/40 hover:text-charcoal transition-all"
                                         title="Close"
                                     >
                                         <X className="w-5 h-5" />
@@ -1384,13 +1384,13 @@ export default function InstructorScheduleCalendar({
                             {/* Actual Content */}
                             <div className="space-y-6 px-8 pt-10">
                                 <div className="flex items-center pt-2">
-                                    <h3 className="text-3xl font-serif text-[#43302E] tracking-tighter text-left">
+                                    <h3 className="text-3xl font-serif text-charcoal tracking-tighter text-left">
                                         {selectedBooking.price_breakdown?.equipment || 'Standard Session'}
                                     </h3>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <div className="flex items-center gap-3 text-[#43302E]">
+                                    <div className="flex items-center gap-3 text-charcoal">
                                         <Clock className="w-4 h-4 opacity-40 shrink-0" />
                                         <span className="text-[11px] font-bold uppercase tracking-widest text-left">
                                             {(() => {
@@ -1405,7 +1405,7 @@ export default function InstructorScheduleCalendar({
                                             })()}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-3 text-[#43302E]">
+                                    <div className="flex items-center gap-3 text-charcoal">
                                         <MapPin className="w-4 h-4 opacity-40 shrink-0" />
                                         <div className="flex items-baseline gap-2 flex-1 min-w-0">
                                             <span className="text-[11px] font-bold uppercase tracking-widest text-left truncate">
@@ -1416,7 +1416,7 @@ export default function InstructorScheduleCalendar({
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="text-[10px] font-bold text-[#43302E] underline decoration-[#43302E]/20 hover:text-forest hover:decoration-forest transition-all shrink-0 whitespace-nowrap"
+                                                className="text-[10px] font-bold text-charcoal underline decoration-charcoal/20 hover:text-forest hover:decoration-forest transition-all shrink-0 whitespace-nowrap"
                                             >
                                                 View on Maps
                                             </a>
@@ -1432,7 +1432,7 @@ export default function InstructorScheduleCalendar({
                                     
                                     return (
                                         <div className="pt-6 border-t border-[#E5E7EB] flex items-center justify-between">
-                                            <span className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em]">
+                                            <span className="text-[10px] font-black text-charcoal uppercase tracking-[0.3em]">
                                                 {qty} {equipment} BOOKED
                                             </span>
                                             <span className="text-[10px] font-black text-[#6B5A58] uppercase tracking-widest">
@@ -1445,8 +1445,8 @@ export default function InstructorScheduleCalendar({
 
                             {/* Booked Section */}
                             <div className="space-y-6 px-8">
-                                <div className="flex items-center justify-between border-b border-[#43302E]/10 pb-4">
-                                    <h4 className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em]">
+                                <div className="flex items-center justify-between border-b border-charcoal/10 pb-4">
+                                    <h4 className="text-[10px] font-black text-charcoal uppercase tracking-[0.3em]">
                                         {(() => {
                                             const qty = selectedBooking.quantity || 1;
                                             const equipment = Array.isArray(selectedBooking.slots?.equipment) && selectedBooking.slots.equipment.length > 0
@@ -1455,7 +1455,7 @@ export default function InstructorScheduleCalendar({
                                             return `${qty} ${equipment} Booked`;
                                         })()}
                                     </h4>
-                                    <span className="text-[10px] font-black text-[#43302E]/40 uppercase tracking-widest">
+                                    <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest">
                                         {currentSlotHistory.length} Cancelled
                                     </span>
                                 </div>
@@ -1473,8 +1473,8 @@ export default function InstructorScheduleCalendar({
                                                 />
                                             </div>
                                             <div>
-                                                <p className="text-[11px] font-black text-[#43302E] uppercase tracking-wider group-hover:text-forest transition-colors">{selectedBooking.client?.full_name}</p>
-                                                <p className="text-[9px] font-medium text-[#43302E]/50 uppercase tracking-tighter">Verified Client</p>
+                                                <p className="text-[11px] font-black text-charcoal uppercase tracking-wider group-hover:text-forest transition-colors">{selectedBooking.client?.full_name}</p>
+                                                <p className="text-[9px] font-medium text-charcoal/50 uppercase tracking-tighter">Verified Client</p>
                                             </div>
                                         </div>
                                         {(() => {
@@ -1492,7 +1492,7 @@ export default function InstructorScheduleCalendar({
                                                     "text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest border",
                                                     statusLabel === 'Completed' ? "bg-forest/5 text-forest border-forest/10" :
                                                         statusLabel === 'Expired' ? "bg-red-50 text-red-600 border-red-100" :
-                                                            "bg-white text-[#43302E] border-[#43302E]/5"
+                                                            "bg-white text-charcoal border-charcoal/5"
                                                 )}>
                                                     {statusLabel}
                                                 </span>
@@ -1503,20 +1503,20 @@ export default function InstructorScheduleCalendar({
                             </div>
 
                             {/* Event History Section */}
-                            <div className="pt-6 border-t border-[#43302E]/10 mt-10 px-8">
-                                <h4 className="text-[10px] font-black text-[#43302E] uppercase tracking-[0.3em] mb-4 flex items-center gap-3 text-left">
+                            <div className="pt-6 border-t border-charcoal/10 mt-10 px-8">
+                                <h4 className="text-[10px] font-black text-charcoal uppercase tracking-[0.3em] mb-4 flex items-center gap-3 text-left">
                                     <Clock className="w-4 h-4 opacity-40" />
                                     Event History
                                 </h4>
                                 <div className="space-y-3">
                                     <div className="text-[10px] space-y-1 text-left">
-                                        <div className="flex items-center justify-between font-bold text-[#43302E]/60">
+                                        <div className="flex items-center justify-between font-bold text-charcoal/60">
                                             <span>Current Session</span>
-                                            <span className="uppercase tracking-tighter text-[8px] bg-[#F5F2EB] px-2 py-0.5 rounded border border-[#43302E]/10">
+                                            <span className="uppercase tracking-tighter text-[8px] bg-[#F5F2EB] px-2 py-0.5 rounded border border-charcoal/10">
                                                 {selectedBooking.status}
                                             </span>
                                         </div>
-                                        <div className="flex flex-col gap-0.5 text-[#43302E]/40 font-medium">
+                                        <div className="flex flex-col gap-0.5 text-charcoal/40 font-medium">
                                             <p>Booked on {format(new Date(selectedBooking.created_at), 'MMM d, h:mm a')}</p>
                                             {['cancelled_refunded', 'cancelled_charged', 'rejected'].includes(selectedBooking.status?.toLowerCase()) && (
                                                 <p className="text-red-900/40 italic">
@@ -1527,13 +1527,13 @@ export default function InstructorScheduleCalendar({
                                     </div>
                                     {currentSlotHistory.map(h => (
                                         <div key={h.id} className="text-[10px] space-y-1 opacity-60 text-left">
-                                            <div className="flex items-center justify-between font-bold text-[#43302E]/60">
+                                            <div className="flex items-center justify-between font-bold text-charcoal/60">
                                                 <span>{h.client?.full_name || 'Previous Client'}</span>
                                                 <span className="uppercase tracking-tighter text-[8px] bg-red-50 text-red-600 px-2 py-0.5 rounded border border-red-100">
                                                     {h.status}
                                                 </span>
                                             </div>
-                                            <div className="flex flex-col gap-0.5 text-[#43302E]/40 font-medium">
+                                            <div className="flex flex-col gap-0.5 text-charcoal/40 font-medium">
                                                 <p>Booked on {format(new Date(h.created_at || h.updated_at), 'MMM d, h:mm a')}</p>
                                                 <p className="text-red-900/40 italic">
                                                     Cancelled on {format(new Date(h.updated_at), 'MMM d, h:mm a')}
@@ -1554,7 +1554,7 @@ export default function InstructorScheduleCalendar({
                                         });
                                         setSelectedBooking(null);
                                     }}
-                                    className="flex-1 bg-[#43302E] text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-125 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3"
+                                    className="flex-1 bg-charcoal text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-125 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3"
                                 >
                                     <MessageSquare className="w-4 h-4" /> Message Client
                                 </button>

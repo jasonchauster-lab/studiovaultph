@@ -398,8 +398,8 @@ export default function InstructorDashboardClient({
                                                                     >
                                                                         {session.slots?.studios?.name || 'Unknown Studio'}
                                                                     </button>
-                                                                    <div className="flex items-center gap-2 bg-[#FFF1B5]/40 px-2 py-0.5 rounded border border-[#43302E]/5 whitespace-nowrap">
-                                                                        <span className="text-[9px] font-black text-[#43302E]">1/1</span>
+                                                                    <div className="flex items-center gap-2 bg-[#FFF1B5]/40 px-2 py-0.5 rounded border border-charcoal/5 whitespace-nowrap">
+                                                                        <span className="text-[9px] font-black text-charcoal">1/1</span>
                                                                     </div>
                                                                 </div>
                                                                 <div className="flex items-center gap-2 text-[10px] text-slate font-black uppercase tracking-[0.1em] mt-1.5">
