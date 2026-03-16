@@ -79,7 +79,7 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                 <div className="flex-none sm:flex-initial">
                     <MultiSelectFilter
                         label="Equipment"
-                        options={['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat']}
+                        options={['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat']}
                         value={getMultiValue('equipment')}
                         onChange={(vals) => handleMultiFilter('equipment', vals)}
                         className="w-auto"

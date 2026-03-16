@@ -54,7 +54,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
 
     return (
         <div className={clsx("flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-transparent sm:bg-white p-0 sm:p-2.5 rounded-none sm:rounded-xl border-none sm:border sm:border-border-grey shadow-none sm:shadow-sm w-full no-scrollbar", className)}>
-            <div className="hidden sm:flex items-center gap-1.5 text-slate shrink-0 sticky left-0 bg-white pr-1 z-10 transition-colors">
+            <div className="hidden sm:flex items-center gap-1.5 text-charcoal/50 shrink-0 sticky left-0 bg-white pr-1 z-10 transition-colors">
                 <Filter className="w-3.5 h-3.5" />
                 <span className="text-[9px] font-black uppercase tracking-widest inline-block">FILTER</span>
             </div>
@@ -62,29 +62,29 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
             <div className="grid grid-cols-2 gap-3 sm:gap-2 flex-1 w-full sm:items-center sm:max-w-xl">
                 {/* Status Dropdown */}
                 <div className="w-full relative group min-w-0">
-                    <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/30 uppercase tracking-[0.2em] z-10">Status</span>
+                    <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/50 uppercase tracking-[0.2em] z-10">Status</span>
                     <div className="relative h-11">
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value as FilterStatus)}
-                            className="w-full h-full pl-3 pr-8 bg-white sm:bg-pastel-blue border border-border-grey text-charcoal text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg focus:ring-burgundy focus:border-burgundy block py-2.5 sm:py-1.5 outline-none transition-colors shadow-sm sm:shadow-none appearance-none"
+                            className="w-full h-full pl-3 pr-8 bg-white sm:bg-off-white border border-border-grey text-charcoal text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg focus:ring-forest focus:border-forest block py-2.5 sm:py-1.5 outline-none transition-colors shadow-sm sm:shadow-tight appearance-none"
                         >
                             <option value="all">ANY STATUS</option>
                             <option value="approved">Approved</option>
                             <option value="completed">Completed</option>
                             <option value="cancelled">Cancelled</option>
                         </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-charcoal/30 pointer-events-none sm:hidden" />
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-charcoal/50 pointer-events-none sm:hidden" />
                     </div>
                 </div>
 
                 <div className="w-full relative group min-w-0">
-                    <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/30 uppercase tracking-[0.2em] z-10">Date</span>
+                    <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/50 uppercase tracking-[0.2em] z-10">Date</span>
                     <div className={clsx(
                         "flex items-center justify-between gap-1 sm:gap-2 border rounded-lg px-2 sm:px-2 py-0 shrink-0 sm:shrink transition-all duration-300 overflow-hidden sm:min-w-0 w-full h-11",
-                        (fromDate || toDate) ? "bg-sage/5 border-sage/20 ring-1 ring-sage/10" : "bg-white sm:bg-pastel-blue border-border-grey shadow-sm sm:shadow-none"
+                        (fromDate || toDate) ? "bg-forest/5 border-forest/20 ring-1 ring-forest/10" : "bg-white sm:bg-off-white border-border-grey shadow-sm sm:shadow-tight"
                     )}>
-                        <CalendarIcon className={clsx("hidden sm:block w-3.5 h-3.5 shrink-0 transition-colors", (fromDate || toDate) ? "text-sage" : "text-slate")} />
+                        <CalendarIcon className={clsx("hidden sm:block w-3.5 h-3.5 shrink-0 transition-colors", (fromDate || toDate) ? "text-forest" : "text-charcoal/50")} />
                         
                         <div className="flex flex-col flex-1 min-w-0 relative h-full justify-center">
                             <div className="flex items-center gap-0.5 w-full">

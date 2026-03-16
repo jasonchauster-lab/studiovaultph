@@ -60,7 +60,7 @@ export default function CancelBookingModal({
                     <h3 className="text-xl font-serif text-charcoal tracking-tighter">{title}</h3>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal"
+                        className="p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/50 hover:text-charcoal"
                     >
                         <X className="w-5 h-5" />
                     </button>

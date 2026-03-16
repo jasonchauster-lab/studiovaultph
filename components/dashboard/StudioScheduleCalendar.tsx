@@ -991,7 +991,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                     {Object.entries(bookingsByEquipment).map(([eqType, bookings]) => (
                                         <div key={eqType} className="space-y-4">
                                             <h4 className="text-[11px] font-bold text-charcoal/60 uppercase tracking-[0.3em] flex items-center gap-3">
-                                                <Box className="w-4 h-4 text-charcoal/30" />
+                                                <Box className="w-4 h-4 text-charcoal/50" />
                                                 {eqType}S
                                                 <span className="h-px flex-1 bg-border-grey" />
                                             </h4>
@@ -1015,7 +1015,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                 <p className="text-[13px] font-bold text-charcoal">{b.client?.full_name || 'Anonymous Client'}</p>
                                                                 <div className="flex items-center gap-2 mt-0.5">
                                                                     <p className="text-[9px] font-bold text-charcoal/40 uppercase tracking-widest">{b.status}</p>
-                                                                    <span className="text-charcoal/20 text-[8px]">•</span>
+                                                                    <span className="text-charcoal/50 text-[8px]">•</span>
                                                                     <div className="flex items-center gap-1 text-[9px] font-bold text-forest/60 uppercase tracking-widest">
                                                                         <Box className="w-2.5 h-2.5 opacity-40" />
                                                                         {b.equipment || b.price_breakdown?.equipment || 'Standard'} ({b.quantity || 1})
@@ -1024,7 +1024,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                             </div>
                                                         </div>
                                                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <ArrowUpRight className="w-4 h-4 text-charcoal/20" />
+                                                            <ArrowUpRight className="w-4 h-4 text-charcoal/50" />
                                                         </div>
                                                     </div>
                                                 ))}
@@ -1088,7 +1088,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                 {selectedProfile && (
                     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedProfile(null)}>
                         <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative" onClick={e => e.stopPropagation()}>
-                            <button onClick={() => setSelectedProfile(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal">
+                            <button onClick={() => setSelectedProfile(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/50 hover:text-charcoal">
                                 <X className="w-5 h-5" />
                             </button>
 

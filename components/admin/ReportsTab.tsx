@@ -245,7 +245,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                         <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Velocity</span>
                     </div>
                     <p className="font-serif text-4xl text-charcoal">{thisWeek.length}</p>
-                    <p className="text-[10px] text-charcoal/30 font-bold uppercase tracking-widest mt-2">ACTIONS THIS WEEK</p>
+                    <p className="text-[10px] text-charcoal/50 font-bold uppercase tracking-widest mt-2">ACTIONS THIS WEEK</p>
                 </div>
 
                 <div className="glass-card p-8 group hover:scale-[1.02] transition-all duration-500">
@@ -256,7 +256,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                         <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Success Rate</span>
                     </div>
                     <p className="font-serif text-4xl text-green-600">{totalApprovals}</p>
-                    <p className="text-[10px] text-charcoal/30 font-bold uppercase tracking-widest mt-2">TOTAL APPROVALS</p>
+                    <p className="text-[10px] text-charcoal/50 font-bold uppercase tracking-widest mt-2">TOTAL APPROVALS</p>
                 </div>
 
                 <div className="glass-card p-8 group hover:scale-[1.02] transition-all duration-500">
@@ -267,7 +267,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                         <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Intercepts</span>
                     </div>
                     <p className="font-serif text-4xl text-red-600">{totalRejections}</p>
-                    <p className="text-[10px] text-charcoal/30 font-bold uppercase tracking-widest mt-2">TOTAL REJECTIONS</p>
+                    <p className="text-[10px] text-charcoal/50 font-bold uppercase tracking-widest mt-2">TOTAL REJECTIONS</p>
                 </div>
 
                 <div className="glass-card p-8 group hover:scale-[1.02] transition-all duration-500">
@@ -278,7 +278,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                         <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Lead Admin</span>
                     </div>
                     <p className="text-xl font-serif text-charcoal truncate">{topAdmin?.[0] ?? '—'}</p>
-                    <p className="text-[10px] text-charcoal/30 font-bold uppercase tracking-widest mt-2">{topAdmin?.[1] ?? 0} OPERATIONS COMPLETED</p>
+                    <p className="text-[10px] text-charcoal/50 font-bold uppercase tracking-widest mt-2">{topAdmin?.[1] ?? 0} OPERATIONS COMPLETED</p>
                 </div>
             </div>
 
@@ -323,7 +323,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-8 bg-alabaster/30 border-b border-cream-100">
                     {/* Search */}
                     <div className="relative group lg:col-span-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30 group-focus-within:text-sage transition-colors" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/50 group-focus-within:text-sage transition-colors" />
                         <input
                             type="text"
                             placeholder="Universal search…"
@@ -378,7 +378,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                 className="w-full px-4 py-3 text-[10px] font-black border border-cream-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer pr-12"
                             />
                         </div>
-                        <span className="text-charcoal/20 font-black">/</span>
+                        <span className="text-charcoal/50 font-black">/</span>
                         <div className="flex-1 relative group">
                             <input
                                 type="date"
@@ -403,7 +403,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                 {paginated.length === 0 ? (
                     <div className="text-center py-24 space-y-4">
                         <div className="w-16 h-16 bg-alabaster rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Search className="w-8 h-8 text-charcoal/20" />
+                            <Search className="w-8 h-8 text-charcoal/50" />
                         </div>
                         <p className="text-charcoal font-serif text-xl">No matching records found.</p>
                         <p className="text-charcoal/40 text-sm italic">Try adjusting your filters or search keywords.</p>
@@ -446,7 +446,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                                 </td>
                                                 <td className="px-8 py-6">
                                                     <p className="text-xs font-black text-charcoal uppercase tracking-widest">{name}</p>
-                                                    {email && <p className="text-[9px] text-charcoal/30 font-bold uppercase mt-0.5">{email}</p>}
+                                                    {email && <p className="text-[9px] text-charcoal/50 font-bold uppercase mt-0.5">{email}</p>}
                                                 </td>
                                                 <td className="px-8 py-6 space-y-2">
                                                     <span className={clsx(
@@ -512,7 +512,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                                 <p className="text-xs font-black text-charcoal uppercase tracking-widest">
                                                     {tx.type === 'Booking' ? `${tx.client} @ ${tx.studio}` : tx.type === 'Payout' ? (tx.studio !== '-' ? tx.studio : tx.instructor) : tx.client}
                                                 </p>
-                                                <p className="text-[9px] text-charcoal/30 font-bold uppercase mt-0.5">
+                                                <p className="text-[9px] text-charcoal/50 font-bold uppercase mt-0.5">
                                                     {tx.type === 'Booking' ? tx.studio_email : (tx.type === 'Payout' && tx.studio !== '-' ? tx.instructor_email : (tx.client_email || '-'))}
                                                 </p>
                                             </td>
@@ -522,13 +522,13 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                                 </p>
                                             </td>
                                             <td className="px-8 py-6 font-serif text-sm text-blue-600">
-                                                {tx.platform_fee > 0 ? `₱${tx.platform_fee.toLocaleString()}` : <span className="text-charcoal/20">—</span>}
+                                                {tx.platform_fee > 0 ? `₱${tx.platform_fee.toLocaleString()}` : <span className="text-charcoal/50">—</span>}
                                             </td>
                                             <td className="px-8 py-6 font-serif text-sm text-purple-600">
-                                                {tx.studio_fee > 0 ? `₱${tx.studio_fee.toLocaleString()}` : <span className="text-charcoal/20">—</span>}
+                                                {tx.studio_fee > 0 ? `₱${tx.studio_fee.toLocaleString()}` : <span className="text-charcoal/50">—</span>}
                                             </td>
                                             <td className="px-8 py-6 font-serif text-sm text-indigo-600">
-                                                {tx.instructor_fee > 0 ? `₱${tx.instructor_fee.toLocaleString()}` : <span className="text-charcoal/20">—</span>}
+                                                {tx.instructor_fee > 0 ? `₱${tx.instructor_fee.toLocaleString()}` : <span className="text-charcoal/50">—</span>}
                                             </td>
                                         </tr>
                                     ))

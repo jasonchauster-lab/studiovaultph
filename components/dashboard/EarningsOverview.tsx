@@ -172,7 +172,7 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                 <div className="bg-white p-3 sm:p-4 rounded-xl border border-cream-200 shadow-tight border-l-4" style={{ borderLeftColor: '#BC926E' }}>
                     <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Security Hold</p>
                     <h3 className="text-lg sm:text-2xl font-bold text-charcoal">₱{summary.pendingBalance.toLocaleString()}</h3>
-                    <p className="text-[9px] font-bold uppercase text-charcoal/30 mt-1">24h hold period</p>
+                    <p className="text-[9px] font-bold uppercase text-charcoal/50 mt-1">24h hold period</p>
                 </div>
             </div>
             {/* Top-Up Modal */}

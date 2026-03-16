@@ -93,7 +93,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                 <td className="px-6 py-5">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-8 h-8 rounded-full bg-cream-100 flex items-center justify-center border border-cream-200">
-                                                            <User className="w-4 h-4 text-charcoal/30" />
+                                                            <User className="w-4 h-4 text-charcoal/50" />
                                                         </div>
                                                         <div className="flex flex-col">
                                                             <span className="font-bold text-charcoal">
@@ -138,7 +138,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                             </span>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-[10px] text-charcoal/30 uppercase font-black italic">No session</span>
+                                                        <span className="text-[10px] text-charcoal/50 uppercase font-black italic">No session</span>
                                                     )}
                                                 </td>
                                                 <td className={clsx(

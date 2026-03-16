@@ -39,7 +39,7 @@ export default async function InstructorSessionsPage() {
                     BACK TO DASHBOARD
                 </Link>
                 <h1 className="text-2xl sm:text-5xl font-serif text-charcoal tracking-tighter mb-4">My Sessions</h1>
-                <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Comprehensive registry of past and future engagements.</p>
+                <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Comprehensive registry of past and future engagements.</p>
             </div>
 
             <div className="glass-card p-1 relative overflow-hidden bg-white/10">

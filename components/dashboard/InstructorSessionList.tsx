@@ -161,10 +161,10 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         <div className="absolute bottom-0 right-0 w-32 h-32 bg-gold/5 rounded-full translate-x-1/2 translate-y-1/2 blur-2xl pointer-events-none" />
                         
                         <div className="w-14 h-14 bg-charcoal/5 rounded-full flex items-center justify-center mb-4 relative">
-                            <Calendar className="w-6 h-6 text-charcoal/30" />
+                            <Calendar className="w-6 h-6 text-charcoal/50" />
                         </div>
-                        <h3 className="text-lg sm:text-xl font-serif text-charcoal mb-2 tracking-tight">No sessions found for this period.</h3>
-                        <p className="text-[11px] sm:text-xs text-charcoal/50 max-w-[280px] mb-6 leading-relaxed font-bold">Try adjusting your filters or find a studio to book a new availability slot.</p>
+                        <h3 className="text-xl sm:text-2xl font-serif text-charcoal mb-3 tracking-tight">No sessions found for this period.</h3>
+                        <p className="text-[11px] sm:text-xs text-charcoal/60 max-w-[300px] mb-8 leading-relaxed font-bold">Try adjusting your filters or find a studio to book a new availability slot.</p>
 
                         
                         <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10 w-full sm:w-auto">
@@ -222,13 +222,13 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                 {/* Desktop Session Header */}
                                                 <div className="hidden sm:flex items-center gap-2 text-[11px] font-black uppercase text-charcoal/60 tracking-widest flex-wrap">
                                                     <span>{getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
-                                                    <span className="text-charcoal/20">•</span>
+                                                    <span className="text-charcoal/50">•</span>
                                                     <button onClick={() => handleStudioClick(studio)} className="text-sm font-bold text-charcoal/90 truncate hover:text-charcoal transition-colors hover:underline underline-offset-2">
                                                         {studio?.name || "Studio"}
                                                     </button>
                                                     {studio?.location && (
                                                         <>
-                                                            <span className="text-charcoal/20">•</span>
+                                                            <span className="text-charcoal/50">•</span>
                                                             <span className="text-[10px] font-black text-slate uppercase tracking-wider truncate">
                                                                 {studio.location}
                                                             </span>
@@ -261,7 +261,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                 </span>
                                                             )}
 
-                                                            <span className="hidden sm:inline-block text-[8.5px] font-black text-charcoal/50 uppercase tracking-widest bg-charcoal/5 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap">
+                                                            <span className="hidden sm:inline-block text-[8.5px] font-black text-charcoal/70 uppercase tracking-widest bg-charcoal/5 px-2 py-1 rounded-lg border border-charcoal/10 whitespace-nowrap">
                                                                 {Array.isArray(slot?.equipment) && slot.equipment.length > 0
                                                                     ? `${slot.equipment[0]} (${booking.quantity || 1})`
                                                                     : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
@@ -325,8 +325,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 <section>
                     <div className="px-6 sm:px-0 flex items-center justify-between mb-6 sm:mb-10">
                         <div className="flex items-center gap-3 sm:gap-4">
-                            <Clock className="w-5 h-5 sm:w-6 h-6 text-charcoal/40" />
-                            <h2 className="text-xl sm:text-3xl font-serif text-charcoal/80 tracking-tighter">Past Sessions</h2>
+                            <Clock className="w-5 h-5 sm:w-6 h-6 text-charcoal/60" />
+                            <h2 className="text-xl sm:text-3xl font-serif text-charcoal/90 tracking-tighter">Past Sessions</h2>
                         </div>
                     </div>
 
@@ -344,7 +344,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             <Calendar className="w-3 h-3 text-charcoal/40" />
                                             <span className="text-[10px] font-black text-charcoal/80 uppercase tracking-widest">
                                                 {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                <span className="mx-2 text-charcoal/20">•</span>
+                                                <span className="mx-2 text-charcoal/50">•</span>
                                                 {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                             </span>
                                         </div>
@@ -367,13 +367,13 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                 {/* Desktop Session Header */}
                                                 <div className="hidden sm:flex items-center gap-2 text-[11px] font-black uppercase text-charcoal/60 tracking-widest flex-wrap">
                                                     <span>{getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
-                                                    <span className="text-charcoal/20">•</span>
+                                                    <span className="text-charcoal/50">•</span>
                                                     <button onClick={() => handleStudioClick(studio)} className="text-sm font-bold text-charcoal/90 truncate hover:text-charcoal transition-colors hover:underline underline-offset-2">
                                                         {studio?.name || "Studio"}
                                                     </button>
                                                     {studio?.location && (
                                                         <>
-                                                            <span className="text-charcoal/20">•</span>
+                                                            <span className="text-charcoal/50">•</span>
                                                             <span className="text-[10px] font-black text-charcoal/60 uppercase tracking-wider truncate">
                                                                 {studio.location}
                                                             </span>
@@ -399,7 +399,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                             <span className="text-sm font-bold text-charcoal sm:truncate">{client.full_name}</span>
                                                         </button>
 
-                                                        <span className="hidden sm:inline-block text-[8.5px] font-black text-charcoal/50 uppercase tracking-widest bg-charcoal/5 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap">
+                                                        <span className="hidden sm:inline-block text-[8.5px] font-black text-charcoal/70 uppercase tracking-widest bg-charcoal/5 px-2 py-1 rounded-lg border border-charcoal/10 whitespace-nowrap">
                                                             {Array.isArray(slot?.equipment) && slot.equipment.length > 0
                                                                 ? `${slot.equipment[0]} (${booking.quantity || 1})`
                                                                 : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
@@ -411,9 +411,9 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             {/* Action Buttons (Desktop Only) */}
                                             <div className="hidden sm:flex flex-col items-end justify-center gap-1.5 shrink-0 ml-auto pl-2 h-full">
                                                 {booking.price_breakdown?.instructor_fee && (
-                                                    <div className="px-3 py-1.5 bg-sage/10 border border-sage/20 rounded-lg flex items-center gap-2 shadow-sm">
-                                                        <span className="text-[9px] font-black text-sage/70 uppercase tracking-[0.2em]">Earned</span>
-                                                        <span className="text-[14px] font-black text-sage tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                                                    <div className="px-4 py-2 bg-sage/10 border border-sage/20 rounded-xl flex items-center gap-3 shadow-tight">
+                                                        <span className="text-[9px] font-black text-sage/80 uppercase tracking-[0.2em]">Earned</span>
+                                                        <span className="text-[16px] font-black text-sage tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
                                                     </div>
                                                 )}
                                                 
@@ -522,7 +522,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                     {studioDetails?.studio?.logo_url || selectedStudio?.logo_url ? (
                                         <img src={studioDetails?.studio?.logo_url || selectedStudio.logo_url} className="w-full h-full object-cover" alt="" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-charcoal/5 text-charcoal/20 text-2xl font-serif">
+                                        <div className="w-full h-full flex items-center justify-center bg-charcoal/5 text-charcoal/50 text-2xl font-serif">
                                             {(studioDetails?.studio?.name || selectedStudio.name || 'S')[0]}
                                         </div>
                                     )}
@@ -542,7 +542,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                 {!loadingStudio && studioDetails && (
                                     <div className="flex items-center gap-1 mt-2">
                                         {Array.from({ length: 5 }).map((_, i) => (
-                                            <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(studioDetails.averageRating || 0) ? 'fill-amber-400 text-amber-400' : 'text-charcoal/20'}`} />
+                                            <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(studioDetails.averageRating || 0) ? 'fill-amber-400 text-amber-400' : 'text-charcoal/50'}`} />
                                         ))}
                                         {studioDetails.totalCount > 0 && (
                                             <span className="text-xs text-charcoal/40 ml-1">({studioDetails.totalCount})</span>
@@ -596,7 +596,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                 <span className="text-xs font-semibold text-charcoal/70">{reviewer?.full_name || 'Anonymous'}</span>
                                                                 <div className="flex items-center gap-0.5 ml-auto">
                                                                     {Array.from({ length: 5 }).map((_, i) => (
-                                                                        <Star key={i} className={`w-3 h-3 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-charcoal/20'}`} />
+                                                                        <Star key={i} className={`w-3 h-3 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-charcoal/50'}`} />
                                                                     ))}
                                                                 </div>
                                                             </div>
@@ -657,7 +657,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
                         {selectedClient.bio && (
                             <div className="bg-white/40 p-6 rounded-[2rem] border border-white/60 mb-6 relative z-10">
-                                <h4 className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">BIO</h4>
+                                <h4 className="text-[9px] font-black text-charcoal/50 uppercase tracking-[0.4em] mb-3">BIO</h4>
                                 <p className="text-[11px] text-charcoal/60 leading-relaxed italic uppercase tracking-wider">"{selectedClient.bio}"</p>
                             </div>
                         )}

@@ -122,7 +122,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                 {filteredBookings.length === 0 ? (
                     <div className="min-h-[200px] py-12 flex flex-col items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0 px-4">
                         <div className="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mb-4">
-                            <CalendarX2 className="w-6 h-6 text-charcoal/30" />
+                            <CalendarX2 className="w-6 h-6 text-charcoal/50" />
                         </div>
                         <h3 className="text-sm font-bold text-charcoal mb-1">No sessions found for this period.</h3>
                         <p className="text-[11px] text-charcoal/50 max-w-[240px] mb-6">Try adjusting your filters or adding a new availability slot.</p>
@@ -282,7 +282,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                         <div className="flex sm:hidden items-center justify-between gap-4 pt-5 border-t border-border-grey w-full">
                                             {['completed', 'approved'].includes(booking.status) ? (
                                                 <div className="flex items-baseline gap-1.5">
-                                                    <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.2em]">EARNED</span>
+                                                    <span className="text-[9px] font-black text-charcoal/50 uppercase tracking-[0.2em]">EARNED</span>
                                                     <span className="text-sm font-black text-charcoal tracking-tighter">₱{Number(studioFee || booking.total_price || 0).toLocaleString()}</span>
                                                 </div>
                                             ) : <div className="flex-1" />}

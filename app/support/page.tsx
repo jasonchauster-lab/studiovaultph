@@ -77,7 +77,7 @@ export default function SupportPage() {
 
             {/* FAQ */}
             <div className="max-w-2xl mx-auto px-6 py-16 space-y-3">
-                <p className="text-[10px] font-black text-charcoal/30 uppercase tracking-[0.4em] mb-8">Frequently Asked Questions</p>
+                <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em] mb-8">Frequently Asked Questions</p>
                 {faqs.map((faq, i) => (
                     <details key={i} className="group bg-white rounded-2xl border border-cream-200 overflow-hidden">
                         <summary className="flex items-center justify-between gap-4 px-6 py-5 cursor-pointer list-none select-none hover:bg-cream-50 transition-colors">
@@ -93,7 +93,7 @@ export default function SupportPage() {
 
             {/* Footer */}
             <footer className="border-t border-cream-200 px-6 py-10">
-                <div className="max-w-2xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.3em]">
+                <div className="max-w-2xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.3em]">
                     <span>© {new Date().getFullYear()} Studio Vault PH. All rights reserved.</span>
                     <div className="flex gap-6">
                         <Link href="/terms-of-service" className="hover:text-charcoal transition-colors">Terms of Service</Link>

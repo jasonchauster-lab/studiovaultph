@@ -404,11 +404,11 @@ export default function InstructorBookingWizard({
                             <p className="text-[9px] font-black text-[#B4C3B2] uppercase tracking-[0.3em] ml-0.5">Start by picking your preferred area</p>
                         </div>
                         <div className="space-y-3 w-full sm:w-64">
-                            <label className="block text-[8px] font-black text-charcoal/30 uppercase tracking-[0.4em] ml-2">
+                            <label className="block text-[8px] font-black text-charcoal/50 uppercase tracking-[0.4em] ml-2">
                                 Select Teaching Area
                             </label>
                             <div className="relative group">
-                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30 group-hover:text-sage transition-colors z-10" />
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/50 group-hover:text-sage transition-colors z-10" />
                                 <select
                                     value={filterLocation || ''}
                                     onChange={(e) => {
@@ -427,7 +427,7 @@ export default function InstructorBookingWizard({
                                         <option key={loc as string} value={loc as string}>{loc as string}</option>
                                     ))}
                                 </select>
-                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30 group-hover:text-sage transition-all pointer-events-none" />
+                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/50 group-hover:text-sage transition-all pointer-events-none" />
                             </div>
                         </div>
                     </div>
@@ -452,7 +452,7 @@ export default function InstructorBookingWizard({
 
                         <div className="grid grid-cols-7 gap-2 mb-4">
                             {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
-                                <div key={d} className="text-center text-[10px] font-bold text-charcoal/20 uppercase tracking-[0.2em]">
+                                <div key={d} className="text-center text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em]">
                                     {d}
                                 </div>
                             ))}
@@ -475,7 +475,7 @@ export default function InstructorBookingWizard({
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {(() => {
                             const activeDate = selectedDate || (availableDatesWithSlots.size > 0 ? Array.from(availableDatesWithSlots).sort()[0] : null);
-                            if (!activeDate) return <div className="col-span-full text-center py-20 text-charcoal/30 italic font-medium">No sessions scheduled for this period.</div>;
+                            if (!activeDate) return <div className="col-span-full text-center py-20 text-charcoal/50 italic font-medium">No sessions scheduled for this period.</div>;
 
                             const d = nextDays.find(nd => nd.date === activeDate);
                             const nowInstance = toManilaDate(new Date());
@@ -497,7 +497,7 @@ export default function InstructorBookingWizard({
                             if (slots.length === 0) {
                                 return (
                                     <div className="col-span-full text-center py-20 bg-off-white rounded-[28px] border border-dashed border-border-grey">
-                                        <p className="text-[11px] font-bold text-charcoal/30 uppercase tracking-widest italic font-serif">
+                                        <p className="text-[11px] font-bold text-charcoal/50 uppercase tracking-widest italic font-serif">
                                             No sessions available for this day.
                                         </p>
                                     </div>
@@ -532,7 +532,7 @@ export default function InstructorBookingWizard({
                                     >
                                         <div className="font-serif text-[18px] sm:text-[20px] font-bold text-charcoal mb-4 flex flex-wrap items-baseline gap-2">
                                             <span className="whitespace-nowrap">{formatTo12Hour(slot.start_time)}</span>
-                                            <span className="text-[9px] text-charcoal/30 font-sans uppercase tracking-[0.2em] font-bold">to</span>
+                                            <span className="text-[9px] text-charcoal/50 font-sans uppercase tracking-[0.2em] font-bold">to</span>
                                             <span className="whitespace-nowrap">{formatTo12Hour(slot.end_time)}</span>
                                         </div>
 
@@ -693,7 +693,7 @@ export default function InstructorBookingWizard({
                         <h3 className="text-xl font-serif font-bold text-charcoal">2. Select Your Studio Sanctuary</h3>
                         <button
                             onClick={() => setStep(1)}
-                            className="text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.2em] hover:text-sage transition-colors flex items-center gap-2"
+                            className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em] hover:text-sage transition-colors flex items-center gap-2"
                         >
                             <ChevronLeft className="w-4 h-4" /> Change Session
                         </button>
@@ -711,11 +711,11 @@ export default function InstructorBookingWizard({
                     {isSearching ? (
                         <div className="text-center py-20">
                             <Loader2 className="w-10 h-10 animate-spin mx-auto text-sage/40" />
-                            <p className="text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.3em] mt-6">Consulting the Vault...</p>
+                            <p className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.3em] mt-6">Consulting the Vault...</p>
                         </div>
                     ) : matchingStudios.length === 0 ? (
                         <div className="text-center py-20 bg-off-white rounded-[32px] border border-dashed border-border-grey">
-                            <p className="text-[11px] font-bold text-charcoal/30 uppercase tracking-widest italic font-serif">No studios available for this specific criteria.</p>
+                            <p className="text-[11px] font-bold text-charcoal/50 uppercase tracking-widest italic font-serif">No studios available for this specific criteria.</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-8">
@@ -735,7 +735,7 @@ export default function InstructorBookingWizard({
                                     </div>
 
                                     <div className="space-y-4">
-                                        <p className="text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.2em]">Available Start Times</p>
+                                        <p className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em]">Available Start Times</p>
                                         <div className="flex flex-wrap gap-3">
                                             {(() => {
                                                 const uniqueTimes = Array.from(new Set(result.matchingSlots.map((s: any) => s.start_time))).sort();
@@ -797,10 +797,10 @@ export default function InstructorBookingWizard({
                                                 {/* Equipment & Quantity */}
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                                     <div className="space-y-5">
-                                                        <label className="text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.2em]">Select Equipment</label>
+                                                        <label className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em]">Select Equipment</label>
                                                         <div className="flex flex-col gap-3">
                                                             {allEq.length === 0 ? (
-                                                                <div className="bg-off-white text-charcoal/30 px-6 py-4 rounded-[20px] text-[11px] font-medium italic border border-border-grey">
+                                                                <div className="bg-off-white text-charcoal/50 px-6 py-4 rounded-[20px] text-[11px] font-medium italic border border-border-grey">
                                                                     No specialized equipment listed.
                                                                 </div>
                                                             ) : (
@@ -821,7 +821,7 @@ export default function InstructorBookingWizard({
                                                                         >
                                                                             <div className="text-left">
                                                                                 <div className="uppercase tracking-widest text-[10px] font-bold mb-0.5">{eq as string}</div>
-                                                                                <div className={clsx("text-[9px] font-medium uppercase tracking-[0.1em]", isSelected ? "text-sage" : "text-charcoal/30")}>
+                                                                                <div className={clsx("text-[9px] font-medium uppercase tracking-[0.1em]", isSelected ? "text-sage" : "text-charcoal/50")}>
                                                                                     {count} Units Available
                                                                                 </div>
                                                                             </div>
@@ -834,7 +834,7 @@ export default function InstructorBookingWizard({
                                                     </div>
 
                                                     <div className="space-y-5">
-                                                        <label className="text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.2em]">Number of Attendees</label>
+                                                        <label className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em]">Number of Attendees</label>
                                                         <div className="bg-off-white p-6 rounded-[28px] border border-border-grey space-y-6">
                                                             <div className="flex items-center justify-between">
                                                                 <div className="flex items-center gap-4">
@@ -857,7 +857,7 @@ export default function InstructorBookingWizard({
                                                                     </button>
                                                                 </div>
                                                                 <div className="text-right">
-                                                                    <div className="text-[9px] font-bold text-charcoal/20 uppercase tracking-widest">Capacity</div>
+                                                                    <div className="text-[9px] font-bold text-charcoal/50 uppercase tracking-widest">Capacity</div>
                                                                     <div className="text-sm font-serif font-bold text-sage">{maxQuantity} Max</div>
                                                                 </div>
                                                             </div>

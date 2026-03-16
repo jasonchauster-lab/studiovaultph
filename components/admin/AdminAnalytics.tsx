@@ -38,7 +38,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                                 <DollarSign className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-charcoal/30 uppercase tracking-[0.3em] mb-1">Total Revenue</p>
+                                <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em] mb-1">Total Revenue</p>
                                 <p className="text-4xl font-serif text-charcoal group-hover:translate-x-1 transition-transform duration-700">₱{stats.totalRevenue.toLocaleString()}</p>
                             </div>
                         </div>
@@ -56,7 +56,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                                 <Percent className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-charcoal/30 uppercase tracking-[0.3em] mb-1">Platform Fees</p>
+                                <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em] mb-1">Platform Fees</p>
                                 <p className="text-4xl font-serif text-charcoal group-hover:translate-x-1 transition-transform duration-700">₱{stats.totalPlatformFees.toLocaleString()}</p>
                             </div>
                         </div>
@@ -74,7 +74,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                                 <TrendingUp className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-charcoal/30 uppercase tracking-[0.3em] mb-1">Studio Share</p>
+                                <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em] mb-1">Studio Share</p>
                                 <p className="text-4xl font-serif text-charcoal group-hover:translate-x-1 transition-transform duration-700">₱{stats.totalStudioFees.toLocaleString()}</p>
                             </div>
                         </div>
@@ -88,11 +88,11 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                 >
                     <div className="p-10 relative z-10">
                         <div className="flex items-center gap-6 mb-6">
-                            <div className="p-5 bg-sage/5 text-charcoal/30 rounded-[20px] group-hover:bg-charcoal group-hover:text-white transition-all duration-700 shadow-sm">
+                            <div className="p-5 bg-sage/5 text-charcoal/50 rounded-[20px] group-hover:bg-charcoal group-hover:text-white transition-all duration-700 shadow-sm">
                                 <Users className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-charcoal/30 uppercase tracking-[0.3em] mb-1">Instructor Share</p>
+                                <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em] mb-1">Instructor Share</p>
                                 <p className="text-4xl font-serif text-charcoal group-hover:translate-x-1 transition-transform duration-700">₱{stats.totalInstructorFees.toLocaleString()}</p>
                             </div>
                         </div>
@@ -110,7 +110,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                                 <DollarSign className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-charcoal/30 uppercase tracking-[0.3em] mb-1">Total Paid Out</p>
+                                <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em] mb-1">Total Paid Out</p>
                                 <p className="text-4xl font-serif text-charcoal group-hover:translate-x-1 transition-transform duration-700">₱{stats.totalPayouts.toLocaleString()}</p>
                             </div>
                         </div>
@@ -124,11 +124,11 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                 >
                     <div className="p-10 relative z-10">
                         <div className="flex items-center gap-6 mb-6">
-                            <div className="p-5 bg-alabaster text-charcoal/20 rounded-[20px] group-hover:bg-charcoal group-hover:text-white transition-all duration-700 shadow-sm border border-white/60">
+                            <div className="p-5 bg-alabaster text-charcoal/50 rounded-[20px] group-hover:bg-charcoal group-hover:text-white transition-all duration-700 shadow-sm border border-white/60">
                                 <Users className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-charcoal/30 uppercase tracking-[0.3em] mb-1">Total Bookings</p>
+                                <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em] mb-1">Total Bookings</p>
                                 <p className="text-4xl font-serif text-charcoal group-hover:translate-x-1 transition-transform duration-700">{stats.bookingCount}</p>
                             </div>
                         </div>
@@ -144,7 +144,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                 <div className="flex items-center justify-between mb-10">
                     <div>
                         <h3 className="text-3xl font-serif text-charcoal tracking-tighter">Spectral Growth Analysis</h3>
-                        <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mt-2">Temporal Mapping of Yield Dynamics</p>
+                        <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em] mt-2">Temporal Mapping of Yield Dynamics</p>
                     </div>
                     <div className="flex gap-6">
                         <div className="flex items-center gap-2">
@@ -228,7 +228,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                             ))}
                         </svg>
                     ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-charcoal/30 text-[10px] font-black uppercase tracking-widest italic bg-alabaster/30 rounded-3xl border border-cream-100 border-dashed">
+                        <div className="flex flex-col items-center justify-center h-full text-charcoal/50 text-[10px] font-black uppercase tracking-widest italic bg-alabaster/30 rounded-3xl border border-cream-100 border-dashed">
                             Insufficient temporal data for trend analysis
                         </div>
                     )}
@@ -237,7 +237,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                 {/* X-Axis Labels */}
                 <div className="relative mt-8 h-8 w-full">
                     {stats.dailyData.length > 1 && (
-                        <div className="absolute top-0 left-0 w-full flex text-[9px] font-black text-charcoal/30 uppercase tracking-[0.15em]">
+                        <div className="absolute top-0 left-0 w-full flex text-[9px] font-black text-charcoal/50 uppercase tracking-[0.15em]">
                             {stats.dailyData.map((d, i) => {
                                 const leftOffset = (i * pointPadding)
                                 const showLabel = i === 0 || i === stats.dailyData.length - 1 || stats.dailyData.length <= 7 || i % Math.ceil(stats.dailyData.length / 5) === 0

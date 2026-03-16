@@ -9,7 +9,7 @@ interface StarRatingProps {
 export default function StarRating({ rating, count, size = 'md' }: StarRatingProps) {
     if (!rating) {
         return (
-            <span className="text-charcoal/30 text-[10px] font-bold uppercase tracking-wider italic">No reviews</span>
+            <span className="text-charcoal/50 text-[10px] font-bold uppercase tracking-wider italic">No reviews</span>
         )
     }
 

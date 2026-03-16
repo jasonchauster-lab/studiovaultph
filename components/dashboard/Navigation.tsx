@@ -21,7 +21,7 @@ export default function Navigation({ role }: NavigationProps) {
     const linkClass = (isActive: boolean) =>
         clsx(
             "text-[10px] uppercase tracking-[0.25em] font-bold flex items-center gap-2.5 transition-all py-2 md:py-0 relative group",
-            isActive ? "text-burgundy" : "text-muted-burgundy hover:text-burgundy"
+            isActive ? "text-burgundy" : "text-charcoal/40 hover:text-burgundy"
         );
 
     const navLinks = (

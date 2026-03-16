@@ -491,7 +491,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                                 <span className="text-xs font-semibold text-charcoal/70">{reviewer?.full_name || 'Anonymous'}</span>
                                                                 <div className="flex items-center gap-0.5 ml-auto">
                                                                     {Array.from({ length: 5 }).map((_, i) => (
-                                                                        <Star key={i} className={`w-3 h-3 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-charcoal/20'}`} />
+                                                                        <Star key={i} className={`w-3 h-3 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-charcoal/50'}`} />
                                                                     ))}
                                                                 </div>
                                                             </div>
@@ -533,7 +533,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     {studioDetails?.studio?.logo_url || selectedStudio?.logo_url ? (
                                         <img src={studioDetails?.studio?.logo_url || selectedStudio.logo_url} className="w-full h-full object-cover" alt="" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-charcoal/5 text-charcoal/20 text-2xl font-serif">
+                                        <div className="w-full h-full flex items-center justify-center bg-charcoal/5 text-charcoal/50 text-2xl font-serif">
                                             {(studioDetails?.studio?.name || selectedStudio.name || 'S')[0]}
                                         </div>
                                     )}
@@ -551,7 +551,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                 {!loadingStudio && studioDetails && (
                                     <div className="flex items-center gap-1 mt-2">
                                         {Array.from({ length: 5 }).map((_, i) => (
-                                            <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(studioDetails.averageRating || 0) ? 'fill-amber-400 text-amber-400' : 'text-charcoal/20'}`} />
+                                            <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(studioDetails.averageRating || 0) ? 'fill-amber-400 text-amber-400' : 'text-charcoal/50'}`} />
                                         ))}
                                         {studioDetails.totalCount > 0 && <span className="text-xs text-charcoal/40 ml-1">({studioDetails.totalCount})</span>}
                                     </div>
@@ -598,7 +598,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                                 <span className="text-xs font-semibold text-charcoal/70">{reviewer?.full_name || 'Anonymous'}</span>
                                                                 <div className="flex items-center gap-0.5 ml-auto">
                                                                     {Array.from({ length: 5 }).map((_, i) => (
-                                                                        <Star key={i} className={`w-3 h-3 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-charcoal/20'}`} />
+                                                                        <Star key={i} className={`w-3 h-3 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-charcoal/50'}`} />
                                                                     ))}
                                                                 </div>
                                                             </div>

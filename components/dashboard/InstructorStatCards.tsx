@@ -77,7 +77,7 @@ export default function InstructorStatCards({ stats, hasPendingPayout }: Instruc
                             </span>
                         </div>
                         <div>
-                            <p className="text-[9px] font-black text-slate uppercase tracking-[0.3em] mb-1.5">{card.label}</p>
+                            <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-1.5">{card.label}</p>
                             <h3 className="text-2xl font-bold font-sans text-charcoal tracking-tighter">{card.value}</h3>
                         </div>
     

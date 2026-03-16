@@ -171,7 +171,7 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
             {selectedClient && (
                 <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/40 animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
                     <div className="earth-card w-full max-w-sm overflow-hidden p-8 relative animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setSelectedClient(null)} className="absolute top-6 right-6 text-charcoal/20 hover:text-charcoal transition-colors"><X className="w-5 h-5" /></button>
+                        <button onClick={() => setSelectedClient(null)} className="absolute top-6 right-6 text-charcoal/50 hover:text-charcoal transition-colors"><X className="w-5 h-5" /></button>
                         <div className="flex flex-col items-center mt-4 mb-8 text-center">
                             <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-white shadow-cloud scale-110">
                                 <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />

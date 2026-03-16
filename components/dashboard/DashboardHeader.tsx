@@ -102,7 +102,7 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                                 <p className="text-xs font-bold text-burgundy leading-tight mb-0.5 whitespace-nowrap">
                                     {profile?.role === 'studio' ? (studioData?.name || profile?.full_name || 'Studio') : (profile?.full_name || 'Partner')}
                                 </p>
-                                <p className="text-[10px] text-muted-burgundy font-bold uppercase tracking-widest leading-none">
+                                <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest leading-none">
                                     {profile?.role === 'instructor' ? 'INSTRUCTOR' :
                                         profile?.role === 'studio' ? 'STUDIO' :
                                             profile?.role || 'USER'}

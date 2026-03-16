@@ -257,7 +257,7 @@ export default function InstructorDashboardClient({
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8">
                     <div>
                         <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-charcoal tracking-tighter mb-3">Instructor Dashboard</h1>
-                        <p className="text-[10px] font-bold text-slate uppercase tracking-[0.4em] max-w-[90%] sm:max-w-none">Manage your professional schedule and earnings with grounded precision.</p>
+                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.4em] max-w-[90%] sm:max-w-none">Manage your professional schedule and earnings with grounded precision.</p>
                     </div>
                 </div>
             </div>
@@ -530,7 +530,7 @@ export default function InstructorDashboardClient({
             {selectedProfile && (
                 <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedProfile(null)}>
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setSelectedProfile(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal"><X className="w-5 h-5" /></button>
+                        <button onClick={() => setSelectedProfile(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/50 hover:text-charcoal"><X className="w-5 h-5" /></button>
                         <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
                         <div className="flex flex-col items-center text-center mb-10">
                             <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
@@ -956,7 +956,7 @@ export default function InstructorDashboardClient({
             {selectedStudio && (
                 <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedStudio(null)}>
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setSelectedStudio(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/20 hover:text-charcoal"><X className="w-5 h-5" /></button>
+                        <button onClick={() => setSelectedStudio(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/50 hover:text-charcoal"><X className="w-5 h-5" /></button>
                         <div className="flex flex-col items-center text-center mb-10">
                             <div className="w-24 h-24 rounded-2xl overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10 bg-white">
                                 <img src={selectedStudio.logo_url || "/logo.png"} className="w-full h-full object-contain p-2" />
@@ -996,7 +996,7 @@ export default function InstructorDashboardClient({
                                                 <p className="text-[11px] font-bold text-charcoal group-hover:text-forest transition-colors">Open in Google Maps</p>
                                             </div>
                                         </div>
-                                        <ArrowUpRight className="w-4 h-4 text-charcoal/20 group-hover:text-forest transition-all" />
+                                        <ArrowUpRight className="w-4 h-4 text-charcoal/50 group-hover:text-forest transition-all" />
                                     </a>
                                 )}
                             </div>

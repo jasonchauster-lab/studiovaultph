@@ -315,7 +315,7 @@ export default async function AdminDashboard({
                         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <div className="space-y-6">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                    <h2 className="text-sm font-black tracking-[0.2em] text-charcoal/30 uppercase flex items-center gap-3">
+                                    <h2 className="text-sm font-black tracking-[0.2em] text-charcoal/50 uppercase flex items-center gap-3">
                                         <div className="w-8 h-px bg-charcoal/20" />
                                         Analytics Engine
                                     </h2>
@@ -486,7 +486,7 @@ export default async function AdminDashboard({
                                                         <div className="space-y-1">
                                                             <div className="flex items-center gap-3">
                                                                 <p className="font-serif text-2xl text-charcoal">
-                                                                    {instructor?.full_name || 'Instructor'} <span className="text-charcoal/20 font-sans text-lg mx-1">→</span> {studio?.name || 'Studio'}
+                                                                    {instructor?.full_name || 'Instructor'} <span className="text-charcoal/50 font-sans text-lg mx-1">→</span> {studio?.name || 'Studio'}
                                                                 </p>
                                                                 <span className="px-2.5 py-1 bg-sage/10 text-sage text-[8px] font-black rounded-lg uppercase tracking-widest border border-sage/20">
                                                                     {breakdown.equipment || 'Session'}
@@ -504,31 +504,31 @@ export default async function AdminDashboard({
 
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-cream-100/50">
                                                             <div className="space-y-1.5">
-                                                                <p className="text-[8px] uppercase tracking-widest font-black text-charcoal/30">Instructor Contact</p>
+                                                                <p className="text-[8px] uppercase tracking-widest font-black text-charcoal/50">Instructor Contact</p>
                                                                 <p className="text-xs font-bold text-charcoal/70">{instructor?.email}</p>
                                                             </div>
                                                             <div className="space-y-1.5">
-                                                                <p className="text-[8px] uppercase tracking-widest font-black text-charcoal/30">Studio Contact</p>
+                                                                <p className="text-[8px] uppercase tracking-widest font-black text-charcoal/50">Studio Contact</p>
                                                                 <p className="text-xs font-bold text-charcoal/70">{studioOwner?.email || 'N/A'}</p>
                                                             </div>
                                                         </div>
 
                                                         <div className="bg-white/40 border border-white/60 p-5 rounded-2xl shadow-sm space-y-4">
                                                             <div className="flex justify-between items-end">
-                                                                <p className="text-[10px] font-black text-charcoal/30 tracking-widest uppercase">Financial Breakdown</p>
+                                                                <p className="text-[10px] font-black text-charcoal/50 tracking-widest uppercase">Financial Breakdown</p>
                                                                 <p className="text-xl font-serif text-charcoal">₱{(b.total_price || 0).toLocaleString()}</p>
                                                             </div>
                                                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                                                 <div className="space-y-0.5">
-                                                                    <p className="text-[8px] text-charcoal/30 uppercase font-black tracking-widest leading-none">Studio</p>
+                                                                    <p className="text-[8px] text-charcoal/50 uppercase font-black tracking-widest leading-none">Studio</p>
                                                                     <p className="text-sm font-bold text-charcoal/80 leading-none">₱{(breakdown.studio_fee || 0).toLocaleString()}</p>
                                                                 </div>
                                                                 <div className="space-y-0.5">
-                                                                    <p className="text-[8px] text-charcoal/30 uppercase font-black tracking-widest leading-none">Instructor</p>
+                                                                    <p className="text-[8px] text-charcoal/50 uppercase font-black tracking-widest leading-none">Instructor</p>
                                                                     <p className="text-sm font-bold text-charcoal/80 leading-none">₱{(breakdown.instructor_fee || 0).toLocaleString()}</p>
                                                                 </div>
                                                                 <div className="space-y-0.5">
-                                                                    <p className="text-[8px] text-charcoal/30 uppercase font-black tracking-widest leading-none">Service</p>
+                                                                    <p className="text-[8px] text-charcoal/50 uppercase font-black tracking-widest leading-none">Service</p>
                                                                     <p className="text-sm font-bold text-charcoal/80 leading-none">₱{(breakdown.service_fee || 0).toLocaleString()}</p>
                                                                 </div>
                                                                 {breakdown.wallet_deduction > 0 && (
@@ -621,7 +621,7 @@ export default async function AdminDashboard({
                                                     <div className="space-y-1">
                                                         <p className="text-lg font-serif text-charcoal">₱{r.amount.toLocaleString()}</p>
                                                         <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest">{r.profile?.full_name}</p>
-                                                        <p className="text-[9px] text-charcoal/30 font-bold uppercase">{r.profile?.email}</p>
+                                                        <p className="text-[9px] text-charcoal/50 font-bold uppercase">{r.profile?.email}</p>
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
@@ -738,7 +738,7 @@ export default async function AdminDashboard({
                                                 <td className="px-8 py-6">
                                                     <p className="font-bold text-charcoal text-sm">{u.full_name}</p>
                                                     <p className="text-[10px] text-charcoal/40 font-medium">{u.email}</p>
-                                                    <p className="text-[10px] text-charcoal/30 mt-0.5">{u.contact_number}</p>
+                                                    <p className="text-[10px] text-charcoal/50 mt-0.5">{u.contact_number}</p>
                                                 </td>
                                                 <td className="px-8 py-6">
                                                     <span className={clsx(
@@ -786,7 +786,7 @@ export default async function AdminDashboard({
                                                             VIEW WAIVER
                                                         </a>
                                                     ) : (
-                                                        <span className="text-[9px] font-black text-charcoal/20 uppercase tracking-widest">NONE</span>
+                                                        <span className="text-[9px] font-black text-charcoal/50 uppercase tracking-widest">NONE</span>
                                                     )}
                                                 </td>
                                             </tr>

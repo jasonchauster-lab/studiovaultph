@@ -137,7 +137,7 @@ export default function InstructorEarningsClient({
                     {/* Info Icon - Fixed to Top Right */}
                     <button
                         onClick={() => setShowInfoModal(true)}
-                        className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 text-charcoal/20 hover:text-charcoal transition-colors p-1 bg-off-white rounded-lg border border-border-grey"
+                        className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 text-charcoal/50 hover:text-charcoal transition-colors p-1 bg-off-white rounded-lg border border-border-grey"
                     >
                         <Info className="w-3 h-3" />
                     </button>
@@ -299,7 +299,7 @@ export default function InstructorEarningsClient({
                                                     </span>
                                                 </div>
                                             ) : (
-                                                <span className="text-[9px] text-charcoal/20 uppercase font-black italic">System</span>
+                                                <span className="text-[9px] text-charcoal/50 uppercase font-black italic">System</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-3">

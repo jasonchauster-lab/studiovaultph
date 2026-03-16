@@ -189,7 +189,7 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                                                     </span>
                                                 </div>
                                             ) : (
-                                                <span className="text-[9px] text-charcoal/20 uppercase font-black italic">System</span>
+                                                <span className="text-[9px] text-charcoal/50 uppercase font-black italic">System</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-3">

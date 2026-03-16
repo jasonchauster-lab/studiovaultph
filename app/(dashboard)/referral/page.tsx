@@ -43,7 +43,7 @@ export default async function ReferralPage() {
                 <div>
                     <Link
                         href={backHref}
-                        className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/20 hover:text-burgundy uppercase tracking-[0.3em] transition-all mb-8 group"
+                        className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/50 hover:text-burgundy uppercase tracking-[0.3em] transition-all mb-8 group"
                     >
                         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                         Back to Dashboard

@@ -96,21 +96,21 @@ export default function PartnerFeeClient({
                 <div className="flex items-start justify-between gap-4 mb-6 relative z-10">
                     <div className="min-w-0">
                         <p className="text-2xl font-serif text-charcoal truncate group-hover:translate-x-1 transition-transform duration-700 tracking-tighter">
-                            {p.name || <span className="text-charcoal/20 italic">Unnamed</span>}
+                            {p.name || <span className="text-charcoal/50 italic">Unnamed</span>}
                         </p>
                         <div className="flex items-center gap-3 mt-2">
-                            <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em]">
+                            <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em]">
                                 {p.type === 'studio' ? 'Studio' : 'Instructor'}
                             </p>
                             {p.location && (
                                 <>
                                     <span className="w-1 h-1 bg-charcoal/10 rounded-full" />
-                                    <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] truncate">{p.location}</p>
+                                    <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em] truncate">{p.location}</p>
                                 </>
                             )}
                         </div>
                     </div>
-                    <div className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border bg-alabaster/50 text-charcoal/30 border-cream-100">
+                    <div className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border bg-alabaster/50 text-charcoal/50 border-cream-100">
                         <Star className="w-3 h-3 fill-charcoal/10" />
                         Partner
                     </div>
@@ -122,13 +122,13 @@ export default function PartnerFeeClient({
                         {(p.email || p.phone) && (
                             <div className="space-y-1.5">
                                 {p.email && (
-                                    <span className="flex items-center gap-3 text-[10px] font-black text-charcoal/30 uppercase tracking-[0.2em] hover:text-charcoal transition-colors">
+                                    <span className="flex items-center gap-3 text-[10px] font-black text-charcoal/50 uppercase tracking-[0.2em] hover:text-charcoal transition-colors">
                                         <Mail className="w-4 h-4 opacity-30" />
                                         {p.email}
                                     </span>
                                 )}
                                 {p.phone && (
-                                    <span className="flex items-center gap-3 text-[10px] font-black text-charcoal/30 uppercase tracking-[0.2em] hover:text-charcoal transition-colors">
+                                    <span className="flex items-center gap-3 text-[10px] font-black text-charcoal/50 uppercase tracking-[0.2em] hover:text-charcoal transition-colors">
                                         <Phone className="w-4 h-4 opacity-30" />
                                         {p.phone}
                                     </span>
@@ -150,7 +150,7 @@ export default function PartnerFeeClient({
                 <div className="bg-alabaster/30 p-5 rounded-2xl border border-cream-100 relative z-10">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.3em] mb-1">Commission Fee</p>
+                            <p className="text-[9px] font-black text-charcoal/50 uppercase tracking-[0.3em] mb-1">Commission Fee</p>
                         </div>
                         <div className="relative">
                             <select
@@ -229,7 +229,7 @@ export default function PartnerFeeClient({
             </div>
             {list.length === 0 ? (
                 <div className="py-20 text-center glass-card border-dashed">
-                    <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-widest italic">No entities detected in this sector</p>
+                    <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-widest italic">No entities detected in this sector</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

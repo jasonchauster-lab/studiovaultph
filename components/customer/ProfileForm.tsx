@@ -265,8 +265,8 @@ export default function ProfileForm({ profile }: { profile: any }) {
             {profile?.role === 'instructor' && (
                 <div className="space-y-6">
                     <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Equipment I can teach</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                        {['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
+                        {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
                             <label key={eq} className="group flex items-center gap-4 p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-burgundy/30 cursor-pointer transition-all duration-500 shadow-sm">
                                 <input
                                     type="checkbox"
@@ -293,14 +293,14 @@ export default function ProfileForm({ profile }: { profile: any }) {
             {profile?.role === 'instructor' && (
                 <div className="space-y-6">
                     <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Rates per session (PHP)</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                        {['Reformer', 'Cadillac', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
+                    <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
+                        {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
                             const isSelected = selectedEquipment.includes(eq);
                             return isSelected ? (
                                 <div key={eq} className="animate-in zoom-in-95 duration-500">
                                     <label className="block text-[10px] font-bold text-burgundy uppercase tracking-wider mb-2">{eq}</label>
                                     <div className="relative">
-                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-charcoal/20">₱</span>
+                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-charcoal/50">₱</span>
                                         <input
                                             type="number"
                                             name={`rate_${eq}`}

@@ -72,7 +72,7 @@ export default function MultiSelectFilter({ label, options, value, onChange, cla
                 <div className="absolute z-50 top-full mt-3 left-0 w-64 bg-white rounded-[24px] border border-border-grey shadow-cloud overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="p-4 border-b border-border-grey/10">
                         <div className="flex items-center gap-3 border border-border-grey focus-within:border-sage rounded-xl px-4 py-2 transition-all bg-off-white shadow-inner">
-                            <Search className="w-3.5 h-3.5 text-charcoal/30 shrink-0" />
+                            <Search className="w-3.5 h-3.5 text-charcoal/50 shrink-0" />
                             <input
                                 autoFocus
                                 type="text"
@@ -87,7 +87,7 @@ export default function MultiSelectFilter({ label, options, value, onChange, cla
                     <div className="max-h-60 overflow-y-auto py-2 custom-scrollbar">
                         {filteredOptions.length === 0 ? (
                             <div className="px-6 py-4 text-center">
-                                <p className="text-[10px] font-bold text-charcoal/30 uppercase tracking-widest">No results</p>
+                                <p className="text-[10px] font-bold text-charcoal/50 uppercase tracking-widest">No results</p>
                             </div>
                         ) : (
                             filteredOptions.map(opt => {

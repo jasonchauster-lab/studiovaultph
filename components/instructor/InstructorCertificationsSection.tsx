@@ -147,7 +147,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                             setPreviewUrl(null)
                                         }
                                     }}
-                                    className="w-full px-8 py-3.5 bg-white/40 border border-white/60 rounded-[2rem] text-charcoal/20 text-[10px] font-black outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer file:mr-6 file:py-2.5 file:px-6 file:rounded-[20px] file:border-0 file:text-[9px] file:font-black file:bg-charcoal file:text-white file:uppercase file:tracking-[0.25em] shadow-sm"
+                                    className="w-full px-8 py-3.5 bg-white/40 border border-white/60 rounded-[2rem] text-charcoal/50 text-[10px] font-black outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer file:mr-6 file:py-2.5 file:px-6 file:rounded-[20px] file:border-0 file:text-[9px] file:font-black file:bg-charcoal file:text-white file:uppercase file:tracking-[0.25em] shadow-sm"
                                 />
                             </div>
                         </div>
@@ -175,7 +175,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                     setShowForm(false)
                                     setPreviewUrl(null)
                                 }}
-                                className="px-10 py-5 text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] hover:text-charcoal hover:bg-white/40 rounded-[20px] transition-all"
+                                className="px-10 py-5 text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em] hover:text-charcoal hover:bg-white/40 rounded-[20px] transition-all"
                             >
                                 ABORT
                             </button>
@@ -209,23 +209,23 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                         <Award className="w-6 h-6 sm:w-8 sm:h-8 text-gold relative z-10" />
                                         <div className="absolute top-0 right-0 w-10 h-10 bg-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-lg" />
                                     </div>
-                                    <div className="flex-1 text-center sm:text-left">
-                                        <h4 className="font-serif text-charcoal text-xl sm:text-2xl tracking-tighter mb-2">{cert.certification_body}</h4>
-                                        <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 sm:gap-6">
-                                            <div className="flex items-center gap-2 text-[10px] font-black text-charcoal/40 uppercase tracking-[0.25em]">
-                                                <FileText className="w-4 h-4 opacity-30" />
+                                    <div className="flex-1 min-w-0 text-center sm:text-left">
+                                        <h4 className="font-serif text-charcoal text-xl sm:text-2xl tracking-tighter mb-2 truncate">{cert.certification_body}</h4>
+                                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-6">
+                                            <div className="flex items-center gap-2 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] shrink-0">
+                                                <FileText className="w-3.5 h-3.5 opacity-30" />
                                                 SUBMITTED
                                             </div>
                                             <div className={clsx(
-                                                "flex items-center gap-2.5 text-[9px] font-black uppercase tracking-[0.3em] px-5 py-2 rounded-full border transition-all duration-700 shadow-sm whitespace-nowrap",
+                                                "flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border transition-all duration-700 shadow-sm whitespace-nowrap",
                                                 cert.verified
                                                     ? 'bg-sage text-white border-white/20'
                                                     : 'bg-gold/10 text-gold border-gold/20'
                                             )}>
                                                 {cert.verified ? (
-                                                    <><CheckCircle className="w-4 h-4" /> VERIFIED</>
+                                                    <><CheckCircle className="w-3.5 h-3.5" /> VERIFIED</>
                                                 ) : (
-                                                    <><Clock className="w-4 h-4" /> PENDING</>
+                                                    <><Clock className="w-3.5 h-3.5" /> PENDING</>
                                                 )}
                                             </div>
                                         </div>
