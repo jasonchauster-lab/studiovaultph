@@ -23,9 +23,13 @@ export async function updateSession(request: NextRequest) {
                             headers: request.headers,
                         },
                     })
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        response.cookies.set(name, value, options)
-                    )
+                    const rememberMe = request.cookies.get('remember_me')?.value === '1'
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        const finalOptions = (rememberMe && name.includes('auth-token'))
+                            ? { ...options, maxAge: 14 * 24 * 60 * 60 }
+                            : options
+                        response.cookies.set(name, value, finalOptions)
+                    })
                 },
             },
         }
