@@ -551,6 +551,9 @@ export default function InstructorScheduleCalendar({
                                                     width: view === 'day' ? 'calc(100% - 100px)' : 'calc((100% - 100px) / 7)'
                                                 }}
                                             >
+                                                <div className="flex items-center gap-2 -ml-[40px] z-40 bg-forest px-2 py-0.5 rounded-r-full shadow-tight">
+                                                    <span className="text-[8px] font-black text-white uppercase tracking-tighter">NOW</span>
+                                                </div>
                                                 <div className="w-[12px] h-[12px] bg-forest rounded-full -ml-[6px] ring-2 ring-white shadow-sm" />
                                                 <div className="h-[3px] w-full bg-forest shadow-[0_0_12px_rgba(67,48,46,0.4)]" />
                                             </div>

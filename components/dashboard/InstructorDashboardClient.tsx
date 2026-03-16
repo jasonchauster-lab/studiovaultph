@@ -20,7 +20,7 @@ const GROUPED_AREAS = AREAS.reduce((acc: Record<string, string[]>, loc: string) 
 }, {})
 
 import { useEffect, useState } from 'react';
-import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2, Pencil, Copy, Trash2, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2, Pencil, Copy, Trash2, AlertTriangle, CheckCircle, Plus, RefreshCcw } from 'lucide-react'
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ChatWindow from '@/components/dashboard/ChatWindow';
@@ -353,7 +353,7 @@ export default function InstructorDashboardClient({
                             </h2>
                             <span className="text-[9px] font-bold text-burgundy/50 border border-burgundy/20 px-3 py-1 rounded-full uppercase tracking-tighter">Next 5 Sessions</span>
                         </div>
-                        <div className="p-6">
+                        <div className="p-4 sm:p-6">
                             {(() => {
                                 if (isLoading) {
                                     return (
@@ -368,7 +368,13 @@ export default function InstructorDashboardClient({
                                         <div className="py-10 text-center bg-off-white/50 rounded-lg border-2 border-dashed border-buttermilk flex flex-col items-center justify-center">
                                             <Calendar className="w-12 h-12 text-muted-burgundy/20 mx-auto mb-6" />
                                             <h3 className="text-[10px] font-black text-burgundy uppercase tracking-[0.4em] mb-1">Quiet Week</h3>
-                                            <p className="text-[9px] text-burgundy font-black uppercase tracking-[0.2em] max-w-[200px] mx-auto">No bookings yet—your schedule is clear.</p>
+                                            <p className="text-[9px] text-burgundy font-black uppercase tracking-[0.2em] max-w-[200px] mx-auto mb-6">No bookings yet—your schedule is clear.</p>
+                                            <button 
+                                                onClick={() => setIsAddModalOpen(true)}
+                                                className="px-4 py-2 bg-forest text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-tight flex items-center gap-2"
+                                            >
+                                                <Plus className="w-3.5 h-3.5" /> Quick Add Availability
+                                            </button>
                                         </div>
                                     );
                                 }

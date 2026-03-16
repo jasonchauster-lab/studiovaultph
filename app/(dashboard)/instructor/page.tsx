@@ -36,7 +36,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
 
     // Determine visible week (computed before try so all queries run in parallel)
     const dateParam = params.date || todayStr;
-    const currentDate = new Date(dateParam + "T00:00:00+08:00");
+    const currentDate = new Date(dateParam + "T00:00:00Z");
     const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
     const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
     const startDateStr = format(weekStart, 'yyyy-MM-dd');

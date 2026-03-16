@@ -67,15 +67,18 @@ export default function InstructorStatCards({ stats, hasPendingPayout }: Instruc
                                 <card.icon className={clsx("w-4 h-4", card.iconColor)} />
                             </div>
                             <span className={clsx(
-                                "text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full border border-border-grey shadow-tight bg-white",
-                                card.trendColor
+                                "text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full border shadow-tight",
+                                card.label === 'Available Balance' && hasPendingPayout ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                                card.label === 'Available Balance' ? 'bg-green-50 text-green-700 border-green-100' :
+                                card.label === 'Pending Earnings' ? 'bg-green-50 text-green-700 border-green-100' :
+                                'bg-white text-burgundy border-border-grey'
                             )}>
                                 {card.trend}
                             </span>
                         </div>
                         <div>
                             <p className="text-[9px] font-black text-slate uppercase tracking-[0.3em] mb-1.5">{card.label}</p>
-                            <h3 className="text-2xl font-serif text-charcoal tracking-tighter">{card.value}</h3>
+                            <h3 className="text-2xl font-bold font-sans text-charcoal tracking-tighter">{card.value}</h3>
                         </div>
     
                         {card.hasAction && (
