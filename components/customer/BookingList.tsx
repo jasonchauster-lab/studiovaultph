@@ -153,7 +153,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                 )}
                                 <Link
                                     href="/customer"
-                                    className="px-4 py-2 bg-burgundy text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-tight"
+                                    className="px-4 py-2 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-tight"
                                 >
                                     Browse Instructors
                                 </Link>
@@ -513,7 +513,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                             <Link href={`/instructors/${selectedInstructor.id}`} target="_blank" className="flex-1 py-2.5 text-center bg-charcoal/5 text-charcoal/70 rounded-xl font-bold text-sm hover:bg-charcoal/10 transition-colors">
                                 View Full Profile
                             </Link>
-                            <button onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }} className="flex-1 py-2.5 bg-charcoal-900 text-white rounded-xl font-bold text-sm hover:bg-charcoal-800 transition-colors">
+                            <button onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }} className="flex-1 py-2.5 bg-forest text-white rounded-xl font-bold text-sm hover:brightness-110 transition-colors">
                                 Close
                             </button>
                         </div>
@@ -620,7 +620,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                             <Link href={`/studios/${selectedStudio.id}`} target="_blank" className="flex-1 py-2.5 text-center bg-burgundy/5 text-burgundy/70 rounded-xl font-bold text-sm hover:bg-burgundy/10 transition-colors">
                                 View Full Profile
                             </Link>
-                            <button onClick={() => { setSelectedStudio(null); setStudioDetails(null) }} className="flex-1 py-2.5 bg-burgundy text-white rounded-xl font-bold text-sm hover:brightness-110 transition-colors">
+                            <button onClick={() => { setSelectedStudio(null); setStudioDetails(null) }} className="flex-1 py-2.5 bg-forest text-white rounded-xl font-bold text-sm hover:brightness-110 transition-colors">
                                 Close
                             </button>
                         </div>

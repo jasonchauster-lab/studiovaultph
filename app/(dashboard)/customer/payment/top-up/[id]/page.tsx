@@ -43,7 +43,7 @@ export default async function TopUpPaymentPage({
                 </Link>
 
                 <div className="bg-white rounded-3xl border border-cream-200 shadow-xl overflow-hidden">
-                    <div className="bg-charcoal-900 p-8 text-center text-white relative">
+                    <div className="bg-forest p-8 text-center text-white relative">
                         <div className="absolute top-0 right-0 p-4 opacity-10">
                             <Wallet className="w-24 h-24" />
                         </div>

@@ -103,7 +103,7 @@ export default function BookSlotButton({ slotId, availableEquipment }: { slotId:
                     <button
                         onClick={handleBook}
                         disabled={loading}
-                        className="flex-1 py-3 px-4 bg-burgundy text-white rounded-lg text-[11px] font-bold uppercase tracking-widest hover:brightness-110 disabled:opacity-50 transition-all shadow-tight"
+                        className="flex-1 py-3 px-4 bg-forest text-white rounded-lg text-[11px] font-bold uppercase tracking-widest hover:brightness-110 disabled:opacity-50 transition-all shadow-tight"
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Confirm'}
                     </button>
@@ -119,7 +119,7 @@ export default function BookSlotButton({ slotId, availableEquipment }: { slotId:
                 disabled={loading}
                 className={`w-full py-3.5 px-6 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center shadow-tight ${status === 'error'
                         ? 'bg-red-50 text-red-500 border border-red-200'
-                        : 'bg-burgundy text-white hover:brightness-110'
+                        : 'bg-forest text-white hover:brightness-110'
                     }`}
             >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (status === 'error' ? 'Retry' : 'Book Now')}

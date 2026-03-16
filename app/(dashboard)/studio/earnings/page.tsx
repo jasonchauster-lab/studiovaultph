@@ -35,7 +35,7 @@ export default async function EarningsPage({
                     <p className="text-charcoal-600 mb-6">
                         We couldn't find a studio associated with your account. Please make sure you have created a studio first.
                     </p>
-                    <Link href="/studio" className="inline-block px-6 py-2 bg-charcoal-900 text-white rounded-lg hover:bg-charcoal-800 transition-colors">
+                    <Link href="/studio" className="inline-block px-6 py-2 bg-forest text-white rounded-lg hover:brightness-110 transition-colors">
                         Go to Dashboard
                     </Link>
                 </div>

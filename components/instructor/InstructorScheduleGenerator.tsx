@@ -192,7 +192,7 @@ export default function InstructorScheduleGenerator({ initialAvailability, teach
                                             className={clsx(
                                                 "w-12 h-12 rounded-lg text-[10px] font-bold transition-all duration-300 border flex items-center justify-center tracking-[0.2em]",
                                                 selectedDays.includes(day.id)
-                                                    ? "bg-charcoal text-white border-charcoal shadow-tight active:scale-95"
+                                                    ? "bg-forest text-white border-charcoal shadow-tight active:scale-95"
                                                     : "bg-off-white text-slate border-border-grey hover:border-forest hover:text-forest shadow-sm"
                                             )}
                                         >
@@ -330,7 +330,7 @@ export default function InstructorScheduleGenerator({ initialAvailability, teach
                     <button
                         onClick={handleGenerate}
                         disabled={isSubmitting}
-                        className="w-full py-6 bg-charcoal text-white rounded-xl text-[11px] font-bold uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-tight active:scale-[0.98] flex items-center justify-center gap-6 disabled:opacity-50"
+                        className="w-full py-6 bg-forest text-white rounded-xl text-[11px] font-bold uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-tight active:scale-[0.98] flex items-center justify-center gap-6 disabled:opacity-50"
                     >
                         {isSubmitting ? (
                             <>

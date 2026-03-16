@@ -286,13 +286,13 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
             <div className="flex gap-4 bg-white/40 backdrop-blur-md p-1.5 rounded-2xl border border-white/50 w-fit">
                 <button
                     onClick={() => { setActiveSubtab('activity'); resetPage() }}
-                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all duration-500 uppercase ${activeSubtab === 'activity' ? 'bg-charcoal text-white shadow-lg' : 'text-charcoal/40 hover:text-charcoal hover:bg-white/50'}`}
+                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all duration-500 uppercase ${activeSubtab === 'activity' ? 'bg-forest text-white shadow-lg' : 'text-charcoal/40 hover:text-charcoal hover:bg-white/50'}`}
                 >
                     Administrative Logs
                 </button>
                 <button
                     onClick={() => { setActiveSubtab('transactions'); resetPage() }}
-                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all duration-500 uppercase ${activeSubtab === 'transactions' ? 'bg-charcoal text-white shadow-lg' : 'text-charcoal/40 hover:text-charcoal hover:bg-white/50'}`}
+                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all duration-500 uppercase ${activeSubtab === 'transactions' ? 'bg-forest text-white shadow-lg' : 'text-charcoal/40 hover:text-charcoal hover:bg-white/50'}`}
                 >
                     Financial Archives
                 </button>
@@ -312,7 +312,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                     </div>
                     <button
                         onClick={activeSubtab === 'activity' ? exportActivityCSV : exportFinancialCSV}
-                        className="flex items-center gap-2.5 px-6 py-3 bg-charcoal text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest shadow-md"
+                        className="flex items-center gap-2.5 px-6 py-3 bg-forest text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest shadow-md"
                     >
                         <Download className="w-3.5 h-3.5" />
                         EXPORT DATASET

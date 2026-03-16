@@ -66,7 +66,7 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                         <div className="px-6 py-4 bg-cream-50 border-t border-cream-200">
                             <button
                                 onClick={() => setShowInfoModal(false)}
-                                className="w-full py-2 bg-charcoal-900 text-white rounded-lg font-bold hover:bg-charcoal-800 transition-colors"
+                                className="w-full py-2 bg-forest text-white rounded-lg font-bold hover:brightness-110 transition-colors"
                             >
                                 Got it
                             </button>

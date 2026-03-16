@@ -350,7 +350,7 @@ export default function InstructorScheduleCalendar({
                     </div>
                     <Link 
                         href="/instructor/profile" 
-                        className="px-6 py-3 bg-burgundy text-buttermilk rounded-lg text-[9px] font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-tight"
+                        className="px-6 py-3 bg-forest text-white rounded-lg text-[9px] font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-tight"
                     >
                         COMPLETE PROFILE
                     </Link>
@@ -495,8 +495,8 @@ export default function InstructorScheduleCalendar({
                         className={clsx(
                             "px-8 py-3 text-[10px] tracking-[0.2em] rounded-lg font-bold flex items-center gap-3 transition-all",
                             isProfileComplete
-                                ? "bg-burgundy text-buttermilk hover:brightness-110 shadow-tight active:scale-95"
-                                : "bg-burgundy/70 text-buttermilk/70 hover:brightness-110 shadow-tight active:scale-95"
+                                ? "bg-forest text-white hover:brightness-110 shadow-tight active:scale-95"
+                                : "bg-forest/70 text-white/70 hover:brightness-110 shadow-tight active:scale-95"
                         )}
                     >
                         <CalendarIcon className="w-4 h-4" /> RECURRING SCHEDULE
@@ -518,7 +518,7 @@ export default function InstructorScheduleCalendar({
                                         <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
                                         <div className={clsx("text-3xl font-serif font-black tracking-tighter", isSameDay(day, new Date()) ? "text-burgundy" : "text-charcoal")}>{format(day, 'd')}</div>
                                         {isSameDay(day, new Date()) && (
-                                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-1 bg-burgundy rounded-t-full" />
+                                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-1 bg-forest rounded-t-full" />
                                         )}
                                     </div>
                                 ))}
@@ -551,8 +551,8 @@ export default function InstructorScheduleCalendar({
                                                     width: view === 'day' ? 'calc(100% - 100px)' : 'calc((100% - 100px) / 7)'
                                                 }}
                                             >
-                                                <div className="w-[12px] h-[12px] bg-burgundy rounded-full -ml-[6px] ring-2 ring-white shadow-sm" />
-                                                <div className="h-[3px] w-full bg-burgundy shadow-[0_0_12px_rgba(67,48,46,0.4)]" />
+                                                <div className="w-[12px] h-[12px] bg-forest rounded-full -ml-[6px] ring-2 ring-white shadow-sm" />
+                                                <div className="h-[3px] w-full bg-forest shadow-[0_0_12px_rgba(67,48,46,0.4)]" />
                                             </div>
                                         )
                                     })()}
@@ -1084,7 +1084,7 @@ export default function InstructorScheduleCalendar({
                                     <button
                                         type="submit"
                                         disabled={isSubmitting || !isProfileComplete}
-                                        className="flex-1 bg-charcoal text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50"
+                                        className="flex-1 bg-forest text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50"
                                     >
                                         {isSubmitting ? 'PROCESSING...' : 'CONFIRM SLOT'}
                                     </button>
@@ -1278,7 +1278,7 @@ export default function InstructorScheduleCalendar({
                                 )}
 
                                 <div className="flex gap-6 pt-12 border-t border-border-grey">
-                                    <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50">
+                                    <button type="submit" disabled={isSubmitting} className="flex-1 bg-forest text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50">
                                         {isSubmitting ? 'SAVING...' : 'UPDATE SLOT'}
                                     </button>
                                     <button
@@ -1625,7 +1625,7 @@ export default function InstructorScheduleCalendar({
                                 );
                             })()}
                         </div>
-                        <button onClick={() => setSelectedProfile(null)} className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
+                        <button onClick={() => setSelectedProfile(null)} className="w-full py-6 bg-forest text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
                     </div>
                 </div>
             )}
@@ -1680,7 +1680,7 @@ export default function InstructorScheduleCalendar({
                             </div>
                         </div>
 
-                        <button onClick={() => setSelectedStudio(null)} className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
+                        <button onClick={() => setSelectedStudio(null)} className="w-full py-6 bg-forest text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
                     </div>
                 </div>
             )}

@@ -40,7 +40,7 @@ export default function SupportPage() {
     return (
         <div className="min-h-screen bg-cream-50">
             {/* Header */}
-            <div className="bg-charcoal text-white px-6 py-16 text-center">
+            <div className="bg-forest text-white px-6 py-16 text-center">
                 <div className="max-w-2xl mx-auto">
                     <Link
                         href="/"
@@ -68,7 +68,7 @@ export default function SupportPage() {
                     </div>
                     <Link
                         href="/login"
-                        className="shrink-0 bg-charcoal text-white text-[10px] font-black uppercase tracking-[0.2em] px-5 py-3 rounded-xl hover:bg-charcoal/80 transition-all"
+                        className="shrink-0 bg-forest text-white text-[10px] font-black uppercase tracking-[0.2em] px-5 py-3 rounded-xl hover:bg-charcoal/80 transition-all"
                     >
                         Chat with Us
                     </Link>

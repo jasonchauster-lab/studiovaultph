@@ -40,7 +40,7 @@ export default function ExpandableImage({ src, alt, className }: ExpandableImage
                 >
                     <div className="relative max-w-4xl max-h-[90vh] bg-white p-2 rounded-xl shadow-2xl overflow-hidden">
                         <button
-                            className="absolute top-4 right-4 bg-charcoal-900/50 hover:bg-charcoal-900 text-white p-2 rounded-full transition-colors"
+                            className="absolute top-4 right-4 bg-charcoal-900/50 hover:bg-forest text-white p-2 rounded-full transition-colors"
                             onClick={(e) => {
                                 e.stopPropagation()
                                 setIsOpen(false)

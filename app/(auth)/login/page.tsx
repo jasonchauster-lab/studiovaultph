@@ -251,7 +251,7 @@ function LoginContent() {
                                     aria-checked={role === opt.id}
                                     onClick={() => setRole(opt.id)}
                                     className={`flex-1 py-3 px-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${role === opt.id
-                                        ? 'bg-burgundy text-white shadow-tight'
+                                        ? 'bg-forest text-white shadow-tight'
                                         : 'text-slate-600 hover:text-charcoal hover:bg-off-white'
                                         }`}
                                 >

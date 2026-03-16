@@ -185,7 +185,7 @@ export default function PayoutForm({ availableBalance }: { availableBalance: num
                 <button
                     type="submit"
                     disabled={isLoading || !amount || parseFloat(amount) > availableBalance}
-                    className="w-full bg-burgundy text-buttermilk py-4 rounded-lg font-semibold shadow-sm hover:brightness-110 hover:shadow-card hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transition-all duration-200 flex items-center justify-center gap-2"
+                    className="w-full bg-forest text-white py-4 rounded-lg font-semibold shadow-sm hover:brightness-110 hover:shadow-card hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transition-all duration-200 flex items-center justify-center gap-2"
                 >
                     {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Request'}
                 </button>

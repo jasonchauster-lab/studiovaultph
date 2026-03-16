@@ -69,7 +69,7 @@ export default async function VerifiedPage() {
 
                 <Link
                     href={nextRoute}
-                    className="block w-full bg-charcoal-900 text-cream-50 py-3 rounded-xl font-medium hover:bg-charcoal-800 transition-colors"
+                    className="block w-full bg-forest text-white py-3 rounded-xl font-medium hover:brightness-110 transition-colors"
                 >
                     {buttonText}
                 </Link>

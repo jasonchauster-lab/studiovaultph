@@ -578,7 +578,7 @@ export default function InstructorDashboardClient({
                                 );
                             })()}
                         </div>
-                        <button onClick={() => setSelectedProfile(null)} className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
+                        <button onClick={() => setSelectedProfile(null)} className="w-full py-6 bg-forest text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
                     </div>
                 </div>
             )}
@@ -722,7 +722,7 @@ export default function InstructorDashboardClient({
                             )}
                             <button 
                                 onClick={() => setSelectedBooking(null)}
-                                className="flex-1 px-8 py-4 bg-charcoal text-white rounded-2xl text-[10px] font-bold hover:brightness-110 transition-all uppercase tracking-[0.25em] shadow-tight active:scale-95"
+                                className="flex-1 px-8 py-4 bg-forest text-white rounded-2xl text-[10px] font-bold hover:brightness-110 transition-all uppercase tracking-[0.25em] shadow-tight active:scale-95"
                             >
                                 Close Overview
                             </button>
@@ -843,7 +843,7 @@ export default function InstructorDashboardClient({
                                     </div>
                                     <h4 className="text-xl font-serif text-charcoal tracking-tight">Setup Required</h4>
                                     <p className="text-xs text-slate leading-relaxed uppercase tracking-widest font-medium">Please define your teaching equipment and rates in settings first.</p>
-                                    <Link href="/instructor/profile" className="block w-full py-4 bg-burgundy text-white rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-tight active:scale-95">Go to Settings</Link>
+                                    <Link href="/instructor/profile" className="block w-full py-4 bg-forest text-white rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-tight active:scale-95">Go to Settings</Link>
                                 </div>
                             ) : (
                                 <form onSubmit={handleCreateSingle} className="space-y-8">
@@ -934,7 +934,7 @@ export default function InstructorDashboardClient({
                                         <button 
                                             type="submit"
                                             disabled={isSubmitting || locations.length === 0}
-                                            className="w-full py-5 bg-charcoal text-white rounded-2xl text-[10px] font-bold hover:brightness-110 transition-all uppercase tracking-[0.3em] shadow-tight disabled:opacity-50 active:scale-95"
+                                            className="w-full py-5 bg-forest text-white rounded-2xl text-[10px] font-bold hover:brightness-110 transition-all uppercase tracking-[0.3em] shadow-tight disabled:opacity-50 active:scale-95"
                                         >
                                             {isSubmitting ? 'Creating Session...' : 'Activate Session'}
                                         </button>
@@ -996,7 +996,7 @@ export default function InstructorDashboardClient({
                             </div>
                         </div>
 
-                        <button onClick={() => setSelectedStudio(null)} className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
+                        <button onClick={() => setSelectedStudio(null)} className="w-full py-6 bg-forest text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
                     </div>
                 </div>
             )}

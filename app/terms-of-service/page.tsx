@@ -21,7 +21,7 @@ export default function TermsOfServicePage() {
                         {/* Section 1 */}
                         <section className="space-y-6">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-charcoal rounded-lg shadow-tight">
+                                <div className="p-3 bg-forest rounded-lg shadow-tight">
                                     <Clock className="w-6 h-6 text-white" />
                                 </div>
                                 <h2 className="text-2xl font-serif text-charcoal">1. The 24-Hour Strict Cancellation Rule</h2>
@@ -86,7 +86,7 @@ export default function TermsOfServicePage() {
                         {/* Section 4 */}
                         <section className="space-y-8">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-charcoal rounded-lg shadow-tight">
+                                <div className="p-3 bg-forest rounded-lg shadow-tight">
                                     <Wallet className="w-6 h-6 text-white" />
                                 </div>
                                 <h2 className="text-2xl font-serif text-charcoal">4. Negative Wallet Balances & Restrictions</h2>
@@ -106,7 +106,7 @@ export default function TermsOfServicePage() {
                                 </div>
                             </div>
 
-                            <div className="bg-charcoal text-white p-10 rounded-lg shadow-tight relative overflow-hidden">
+                            <div className="bg-forest text-white p-10 rounded-lg shadow-tight relative overflow-hidden">
                                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
                                     <div>
                                         <h3 className="text-xl font-serif mb-4 italic">Manual Settlement</h3>

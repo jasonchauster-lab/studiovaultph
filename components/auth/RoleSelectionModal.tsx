@@ -28,7 +28,7 @@ const OPTIONS = [
         icon: <User className="w-6 h-6 text-charcoal" />,
         bgColor: "bg-[#fdf9f4]",
         hoverBorder: "hover:border-forest/30",
-        buttonColor: "bg-charcoal text-white hover:brightness-110",
+        buttonColor: "bg-forest text-white hover:brightness-110",
         target: "/login?role=instructor&mode=signup"
     },
     {

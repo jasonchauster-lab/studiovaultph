@@ -173,7 +173,7 @@ export default function MobileScheduleCalendar({
                 <div className="grid grid-cols-2 gap-3 mb-6">
                     <button
                         onClick={() => onAddSlot?.(selectedDate)}
-                        className="flex items-center justify-center gap-2 py-3 bg-burgundy text-buttermilk rounded-xl text-[10px] font-black uppercase tracking-widest shadow-tight active:scale-95 transition-all"
+                        className="flex items-center justify-center gap-2 py-3 bg-forest text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-tight active:scale-95 transition-all"
                     >
                         <Plus className="w-4 h-4" /> Add Slot
                     </button>
@@ -250,7 +250,7 @@ export default function MobileScheduleCalendar({
                                 {currentTimeIndex === index && (
                                     <div className="flex items-center gap-4 py-2 animate-in fade-in slide-in-from-left duration-700">
                                         <div className="w-3 h-3 rounded-full bg-burgundy shadow-[0_0_12px_rgba(67,48,46,0.4)] flex-shrink-0" />
-                                        <div className="h-[3px] flex-1 bg-burgundy opacity-30" />
+                                        <div className="h-[3px] flex-1 bg-forest opacity-30" />
                                         <span className="text-[9px] font-black text-burgundy uppercase tracking-widest whitespace-nowrap">Now</span>
                                     </div>
                                 )}
@@ -335,7 +335,7 @@ export default function MobileScheduleCalendar({
                         {currentTimeIndex === agendaSessions.length && (
                             <div className="flex items-center gap-4 py-2 animate-in fade-in slide-in-from-left duration-700">
                                 <div className="w-3 h-3 rounded-full bg-burgundy shadow-[0_0_12px_rgba(67,48,46,0.4)] flex-shrink-0" />
-                                <div className="h-[3px] flex-1 bg-burgundy opacity-30" />
+                                <div className="h-[3px] flex-1 bg-forest opacity-30" />
                                 <span className="text-[9px] font-black text-burgundy uppercase tracking-widest whitespace-nowrap">Now</span>
                             </div>
                         )}

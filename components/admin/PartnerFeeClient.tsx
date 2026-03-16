@@ -138,7 +138,7 @@ export default function PartnerFeeClient({
 
                         <button
                             onClick={() => onOpenBookings(p.id, p.name, p.type)}
-                            className="bg-charcoal text-white px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:brightness-110 transition-all flex items-center gap-2 shadow-xl shadow-charcoal/10 group/btn"
+                            className="bg-forest text-white px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:brightness-110 transition-all flex items-center gap-2 shadow-xl shadow-charcoal/10 group/btn"
                         >
                             <Calendar className="w-3.5 h-3.5 text-gold group-hover/btn:scale-110 transition-transform" />
                             View Bookings

@@ -382,7 +382,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                         </button>
                         <button
                             onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
-                            className="px-8 py-3 text-[10px] tracking-[0.2em] rounded-lg font-bold flex items-center gap-3 transition-all bg-burgundy text-buttermilk hover:brightness-110 shadow-tight active:scale-95"
+                            className="px-8 py-3 text-[10px] tracking-[0.2em] rounded-lg font-bold flex items-center gap-3 transition-all bg-forest text-white hover:brightness-110 shadow-tight active:scale-95"
                         >
                             <CalendarIcon className="w-4 h-4" /> BULK GENERATE
                         </button>
@@ -404,7 +404,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                             <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
                                             <div className={clsx("text-3xl font-serif font-black tracking-tighter", isSameDay(day, new Date()) ? "text-burgundy" : "text-charcoal")}>{format(day, 'd')}</div>
                                             {isSameDay(day, new Date()) && (
-                                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-1 bg-burgundy rounded-t-full" />
+                                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-1 bg-forest rounded-t-full" />
                                             )}
                                         </div>
                                     ))}
@@ -428,8 +428,8 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                         : `calc((100% - 100px) / 7)`
                                                 }}
                                             >
-                                                <div className="w-[12px] h-[12px] bg-burgundy rounded-full -ml-[6px] ring-2 ring-white shadow-sm" />
-                                                <div className="h-[3px] w-full bg-burgundy shadow-[0_0_12px_rgba(67,48,46,0.4)]" />
+                                                <div className="w-[12px] h-[12px] bg-forest rounded-full -ml-[6px] ring-2 ring-white shadow-sm" />
+                                                <div className="h-[3px] w-full bg-forest shadow-[0_0_12px_rgba(67,48,46,0.4)]" />
                                             </div>
                                         )}
 
@@ -751,7 +751,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                         <button
                                             type="submit"
                                             disabled={isSubmitting}
-                                            className="flex-1 bg-charcoal text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50"
+                                            className="flex-1 bg-forest text-white py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50"
                                         >
                                             {isSubmitting ? 'PROCESSING...' : 'CONFIRM SLOT'}
                                         </button>
@@ -906,7 +906,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                 )}
 
                                     <div className="flex flex-col sm:flex-row gap-4 pt-10 border-t border-border-grey">
-                                        <button type="submit" disabled={isSubmitting} className="flex-1 bg-charcoal text-white py-4 md:py-5 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 flex items-center justify-center gap-3">
+                                        <button type="submit" disabled={isSubmitting} className="flex-1 bg-forest text-white py-4 md:py-5 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 flex items-center justify-center gap-3">
                                             <Edit2 className="w-4 h-4" /> {isSubmitting ? 'PROCESSING...' : 'UPDATE SLOT'}
                                         </button>
                                         <button
@@ -1147,7 +1147,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                             <button
                                 onClick={() => setSelectedProfile(null)}
-                                className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95"
+                                className="w-full py-6 bg-forest text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95"
                             >
                                 CLOSE
                             </button>

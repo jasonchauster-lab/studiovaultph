@@ -281,7 +281,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                     <button
                         type="button"
                         onClick={() => spacePhotosInputRef.current?.click()}
-                        className="flex items-center gap-2 bg-charcoal text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-sm active:scale-95"
+                        className="flex items-center gap-2 bg-forest text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-sm active:scale-95"
                     >
                         <Upload className="w-4 h-4 text-gold" />
                         Add New Photos
@@ -461,7 +461,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full sm:w-auto px-16 py-6 bg-charcoal text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
+                    className="w-full sm:w-auto px-16 py-6 bg-forest text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
                 >
                     {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-gold" /> : <Save className="w-5 h-5 text-gold stroke-[2px]" />}
                     {isLoading ? 'SAVING...' : 'SAVE SETTINGS'}

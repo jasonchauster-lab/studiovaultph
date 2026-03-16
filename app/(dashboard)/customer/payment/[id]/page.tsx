@@ -96,7 +96,7 @@ export default async function PaymentPage({
                     </p>
                     <Link
                         href="/customer"
-                        className="inline-block bg-charcoal-900 text-cream-50 px-6 py-3 rounded-xl font-medium hover:bg-charcoal-800 transition-colors"
+                        className="inline-block bg-forest text-white px-6 py-3 rounded-xl font-medium hover:brightness-110 transition-colors"
                     >
                         Browse Studios
                     </Link>
@@ -122,7 +122,7 @@ export default async function PaymentPage({
 
                 <div className="bg-white rounded-2xl border border-cream-200 shadow-sm p-8">
                     <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-charcoal-900 text-cream-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-forest text-white rounded-full flex items-center justify-center mx-auto mb-4">
                             <CreditCard className="w-8 h-8" />
                         </div>
                         <h1 className="text-3xl font-serif text-charcoal-900 mb-2">Complete Payment</h1>

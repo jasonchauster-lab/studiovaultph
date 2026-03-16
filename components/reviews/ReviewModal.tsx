@@ -136,7 +136,7 @@ export default function ReviewModal({ booking, isInstructor, revieweeId: reviewe
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-burgundy/40 backdrop-blur-sm p-4 animate-in fade-in duration-300">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500">
                 {/* Header */}
-                <div className="bg-burgundy px-8 py-6 text-white relative">
+                <div className="bg-forest px-8 py-6 text-white relative">
                     <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">
                         <X className="w-5 h-5" />
                     </button>

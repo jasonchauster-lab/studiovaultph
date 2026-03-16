@@ -73,7 +73,7 @@ export default async function InstructorPaymentPage({
 
                 <div className="bg-white rounded-2xl border border-cream-200 shadow-sm p-8">
                     <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-charcoal-900 text-cream-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-forest text-white rounded-full flex items-center justify-center mx-auto mb-4">
                             <CreditCard className="w-8 h-8" />
                         </div>
                         <h1 className="text-3xl font-serif text-charcoal-900 mb-2">Complete Payment</h1>

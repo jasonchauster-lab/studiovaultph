@@ -152,7 +152,7 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col h-[600px]">
                 {/* Header */}
-                <div className="bg-charcoal-900 text-white p-4 flex justify-between items-center shrink-0">
+                <div className="bg-forest text-white p-4 flex justify-between items-center shrink-0">
                     <div>
                         <h3 className="font-serif font-bold text-lg">Chat with {recipientName}</h3>
                         {!isExpired && <UserPresenceIndicator userId={recipientId} className="mt-1" />}

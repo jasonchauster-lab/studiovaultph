@@ -52,7 +52,7 @@ export default function ReferralCard({ referralCode, origin }: ReferralCardProps
                 <button
                     type="button"
                     onClick={handleCopy}
-                    className="flex items-center gap-1.5 bg-burgundy text-white px-4 py-2.5 rounded-md text-[10px] font-bold uppercase tracking-wider hover:brightness-110 transition-all flex-shrink-0"
+                    className="flex items-center gap-1.5 bg-forest text-white px-4 py-2.5 rounded-md text-[10px] font-bold uppercase tracking-wider hover:brightness-110 transition-all flex-shrink-0"
                 >
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     {copied ? 'Copied!' : 'Copy Link'}

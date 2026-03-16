@@ -76,7 +76,7 @@ export default function PublicInstructorGallery({ images }: PublicInstructorGall
                                 alt={`Gallery photo ${index + 1}`}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
-                            <div className="absolute inset-0 bg-charcoal-900/0 group-hover:bg-charcoal-900/10 transition-colors" />
+                            <div className="absolute inset-0 bg-charcoal-900/0 group-hover:brightness-110/10 transition-colors" />
                         </div>
                     ))}
                 </div>

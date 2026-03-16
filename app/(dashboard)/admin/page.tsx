@@ -1,4 +1,4 @@
-﻿import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { CheckCircle, Clock, Building2, MessageCircle, BarChart3, Wallet, ShieldAlert, AlertTriangle, Users } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
@@ -292,7 +292,7 @@ export default async function AdminDashboard({
                                     key={t.id}
                                     href={`/admin?tab=${t.id}`}
                                     className={`relative flex items-center gap-2.5 px-6 py-3 rounded-xl text-[10px] font-black tracking-[0.15em] transition-all duration-500 overflow-hidden group ${isActive
-                                        ? 'bg-charcoal text-white shadow-lg shadow-charcoal/20 scale-[1.02]'
+                                        ? 'bg-forest text-white shadow-lg shadow-charcoal/20 scale-[1.02]'
                                         : 'text-charcoal/40 hover:text-charcoal hover:bg-white/50'
                                         }`}
                                 >
@@ -300,7 +300,7 @@ export default async function AdminDashboard({
                                     {t.label}
                                     {count > 0 && (
                                         <span className={clsx("ml-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[8px] font-black shadow-sm",
-                                            isActive ? "bg-white text-charcoal" : "bg-charcoal text-white"
+                                            isActive ? "bg-white text-charcoal" : "bg-forest text-white"
                                         )}>
                                             {count > 99 ? '99+' : count}
                                         </span>
@@ -351,7 +351,7 @@ export default async function AdminDashboard({
                                                     <p className="font-bold text-charcoal-900">{instructor.full_name}</p>
                                                     <p className="text-xs text-charcoal-600 font-bold text-red-600 mt-1">₱{(instructor.available_balance || 0).toLocaleString()}</p>
                                                 </div>
-                                                <VerifyButton id={instructor.id} action="settleInstructorDebt" label="Settle" className="px-4 py-2 bg-charcoal-900 text-cream-50 text-xs rounded-lg font-bold" />
+                                                <VerifyButton id={instructor.id} action="settleInstructorDebt" label="Settle" className="px-4 py-2 bg-forest text-white text-xs rounded-lg font-bold" />
                                             </div>
                                         ))}
                                     </div>
@@ -366,7 +366,7 @@ export default async function AdminDashboard({
                                 <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
                                     <CheckCircle className="w-4 h-4 text-sage" />
                                     INSTRUCTOR VERIFICATIONS
-                                    {certsWithUrls.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{certsWithUrls.length}</span>}
+                                    {certsWithUrls.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-forest text-white text-[10px] font-black">{certsWithUrls.length}</span>}
                                 </h2>
                                 {certsWithUrls.length === 0 ? <p className="text-charcoal/40 text-xs italic">All instructor certifications are up to date.</p> : (
                                     <div className="space-y-4">
@@ -393,7 +393,7 @@ export default async function AdminDashboard({
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={cert.id} action="rejectCert" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl hover:bg-red-100 transition-colors tracking-widest" />
-                                                        <VerifyButton id={cert.id} action="approveCert" label="APPROVE" className="px-4 py-2 bg-charcoal text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest shadow-md" />
+                                                        <VerifyButton id={cert.id} action="approveCert" label="APPROVE" className="px-4 py-2 bg-forest text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest shadow-md" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -406,7 +406,7 @@ export default async function AdminDashboard({
                                 <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
                                     <Building2 className="w-4 h-4 text-sage" />
                                     STUDIO VERIFICATIONS
-                                    {studiosWithUrls.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{studiosWithUrls.length}</span>}
+                                    {studiosWithUrls.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-forest text-white text-[10px] font-black">{studiosWithUrls.length}</span>}
                                 </h2>
                                 {studiosWithUrls.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending studio verifications.</p> : (
                                     <div className="space-y-4">
@@ -423,7 +423,7 @@ export default async function AdminDashboard({
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={s.id} action="rejectStudio" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
-                                                        <VerifyButton id={s.id} action="verifyStudio" label="APPROVE" className="px-4 py-2 bg-charcoal text-white text-[10px] font-black rounded-xl" />
+                                                        <VerifyButton id={s.id} action="verifyStudio" label="APPROVE" className="px-4 py-2 bg-forest text-white text-[10px] font-black rounded-xl" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -436,7 +436,7 @@ export default async function AdminDashboard({
                                 <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
                                     <Wallet className="w-4 h-4 text-sage" />
                                     STUDIO PAYOUT SETUPS
-                                    {payoutStudiosWithUrls.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{payoutStudiosWithUrls.length}</span>}
+                                    {payoutStudiosWithUrls.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-forest text-white text-[10px] font-black">{payoutStudiosWithUrls.length}</span>}
                                 </h2>
                                 {payoutStudiosWithUrls.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending payout setups.</p> : (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -453,7 +453,7 @@ export default async function AdminDashboard({
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={s.id} action="rejectStudioPayout" label="REJECT" className="px-3 py-1 bg-red-50 text-red-700 text-[10px] font-black rounded-lg" />
-                                                        <VerifyButton id={s.id} action="approveStudioPayout" label="APPROVE" className="px-3 py-1 bg-charcoal text-white text-[10px] font-black rounded-lg" />
+                                                        <VerifyButton id={s.id} action="approveStudioPayout" label="APPROVE" className="px-3 py-1 bg-forest text-white text-[10px] font-black rounded-lg" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -470,7 +470,7 @@ export default async function AdminDashboard({
                                 <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
                                     <Clock className="w-4 h-4 text-sage" />
                                     BOOKING REQUESTS
-                                    {pendingBookings.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{pendingBookings.length}</span>}
+                                    {pendingBookings.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-forest text-white text-[10px] font-black">{pendingBookings.length}</span>}
                                 </h2>
                                 {pendingBookings.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending booking approvals.</p> : (
                                     <div className="space-y-6">
@@ -549,7 +549,7 @@ export default async function AdminDashboard({
                                                     </div>
 
                                                     <div className="flex lg:flex-col gap-3 w-full lg:w-40 h-full justify-end lg:pt-2">
-                                                        <VerifyButton id={b.id} action="confirmBooking" label="APPROVE" className="flex-1 py-3 bg-charcoal text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest shadow-md" />
+                                                        <VerifyButton id={b.id} action="confirmBooking" label="APPROVE" className="flex-1 py-3 bg-forest text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest shadow-md" />
                                                         <RejectBookingButton id={b.id} className="flex-1 py-3 bg-red-50 text-red-600 text-[10px] font-black rounded-xl border border-red-100 hover:bg-red-100 transition-colors tracking-widest uppercase shadow-sm" />
                                                     </div>
                                                 </div>
@@ -564,7 +564,7 @@ export default async function AdminDashboard({
                                     <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
                                         <Wallet className="w-4 h-4 text-sage" />
                                         INSTRUCTOR PAYOUTS
-                                        {payoutRequests.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{payoutRequests.length}</span>}
+                                        {payoutRequests.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-forest text-white text-[10px] font-black">{payoutRequests.length}</span>}
                                     </h2>
                                     {payoutRequests.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending requests.</p> : (
                                         <div className="space-y-4">
@@ -576,7 +576,7 @@ export default async function AdminDashboard({
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
-                                                        <VerifyButton id={r.id} action="approvePayout" label="APPROVE" className="px-4 py-2 bg-charcoal text-white text-[10px] font-black rounded-xl shadow-sm" />
+                                                        <VerifyButton id={r.id} action="approvePayout" label="APPROVE" className="px-4 py-2 bg-forest text-white text-[10px] font-black rounded-xl shadow-sm" />
                                                     </div>
                                                 </div>
                                             ))}
@@ -588,7 +588,7 @@ export default async function AdminDashboard({
                                     <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
                                         <Wallet className="w-4 h-4 text-sage" />
                                         STUDIO PAYOUTS
-                                        {studioPayouts.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{studioPayouts.length}</span>}
+                                        {studioPayouts.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-forest text-white text-[10px] font-black">{studioPayouts.length}</span>}
                                     </h2>
                                     {studioPayouts.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending payouts.</p> : (
                                         <div className="space-y-4">
@@ -600,7 +600,7 @@ export default async function AdminDashboard({
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
-                                                        <VerifyButton id={r.id} action="approvePayout" label="APPROVE" className="px-4 py-2 bg-charcoal text-white text-[10px] font-black rounded-xl shadow-sm" />
+                                                        <VerifyButton id={r.id} action="approvePayout" label="APPROVE" className="px-4 py-2 bg-forest text-white text-[10px] font-black rounded-xl shadow-sm" />
                                                     </div>
                                                 </div>
                                             ))}
@@ -612,7 +612,7 @@ export default async function AdminDashboard({
                                     <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
                                         <Wallet className="w-4 h-4 text-sage" />
                                         CUSTOMER PAYOUTS
-                                        {customerPayouts.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{customerPayouts.length}</span>}
+                                        {customerPayouts.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-forest text-white text-[10px] font-black">{customerPayouts.length}</span>}
                                     </h2>
                                     {customerPayouts.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending customer breakouts.</p> : (
                                         <div className="space-y-4">
@@ -625,7 +625,7 @@ export default async function AdminDashboard({
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
-                                                        <VerifyButton id={r.id} action="approvePayout" label="APPROVE" className="px-4 py-2 bg-charcoal text-white text-[10px] font-black rounded-xl shadow-sm" />
+                                                        <VerifyButton id={r.id} action="approvePayout" label="APPROVE" className="px-4 py-2 bg-forest text-white text-[10px] font-black rounded-xl shadow-sm" />
                                                     </div>
                                                 </div>
                                             ))}
@@ -637,7 +637,7 @@ export default async function AdminDashboard({
                                     <h2 className="text-sm font-black tracking-[0.2em] text-charcoal flex items-center gap-3">
                                         <Wallet className="w-4 h-4 text-sage" />
                                         WALLET TOP-UPS
-                                        {pendingTopUps.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-charcoal text-white text-[10px] font-black">{pendingTopUps.length}</span>}
+                                        {pendingTopUps.length > 0 && <span className="flex items-center justify-center w-6 h-6 rounded-full bg-forest text-white text-[10px] font-black">{pendingTopUps.length}</span>}
                                     </h2>
                                     {pendingTopUps.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending top-ups.</p> : (
                                         <div className="space-y-4">
@@ -654,7 +654,7 @@ export default async function AdminDashboard({
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={t.id} action="rejectTopUp" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
-                                                        <VerifyButton id={t.id} action="approveTopUp" label="APPROVE" className="px-4 py-2 bg-charcoal text-white text-[10px] font-black rounded-xl shadow-sm" />
+                                                        <VerifyButton id={t.id} action="approveTopUp" label="APPROVE" className="px-4 py-2 bg-forest text-white text-[10px] font-black rounded-xl shadow-sm" />
                                                     </div>
                                                 </div>
                                             ))}
@@ -662,7 +662,7 @@ export default async function AdminDashboard({
                                     )}
                                 </div>
 
-                                <div className="glass-card p-8 bg-charcoal text-white border-0 shadow-2xl lg:col-span-2">
+                                <div className="glass-card p-8 bg-forest text-white border-0 shadow-2xl lg:col-span-2">
                                     <div className="flex items-center gap-4 mb-6">
                                         <div className="p-3 bg-white/10 rounded-2xl">
                                             <ShieldAlert className="w-6 h-6 text-rose-gold" />
@@ -703,7 +703,7 @@ export default async function AdminDashboard({
                                                         <p className="font-bold text-charcoal text-sm">{p.studios?.[0]?.name || p.full_name}</p>
                                                         <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest mt-1">{p.studios?.[0] ? 'Studio Owner' : 'Instructor'}</p>
                                                     </div>
-                                                    <VerifyButton id={p.id} action="reinstateStudio" label="REINSTATE ACCESS" className="w-full py-3 bg-charcoal text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest" />
+                                                    <VerifyButton id={p.id} action="reinstateStudio" label="REINSTATE ACCESS" className="w-full py-3 bg-forest text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest" />
                                                 </div>
                                             </div>
                                         ))}
@@ -743,7 +743,7 @@ export default async function AdminDashboard({
                                                 <td className="px-8 py-6">
                                                     <span className={clsx(
                                                         "inline-flex px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border",
-                                                        u.role === 'admin' ? "bg-charcoal text-white border-charcoal" :
+                                                        u.role === 'admin' ? "bg-forest text-white border-charcoal" :
                                                             u.role === 'instructor' ? "bg-sage/10 text-sage border-sage/20" :
                                                                 u.role === 'studio' ? "bg-rose-gold/10 text-rose-gold border-rose-gold/20" :
                                                                     "bg-alabaster text-charcoal/40 border-cream-100"
@@ -774,7 +774,7 @@ export default async function AdminDashboard({
                                                             label={u.is_suspended ? "REINSTATE" : "SUSPEND"}
                                                             className={clsx(
                                                                 "px-3 py-1.5 text-[8px] font-black rounded-lg transition-all",
-                                                                u.is_suspended ? "bg-charcoal text-white" : "bg-red-50 text-red-600 hover:bg-red-100"
+                                                                u.is_suspended ? "bg-forest text-white" : "bg-red-50 text-red-600 hover:bg-red-100"
                                                             )}
                                                         />
                                                     </div>
@@ -820,7 +820,7 @@ export default async function AdminDashboard({
                     </div>
                     <p className="text-charcoal/60 text-sm italic">"{err.message || 'An unexpected error occurred while loading the dashboard.'}"</p>
                     <div className="pt-4">
-                        <Link href="/admin" className="inline-block w-full py-4 bg-charcoal text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-[0.2em] shadow-xl text-center">
+                        <Link href="/admin" className="inline-block w-full py-4 bg-forest text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-[0.2em] shadow-xl text-center">
                             RESTART DASHBOARD
                         </Link>
                     </div>

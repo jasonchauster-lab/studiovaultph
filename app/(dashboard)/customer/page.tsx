@@ -441,7 +441,7 @@ export default async function CustomerDashboard({
                                             <div className="pt-2">
                                                 <Link
                                                     href={`/studios/${studio.id}`}
-                                                    className="block w-full text-center py-3 rounded-xl bg-burgundy text-white text-[11px] font-bold uppercase tracking-widest hover:bg-burgundy/90 transition-all shadow-sm"
+                                                    className="block w-full text-center py-3 rounded-xl bg-forest text-white text-[11px] font-bold uppercase tracking-widest hover:bg-burgundy/90 transition-all shadow-sm"
                                                 >
                                                     Book Now
                                                 </Link>

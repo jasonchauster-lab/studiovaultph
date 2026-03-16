@@ -34,7 +34,7 @@ export default function LandingPage() {
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="bg-burgundy text-white px-6 sm:px-8 py-3 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-tight"
+              className="bg-forest text-white px-6 sm:px-8 py-3 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-tight"
             >
               Sign Up
             </button>
@@ -73,7 +73,7 @@ export default function LandingPage() {
                 type="button"
                 onClick={() => setIsModalOpen(true)}
                 aria-label="Get Started Now - Sign up for an account"
-                className="group bg-burgundy text-white w-full sm:w-auto px-10 py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-110 transition-all flex items-center justify-center gap-4 shadow-tight"
+                className="group bg-forest text-white w-full sm:w-auto px-10 py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-110 transition-all flex items-center justify-center gap-4 shadow-tight"
               >
                 Get Started Now
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
@@ -117,7 +117,7 @@ export default function LandingPage() {
               />
               {/* Overlay card — bottom left */}
               <div className="absolute bottom-6 md:bottom-8 left-6 md:left-8 right-6 md:right-8 p-5 md:p-6 bg-white/95 backdrop-blur-sm border border-border-grey rounded-xl flex items-center gap-5 shadow-card animate-in slide-in-from-bottom-8 duration-1000 delay-700">
-                <div className="w-12 h-12 bg-burgundy rounded-xl flex items-center justify-center shadow-tight flex-shrink-0">
+                <div className="w-12 h-12 bg-forest rounded-xl flex items-center justify-center shadow-tight flex-shrink-0">
                   <Sparkles className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -206,7 +206,7 @@ export default function LandingPage() {
               </blockquote>
               <div className="flex flex-col items-center gap-4">
                 <p className="text-[10px] font-bold text-muted-burgundy uppercase tracking-[0.3em]">STUDIO VAULT PH FOUNDERS</p>
-                <div className="w-16 h-1 bg-burgundy rounded-full" />
+                <div className="w-16 h-1 bg-forest rounded-full" />
               </div>
             </div>
           </div>

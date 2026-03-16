@@ -99,7 +99,7 @@ export default async function CustomerBookingsPage() {
 
                 {/* Digital Entry Pass (For the next confirmed session) */}
                 {nextSession && (
-                    <div className="bg-charcoal-900 rounded-2xl p-8 text-cream-50 flex flex-col md:flex-row items-center justify-between shadow-xl">
+                    <div className="bg-forest rounded-2xl p-8 text-cream-50 flex flex-col md:flex-row items-center justify-between shadow-xl">
                         <div>
                             <div className="flex items-center gap-2 mb-2 text-charcoal-300 text-sm uppercase tracking-widest font-medium">
                                 <QrCode className="w-4 h-4" />
@@ -123,7 +123,7 @@ export default async function CustomerBookingsPage() {
                                 {getSlotDateTime(nextSession.slots?.date, nextSession.slots?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
                             </p>
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-charcoal-800 rounded-full flex items-center justify-center text-lg font-bold">
+                                <div className="w-10 h-10 bg-forest/80 rounded-full flex items-center justify-center text-lg font-bold">
                                     {(user.email?.[0] || 'U').toUpperCase()}
                                 </div>
                                 <div>

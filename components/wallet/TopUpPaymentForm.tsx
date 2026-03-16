@@ -88,7 +88,7 @@ export default function TopUpPaymentForm({ topUpId, amount }: TopUpPaymentFormPr
                 </p>
                 <button
                     onClick={() => router.push('/customer/wallet')}
-                    className="bg-charcoal-900 text-white px-6 py-2 rounded-lg font-medium hover:bg-charcoal-800 transition-colors"
+                    className="bg-forest text-white px-6 py-2 rounded-lg font-medium hover:brightness-110 transition-colors"
                 >
                     Back to Wallet
                 </button>
@@ -151,7 +151,7 @@ export default function TopUpPaymentForm({ topUpId, amount }: TopUpPaymentFormPr
             <button
                 type="submit"
                 disabled={!file || isUploading}
-                className="w-full py-4 bg-charcoal-900 text-white rounded-xl font-bold hover:bg-charcoal-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-charcoal-900/10 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-forest text-white rounded-xl font-bold hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-charcoal-900/10 flex items-center justify-center gap-2"
             >
                 {isUploading ? (
                     <>

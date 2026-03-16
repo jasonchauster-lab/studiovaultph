@@ -131,14 +131,14 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                             {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
                                 <button 
                                     onClick={() => setResetKey(prev => prev + 1)}
-                                    className="px-4 py-2 bg-charcoal text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-charcoal/80 transition-all shadow-sm"
+                                    className="px-4 py-2 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-charcoal/80 transition-all shadow-sm"
                                 >
                                     Clear Filters
                                 </button>
                             )}
                             <Link
                                 href="/studio"
-                                className="px-4 py-2 bg-burgundy text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-tight"
+                                className="px-4 py-2 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-tight"
                             >
                                 Add Availability Slot
                             </Link>
@@ -472,7 +472,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                         <div className="p-4 border-t border-border-grey">
                             <button
                                 onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }}
-                                className="w-full py-2.5 bg-burgundy text-white rounded-xl font-bold text-sm hover:brightness-110 transition-colors"
+                                className="w-full py-2.5 bg-forest text-white rounded-xl font-bold text-sm hover:brightness-110 transition-colors"
                             >
                                 Close
                             </button>
@@ -535,7 +535,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                             })()}
                             <button
                                 onClick={() => setSelectedClient(null)}
-                                className="w-full mt-4 py-3 bg-burgundy text-white rounded-xl font-bold hover:brightness-110 transition-colors"
+                                className="w-full mt-4 py-3 bg-forest text-white rounded-xl font-bold hover:brightness-110 transition-colors"
                             >
                                 Close
                             </button>

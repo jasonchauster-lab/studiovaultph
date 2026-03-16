@@ -214,7 +214,7 @@ export default function InstructorBookingWizard({
                         !isSameMonth(cloneDay, monthStart) ? "text-charcoal/10 pointer-events-none" : "",
                         isSameMonth(cloneDay, monthStart) && !hasSlots && !isPastDay && !isSelected ? "text-charcoal/40" : "",
                         isPastDay ? "text-charcoal/10 pointer-events-none opacity-40" : "",
-                        hasSlots && !isSelected ? "bg-white/40 text-charcoal font-bold hover:bg-white/60 cursor-pointer border border-white/80" : "",
+                        hasSlots && !isSelected ? "bg-off-white text-charcoal font-bold hover:bg-white cursor-pointer border border-border-grey" : "",
                         isSelected ? "bg-forest text-white font-bold shadow-md transform scale-105" : ""
                     )}
                     disabled={!hasSlots || isPastDay}
@@ -420,7 +420,7 @@ export default function InstructorBookingWizard({
                                         }
                                         router.push(`?${params.toString()}`, { scroll: false })
                                     }}
-                                    className="appearance-none bg-white/40 border-2 border-white/80 text-charcoal text-[11px] font-bold uppercase tracking-widest rounded-[14px] pl-11 pr-12 py-4 outline-none focus:ring-2 focus:ring-sage/20 focus:border-sage/40 w-full transition-all cursor-pointer shadow-tight hover:bg-white/60"
+                                    className="appearance-none bg-off-white border-2 border-border-grey text-charcoal text-[11px] font-bold uppercase tracking-widest rounded-[14px] pl-11 pr-12 py-4 outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 w-full transition-all cursor-pointer shadow-tight hover:bg-white"
                                 >
                                     <option value="">All Teaching Areas</option>
                                     {Array.from(new Set(processedAvailability.map(a => a.location_area).filter(Boolean))).sort().map(loc => (
@@ -433,7 +433,7 @@ export default function InstructorBookingWizard({
                     </div>
 
                     {/* Monthly Calendar View */}
-                    <div className="bg-white/30 backdrop-blur-md border border-white/80 rounded-[32px] p-6 sm:p-8 shadow-cloud max-w-sm mx-auto">
+                    <div className="bg-off-white border border-border-grey rounded-[32px] p-6 sm:p-8 shadow-cloud max-w-sm mx-auto">
                         <div className="flex items-center justify-between mb-8">
                             <button
                                 onClick={() => handleMonthChange(-1)}
@@ -496,7 +496,7 @@ export default function InstructorBookingWizard({
 
                             if (slots.length === 0) {
                                 return (
-                                    <div className="col-span-full text-center py-20 bg-white/20 rounded-[28px] border border-dashed border-white/60">
+                                    <div className="col-span-full text-center py-20 bg-off-white rounded-[28px] border border-dashed border-border-grey">
                                         <p className="text-[11px] font-bold text-charcoal/30 uppercase tracking-widest italic font-serif">
                                             No sessions available for this day.
                                         </p>
@@ -528,7 +528,7 @@ export default function InstructorBookingWizard({
                                 return (
                                     <div
                                         key={key}
-                                        className="p-6 rounded-[12px] border border-white/80 bg-white/40 backdrop-blur-[8px] text-left transition-all relative shadow-[0_10px_20px_rgba(0,0,0,0.03)] hover:shadow-cloud hover:bg-white/50"
+                                        className="p-6 rounded-[12px] border border-border-grey bg-white text-left transition-all relative shadow-tight hover:shadow-cloud"
                                     >
                                         <div className="font-serif text-[18px] sm:text-[20px] font-bold text-charcoal mb-4 flex flex-wrap items-baseline gap-2">
                                             <span className="whitespace-nowrap">{formatTo12Hour(slot.start_time)}</span>
@@ -883,7 +883,7 @@ export default function InstructorBookingWizard({
                                                     const total = (sessionFee + serviceFee) * quantity;
 
                                                     return (
-                                                        <div className="bg-charcoal text-white p-8 rounded-[32px] shadow-cloud-lg space-y-5 relative overflow-hidden">
+                                                        <div className="bg-forest text-white p-8 rounded-[32px] shadow-cloud-lg space-y-5 relative overflow-hidden">
                                                             <div className="absolute top-0 right-0 w-32 h-32 bg-sage/10 blur-[60px] rounded-full" />
 
                                                             <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">

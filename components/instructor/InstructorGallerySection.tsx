@@ -78,7 +78,7 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isUploading}
-                        className="flex items-center gap-3 bg-charcoal text-white px-8 py-4 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50"
+                        className="flex items-center gap-3 bg-forest text-white px-8 py-4 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50"
                     >
                         {isUploading ? (
                             <Loader2 className="w-4 h-4 animate-spin text-gold" />

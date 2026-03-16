@@ -316,7 +316,7 @@ export default function SupportDashboardClient() {
                                     <div key={msg.id} className={clsx("flex", isUser ? "justify-start" : "justify-end")}>
                                         <div className={clsx(
                                             "max-w-[70%] p-3 rounded-2xl text-sm shadow-sm",
-                                            isUser ? "bg-white border border-cream-200 text-charcoal-800 rounded-bl-none" : "bg-charcoal-900 text-cream-50 rounded-br-none"
+                                            isUser ? "bg-white border border-cream-200 text-charcoal-800 rounded-bl-none" : "bg-forest text-white rounded-br-none"
                                         )}>
                                             {msg.message}
                                         </div>
@@ -345,7 +345,7 @@ export default function SupportDashboardClient() {
                                 <button
                                     type="submit"
                                     disabled={!inputValue.trim() || isSending}
-                                    className="w-10 h-10 bg-charcoal-900 text-cream-50 rounded-lg flex items-center justify-center hover:bg-charcoal-800 disabled:opacity-50 transition-colors"
+                                    className="w-10 h-10 bg-forest text-white rounded-lg flex items-center justify-center hover:brightness-110 disabled:opacity-50 transition-colors"
                                 >
                                     {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                                 </button>

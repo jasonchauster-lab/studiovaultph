@@ -148,7 +148,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                     </div>
                     <div className="flex gap-6">
                         <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-charcoal" />
+                            <div className="w-2 h-2 rounded-full bg-forest" />
                             <span className="text-[9px] font-black text-charcoal/40 uppercase tracking-widest">Gross Yield</span>
                         </div>
                         <div className="flex items-center gap-2">

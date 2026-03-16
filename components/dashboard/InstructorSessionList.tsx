@@ -171,14 +171,14 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
                                 <button 
                                     onClick={() => setResetKey(prev => prev + 1)}
-                                    className="w-full sm:w-auto px-8 py-3 bg-charcoal text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-125 transition-all shadow-md active:scale-95"
+                                    className="w-full sm:w-auto px-8 py-3 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-125 transition-all shadow-md active:scale-95"
                                 >
                                     Clear Filters
                                 </button>
                             )}
                             <Link
                                 href="/instructor/schedule"
-                                className="w-full sm:w-auto px-8 py-3 bg-charcoal text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-md active:scale-95 text-center"
+                                className="w-full sm:w-auto px-8 py-3 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-md active:scale-95 text-center"
                             >
                                 Find a Studio / Add Slot
                             </Link>
@@ -425,7 +425,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                 revieweeId: studio?.owner_id || '',
                                                                 revieweeName: studio?.name || 'Studio'
                                                             })}
-                                                            className="h-8 bg-charcoal text-white px-4 rounded text-[8px] font-black uppercase tracking-widest hover:brightness-[1.2] transition-all shadow-sm active:scale-95"
+                                                            className="h-8 bg-forest text-white px-4 rounded text-[8px] font-black uppercase tracking-widest hover:brightness-[1.2] transition-all shadow-sm active:scale-95"
                                                         >
                                                             LEAVE FEEDBACK
                                                         </button>
@@ -464,7 +464,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                 revieweeId: studio?.owner_id || '',
                                                                 revieweeName: studio?.name || 'Studio'
                                                             })}
-                                                            className="w-full h-9 bg-charcoal text-white px-4 rounded-xl text-[8px] font-black uppercase tracking-widest hover:brightness-[1.2] transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                                                            className="w-full h-9 bg-forest text-white px-4 rounded-xl text-[8px] font-black uppercase tracking-widest hover:brightness-[1.2] transition-all shadow-sm active:scale-95 whitespace-nowrap"
                                                         >
                                                             LEAVE FEEDBACK
                                                         </button>
@@ -625,7 +625,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             </Link>
                             <button
                                 onClick={() => { setSelectedStudio(null); setStudioDetails(null) }}
-                                className="flex-1 py-2.5 bg-charcoal text-white rounded-xl font-bold text-sm hover:brightness-110 transition-all"
+                                className="flex-1 py-2.5 bg-forest text-white rounded-xl font-bold text-sm hover:brightness-110 transition-all"
                             >
                                 Close
                             </button>
@@ -693,7 +693,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
                         <button
                             onClick={() => setSelectedClient(null)}
-                            className="w-full py-6 bg-charcoal text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95"
+                            className="w-full py-6 bg-forest text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95"
                         >
                             CLOSE
                         </button>

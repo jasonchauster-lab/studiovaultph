@@ -441,7 +441,7 @@ export default function InstructorOnboardingForm() {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-4 px-6 bg-charcoal-900 text-white rounded-xl font-bold text-lg hover:bg-charcoal-800 active:scale-[0.99] transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:opacity-70 group"
+                    className="w-full py-4 px-6 bg-forest text-white rounded-xl font-bold text-lg hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:opacity-70 group"
                 >
                     {isSubmitting ? (
                         <>

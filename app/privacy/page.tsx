@@ -118,7 +118,7 @@ export default function PrivacyPolicy() {
             <p className="text-slate-600 text-[10px] font-bold uppercase tracking-[0.3em]">Questions regarding our policy?</p>
             <Link 
               href="/support"
-              className="inline-block bg-charcoal text-white px-10 py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight"
+              className="inline-block bg-forest text-white px-10 py-5 rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight"
             >
               Contact Support
             </Link>

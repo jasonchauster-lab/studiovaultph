@@ -36,7 +36,7 @@ export default function CompleteSessionButton({ bookingId }: CompleteSessionButt
         <button
             onClick={handleComplete}
             disabled={loading}
-            className="flex items-center gap-2 text-xs font-medium px-4 py-2 bg-charcoal-900 text-white rounded-lg hover:bg-black transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 text-xs font-medium px-4 py-2 bg-forest text-white rounded-lg hover:bg-black transition-colors disabled:opacity-50"
         >
             <CheckCircle className="w-4 h-4" />
             {loading ? 'Processing...' : 'Complete Session'}

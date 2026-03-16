@@ -220,7 +220,7 @@ export default function BookingSection({
                     disabled={!hasSlots || isPast}
                 >
                     <span className="leading-none">{formattedDate}</span>
-                    {hasSlots && !isSelected && <span className="w-1 h-1 bg-charcoal-500 rounded-full mt-1"></span>}
+                    {hasSlots && !isSelected && <span className="w-1 h-1 bg-forest/40 rounded-full mt-1"></span>}
                 </button>
             )
             day = addDays(day, 1)

@@ -348,7 +348,7 @@ export default function TopUpModal({ isOpen, onClose }: TopUpModalProps) {
                             {[1, 2, 3].map((s) => (
                                 <div
                                     key={s}
-                                    className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${step === s ? 'bg-burgundy w-10' :
+                                    className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${step === s ? 'bg-forest w-10' :
                                         step > s ? 'bg-burgundy/20 w-6' : 'bg-border-grey w-6'
                                         }`}
                                 />

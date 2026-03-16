@@ -262,7 +262,7 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
                                 type="submit"
                                 disabled={!inputValue.trim() || isSending}
                                 aria-label="Send Message"
-                                className="w-12 h-12 bg-charcoal text-white rounded-lg flex items-center justify-center hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-tight"
+                                className="w-12 h-12 bg-forest text-white rounded-lg flex items-center justify-center hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-tight"
                             >
                                 {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                             </button>
@@ -281,7 +281,7 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
             >
                 {isOpen ? <X className="w-7 h-7" /> : <MessageCircle className="w-7 h-7" />}
                 {!isOpen && unreadCount > 0 && (
-                    <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-lg bg-charcoal border-2 border-white text-[10px] font-bold text-white shadow-tight">
+                    <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-lg bg-forest border-2 border-white text-[10px] font-bold text-white shadow-tight">
                         <span className="sr-only">New messages: </span>
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>

@@ -89,7 +89,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                     {!showForm && (
                         <button
                             onClick={() => setShowForm(true)}
-                            className="bg-charcoal text-white px-8 py-4 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 w-full sm:w-auto"
+                            className="bg-forest text-white px-8 py-4 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 w-full sm:w-auto"
                         >
                             <span className="flex items-center justify-center gap-3">
                                 <Plus className="w-4 h-4 text-gold stroke-[3px]" />
@@ -182,7 +182,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="flex items-center gap-4 bg-charcoal text-white px-12 py-5 rounded-[2.5rem] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50"
+                                className="flex items-center gap-4 bg-forest text-white px-12 py-5 rounded-[2.5rem] text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50"
                             >
                                 {isSubmitting ? (
                                     <Loader2 className="w-4 h-4 animate-spin text-gold" />

@@ -204,7 +204,7 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
                     <button
                         onClick={handleGenerate}
                         disabled={isSubmitting}
-                        className="w-full py-5 bg-charcoal text-white rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
+                        className="w-full py-5 bg-forest text-white rounded-lg text-[10px] font-bold uppercase tracking-[0.3em] hover:brightness-[1.2] transition-all shadow-tight active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
                     >
                         {isSubmitting ? (
                             <>
