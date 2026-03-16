@@ -124,6 +124,31 @@ export async function GET(request: Request) {
             }
         }
 
+        // ── 2FA magic-link completion ─────────────────────────────────────────
+        // `next=2fa` is set by the login page when sending a post-password OTP link.
+        if (next === '2fa' && user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single()
+
+            const dashboard = getDashboard(profile?.role || '')
+            const response = buildRedirect(origin, request, dashboard)
+
+            // If the user ticked "Remember this device", a short-lived
+            // pending_otp_remember cookie was set before the email was sent.
+            const cookies = request.headers.get('cookie') || ''
+            if (cookies.includes('pending_otp_remember=1')) {
+                const maxAge = 14 * 24 * 60 * 60
+                response.cookies.set('otp_remembered', '1', { maxAge, path: '/', sameSite: 'lax' })
+                response.cookies.set('remember_me', '1', { maxAge, path: '/', sameSite: 'lax' })
+                response.cookies.set('pending_otp_remember', '', { maxAge: 0, path: '/' })
+            }
+
+            return response
+        }
+
         // ── Email-based auth (confirmation link, password reset, magic link) ──
         // If a referral code was embedded in the confirmation link, apply it now
         // — but only if the profile doesn't already have a referrer set.
@@ -148,7 +173,51 @@ export async function GET(request: Request) {
         return buildRedirect(origin, request, next)
     }
 
-    // No code present — fall back to login
+    // ── Magic-link / OTP flow (token_hash + type params) ─────────────────
+    // signInWithOtp sends the callback URL with ?token_hash=XXX&type=magiclink
+    // instead of ?code=XXX, so the PKCE block above is never entered.
+    const tokenHash = searchParams.get('token_hash')
+    const tokenType = searchParams.get('type') as 'magiclink' | 'email' | null
+
+    if (tokenHash && tokenType) {
+        const supabase = await createClient()
+        const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: tokenType,
+        })
+
+        if (error) {
+            console.error('Auth callback OTP verify error:', error.message)
+            return buildRedirect(origin, request, `/login?error=${encodeURIComponent(error.message)}`)
+        }
+
+        const user = data?.user
+
+        if (next === '2fa' && user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single()
+
+            const dashboard = getDashboard(profile?.role || '')
+            const response = buildRedirect(origin, request, dashboard)
+
+            const cookies = request.headers.get('cookie') || ''
+            if (cookies.includes('pending_otp_remember=1')) {
+                const maxAge = 14 * 24 * 60 * 60
+                response.cookies.set('otp_remembered', '1', { maxAge, path: '/', sameSite: 'lax' })
+                response.cookies.set('remember_me', '1', { maxAge, path: '/', sameSite: 'lax' })
+                response.cookies.set('pending_otp_remember', '', { maxAge: 0, path: '/' })
+            }
+
+            return response
+        }
+
+        return buildRedirect(origin, request, next)
+    }
+
+    // No code or token_hash present — fall back to login
     return buildRedirect(origin, request, '/login')
 }
 
