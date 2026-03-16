@@ -149,6 +149,31 @@ export async function GET(request: Request) {
             return response
         }
 
+        // ── Sign-up email confirmation → route to onboarding/dashboard ─────
+        // `next=confirm` is set by the sign-up form so new users land in the
+        // right place instead of the generic /verified page.
+        if (next === 'confirm' && user) {
+            // Apply referral code if present
+            if (ref) {
+                const { data: referrer } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('referral_code', ref.toUpperCase())
+                    .maybeSingle()
+                if (referrer && referrer.id !== user.id) {
+                    await supabase
+                        .from('profiles')
+                        .update({ referred_by: referrer.id })
+                        .eq('id', user.id)
+                        .is('referred_by', null)
+                }
+            }
+            // Route by the role they selected on sign-up (stored in user_metadata)
+            const role = user.user_metadata?.role as string | undefined
+            const onboardingPath = role ? `/${role}/onboarding` : '/welcome'
+            return buildRedirect(origin, request, onboardingPath)
+        }
+
         // ── Email-based auth (confirmation link, password reset, magic link) ──
         // If a referral code was embedded in the confirmation link, apply it now
         // — but only if the profile doesn't already have a referrer set.

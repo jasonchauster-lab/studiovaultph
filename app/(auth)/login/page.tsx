@@ -90,7 +90,7 @@ function LoginContent() {
                 email, password,
                 options: {
                     data: { full_name: fullName, email: email.toLowerCase(), role, date_of_birth: birthday, ...(refCode ? { referred_by_code: refCode } : {}) },
-                    emailRedirectTo: `${window.location.origin}/auth/callback?next=/verified${refCode ? '&ref=' + refCode : ''}`
+                    emailRedirectTo: `${window.location.origin}/auth/callback?next=confirm${refCode ? '&ref=' + refCode : ''}`
                 }
             })
             if (error) {
