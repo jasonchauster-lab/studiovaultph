@@ -543,7 +543,7 @@ export default function InstructorDashboardClient({
 
                         {selectedProfile.bio && (
                             <div className="bg-white/40 p-6 rounded-[2rem] border border-white/60 mb-6 relative z-10">
-                                <h4 className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">BIO</h4>
+                                <h4 className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.4em] mb-3">BIO</h4>
                                 <p className="text-[11px] text-charcoal/60 leading-relaxed italic uppercase tracking-wider">"{selectedProfile.bio}"</p>
                             </div>
                         )}
@@ -962,7 +962,7 @@ export default function InstructorDashboardClient({
                         <div className="space-y-6 mb-10">
                             {selectedStudio.description && (
                                 <div className="bg-off-white/50 p-6 rounded-2xl border border-border-grey/50">
-                                    <h4 className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">ABOUT THE STUDIO</h4>
+                                    <h4 className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.4em] mb-3">ABOUT THE STUDIO</h4>
                                     <p className="text-[11px] text-charcoal/70 leading-relaxed">{selectedStudio.description}</p>
                                 </div>
                             )}
@@ -971,7 +971,7 @@ export default function InstructorDashboardClient({
                                 <div className="flex items-center gap-4 p-4 bg-white border border-border-grey rounded-xl shadow-tight">
                                     <div className="w-10 h-10 rounded-lg bg-forest/5 flex items-center justify-center"><Box className="w-5 h-5 text-forest/40" /></div>
                                     <div>
-                                        <p className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.2em]">CONTACT INFO</p>
+                                        <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">CONTACT INFO</p>
                                         <p className="text-[11px] font-bold text-charcoal">{selectedStudio.email || 'No email provided'}</p>
                                         <p className="text-[11px] font-bold text-slate">{selectedStudio.phone || 'No phone provided'}</p>
                                     </div>
@@ -986,7 +986,7 @@ export default function InstructorDashboardClient({
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-lg bg-forest/5 flex items-center justify-center"><MapPin className="w-5 h-5 text-forest/40" /></div>
                                             <div>
-                                                <p className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.2em]">LOCATION</p>
+                                                <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">LOCATION</p>
                                                 <p className="text-[11px] font-bold text-charcoal group-hover:text-forest transition-colors">Open in Google Maps</p>
                                             </div>
                                         </div>

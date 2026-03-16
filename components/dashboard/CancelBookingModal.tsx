@@ -80,7 +80,7 @@ export default function CancelBookingModal({
                     )}
 
                     <div className="space-y-3">
-                        <label className="block text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em]">
+                        <label className="block text-[9px] font-black text-charcoal/40 uppercase tracking-[0.4em]">
                             Cancellation Reason <span className="text-red-300">*</span>
                         </label>
                         <textarea

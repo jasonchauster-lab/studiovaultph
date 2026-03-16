@@ -40,13 +40,13 @@ export default async function InstructorProfilePage() {
                 <div>
                     <Link
                         href="/instructor"
-                        className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/20 hover:text-gold uppercase tracking-[0.3em] transition-all mb-6 group"
+                        className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/40 hover:text-gold uppercase tracking-[0.3em] transition-all mb-6 group"
                     >
                         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                         BACK TO DASHBOARD
                     </Link>
                     <h1 className="text-2xl sm:text-4xl font-serif text-charcoal tracking-tighter mb-2">My Profile</h1>
-                    <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Manage your public instructor profile, gallery, and credentials.</p>
+                    <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.4em]">Manage your public instructor profile, gallery, and credentials.</p>
                 </div>
 
                 {/* Contact Info & Bio Section */}

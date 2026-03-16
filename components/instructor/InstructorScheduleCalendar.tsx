@@ -688,7 +688,7 @@ export default function InstructorScheduleCalendar({
                                                                             className={clsx(
                                                                                 "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-2 py-1 group/slot flex flex-col justify-center shadow-tight",
                                                                                 isPastCell
-                                                                                    ? "bg-off-white border-border-grey text-slate"
+                                                                                    ? "bg-white border-border-grey text-slate"
                                                                                     : "bg-warm-stone border-border-grey text-charcoal",
                                                                                 duration < 45 && "py-1 px-2 justify-center"
                                                                             )}
@@ -722,7 +722,7 @@ export default function InstructorScheduleCalendar({
 
                                                                                     <div className="flex flex-wrap items-center gap-1 overflow-hidden">
                                                                                         {locations.map((loc, idx) => (
-                                                                                            <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell ? "text-slate border-border-grey bg-white/50" : "text-charcoal border-charcoal/20 bg-buttermilk/10")}>
+                                                                                            <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell ? "text-slate border-border-grey bg-off-white" : "text-charcoal border-charcoal/20 bg-buttermilk/10")}>
                                                                                                 <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-slate/40" : "text-charcoal/40")} />
                                                                                                 <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || loc || 'Studio'}</span>
                                                                                             </div>
@@ -1590,7 +1590,7 @@ export default function InstructorScheduleCalendar({
 
                         {selectedProfile.bio && (
                             <div className="bg-white/40 p-6 rounded-[2rem] border border-white/60 mb-6 relative z-10">
-                                <h4 className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">BIO</h4>
+                                <h4 className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.4em] mb-3">BIO</h4>
                                 <p className="text-[11px] text-charcoal/60 leading-relaxed italic uppercase tracking-wider">"{selectedProfile.bio}"</p>
                             </div>
                         )}
@@ -1646,7 +1646,7 @@ export default function InstructorScheduleCalendar({
                         <div className="space-y-6 mb-10">
                             {selectedStudio.description && (
                                 <div className="bg-off-white/50 p-6 rounded-2xl border border-border-grey/50">
-                                    <h4 className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-3">ABOUT THE STUDIO</h4>
+                                    <h4 className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.4em] mb-3">ABOUT THE STUDIO</h4>
                                     <p className="text-[11px] text-charcoal/70 leading-relaxed">{selectedStudio.description}</p>
                                 </div>
                             )}
@@ -1655,7 +1655,7 @@ export default function InstructorScheduleCalendar({
                                 <div className="flex items-center gap-4 p-4 bg-white border border-border-grey rounded-xl shadow-tight">
                                     <div className="w-10 h-10 rounded-lg bg-forest/5 flex items-center justify-center"><Clock className="w-5 h-5 text-forest/40" /></div>
                                     <div>
-                                        <p className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.2em]">CONTACT INFO</p>
+                                        <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">CONTACT INFO</p>
                                         <p className="text-[11px] font-bold text-charcoal">{selectedStudio.email || 'No email provided'}</p>
                                         <p className="text-[11px] font-bold text-slate">{selectedStudio.phone || 'No phone provided'}</p>
                                     </div>
@@ -1670,7 +1670,7 @@ export default function InstructorScheduleCalendar({
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-lg bg-forest/5 flex items-center justify-center"><MapPin className="w-5 h-5 text-forest/40" /></div>
                                             <div>
-                                                <p className="text-[9px] font-black text-charcoal/20 uppercase tracking-[0.2em]">LOCATION</p>
+                                                <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">LOCATION</p>
                                                 <p className="text-[11px] font-bold text-charcoal group-hover:text-forest transition-colors">Open in Google Maps</p>
                                             </div>
                                         </div>

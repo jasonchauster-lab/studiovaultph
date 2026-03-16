@@ -84,7 +84,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                             <Award className="w-5 h-5 sm:w-6 sm:h-6 text-gold" />
                             <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter">Accreditations</h2>
                         </div>
-                        <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Verified Teaching Credentials & Lineage</p>
+                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.4em]">Verified Teaching Credentials & Lineage</p>
                     </div>
                     {!showForm && (
                         <button
@@ -103,7 +103,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                     <form onSubmit={handleSubmit} className="bg-white/40 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/60 space-y-10 mb-12 animate-in slide-in-from-top-4 duration-700 shadow-sm">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             <div>
-                                <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-4 ml-6">Certification Body</label>
+                                <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-4 ml-6">Certification Body</label>
                                 <select
                                     name="certificationBody"
                                     required
@@ -120,7 +120,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black text-charcoal/20 uppercase tracking-[0.3em] mb-4 ml-6">Credential Proof (PDF/IMG)</label>
+                                <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-4 ml-6">Credential Proof (PDF/IMG)</label>
                                 <input
                                     type="file"
                                     name="certificateFile"
@@ -154,7 +154,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
 
                         {previewUrl && (
                             <div className="bg-white/40 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/60 inline-block shadow-sm">
-                                <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em] mb-6">Verification Preview</p>
+                                <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.4em] mb-6">Verification Preview</p>
                                 <div className="w-48 h-48 rounded-[20px] overflow-hidden shadow-cloud bg-alabaster/50 border border-white/60">
                                     <img src={previewUrl} alt="Certificate preview" className="w-full h-full object-cover" />
                                 </div>
@@ -199,7 +199,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                     {certifications.length === 0 ? (
                         <div className="col-span-2 py-24 text-center glass-card border-dashed">
                             <Award className="w-16 h-16 text-charcoal/5 mx-auto mb-6" />
-                            <p className="text-charcoal/20 text-[10px] font-black uppercase tracking-[0.4em] italic">Zero accreditations on record</p>
+                            <p className="text-charcoal/40 text-[10px] font-black uppercase tracking-[0.4em] italic">Zero accreditations on record</p>
                         </div>
                     ) : (
                         certifications.map((cert) => (
@@ -212,20 +212,20 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                     <div className="flex-1 text-center sm:text-left">
                                         <h4 className="font-serif text-charcoal text-xl sm:text-2xl tracking-tighter mb-2">{cert.certification_body}</h4>
                                         <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 sm:gap-6">
-                                            <div className="flex items-center gap-2 text-[10px] font-black text-charcoal/20 uppercase tracking-[0.25em]">
+                                            <div className="flex items-center gap-2 text-[10px] font-black text-charcoal/40 uppercase tracking-[0.25em]">
                                                 <FileText className="w-4 h-4 opacity-30" />
                                                 SUBMITTED
                                             </div>
                                             <div className={clsx(
-                                                "flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.3em] px-4 py-1.5 rounded-full border transition-all duration-700 shadow-sm",
+                                                "flex items-center gap-2.5 text-[9px] font-black uppercase tracking-[0.3em] px-5 py-2 rounded-full border transition-all duration-700 shadow-sm whitespace-nowrap",
                                                 cert.verified
-                                                    ? 'bg-sage text-charcoal border-white/60'
+                                                    ? 'bg-sage text-white border-white/20'
                                                     : 'bg-gold/10 text-gold border-gold/20'
                                             )}>
                                                 {cert.verified ? (
-                                                    <><CheckCircle className="w-3.5 h-3.5" /> VERIFIED</>
+                                                    <><CheckCircle className="w-4 h-4" /> VERIFIED</>
                                                 ) : (
-                                                    <><Clock className="w-3.5 h-3.5" /> PENDING</>
+                                                    <><Clock className="w-4 h-4" /> PENDING</>
                                                 )}
                                             </div>
                                         </div>

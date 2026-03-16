@@ -84,7 +84,7 @@ export default function InstructorEarningsClient({
                 <div className="relative w-full sm:w-auto px-4 sm:px-0">
                     <Link
                         href="/instructor"
-                        className="hidden sm:inline-flex items-center gap-3 text-[10px] font-black text-charcoal/20 hover:text-gold uppercase tracking-[0.3em] transition-all mb-8 group"
+                        className="hidden sm:inline-flex items-center gap-3 text-[10px] font-black text-charcoal/40 hover:text-gold uppercase tracking-[0.3em] transition-all mb-8 group"
                     >
                         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                         BACK TO DASHBOARD
@@ -329,7 +329,7 @@ export default function InstructorEarningsClient({
                                             <div className="p-10 bg-white/40 rounded-full border border-white/60 mb-8 shadow-sm group-hover:scale-110 transition-transform duration-700">
                                                 <Wallet className="w-12 h-12 text-charcoal/5" />
                                             </div>
-                                            <p className="text-charcoal/20 font-black uppercase tracking-[0.4em] italic">No transaction records detected in the vault</p>
+                                            <p className="text-charcoal/40 font-black uppercase tracking-[0.4em] italic">No transaction records detected in the vault</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -378,7 +378,7 @@ export default function InstructorEarningsClient({
                             ))
                         ) : (
                             <div className="px-10 py-20 text-center">
-                                <p className="text-charcoal/20 font-black uppercase tracking-[0.2em] italic text-[10px]">No transaction records found</p>
+                                <p className="text-charcoal/40 font-black uppercase tracking-[0.2em] italic text-[10px]">No transaction records found</p>
                             </div>
                         )}
                     </div>

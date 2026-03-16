@@ -73,7 +73,7 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
                             <Camera className="w-6 h-6 text-gold" />
                             <h2 className="text-3xl font-serif text-charcoal tracking-tighter">Teaching Gallery</h2>
                         </div>
-                        <p className="text-[10px] font-black text-charcoal/20 uppercase tracking-[0.4em]">Visual Documentation of Movement Sequences</p>
+                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.4em]">Visual Documentation of Movement Sequences</p>
                     </div>
                     <button
                         onClick={() => fileInputRef.current?.click()}
@@ -110,7 +110,7 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
                         <div className="p-6 bg-white/60 rounded-full mb-6 group-hover:scale-110 transition-transform duration-700 shadow-sm">
                             <ImageIcon className="w-12 h-12 text-charcoal/5" />
                         </div>
-                        <p className="text-charcoal/20 text-[10px] font-black uppercase tracking-[0.4em] italic">No visual records captured yet</p>
+                        <p className="text-charcoal/40 text-[10px] font-black uppercase tracking-[0.4em] italic">No visual records captured yet</p>
                     </div>
                 ) : (
                     <div className="relative group/gallery">

@@ -216,8 +216,7 @@ h6 {
 
   /* Walking Vinnie — Completed / Verified */
   .status-pill-green {
-    background: var(--walking-vinnie);
-    @apply text-burgundy border-burgundy/10;
+    @apply bg-green-50 text-green-700 border-green-100;
   }
 
   .status-pill-yellow {
