@@ -239,7 +239,7 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                                         )}
                                     </div>
                                     <div className="shrink-0 text-right">
-                                        <span className="text-[11px] font-bold text-[#43302E] tracking-tight">
+                                        <span className="text-[11px] font-bold text-charcoal tracking-tight">
                                             {tx.amount > 0 ? '+' : ''}₱{Math.abs(tx.amount).toLocaleString()}
                                         </span>
                                         {tx.status && (

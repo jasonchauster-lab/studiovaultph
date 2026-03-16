@@ -116,7 +116,7 @@ export default function InstructorEarningsClient({
                         ) : (
                             <Link
                                 href="/instructor/payout"
-                                className="h-12 sm:h-14 w-full sm:w-[180px] bg-charcoal text-white px-10 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-125 transition-all shadow-tight active:scale-95 whitespace-nowrap"
+                                className="h-12 sm:h-14 w-full sm:w-[180px] bg-forest text-white px-10 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-110 transition-all shadow-tight active:scale-95 whitespace-nowrap"
                             >
                                 <Wallet className="w-4 h-4 text-white" />
                                 CASH OUT

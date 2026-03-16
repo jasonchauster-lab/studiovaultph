@@ -150,7 +150,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest shrink-0 mt-1 sm:mt-1.5" />
                         <div className="flex flex-col justify-center">
                             <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter leading-tight">My Sessions</h2>
-                            <div className="text-[8px] sm:text-[9px] font-black text-[#43302E]/40 uppercase tracking-[0.3em] mt-1">{activeBookings.length} SESSIONS FOUND</div>
+                            <div className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.3em] mt-1">{activeBookings.length} SESSIONS FOUND</div>
                         </div>
                     </div>
                 </div>
