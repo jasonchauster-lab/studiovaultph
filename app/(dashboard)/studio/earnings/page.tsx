@@ -93,15 +93,15 @@ export default async function EarningsPage({
     }
 
     return (
-        <div className="min-h-screen bg-cream-50/30 p-4 sm:p-8 selection:bg-forest/10 selection:text-forest">
-            <div className="max-w-7xl mx-auto space-y-10">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-700 ease-out">
+        <div className="min-h-screen bg-cream-50/30 px-4 py-6 sm:p-8 selection:bg-forest/10 selection:text-forest">
+            <div className="max-w-7xl mx-auto space-y-6 sm:space-y-10">
+                <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-700 ease-out">
                     <div>
-                        <h1 className="text-4xl font-serif text-charcoal-900 mb-2 tracking-tight">Earnings & Payouts</h1>
-                        <p className="text-charcoal-600/80 font-medium">Manage your studio income, track withdrawals, and monitor your wallet balance.</p>
+                        <h1 className="text-3xl sm:text-4xl font-serif text-charcoal-900 mb-1 tracking-tight">Earnings &amp; Payouts</h1>
+                        <p className="text-charcoal-600/80 font-medium text-sm sm:text-base">Manage your studio income, track withdrawals, and monitor your wallet balance.</p>
                     </div>
                     {transactions && (
-                        <div className="hover:scale-105 transition-transform duration-300">
+                        <div className="hover:scale-105 transition-transform duration-300 sm:self-start">
                             <ExportCsvButton data={transactions} filename="studio-earnings" />
                         </div>
                     )}

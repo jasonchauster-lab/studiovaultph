@@ -57,41 +57,39 @@ export default function InstructorStatCards({ stats, hasPendingPayout }: Instruc
         <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
                 {cardData.map((card, index) => (
-                    <div key={index} className="earth-card p-5 group relative overflow-hidden transition-all duration-500 hover:-translate-y-1.5 shadow-tight border border-border-grey/50 bg-white">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-off-white/30 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none group-hover:bg-off-white/50 transition-colors" />
+                    <div key={index} className="earth-card p-4 sm:p-6 group relative overflow-hidden transition-all duration-500 hover:-translate-y-1 shadow-tight border border-border-grey/40 bg-white/60 backdrop-blur-sm">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none group-hover:bg-forest/10 transition-colors" />
     
-                        <div className="flex justify-between items-start mb-6 relative z-10">
+                        <div className="flex justify-between items-start mb-5 relative z-10">
                             <div className={clsx(
-                                "p-3 rounded-xl group-hover:scale-110 transition-all duration-500 border border-border-grey shadow-tight bg-white",
+                                "p-2.5 rounded-xl group-hover:scale-105 transition-all duration-500 border border-border-grey/40 shadow-sm bg-white/40",
                                 card.bgIcon
                             )}>
                                 <card.icon className={clsx("w-4 h-4", card.iconColor)} />
                             </div>
                             <span className={clsx(
-                                "text-[9px] font-black uppercase tracking-[0.2em] px-3.5 py-1.5 rounded-full border shadow-tight transition-colors",
-                                card.label === 'Available Balance' && hasPendingPayout ? 'bg-[#FFF1B5] text-burgundy border-burgundy/10' :
-                                card.label === 'Available Balance' ? 'bg-sage/10 text-sage border-sage/20' :
-                                card.label === 'Pending Earnings' ? 'bg-sage/10 text-sage border-sage/20' :
-                                'bg-white text-charcoal/50 border-border-grey'
+                                "text-[9px] font-black uppercase tracking-[0.3em] px-3 py-1.5 rounded-lg border shadow-sm transition-all",
+                                card.label === 'Available Balance' && hasPendingPayout ? 'bg-amber-50 text-amber-900 border-amber-200' :
+                                card.label === 'Available Balance' ? 'bg-sage/5 text-forest border-forest/10' :
+                                card.label === 'Pending Earnings' ? 'bg-sage/5 text-forest border-forest/10' :
+                                'bg-white/40 text-charcoal/40 border-border-grey/50'
                             )}>
                                 {card.label === 'Available Balance' && hasPendingPayout ? 'PAYOUT PENDING' : card.trend}
                             </span>
                         </div>
-                        <div className="relative z-10">
-                            <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em] mb-3">{card.label}</p>
-                            <div className="flex items-baseline gap-1">
-                                <h3 className="text-3xl sm:text-4xl font-bold font-serif text-charcoal tracking-tighter">{card.value}</h3>
-                            </div>
+                        <div className="relative z-10 space-y-1">
+                            <p className="text-[10px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.4em] leading-tight mb-2">{card.label}</p>
+                            <h3 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate leading-none">{card.value}</h3>
                         </div>
     
                         {card.hasAction && (
-                            <div className="mt-6 pt-5 border-t border-border-grey/60 relative z-10">
+                            <div className="mt-6 pt-5 border-t border-border-grey/40 relative z-10">
                                 <Link
                                     href="/instructor/payout"
-                                    className="w-full h-10 bg-forest text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2.5 hover:brightness-110 transition-all shadow-tight active:scale-95"
+                                    className="w-full h-11 bg-forest text-white rounded-xl text-[9px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2.5 hover:brightness-110 transition-all shadow-tight active:scale-95"
                                 >
-                                    <ArrowUpRight className="w-3.5 h-3.5 text-buttermilk stroke-[3px]" />
-                                    REQUEST PAYOUT
+                                    <ArrowUpRight className="w-4 h-4 text-white/60 stroke-[3px]" />
+                                    CASH OUT
                                 </Link>
                             </div>
                         )}

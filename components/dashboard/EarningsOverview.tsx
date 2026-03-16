@@ -75,7 +75,131 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                 </div>
             )}
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {/* Mobile: 2-col summary cards row */}
+            <div className="grid grid-cols-2 gap-3 sm:hidden">
+                {/* Gross Earnings */}
+                <div className="group bg-white p-3.5 rounded-2xl border border-cream-200 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2.5">
+                        <div className="p-1.5 rounded-lg bg-charcoal/5">
+                            <TrendingUp className="w-3.5 h-3.5 text-charcoal/50" />
+                        </div>
+                    </div>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-charcoal/35 mb-1">Gross Earnings</p>
+                    <h3 className="text-xl font-black text-charcoal tracking-tight">₱{summary.totalEarnings.toLocaleString()}</h3>
+                </div>
+
+                {/* Cancellation Comp */}
+                <div className="group bg-white p-3.5 rounded-2xl border border-cream-200 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2.5">
+                        <div className="p-1.5 rounded-lg bg-green-50">
+                            <TrendingUp className="w-3.5 h-3.5 text-green-600" />
+                        </div>
+                    </div>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-charcoal/35 mb-1 leading-tight">Cancel Comp.</p>
+                    <h3 className="text-xl font-black text-green-600 tracking-tight">₱{summary.totalCompensation.toLocaleString()}</h3>
+                </div>
+
+                {/* Penalty */}
+                <div className="group bg-white p-3.5 rounded-2xl border border-cream-200 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2.5">
+                        <div className="p-1.5 rounded-lg bg-red-50">
+                            <TrendingUp className="w-3.5 h-3.5 text-red-500" style={{transform:'rotate(180deg)'}} />
+                        </div>
+                    </div>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-charcoal/35 mb-1">Penalty</p>
+                    <h3 className="text-xl font-black text-red-500 tracking-tight">-₱{summary.totalPenalty.toLocaleString()}</h3>
+                </div>
+
+                {/* Net Earnings */}
+                <div className="group bg-white p-3.5 rounded-2xl border-2 border-forest/20 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-1 bg-forest/5 rounded-bl-lg">
+                        <ShieldCheck className="w-3 h-3 text-forest/30" />
+                    </div>
+                    <div className="flex items-center gap-2 mb-2.5">
+                        <div className="p-1.5 rounded-lg bg-forest/10">
+                            <TrendingUp className="w-3.5 h-3.5 text-forest" />
+                        </div>
+                    </div>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-forest/50 mb-1">Net Earnings</p>
+                    <h3 className="text-xl font-black text-charcoal tracking-tight">₱{summary.netEarnings.toLocaleString()}</h3>
+                </div>
+            </div>
+
+            {/* Mobile: Available Balance — full width hero card */}
+            <div className="sm:hidden group p-0.5 rounded-2xl shadow-lg bg-gradient-to-br from-[#BC926E] via-[#A67B5B] to-[#8E6548] overflow-hidden">
+                <div className="p-4 h-full flex flex-col relative">
+                    <div className="absolute -right-4 -bottom-4 opacity-10">
+                        <Wallet className="w-28 h-28 text-white" />
+                    </div>
+                    <div className="flex justify-between items-center mb-3 relative z-10">
+                        <div className="flex items-center gap-2">
+                            <div className="p-2 rounded-xl bg-white/20 backdrop-blur-md">
+                                <Wallet className="w-4 h-4 text-white" />
+                            </div>
+                            <button
+                                onClick={() => setShowInfoModal(true)}
+                                className="text-white/60 hover:text-white transition-colors"
+                                title="Wallet Rules"
+                            >
+                                <Info className="w-4 h-4" />
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setShowTopUpModal(true)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-white/20"
+                            >
+                                <ArrowUpRight className="w-3 h-3" />
+                                Top-Up
+                            </button>
+                            <PayoutRequestModal
+                                studioId={studioId}
+                                availableBalance={summary.availableBalance}
+                                payoutApprovalStatus={summary.payoutApprovalStatus}
+                            />
+                        </div>
+                    </div>
+                    <div className="relative z-10">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-1">Available to Withdraw</p>
+                        <h3 className="text-3xl font-black text-white drop-shadow-sm tracking-tight">₱{summary.availableBalance.toLocaleString()}</h3>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile: Paid Out + Security Hold row */}
+            <div className="grid grid-cols-2 gap-3 sm:hidden">
+                <div className="group bg-white p-3.5 rounded-2xl border border-cream-200 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2.5">
+                        <div className="p-1.5 rounded-lg bg-charcoal/5">
+                            <CreditCard className="w-3.5 h-3.5 text-charcoal/50" />
+                        </div>
+                    </div>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-charcoal/35 mb-1">Paid Out</p>
+                    <h3 className="text-xl font-black text-charcoal tracking-tight">₱{summary.totalPaidOut.toLocaleString()}</h3>
+                    {summary.pendingPayouts > 0 && (
+                        <div className="flex items-center gap-1 mt-1.5 px-1.5 py-0.5 bg-orange-50 rounded-full w-fit">
+                            <Clock className="w-2 h-2 text-orange-500" />
+                            <span className="text-[8px] font-black uppercase text-orange-600">₱{summary.pendingPayouts.toLocaleString()} pending</span>
+                        </div>
+                    )}
+                </div>
+                <div className="group bg-white p-3.5 rounded-2xl border border-cream-200 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2.5">
+                        <div className="p-1.5 rounded-lg bg-charcoal/5">
+                            <Clock className="w-3.5 h-3.5 text-charcoal/50" />
+                        </div>
+                    </div>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-charcoal/35 mb-1">Security Hold</p>
+                    <h3 className="text-xl font-black text-charcoal tracking-tight">₱{summary.pendingBalance.toLocaleString()}</h3>
+                    <p className="text-[8px] font-black uppercase text-charcoal/30 mt-1 flex items-center gap-1">
+                        <ShieldCheck className="w-2.5 h-2.5" />
+                        24h hold
+                    </p>
+                </div>
+            </div>
+
+            {/* Desktop: original grid layout */}
+            <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {/* Gross Earnings Card */}
                 <div className="group bg-white p-3 sm:p-4 rounded-2xl border border-cream-200 shadow-tight hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                     <div className="flex justify-between items-start mb-2">
@@ -83,8 +207,8 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                             <TrendingUp className="w-4 h-4 text-charcoal/60" />
                         </div>
                     </div>
-                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Gross Earnings</p>
-                    <h3 className="text-lg sm:text-2xl font-bold text-charcoal">₱{summary.totalEarnings.toLocaleString()}</h3>
+                    <p className="text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Gross Earnings</p>
+                    <h3 className="text-2xl font-bold text-charcoal">₱{summary.totalEarnings.toLocaleString()}</h3>
                 </div>
 
                 {/* Compensation Card */}
@@ -94,8 +218,8 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                             <TrendingUp className="w-4 h-4 text-green-600" />
                         </div>
                     </div>
-                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1 leading-tight">Cancellation Comp.</p>
-                    <h3 className="text-lg sm:text-2xl font-bold text-green-600">₱{summary.totalCompensation.toLocaleString()}</h3>
+                    <p className="text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1 leading-tight">Cancellation Comp.</p>
+                    <h3 className="text-2xl font-bold text-green-600">₱{summary.totalCompensation.toLocaleString()}</h3>
                 </div>
 
                 {/* Penalty Card */}
@@ -105,8 +229,8 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                             <TrendingUp className="w-4 h-4 text-red-600" transform="rotate(180)" />
                         </div>
                     </div>
-                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1 leading-tight">Penalty</p>
-                    <h3 className="text-lg sm:text-2xl font-bold text-red-600">-₱{summary.totalPenalty.toLocaleString()}</h3>
+                    <p className="text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1 leading-tight">Penalty</p>
+                    <h3 className="text-2xl font-bold text-red-600">-₱{summary.totalPenalty.toLocaleString()}</h3>
                 </div>
 
                 {/* Net Earnings Card */}
@@ -119,14 +243,13 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                             <TrendingUp className="w-4 h-4 text-forest" />
                         </div>
                     </div>
-                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-forest/60 mb-1">Net Earnings</p>
-                    <h3 className="text-lg sm:text-2xl font-bold text-charcoal">₱{summary.netEarnings.toLocaleString()}</h3>
+                    <p className="text-xs font-bold uppercase tracking-widest text-forest/60 mb-1">Net Earnings</p>
+                    <h3 className="text-2xl font-bold text-charcoal">₱{summary.netEarnings.toLocaleString()}</h3>
                 </div>
 
                 {/* Available Balance Card */}
                 <div className="group p-0.5 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-gradient-to-br from-[#BC926E] via-[#A67B5B] to-[#8E6548] overflow-hidden col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-1">
                     <div className="p-3 sm:p-4 h-full flex flex-col justify-between relative">
-                        {/* Background subtle decoration */}
                         <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
                             <Wallet className="w-24 h-24 text-white" />
                         </div>
@@ -160,8 +283,8 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                                     </button>
                                 </div>
                             </div>
-                            <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/70 mb-1">Available to Withdraw</p>
-                            <h3 className="text-xl sm:text-3xl font-black text-white drop-shadow-sm tracking-tight">₱{summary.availableBalance.toLocaleString()}</h3>
+                            <p className="text-xs font-black uppercase tracking-widest text-white/70 mb-1">Available to Withdraw</p>
+                            <h3 className="text-3xl font-black text-white drop-shadow-sm tracking-tight">₱{summary.availableBalance.toLocaleString()}</h3>
                         </div>
                     </div>
                 </div>
@@ -173,8 +296,8 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                             <CreditCard className="w-4 h-4 text-charcoal/60" />
                         </div>
                     </div>
-                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Paid Out</p>
-                    <h3 className="text-lg sm:text-2xl font-bold text-charcoal">₱{summary.totalPaidOut.toLocaleString()}</h3>
+                    <p className="text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Paid Out</p>
+                    <h3 className="text-2xl font-bold text-charcoal">₱{summary.totalPaidOut.toLocaleString()}</h3>
                     {summary.pendingPayouts > 0 && (
                         <div className="flex items-center gap-1.5 mt-2 px-2 py-0.5 bg-orange-50 rounded-full w-fit">
                             <Clock className="w-2.5 h-2.5 text-orange-500" />
@@ -192,8 +315,8 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                             <Clock className="w-4 h-4 text-charcoal/60" />
                         </div>
                     </div>
-                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Security Hold</p>
-                    <h3 className="text-lg sm:text-2xl font-bold text-charcoal">₱{summary.pendingBalance.toLocaleString()}</h3>
+                    <p className="text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Security Hold</p>
+                    <h3 className="text-2xl font-bold text-charcoal">₱{summary.pendingBalance.toLocaleString()}</h3>
                     <p className="text-[9px] font-bold uppercase text-charcoal/40 mt-1 flex items-center gap-1">
                         <ShieldCheck className="w-2.5 h-2.5" />
                         24h hold period

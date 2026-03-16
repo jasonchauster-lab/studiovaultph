@@ -198,12 +198,12 @@ export default async function StudioDashboard(props: {
         <div className="pt-24 md:pt-12 space-y-12 pb-20">
             <div className="max-w-7xl mx-auto space-y-12">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
-                    <div>
-                        <h1 className="text-4xl sm:text-6xl font-serif font-black text-charcoal tracking-tightest mb-6">Studio Dashboard</h1>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 sm:gap-10">
+                    <div className="w-full">
+                        <h1 className="text-3xl sm:text-6xl font-serif font-black text-charcoal tracking-tightest mb-4 sm:mb-6">Studio Dashboard</h1>
                         {myStudio && (
-                            <div className="flex items-center gap-6 mt-8">
-                                <div className="w-16 h-16 rounded-[24px] overflow-hidden border-2 border-white shadow-cloud scale-110 ring-1 ring-border-grey/10">
+                            <div className="flex items-center gap-4 sm:gap-6 mt-6 sm:mt-8">
+                                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-[20px] sm:rounded-[24px] overflow-hidden border-2 border-white shadow-cloud scale-100 sm:scale-110 ring-1 ring-border-grey/10 shrink-0">
                                     <Image
                                         src={myStudio.logo_url || myStudio.space_photos_urls?.[0] || "/logo2.jpg"}
                                         alt={myStudio.name}
@@ -212,8 +212,8 @@ export default async function StudioDashboard(props: {
                                         className="object-cover w-full h-full mix-blend-multiply"
                                     />
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-xl font-black text-charcoal tracking-tight">Welcome, {myStudio.name}</p>
+                                <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                                    <p className="text-lg sm:text-xl font-black text-charcoal tracking-tight truncate">Welcome, {myStudio.name}</p>
                                     <p className="text-[11px] text-slate/60 flex items-center gap-2 font-black uppercase tracking-[0.3em]">
                                         <MapPin className="w-3.5 h-3.5 text-forest" />
                                         {myStudio.location}
@@ -222,10 +222,10 @@ export default async function StudioDashboard(props: {
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center gap-3 bg-white/40 backdrop-blur-md px-6 py-3 rounded-full border border-border-grey/50 shadow-tight ring-1 ring-white/20">
+                    <div className="flex items-center gap-2 sm:gap-3 bg-white/40 backdrop-blur-md px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-border-grey/50 shadow-tight ring-1 ring-white/20 w-fit">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                        <Sparkles className="w-4 h-4 text-forest" />
-                        <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.3em]">Verified Partner</span>
+                        <Sparkles className="w-3.5 h-3.5 sm:w-4 h-4 text-forest" />
+                        <span className="text-[9px] sm:text-[11px] font-black text-charcoal uppercase tracking-[0.2em] sm:tracking-[0.3em]">Verified Partner</span>
                     </div>
                 </div>
 

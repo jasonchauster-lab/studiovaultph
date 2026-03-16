@@ -170,42 +170,52 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
             {/* Active Sessions List */}
             <section>
-                <div className="px-6 sm:px-0 flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-2">
+                <div className="px-6 sm:px-0 flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-12 gap-2">
                     <div className="flex items-start gap-3 sm:gap-4 h-full">
-                        <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest shrink-0 mt-1 sm:mt-1.5" />
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-forest/5 rounded-2xl flex items-center justify-center shrink-0 border border-forest/10">
+                            <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest" />
+                        </div>
                         <div className="flex flex-col justify-center">
-                            <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter leading-tight">My Sessions</h2>
-                            <div className="text-[8px] sm:text-[9px] font-black text-charcoal/60 uppercase tracking-[0.2em] mt-1">{activeBookings.length} SESSIONS FOUND</div>
+                            <h2 className="text-2xl sm:text-4xl font-serif text-charcoal tracking-tight leading-none">Upcoming Sessions</h2>
+                            <div className="text-[8px] sm:text-[9px] font-black text-forest uppercase tracking-[0.25em] mt-1.5 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-forest rounded-full animate-pulse" />
+                                {activeBookings.length} {activeBookings.length === 1 ? 'Engagement' : 'Engagements'} Found
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {activeBookings.length === 0 ? (
-                    <div className="py-6 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-border-grey/50 mx-4 sm:mx-0 px-6 shadow-tight relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-32 h-32 bg-forest/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl pointer-events-none" />
-                        <div className="absolute bottom-0 right-0 w-32 h-32 bg-gold/5 rounded-full translate-x-1/2 translate-y-1/2 blur-2xl pointer-events-none" />
+                    <div className="py-12 sm:py-20 flex flex-col items-center justify-center text-center bg-white/50 backdrop-blur-sm rounded-[2.5rem] border border-border-grey/30 mx-4 sm:mx-0 px-8 shadow-tight relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-64 h-64 bg-forest/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-[100px] pointer-events-none" />
+                        <div className="absolute bottom-0 right-0 w-64 h-64 bg-gold/5 rounded-full translate-x-1/2 translate-y-1/2 blur-[100px] pointer-events-none" />
                         
-                        <div className="w-16 h-16 bg-charcoal/5 rounded-2xl flex items-center justify-center mb-6 relative">
-                            <Calendar className="w-7 h-7 text-charcoal/40" />
+                        <div className="w-20 h-20 bg-charcoal/5 rounded-[2rem] flex items-center justify-center mb-8 relative border border-charcoal/5">
+                            <Calendar className="w-8 h-8 text-charcoal/20" />
+                            <div className="absolute -top-1 -right-1 w-6 h-6 bg-forest/10 rounded-full flex items-center justify-center animate-bounce">
+                                <div className="w-2 h-2 bg-forest rounded-full" />
+                            </div>
                         </div>
-                        <h3 className="text-xl sm:text-2xl font-serif text-charcoal mb-3 tracking-tight">No sessions found for this period.</h3>
-                        <p className="text-[11px] sm:text-xs text-charcoal/70 max-w-[300px] mb-8 leading-relaxed font-bold">Try adjusting your filters or find a studio to book a new availability slot.</p>
+                        <h3 className="text-2xl sm:text-4xl font-serif text-charcoal mb-4 tracking-tight">No active schedule yet.</h3>
+                        <p className="text-[11px] sm:text-sm text-charcoal/50 max-w-[320px] mb-10 leading-relaxed font-medium uppercase tracking-wider">
+                            Sync your availability or find a studio node to begin your session regsitry.
+                        </p>
 
-                        
                         <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10 w-full sm:w-auto">
                             {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
                                 <button 
                                     onClick={() => setResetKey(prev => prev + 1)}
-                                    className="w-full sm:w-auto px-10 py-4 bg-white text-forest border-2 border-forest text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-forest/5 transition-all active:scale-95"
+                                    className="w-full sm:w-auto px-10 py-4 bg-white text-forest border border-forest/20 text-[10px] font-black uppercase tracking-[0.25em] rounded-2xl hover:bg-forest/5 transition-all active:scale-95 shadow-tight"
                                 >
                                     Clear Filters
                                 </button>
                             )}
                             <Link
                                 href="/instructor/schedule"
-                                className="w-full sm:w-auto px-10 py-4 bg-forest text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:brightness-110 transition-all shadow-tight active:scale-95 text-center"
+                                className="w-full sm:w-auto px-12 py-5 bg-forest text-white text-[10px] font-black uppercase tracking-[0.25em] rounded-2xl hover:brightness-110 transition-all shadow-tight active:scale-95 text-center flex items-center justify-center gap-3"
                             >
-                                Find a Studio / Add Slot
+                                <Navigation className="w-3.5 h-3.5" />
+                                FIND STUDIO / ADD SLOT
                             </Link>
                         </div>
                     </div>
@@ -214,14 +224,19 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         {activeGroups.map((group) => (
                             <div key={group.date} className="relative">
                                 {/* Date Header */}
-                                <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md px-4 py-3 mb-4 rounded-xl border border-border-grey/30 flex items-center justify-between mx-4 sm:mx-0 shadow-sm">
-                                    <div className="flex items-center gap-2">
-                                        <Calendar className="w-4 h-4 text-forest" />
-                                        <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em]">
+                                <div className="sticky top-0 z-20 bg-white/60 backdrop-blur-xl px-5 py-3.5 mb-6 rounded-2xl border border-white/40 flex items-center justify-between mx-4 sm:mx-0 shadow-sm ring-1 ring-charcoal/5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center">
+                                            <Calendar className="w-3.5 h-3.5 text-forest" />
+                                        </div>
+                                        <span className="text-[10px] font-black text-charcoal uppercase tracking-[0.3em]">
                                             {new Date(group.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                                         </span>
                                     </div>
-                                    <span className="text-[9px] font-black text-charcoal/40 uppercase tracking-widest">{group.bookings.length} {group.bookings.length === 1 ? 'Session' : 'Sessions'}</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-forest/20" />
+                                        <span className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">{group.bookings.length} {group.bookings.length === 1 ? 'Session' : 'Sessions'}</span>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-4">
@@ -231,18 +246,20 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                         const client = getFirst(booking.client)
 
                                         return (
-                                            <div key={booking.id} className="earth-card p-4 sm:p-6 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0 rounded-[2rem]">
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                            <div key={booking.id} className="earth-card p-4 sm:p-5 bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0 rounded-[2rem] border-l-[3px] border-l-forest overflow-hidden">
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-forest/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl pointer-events-none group-hover:bg-forest/10 transition-colors" />
+                                                
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-4 relative z-10">
                                                     {/* Time Indicator */}
-                                                    <div className="flex items-center gap-3 sm:flex-col sm:justify-center sm:bg-forest/5 sm:rounded-2xl sm:w-20 sm:h-20 sm:shrink-0 sm:border sm:border-forest/10">
+                                                    <div className="flex items-center gap-3 sm:flex-col sm:justify-center sm:bg-forest/5 sm:rounded-[1.5rem] sm:w-20 sm:h-20 sm:shrink-0 sm:border sm:border-forest/10">
                                                         <div className="flex sm:hidden items-center justify-center w-8 h-8 rounded-full bg-forest/10">
-                                                            <Clock className="w-4 h-4 text-forest" />
+                                                            <Clock className="w-3.5 h-3.5 text-forest" />
                                                         </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-sm sm:text-lg font-serif text-charcoal leading-none">
+                                                        <div className="flex flex-col sm:items-center">
+                                                            <span className="text-base sm:text-lg font-serif text-charcoal leading-none tracking-tighter">
                                                                 {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                             </span>
-                                                            <span className="text-[8px] font-black text-forest uppercase tracking-widest sm:text-center mt-0.5">START</span>
+                                                            <span className="text-[7px] sm:text-[8px] font-black text-forest uppercase tracking-[0.2em] mt-1">START</span>
                                                         </div>
                                                     </div>
 
@@ -250,16 +267,16 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex flex-col gap-1">
                                                             <div className="flex items-center justify-between">
-                                                                <button onClick={() => handleStudioClick(studio)} className="text-base font-serif text-charcoal hover:text-forest transition-colors text-left tracking-tight">
-                                                                    {studio?.name || "Studio"}
+                                                                <button onClick={() => handleStudioClick(studio)} className="text-lg sm:text-xl font-serif text-charcoal hover:text-forest transition-colors text-left tracking-tight">
+                                                                    {studio?.name || "Studio Node"}
                                                                 </button>
-                                                                <div className="flex sm:hidden items-center gap-1.5 shrink-0">
+                                                                <div className="flex sm:hidden items-center gap-2 shrink-0">
                                                                     {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
                                                                         <button
                                                                             onClick={() => setCancellingBooking(booking)}
-                                                                            className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-red-600 border border-red-100/50"
+                                                                            className="w-9 h-9 flex items-center justify-center rounded-2xl bg-red-50 text-red-600 border border-red-100/50 active:scale-95 transition-transform"
                                                                         >
-                                                                            <X className="w-3.5 h-3.5" />
+                                                                            <X className="w-4 h-4" />
                                                                         </button>
                                                                     )}
                                                                     {client && client.id !== currentUserId && (
@@ -268,20 +285,23 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                 </div>
                                                             </div>
                                                             
-                                                            <div className="flex items-center gap-2 text-charcoal/50">
+                                                            <div className="flex items-center gap-2 text-charcoal/40">
                                                                 <MapPin className="w-3 h-3 shrink-0" />
-                                                                <span className="text-[9px] font-black uppercase tracking-widest truncate">{studio?.location || "N/A"}</span>
+                                                                <span className="text-[9px] font-black uppercase tracking-[0.15em] truncate">{studio?.location || "REGISTRY N/A"}</span>
                                                             </div>
 
-                                                            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border-grey/30">
+                                                            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border-grey/30">
                                                                 {client && (
-                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
-                                                                        <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-6 h-6 rounded-full border border-border-grey shrink-0 object-cover" />
-                                                                        <span className="text-[11px] font-black text-charcoal uppercase tracking-widest truncate">{client.full_name}</span>
+                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity min-w-0 flex-1">
+                                                                        <div className="w-7 h-7 rounded-full border border-forest/10 p-0.5 shrink-0">
+                                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full rounded-full object-cover" />
+                                                                        </div>
+                                                                        <span className="text-[10px] font-black text-charcoal uppercase tracking-[0.2em] truncate">{client.full_name}</span>
                                                                     </button>
                                                                 )}
                                                                 <div className="flex items-center gap-2 shrink-0">
-                                                                    <span className="px-2 py-1 bg-charcoal/5 text-charcoal/60 text-[8px] font-black uppercase tracking-widest rounded-lg border border-charcoal/10">
+                                                                    <span className="px-3 py-1 bg-forest/5 text-forest/70 text-[8px] font-black uppercase tracking-[0.2em] rounded-xl border border-forest/10 flex items-center gap-1.5">
+                                                                        <Box className="w-2.5 h-2.5" />
                                                                         {Array.isArray(slot?.equipment) && slot.equipment.length > 0
                                                                             ? `${slot.equipment[0]} (${booking.quantity || 1})`
                                                                             : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
@@ -319,10 +339,12 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             {/* Past Sessions List */}
             {historicalBookings.length > 0 && (
                 <section>
-                    <div className="px-6 sm:px-0 flex items-center justify-between mb-6 sm:mb-10">
+                    <div className="px-6 sm:px-0 flex items-center justify-between mb-8 sm:mb-12">
                         <div className="flex items-center gap-3 sm:gap-4">
-                            <Clock className="w-5 h-5 sm:w-6 h-6 text-charcoal/60" />
-                            <h2 className="text-xl sm:text-3xl font-serif text-charcoal/90 tracking-tighter">Past Sessions</h2>
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-charcoal/5 rounded-2xl flex items-center justify-center shrink-0 border border-charcoal/10">
+                                <Clock className="w-5 h-5 sm:w-6 h-6 text-charcoal/60" />
+                            </div>
+                            <h2 className="text-xl sm:text-3xl font-serif text-charcoal/60 tracking-tight">Archive Registry</h2>
                         </div>
                     </div>
 
@@ -330,14 +352,19 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         {historicalGroups.map((group) => (
                             <div key={group.date} className="relative">
                                 {/* Date Header */}
-                                <div className="sticky top-0 z-20 bg-charcoal/5 backdrop-blur-md px-4 py-3 mb-4 rounded-xl border border-charcoal/10 flex items-center justify-between mx-4 sm:mx-0">
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="w-4 h-4 text-charcoal/40" />
-                                        <span className="text-[11px] font-black text-charcoal/60 uppercase tracking-[0.2em]">
+                                <div className="sticky top-0 z-20 bg-charcoal/[0.03] backdrop-blur-xl px-5 py-3.5 mb-6 rounded-2xl border border-charcoal/5 flex items-center justify-between mx-4 sm:mx-0 ring-1 ring-charcoal/[0.02]">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-charcoal/5 flex items-center justify-center">
+                                            <Clock className="w-3.5 h-3.5 text-charcoal/40" />
+                                        </div>
+                                        <span className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em]">
                                             {new Date(group.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                                         </span>
                                     </div>
-                                    <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-widest">{group.bookings.length} {group.bookings.length === 1 ? 'Session' : 'Sessions'}</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-charcoal/10" />
+                                        <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.2em]">{group.bookings.length} {group.bookings.length === 1 ? 'Legacy' : 'Legacies'}</span>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-4">
@@ -347,20 +374,20 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                         const client = getFirst(booking.client)
 
                                         return (
-                                            <div key={booking.id} className="glass-card p-4 sm:p-6 border border-white/60 bg-white/20 hover:bg-white/40 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0 rounded-[2rem]">
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                            <div key={booking.id} className="glass-card p-4 sm:p-5 border border-white/40 bg-white/5 hover:bg-white/10 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0 rounded-[2rem] overflow-hidden grayscale-[0.5] hover:grayscale-0">
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-4 relative z-10">
                                                     {/* Time & Earnings */}
-                                                    <div className="flex items-center justify-between sm:flex-col sm:justify-center sm:bg-charcoal/5 sm:rounded-2xl sm:w-24 sm:h-24 sm:shrink-0 sm:border sm:border-charcoal/10">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-sm sm:text-base font-serif text-charcoal/70 leading-none">
+                                                    <div className="flex items-center justify-between sm:flex-col sm:justify-center sm:bg-charcoal/[0.03] sm:rounded-[1.5rem] sm:w-24 sm:h-24 sm:shrink-0 sm:border sm:border-charcoal/5">
+                                                        <div className="flex flex-col sm:items-center">
+                                                            <span className="text-sm sm:text-base font-serif text-charcoal/50 leading-none tracking-tight">
                                                                 {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                             </span>
-                                                            <span className="text-[8px] font-black text-charcoal/40 uppercase tracking-widest sm:text-center mt-1">TIME</span>
+                                                            <span className="text-[7px] sm:text-[8px] font-black text-charcoal/30 uppercase tracking-[0.2em] mt-1.5">RECORDED</span>
                                                         </div>
                                                         {booking.price_breakdown?.instructor_fee && (
-                                                            <div className="flex flex-col items-end sm:items-center sm:mt-2">
-                                                                <span className="text-xs sm:text-sm font-black text-sage tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
-                                                                <span className="text-[7px] font-black text-sage/60 uppercase tracking-widest">EARNED</span>
+                                                            <div className="flex flex-col items-end sm:items-center sm:mt-3">
+                                                                <span className="text-sm sm:text-base font-black text-sage tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                                                                <span className="text-[7px] font-black text-sage/50 uppercase tracking-[0.25em]">VALUED</span>
                                                             </div>
                                                         )}
                                                     </div>
@@ -368,20 +395,22 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     {/* Session Info */}
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex flex-col gap-1">
-                                                            <button onClick={() => handleStudioClick(studio)} className="text-base font-serif text-charcoal/80 hover:text-charcoal transition-colors text-left tracking-tight">
-                                                                {studio?.name || "Studio"}
+                                                            <button onClick={() => handleStudioClick(studio)} className="text-base sm:text-lg font-serif text-charcoal/50 hover:text-charcoal transition-colors text-left tracking-tight">
+                                                                {studio?.name || "Historical Node"}
                                                             </button>
                                                             
-                                                            <div className="flex items-center gap-2 text-charcoal/40">
+                                                            <div className="flex items-center gap-2 text-charcoal/30">
                                                                 <MapPin className="w-3 h-3 shrink-0" />
-                                                                <span className="text-[9px] font-black uppercase tracking-widest truncate">{studio?.location || "N/A"}</span>
+                                                                <span className="text-[9px] font-black uppercase tracking-[0.15em] truncate">{studio?.location || "ARCHIVE N/A"}</span>
                                                             </div>
 
-                                                            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-charcoal/10">
+                                                            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-charcoal/5">
                                                                 {client && (
-                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
-                                                                        <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-6 h-6 rounded-full border border-white shrink-0 object-cover opacity-80" />
-                                                                        <span className="text-[11px] font-black text-charcoal/60 uppercase tracking-widest truncate">{client.full_name}</span>
+                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity min-w-0 flex-1">
+                                                                        <div className="w-7 h-7 rounded-full border border-charcoal/5 p-0.5 shrink-0 opacity-40">
+                                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full rounded-full object-cover" />
+                                                                        </div>
+                                                                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] truncate">{client.full_name}</span>
                                                                     </button>
                                                                 )}
                                                                 {booking.status === 'completed' && !booking.instructor_reviewed_studio && (
@@ -391,13 +420,13 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                             revieweeId: studio?.owner_id || '',
                                                                             revieweeName: studio?.name || 'Studio'
                                                                         })}
-                                                                        className="h-8 px-4 bg-forest text-white rounded-lg text-[8px] font-black uppercase tracking-widest shadow-sm"
+                                                                        className="h-8 px-5 bg-sage/[0.08] text-sage border border-sage/20 rounded-xl text-[9px] font-black uppercase tracking-[0.25em] hover:bg-sage hover:text-white transition-all shadow-sm active:scale-95"
                                                                     >
                                                                         FEEDBACK
                                                                     </button>
                                                                 )}
                                                                 {booking.instructor_reviewed_studio && (
-                                                                    <span className="text-[7px] text-sage font-black uppercase tracking-widest bg-sage/5 px-2 py-1 rounded border border-sage/10">SUBMITTED</span>
+                                                                    <span className="text-[8px] text-charcoal/30 font-black uppercase tracking-[0.25em] bg-charcoal/[0.03] px-3 py-1.5 rounded-xl border border-charcoal/5">SUBMITTED</span>
                                                                 )}
                                                             </div>
                                                         </div>

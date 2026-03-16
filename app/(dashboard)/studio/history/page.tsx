@@ -70,21 +70,21 @@ export default async function StudioHistoryPage() {
             .order('created_at', { ascending: false })
 
     return (
-        <div className="min-h-screen bg-cream-50 p-6 sm:p-10">
-            <div className="max-w-6xl mx-auto space-y-8">
+        <div className="min-h-screen bg-cream-50 px-4 py-6 sm:p-10">
+            <div className="max-w-6xl mx-auto space-y-6">
 
                 {/* Header */}
-                <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div className="flex items-start justify-between gap-4 flex-wrap px-0 sm:px-0">
                     <div>
-                        <h1 className="text-3xl sm:text-4xl font-serif font-bold text-charcoal-900 mb-1">Rental History</h1>
-                        <p className="text-charcoal-600 text-sm">Past sessions and earnings for your studio.</p>
+                        <h1 className="text-2xl sm:text-4xl font-serif font-bold text-charcoal-900 mb-0.5">Rental History</h1>
+                        <p className="text-charcoal-500 text-sm">Past sessions and earnings for your studio.</p>
                     </div>
                     <Link
                         href="/studio"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-forest text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-forest/90 active:scale-95 transition-all"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-forest text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-forest/90 active:scale-95 transition-all"
                     >
                         <PlusCircle className="w-4 h-4" />
-                        Add Availability Slot
+                        Add Slot
                     </Link>
                 </div>
 

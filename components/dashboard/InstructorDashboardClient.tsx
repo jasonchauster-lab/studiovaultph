@@ -532,16 +532,16 @@ export default function InstructorDashboardClient({
             {/* Profile Detail Modal */}
             {selectedProfile && (
                 <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedProfile(null)}>
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setSelectedProfile(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/50 hover:text-charcoal"><X className="w-5 h-5" /></button>
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                    <div className="bg-white/90 backdrop-blur-md rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative border border-white/40" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedProfile(null)} className="absolute top-8 right-8 p-3 hover:bg-charcoal/5 rounded-2xl transition-all text-charcoal/30 hover:text-charcoal border border-transparent hover:border-border-grey"><X className="w-5 h-5" /></button>
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
                         <div className="flex flex-col items-center text-center mb-10">
                             <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
                                 <img src={selectedProfile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedProfile.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
                             </div>
                             <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedProfile.full_name}</h3>
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedProfile.email}</p>
+                                <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.35em]">{selectedProfile.email}</p>
                                 {selectedProfile.date_of_birth && (
                                     <div className="inline-block px-3 py-1 bg-forest/5 rounded-full border border-forest/10 mt-2">
                                         <p className="text-[9px] font-black text-forest uppercase tracking-[0.2em]">{calculateAge(selectedProfile.date_of_birth)} YEARS OLD</p>
@@ -575,14 +575,14 @@ export default function InstructorDashboardClient({
                                      .join(', ');
 
                                 return displayConditions ? (
-                                    <div className="bg-red-50 p-8 rounded-lg border border-red-200 relative z-10">
-                                        <h4 className="text-[10px] font-black text-red-800 uppercase tracking-[0.3em] mb-4 flex items-center gap-3"><AlertCircle className="w-4 h-4" /> PHYSICAL CONDITIONS</h4>
+                                    <div className="bg-red-50/60 backdrop-blur-sm p-8 rounded-3xl border border-red-100 relative z-10">
+                                        <h4 className="text-[10px] font-black text-red-900/60 uppercase tracking-[0.4em] mb-4 flex items-center gap-3"><AlertCircle className="w-4 h-4" /> PHYSICAL CONDITIONS</h4>
                                         <p className="text-[11px] text-red-900 font-black uppercase tracking-[0.2em] leading-relaxed">{displayConditions}</p>
                                     </div>
                                 ) : (
-                                    <div className="bg-green-50 p-8 rounded-lg border border-green-200 relative z-10">
-                                        <h4 className="text-[10px] font-black text-forest uppercase tracking-[0.4em] mb-2">HEALTH STATUS</h4>
-                                        <p className="text-[10px] text-forest/40 uppercase tracking-[0.2em] italic">No reported conditions.</p>
+                                    <div className="bg-sage/5 backdrop-blur-sm p-8 rounded-3xl border border-forest/10 relative z-10">
+                                        <h4 className="text-[10px] font-black text-forest/40 uppercase tracking-[0.4em] mb-2">HEALTH STATUS</h4>
+                                        <p className="text-[10px] text-forest/60 uppercase tracking-[0.3em] font-black">No reported conditions.</p>
                                     </div>
                                 );
                             })()}
@@ -595,21 +595,21 @@ export default function InstructorDashboardClient({
             {/* Booking Detail Modal (Mobile) */}
             {selectedBooking && (
                 <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 md:p-6 bg-charcoal/40 backdrop-blur-sm" onClick={() => setSelectedBooking(null)}>
-                    <div className="bg-white rounded-[2rem] w-full max-w-2xl shadow-card border border-border-grey overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
-                        <div className="p-6 md:p-8 border-b border-border-grey flex justify-between items-center bg-alabaster/50">
+                    <div className="bg-white/90 backdrop-blur-md rounded-[2.5rem] w-full max-w-2xl shadow-2xl border border-white/40 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+                        <div className="p-8 md:p-10 border-b border-border-grey/50 flex justify-between items-center bg-white/30">
                             <div>
-                                <h3 className="text-2xl font-serif text-charcoal tracking-tight">Booking Details</h3>
-                                <p className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] mt-1">SESSION OVERVIEW</p>
+                                <h3 className="text-2xl font-serif text-charcoal tracking-tighter">Booking Details</h3>
+                                <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.4em] mt-2">SESSION OVERVIEW</p>
                             </div>
-                            <button onClick={() => setSelectedBooking(null)} className="p-3 hover:bg-white rounded-xl transition-colors border border-border-grey shadow-tight">
-                                <X className="w-5 h-5 text-slate" />
+                            <button onClick={() => setSelectedBooking(null)} className="p-4 hover:bg-white/60 rounded-2xl transition-all border border-transparent hover:border-border-grey">
+                                <X className="w-5 h-5 text-charcoal/40" />
                             </button>
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-10">
                             {/* Client Info */}
-                            <div className="flex items-center gap-6 bg-white p-6 rounded-2xl border border-border-grey shadow-tight">
-                                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-tight shrink-0">
+                            <div className="flex items-center gap-6 bg-white/40 backdrop-blur-sm p-6 sm:p-8 rounded-[2rem] border border-border-grey/40 shadow-tight">
+                                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-tight shrink-0">
                                     {selectedBooking.client?.avatar_url ? (
                                         <img src={selectedBooking.client.avatar_url} alt={selectedBooking.client.full_name} className="w-full h-full object-cover" />
                                     ) : (
@@ -619,11 +619,11 @@ export default function InstructorDashboardClient({
                                     )}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <h4 className="text-xl font-serif text-charcoal truncate">{selectedBooking.client?.full_name}</h4>
-                                    <div className="mt-4 flex flex-wrap gap-2">
+                                    <h4 className="text-2xl font-serif text-charcoal truncate tracking-tight">{selectedBooking.client?.full_name}</h4>
+                                    <div className="mt-5 flex flex-wrap gap-3">
                                         <button 
                                             onClick={() => setSelectedProfile(selectedBooking.client)}
-                                            className="px-4 py-2 bg-white border border-border-grey rounded-full text-[10px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.15em] shadow-tight"
+                                            className="px-5 py-2.5 bg-white/60 border border-border-grey/60 rounded-xl text-[10px] font-black text-charcoal/60 hover:text-charcoal transition-all uppercase tracking-[0.2em] active:scale-95"
                                         >
                                             View Profile
                                         </button>
@@ -638,9 +638,9 @@ export default function InstructorDashboardClient({
                                                 setActiveChat(chat);
                                                 setSelectedBooking(null);
                                             }}
-                                            className="px-4 py-2 bg-forest text-white rounded-full text-[10px] font-bold hover:brightness-110 transition-all flex items-center gap-2 uppercase tracking-[0.15em] shadow-tight"
+                                            className="px-5 py-2.5 bg-forest text-white rounded-xl text-[10px] font-black hover:brightness-110 transition-all flex items-center gap-2.5 uppercase tracking-[0.2em] shadow-tight active:scale-95"
                                         >
-                                            <MessageSquare className="w-3.5 h-3.5" /> Message
+                                            <MessageSquare className="w-4 h-4" /> Message
                                         </button>
                                     </div>
                                 </div>
