@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -153,6 +153,45 @@ function LoginContent() {
         setLoading(false)
     }
 
+    // When "Check Your Email" is visible, listen for the session that the magic
+    // link creates — whether clicked in this tab, a new tab, or the same browser
+    // from a different tab. Also poll every 4 s so a link opened on a completely
+    // different device (e.g. phone) completes the login here too if both are on
+    // the same browser profile (shared storage). If on a truly different device,
+    // that device gets logged in and the user can close this tab.
+    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+    useEffect(() => {
+        if (!otpSent) return
+
+        // Auth state listener — fires instantly on same-device clicks
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            async (event, session) => {
+                if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
+                    subscription.unsubscribe()
+                    if (pollRef.current) clearInterval(pollRef.current)
+                    await redirectByRole(session.user.id)
+                }
+            }
+        )
+
+        // Fallback poll every 4 s — handles same browser, different tab
+        pollRef.current = setInterval(async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session?.user) {
+                subscription.unsubscribe()
+                clearInterval(pollRef.current!)
+                await redirectByRole(session.user.id)
+            }
+        }, 4000)
+
+        return () => {
+            subscription.unsubscribe()
+            if (pollRef.current) clearInterval(pollRef.current)
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [otpSent])
+
     const handleResendOtp = async () => {
         setLoading(true)
         setMessage(null)
@@ -268,8 +307,9 @@ function LoginContent() {
                             ) : (
                                 // Post-send: awaiting click
                                 <div className="space-y-5">
-                                    <div className="p-5 rounded-xl border border-forest/20 bg-forest/5 text-center">
+                                    <div className="p-5 rounded-xl border border-forest/20 bg-forest/5 text-center space-y-1">
                                         <p className="text-[10px] font-bold text-forest uppercase tracking-widest">Link expires in 10 minutes</p>
+                                        <p className="text-[10px] text-slate-500 font-medium">You can click it on any device — this page will update automatically.</p>
                                     </div>
 
                                     {message && (
