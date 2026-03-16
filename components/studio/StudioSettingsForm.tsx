@@ -423,7 +423,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                                                 className="peer w-6 h-6 opacity-0 absolute cursor-pointer"
                                                 defaultChecked={studio.equipment?.includes(eq)}
                                             />
-                                            <div className="w-6 h-6 bg-cream-50 border border-cream-200 rounded-lg peer-checked:bg-charcoal-900 peer-checked:border-charcoal-900 transition-all flex items-center justify-center">
+                                            <div className="w-6 h-6 bg-cream-50 border border-cream-200 rounded-lg peer-checked:bg-forest peer-checked:border-forest transition-all flex items-center justify-center">
                                                 <svg className="w-4 h-4 text-white scale-0 peer-checked:scale-100 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
                                             </div>
                                         </div>
@@ -481,7 +481,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                                 defaultChecked={studio.amenities?.includes(amenity)}
                                 className="peer absolute opacity-0"
                             />
-                            <div className="absolute inset-0 bg-cream-50/50 peer-checked:bg-charcoal-900 transition-colors duration-300" />
+                            <div className="absolute inset-0 bg-cream-50/50 peer-checked:bg-forest transition-colors duration-300" />
                             <div className="relative z-10 w-5 h-5 flex-none rounded-full border-2 border-cream-200 peer-checked:border-white transition-all flex items-center justify-center">
                                 <div className="w-2 h-2 rounded-full bg-charcoal-900 peer-checked:bg-white scale-0 peer-checked:scale-100 transition-transform" />
                             </div>
@@ -511,7 +511,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full sm:w-auto px-12 py-5 bg-charcoal-900 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:bg-forest transition-all shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 transition-all duration-500"
+                    className="w-full sm:w-auto px-12 py-5 bg-forest text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-110 transition-all shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 transition-all duration-500"
                 >
                     {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-gold" /> : <Save className="w-4 h-4 text-gold" />}
                     {isLoading ? 'Processing' : 'Commit Changes'}

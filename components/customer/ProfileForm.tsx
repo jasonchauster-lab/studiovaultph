@@ -266,8 +266,8 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 className={clsx(
                                     "relative flex items-center gap-3 px-6 py-4 border rounded-[1.25rem] cursor-pointer transition-all duration-300 overflow-hidden active:scale-95 group",
                                     isSelected 
-                                        ? "border-charcoal-900" 
-                                        : "bg-white border-cream-200 hover:border-charcoal-900/20"
+                                        ? "border-forest" 
+                                        : "bg-white border-cream-200 hover:border-forest/20"
                                 )}
                             >
                                 <input
@@ -286,7 +286,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 />
                                 <div className={clsx(
                                     "absolute inset-0 transition-colors duration-300",
-                                    isSelected ? "bg-charcoal-900" : "bg-cream-50/30 group-hover:bg-cream-50"
+                                    isSelected ? "bg-forest" : "bg-cream-50/30 group-hover:bg-cream-50"
                                 )} />
                                 
                                 <div className={clsx(
@@ -339,8 +339,8 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                     className={clsx(
                                         "px-6 py-3.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] cursor-pointer transition-all duration-500 border shadow-sm flex items-center gap-3 active:scale-95",
                                         isSelected
-                                            ? "bg-burgundy text-white border-burgundy shadow-burgundy/20"
-                                            : "bg-white/40 text-charcoal/60 border-white/60 hover:bg-white hover:border-burgundy/30"
+                                            ? "bg-forest text-white border-forest shadow-forest/20"
+                                            : "bg-white/40 text-charcoal/60 border-white/60 hover:bg-white hover:border-forest/30"
                                     )}
                                 >
                                     <input
@@ -410,7 +410,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full sm:w-auto px-12 py-5 bg-charcoal-900 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:bg-forest transition-all shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 transition-all duration-500 group"
+                    className="w-full sm:w-auto px-12 py-5 bg-forest text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-110 transition-all shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 transition-all duration-500 group"
                 >
                     {isLoading ? (
                         <Loader2 className="w-5 h-5 animate-spin text-gold" />

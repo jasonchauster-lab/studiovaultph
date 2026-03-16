@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
-import { Filter, Calendar, Clock } from 'lucide-react'
+import { Filter, Calendar, Clock, ChevronDown } from 'lucide-react'
 import { STUDIO_AMENITIES } from '@/types'
 import LocationFilterDropdown from '@/components/shared/LocationFilterDropdown'
 import MultiSelectFilter from '@/components/shared/MultiSelectFilter'
@@ -54,17 +54,20 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
         <div className="flex flex-col gap-6 bg-white p-5 sm:p-7 rounded-[2rem] border border-burgundy/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden relative">
             {/* Header: Label + Clear (on mobile) */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5 text-burgundy/60">
-                    <div className="w-8 h-8 rounded-full bg-off-white flex items-center justify-center border border-burgundy/10">
-                        <Filter className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-3 text-burgundy/60">
+                    <div className="w-10 h-10 rounded-full bg-walking-vinnie/10 flex items-center justify-center border border-walking-vinnie/20 shadow-inner">
+                        <Filter className="w-4 h-4 text-burgundy/40" />
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Filter Discovery</span>
+                    <div className="flex flex-col -gap-y-0.5">
+                        <span className="text-[10px] font-black uppercase tracking-[0.25em] text-burgundy">Filter Discovery</span>
+                        <p className="text-[9px] font-bold text-burgundy/30 uppercase tracking-widest">Tailor your search</p>
+                    </div>
                 </div>
 
                 {hasFilters && (
                     <button
                         onClick={clearAllFilters}
-                        className="text-[10px] font-bold text-burgundy hover:text-burgundy/60 transition-colors uppercase tracking-widest flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-off-white border border-burgundy/10"
+                        className="text-[10px] font-black text-burgundy/60 hover:text-white hover:bg-burgundy transition-all duration-300 uppercase tracking-[0.2em] flex items-center gap-2 px-4 py-2 rounded-xl bg-off-white border border-burgundy/10 hover:border-burgundy shadow-sm"
                     >
                         Clear All
                     </button>
@@ -80,16 +83,14 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                             <select
                                 onChange={(e) => handleFilter('type', e.target.value)}
                                 value={searchParams.get('type') || 'all'}
-                                className="w-auto pl-4 pr-10 py-2.5 bg-off-white border border-burgundy/10 rounded-xl text-[11px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-2 focus:ring-burgundy/20 focus:border-burgundy/30 transition-all appearance-none cursor-pointer hover:bg-white hover:border-burgundy/20 whitespace-nowrap"
+                                className="w-auto pl-5 pr-12 py-2.5 bg-off-white border border-burgundy/10 rounded-xl text-[11px] font-black uppercase tracking-widest text-burgundy shadow-sm focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all appearance-none cursor-pointer hover:bg-white hover:border-burgundy/20 whitespace-nowrap h-[42px]"
                             >
                                 <option value="all">All Modes</option>
                                 <option value="instructor">Instructors</option>
                                 <option value="studio">Studios</option>
                             </select>
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-burgundy/40">
-                                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-burgundy/30 group-hover:text-forest transition-colors">
+                                <ChevronDown className="w-4 h-4" />
                             </div>
                         </div>
                     </div>
@@ -133,25 +134,25 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                 </div>
 
                 {/* Date and Time Group */}
-                <div className="flex gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 border-burgundy/5">
-                    <div className="flex flex-col gap-2 flex-1 lg:flex-none">
-                        <label className="text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em] ml-1">Date</label>
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-burgundy/30 pointer-events-none" />
+                <div className="flex gap-4 pt-6 lg:pt-0 border-t lg:border-t-0 border-burgundy/5">
+                    <div className="flex flex-col gap-2.5 flex-1 lg:flex-none">
+                        <label className="text-[9px] font-black text-burgundy/40 uppercase tracking-[0.25em] ml-1">Preferred Date</label>
+                        <div className="relative group">
+                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-burgundy/30 group-focus-within:text-forest transition-colors pointer-events-none" />
                             <input
                                 type="date"
                                 min={getManilaTodayStr()}
                                 onChange={(e) => handleFilter('date', e.target.value)}
                                 value={searchParams.get('date') || ''}
-                                className="w-full lg:w-40 pl-9 pr-4 py-2 bg-off-white border border-burgundy/10 rounded-xl text-[11px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-2 focus:ring-burgundy/20 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20"
+                                className="w-full lg:w-44 pl-11 pr-4 py-2 bg-off-white border border-burgundy/10 rounded-xl text-[11px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20 h-[42px]"
                             />
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-2 flex-1 lg:flex-none">
-                        <label className="text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em] ml-1">Time</label>
-                        <div className="relative">
-                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-burgundy/30 pointer-events-none" />
+                    <div className="flex flex-col gap-2.5 flex-1 lg:flex-none">
+                        <label className="text-[9px] font-black text-burgundy/40 uppercase tracking-[0.25em] ml-1">Preferred Time</label>
+                        <div className="relative group">
+                            <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-burgundy/30 group-focus-within:text-forest transition-colors pointer-events-none" />
                             <input
                                 type="time"
                                 min={
@@ -161,7 +162,7 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                                 }
                                 onChange={(e) => handleFilter('time', e.target.value)}
                                 value={searchParams.get('time') || ''}
-                                className="w-full lg:w-32 pl-9 pr-4 py-2 bg-off-white border border-burgundy/10 rounded-xl text-[11px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-2 focus:ring-burgundy/20 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20"
+                                className="w-full lg:w-36 pl-11 pr-4 py-2 bg-off-white border border-burgundy/10 rounded-xl text-[11px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20 h-[42px]"
                             />
                         </div>
                     </div>

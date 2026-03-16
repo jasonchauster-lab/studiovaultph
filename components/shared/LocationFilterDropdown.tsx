@@ -58,24 +58,24 @@ export default function LocationFilterDropdown({ value, onChange, className }: L
                 type="button"
                 onClick={() => setOpen(o => !o)}
                 className={clsx(
-                    'flex items-center gap-3 px-4 py-1.5 rounded-xl border text-[11px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-sm',
+                    'flex items-center gap-3 px-4 py-2.5 rounded-xl border text-[11px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-sm h-[42px]',
                     isActive
-                        ? 'bg-sage text-white border-sage'
-                        : 'bg-white text-charcoal border-border-grey hover:border-sage/40 hover:bg-off-white'
+                        ? 'bg-forest text-white border-forest'
+                        : 'bg-off-white text-charcoal border-burgundy/10 hover:border-burgundy/20 hover:bg-white'
                 )}
             >
-                <MapPin className="w-3.5 h-3.5 shrink-0" />
+                <MapPin className={clsx('w-3.5 h-3.5 shrink-0', isActive ? 'text-white' : 'text-forest')} />
                 <span className="max-w-[160px] truncate">{displayLabel(value)}</span>
                 {isActive
                     ? <X className="w-2.5 h-2.5 shrink-0 opacity-70 hover:opacity-100" onClick={e => { e.stopPropagation(); onChange('all'); setOpen(false) }} />
-                    : <ChevronDown className={clsx('w-3 h-3 shrink-0 transition-transform', open && 'rotate-180')} />
+                    : <ChevronDown className={clsx('w-3 h-3 shrink-0 transition-transform duration-300', open && 'rotate-180')} />
                 }
             </button>
 
             {/* Panel */}
             {open && (
-                <div className="absolute z-50 top-full mt-3 left-0 w-80 bg-white rounded-[24px] border border-border-grey shadow-cloud overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="p-5 flex flex-wrap gap-2.5">
+                <div className="absolute z-50 top-full mt-3 left-0 w-80 bg-white rounded-[2rem] border border-burgundy/5 shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="p-6 flex flex-wrap gap-2.5">
                         {FILTER_CITIES.map(city => {
                             const isCityActive = activePrefix === city.prefix
                             return (
@@ -84,10 +84,10 @@ export default function LocationFilterDropdown({ value, onChange, className }: L
                                     type="button"
                                     onClick={() => handleCityPill(city.prefix)}
                                     className={clsx(
-                                        'px-4 py-2 rounded-full text-[10px] font-bold border uppercase tracking-widest transition-all',
+                                        'px-4 py-2 rounded-full text-[10px] font-bold border uppercase tracking-widest transition-all duration-300',
                                         isCityActive
-                                            ? 'bg-sage text-white border-sage shadow-sm'
-                                            : 'bg-off-white text-charcoal/60 border-border-grey hover:border-sage/40 hover:bg-white'
+                                            ? 'bg-forest text-white border-forest shadow-md'
+                                            : 'bg-off-white text-charcoal/60 border-burgundy/10 hover:border-burgundy/30 hover:bg-white hover:text-charcoal'
                                     )}
                                 >
                                     {city.label}
