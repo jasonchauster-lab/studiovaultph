@@ -433,6 +433,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                                     src={reviewer?.avatar_url
                                                                         ? (reviewer.avatar_url.startsWith('http') ? reviewer.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`)
                                                                         : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=3C2F2F`}
+                                                                    onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=3C2F2F` }}
                                                                     className="w-6 h-6 rounded-full object-cover border border-border-grey"
                                                                     alt=""
                                                                 />

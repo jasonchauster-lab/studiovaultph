@@ -132,10 +132,9 @@ export default function InstructorEarningsClient({
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-4 sm:px-0">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 px-4 sm:px-0">
                 {/* Available Balance */}
                 <div className="earth-card p-3 sm:p-5 relative overflow-hidden bg-white hover:-translate-y-2 transition-all duration-700 shadow-tight border border-border-grey/50">
-                    {/* Info Icon - Fixed to Top Right */}
                     <button
                         onClick={() => setShowInfoModal(true)}
                         className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 text-charcoal/50 hover:text-charcoal transition-colors p-1 bg-off-white rounded-lg border border-border-grey"
@@ -153,10 +152,21 @@ export default function InstructorEarningsClient({
                         </div>
                         <h2 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tighter mb-1 truncate">₱{(availableBalance || 0).toLocaleString()}</h2>
                         <div className="flex items-center gap-4 text-[7px] sm:text-[8px] font-black text-charcoal/50 uppercase tracking-[0.3em] overflow-hidden">
-                            <div className="px-2 py-0.5 bg-sage/10 rounded-full border border-forest/10 truncate">LIQUID</div>
+                            <div className="px-2 py-0.5 bg-sage/10 rounded-full border border-forest/10 truncate">CURRENTLY WITHDRAWABLE</div>
                         </div>
                 </div>
 
+                {/* Pending Balance */}
+                <div className="earth-card p-3 sm:p-5 hover:-translate-y-2 transition-all duration-700 bg-white shadow-tight border border-border-grey/50">
+                    <div className="flex items-center gap-2 mb-3 sm:mb-5 overflow-hidden">
+                        <div className="p-1.5 sm:p-2.5 bg-buttermilk/20 rounded-lg border border-border-grey shadow-tight shrink-0">
+                            <Clock className="w-3.5 h-3.5 sm:w-4 h-4 text-burgundy/60" />
+                        </div>
+                        <span className="text-[7px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight truncate">Virtual Pending</span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tighter mb-1 truncate">₱{(pendingBalance || 0).toLocaleString()}</h3>
+                    <p className="text-[7px] sm:text-[8px] font-bold text-charcoal/50 uppercase tracking-[0.2em] truncate">FUTURE INCOME</p>
+                </div>
 
                 {/* Gross Earnings */}
                 <div className="earth-card p-3 sm:p-5 hover:-translate-y-2 transition-all duration-700 bg-white shadow-tight border border-border-grey/50">
@@ -164,24 +174,55 @@ export default function InstructorEarningsClient({
                         <div className="p-1.5 sm:p-2.5 bg-sage/10 rounded-lg border border-border-grey shadow-tight shrink-0">
                             <TrendingUp className="w-3.5 h-3.5 sm:w-4 h-4 text-forest" />
                         </div>
-                        <span className="text-[7px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight truncate">Total</span>
+                        <span className="text-[7px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight truncate">Lifetime Earned</span>
                     </div>
                     <h3 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tighter mb-1 truncate">₱{(totalEarned || 0).toLocaleString()}</h3>
-                    <p className="text-[7px] sm:text-[8px] font-bold text-charcoal/50 uppercase tracking-[0.2em] truncate">LIFETIME</p>
+                    <p className="text-[7px] sm:text-[8px] font-bold text-charcoal/50 uppercase tracking-[0.2em] truncate">GROSS TOTAL</p>
                 </div>
 
-                {/* Net Earnings */}
+                {/* Total Withdrawn */}
+                <div className="earth-card p-3 sm:p-5 hover:-translate-y-2 transition-all duration-700 bg-white shadow-tight border border-border-grey/50 relative overflow-hidden">
+                    <div className="flex items-center gap-2 mb-3 sm:mb-5 overflow-hidden">
+                        <div className="p-1.5 sm:p-2.5 bg-charcoal/5 rounded-lg border border-border-grey shadow-tight shrink-0">
+                            <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 h-4 text-charcoal/40" />
+                        </div>
+                        <span className="text-[7px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight truncate">Total Withdrawn</span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tighter mb-1 truncate">₱{(totalWithdrawn || 0).toLocaleString()}</h3>
+                    <p className="text-[7px] sm:text-[8px] font-bold text-charcoal/50 uppercase tracking-[0.2em] truncate">LIFETIME CASH OUT</p>
+                </div>
+
+                {/* Net Balance / Current */}
                 <div className="earth-card p-3 sm:p-5 hover:-translate-y-2 transition-all duration-700 bg-white shadow-tight border border-border-grey/50">
                     <div className="flex items-center justify-between mb-3 sm:mb-5 overflow-hidden">
                         <div className="flex items-center gap-2 min-w-0">
                             <div className="p-1.5 sm:p-2.5 bg-gold/10 rounded-lg border border-border-grey shadow-tight shrink-0">
                                 <DollarSign className="w-3.5 h-3.5 sm:w-4 h-4 text-gold" />
                             </div>
-                            <span className="text-[7px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight truncate">Current</span>
+                            <span className="text-[7px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight truncate">Net Balance</span>
                         </div>
                     </div>
                     <h3 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tighter mb-1 truncate">₱{(netEarnings || 0).toLocaleString()}</h3>
-                    <p className="text-[7px] sm:text-[8px] font-bold text-charcoal/50 uppercase tracking-[0.2em] truncate">NET BALANCE</p>
+                    <p className="text-[7px] sm:text-[8px] font-bold text-charcoal/50 uppercase tracking-[0.2em] truncate">CURRENT POSITION</p>
+                </div>
+
+                {/* Adjustments (Compensation & penalties) */}
+                <div className="earth-card p-3 sm:p-5 hover:-translate-y-2 transition-all duration-700 bg-white shadow-tight border border-border-grey/50">
+                    <div className="flex items-center gap-2 mb-3 sm:mb-5 overflow-hidden">
+                        <div className="p-1.5 sm:p-2.5 bg-red-400/5 rounded-lg border border-border-grey shadow-tight shrink-0">
+                            <AlertCircle className="w-3.5 h-3.5 sm:w-4 h-4 text-red-400/60" />
+                        </div>
+                        <span className="text-[7px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight truncate">Vault Adjustments</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[7px] sm:text-[8px] font-black text-forest uppercase tracking-widest">Comp: +₱{(totalCompensation || 0).toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-[7px] sm:text-[8px] font-black text-red-500 uppercase tracking-widest">Penalties: -₱{(totalPenalty || 0).toLocaleString()}</span>
+                        </div>
+                    </div>
+                    <p className="text-[7px] sm:text-[8px] font-bold text-charcoal/50 uppercase tracking-[0.2em] truncate mt-1">LATE CANCELLATIONS</p>
                 </div>
             </div>
 

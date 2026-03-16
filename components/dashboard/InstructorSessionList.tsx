@@ -590,6 +590,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                     src={reviewer?.avatar_url
                                                                         ? (reviewer.avatar_url.startsWith('http') ? reviewer.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`)
                                                                         : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230`}
+                                                                    onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230` }}
                                                                     className="w-6 h-6 rounded-full object-cover border border-cream-200"
                                                                     alt=""
                                                                 />

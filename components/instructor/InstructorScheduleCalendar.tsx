@@ -689,7 +689,7 @@ export default function InstructorScheduleCalendar({
                                                                         <div
                                                                             key={slot.id}
                                                                             className={clsx(
-                                                                                "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-2 py-1 group/slot flex flex-col justify-center shadow-tight",
+                                                                                "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-2 py-1 group/slot flex flex-col justify-start shadow-tight",
                                                                                 isPastCell
                                                                                     ? "bg-white border-border-grey text-slate"
                                                                                     : "bg-warm-stone border-border-grey text-charcoal",
@@ -718,7 +718,7 @@ export default function InstructorScheduleCalendar({
                                                                                         <div className={clsx("text-[10px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
                                                                                             {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
                                                                                         </div>
-                                                                                      <div className="text-[10px] font-black text-charcoal/60 bg-white px-2.5 py-1 rounded-lg border border-charcoal/10 whitespace-nowrap shadow-sm shrink-0">
+                                                                                      <div className="text-[8px] font-black text-charcoal/60 bg-white/80 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap ml-2 shrink-0 shadow-sm">
                                                               0/1
                                                           </div>
 

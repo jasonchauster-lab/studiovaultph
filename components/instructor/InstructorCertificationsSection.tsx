@@ -84,7 +84,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                             <Award className="w-5 h-5 sm:w-6 sm:h-6 text-gold" />
                             <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter">Accreditations</h2>
                         </div>
-                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.4em]">Verified Teaching Credentials & Lineage</p>
+                        <p className="text-[10px] font-black text-charcoal/60 uppercase tracking-[0.4em]">Verified Teaching Credentials & Lineage</p>
                     </div>
                     {!showForm && (
                         <button
@@ -103,7 +103,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                     <form onSubmit={handleSubmit} className="bg-white/40 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/60 space-y-10 mb-12 animate-in slide-in-from-top-4 duration-700 shadow-sm">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             <div>
-                                <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-4 ml-6">Certification Body</label>
+                                <label className="block text-[10px] font-black text-charcoal/60 uppercase tracking-[0.3em] mb-4 ml-6">Certification Body</label>
                                 <select
                                     name="certificationBody"
                                     required
@@ -120,7 +120,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] mb-4 ml-6">Credential Proof (PDF/IMG)</label>
+                                <label className="block text-[10px] font-black text-charcoal/60 uppercase tracking-[0.3em] mb-4 ml-6">Credential Proof (PDF/IMG)</label>
                                 <input
                                     type="file"
                                     name="certificateFile"
@@ -147,14 +147,14 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                             setPreviewUrl(null)
                                         }
                                     }}
-                                    className="w-full px-8 py-3.5 bg-white/40 border border-white/60 rounded-[2rem] text-charcoal/50 text-[10px] font-black outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer file:mr-6 file:py-2.5 file:px-6 file:rounded-[20px] file:border-0 file:text-[9px] file:font-black file:bg-charcoal file:text-white file:uppercase file:tracking-[0.25em] shadow-sm"
+                                    className="w-full px-8 py-3.5 bg-white/40 border border-white/60 rounded-[2rem] text-charcoal/60 text-[10px] font-black outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all uppercase tracking-[0.2em] cursor-pointer file:mr-6 file:py-2.5 file:px-6 file:rounded-[20px] file:border-0 file:text-[9px] file:font-black file:bg-charcoal file:text-white file:uppercase file:tracking-[0.25em] shadow-sm"
                                 />
                             </div>
                         </div>
 
                         {previewUrl && (
                             <div className="bg-white/40 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/60 inline-block shadow-sm">
-                                <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.4em] mb-6">Verification Preview</p>
+                                <p className="text-[10px] font-black text-charcoal/60 uppercase tracking-[0.4em] mb-6">Verification Preview</p>
                                 <div className="w-48 h-48 rounded-[20px] overflow-hidden shadow-cloud bg-alabaster/50 border border-white/60">
                                     <img src={previewUrl} alt="Certificate preview" className="w-full h-full object-cover" />
                                 </div>
@@ -175,7 +175,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                     setShowForm(false)
                                     setPreviewUrl(null)
                                 }}
-                                className="px-10 py-5 text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em] hover:text-charcoal hover:bg-white/40 rounded-[20px] transition-all"
+                                className="px-10 py-5 text-[10px] font-black text-charcoal/60 uppercase tracking-[0.3em] hover:text-charcoal hover:bg-white/40 rounded-[20px] transition-all"
                             >
                                 ABORT
                             </button>
@@ -199,7 +199,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                     {certifications.length === 0 ? (
                         <div className="col-span-2 py-32 text-center glass-card border-dashed bg-white/20">
                             <Award className="w-16 h-16 text-charcoal/5 mx-auto mb-8 animate-pulse" />
-                            <p className="text-charcoal/40 text-[10px] font-black uppercase tracking-[0.5em] italic">Zero accreditations on record</p>
+                            <p className="text-charcoal/60 text-[10px] font-black uppercase tracking-[0.5em] italic">Zero accreditations on record</p>
                         </div>
                     ) : (
                         certifications.map((cert) => (
@@ -214,7 +214,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                     <div className="flex-1 min-w-0 text-center sm:text-left">
                                         <h4 className="font-serif text-charcoal text-2xl sm:text-3xl tracking-tighter mb-4 truncate">{cert.certification_body}</h4>
                                         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
-                                            <div className="flex items-center gap-2.5 text-[9px] font-black text-charcoal/30 uppercase tracking-[0.2em] shrink-0">
+                                            <div className="flex items-center gap-2.5 text-[9px] font-black text-charcoal/50 uppercase tracking-[0.2em] shrink-0">
                                                 <FileText className="w-3.5 h-3.5" />
                                                 SUBMITTED
                                             </div>
@@ -235,7 +235,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                     
                                     <button
                                         onClick={() => handleDelete(cert.id)}
-                                        className="p-5 text-charcoal/10 hover:text-red-500 hover:bg-red-50/50 rounded-full transition-all duration-700 opacity-100 sm:opacity-0 group-hover:opacity-100 border border-transparent hover:border-red-100 active:scale-90"
+                                        className="p-5 text-charcoal/40 hover:text-red-500 hover:bg-red-50/50 rounded-full transition-all duration-700 opacity-100 sm:opacity-0 group-hover:opacity-100 border border-transparent hover:border-red-100 active:scale-90"
                                         title="Purge Accreditation"
                                     >
                                         <Trash2 className="w-5 h-5" />

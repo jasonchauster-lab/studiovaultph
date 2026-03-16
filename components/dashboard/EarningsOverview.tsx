@@ -186,15 +186,15 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                 </div>
 
                 {/* Security Hold Card */}
-                <div className="group bg-cream-50/50 p-3 sm:p-4 rounded-2xl border-2 border-dashed border-cream-300 shadow-tight hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                <div className="group bg-white p-3 sm:p-4 rounded-2xl border border-cream-200 shadow-tight hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="p-2 rounded-xl bg-cream-200/50 group-hover:bg-cream-200 transition-colors">
-                            <Clock className="w-4 h-4 text-charcoal/40" />
+                        <div className="p-2 rounded-xl bg-charcoal/5 group-hover:bg-charcoal/10 transition-colors">
+                            <Clock className="w-4 h-4 text-charcoal/60" />
                         </div>
                     </div>
                     <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Security Hold</p>
-                    <h3 className="text-lg sm:text-2xl font-bold text-charcoal/60 tracking-tight">₱{summary.pendingBalance.toLocaleString()}</h3>
-                    <p className="text-[9px] font-bold uppercase text-charcoal/30 mt-1 flex items-center gap-1">
+                    <h3 className="text-lg sm:text-2xl font-bold text-charcoal">₱{summary.pendingBalance.toLocaleString()}</h3>
+                    <p className="text-[9px] font-bold uppercase text-charcoal/40 mt-1 flex items-center gap-1">
                         <ShieldCheck className="w-2.5 h-2.5" />
                         24h hold period
                     </p>

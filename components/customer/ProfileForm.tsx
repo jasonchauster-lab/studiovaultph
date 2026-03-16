@@ -252,7 +252,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                 <div className="flex items-center gap-3 border-b border-cream-200/60 pb-3">
                     <div className="flex flex-col gap-0.5">
                         <h2 className="text-xl font-serif font-bold text-charcoal-900">Medical Conditions</h2>
-                        <p className="text-[10px] font-bold text-charcoal-400 uppercase tracking-widest">Select all that apply to you</p>
+                        <p className="text-[10px] font-bold text-charcoal-500 uppercase tracking-widest">Select all that apply to you</p>
                     </div>
                     <div className="h-px flex-1 bg-cream-100/50" />
                 </div>
@@ -327,8 +327,8 @@ export default function ProfileForm({ profile }: { profile: any }) {
             {profile?.role === 'instructor' && (
                 <div className="space-y-6">
                     <div className="flex flex-col gap-1">
-                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em]">Equipment I can teach</label>
-                        <p className="text-[10px] font-medium text-charcoal/30 italic">Select apparatuses you are qualified for</p>
+                        <label className="block text-[10px] font-black text-charcoal/60 uppercase tracking-[0.3em]">Equipment I can teach</label>
+                        <p className="text-[10px] font-medium text-charcoal/50 italic">Select apparatuses you are qualified for</p>
                     </div>
                     <div className="flex flex-wrap gap-3">
                         {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
@@ -340,7 +340,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                         "px-6 py-3.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] cursor-pointer transition-all duration-500 border shadow-sm flex items-center gap-3 active:scale-95",
                                         isSelected
                                             ? "bg-burgundy text-white border-burgundy shadow-burgundy/20"
-                                            : "bg-white/40 text-charcoal/40 border-white/60 hover:bg-white hover:border-burgundy/30"
+                                            : "bg-white/40 text-charcoal/60 border-white/60 hover:bg-white hover:border-burgundy/30"
                                     )}
                                 >
                                     <input
@@ -369,8 +369,8 @@ export default function ProfileForm({ profile }: { profile: any }) {
             {profile?.role === 'instructor' && (
                 <div className="space-y-8 pt-4">
                     <div className="flex flex-col gap-1">
-                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em]">Rates per session (PHP)</label>
-                        <p className="text-[10px] font-medium text-charcoal/30 italic">Define your pricing per session type</p>
+                        <label className="block text-[10px] font-black text-charcoal/60 uppercase tracking-[0.3em]">Rates per session (PHP)</label>
+                        <p className="text-[10px] font-medium text-charcoal/50 italic">Define your pricing per session type</p>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
@@ -379,7 +379,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 <div key={eq} className="animate-in zoom-in-95 duration-700 bg-white/30 backdrop-blur-sm p-6 rounded-[2rem] border border-white/60 shadow-sm">
                                     <label className="block text-[10px] font-black text-burgundy uppercase tracking-[0.3em] mb-4 ml-2">{eq}</label>
                                     <div className="relative">
-                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-charcoal/40 tracking-widest">PHP</span>
+                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-charcoal/60 tracking-widest">PHP</span>
                                         <input
                                             type="number"
                                             name={`rate_${eq}`}

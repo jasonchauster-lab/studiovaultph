@@ -69,7 +69,7 @@ export default function InstructorProfileCard({
 
             {/* Bio Quote */}
             {instructor.bio && (
-                <div className="text-[13px] font-medium text-burgundy/60 leading-relaxed italic px-4 mb-8">
+                <div className="text-[13px] font-medium text-burgundy/80 leading-relaxed italic px-4 mb-8">
                     &ldquo;{instructor.bio}&rdquo;
                 </div>
             )}
@@ -82,7 +82,7 @@ export default function InstructorProfileCard({
                             key={i}
                             className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-1.5 border ${c.verified
                                 ? "bg-sage/10 text-sage border-sage/20"
-                                : "bg-white/40 text-burgundy/40 border-white/60"
+                                : "bg-white/40 text-burgundy/60 border-white/60"
                                 }`}
                             title={c.verified ? 'Verified Certification' : 'Pending Verification'}
                         >
@@ -97,7 +97,7 @@ export default function InstructorProfileCard({
             {/* Teaching Equipment */}
             {(instructor.teaching_equipment || (instructor.rates && Object.keys(instructor.rates).length > 0)) && (
                 <div className="pt-8 border-t border-burgundy/5">
-                    <h3 className="text-[10px] font-bold text-burgundy/30 uppercase tracking-[0.2em] mb-4">
+                    <h3 className="text-[10px] font-bold text-burgundy/60 uppercase tracking-[0.2em] mb-4">
                         Certified Equipment
                     </h3>
                     <div className="flex flex-wrap justify-center gap-2">
