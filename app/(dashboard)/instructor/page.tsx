@@ -142,7 +142,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
             // 6. Total Sessions Taught
             supabase
                 .from('bookings')
-                .select('*', { count: 'exact', head: true })
+                .select('id', { count: 'exact', head: true })
                 .eq('instructor_id', user.id)
                 .in('status', ['approved', 'completed']),
             // 7. Pending Earnings

@@ -611,7 +611,12 @@ export default function InstructorDashboardClient({
                             <div className="flex items-center gap-6 bg-white/40 backdrop-blur-sm p-6 sm:p-8 rounded-[2rem] border border-border-grey/40 shadow-tight">
                                 <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-tight shrink-0">
                                     {selectedBooking.client?.avatar_url ? (
-                                        <img src={selectedBooking.client.avatar_url} alt={selectedBooking.client.full_name} className="w-full h-full object-cover" />
+                                        <img
+                                            src={selectedBooking.client.avatar_url.startsWith('http') ? selectedBooking.client.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${selectedBooking.client.avatar_url}`}
+                                            alt={selectedBooking.client.full_name}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.client.full_name || 'C')}&background=F5F2EB&color=2C3230` }}
+                                        />
                                     ) : (
                                         <div className="w-full h-full bg-buttermilk flex items-center justify-center">
                                             <User className="w-8 h-8 text-burgundy/40" />

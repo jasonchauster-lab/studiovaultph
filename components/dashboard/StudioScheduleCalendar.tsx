@@ -1013,7 +1013,12 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                         <div className="flex items-center gap-4">
                                                             <div className="w-10 h-10 rounded-full bg-off-white flex items-center justify-center overflow-hidden border border-border-grey shadow-inner">
                                                                 {b.client?.avatar_url ? (
-                                                                    <img src={b.client.avatar_url} alt="" className="object-cover w-full h-full" />
+                                                                    <img
+                                                                        src={b.client.avatar_url.startsWith('http') ? b.client.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${b.client.avatar_url}`}
+                                                                        alt=""
+                                                                        className="object-cover w-full h-full"
+                                                                        onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(b.client.full_name || 'C')}&background=F5F2EB&color=2C3230` }}
+                                                                    />
                                                                 ) : (
                                                                     <User className="w-5 h-5 text-slate" />
                                                                 )}
