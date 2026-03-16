@@ -58,20 +58,20 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                 <div className="w-8 h-8 rounded-xl bg-charcoal/5 flex items-center justify-center">
                     <Filter className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] inline-block">SORT NODES</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] inline-block">Filters</span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:gap-2 flex-1 w-full sm:items-center sm:max-w-xl">
                 {/* Status Dropdown */}
                 <div className="w-full relative group min-w-0">
-                    <span className="absolute -top-2 left-3 px-1.5 bg-white text-[8px] font-black text-forest/60 uppercase tracking-[0.2em] z-10 sm:hidden">Registry Status</span>
+                    <span className="absolute -top-2 left-3 px-1.5 bg-white text-[8px] font-black text-forest/60 uppercase tracking-[0.2em] z-10 sm:hidden">Filter by Status</span>
                     <div className="relative h-12 sm:h-10">
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value as FilterStatus)}
                             className="w-full h-full pl-4 pr-10 bg-white sm:bg-charcoal/5 border border-border-grey/30 sm:border-charcoal/5 text-charcoal text-[11px] font-black uppercase tracking-[0.2em] rounded-xl focus:ring-forest focus:border-forest block py-2 sm:py-1 outline-none transition-all shadow-sm sm:shadow-none appearance-none hover:bg-forest/5"
                         >
-                            <option value="all">ANY PROTOCOL</option>
+                            <option value="all">All Statuses</option>
                             <option value="approved">Approved</option>
                             <option value="completed">Completed</option>
                             <option value="cancelled">Cancelled</option>

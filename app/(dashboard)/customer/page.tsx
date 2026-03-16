@@ -212,13 +212,13 @@ export default async function CustomerDashboard({
     }) || []
 
     return (
-        <div className="relative min-h-screen pb-24 space-y-16 overflow-hidden">
-            {/* Page-wide subtle texture */}
-            <div className="absolute inset-0 pointer-events-none opacity-[0.02]" 
-                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23513229' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }} 
+        <div className="relative min-h-screen pb-32 space-y-20 overflow-hidden bg-[#faf9f6]">
+            {/* Page-wide extremely subtle texture/grain */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-multiply" 
+                style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/felt.png")` }} 
             />
 
-            <div className="relative z-10 max-w-[1600px] mx-auto pt-10 px-4 sm:px-8 space-y-16">
+            <div className="relative z-10 max-w-[1400px] mx-auto pt-12 px-6 sm:px-10 space-y-20">
 
                 {/* ─── Filters Row ─── */}
                 <div className="relative z-20">
@@ -232,16 +232,16 @@ export default async function CustomerDashboard({
                         INSTRUCTORS SECTION
                     ══════════════════════════════════════ */}
                     {(!params.type || params.type === 'instructor') && (
-                        <section>
-                            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 border-b border-burgundy/5 pb-8">
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-4">
-                                        <h2 className="text-4xl font-serif font-bold text-burgundy tracking-tight">Verified Instructors</h2>
-                                        <div className="px-3 py-1 rounded-full bg-walking-vinnie/10 border border-walking-vinnie/20 text-[10px] font-black text-burgundy uppercase tracking-[0.2em] shadow-sm">
+                        <section className="animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8 mb-16 border-b border-burgundy/5 pb-10">
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-5">
+                                        <h2 className="text-4xl sm:text-5xl font-serif font-bold text-burgundy tracking-tight">Verified Instructors</h2>
+                                        <div className="px-4 py-1.5 rounded-full bg-forest text-[10px] font-black text-white uppercase tracking-[0.25em] shadow-lg shadow-forest/20">
                                             {instructors.length} Available
                                         </div>
                                     </div>
-                                    <p className="text-muted-burgundy/60 text-base font-medium">World-class talent, personally vetted for quality and expertise.</p>
+                                    <p className="text-burgundy/40 text-lg font-medium max-w-2xl">World-class talent, personally vetted for quality and expertise.</p>
                                 </div>
                             </div>
 
@@ -265,22 +265,19 @@ export default async function CustomerDashboard({
                                     {instructors.map(inst => {
                                         const hasVerifiedCert = inst.certifications?.some((c: any) => c.verified)
                                         return (
-                                            <div key={inst.id} className="marketplace-card earth-card overflow-hidden hover:translate-y-[-8px] transition-all duration-700 group border-burgundy/5 bg-white flex flex-col shadow-[0_10px_40px_rgba(81,50,41,0.03)] hover:shadow-[0_30px_70px_rgba(81,50,41,0.12)]">
+                                            <div key={inst.id} className="marketplace-card earth-card group bg-white rounded-[2.5rem] border border-burgundy/5 overflow-hidden transition-all duration-700 hover:shadow-[0_40px_100px_rgba(81,50,41,0.12)] hover:-translate-y-2 flex flex-col h-full">
                                                 {/* ── Banner: gradient lifestyle area ── */}
-                                                <div className="relative h-40 overflow-hidden bg-gradient-to-br from-off-white via-walking-vinnie/10 to-buttermilk/20">
-                                                    {/* decorative pattern */}
-                                                    <div
-                                                        className="absolute inset-0 opacity-[0.04] group-hover:opacity-[0.07] transition-opacity duration-700"
-                                                        style={{ 
-                                                            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm76-52c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-3-11c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM86 82c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-49 11c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM25 17c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM9 43c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm44 46c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM100 4c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM78 68c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM25 95c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM18 30c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm64 56c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm33-60c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM58 85c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm14-42c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm32 20c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-66 10c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-9-53c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm20 30c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-10 68c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM9 62c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm44-53c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM27 80c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm10-55c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z' fill='%23513229' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")` 
-                                                        }}
-                                                        aria-hidden="true"
-                                                    />
-                                                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent" />
+                                                <div className="relative h-44 overflow-hidden bg-[#F5F2EB]">
+                                                    {/* Premium mesh gradient background */}
+                                                    <div className="absolute inset-0 bg-gradient-to-br from-walking-vinnie/20 via-buttermilk/10 to-transparent opacity-60" />
+                                                    <div className="absolute -top-20 -right-20 w-64 h-64 bg-forest/5 rounded-full blur-[80px]" />
+                                                    <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-burgundy/5 rounded-full blur-[80px]" />
+                                                    
+                                                    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent" />
                                                     
                                                     {/* Verified badge — top right */}
                                                     {hasVerifiedCert && (
-                                                        <div className="absolute top-5 right-5 bg-forest/90 backdrop-blur-md text-white px-4 py-1.5 rounded-full flex items-center gap-2 z-10 text-[10px] font-black uppercase tracking-wider border border-white/20 shadow-lg">
+                                                        <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md text-burgundy px-4 py-2 rounded-2xl flex items-center gap-2 z-10 text-[9px] font-black uppercase tracking-[0.15em] border border-burgundy/5 shadow-xl transition-all duration-500 group-hover:bg-forest group-hover:text-white group-hover:border-forest/20">
                                                             <Award className="w-3.5 h-3.5" />
                                                             Verified Master
                                                         </div>
@@ -296,51 +293,56 @@ export default async function CustomerDashboard({
                                                     </div>
                                                 </div>
 
-                                                {/* ── Card Body — padded with room for overlapping avatar ── */}
-                                                <div className="p-8 pt-16 flex flex-col gap-y-6 flex-1 relative">
+                                                {/* ── Card Body ── */}
+                                                <div className="p-10 pt-16 flex flex-col gap-y-8 flex-1 relative">
                                                     {/* Name + handle */}
-                                                    <div className="space-y-1.5">
-                                                        <h3 className="text-2xl font-serif font-bold text-burgundy tracking-tight leading-tight group-hover:text-forest transition-colors duration-300">{inst.full_name}</h3>
+                                                    <div className="space-y-2">
+                                                        <h3 className="text-3xl font-serif font-bold text-burgundy tracking-tight leading-tight group-hover:text-forest transition-colors duration-500">{inst.full_name}</h3>
                                                         {inst.instagram_handle && (
-                                                            <p className="text-[10px] font-black text-burgundy/30 uppercase tracking-[0.25em]">
+                                                            <p className="text-[10px] font-black text-burgundy/20 uppercase tracking-[0.3em] group-hover:text-forest/30 transition-colors duration-500">
                                                                 @{inst.instagram_handle}
                                                             </p>
                                                         )}
                                                     </div>
 
-                                                    {/* Star rating */}
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-1.5 rounded-lg bg-off-white border border-burgundy/5">
-                                                            <StarRating
-                                                                rating={ratingsMap[inst.id]?.average || null}
-                                                                count={ratingsMap[inst.id]?.count}
-                                                                size="xs"
-                                                            />
+                                                    {/* Rating and Badges container */}
+                                                    <div className="flex flex-col gap-6">
+                                                        {/* Star rating */}
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="px-3 py-1.5 rounded-xl bg-[#F5F2EB] border border-burgundy/5 flex items-center gap-2 shadow-sm">
+                                                                <StarRating
+                                                                    rating={ratingsMap[inst.id]?.average || null}
+                                                                    count={ratingsMap[inst.id]?.count}
+                                                                    size="xs"
+                                                                />
+                                                                {ratingsMap[inst.id]?.count > 0 && (
+                                                                    <span className="text-[10px] text-burgundy/30 font-black uppercase tracking-widest border-l border-burgundy/10 pl-2">
+                                                                        {ratingsMap[inst.id].count} Reviews
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        {ratingsMap[inst.id]?.count > 0 && (
-                                                            <span className="text-[10px] text-burgundy/40 font-black uppercase tracking-widest mt-0.5">({ratingsMap[inst.id].count})</span>
+
+                                                        {/* Certification badges */}
+                                                        {(inst.certifications || []).filter((c: any) => c.verified).length > 0 && (
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {(inst.certifications || []).filter((c: any) => c.verified).slice(0, 3).map((c: any) => (
+                                                                    <span
+                                                                        key={c.id}
+                                                                        className="text-[9px] font-black uppercase tracking-[0.2em] bg-walking-vinnie/10 text-burgundy/40 px-3.5 py-1.5 rounded-xl border border-walking-vinnie/20 transition-all duration-500 group-hover:bg-forest/5 group-hover:text-forest/50 group-hover:border-forest/10"
+                                                                    >
+                                                                        {c.certification_body}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
                                                         )}
                                                     </div>
 
-                                                    {/* Certification badges — Walking Vinnie palette */}
-                                                    {(inst.certifications || []).filter((c: any) => c.verified).length > 0 && (
-                                                        <div className="flex flex-wrap gap-2.5">
-                                                            {(inst.certifications || []).filter((c: any) => c.verified).slice(0, 3).map((c: any) => (
-                                                                <span
-                                                                    key={c.id}
-                                                                    className="text-[9px] font-black uppercase tracking-[0.18em] bg-walking-vinnie/10 text-burgundy/70 px-3 py-1.5 rounded-lg border border-walking-vinnie/20 transition-colors group-hover:bg-walking-vinnie/20"
-                                                                >
-                                                                    {c.certification_body}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    )}
-
                                                     {/* Actions */}
-                                                    <div className="flex flex-col gap-y-4 mt-auto pt-6 border-t border-burgundy/5">
+                                                    <div className="flex flex-col gap-y-4 mt-auto pt-8 border-t border-burgundy/5">
                                                         <Link
                                                             href={`/instructors/${inst.id}`}
-                                                            className="flex items-center justify-center w-full py-4 rounded-2xl bg-off-white text-burgundy text-[11px] font-black uppercase tracking-[0.25em] border border-burgundy/10 hover:bg-white hover:border-burgundy/30 hover:shadow-md transition-all duration-500"
+                                                            className="flex items-center justify-center w-full py-4.5 rounded-[1.25rem] bg-[#F5F2EB]/50 text-burgundy text-[11px] font-black uppercase tracking-[0.3em] border border-burgundy/5 hover:bg-white hover:border-burgundy/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-500"
                                                         >
                                                             View Full Profile
                                                         </Link>
@@ -369,53 +371,53 @@ export default async function CustomerDashboard({
                         STUDIOS SECTION — Marketplace Cards
                     ══════════════════════════════════════ */}
                     {(!params.type || params.type === 'studio') && (
-                        <section>
-                            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 border-b border-burgundy/5 pb-8">
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-4">
-                                        <h2 className="text-4xl font-serif font-bold text-burgundy tracking-tight">Partner Studios</h2>
-                                        <div className="px-3 py-1 rounded-full bg-buttermilk/20 border border-buttermilk/40 text-[10px] font-black text-burgundy/50 uppercase tracking-[0.2em] shadow-sm">
+                        <section className="animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-150">
+                            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8 mb-16 border-b border-burgundy/5 pb-10">
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-5">
+                                        <h2 className="text-4xl sm:text-5xl font-serif font-bold text-burgundy tracking-tight">Partner Studios</h2>
+                                        <div className="px-4 py-1.5 rounded-full bg-buttermilk/20 border border-buttermilk/40 text-[10px] font-black text-burgundy/50 uppercase tracking-[0.25em] shadow-sm">
                                             {studios?.length || 0} Registered
                                         </div>
                                     </div>
-                                    <p className="text-muted-burgundy/60 text-base font-medium">Top-tier facilities curated for your practice and excellence.</p>
+                                    <p className="text-burgundy/40 text-lg font-medium max-w-2xl">Top-tier facilities curated for your practice and excellence.</p>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                                 {studios?.map(studio => (
-                                    <div key={studio.id} className="marketplace-card earth-card overflow-hidden hover:translate-y-[-8px] transition-all duration-700 group flex flex-col border-burgundy/5 bg-white shadow-[0_10px_40px_rgba(81,50,41,0.03)] hover:shadow-[0_30px_70px_rgba(81,50,41,0.12)]">
-                                        {/* ── Banner Image — aspect-[16/9] — object-cover ── */}
-                                        <div className="relative aspect-[16/10] overflow-hidden bg-off-white">
+                                    <div key={studio.id} className="marketplace-card earth-card group bg-white rounded-[2.5rem] border border-burgundy/5 overflow-hidden transition-all duration-700 hover:shadow-[0_40px_100px_rgba(81,50,41,0.12)] hover:-translate-y-2 flex flex-col h-full ring-1 ring-burgundy/[0.02]">
+                                        {/* ── Banner Image ── */}
+                                        <div className="relative aspect-[16/10] overflow-hidden bg-[#F5F2EB]">
                                             {studio.logo_url ? (
                                                 <Image
                                                     src={studio.logo_url}
                                                     alt={studio.name}
                                                     fill
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                                    className="object-cover group-hover:scale-105 transition-transform duration-[2000ms] ease-out"
+                                                    className="object-cover group-hover:scale-110 transition-transform duration-[3000ms] ease-out will-change-transform"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-off-white to-walking-vinnie/20">
-                                                    <span className="text-burgundy/10 font-serif italic text-7xl select-none group-hover:scale-110 transition-transform duration-1000">
+                                                    <span className="text-burgundy/10 font-serif italic text-8xl select-none group-hover:scale-110 transition-transform duration-1000">
                                                         {studio.name.slice(0, 1)}
                                                     </span>
                                                 </div>
                                             )}
                                             
-                                            <div className="absolute inset-0 bg-burgundy/5 group-hover:bg-transparent transition-colors duration-700" />
+                                            <div className="absolute inset-0 bg-burgundy/5 group-hover:bg-transparent transition-colors duration-1000" />
 
                                             {/* Location overlay — top left */}
-                                            <div className="absolute top-5 left-5 z-10 transition-all duration-500 group-hover:translate-x-1">
-                                                <div className="flex items-center gap-2 bg-white/95 backdrop-blur-md px-4 py-2 rounded-full shadow-xl border border-white/50">
-                                                    <MapPin className="w-3.5 h-3.5 text-forest shrink-0" />
-                                                    <span className="text-[10px] font-black text-burgundy uppercase tracking-widest">{studio.location}</span>
+                                            <div className="absolute top-6 left-6 z-10">
+                                                <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border border-white/50 transition-all duration-500 group-hover:bg-forest group-hover:text-white group-hover:border-forest/20">
+                                                    <MapPin className="w-3.5 h-3.5 text-forest shrink-0 group-hover:text-white" />
+                                                    <span className="text-[9px] font-black uppercase tracking-[0.15em]">{studio.location}</span>
                                                 </div>
                                             </div>
 
                                             {/* Studio small logo overlay — bottom left circular */}
-                                            <div className="absolute bottom-5 left-5 z-10 hidden sm:block transition-all duration-700 group-hover:scale-110 group-hover:rotate-3">
-                                                <div className="w-14 h-14 rounded-full border-4 border-white shadow-2xl overflow-hidden bg-white ring-1 ring-burgundy/5">
+                                            <div className="absolute bottom-6 left-6 z-10 hidden sm:block transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
+                                                <div className="w-16 h-16 rounded-full border-[6px] border-white shadow-2xl overflow-hidden bg-white ring-1 ring-burgundy/5">
                                                     <AvatarWithFallback
                                                         src={studio.logo_url}
                                                         alt={studio.name}
@@ -426,34 +428,37 @@ export default async function CustomerDashboard({
                                         </div>
 
                                         {/* ── Card Body ── */}
-                                        <div className="p-8 flex flex-col flex-1 gap-y-6">
+                                        <div className="p-10 flex flex-col flex-1 gap-y-8">
 
                                             {/* Studio name + rating */}
-                                            <div className="flex items-start justify-between gap-4">
-                                                <h3 className="text-2xl font-serif font-bold text-burgundy tracking-tight leading-tight group-hover:text-forest transition-colors duration-300">{studio.name}</h3>
-                                                <div className="shrink-0 p-2 rounded-xl bg-off-white border border-burgundy/5 flex flex-col items-center gap-0.5">
+                                            <div className="flex items-start justify-between gap-6">
+                                                <div className="space-y-2">
+                                                    <h3 className="text-3xl font-serif font-bold text-burgundy tracking-tight leading-tight group-hover:text-forest transition-colors duration-500">{studio.name}</h3>
+                                                    <p className="text-[10px] font-black text-burgundy/20 uppercase tracking-[0.3em]">Partner Studio</p>
+                                                </div>
+                                                <div className="shrink-0 px-3 py-2 rounded-2xl bg-[#F5F2EB] border border-burgundy/5 flex flex-col items-center gap-1 shadow-sm transition-all duration-500 group-hover:bg-white group-hover:border-burgundy/10">
                                                     <StarRating
                                                         rating={ratingsMap[studio.owner_id]?.average || null}
                                                         count={ratingsMap[studio.owner_id]?.count}
                                                         size="xs"
                                                     />
                                                     {(!ratingsMap[studio.owner_id]?.count || ratingsMap[studio.owner_id].count === 0) && (
-                                                        <span className="text-[8px] font-black text-burgundy/30 uppercase tracking-tighter">Vault Choice</span>
+                                                        <span className="text-[8px] font-black text-burgundy/25 uppercase tracking-[0.1em]">Vault Choice</span>
                                                     )}
                                                 </div>
                                             </div>
 
                                             {/* Description */}
-                                            <p className="text-sm text-muted-burgundy leading-relaxed line-clamp-2 italic font-medium opacity-80">
-                                                {studio.description || 'A premiere pilates studio dedicated to your well-being.'}
+                                            <p className="text-[14px] text-burgundy/40 leading-relaxed line-clamp-2 italic font-medium transition-colors duration-500 group-hover:text-burgundy/60">
+                                                {studio.description || 'A premiere pilates studio dedicated to your well-being and excellence.'}
                                             </p>
 
                                             {/* Features/Equipment */}
                                             {(studio.reformers_count || 0) > 0 && (
-                                                <div className="flex flex-wrap gap-2 pt-2 mt-auto">
-                                                    <div className="flex items-center gap-2.5 bg-walking-vinnie/5 px-4 py-2 rounded-xl border border-walking-vinnie/10 group-hover:border-walking-vinnie/30 transition-colors">
+                                                <div className="flex flex-wrap gap-2">
+                                                    <div className="flex items-center gap-3 bg-walking-vinnie/5 px-4 py-2.5 rounded-2xl border border-walking-vinnie/10 group-hover:border-forest/20 group-hover:bg-forest/5 transition-all duration-500">
                                                         <div className="w-2 h-2 rounded-full bg-forest animate-pulse" />
-                                                        <span className="text-[10px] font-black text-burgundy/60 uppercase tracking-[0.2em]">
+                                                        <span className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em] group-hover:text-forest/70">
                                                             {studio.reformers_count} Professional Reformers
                                                         </span>
                                                     </div>
@@ -461,10 +466,10 @@ export default async function CustomerDashboard({
                                             )}
 
                                             {/* Book Now Button — Full width at bottom */}
-                                            <div className="pt-4 mt-auto">
+                                            <div className="pt-8 mt-auto border-t border-burgundy/5">
                                                 <Link
                                                     href={`/studios/${studio.id}`}
-                                                    className="flex items-center justify-center w-full py-4.5 rounded-2xl bg-forest text-white text-[11px] font-black uppercase tracking-[0.3em] hover:bg-burgundy hover:scale-[1.03] transition-all duration-500 shadow-[0_15px_30px_rgba(40,63,55,0.2)] hover:shadow-[0_20px_40px_rgba(81,50,41,0.3)] group-hover:bg-forest group-hover:hover:bg-burgundy"
+                                                    className="flex items-center justify-center w-full py-5 rounded-[1.5rem] bg-[#F5F2EB]/50 text-burgundy text-[11px] font-black uppercase tracking-[0.3em] border border-burgundy/5 hover:bg-forest hover:text-white hover:border-forest/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-500"
                                                 >
                                                     Book Studio
                                                 </Link>

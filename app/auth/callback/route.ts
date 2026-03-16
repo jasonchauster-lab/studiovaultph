@@ -141,7 +141,7 @@ export async function GET(request: Request) {
             const cookies = request.headers.get('cookie') || ''
             if (cookies.includes('pending_otp_remember=1')) {
                 const maxAge = 14 * 24 * 60 * 60
-                response.cookies.set('otp_remembered', '1', { maxAge, path: '/', sameSite: 'lax' })
+                response.cookies.set('otp_remembered', user.id, { maxAge, path: '/', sameSite: 'lax' })
                 response.cookies.set('remember_me', '1', { maxAge, path: '/', sameSite: 'lax' })
                 response.cookies.set('pending_otp_remember', '', { maxAge: 0, path: '/' })
             }
@@ -231,7 +231,7 @@ export async function GET(request: Request) {
             const cookies = request.headers.get('cookie') || ''
             if (cookies.includes('pending_otp_remember=1')) {
                 const maxAge = 14 * 24 * 60 * 60
-                response.cookies.set('otp_remembered', '1', { maxAge, path: '/', sameSite: 'lax' })
+                response.cookies.set('otp_remembered', user.id, { maxAge, path: '/', sameSite: 'lax' })
                 response.cookies.set('remember_me', '1', { maxAge, path: '/', sameSite: 'lax' })
                 response.cookies.set('pending_otp_remember', '', { maxAge: 0, path: '/' })
             }

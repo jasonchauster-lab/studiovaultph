@@ -35,8 +35,8 @@ function LoginContent() {
     const router = useRouter()
     const supabase = createClient()
 
-    const isOtpRemembered = () =>
-        document.cookie.split(';').some(c => c.trim().startsWith('otp_remembered=1'))
+    const isOtpRemembered = (userId: string) =>
+        document.cookie.split(';').some(c => c.trim() === `otp_remembered=${userId}`)
 
     const redirectByRole = async (userId: string) => {
         const { data: profile } = await supabase
@@ -112,8 +112,8 @@ function LoginContent() {
         }
         if (!user) { router.push('/welcome'); router.refresh(); return }
 
-        // Skip 2FA if this device is already remembered
-        if (isOtpRemembered()) {
+        // Skip 2FA if this device is already remembered for this specific user
+        if (isOtpRemembered(user.id)) {
             await redirectByRole(user.id)
             return
         }

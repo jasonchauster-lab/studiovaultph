@@ -123,9 +123,9 @@ export default function ProfileForm({ profile }: { profile: any }) {
                     />
                 </div>
 
-                <div className="text-center sm:text-left space-y-1">
-                    <h3 className="text-2xl font-serif font-bold text-charcoal-900 tracking-tight">Identity Image</h3>
-                    <p className="text-xs font-medium text-charcoal-400 max-w-xs leading-relaxed">
+                <div className="text-center sm:text-left space-y-1.5">
+                    <h3 className="text-2xl font-serif font-bold text-charcoal-900 tracking-tight">Profile Photo</h3>
+                    <p className="text-[11px] font-medium text-charcoal-500 max-w-xs leading-relaxed">
                         This helps students and studios recognize you. Upload a clear photo of yourself.
                     </p>
                 </div>
@@ -147,7 +147,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 name="fullName"
                                 defaultValue={profile?.fullName || profile?.full_name || ''}
                                 required
-                                className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
+                                className="w-full px-5 py-4 bg-cream-50/20 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-4 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all duration-300 shadow-sm placeholder:text-charcoal-300 hover:border-cream-300"
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -157,7 +157,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 name="email"
                                 defaultValue={profile?.email || ''}
                                 required
-                                className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
+                                className="w-full px-5 py-4 bg-cream-50/20 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-4 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all duration-300 shadow-sm placeholder:text-charcoal-300 hover:border-cream-300"
                             />
                             {profile?.new_email && (
                                 <p className="mt-2 ml-2 text-[10px] text-gold font-bold uppercase tracking-[0.2em] animate-pulse">
@@ -173,7 +173,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                     type="text"
                                     name="instagram"
                                     defaultValue={profile?.instagram_handle || ''}
-                                    className="w-full pl-10 pr-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
+                                    className="w-full pl-10 pr-5 py-4 bg-cream-50/20 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-4 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all duration-300 shadow-sm placeholder:text-charcoal-300 hover:border-cream-300"
                                     placeholder="username"
                                 />
                             </div>
@@ -196,7 +196,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 defaultValue={profile?.contact_number || ''}
                                 placeholder="09XXXXXXXXX"
                                 maxLength={13}
-                                className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
+                                className="w-full px-5 py-4 bg-cream-50/20 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-4 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all duration-300 shadow-sm placeholder:text-charcoal-300 hover:border-cream-300"
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -206,7 +206,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 name="emergencyContactName"
                                 defaultValue={profile?.emergency_contact_name || profile?.emergency_contact || ''}
                                 placeholder="Contact Name"
-                                className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
+                                className="w-full px-5 py-4 bg-cream-50/20 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-4 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all duration-300 shadow-sm placeholder:text-charcoal-300 hover:border-cream-300"
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -216,7 +216,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 name="emergencyContactPhone"
                                 defaultValue={profile?.emergency_contact_phone || ''}
                                 placeholder="09XXXXXXXXX"
-                                className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
+                                className="w-full px-5 py-4 bg-cream-50/20 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-4 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all duration-300 shadow-sm placeholder:text-charcoal-300 hover:border-cream-300"
                             />
                         </div>
                     </div>
@@ -230,7 +230,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 type="date"
                                 name="birthday"
                                 defaultValue={profile?.date_of_birth || ''}
-                                className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm cursor-pointer"
+                                className="w-full px-5 py-4 bg-cream-50/20 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-4 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all duration-300 shadow-sm cursor-pointer hover:border-cream-300"
                             />
                         </div>
                         <div className="md:col-span-2 space-y-1.5">
@@ -240,7 +240,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 defaultValue={profile?.bio || ''}
                                 rows={5}
                                 placeholder="Tell studios and instructors about your fitness journey, goals, or philosophy..."
-                                className="w-full px-6 py-5 bg-cream-50/50 border border-cream-200 rounded-2xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 resize-none transition-all leading-relaxed shadow-sm placeholder:text-charcoal-300"
+                                className="w-full px-6 py-5 bg-cream-50/20 border border-cream-200 rounded-2xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-4 focus:ring-charcoal-900/5 focus:border-charcoal-900 resize-none transition-all duration-300 leading-relaxed shadow-sm placeholder:text-charcoal-300 hover:border-cream-300"
                             />
                         </div>
                     </div>
@@ -257,17 +257,17 @@ export default function ProfileForm({ profile }: { profile: any }) {
                     <div className="h-px flex-1 bg-cream-100/50" />
                 </div>
 
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2.5">
                     {['Scoliosis', 'Obesity', 'Herniated Disc', 'Post-partum', 'Chronic Back Pain', 'Hypertension', 'Diabetes', 'Asthma', 'Osteoporosis', 'Others'].map((condition) => {
                         const isSelected = selectedMedicalConditions.includes(condition);
                         return (
                             <label
                                 key={condition}
                                 className={clsx(
-                                    "relative flex items-center gap-3 px-6 py-4 border rounded-[1.25rem] cursor-pointer transition-all duration-300 overflow-hidden active:scale-95 group",
+                                    "relative flex items-center gap-3 px-5 py-3.5 border rounded-2xl cursor-pointer transition-all duration-500 overflow-hidden active:scale-95 group",
                                     isSelected 
-                                        ? "border-forest" 
-                                        : "bg-white border-cream-200 hover:border-forest/20"
+                                        ? "border-forest shadow-md shadow-forest/10" 
+                                        : "bg-white border-cream-200 hover:border-forest/30 hover:shadow-sm"
                                 )}
                             >
                                 <input
@@ -285,23 +285,23 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                     className="peer absolute opacity-0"
                                 />
                                 <div className={clsx(
-                                    "absolute inset-0 transition-colors duration-300",
-                                    isSelected ? "bg-forest" : "bg-cream-50/30 group-hover:bg-cream-50"
+                                    "absolute inset-0 transition-opacity duration-500",
+                                    isSelected ? "bg-forest opacity-100" : "bg-cream-50/30 opacity-0 group-hover:opacity-100"
                                 )} />
                                 
                                 <div className={clsx(
-                                    "relative z-10 w-4 h-4 flex-none rounded-full border-2 transition-all flex items-center justify-center",
-                                    isSelected ? "border-white" : "border-cream-200"
+                                    "relative z-10 w-4 h-4 flex-none rounded-full border-2 transition-all duration-500 flex items-center justify-center",
+                                    isSelected ? "border-white" : "border-cream-200 group-hover:border-forest/40"
                                 )}>
                                     <div className={clsx(
-                                        "w-1.5 h-1.5 rounded-full transition-transform",
-                                        isSelected ? "bg-white scale-100" : "bg-charcoal-900 scale-0"
+                                        "w-1.5 h-1.5 rounded-full transition-all duration-500",
+                                        isSelected ? "bg-white scale-100" : "bg-forest scale-0"
                                     )} />
                                 </div>
-
+                                
                                 <span className={clsx(
-                                    "relative z-10 text-[10px] font-black uppercase tracking-[0.15em] transition-colors duration-300",
-                                    isSelected ? "text-white" : "text-charcoal-600"
+                                    "relative z-10 text-[10px] font-black uppercase tracking-[0.12em] transition-colors duration-500",
+                                    isSelected ? "text-white" : "text-charcoal-600 group-hover:text-charcoal-900"
                                 )}>
                                     {condition}
                                 </span>
@@ -317,7 +317,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                             name="otherMedicalCondition"
                             defaultValue={profile?.other_medical_condition || ''}
                             placeholder="Please specify your condition(s)..."
-                            className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
+                            className="w-full px-5 py-4 bg-cream-50/20 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-4 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all duration-300 shadow-sm placeholder:text-charcoal-300 hover:border-cream-300"
                         />
                     </div>
                 )}
@@ -410,12 +410,12 @@ export default function ProfileForm({ profile }: { profile: any }) {
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full sm:w-auto px-12 py-5 bg-forest text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-110 transition-all shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 transition-all duration-500 group"
+                    className="w-full sm:w-auto px-14 py-5 bg-forest text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-110 hover:shadow-2xl hover:shadow-forest/20 transition-all duration-500 shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 group"
                 >
                     {isLoading ? (
                         <Loader2 className="w-5 h-5 animate-spin text-gold" />
                     ) : (
-                        <Save className="w-4 h-4 text-gold group-hover:rotate-12 transition-transform duration-500" />
+                        <Save className="w-4 h-4 text-gold group-hover:rotate-12 group-hover:scale-110 transition-all duration-500" />
                     )}
                     {isLoading ? 'Processing' : 'Commit Changes'}
                 </button>

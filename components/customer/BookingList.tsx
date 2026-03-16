@@ -108,10 +108,42 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
         return dateB - dateA // Sort descending
     })
 
+    const groupedPastBookings = pastBookings.reduce((groups: Record<string, any[]>, booking: any) => {
+        const date = getSlotDateTime(booking.slots?.date, booking.slots?.start_time)
+        const monthYear = date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+        if (!groups[monthYear]) {
+            groups[monthYear] = []
+        }
+        groups[monthYear].push(booking)
+        return groups
+    }, {})
+
     const isChatExpired = (booking: any) => {
         const endTime = getSlotDateTime(booking.slots?.date, booking.slots?.end_time)
         const expirationTime = new Date(endTime.getTime() + 12 * 60 * 60 * 1000)
         return now > expirationTime
+    }
+
+    const getStatusLabel = (status: string, isPast: boolean) => {
+        switch (status) {
+            case 'approved':
+                return isPast ? 'Completed' : 'Confirmed'
+            case 'completed':
+                return 'Completed'
+            case 'pending':
+            case 'submitted':
+                return 'Awaiting Confirmation'
+            case 'rejected':
+                return 'Not Accepted'
+            case 'expired':
+                return 'No-Show'
+            case 'cancelled':
+            case 'cancelled_refunded':
+            case 'cancelled_charged':
+                return 'Cancelled'
+            default:
+                return status
+        }
     }
 
     const handleCancelConfirm = async (reason: string) => {
@@ -163,8 +195,12 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                         upcomingBookings.map((booking) => {
                             const studio = getFirst(booking.studios) || getFirst(booking.slots?.studios)
                             const instructor = getFirst(booking.instructor)
+                            const isPending = ['pending', 'submitted'].includes(booking.status)
                             return (
-                                <div key={booking.id} className="earth-card p-6 bg-white hover:translate-y-[-2px] transition-all duration-300 shadow-tight group relative overflow-hidden">
+                                <div key={booking.id} className={clsx(
+                                    "earth-card p-6 transition-all duration-300 shadow-tight group relative overflow-hidden",
+                                    isPending ? "bg-amber-50/30 border-amber-100" : "bg-white hover:translate-y-[-2px]"
+                                )}>
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="flex flex-col gap-1 w-full">
                                             <div className="flex items-center justify-between w-full">
@@ -185,11 +221,11 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                                 <span className={clsx(
                                                                     "status-pill-earth",
                                                                     booking.status === 'approved' ? "status-pill-green" :
-                                                                        ['pending', 'submitted'].includes(booking.status) ? "status-pill-yellow" :
+                                                                        isPending ? "bg-amber-100 text-amber-900 border-amber-200" :
                                                                             ['rejected', 'cancelled', 'cancelled_refunded', 'cancelled_charged', 'expired'].includes(booking.status) ? "status-pill-red" :
                                                                                 "bg-off-white text-slate border-border-grey"
                                                                 )}>
-                                                                    {booking.status === 'approved' ? 'Confirmed' : booking.status}
+                                                                    {getStatusLabel(booking.status, false)}
                                                                 </span>
                                                             </div>
                                                             <div className="text-right shrink-0">
@@ -282,97 +318,116 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                 </div>
             </section>
 
-            {/* Past List */}
+            {/* Past List with Date Grouping */}
             {pastBookings.length > 0 && (
-                <section>
-                    <h2 className="text-xl font-serif text-charcoal-900 mb-6">Session History</h2>
-                    <div className="space-y-4">
-                        {pastBookings.map((booking: any) => {
-                            const studio = getFirst(booking.studios) || getFirst(booking.slots?.studios)
-                            const instructor = getFirst(booking.instructor)
-                            return (
-                                <div key={booking.id} className="earth-card p-5 bg-white flex justify-between items-center sm:flex-row flex-col gap-4 shadow-tight">
-                                    <div className="flex items-center gap-4 w-full sm:w-auto">
-                                        <div className="text-slate text-sm shrink-0 font-medium">
-                                            {getSlotDateTime(booking.slots?.date, booking.slots?.start_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                        </div>
-                                        <div className="font-bold text-burgundy">
-                                            <button onClick={() => handleStudioClick(studio)} className="hover:text-sage transition-colors hover:underline underline-offset-2">
-                                                {studio?.name || "Studio"}
-                                            </button>
-                                            <span className="mx-2 text-border-grey font-normal">•</span>
-                                            <button onClick={() => handleInstructorClick(instructor)} className="text-slate font-medium hover:text-forest transition-colors hover:underline underline-offset-2">
-                                                {instructor?.full_name || 'N/A'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-end w-full sm:w-auto gap-3">
-                                        {(() => {
-                                            const slotEnd = getSlotDateTime(booking.slots?.date, booking.slots?.end_time)
-                                            const isPast = slotEnd < now
-                                            const canReview = booking.status === 'completed' || (booking.status === 'approved' && isPast)
-
-                                            if (!canReview) return null
-
-                                            const hasStudioOwner = !!studio?.owner_id
-                                            const reviewedInstructor = booking.customer_reviewed_instructor || booking.customer_reviewed
-                                            const reviewedStudio = booking.customer_reviewed_studio
-
-                                            return (
-                                                <div className="flex items-center gap-2">
-                                                    {!reviewedInstructor ? (
-                                                        <button
-                                                            onClick={() => setReviewTarget({
-                                                                booking,
-                                                                type: 'instructor',
-                                                                revieweeId: booking.instructor_id,
-                                                                revieweeName: instructor?.full_name || 'Instructor',
-                                                                context: 'Instructor'
-                                                            })}
-                                                            className="px-3 py-1 bg-off-white text-burgundy text-[10px] font-bold rounded-full border border-border-grey hover:bg-sage hover:text-white hover:border-sage transition-all shadow-tight"
-                                                        >
-                                                            Review Instructor
-                                                        </button>
-                                                    ) : (
-                                                        <span className="status-pill-earth status-pill-green">Instructor ✓</span>
-                                                    )}
-                                                    {hasStudioOwner && (!reviewedStudio ? (
-                                                        <button
-                                                            onClick={() => setReviewTarget({
-                                                                booking,
-                                                                type: 'studio',
-                                                                revieweeId: studio.owner_id,
-                                                                revieweeName: studio.name || 'Studio',
-                                                                context: 'Studio'
-                                                            })}
-                                                            className="px-3 py-1 bg-off-white text-burgundy text-[10px] font-bold rounded-full border border-border-grey hover:bg-sage hover:text-white hover:border-sage transition-all shadow-tight"
-                                                        >
-                                                            Review Studio
-                                                        </button>
-                                                    ) : (
-                                                        <span className="status-pill-earth status-pill-green">Studio ✓</span>
-                                                    ))}
+                <section className="space-y-8">
+                    <h2 className="text-xl font-serif text-charcoal-900 mb-6 sticky top-0 py-4 bg-cream-50 z-20 border-b border-charcoal/5">Session History</h2>
+                    
+                    {(Object.entries(groupedPastBookings) as [string, any[]][]).map(([monthYear, monthBookings]) => (
+                        <div key={monthYear} className="space-y-4">
+                            <h3 className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em] flex items-center gap-3">
+                                {monthYear}
+                                <div className="h-[1px] flex-1 bg-charcoal/10" />
+                            </h3>
+                            
+                            <div className="space-y-3">
+                                {monthBookings.map((booking: any) => {
+                                    const studio = getFirst(booking.studios) || getFirst(booking.slots?.studios)
+                                    const instructor = getFirst(booking.instructor)
+                                    const slotEnd = getSlotDateTime(booking.slots?.date, booking.slots?.end_time)
+                                    const isPast = slotEnd < now
+                                    const canReview = booking.status === 'completed' || (booking.status === 'approved' && isPast)
+                                    
+                                    return (
+                                        <div key={booking.id} className="earth-card p-4 sm:p-5 bg-white flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-tight hover:shadow-md transition-shadow">
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex flex-col items-center justify-center w-12 h-12 bg-charcoal/5 rounded-xl shrink-0">
+                                                    <span className="text-[10px] uppercase font-black text-charcoal/40 leading-none">
+                                                        {getSlotDateTime(booking.slots?.date, booking.slots?.start_time).toLocaleDateString(undefined, { month: 'short' })}
+                                                    </span>
+                                                    <span className="text-lg font-serif text-charcoal leading-none mt-0.5">
+                                                        {getSlotDateTime(booking.slots?.date, booking.slots?.start_time).toLocaleDateString(undefined, { day: 'numeric' })}
+                                                    </span>
                                                 </div>
-                                            )
-                                        })()}
-                                        <span className={clsx(
-                                            "status-pill-earth",
-                                            booking.status === 'completed' || booking.status === 'approved' ? "status-pill-green" :
-                                                ['pending', 'submitted'].includes(booking.status) ? "status-pill-yellow" :
-                                                    ['cancelled', 'cancelled_refunded', 'cancelled_charged', 'rejected', 'expired'].includes(booking.status) ? "status-pill-red" :
-                                                        "bg-off-white text-slate border-border-grey"
-                                        )}>
-                                            {booking.status === 'completed' ? 'Completed' :
-                                                booking.status === 'approved' ? 'Completed' :
-                                                    ['pending', 'submitted'].includes(booking.status) ? 'Pending' :
-                                                        ['rejected', 'expired'].includes(booking.status) ? booking.status :
-                                                            'Cancelled'}
-                                        </span>
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
+                                                
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex flex-col">
+                                                        <button onClick={() => handleStudioClick(studio)} className="text-base font-bold text-burgundy hover:text-sage transition-colors text-left truncate">
+                                                            {studio?.name || "Studio"}
+                                                        </button>
+                                                        <div className="flex items-center gap-2 mt-0.5 min-w-0">
+                                                            <button onClick={() => handleInstructorClick(instructor)} className="text-[12px] text-slate font-medium hover:text-forest transition-colors truncate">
+                                                                {instructor?.full_name || 'N/A'}
+                                                            </button>
+                                                            <span className="text-charcoal/20 shrink-0">•</span>
+                                                            <span className="text-[11px] text-charcoal/50 shrink-0">
+                                                                {getSlotDateTime(booking.slots?.date, booking.slots?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between sm:justify-end gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-charcoal/5">
+                                                <div className="flex items-center gap-2">
+                                                    {canReview && (
+                                                        <>
+                                                            {!(booking.customer_reviewed_instructor || booking.customer_reviewed) ? (
+                                                                <button
+                                                                    onClick={() => setReviewTarget({
+                                                                        booking,
+                                                                        type: 'instructor',
+                                                                        revieweeId: booking.instructor_id,
+                                                                        revieweeName: instructor?.full_name || 'Instructor',
+                                                                        context: 'Instructor'
+                                                                    })}
+                                                                    className="px-3 py-1.5 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-full hover:brightness-110 transition-all shadow-tight"
+                                                                >
+                                                                    Review Instructor
+                                                                </button>
+                                                            ) : (
+                                                                <span className="status-pill-earth status-pill-green flex items-center gap-1">
+                                                                    <CheckCircle2 className="w-3 h-3" /> Inst.
+                                                                </span>
+                                                            )}
+                                                            {!!studio?.owner_id && (!booking.customer_reviewed_studio ? (
+                                                                <button
+                                                                    onClick={() => setReviewTarget({
+                                                                        booking,
+                                                                        type: 'studio',
+                                                                        revieweeId: studio.owner_id,
+                                                                        revieweeName: studio.name || 'Studio',
+                                                                        context: 'Studio'
+                                                                    })}
+                                                                    className="px-3 py-1.5 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-full hover:brightness-110 transition-all shadow-tight"
+                                                                >
+                                                                    Review Studio
+                                                                </button>
+                                                            ) : (
+                                                                <span className="status-pill-earth status-pill-green flex items-center gap-1">
+                                                                    <CheckCircle2 className="w-3 h-3" /> Studio
+                                                                </span>
+                                                            ))}
+                                                        </>
+                                                    )}
+                                                </div>
+
+                                                <span className={clsx(
+                                                    "status-pill-earth shrink-0",
+                                                    (booking.status === 'completed' || booking.status === 'approved') ? "status-pill-green" :
+                                                        ['pending', 'submitted'].includes(booking.status) ? "status-pill-yellow" :
+                                                            ['cancelled', 'cancelled_refunded', 'cancelled_charged', 'rejected', 'expired'].includes(booking.status) ? "status-pill-red" :
+                                                                "bg-off-white text-slate border-border-grey"
+                                                )}>
+                                                    {getStatusLabel(booking.status, true)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    ))}
                 </section>
             )}
 
