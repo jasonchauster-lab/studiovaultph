@@ -215,12 +215,12 @@ export default function InstructorBookingWizard({
                         isSameMonth(cloneDay, monthStart) && !hasSlots && !isPastDay && !isSelected ? "text-charcoal/40" : "",
                         isPastDay ? "text-charcoal/10 pointer-events-none opacity-40" : "",
                         hasSlots && !isSelected ? "bg-white/40 text-charcoal font-bold hover:bg-white/60 cursor-pointer border border-white/80" : "",
-                        isSelected ? "bg-[#B4C3B2] text-white font-bold shadow-md transform scale-105" : ""
+                        isSelected ? "bg-forest text-white font-bold shadow-md transform scale-105" : ""
                     )}
                     disabled={!hasSlots || isPastDay}
                 >
                     <span className="leading-none">{formattedDate}</span>
-                    {hasSlots && !isSelected && <span className="w-1 h-1 bg-[#B4C3B2]/40 rounded-full mt-1.5"></span>}
+                    {hasSlots && !isSelected && <span className="w-1 h-1 bg-forest/40 rounded-full mt-1.5"></span>}
                 </button>
             )
             day = addDays(day, 1)
@@ -553,7 +553,7 @@ export default function InstructorBookingWizard({
                                                     onClick={() => setExpandedSlotKey(isExpanded ? null : key)}
                                                     className={clsx(
                                                         "w-full flex items-center justify-between text-[9px] font-bold uppercase tracking-widest px-3 py-2.5 rounded-[12px] border transition-all",
-                                                        isExpanded ? "bg-charcoal text-white border-charcoal" : "bg-gold/5 text-gold border-gold/20 hover:bg-gold/10"
+                                                        isExpanded ? "bg-forest text-white border-forest" : "bg-forest/5 text-forest border-forest/20 hover:bg-forest/10"
                                                     )}
                                                 >
                                                     <div className="flex items-center gap-2 truncate pr-2">
@@ -676,7 +676,7 @@ export default function InstructorBookingWizard({
                             </p>
                             <button
                                 onClick={() => router.push(`/customer/payment/${resumeBooking.id}`)}
-                                className="bg-charcoal text-white px-10 py-4 rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:opacity-90 transition-all shadow-cloud shadow-charcoal/10"
+                                className="bg-forest text-white px-10 py-4 rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:brightness-110 transition-all shadow-cloud"
                             >
                                 Continue to Payment
                             </button>
@@ -815,7 +815,7 @@ export default function InstructorBookingWizard({
                                                                             className={clsx(
                                                                                 "px-6 py-4 rounded-[20px] border transition-all flex items-center justify-between group",
                                                                                 isSelected
-                                                                                    ? "bg-charcoal text-white border-charcoal shadow-cloud-lg scale-[1.02]"
+                                                                                    ? "bg-forest text-white border-forest shadow-cloud-lg scale-[1.02]"
                                                                                     : "bg-white/40 border-white/60 text-charcoal/60 hover:bg-white/60 hover:text-charcoal"
                                                                             )}
                                                                         >

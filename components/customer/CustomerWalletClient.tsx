@@ -82,7 +82,7 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                 <div className="flex gap-2">
                     <Link
                         href="/customer/payout"
-                        className="bg-charcoal-900 text-cream-50 px-6 py-3 rounded-lg font-medium hover:bg-charcoal-800 transition-colors flex items-center gap-2 shadow-sm"
+                        className="bg-forest text-white px-6 py-3 rounded-lg font-medium hover:brightness-110 transition-all flex items-center gap-2 shadow-sm"
                     >
                         <ArrowUpRight className="w-4 h-4" />
                         Withdraw Funds
@@ -93,7 +93,7 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
             {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-4 max-w-4xl">
                 {/* Available Balance */}
-                <div className="bg-charcoal-900 text-cream-50 p-4 sm:p-6 rounded-xl shadow-lg relative overflow-hidden h-full flex flex-col justify-between">
+                <div className="bg-forest text-white p-4 sm:p-6 rounded-xl shadow-lg relative overflow-hidden h-full flex flex-col justify-between">
                     <div className="absolute -right-4 -top-4 text-white/5">
                         <Wallet className="w-24 h-24 sm:w-32 sm:h-32" />
                     </div>

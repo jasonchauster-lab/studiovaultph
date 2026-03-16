@@ -192,7 +192,7 @@ function AgreementModal({ title, content, onClose }: { title: string; content: s
                 <div className="px-6 py-4 border-t border-cream-200">
                     <button
                         onClick={onClose}
-                        className="w-full bg-charcoal-900 text-cream-50 py-2.5 rounded-lg font-medium hover:bg-charcoal-800 transition-colors"
+                        className="w-full bg-forest text-white py-2.5 rounded-lg font-medium hover:brightness-110 transition-all"
                     >
                         Close
                     </button>
@@ -475,7 +475,7 @@ export default function PaymentForm({
                     </p>
                     <a
                         href="/customer"
-                        className="inline-block bg-charcoal-900 text-cream-50 px-6 py-3 rounded-xl font-medium hover:bg-charcoal-800 transition-colors"
+                        className="inline-block bg-forest text-white px-6 py-3 rounded-xl font-medium hover:brightness-110 transition-all"
                     >
                         Browse Studios
                     </a>

@@ -68,7 +68,7 @@ export default function BookSessionButton({
             <button
                 onClick={handleBook}
                 disabled={isLoading}
-                className="w-full py-4 px-6 bg-charcoal text-white rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-cloud"
+                className="w-full py-4 px-6 bg-forest text-white rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:brightness-110 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-cloud"
             >
                 {isLoading ? (
                     <>

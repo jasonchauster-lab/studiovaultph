@@ -331,7 +331,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full sm:w-auto px-16 py-6 bg-charcoal text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
+                    className="w-full sm:w-auto px-16 py-6 bg-forest text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
                 >
                     {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-gold" /> : <Save className="w-5 h-5 text-gold stroke-[2px]" />}
                     {isLoading ? 'Saving...' : 'Save Changes'}

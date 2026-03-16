@@ -214,8 +214,8 @@ export default function BookingSection({
                         !isSameMonth(day, monthStart) ? "text-cream-300 pointer-events-none" : "",
                         isSameMonth(day, monthStart) && !hasSlots && !isPast && !isSelected ? "text-charcoal-500 opacity-60" : "",
                         isPast ? "text-cream-400 pointer-events-none opacity-40" : "",
-                        hasSlots && !isSelected ? "bg-white text-[#333333] font-medium hover:bg-cream-50 cursor-pointer border border-[#ebd3cf]" : "",
-                        isSelected ? "bg-[#ebd3cf] text-[#333333] font-bold shadow-md transform scale-105 border border-[#ebd3cf]" : ""
+                        hasSlots && !isSelected ? "bg-white text-burgundy font-medium hover:bg-off-white cursor-pointer border border-border-grey" : "",
+                        isSelected ? "bg-forest text-white font-bold shadow-md transform scale-105 border border-forest" : ""
                     )}
                     disabled={!hasSlots || isPast}
                 >
@@ -485,8 +485,8 @@ export default function BookingSection({
                             className={clsx(
                                 "p-5 rounded-2xl border text-left transition-all relative overflow-hidden",
                                 isSelected
-                                    ? "bg-[#ebd3cf] border-[#ebd3cf] text-[#333333] shadow-md transform scale-[1.02]"
-                                    : "bg-white border-[#ebd3cf] hover:shadow-md text-[#333333]"
+                                    ? "bg-forest border-forest text-white shadow-md transform scale-[1.02]"
+                                    : "bg-white border-border-grey hover:shadow-md text-burgundy hover:border-forest/40"
                             )}
                         >
                             <div className="font-serif text-xl mb-2">
@@ -501,7 +501,7 @@ export default function BookingSection({
                                             "text-xs px-2.5 py-1 rounded-lg inline-block font-medium border",
                                             isSelected
                                                 ? "bg-white/20 text-white border-white/30"
-                                                : "bg-cream-50 text-charcoal-700 border-[#ebd3cf]"
+                                                : "bg-off-white text-burgundy border-border-grey"
                                         )}>
                                             {qty} {eq}{qty !== 1 ? 's' : ''} available
                                         </span>
@@ -574,8 +574,8 @@ export default function BookingSection({
                                                     className={clsx(
                                                         "p-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-between text-left",
                                                         selectedEquipment.toLowerCase() === eq.toLowerCase()
-                                                            ? "bg-charcoal-900 border-charcoal-900 text-cream-50"
-                                                            : "bg-white border-cream-200 text-charcoal-700 hover:border-charcoal-400"
+                                                            ? "bg-forest border-forest text-white"
+                                                            : "bg-white border-border-grey text-burgundy hover:border-forest/50"
                                                     )}
                                                 >
                                                     <div>
@@ -679,7 +679,7 @@ export default function BookingSection({
                                 <button
                                     onClick={handleBook}
                                     disabled={!selectedInstructor || isSubmitting || !selectedEquipment}
-                                    className="w-full bg-charcoal-900 text-cream-50 py-3 rounded-lg font-medium hover:bg-charcoal-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                                    className="w-full bg-forest text-white py-3 rounded-lg font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                                 >
                                     {isSubmitting ? (
                                         <>

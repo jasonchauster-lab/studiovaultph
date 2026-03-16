@@ -35,7 +35,7 @@ export default function TopUpButton() {
         <button
             onClick={handleTopUp}
             disabled={isLoading}
-            className="bg-charcoal-900 text-cream-50 px-6 py-3 rounded-lg font-medium hover:bg-charcoal-800 transition-colors flex items-center gap-2 disabled:opacity-70"
+            className="bg-forest text-white px-6 py-3 rounded-lg font-medium hover:brightness-110 transition-all flex items-center gap-2 disabled:opacity-70"
         >
             <PlusCircle className="w-4 h-4" />
             {isLoading ? 'Processing...' : 'Top Up Wallet'}
