@@ -110,7 +110,7 @@ function LoginContent() {
 
         } else {
             // HANDLE LOGIN
-            const { error } = await supabase.auth.signInWithPassword({
+            const { data: { user }, error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             })
@@ -119,8 +119,6 @@ function LoginContent() {
                 setMessage({ type: 'error', text: error.message })
                 setLoading(false)
             } else {
-                const { data: { user } } = await supabase.auth.getUser()
-
                 if (user) {
                     // Check credentials/role
                     const { data: profile } = await supabase

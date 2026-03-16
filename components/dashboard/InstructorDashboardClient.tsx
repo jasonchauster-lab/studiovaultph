@@ -253,11 +253,11 @@ export default function InstructorDashboardClient({
     return (
         <div className="space-y-16 pb-20">
             {/* Sticky Header */}
-            <div className="sticky-header-antigravity -mx-4 sm:-mx-8 lg:-mx-12 mb-12 px-4 sm:px-8 lg:px-12">
+            <div className="sticky-header-antigravity -mx-4 sm:-mx-8 lg:-mx-12 mb-12 px-6 sm:px-8 lg:px-12 py-8 sm:py-0">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8">
                     <div>
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-charcoal tracking-tighter mb-3">Instructor Dashboard</h1>
-                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.4em] max-w-[90%] sm:max-w-none">Manage your professional schedule and earnings with grounded precision.</p>
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-charcoal tracking-tighter mb-4">Instructor Dashboard</h1>
+                        <p className="text-[10px] font-bold text-charcoal/40 uppercase tracking-[0.4em] max-w-[90%] sm:max-w-none leading-relaxed">Manage your professional schedule and earnings with grounded precision.</p>
                     </div>
                 </div>
             </div>

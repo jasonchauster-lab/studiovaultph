@@ -189,7 +189,7 @@ export default function MobileScheduleCalendar({
 
                 <div
                     ref={scrollRef}
-                    className="flex overflow-x-auto no-scrollbar gap-8 pb-4 snap-x"
+                    className="flex overflow-x-auto no-scrollbar gap-2 pb-4 snap-x"
                 >
                     {weekDays.map((day) => {
                         const isSelected = isSameDay(day, selectedDate);
@@ -200,7 +200,7 @@ export default function MobileScheduleCalendar({
                             <button
                                 key={day.toISOString()}
                                 onClick={() => setSelectedDate(day)}
-                                className="flex flex-col items-center min-w-[32px] snap-center group focus:outline-none"
+                                className="flex flex-col items-center min-w-[48px] snap-center group focus:outline-none py-1"
                             >
                                 <span className={clsx(
                                     "text-[9px] font-black uppercase tracking-[0.2em] mb-4 transition-colors",

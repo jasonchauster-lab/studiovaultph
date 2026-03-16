@@ -137,6 +137,31 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
         return dateB - dateA // Date descending
     }), [filteredBookings, now]);
 
+    // Grouping helper
+    const groupBookingsByDate = (bookingsList: any[]) => {
+        const groups: { [key: string]: any[] } = {}
+        bookingsList.forEach(b => {
+            const slot = getFirst(b.slots)
+            if (!slot?.date) return
+            if (!groups[slot.date]) groups[slot.date] = []
+            groups[slot.date].push(b)
+        })
+        return Object.keys(groups).sort((a, b) => {
+            // Sort dates based on whether they are future or past
+            return new Date(a).getTime() - new Date(b).getTime()
+        }).map(date => ({
+            date,
+            bookings: groups[date]
+        }))
+    }
+
+    const activeGroups = useMemo(() => groupBookingsByDate(activeBookings), [activeBookings])
+    const historicalGroups = useMemo(() => {
+        // Sort historical groups by date descending
+        const groups = groupBookingsByDate(historicalBookings)
+        return groups.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    }, [historicalBookings])
+
     return (
         <div className="space-y-10 pb-48">
             <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible mb-8">
@@ -156,7 +181,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 </div>
 
                 {activeBookings.length === 0 ? (
-                    <div className="py-6 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-border-grey/50 mx-6 sm:mx-0 px-6 shadow-tight relative overflow-hidden">
+                    <div className="py-6 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-border-grey/50 mx-4 sm:mx-0 px-6 shadow-tight relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-32 h-32 bg-forest/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl pointer-events-none" />
                         <div className="absolute bottom-0 right-0 w-32 h-32 bg-gold/5 rounded-full translate-x-1/2 translate-y-1/2 blur-2xl pointer-events-none" />
                         
@@ -185,137 +210,108 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         </div>
                     </div>
                 ) : (
-                    <div className="space-y-4 sm:space-y-6">
-                        {activeBookings.map((booking: any) => {
-                            const slot = getFirst(booking.slots)
-                            const studio = getFirst(slot?.studios)
-                            const client = getFirst(booking.client)
-
-                            return (
-                                <div key={booking.id} className="earth-card p-4 pb-10 sm:p-6 sm:pb-12 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0">
-                                    {/* Row 1: Date & Time Header (Mobile) */}
-                                    <div className="flex items-center gap-2 mb-3 sm:hidden">
-                                        <div className="flex items-center gap-2 px-2 py-1 bg-forest/5 rounded border border-forest/10 w-full">
-                                            <Calendar className="w-3 h-3 text-forest/40" />
-                                            <span className="text-[10px] font-black text-forest/80 uppercase tracking-widest">
-                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                <span className="mx-2 text-forest/20">•</span>
-                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                            </span>
-                                        </div>
+                    <div className="space-y-10">
+                        {activeGroups.map((group) => (
+                            <div key={group.date} className="relative">
+                                {/* Date Header */}
+                                <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md px-4 py-3 mb-4 rounded-xl border border-border-grey/30 flex items-center justify-between mx-4 sm:mx-0 shadow-sm">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="w-4 h-4 text-forest" />
+                                        <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em]">
+                                            {new Date(group.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                        </span>
                                     </div>
+                                    <span className="text-[9px] font-black text-charcoal/40 uppercase tracking-widest">{group.bookings.length} {group.bookings.length === 1 ? 'Session' : 'Sessions'}</span>
+                                </div>
 
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                                        <div className="flex items-center gap-3 sm:gap-4 flex-1">
-                                            {/* Date Block (Desktop Only) */}
-                                            <div className="hidden sm:flex flex-col items-center justify-center bg-forest/5 rounded-lg w-16 shrink-0 py-2 border border-forest/10">
-                                                <span className="text-[9px] font-black text-forest uppercase tracking-widest leading-none mb-1">
-                                                    {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { month: 'short' })}
-                                                </span>
-                                                <span className="text-lg font-serif text-charcoal leading-none">
-                                                    {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { day: 'numeric' })}
-                                                </span>
-                                            </div>
+                                <div className="space-y-4">
+                                    {group.bookings.map((booking: any) => {
+                                        const slot = getFirst(booking.slots)
+                                        const studio = getFirst(slot?.studios)
+                                        const client = getFirst(booking.client)
 
-                                            {/* Consolidated Session Info */}
-                                            <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5">
-                                                {/* Desktop Session Header */}
-                                                <div className="hidden sm:flex items-center gap-2 text-[11px] font-black uppercase text-charcoal/70 tracking-widest flex-wrap">
-                                                    <span>{getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
-                                                    <span className="text-charcoal/50">•</span>
-                                                    <button onClick={() => handleStudioClick(studio)} className="text-sm font-bold text-charcoal/90 truncate hover:text-charcoal transition-colors hover:underline underline-offset-2">
-                                                        {studio?.name || "Studio"}
-                                                    </button>
-                                                    {studio?.location && (
-                                                        <>
-                                                            <span className="text-charcoal/50">•</span>
-                                                            <span className="text-[10px] font-black text-slate uppercase tracking-wider truncate">
-                                                                {studio.location}
+                                        return (
+                                            <div key={booking.id} className="earth-card p-4 sm:p-6 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0 rounded-[2rem]">
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                                    {/* Time Indicator */}
+                                                    <div className="flex items-center gap-3 sm:flex-col sm:justify-center sm:bg-forest/5 sm:rounded-2xl sm:w-20 sm:h-20 sm:shrink-0 sm:border sm:border-forest/10">
+                                                        <div className="flex sm:hidden items-center justify-center w-8 h-8 rounded-full bg-forest/10">
+                                                            <Clock className="w-4 h-4 text-forest" />
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm sm:text-lg font-serif text-charcoal leading-none">
+                                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                             </span>
-                                                        </>
-                                                    )}
-                                                </div>
-
-                                                {/* Mobile Session Info (Vertical Stack) */}
-                                                <div className="flex flex-col gap-1 sm:hidden text-left">
-                                                    <button onClick={() => handleStudioClick(studio)} className="text-sm font-bold text-charcoal/90 text-left hover:text-charcoal transition-colors">
-                                                        {studio?.name || "Studio"}
-                                                    </button>
-                                                    <div className="flex items-center gap-1.5 -ml-0.5">
-                                                        <MapPin className="w-3 h-3 text-forest shrink-0" />
-                                                        <span className="text-[9px] font-black text-charcoal/80 uppercase tracking-wider">{studio?.location || "N/A"}</span>
-                                                    </div>
-                                                </div>
-                                                
-                                                {client && (
-                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-1 sm:mt-0.5">
-                                                        <button onClick={() => setSelectedClient(client)} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity min-w-0">
-                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="hidden sm:block w-6 h-6 rounded-full border border-border-grey shrink-0 object-cover" />
-                                                            <span className="text-sm font-bold text-charcoal sm:truncate">{client.full_name}</span>
-                                                        </button>
-                                                        
-                                                        <div className="flex items-center gap-2">
-                                                            {client.medical_conditions && (
-                                                                <span className="px-1.5 py-0.5 bg-red-50 text-red-600 text-[6.5px] sm:text-[7px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-1 tracking-widest shrink-0">
-                                                                    <AlertCircle className="w-2.5 h-2.5" /> <span className="hidden sm:inline">MED</span>
-                                                                </span>
-                                                            )}
-
-                                                            <span className="hidden sm:inline-block text-[8.5px] font-black text-charcoal/70 uppercase tracking-widest bg-charcoal/5 px-2 py-1 rounded-lg border border-charcoal/10 whitespace-nowrap">
-                                                                {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                                                                    ? `${slot.equipment[0]} (${booking.quantity || 1})`
-                                                                    : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
-                                                            </span>
+                                                            <span className="text-[8px] font-black text-forest uppercase tracking-widest sm:text-center mt-0.5">START</span>
                                                         </div>
                                                     </div>
-                                                )}
-                                            </div>
 
-                                            {/* Action Buttons (Desktop Only) */}
-                                            <div className="hidden sm:flex items-center gap-1.5 shrink-0 ml-auto pl-2">
-                                                {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
-                                                    <button
-                                                        onClick={() => setCancellingBooking(booking)}
-                                                        className="w-8 h-8 bg-off-white text-red-600 border border-border-grey rounded-full hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-tight"
-                                                        title="Cancel Session"
-                                                    >
-                                                        <X className="w-3.5 h-3.5" />
-                                                    </button>
-                                                )}
-                                                {client && client.id !== currentUserId && (
-                                                    <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="CHAT" variant="antigravity" />
-                                                )}
-                                            </div>
-                                        </div>
+                                                    {/* Session Details */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex flex-col gap-1">
+                                                            <div className="flex items-center justify-between">
+                                                                <button onClick={() => handleStudioClick(studio)} className="text-base font-serif text-charcoal hover:text-forest transition-colors text-left tracking-tight">
+                                                                    {studio?.name || "Studio"}
+                                                                </button>
+                                                                <div className="flex sm:hidden items-center gap-1.5 shrink-0">
+                                                                    {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
+                                                                        <button
+                                                                            onClick={() => setCancellingBooking(booking)}
+                                                                            className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-red-600 border border-red-100/50"
+                                                                        >
+                                                                            <X className="w-3.5 h-3.5" />
+                                                                        </button>
+                                                                    )}
+                                                                    {client && client.id !== currentUserId && (
+                                                                        <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="" variant="antigravity" />
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div className="flex items-center gap-2 text-charcoal/50">
+                                                                <MapPin className="w-3 h-3 shrink-0" />
+                                                                <span className="text-[9px] font-black uppercase tracking-widest truncate">{studio?.location || "N/A"}</span>
+                                                            </div>
 
-                                        {/* Row 3: Actions & Tags (Mobile) */}
-                                        <div className="flex sm:hidden items-center justify-between pt-3 mt-1 border-t border-border-grey">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[7.5px] font-black text-charcoal/50 uppercase tracking-widest bg-charcoal/5 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap">
-                                                    {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                                                        ? `${slot.equipment[0]} (${booking.quantity || 1})`
-                                                        : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
-                                                </span>
-                                            </div>
+                                                            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border-grey/30">
+                                                                {client && (
+                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
+                                                                        <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-6 h-6 rounded-full border border-border-grey shrink-0 object-cover" />
+                                                                        <span className="text-[11px] font-black text-charcoal uppercase tracking-widest truncate">{client.full_name}</span>
+                                                                    </button>
+                                                                )}
+                                                                <div className="flex items-center gap-2 shrink-0">
+                                                                    <span className="px-2 py-1 bg-charcoal/5 text-charcoal/60 text-[8px] font-black uppercase tracking-widest rounded-lg border border-charcoal/10">
+                                                                        {Array.isArray(slot?.equipment) && slot.equipment.length > 0
+                                                                            ? `${slot.equipment[0]} (${booking.quantity || 1})`
+                                                                            : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
-                                            <div className="flex items-center gap-2">
-                                                {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
-                                                    <button
-                                                        onClick={() => setCancellingBooking(booking)}
-                                                        className="h-7 px-3 bg-off-white text-red-600 border border-border-grey rounded text-[7.5px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-tight"
-                                                    >
-                                                        CANCEL
-                                                    </button>
-                                                )}
-                                                {client && client.id !== currentUserId && (
-                                                    <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="CHAT" variant="antigravity" />
-                                                )}
+                                                    {/* Desktop Actions */}
+                                                    <div className="hidden sm:flex items-center gap-2 ml-auto">
+                                                        {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
+                                                            <button
+                                                                onClick={() => setCancellingBooking(booking)}
+                                                                className="h-10 px-4 bg-off-white text-red-600 border border-border-grey rounded-xl hover:bg-red-600 hover:text-white transition-all text-[9px] font-black uppercase tracking-[0.2em] shadow-tight"
+                                                            >
+                                                                CANCEL
+                                                            </button>
+                                                        )}
+                                                        {client && client.id !== currentUserId && (
+                                                            <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="CHAT" variant="antigravity" />
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
+                                        )
+                                    })}
                                 </div>
-                            )
-                        })}
+                            </div>
+                        ))}
                     </div>
                 )}
             </section>
@@ -330,157 +326,89 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         </div>
                     </div>
 
-                    <div className="space-y-4 sm:space-y-6">
-                        {historicalBookings.map((booking: any) => {
-                            const slot = getFirst(booking.slots)
-                            const studio = getFirst(slot?.studios)
-                            const client = getFirst(booking.client)
-
-                            return (
-                                <div key={booking.id} className="glass-card p-4 pb-10 sm:p-6 sm:pb-12 border border-white/60 bg-white/20 hover:bg-white/40 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0">
-                                    {/* Row 1: Date & Time Header (Mobile) */}
-                                    <div className="flex items-center gap-2 mb-3 sm:hidden">
-                                        <div className="flex items-center gap-2 px-2 py-1 bg-charcoal/5 rounded border border-charcoal/10 w-full">
-                                            <Calendar className="w-3 h-3 text-charcoal/40" />
-                                            <span className="text-[10px] font-black text-charcoal/80 uppercase tracking-widest">
-                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                <span className="mx-2 text-charcoal/50">•</span>
-                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                            </span>
-                                        </div>
+                    <div className="space-y-10">
+                        {historicalGroups.map((group) => (
+                            <div key={group.date} className="relative">
+                                {/* Date Header */}
+                                <div className="sticky top-0 z-20 bg-charcoal/5 backdrop-blur-md px-4 py-3 mb-4 rounded-xl border border-charcoal/10 flex items-center justify-between mx-4 sm:mx-0">
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="w-4 h-4 text-charcoal/40" />
+                                        <span className="text-[11px] font-black text-charcoal/60 uppercase tracking-[0.2em]">
+                                            {new Date(group.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                        </span>
                                     </div>
-
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                                        <div className="flex items-center gap-3 sm:gap-4 flex-1">
-                                            {/* Date Block (Desktop Only) */}
-                                            <div className="hidden sm:flex flex-col items-center justify-center bg-charcoal/5 rounded-lg w-16 shrink-0 py-2 border border-charcoal/10">
-                                                <span className="text-[9px] font-black text-charcoal/40 uppercase tracking-widest leading-none mb-1">
-                                                    {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { month: 'short' })}
-                                                </span>
-                                                <span className="text-lg font-serif text-charcoal/80 leading-none">
-                                                    {getSlotDateTime(slot?.date, slot?.start_time).toLocaleDateString(undefined, { day: 'numeric' })}
-                                                </span>
-                                            </div>
-
-                                            {/* Consolidated Session Info */}
-                                            <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5">
-                                                {/* Desktop Session Header */}
-                                                <div className="hidden sm:flex items-center gap-2 text-[11px] font-black uppercase text-charcoal/60 tracking-widest flex-wrap">
-                                                    <span>{getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
-                                                    <span className="text-charcoal/50">•</span>
-                                                    <button onClick={() => handleStudioClick(studio)} className="text-sm font-bold text-charcoal/90 truncate hover:text-charcoal transition-colors hover:underline underline-offset-2">
-                                                        {studio?.name || "Studio"}
-                                                    </button>
-                                                    {studio?.location && (
-                                                        <>
-                                                            <span className="text-charcoal/50">•</span>
-                                                            <span className="text-[10px] font-black text-charcoal/80 uppercase tracking-wider truncate">
-                                                                {studio.location}
-                                                            </span>
-                                                        </>
-                                                    )}
-                                                </div>
-
-                                                {/* Mobile Session Info (Vertical Stack) */}
-                                                <div className="flex flex-col gap-1 sm:hidden">
-                                                    <button onClick={() => handleStudioClick(studio)} className="text-sm font-bold text-charcoal/90 text-left hover:text-charcoal transition-colors">
-                                                        {studio?.name || "Studio"}
-                                                    </button>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <MapPin className="w-3 h-3 text-charcoal/40" />
-                                                        <span className="text-[9px] font-black text-charcoal/80 uppercase tracking-wider">{studio?.location || "N/A"}</span>
-                                                    </div>
-                                                </div>
-                                                
-                                                {client && (
-                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-1 sm:mt-0.5">
-                                                        <button onClick={() => setSelectedClient(client)} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity min-w-0">
-                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="hidden sm:block w-6 h-6 rounded-full border border-white shrink-0 object-cover opacity-80" />
-                                                            <span className="text-sm font-bold text-charcoal sm:truncate">{client.full_name}</span>
-                                                        </button>
-
-                                                        <span className="hidden sm:inline-block text-[8.5px] font-black text-charcoal/70 uppercase tracking-widest bg-charcoal/5 px-2 py-1 rounded-lg border border-charcoal/10 whitespace-nowrap">
-                                                            {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                                                                ? `${slot.equipment[0]} (${booking.quantity || 1})`
-                                                                : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Action Buttons (Desktop Only) */}
-                                            <div className="hidden sm:flex flex-col items-end justify-center gap-1.5 shrink-0 ml-auto pl-2 h-full">
-                                                {booking.price_breakdown?.instructor_fee && (
-                                                    <div className="px-5 py-2.5 bg-sage/20 border border-sage/30 rounded-2xl flex items-center gap-4 shadow-tight">
-                                                        <span className="text-[10px] font-black text-sage/80 uppercase tracking-[0.2em]">Earned</span>
-                                                        <span className="text-[18px] font-black text-sage tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
-                                                    </div>
-                                                )}
-                                                
-                                                {booking.status === 'completed' && (
-                                                    !booking.instructor_reviewed_studio ? (
-                                                        <button
-                                                            onClick={() => setReviewTarget({
-                                                                booking,
-                                                                revieweeId: studio?.owner_id || '',
-                                                                revieweeName: studio?.name || 'Studio'
-                                                            })}
-                                                            className="h-10 bg-forest text-white px-6 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] hover:brightness-[1.1] transition-all shadow-tight active:scale-95"
-                                                        >
-                                                            LEAVE FEEDBACK
-                                                        </button>
-                                                    ) : (
-                                                        <span className="text-[8px] text-sage font-black uppercase tracking-widest bg-sage/5 px-3 py-1.5 rounded border border-sage/10">SUBMITTED</span>
-                                                    )
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Row 3: Earnings & Action (Mobile) */}
-                                        <div className="flex sm:hidden flex-col gap-3 pt-4 mt-2 border-t border-white/60">
-                                            <div className="flex items-end justify-between gap-2">
-                                                <div className="flex items-baseline gap-1.5">
-                                                    <span className="text-[7.5px] font-black text-charcoal/40 uppercase tracking-widest">Equip:</span>
-                                                    <span className="text-[7.5px] font-bold text-charcoal/70 uppercase tracking-widest px-1.5 py-0.5 bg-charcoal/5 rounded border border-charcoal/10 whitespace-nowrap">
-                                                        {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                                                            ? `${slot.equipment[0]} (${booking.quantity || 1})`
-                                                            : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
-                                                    </span>
-                                                </div>
-                                                {booking.price_breakdown?.instructor_fee && (
-                                                    <div className="flex items-baseline gap-1.5">
-                                                        <span className="text-[7.5px] font-black text-sage/60 uppercase tracking-widest">Earnings:</span>
-                                                        <span className="text-[11px] font-black text-sage tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="w-full">
-                                                {booking.status === 'completed' && (
-                                                    !booking.instructor_reviewed_studio ? (
-                                                        <button
-                                                            onClick={() => setReviewTarget({
-                                                                booking,
-                                                                revieweeId: studio?.owner_id || '',
-                                                                revieweeName: studio?.name || 'Studio'
-                                                            })}
-                                                            className="w-full h-9 bg-forest text-white px-4 rounded-xl text-[8px] font-black uppercase tracking-widest hover:brightness-[1.2] transition-all shadow-sm active:scale-95 whitespace-nowrap"
-                                                        >
-                                                            LEAVE FEEDBACK
-                                                        </button>
-                                                    ) : (
-                                                        <div className="w-full h-9 flex items-center justify-center bg-sage/5 rounded-xl border border-sage/10">
-                                                            <span className="text-[7.5px] text-sage font-black uppercase tracking-widest">SUBMITTED</span>
-                                                        </div>
-                                                    )
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-widest">{group.bookings.length} {group.bookings.length === 1 ? 'Session' : 'Sessions'}</span>
                                 </div>
 
-                            )
-                        })}
+                                <div className="space-y-4">
+                                    {group.bookings.map((booking: any) => {
+                                        const slot = getFirst(booking.slots)
+                                        const studio = getFirst(slot?.studios)
+                                        const client = getFirst(booking.client)
+
+                                        return (
+                                            <div key={booking.id} className="glass-card p-4 sm:p-6 border border-white/60 bg-white/20 hover:bg-white/40 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0 rounded-[2rem]">
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                                    {/* Time & Earnings */}
+                                                    <div className="flex items-center justify-between sm:flex-col sm:justify-center sm:bg-charcoal/5 sm:rounded-2xl sm:w-24 sm:h-24 sm:shrink-0 sm:border sm:border-charcoal/10">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm sm:text-base font-serif text-charcoal/70 leading-none">
+                                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                            </span>
+                                                            <span className="text-[8px] font-black text-charcoal/40 uppercase tracking-widest sm:text-center mt-1">TIME</span>
+                                                        </div>
+                                                        {booking.price_breakdown?.instructor_fee && (
+                                                            <div className="flex flex-col items-end sm:items-center sm:mt-2">
+                                                                <span className="text-xs sm:text-sm font-black text-sage tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                                                                <span className="text-[7px] font-black text-sage/60 uppercase tracking-widest">EARNED</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Session Info */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex flex-col gap-1">
+                                                            <button onClick={() => handleStudioClick(studio)} className="text-base font-serif text-charcoal/80 hover:text-charcoal transition-colors text-left tracking-tight">
+                                                                {studio?.name || "Studio"}
+                                                            </button>
+                                                            
+                                                            <div className="flex items-center gap-2 text-charcoal/40">
+                                                                <MapPin className="w-3 h-3 shrink-0" />
+                                                                <span className="text-[9px] font-black uppercase tracking-widest truncate">{studio?.location || "N/A"}</span>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-charcoal/10">
+                                                                {client && (
+                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
+                                                                        <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-6 h-6 rounded-full border border-white shrink-0 object-cover opacity-80" />
+                                                                        <span className="text-[11px] font-black text-charcoal/60 uppercase tracking-widest truncate">{client.full_name}</span>
+                                                                    </button>
+                                                                )}
+                                                                {booking.status === 'completed' && !booking.instructor_reviewed_studio && (
+                                                                    <button
+                                                                        onClick={() => setReviewTarget({
+                                                                            booking,
+                                                                            revieweeId: studio?.owner_id || '',
+                                                                            revieweeName: studio?.name || 'Studio'
+                                                                        })}
+                                                                        className="h-8 px-4 bg-forest text-white rounded-lg text-[8px] font-black uppercase tracking-widest shadow-sm"
+                                                                    >
+                                                                        FEEDBACK
+                                                                    </button>
+                                                                )}
+                                                                {booking.instructor_reviewed_studio && (
+                                                                    <span className="text-[7px] text-sage font-black uppercase tracking-widest bg-sage/5 px-2 py-1 rounded border border-sage/10">SUBMITTED</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </section>
             )}

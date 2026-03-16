@@ -30,6 +30,37 @@ export default function InstructorEarningsClient({
         netEarnings
     } = data
 
+    // Helper for date grouping
+    const groupTransactionsByDate = (transactions: any[]) => {
+        if (!transactions) return {}
+        const groups: { [key: string]: any[] } = {}
+        
+        transactions.forEach(tx => {
+            const date = new Date(tx.date)
+            const today = new Date()
+            const yesterday = new Date()
+            yesterday.setDate(today.getDate() - 1)
+
+            let dateLabel = ''
+            if (date.toDateString() === today.toDateString()) {
+                dateLabel = 'TODAY'
+            } else if (date.toDateString() === yesterday.toDateString()) {
+                dateLabel = 'YESTERDAY'
+            } else {
+                dateLabel = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()
+            }
+
+            if (!groups[dateLabel]) {
+                groups[dateLabel] = []
+            }
+            groups[dateLabel].push(tx)
+        })
+        
+        return groups
+    }
+
+    const groupedTransactions = groupTransactionsByDate(recentTransactions)
+
     return (
         <div className="max-w-7xl mx-auto space-y-12 pb-20">
             <TopUpModal
@@ -81,8 +112,8 @@ export default function InstructorEarningsClient({
                 </div>
             )}
 
-            <div className="sticky top-0 z-50 bg-off-white/80 backdrop-blur-md -mx-4 px-4 py-4 sm:static sm:bg-transparent sm:backdrop-blur-none sm:mx-0 sm:px-0 sm:py-0 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                <div className="relative w-full sm:w-auto px-4 sm:px-0">
+            <div className="sticky top-0 z-50 bg-off-white/80 backdrop-blur-md -mx-4 px-6 py-8 sm:static sm:bg-transparent sm:backdrop-blur-none sm:mx-0 sm:px-0 sm:py-0 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 sm:gap-6">
+                <div className="relative w-full sm:w-auto">
                     <Link
                         href="/instructor"
                         className="hidden sm:inline-flex items-center gap-3 text-[10px] font-black text-charcoal/50 hover:text-gold uppercase tracking-[0.3em] transition-all mb-8 group"
@@ -90,39 +121,40 @@ export default function InstructorEarningsClient({
                         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                         BACK TO DASHBOARD
                     </Link>
-                    <h1 className="text-3xl sm:text-5xl font-serif text-charcoal tracking-tighter mb-2 sm:mb-4 px-4 sm:px-0">Earnings & Payouts</h1>
-                    <p className="hidden sm:block text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.4em]">Manage your earnings, payouts, and financial history.</p>
+                    <h1 className="text-3xl sm:text-5xl font-serif text-charcoal tracking-tighter mb-4">Earnings & Payouts</h1>
+                    <p className="text-[10px] font-bold text-charcoal/40 uppercase tracking-[0.4em] leading-relaxed">Manage your earnings, payouts, and financial history.</p>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto px-4 sm:px-0">
-                    <div className="flex w-full sm:w-auto">
-                        {recentTransactions && <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />}
-                    </div>
-                    <button
-                        onClick={() => setShowTopUpModal(true)}
-                        className="h-12 sm:h-14 w-full sm:w-auto bg-white text-charcoal px-8 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 border border-border-grey hover:bg-off-white transition-all shadow-tight active:scale-95 whitespace-nowrap"
-                    >
-                        <ArrowUpRight className="w-4 h-4 text-forest stroke-[3px]" />
-                        ADD FUNDS
-                    </button>
-                    <div className="w-full sm:w-auto">
-                        {availableBalance < 0 ? (
-                            <button
-                                disabled
-                                className="h-12 sm:h-14 w-full sm:w-[180px] bg-charcoal text-white/40 px-10 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 cursor-not-allowed opacity-50 whitespace-nowrap"
-                                title="Payouts are restricted while balance is negative."
-                            >
-                                <Wallet className="w-4 h-4 text-white/40" />
-                                RESTRICTED
-                            </button>
-                        ) : (
-                            <Link
-                                href="/instructor/payout"
-                                className="h-12 sm:h-14 w-full sm:w-[180px] bg-forest text-white px-10 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:brightness-110 transition-all shadow-tight active:scale-95 whitespace-nowrap"
-                            >
-                                <Wallet className="w-4 h-4 text-white" />
-                                CASH OUT
-                            </Link>
-                        )}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full sm:w-auto">
+                    <div className="flex gap-3 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+                        <div className="shrink-0 sm:w-auto">
+                            {recentTransactions && <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />}
+                        </div>
+                        <button
+                            onClick={() => setShowTopUpModal(true)}
+                            className="h-12 w-full sm:w-auto bg-white text-charcoal px-6 rounded-lg text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2 border border-border-grey hover:bg-off-white transition-all shadow-tight active:scale-95 whitespace-nowrap"
+                        >
+                            <ArrowUpRight className="w-3.5 h-3.5 text-forest" />
+                            ADD FUNDS
+                        </button>
+                        <div className="shrink-0 sm:w-auto">
+                            {availableBalance < 0 ? (
+                                <button
+                                    disabled
+                                    className="h-12 w-full px-8 bg-charcoal text-white/40 rounded-lg text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2 cursor-not-allowed opacity-50 whitespace-nowrap"
+                                >
+                                    <Wallet className="w-3.5 h-3.5" />
+                                    RESTRICTED
+                                </button>
+                            ) : (
+                                <Link
+                                    href="/instructor/payout"
+                                    className="h-12 w-full px-8 bg-forest text-white rounded-lg text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-tight active:scale-95 whitespace-nowrap"
+                                >
+                                    <Wallet className="w-3.5 h-3.5" />
+                                    CASH OUT
+                                </Link>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -134,95 +166,103 @@ export default function InstructorEarningsClient({
             {/* Stats Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 px-4 sm:px-0">
                 {/* Available Balance */}
-                <div className="earth-card p-3 sm:p-5 relative overflow-hidden bg-white hover:-translate-y-2 transition-all duration-700 shadow-tight border border-border-grey/50">
+                <div className="earth-card p-4 sm:p-6 relative overflow-hidden bg-white/60 backdrop-blur-sm hover:-translate-y-1 transition-all duration-500 shadow-tight border border-border-grey/50 group">
                     <button
                         onClick={() => setShowInfoModal(true)}
-                        className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 text-charcoal/50 hover:text-charcoal transition-colors p-1 bg-off-white rounded-lg border border-border-grey"
+                        className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 text-charcoal/30 hover:text-charcoal transition-colors p-1.5 bg-off-white rounded-lg border border-border-grey"
                     >
-                        <Info className="w-3 h-3" />
+                        <Info className="w-3.5 h-3.5" />
                     </button>
  
-                    <div className="absolute top-0 right-0 w-16 h-16 sm:w-32 sm:h-32 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-xl sm:blur-2xl pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none group-hover:bg-forest/10 transition-colors" />
                         
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 mb-3 sm:mb-5">
-                            <div className="p-1.5 sm:p-2.5 bg-sage/10 rounded-lg border border-border-grey shadow-tight w-fit">
-                                <Wallet className="w-3.5 h-3.5 sm:w-4 h-4 text-forest" />
-                            </div>
-                            <span className="text-[10px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight">LIQUID BALANCE</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
+                        <div className="p-2 sm:p-2.5 bg-sage/5 rounded-xl border border-border-grey shadow-sm w-fit">
+                            <Wallet className="w-4 h-4 text-forest" />
                         </div>
-                        <h2 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tighter mb-1 truncate">₱{(availableBalance || 0).toLocaleString()}</h2>
-                        <div className="flex items-center gap-4 text-[7px] sm:text-[8px] font-black text-charcoal/50 uppercase tracking-[0.3em] overflow-hidden">
-                            <div className="px-2 py-0.5 bg-sage/10 rounded-full border border-forest/10 truncate">CURRENTLY WITHDRAWABLE</div>
+                        <span className="text-[10px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.3em] leading-tight">LIQUID BALANCE</span>
+                    </div>
+                    <div className="space-y-1">
+                        <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate">₱{(availableBalance || 0).toLocaleString()}</h2>
+                        <div className="flex items-center gap-4 text-[7px] sm:text-[8px] font-black text-charcoal/50 uppercase tracking-[0.4em] overflow-hidden">
+                            <div className="px-2 py-0.5 bg-sage/10 rounded-full border border-forest/5 truncate">CURRENTLY WITHDRAWABLE</div>
                         </div>
+                    </div>
                 </div>
 
                 {/* Pending Balance */}
-                <div className="earth-card p-3 sm:p-5 hover:-translate-y-2 transition-all duration-700 bg-white shadow-tight border border-border-grey/50">
-                    <div className="flex items-center gap-2 mb-3 sm:mb-5 overflow-hidden">
-                        <div className="p-1.5 sm:p-2.5 bg-buttermilk/20 rounded-lg border border-border-grey shadow-tight shrink-0">
-                            <Clock className="w-3.5 h-3.5 sm:w-4 h-4 text-burgundy/60" />
+                <div className="earth-card p-4 sm:p-6 hover:-translate-y-1 transition-all duration-500 bg-white/60 backdrop-blur-sm shadow-tight border border-border-grey/50 group">
+                    <div className="flex items-center gap-2 mb-4 overflow-hidden">
+                        <div className="p-2 sm:p-2.5 bg-buttermilk/10 rounded-xl border border-border-grey shadow-sm shrink-0">
+                            <Clock className="w-4 h-4 text-burgundy/40 group-hover:text-burgundy/60 transition-colors" />
                         </div>
-                        <span className="text-[7px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight truncate">Virtual Pending</span>
+                        <span className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.3em] leading-tight truncate">Virtual Pending</span>
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tighter mb-1 truncate">₱{(pendingBalance || 0).toLocaleString()}</h3>
-                    <p className="text-[7px] sm:text-[8px] font-bold text-charcoal/50 uppercase tracking-[0.2em] truncate">FUTURE INCOME</p>
+                    <div className="space-y-1">
+                        <h3 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate">₱{(pendingBalance || 0).toLocaleString()}</h3>
+                        <p className="text-[7px] sm:text-[8px] font-black text-charcoal/40 uppercase tracking-[0.4em] truncate">FUTURE INCOME</p>
+                    </div>
                 </div>
 
                 {/* Gross Earnings */}
-                <div className="earth-card p-3 sm:p-5 hover:-translate-y-2 transition-all duration-700 bg-white shadow-tight border border-border-grey/50">
-                    <div className="flex items-center gap-2 mb-3 sm:mb-5 overflow-hidden">
-                        <div className="p-1.5 sm:p-2.5 bg-sage/10 rounded-lg border border-border-grey shadow-tight shrink-0">
-                            <TrendingUp className="w-3.5 h-3.5 sm:w-4 h-4 text-forest" />
+                <div className="earth-card p-4 sm:p-6 hover:-translate-y-1 transition-all duration-500 bg-white/60 backdrop-blur-sm shadow-tight border border-border-grey/50 group">
+                    <div className="flex items-center gap-2 mb-4 overflow-hidden">
+                        <div className="p-2 sm:p-2.5 bg-sage/5 rounded-xl border border-border-grey shadow-sm shrink-0">
+                            <TrendingUp className="w-4 h-4 text-forest/40 group-hover:text-forest transition-colors" />
                         </div>
-                        <span className="text-[7px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight truncate">Lifetime Earned</span>
+                        <span className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.3em] leading-tight truncate">Lifetime Earned</span>
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tighter mb-1 truncate">₱{(totalEarned || 0).toLocaleString()}</h3>
-                    <p className="text-[7px] sm:text-[8px] font-bold text-charcoal/50 uppercase tracking-[0.2em] truncate">GROSS TOTAL</p>
+                    <div className="space-y-1">
+                        <h3 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate">₱{(totalEarned || 0).toLocaleString()}</h3>
+                        <p className="text-[7px] sm:text-[8px] font-black text-charcoal/40 uppercase tracking-[0.4em] truncate">GROSS TOTAL</p>
+                    </div>
                 </div>
 
                 {/* Total Withdrawn */}
-                <div className="earth-card p-3 sm:p-5 hover:-translate-y-2 transition-all duration-700 bg-white shadow-tight border border-border-grey/50 relative overflow-hidden">
-                    <div className="flex items-center gap-2 mb-3 sm:mb-5 overflow-hidden">
-                        <div className="p-1.5 sm:p-2.5 bg-charcoal/5 rounded-lg border border-border-grey shadow-tight shrink-0">
-                            <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 h-4 text-charcoal/40" />
+                <div className="earth-card p-4 sm:p-6 hover:-translate-y-1 transition-all duration-500 bg-white/60 backdrop-blur-sm shadow-tight border border-border-grey/50 group relative overflow-hidden">
+                    <div className="flex items-center gap-2 mb-4 overflow-hidden">
+                        <div className="p-2 sm:p-2.5 bg-charcoal/5 rounded-xl border border-border-grey shadow-sm shrink-0">
+                            <ArrowUpRight className="w-4 h-4 text-charcoal/30 group-hover:text-charcoal/50 transition-colors" />
                         </div>
-                        <span className="text-[7px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight truncate">Total Withdrawn</span>
+                        <span className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.3em] leading-tight truncate">Total Withdrawn</span>
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tighter mb-1 truncate">₱{(totalWithdrawn || 0).toLocaleString()}</h3>
-                    <p className="text-[7px] sm:text-[8px] font-bold text-charcoal/50 uppercase tracking-[0.2em] truncate">LIFETIME CASH OUT</p>
+                    <div className="space-y-1">
+                        <h3 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate">₱{(totalWithdrawn || 0).toLocaleString()}</h3>
+                        <p className="text-[7px] sm:text-[8px] font-black text-charcoal/40 uppercase tracking-[0.4em] truncate">LIFETIME CASH OUT</p>
+                    </div>
                 </div>
 
                 {/* Net Balance / Current */}
-                <div className="earth-card p-3 sm:p-5 hover:-translate-y-2 transition-all duration-700 bg-white shadow-tight border border-border-grey/50">
-                    <div className="flex items-center justify-between mb-3 sm:mb-5 overflow-hidden">
-                        <div className="flex items-center gap-2 min-w-0">
-                            <div className="p-1.5 sm:p-2.5 bg-gold/10 rounded-lg border border-border-grey shadow-tight shrink-0">
-                                <DollarSign className="w-3.5 h-3.5 sm:w-4 h-4 text-gold" />
-                            </div>
-                            <span className="text-[7px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight truncate">Net Balance</span>
+                <div className="earth-card p-4 sm:p-6 hover:-translate-y-1 transition-all duration-500 bg-white/60 backdrop-blur-sm shadow-tight border border-border-grey/50 group">
+                    <div className="flex items-center gap-2 mb-4 overflow-hidden">
+                        <div className="p-2 sm:p-2.5 bg-gold/5 rounded-xl border border-border-grey shadow-sm shrink-0">
+                            <DollarSign className="w-4 h-4 text-gold/40 group-hover:text-gold transition-colors" />
                         </div>
+                        <span className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.3em] leading-tight truncate">Net Balance</span>
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tighter mb-1 truncate">₱{(netEarnings || 0).toLocaleString()}</h3>
-                    <p className="text-[7px] sm:text-[8px] font-bold text-charcoal/50 uppercase tracking-[0.2em] truncate">CURRENT POSITION</p>
+                    <div className="space-y-1">
+                        <h3 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate">₱{(netEarnings || 0).toLocaleString()}</h3>
+                        <p className="text-[7px] sm:text-[8px] font-black text-charcoal/40 uppercase tracking-[0.4em] truncate">CURRENT POSITION</p>
+                    </div>
                 </div>
 
                 {/* Adjustments (Compensation & penalties) */}
-                <div className="earth-card p-3 sm:p-5 hover:-translate-y-2 transition-all duration-700 bg-white shadow-tight border border-border-grey/50">
-                    <div className="flex items-center gap-2 mb-3 sm:mb-5 overflow-hidden">
-                        <div className="p-1.5 sm:p-2.5 bg-red-400/5 rounded-lg border border-border-grey shadow-tight shrink-0">
-                            <AlertCircle className="w-3.5 h-3.5 sm:w-4 h-4 text-red-400/60" />
+                <div className="earth-card p-4 sm:p-6 hover:-translate-y-1 transition-all duration-500 bg-white/60 backdrop-blur-sm shadow-tight border border-border-grey/50 group">
+                    <div className="flex items-center gap-2 mb-4 overflow-hidden">
+                        <div className="p-2 sm:p-2.5 bg-red-400/5 rounded-xl border border-border-grey shadow-sm shrink-0">
+                            <AlertCircle className="w-4 h-4 text-red-400/30 group-hover:text-red-400/60 transition-colors" />
                         </div>
-                        <span className="text-[7px] sm:text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.2em] sm:tracking-[0.4em] leading-tight truncate">Vault Adjustments</span>
+                        <span className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.3em] leading-tight truncate">Vault Adjustments</span>
                     </div>
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1 mb-1">
                         <div className="flex items-center justify-between">
-                            <span className="text-[7px] sm:text-[8px] font-black text-forest uppercase tracking-widest">Comp: +₱{(totalCompensation || 0).toLocaleString()}</span>
+                            <span className="text-[7px] sm:text-[8px] font-black text-forest uppercase tracking-widest whitespace-nowrap">Comp: +₱{(totalCompensation || 0).toLocaleString()}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                            <span className="text-[7px] sm:text-[8px] font-black text-red-500 uppercase tracking-widest">Penalties: -₱{(totalPenalty || 0).toLocaleString()}</span>
+                            <span className="text-[7px] sm:text-[8px] font-black text-red-500 uppercase tracking-widest whitespace-nowrap">Penalty: -₱{(totalPenalty || 0).toLocaleString()}</span>
                         </div>
                     </div>
-                    <p className="text-[7px] sm:text-[8px] font-bold text-charcoal/50 uppercase tracking-[0.2em] truncate mt-1">LATE CANCELLATIONS</p>
+                    <p className="text-[7px] sm:text-[8px] font-black text-charcoal/40 uppercase tracking-[0.4em] truncate mt-1">LATE CANCELLATIONS</p>
                 </div>
             </div>
 
@@ -324,53 +364,53 @@ export default function InstructorEarningsClient({
                     <div className="sm:hidden divide-y divide-border-grey/20">
                         {recentTransactions && recentTransactions.length > 0 ? (
                             recentTransactions.map((tx: any, i: number) => (
-                                <div key={i} className="p-5 flex items-center justify-between gap-4 bg-white hover:bg-off-white active:scale-[0.98] transition-all duration-300">
-                                    <div className="shrink-0 flex flex-col gap-1 min-w-[70px]">
-                                        <span className="text-[10px] font-black text-charcoal uppercase tracking-widest whitespace-nowrap">
-                                            {new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                        </span>
-                                        <span className="text-[8px] text-charcoal/40 font-bold uppercase tracking-[0.2em]">
-                                            {new Date(tx.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
-                                    </div>
+                                <div key={i} className="p-6 flex items-start justify-between gap-6 bg-white hover:bg-off-white active:scale-[0.98] transition-all duration-300">
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-[11px] font-black text-charcoal uppercase tracking-wide truncate">
-                                            {tx.client || 'System'}
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className={clsx(
+                                                "text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded border shadow-sm",
+                                                (tx.status === 'approved' || tx.status === 'processed' || tx.status === 'completed')
+                                                    ? "bg-sage/10 text-forest border-forest/10"
+                                                    : tx.status === 'pending'
+                                                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                                                        : "bg-off-white text-charcoal/40 border-border-grey/30"
+                                            )}>
+                                                {tx.status}
+                                            </span>
+                                            <span className="text-[9px] text-charcoal/40 font-bold uppercase tracking-[0.2em]">
+                                                {new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} • {new Date(tx.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm font-serif text-charcoal tracking-tight truncate leading-tight mb-1">
+                                            {tx.client || 'System Settlement'}
                                         </p>
-                                        <p className="text-[9px] text-charcoal/50 font-bold uppercase tracking-tighter whitespace-normal break-words leading-tight mt-1">
-                                            {tx.type} {tx.details ? `• ${tx.details}` : ''}
-                                        </p>
-                                        {tx.session_date && (
-                                            <p className="text-[9px] text-charcoal/60 font-black uppercase tracking-tighter mt-1 bg-buttermilk/10 px-1.5 py-0.5 rounded border border-charcoal/5 w-fit">
-                                                Slot: {new Date(tx.session_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} @ {tx.session_time?.slice(0, 5)}
-                                            </p>
-                                        )}
+                                        <div className="flex flex-wrap gap-2 items-center">
+                                            <span className="text-[9px] font-black text-charcoal/50 uppercase tracking-widest px-2 py-0.5 bg-off-white rounded border border-border-grey/40">
+                                                {tx.type}
+                                            </span>
+                                            {tx.session_date && (
+                                                <span className="text-[9px] text-charcoal/60 font-black uppercase tracking-tighter bg-buttermilk/10 px-2 py-0.5 rounded border border-charcoal/5">
+                                                    Slot: {new Date(tx.session_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="shrink-0 text-right">
-                                        <span className={`text-[12px] font-bold tracking-tight ${tx.total_amount > 0 ? 'text-forest' : tx.total_amount < 0 ? 'text-red-500' : 'text-charcoal'}`}>
+                                    <div className="shrink-0 text-right flex flex-col items-end gap-1">
+                                        <span className={`text-lg font-serif tracking-tight ${tx.total_amount > 0 ? 'text-forest' : tx.total_amount < 0 ? 'text-red-500' : 'text-charcoal'}`}>
                                             {tx.total_amount > 0 ? '+' : tx.total_amount < 0 ? '-' : ''}
                                             ₱{Math.abs(tx.total_amount).toLocaleString()}
                                         </span>
-                                        {tx.status && (
-                                            <div className="mt-1.5">
-                                                <span className={clsx(
-                                                    "text-[7px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded border",
-                                                    (tx.status === 'approved' || tx.status === 'processed' || tx.status === 'completed')
-                                                        ? "bg-sage/10 text-forest border-forest/10"
-                                                        : tx.status === 'pending'
-                                                            ? "bg-amber-50 text-amber-700 border-amber-200"
-                                                            : "bg-off-white text-charcoal/40 border-border-grey/30"
-                                                )}>
-                                                    {tx.status}
-                                                </span>
-                                            </div>
+                                        {tx.details && (
+                                            <span className="text-[8px] text-charcoal/30 font-bold uppercase tracking-widest max-w-[80px] leading-tight">
+                                                {tx.details}
+                                            </span>
                                         )}
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <div className="px-10 py-20 text-center">
-                                <p className="text-charcoal/40 font-black uppercase tracking-[0.2em] italic text-[10px]">No transaction records found</p>
+                            <div className="px-10 py-32 text-center bg-white">
+                                <p className="text-charcoal/40 font-black uppercase tracking-[0.4em] italic text-[10px]">No transaction records found</p>
                             </div>
                         )}
                     </div>

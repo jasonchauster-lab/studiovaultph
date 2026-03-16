@@ -12,21 +12,6 @@ export default async function InstructorDashboardPage({ searchParams }: { search
         redirect('/login')
     }
 
-    // Check verification status
-    const { data: certs } = await supabase
-        .from('certifications')
-        .select('verified')
-        .eq('instructor_id', user.id)
-        .limit(1)
-
-    const cert = certs && certs.length > 0 ? certs[0] : null
-
-    // If not verified (or no cert at all), redirect to onboarding
-    if (!cert || !cert.verified) {
-        console.log(`[Dashboard] User ${user.email} (${user.id}) is not verified or has no certs. Redirecting to onboarding.`);
-        redirect('/instructor/onboarding')
-    }
-
     const params = await searchParams
 
     // --- DATA FETCHING ---
@@ -44,6 +29,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
 
     try {
         const [
+            certsResult,
             { data: sidebarData, error: sidebarError },
             { data: calendarData, error: calendarError },
             { data: profile, error: profileError },
@@ -52,6 +38,12 @@ export default async function InstructorDashboardPage({ searchParams }: { search
             { count: sessionCount },
             { data: upcomingApproved, error: earningsError },
         ] = await Promise.all([
+            // 0. Verification check (run in parallel with data fetches)
+            supabase
+                .from('certifications')
+                .select('verified')
+                .eq('instructor_id', user.id)
+                .limit(1),
             // 1. Sidebar "Upcoming" (Global)
             supabase
                 .from('bookings')
@@ -161,6 +153,13 @@ export default async function InstructorDashboardPage({ searchParams }: { search
                 .eq('status', 'approved')
                 .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' }),
         ]);
+
+        // Check verification status (result fetched in parallel above)
+        const cert = certsResult.data && certsResult.data.length > 0 ? certsResult.data[0] : null
+        if (!cert || !cert.verified) {
+            console.log(`[Dashboard] User ${user.email} (${user.id}) is not verified or has no certs. Redirecting to onboarding.`);
+            redirect('/instructor/onboarding')
+        }
 
         if (sidebarError) console.error('[Dashboard] Sidebar fetch error:', sidebarError);
         if (calendarError) console.error('[Dashboard] Calendar fetch error:', calendarError);

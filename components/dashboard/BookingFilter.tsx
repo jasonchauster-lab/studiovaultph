@@ -53,7 +53,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
     const hasActiveFilters = status !== 'all' || fromDate !== '' || toDate !== ''
 
     return (
-        <div className={clsx("flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-transparent sm:bg-white p-0 sm:p-2.5 rounded-none sm:rounded-xl border-none sm:border sm:border-border-grey shadow-none sm:shadow-sm w-full no-scrollbar", className)}>
+        <div className={clsx("flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-transparent sm:bg-white p-4 sm:p-2.5 rounded-none sm:rounded-xl border-none sm:border sm:border-border-grey shadow-none sm:shadow-sm w-full no-scrollbar", className)}>
             <div className="hidden sm:flex items-center gap-1.5 text-charcoal/70 shrink-0 sticky left-0 bg-white pr-1 z-10 transition-colors">
                 <Filter className="w-3.5 h-3.5" />
                 <span className="text-[9px] font-black uppercase tracking-[0.2em] inline-block">FILTER</span>

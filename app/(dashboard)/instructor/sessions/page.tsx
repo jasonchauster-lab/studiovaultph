@@ -29,17 +29,21 @@ export default async function InstructorSessionsPage() {
         .order('created_at', { ascending: false })
 
     return (
-        <div className="px-6 sm:p-8 lg:p-12 max-w-7xl mx-auto space-y-16">
+        <div className="px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto space-y-10 sm:space-y-16 py-6 sm:py-12">
             <div className="relative">
                 <Link
                     href="/instructor"
-                    className="inline-flex items-center gap-3 px-6 py-3 bg-forest text-white text-[10px] font-bold uppercase tracking-[0.3em] rounded-lg transition-all mb-8 shadow-tight hover:brightness-110 active:scale-95"
+                    className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-forest text-white text-[9px] font-black uppercase tracking-[0.25em] rounded-xl transition-all mb-8 shadow-tight hover:brightness-110 active:scale-95"
                 >
-                    <ArrowLeft className="w-4 h-4" />
-                    BACK TO DASHBOARD
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    DASHBOARD
                 </Link>
-                <h1 className="text-2xl sm:text-5xl font-serif text-charcoal tracking-tighter mb-4">My Sessions</h1>
-                <p className="text-[10px] font-bold text-charcoal/70 uppercase tracking-[0.3em]">Comprehensive registry of past and future engagements.</p>
+                <div className="flex flex-col gap-2">
+                    <h1 className="text-3xl sm:text-5xl font-serif text-charcoal tracking-tighter">My Sessions</h1>
+                    <p className="text-[9px] sm:text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em] max-w-xs sm:max-w-none">
+                        Comprehensive registry of past and future engagements.
+                    </p>
+                </div>
             </div>
 
             <div className="glass-card p-1 relative overflow-hidden bg-white/10">
