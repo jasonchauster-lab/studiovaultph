@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  /* Studio Vault PH Design System — Minimalist Luxury Palette */
-  --off-white: #FAF9F6;      /* Bone / Cooler Linen */
-  --burgundy: #3C2F2F;       /* Espresso */
-  --muted-burgundy: #666666;  /* Slate Grey (slightly darkened for accessibility) */
-  --buttermilk: #D4AF37;     /* Gold — incentives, special highlights */
-  --pastel-blue: #F0F2F5;    /* Soft Neutral */
-  --walking-vinnie: #8BA889; /* Sage Green — Positive indicators */
-  --border-grey: #E8E8E1;
-  --sage: #8BA889;
-  --gold: #D4AF37;
+  /* Elevated Wellness Design System */
+  --off-white: #F9F8F6;      /* Soft Alabaster — app backgrounds */
+  --burgundy: #1A1C1E;       /* Rich Charcoal — primary text */
+  --muted-burgundy: #6B7280; /* Muted Slate — secondary text */
+  --buttermilk: #EAE6DF;     /* Warm Stone — secondary surfaces & highlights */
+  --pastel-blue: #EAE6DF;    /* Warm Stone — neutral secondary */
+  --walking-vinnie: #3D6B57; /* Deep Sage — success / verified indicators */
+  --border-grey: #E3E3DC;    /* Subtle warm border */
+  --sage: #2D4A3E;            /* Deep Forest Slate — accents */
+  --forest: #2D4A3E;          /* Deep Forest Slate — primary buttons & active states */
+  --gold: #2D4A3E;            /* Deep Forest Slate — replaces all yellow-gold accent */
+  --rose-gold: #2D4A3E;       /* Deep Forest Slate — replaces rose-gold */
 
   --background: var(--off-white);
   --foreground: var(--burgundy);
@@ -18,9 +20,9 @@
   --radius: 8px;
   --radius-pill: 9999px;
 
-  /* Refined shadows for Minimalist Luxury — "feel rather than see" */
-  --shadow-tight: 0 1px 2px 0 rgba(60, 47, 47, 0.03);
-  --shadow-card: 0 10px 15px -3px rgba(60, 47, 47, 0.04), 0 4px 6px -2px rgba(60, 47, 47, 0.02);
+  /* Crisp, high-contrast shadows */
+  --shadow-tight: 0 1px 2px 0 rgba(26, 28, 30, 0.04);
+  --shadow-card: 0 10px 15px -3px rgba(26, 28, 30, 0.06), 0 4px 6px -2px rgba(26, 28, 30, 0.03);
 }
 
 @theme inline {
@@ -36,10 +38,14 @@
   --color-walking-vinnie: var(--walking-vinnie);
   --color-border-grey: var(--border-grey);
 
+  /* Additional tokens */
+  --color-gold: var(--gold);
+  --color-rose-gold: var(--rose-gold);
+  --color-forest: var(--forest);
+
   /* Legacy Mappings */
   --color-charcoal: var(--burgundy);
   --color-slate: var(--muted-burgundy);
-  --color-forest: var(--sage);
   --color-sage: var(--sage);
 
   /* System Mappings */
@@ -58,7 +64,7 @@
   --radius-pill: var(--radius-pill);
 
   /* Selection color */
-  --color-selection: rgba(252, 230, 183, 0.35);
+  --color-selection: rgba(234, 230, 223, 0.50);
 
   /* ─── Typography: Playfair Display (Serif) + Inter (Sans) ─── */
   --font-serif: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
@@ -76,8 +82,8 @@ input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
   box-shadow: 0 0 0 1000px #ffffff inset !important;
-  -webkit-text-fill-color: #3C2F2F !important;
-  caret-color: #3C2F2F;
+  -webkit-text-fill-color: #1A1C1E !important;
+  caret-color: #1A1C1E;
   transition: background-color 9999s ease-in-out 0s;
 }
 
@@ -134,7 +140,7 @@ h6 {
   .earth-card:hover {
     box-shadow: var(--shadow-card);
     transform: translateY(-1px);
-    border-color: rgba(81, 50, 41, 0.12);
+    border-color: rgba(26, 28, 30, 0.10);
   }
 
   /* Prevent hover transforms when a modal is open */
@@ -157,13 +163,13 @@ h6 {
     transition: all 0.3s ease;
   }
 
-  /* ─── PRIMARY BUTTONS — Mother Earth with pure white text ─── */
+  /* ─── PRIMARY BUTTONS — Deep Forest Slate ─── */
   .btn-primary,
   .btn-forest,
   .btn-antigravity,
   .btn-sage-glow,
   .btn-rose {
-    background: var(--burgundy);
+    background: var(--forest);
     color: #ffffff;
     font-family: var(--font-inter), var(--font-lexend), system-ui, sans-serif;
     @apply rounded-lg font-semibold transition-all duration-200 shadow-sm px-6 py-2.5 inline-flex items-center justify-center gap-2;
@@ -185,7 +191,7 @@ h6 {
 
   /* ─── Book Now CTA — high contrast, marketplace action ─── */
   .btn-book-now {
-    background: var(--burgundy);
+    background: var(--forest);
     color: #ffffff;
     font-family: var(--font-inter), var(--font-lexend), system-ui, sans-serif;
     @apply rounded-lg font-bold transition-all duration-200 shadow-sm px-5 py-2.5 inline-flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider;
@@ -222,14 +228,15 @@ h6 {
     @apply bg-red-50 text-red-700 border-red-100;
   }
 
-  /* The Bay — active/highlighted */
+  /* Warm Stone — active/highlighted */
   .status-pill-bay {
     background: var(--buttermilk);
     @apply text-burgundy border-burgundy/10;
   }
 
   .status-pill-grey {
-    @apply bg-pastel-blue text-burgundy border-pastel-blue/20;
+    background: var(--pastel-blue);
+    @apply text-burgundy border-burgundy/10;
   }
 
   /* ─── Session Block ─── */
@@ -269,25 +276,25 @@ h6 {
     z-index: 10;
   }
 
-  /* ─── Price Highlight — The Bay accent ─── */
+  /* ─── Price Highlight — Warm Stone accent ─── */
   .price-highlight {
     background: var(--buttermilk);
     color: var(--burgundy);
     @apply px-3 py-1 rounded-full text-sm font-bold;
   }
 
-  /* ─── Last Minute tag — The Bay accent ─── */
+  /* ─── Last Minute tag ─── */
   .tag-last-minute {
     background: var(--buttermilk);
     color: var(--burgundy);
     @apply px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border border-burgundy/10;
   }
 
-  /* ─── Verified / Completed badge — Walking Vinnie ─── */
+  /* ─── Verified / Completed badge ─── */
   .badge-verified {
     background: var(--walking-vinnie);
-    color: var(--burgundy);
-    @apply px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border border-burgundy/10;
+    color: #ffffff;
+    @apply px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest;
   }
 
   /* ─── No scrollbar ─── */
