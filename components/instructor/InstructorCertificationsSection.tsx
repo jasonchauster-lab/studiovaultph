@@ -195,32 +195,34 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                     </form>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {certifications.length === 0 ? (
-                        <div className="col-span-2 py-24 text-center glass-card border-dashed">
-                            <Award className="w-16 h-16 text-charcoal/5 mx-auto mb-6" />
-                            <p className="text-charcoal/40 text-[10px] font-black uppercase tracking-[0.4em] italic">Zero accreditations on record</p>
+                        <div className="col-span-2 py-32 text-center glass-card border-dashed bg-white/20">
+                            <Award className="w-16 h-16 text-charcoal/5 mx-auto mb-8 animate-pulse" />
+                            <p className="text-charcoal/40 text-[10px] font-black uppercase tracking-[0.5em] italic">Zero accreditations on record</p>
                         </div>
                     ) : (
                         certifications.map((cert) => (
-                            <div key={cert.id} className="group relative glass-card p-6 sm:p-10 border-white/60 hover:shadow-cloud transition-all duration-700 overflow-hidden">
-                                <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
-                                    <div className="p-5 bg-white/40 rounded-[20px] group-hover:bg-white transition-all duration-700 border border-white/60 shadow-sm relative overflow-hidden shrink-0">
-                                        <Award className="w-6 h-6 sm:w-8 sm:h-8 text-gold relative z-10" />
-                                        <div className="absolute top-0 right-0 w-10 h-10 bg-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-lg" />
+                            <div key={cert.id} className="group relative glass-card p-8 sm:p-12 border-white/60 hover:shadow-2xl hover:shadow-gold/5 transition-all duration-1000 overflow-hidden bg-white/40 active:scale-[0.98]">
+                                <div className="absolute top-0 right-0 w-40 h-40 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:bg-gold/10 transition-colors duration-1000" />
+                                
+                                <div className="flex flex-col sm:flex-row items-center gap-8 sm:gap-10 relative z-10">
+                                    <div className="p-6 bg-white rounded-[2.5rem] group-hover:scale-110 group-hover:rotate-6 transition-all duration-1000 border border-white/60 shadow-sm relative shrink-0">
+                                        <Award className="w-8 h-8 text-gold" />
                                     </div>
+                                    
                                     <div className="flex-1 min-w-0 text-center sm:text-left">
-                                        <h4 className="font-serif text-charcoal text-xl sm:text-2xl tracking-tighter mb-2 truncate">{cert.certification_body}</h4>
-                                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-6">
-                                            <div className="flex items-center gap-2 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] shrink-0">
-                                                <FileText className="w-3.5 h-3.5 opacity-30" />
+                                        <h4 className="font-serif text-charcoal text-2xl sm:text-3xl tracking-tighter mb-4 truncate">{cert.certification_body}</h4>
+                                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
+                                            <div className="flex items-center gap-2.5 text-[9px] font-black text-charcoal/30 uppercase tracking-[0.2em] shrink-0">
+                                                <FileText className="w-3.5 h-3.5" />
                                                 SUBMITTED
                                             </div>
                                             <div className={clsx(
-                                                "flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border transition-all duration-700 shadow-sm whitespace-nowrap",
+                                                "flex items-center gap-2.5 text-[8px] font-black uppercase tracking-[0.25em] px-6 py-2 rounded-full border transition-all duration-1000 shadow-sm whitespace-nowrap",
                                                 cert.verified
-                                                    ? 'bg-sage text-white border-white/20'
-                                                    : 'bg-gold/10 text-gold border-gold/20'
+                                                    ? 'bg-sage text-white border-sage/20 shadow-sage/10'
+                                                    : 'bg-gold/5 text-gold border-gold/20 shadow-gold/5'
                                             )}>
                                                 {cert.verified ? (
                                                     <><CheckCircle className="w-3.5 h-3.5" /> VERIFIED</>
@@ -230,12 +232,13 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                             </div>
                                         </div>
                                     </div>
+                                    
                                     <button
                                         onClick={() => handleDelete(cert.id)}
-                                        className="p-4 text-charcoal/10 hover:text-red-600 hover:bg-red-50/50 rounded-[20px] transition-all duration-500 opacity-100 sm:opacity-0 group-hover:opacity-100 border border-transparent sm:border-transparent hover:border-red-100"
+                                        className="p-5 text-charcoal/10 hover:text-red-500 hover:bg-red-50/50 rounded-full transition-all duration-700 opacity-100 sm:opacity-0 group-hover:opacity-100 border border-transparent hover:border-red-100 active:scale-90"
                                         title="Purge Accreditation"
                                     >
-                                        <Trash2 className="w-5 h-5 stroke-[2.5px]" />
+                                        <Trash2 className="w-5 h-5" />
                                     </button>
                                 </div>
                             </div>

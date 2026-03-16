@@ -54,20 +54,20 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
 
     return (
         <div className={clsx("flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-transparent sm:bg-white p-0 sm:p-2.5 rounded-none sm:rounded-xl border-none sm:border sm:border-border-grey shadow-none sm:shadow-sm w-full no-scrollbar", className)}>
-            <div className="hidden sm:flex items-center gap-1.5 text-charcoal/50 shrink-0 sticky left-0 bg-white pr-1 z-10 transition-colors">
+            <div className="hidden sm:flex items-center gap-1.5 text-charcoal/70 shrink-0 sticky left-0 bg-white pr-1 z-10 transition-colors">
                 <Filter className="w-3.5 h-3.5" />
-                <span className="text-[9px] font-black uppercase tracking-widest inline-block">FILTER</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] inline-block">FILTER</span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:gap-2 flex-1 w-full sm:items-center sm:max-w-xl">
                 {/* Status Dropdown */}
                 <div className="w-full relative group min-w-0">
-                    <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/50 uppercase tracking-[0.2em] z-10">Status</span>
+                    <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/60 uppercase tracking-[0.2em] z-10">Status</span>
                     <div className="relative h-11">
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value as FilterStatus)}
-                            className="w-full h-full pl-3 pr-8 bg-white sm:bg-off-white border border-border-grey text-charcoal text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg focus:ring-forest focus:border-forest block py-2.5 sm:py-1.5 outline-none transition-colors shadow-sm sm:shadow-tight appearance-none"
+                            className="w-full h-full pl-3 pr-8 bg-white sm:bg-white border border-border-grey/60 text-charcoal text-[10px] sm:text-[11px] font-bold uppercase tracking-widest rounded-lg focus:ring-forest focus:border-forest block py-2 sm:py-1 outline-none transition-colors shadow-sm sm:shadow-tight appearance-none"
                         >
                             <option value="all">ANY STATUS</option>
                             <option value="approved">Approved</option>
@@ -79,10 +79,10 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                 </div>
 
                 <div className="w-full relative group min-w-0">
-                    <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/50 uppercase tracking-[0.2em] z-10">Date</span>
+                    <span className="absolute -top-2 left-2 px-1 bg-white text-[7px] font-black text-charcoal/60 uppercase tracking-[0.2em] z-10">Date</span>
                     <div className={clsx(
                         "flex items-center justify-between gap-1 sm:gap-2 border rounded-lg px-2 sm:px-2 py-0 shrink-0 sm:shrink transition-all duration-300 overflow-hidden sm:min-w-0 w-full h-11",
-                        (fromDate || toDate) ? "bg-forest/5 border-forest/20 ring-1 ring-forest/10" : "bg-white sm:bg-off-white border-border-grey shadow-sm sm:shadow-tight"
+                        (fromDate || toDate) ? "bg-forest/5 border-forest/20 ring-1 ring-forest/10" : "bg-white sm:bg-white border-border-grey/60 shadow-sm sm:shadow-tight"
                     )}>
                         <CalendarIcon className={clsx("hidden sm:block w-3.5 h-3.5 shrink-0 transition-colors", (fromDate || toDate) ? "text-forest" : "text-charcoal/50")} />
                         
@@ -92,7 +92,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                                     type="date"
                                     value={fromDate}
                                     onChange={(e) => setFromDate(e.target.value)}
-                                    className="bg-transparent text-charcoal text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none w-full pr-14"
+                                    className="bg-transparent text-charcoal text-[9px] sm:text-[11px] font-bold uppercase tracking-wider focus:outline-none w-full pr-1.5"
                                     aria-label="From Date"
                                 />
                                 {fromDate && (
@@ -111,7 +111,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                                     type="date"
                                     value={toDate}
                                     onChange={(e) => setToDate(e.target.value)}
-                                    className="bg-transparent text-charcoal text-[9px] sm:text-xs font-bold uppercase tracking-wider focus:outline-none w-full text-right sm:text-left pr-14"
+                                    className="bg-transparent text-charcoal text-[9px] sm:text-[11px] font-bold uppercase tracking-wider focus:outline-none w-full text-right sm:text-left pr-1.5"
                                     aria-label="To Date"
                                 />
                                 {toDate && (

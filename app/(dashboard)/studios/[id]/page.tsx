@@ -154,7 +154,7 @@ export default async function StudioDetailsPage(props: {
                         {studio.logo_url ? (
                             <img src={studio.logo_url} alt={studio.name} className="w-full h-full object-cover" />
                         ) : (studio.profiles as any)?.avatar_url ? (
-                            <img src={`https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${(studio.profiles as any).avatar_url}`} alt={studio.name} className="w-full h-full object-cover" />
+                            <img src={(studio.profiles as any).avatar_url.startsWith('http') ? (studio.profiles as any).avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${(studio.profiles as any).avatar_url}`} alt={studio.name} className="w-full h-full object-cover" />
                         ) : (
                             <Users className="w-12 h-12 text-burgundy/10" />
                         )}

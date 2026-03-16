@@ -17,62 +17,68 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             value: `₱${stats.revenue.toLocaleString()}`,
             icon: TrendingUp,
             trend: 'Last 30 Days',
-            trendColor: 'text-sage',
-            bgIcon: 'bg-sage/10',
-            iconColor: 'text-sage'
+            trendColor: 'text-forest',
+            bgIcon: 'bg-forest/5',
+            iconColor: 'text-forest'
         },
         {
             label: 'Active Listings',
             value: `${stats.activeListings} slots`,
             icon: Calendar,
             trend: 'This week',
-            trendColor: 'text-burgundy',
-            bgIcon: 'bg-burgundy/5',
-            iconColor: 'text-burgundy'
+            trendColor: 'text-charcoal',
+            bgIcon: 'bg-charcoal/5',
+            iconColor: 'text-charcoal'
         },
         {
             label: 'Average Occupancy',
             value: `${stats.occupancy}%`,
             icon: Zap,
             trend: 'Current Week',
-            trendColor: 'text-burgundy',
-            bgIcon: 'bg-burgundy/5',
-            iconColor: 'text-burgundy'
+            trendColor: 'text-forest',
+            bgIcon: 'bg-forest/5',
+            iconColor: 'text-forest'
         },
         {
             label: 'Top Instructor',
             value: stats.topInstructor,
             icon: Star,
             trend: 'Most Bookings',
-            trendColor: 'text-gold',
-            bgIcon: 'bg-gold/10',
-            iconColor: 'text-gold'
+            trendColor: 'text-sage',
+            bgIcon: 'bg-sage/10',
+            iconColor: 'text-sage'
         }
     ]
 
     return (
-        <div className="max-w-5xl mx-auto">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {cardData.map((card, index) => (
-                    <div key={index} className="earth-card p-4 group transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-                        <div className="flex justify-between items-start mb-4">
+                    <div key={index} className="earth-card p-6 group transition-all duration-500 hover:shadow-card hover:-translate-y-1.5 relative overflow-hidden bg-white/50 backdrop-blur-sm">
+                        <div className="flex justify-between items-start mb-6">
                             <div className={clsx(
-                                "p-2.5 rounded-lg group-hover:scale-110 transition-transform duration-300 shadow-tight border border-border-grey bg-white",
+                                "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-tight border border-border-grey/50 bg-white group-hover:scale-110 group-hover:shadow-card",
                                 card.bgIcon
                             )}>
-                                <card.icon className={clsx("w-4 h-4", card.iconColor)} />
+                                <card.icon className={clsx("w-5 h-5", card.iconColor)} />
                             </div>
                             <span className={clsx(
-                                "text-[8px] font-bold uppercase tracking-[0.1em] px-2.5 py-1 rounded-full border border-border-grey bg-white shadow-tight",
+                                "text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full border border-border-grey/30 bg-white/80 shadow-tight backdrop-blur-sm",
                                 card.trendColor
                             )}>
                                 {card.trend}
                             </span>
                         </div>
                         <div>
-                            <p className="text-[9px] font-bold text-slate uppercase tracking-[0.15em] mb-1.5">{card.label}</p>
-                            <h3 className="text-2xl font-serif font-bold text-charcoal tracking-tight truncate whitespace-nowrap" title={card.value}>{card.value}</h3>
+                            <p className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-2 opacity-70">{card.label}</p>
+                            <h3 className="text-3xl font-serif font-black text-charcoal tracking-tight truncate leading-none" title={card.value}>{card.value}</h3>
                         </div>
+                        
+                        {/* Decorative background element */}
+                        <div className={clsx(
+                            "absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-1000",
+                            card.bgIcon
+                        )} />
                     </div>
                 ))}
             </div>

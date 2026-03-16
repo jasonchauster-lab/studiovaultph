@@ -44,100 +44,126 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
         return val ? val.split(',') : []
     }
 
+    const hasFilters = Array.from(searchParams.keys()).some(key => key !== 'q')
+
+    const clearAllFilters = () => {
+        router.push('/customer')
+    }
+
     return (
-        <div className="flex flex-col gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-border-grey shadow-card overflow-hidden">
+        <div className="flex flex-col gap-6 bg-white p-5 sm:p-7 rounded-[2rem] border border-burgundy/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden relative">
             {/* Header: Label + Clear (on mobile) */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-muted-burgundy">
-                    <Filter className="w-4 h-4" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Filters</span>
+                <div className="flex items-center gap-2.5 text-burgundy/60">
+                    <div className="w-8 h-8 rounded-full bg-off-white flex items-center justify-center border border-burgundy/10">
+                        <Filter className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Filter Discovery</span>
                 </div>
-            </div>
 
-            {/* Main Categories: Horizontal Scroll on Mobile */}
-            <div className="flex flex-nowrap overflow-x-auto hide-scrollbar gap-3 pb-1 -mb-1 sm:flex-wrap sm:overflow-visible">
-                <div className="flex-none sm:flex-initial">
-                    {/* Type Filter */}
-                    <select
-                        onChange={(e) => handleFilter('type', e.target.value)}
-                        value={searchParams.get('type') || 'all'}
-                        className="w-auto px-4 py-2 bg-off-white border border-burgundy/15 rounded-xl text-[11px] font-bold text-burgundy shadow-tight focus:outline-none focus:ring-2 focus:ring-burgundy/30 focus:border-burgundy/40 transition-all appearance-none cursor-pointer hover:border-burgundy/25 whitespace-nowrap"
+                {hasFilters && (
+                    <button
+                        onClick={clearAllFilters}
+                        className="text-[10px] font-bold text-burgundy hover:text-burgundy/60 transition-colors uppercase tracking-widest flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-off-white border border-burgundy/10"
                     >
-                        <option value="all">All Modes</option>
-                        <option value="instructor">Instructors</option>
-                        <option value="studio">Studios</option>
-                    </select>
-                </div>
-
-                <div className="flex-none sm:flex-initial">
-                    <LocationFilterDropdown
-                        value={searchParams.get('location') || 'all'}
-                        onChange={(val) => handleFilter('location', val)}
-                    />
-                </div>
-
-                <div className="flex-none sm:flex-initial">
-                    <MultiSelectFilter
-                        label="Equipment"
-                        options={['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat']}
-                        value={getMultiValue('equipment')}
-                        onChange={(vals) => handleMultiFilter('equipment', vals)}
-                        className="w-auto"
-                    />
-                </div>
-
-                <div className="flex-none sm:flex-initial">
-                    <MultiSelectFilter
-                        label="Certification"
-                        options={['STOTT', 'BASI', 'Balanced Body', 'Polestar', 'Classical']}
-                        value={getMultiValue('certification')}
-                        onChange={(vals) => handleMultiFilter('certification', vals)}
-                        className="w-auto"
-                    />
-                </div>
-
-                <div className="flex-none sm:flex-initial">
-                    <MultiSelectFilter
-                        label="Amenities"
-                        options={[...STUDIO_AMENITIES]}
-                        value={getMultiValue('amenity')}
-                        onChange={(vals) => handleMultiFilter('amenity', vals)}
-                        className="w-auto"
-                    />
-                </div>
+                        Clear All
+                    </button>
+                )}
             </div>
 
-            {/* Date and Time Group: 2-column grid on mobile */}
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 w-full sm:w-auto items-end pt-2 border-t border-border-grey/30 sm:border-0 sm:pt-0">
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-[8px] sm:text-[9px] font-black text-muted-burgundy uppercase tracking-[0.2em] ml-1">Select Date</label>
-                    <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-burgundy/40 pointer-events-none" />
-                        <input
-                            type="date"
-                            min={getManilaTodayStr()}
-                            onChange={(e) => handleFilter('date', e.target.value)}
-                            value={searchParams.get('date') || ''}
-                            className="w-full sm:w-auto pl-8 pr-12 py-1.5 bg-off-white border border-burgundy/15 rounded-xl text-[10px] sm:text-[11px] font-bold text-burgundy shadow-tight focus:outline-none transition-all cursor-pointer hover:border-burgundy/25"
+            <div className="flex flex-col lg:flex-row lg:items-end gap-6">
+                {/* Main Categories: Horizontal Scroll on Mobile */}
+                <div className="flex flex-nowrap overflow-x-auto hide-scrollbar gap-3 pb-1 -mb-1 lg:flex-wrap lg:overflow-visible flex-1">
+                    <div className="flex-none">
+                        {/* Type Filter */}
+                        <div className="relative group">
+                            <select
+                                onChange={(e) => handleFilter('type', e.target.value)}
+                                value={searchParams.get('type') || 'all'}
+                                className="w-auto pl-4 pr-10 py-2.5 bg-off-white border border-burgundy/10 rounded-xl text-[11px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-2 focus:ring-burgundy/20 focus:border-burgundy/30 transition-all appearance-none cursor-pointer hover:bg-white hover:border-burgundy/20 whitespace-nowrap"
+                            >
+                                <option value="all">All Modes</option>
+                                <option value="instructor">Instructors</option>
+                                <option value="studio">Studios</option>
+                            </select>
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-burgundy/40">
+                                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex-none">
+                        <LocationFilterDropdown
+                            value={searchParams.get('location') || 'all'}
+                            onChange={(val) => handleFilter('location', val)}
+                        />
+                    </div>
+
+                    <div className="flex-none">
+                        <MultiSelectFilter
+                            label="Equipment"
+                            options={['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat']}
+                            value={getMultiValue('equipment')}
+                            onChange={(vals) => handleMultiFilter('equipment', vals)}
+                            className="w-auto"
+                        />
+                    </div>
+
+                    <div className="flex-none">
+                        <MultiSelectFilter
+                            label="Certification"
+                            options={['STOTT', 'BASI', 'Balanced Body', 'Polestar', 'Classical']}
+                            value={getMultiValue('certification')}
+                            onChange={(vals) => handleMultiFilter('certification', vals)}
+                            className="w-auto"
+                        />
+                    </div>
+
+                    <div className="flex-none">
+                        <MultiSelectFilter
+                            label="Amenities"
+                            options={[...STUDIO_AMENITIES]}
+                            value={getMultiValue('amenity')}
+                            onChange={(vals) => handleMultiFilter('amenity', vals)}
+                            className="w-auto"
                         />
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-[8px] sm:text-[9px] font-black text-muted-burgundy uppercase tracking-[0.2em] ml-1">Start Time</label>
-                    <div className="relative">
-                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-burgundy/40 pointer-events-none" />
-                        <input
-                            type="time"
-                            min={
-                                searchParams.get('date') === getManilaTodayStr()
-                                    ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-                                    : undefined
-                            }
-                            onChange={(e) => handleFilter('time', e.target.value)}
-                            value={searchParams.get('time') || ''}
-                            className="w-full sm:w-auto pl-8 pr-12 py-1.5 bg-off-white border border-burgundy/15 rounded-xl text-[10px] sm:text-[11px] font-bold text-burgundy shadow-tight focus:outline-none transition-all cursor-pointer hover:border-burgundy/25"
-                        />
+                {/* Date and Time Group */}
+                <div className="flex gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 border-burgundy/5">
+                    <div className="flex flex-col gap-2 flex-1 lg:flex-none">
+                        <label className="text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em] ml-1">Date</label>
+                        <div className="relative">
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-burgundy/30 pointer-events-none" />
+                            <input
+                                type="date"
+                                min={getManilaTodayStr()}
+                                onChange={(e) => handleFilter('date', e.target.value)}
+                                value={searchParams.get('date') || ''}
+                                className="w-full lg:w-40 pl-9 pr-4 py-2 bg-off-white border border-burgundy/10 rounded-xl text-[11px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-2 focus:ring-burgundy/20 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 flex-1 lg:flex-none">
+                        <label className="text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em] ml-1">Time</label>
+                        <div className="relative">
+                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-burgundy/30 pointer-events-none" />
+                            <input
+                                type="time"
+                                min={
+                                    searchParams.get('date') === getManilaTodayStr()
+                                        ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+                                        : undefined
+                                }
+                                onChange={(e) => handleFilter('time', e.target.value)}
+                                value={searchParams.get('time') || ''}
+                                className="w-full lg:w-32 pl-9 pr-4 py-2 bg-off-white border border-burgundy/10 rounded-xl text-[11px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-2 focus:ring-burgundy/20 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

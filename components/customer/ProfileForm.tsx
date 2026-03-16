@@ -86,26 +86,33 @@ export default function ProfileForm({ profile }: { profile: any }) {
         <form action={handleSubmit} className="space-y-8">
 
             {/* Avatar Upload */}
-            <div className="flex flex-col items-center sm:flex-row gap-6 sm:gap-10 pb-6 sm:pb-10 border-b border-white/60">
-                <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                    <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-cloud bg-white/40 flex items-center justify-center relative z-10">
+            <div className="flex flex-col items-center sm:flex-row gap-8 pb-10 border-b border-cream-200/60">
+                <div 
+                    className="relative group cursor-pointer transition-transform duration-300 hover:scale-[1.02]" 
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <div className="w-36 h-36 rounded-full overflow-hidden border-[6px] border-white shadow-xl bg-cream-50 flex items-center justify-center relative z-10 transition-all duration-300 group-hover:shadow-2xl">
                         {previewUrl ? (
                             <Image
                                 src={previewUrl}
                                 alt="Profile"
-                                width={128}
-                                height={128}
+                                width={144}
+                                height={144}
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                             />
                         ) : (
-                            <User className="w-12 h-12 text-charcoal/10" />
+                            <div className="text-center p-6 flex flex-col items-center">
+                                <User className="w-12 h-12 text-charcoal-200" />
+                            </div>
                         )}
-                        <div className="absolute inset-0 bg-charcoal/20 opacity-0 group-hover:opacity-100 transition-all duration-700 backdrop-blur-[2px] flex items-center justify-center">
-                            <Camera className="w-8 h-8 text-white" />
+                        <div className="absolute inset-0 bg-charcoal-900/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-full backdrop-blur-[2px]">
+                            <div className="bg-white/90 p-3 rounded-full shadow-lg">
+                                <Camera className="w-6 h-6 text-charcoal-900" />
+                            </div>
                         </div>
                     </div>
                     {/* Decorative Ring */}
-                    <div className="absolute inset-0 rounded-full border border-burgundy/20 scale-110 opacity-0 group-hover:opacity-100 transition-all duration-700 group-hover:scale-125 pointer-events-none" />
+                    <div className="absolute inset-[-10px] rounded-full border border-charcoal-900/5 scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500 pointer-events-none" />
 
                     <input
                         type="file"
@@ -116,146 +123,201 @@ export default function ProfileForm({ profile }: { profile: any }) {
                     />
                 </div>
 
-                <div className="text-center sm:text-left">
-                    <h3 className="text-2xl font-serif text-charcoal tracking-tight mb-2">Profile Picture</h3>
-                    <p className="text-sm font-medium text-charcoal/60 max-w-xs leading-relaxed">
-                        This helps students and studios recognize you.
+                <div className="text-center sm:text-left space-y-1">
+                    <h3 className="text-2xl font-serif font-bold text-charcoal-900 tracking-tight">Identity Image</h3>
+                    <p className="text-xs font-medium text-charcoal-400 max-w-xs leading-relaxed">
+                        This helps students and studios recognize you. Upload a clear photo of yourself.
                     </p>
                 </div>
             </div>
 
             {/* Form Fields Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 sm:gap-x-12 sm:gap-y-10">
-                <div className="space-y-5 sm:space-y-8">
-                    <div>
-                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Full Name</label>
-                        <input
-                            type="text"
-                            name="fullName"
-                            defaultValue={profile?.fullName || profile?.full_name || ''}
-                            required
-                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
-                        />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-10">
+                <div className="space-y-8">
+                    <div className="flex items-center gap-3 border-b border-cream-200/60 pb-3 mb-2">
+                        <h3 className="text-xl font-serif font-bold text-charcoal-900 tracking-tight">Personal Details</h3>
+                        <div className="h-px flex-1 bg-cream-100/50" />
                     </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Email Address</label>
-                        <input
-                            type="email"
-                            name="email"
-                            defaultValue={profile?.email || ''}
-                            required
-                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-base sm:text-sm outline-none focus:ring-4 focus:ring-burgundy/10 focus:border-burgundy/30 transition-all shadow-sm"
-                        />
-                        {profile?.new_email && (
-                            <p className="mt-2 text-[10px] text-gold font-bold uppercase tracking-wider">
-                                Pending verification: {profile.new_email}
-                            </p>
-                        )}
-                    </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Instagram Handle</label>
-                        <div className="relative">
-                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gold font-bold text-sm">@</span>
+                    
+                    <div className="space-y-6">
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Full Name</label>
                             <input
                                 type="text"
-                                name="instagram"
-                                defaultValue={profile?.instagram_handle || ''}
-                                className="w-full pl-12 pr-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
-                                placeholder="username"
+                                name="fullName"
+                                defaultValue={profile?.fullName || profile?.full_name || ''}
+                                required
+                                className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Email Address</label>
+                            <input
+                                type="email"
+                                name="email"
+                                defaultValue={profile?.email || ''}
+                                required
+                                className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
+                            />
+                            {profile?.new_email && (
+                                <p className="mt-2 ml-2 text-[10px] text-gold font-bold uppercase tracking-[0.2em] animate-pulse">
+                                    Pending verification: {profile.new_email}
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Instagram Handle</label>
+                            <div className="relative group/input">
+                                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-charcoal-400 font-bold text-sm">@</span>
+                                <input
+                                    type="text"
+                                    name="instagram"
+                                    defaultValue={profile?.instagram_handle || ''}
+                                    className="w-full pl-10 pr-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
+                                    placeholder="username"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-8">
+                    <div className="flex items-center gap-3 border-b border-cream-200/60 pb-3 mb-2">
+                        <h3 className="text-xl font-serif font-bold text-charcoal-900 tracking-tight">Contact & Safety</h3>
+                        <div className="h-px flex-1 bg-cream-100/50" />
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Phone Number</label>
+                            <input
+                                type="tel"
+                                name="contactNumber"
+                                defaultValue={profile?.contact_number || ''}
+                                placeholder="09XXXXXXXXX"
+                                maxLength={13}
+                                className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Emergency Name</label>
+                            <input
+                                type="text"
+                                name="emergencyContactName"
+                                defaultValue={profile?.emergency_contact_name || profile?.emergency_contact || ''}
+                                placeholder="Contact Name"
+                                className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Emergency Phone</label>
+                            <input
+                                type="tel"
+                                name="emergencyContactPhone"
+                                defaultValue={profile?.emergency_contact_phone || ''}
+                                placeholder="09XXXXXXXXX"
+                                className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
                             />
                         </div>
                     </div>
                 </div>
 
-                <div className="space-y-5 sm:space-y-8">
-                    <div>
-                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Phone Number</label>
-                        <input
-                            type="tel"
-                            name="contactNumber"
-                            defaultValue={profile?.contact_number || ''}
-                            placeholder="09XXXXXXXXX"
-                            maxLength={13}
-                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
-                        />
+                <div className="lg:col-span-2 pt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                        <div className="md:col-span-1 space-y-1.5">
+                            <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Date of Birth</label>
+                            <input
+                                type="date"
+                                name="birthday"
+                                defaultValue={profile?.date_of_birth || ''}
+                                className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm cursor-pointer"
+                            />
+                        </div>
+                        <div className="md:col-span-2 space-y-1.5">
+                            <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">About You (Philosophy)</label>
+                            <textarea
+                                name="bio"
+                                defaultValue={profile?.bio || ''}
+                                rows={5}
+                                placeholder="Tell studios and instructors about your fitness journey, goals, or philosophy..."
+                                className="w-full px-6 py-5 bg-cream-50/50 border border-cream-200 rounded-2xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 resize-none transition-all leading-relaxed shadow-sm placeholder:text-charcoal-300"
+                            />
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Emergency Name</label>
-                        <input
-                            type="text"
-                            name="emergencyContactName"
-                            defaultValue={profile?.emergency_contact_name || profile?.emergency_contact || ''}
-                            placeholder="Contact Name"
-                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Emergency Phone</label>
-                        <input
-                            type="tel"
-                            name="emergencyContactPhone"
-                            defaultValue={profile?.emergency_contact_phone || ''}
-                            placeholder="09XXXXXXXXX"
-                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
-                        />
-                    </div>
-                </div>
-
-                <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Date of Birth</label>
-                    <input
-                        type="date"
-                        name="birthday"
-                        defaultValue={profile?.date_of_birth || ''}
-                        className="w-full sm:w-64 px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm cursor-pointer"
-                    />
-                </div>
-
-                <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">About You</label>
-                    <textarea
-                        name="bio"
-                        defaultValue={profile?.bio || ''}
-                        rows={6}
-                        placeholder="Tell studios and instructors about your fitness journey, goals, or philosophy..."
-                        className="w-full px-6 py-6 bg-white/40 border border-white/60 rounded-[2rem] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 resize-none transition-all leading-relaxed shadow-sm"
-                    />
                 </div>
             </div>
 
             {/* Medical Conditions */}
             <div className="space-y-6">
-                <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Medical Conditions</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    {['Scoliosis', 'Obesity', 'Herniated Disc', 'Post-partum', 'Chronic Back Pain', 'Hypertension', 'Diabetes', 'Asthma', 'Osteoporosis', 'Others'].map((condition) => (
-                        <label key={condition} className="group flex items-center gap-3 p-3 sm:p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-gold/30 cursor-pointer transition-all duration-500 shadow-sm relative">
-                            <input
-                                type="checkbox"
-                                name="medical_conditions"
-                                value={condition}
-                                checked={selectedMedicalConditions.includes(condition)}
-                                onChange={(e) => {
-                                    if (e.target.checked) {
-                                        setSelectedMedicalConditions([...selectedMedicalConditions, condition])
-                                    } else {
-                                        setSelectedMedicalConditions(selectedMedicalConditions.filter((item) => item !== condition))
-                                    }
-                                }}
-                                className="w-5 h-5 text-burgundy border-white/60 bg-white/20 rounded-lg focus:ring-burgundy/20 focus:ring-offset-0 transition-all cursor-pointer"
-                            />
-                            <span className="text-xs font-semibold text-charcoal/60 uppercase tracking-wide group-hover:text-charcoal transition-colors">{condition}</span>
-                        </label>
-                    ))}
+                <div className="flex items-center gap-3 border-b border-cream-200/60 pb-3">
+                    <div className="flex flex-col gap-0.5">
+                        <h2 className="text-xl font-serif font-bold text-charcoal-900">Medical Conditions</h2>
+                        <p className="text-[10px] font-bold text-charcoal-400 uppercase tracking-widest">Select all that apply to you</p>
+                    </div>
+                    <div className="h-px flex-1 bg-cream-100/50" />
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                    {['Scoliosis', 'Obesity', 'Herniated Disc', 'Post-partum', 'Chronic Back Pain', 'Hypertension', 'Diabetes', 'Asthma', 'Osteoporosis', 'Others'].map((condition) => {
+                        const isSelected = selectedMedicalConditions.includes(condition);
+                        return (
+                            <label
+                                key={condition}
+                                className={clsx(
+                                    "relative flex items-center gap-3 px-6 py-4 border rounded-[1.25rem] cursor-pointer transition-all duration-300 overflow-hidden active:scale-95 group",
+                                    isSelected 
+                                        ? "border-charcoal-900" 
+                                        : "bg-white border-cream-200 hover:border-charcoal-900/20"
+                                )}
+                            >
+                                <input
+                                    type="checkbox"
+                                    name="medical_conditions"
+                                    value={condition}
+                                    checked={isSelected}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setSelectedMedicalConditions([...selectedMedicalConditions, condition])
+                                        } else {
+                                            setSelectedMedicalConditions(selectedMedicalConditions.filter((item) => item !== condition))
+                                        }
+                                    }}
+                                    className="peer absolute opacity-0"
+                                />
+                                <div className={clsx(
+                                    "absolute inset-0 transition-colors duration-300",
+                                    isSelected ? "bg-charcoal-900" : "bg-cream-50/30 group-hover:bg-cream-50"
+                                )} />
+                                
+                                <div className={clsx(
+                                    "relative z-10 w-4 h-4 flex-none rounded-full border-2 transition-all flex items-center justify-center",
+                                    isSelected ? "border-white" : "border-cream-200"
+                                )}>
+                                    <div className={clsx(
+                                        "w-1.5 h-1.5 rounded-full transition-transform",
+                                        isSelected ? "bg-white scale-100" : "bg-charcoal-900 scale-0"
+                                    )} />
+                                </div>
+
+                                <span className={clsx(
+                                    "relative z-10 text-[10px] font-black uppercase tracking-[0.15em] transition-colors duration-300",
+                                    isSelected ? "text-white" : "text-charcoal-600"
+                                )}>
+                                    {condition}
+                                </span>
+                            </label>
+                        )
+                    })}
                 </div>
                 {selectedMedicalConditions.includes('Others') && (
-                    <div className="mt-6 animate-in slide-in-from-top-4">
-                        <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Other Medical Conditions</label>
+                    <div className="mt-8 animate-in slide-in-from-top-4 duration-500 space-y-1.5">
+                        <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Specify Other Conditions</label>
                         <input
                             type="text"
                             name="otherMedicalCondition"
                             defaultValue={profile?.other_medical_condition || ''}
-                            placeholder="Please specify..."
-                            className="w-full px-6 py-4 bg-white/40 border border-white/60 rounded-[20px] text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-gold/10 focus:border-gold/30 transition-all shadow-sm"
+                            placeholder="Please specify your condition(s)..."
+                            className="w-full px-5 py-4 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all shadow-sm placeholder:text-charcoal-300"
                         />
                     </div>
                 )}
@@ -264,51 +326,68 @@ export default function ProfileForm({ profile }: { profile: any }) {
             {/* Teaching Equipment (Instructors Only) */}
             {profile?.role === 'instructor' && (
                 <div className="space-y-6">
-                    <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Equipment I can teach</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
-                        {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => (
-                            <label key={eq} className="group flex items-center gap-4 p-5 bg-white/40 border border-white/60 rounded-[20px] hover:bg-white hover:border-burgundy/30 cursor-pointer transition-all duration-500 shadow-sm">
-                                <input
-                                    type="checkbox"
-                                    name="teaching_equipment"
-                                    value={eq}
-                                    checked={selectedEquipment.includes(eq)}
-                                    onChange={(e) => {
-                                        if (e.target.checked) {
-                                            setSelectedEquipment([...selectedEquipment, eq])
-                                        } else {
-                                            setSelectedEquipment(selectedEquipment.filter((item) => item !== eq))
-                                        }
-                                    }}
-                                    className="w-5 h-5 text-burgundy border-white/60 bg-white/20 rounded-lg focus:ring-burgundy/20 transition-all cursor-pointer"
-                                />
-                                <span className="text-xs font-semibold text-charcoal/60 uppercase tracking-wide group-hover:text-charcoal transition-colors">{eq}</span>
-                            </label>
-                        ))}
+                    <div className="flex flex-col gap-1">
+                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em]">Equipment I can teach</label>
+                        <p className="text-[10px] font-medium text-charcoal/30 italic">Select apparatuses you are qualified for</p>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                        {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
+                            const isSelected = selectedEquipment.includes(eq);
+                            return (
+                                <label
+                                    key={eq}
+                                    className={clsx(
+                                        "px-6 py-3.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] cursor-pointer transition-all duration-500 border shadow-sm flex items-center gap-3 active:scale-95",
+                                        isSelected
+                                            ? "bg-burgundy text-white border-burgundy shadow-burgundy/20"
+                                            : "bg-white/40 text-charcoal/40 border-white/60 hover:bg-white hover:border-burgundy/30"
+                                    )}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        name="teaching_equipment"
+                                        value={eq}
+                                        checked={isSelected}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setSelectedEquipment([...selectedEquipment, eq])
+                                            } else {
+                                                setSelectedEquipment(selectedEquipment.filter((item) => item !== eq))
+                                            }
+                                        }}
+                                        className="hidden"
+                                    />
+                                    {eq}
+                                </label>
+                            )
+                        })}
                     </div>
                 </div>
             )}
 
             {/* Teaching Rates (Instructors Only) */}
             {profile?.role === 'instructor' && (
-                <div className="space-y-6">
-                    <label className="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider">Rates per session (PHP)</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
+                <div className="space-y-8 pt-4">
+                    <div className="flex flex-col gap-1">
+                        <label className="block text-[10px] font-black text-charcoal/40 uppercase tracking-[0.3em]">Rates per session (PHP)</label>
+                        <p className="text-[10px] font-medium text-charcoal/30 italic">Define your pricing per session type</p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat'].map((eq) => {
                             const isSelected = selectedEquipment.includes(eq);
                             return isSelected ? (
-                                <div key={eq} className="animate-in zoom-in-95 duration-500">
-                                    <label className="block text-[10px] font-bold text-burgundy uppercase tracking-wider mb-2">{eq}</label>
+                                <div key={eq} className="animate-in zoom-in-95 duration-700 bg-white/30 backdrop-blur-sm p-6 rounded-[2rem] border border-white/60 shadow-sm">
+                                    <label className="block text-[10px] font-black text-burgundy uppercase tracking-[0.3em] mb-4 ml-2">{eq}</label>
                                     <div className="relative">
-                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-charcoal/50">₱</span>
+                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-charcoal/40 tracking-widest">PHP</span>
                                         <input
                                             type="number"
                                             name={`rate_${eq}`}
                                             defaultValue={profile?.rates?.[eq] || ''}
-                                            placeholder="0"
+                                            placeholder="0.00"
                                             min="0"
                                             step="0.01"
-                                            className="w-full pl-8 pr-6 py-4 bg-white/40 border border-white/60 rounded-xl text-charcoal font-medium text-sm outline-none focus:ring-4 focus:ring-burgundy/10 focus:border-burgundy/30 transition-all shadow-sm"
+                                            className="w-full pl-14 pr-6 py-5 bg-white border border-white/20 rounded-2xl text-charcoal font-serif text-xl outline-none focus:ring-4 focus:ring-burgundy/10 focus:border-burgundy/30 transition-all"
                                         />
                                     </div>
                                 </div>
@@ -327,14 +406,18 @@ export default function ProfileForm({ profile }: { profile: any }) {
                 </div>
             )}
 
-            <div className="pt-10">
+            <div className="pt-12">
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full sm:w-auto px-16 py-6 bg-forest text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-cloud active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
+                    className="w-full sm:w-auto px-12 py-5 bg-charcoal-900 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.4em] hover:bg-forest transition-all shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 transition-all duration-500 group"
                 >
-                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-gold" /> : <Save className="w-5 h-5 text-gold stroke-[2px]" />}
-                    {isLoading ? 'Saving...' : 'Save Changes'}
+                    {isLoading ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-gold" />
+                    ) : (
+                        <Save className="w-4 h-4 text-gold group-hover:rotate-12 transition-transform duration-500" />
+                    )}
+                    {isLoading ? 'Processing' : 'Commit Changes'}
                 </button>
             </div>
         </form>

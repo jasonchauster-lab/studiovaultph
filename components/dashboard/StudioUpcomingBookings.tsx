@@ -44,16 +44,22 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
 
     if (bookings.length === 0) {
         return (
-            <div className="py-5 text-center bg-off-white rounded-[8px] border border-dashed border-border-grey flex flex-col items-center justify-center">
-                <Calendar className="w-6 h-6 text-slate/20 mx-auto mb-2" />
-                <h3 className="text-xs font-bold text-charcoal mb-1">Quiet Week</h3>
-                <p className="text-[10px] text-slate max-w-[200px] mx-auto">No upcoming bookings for the next 7 days.</p>
+            <div className="py-12 px-6 text-center bg-off-white/50 rounded-2xl border-2 border-dashed border-border-grey/50 flex flex-col items-center justify-center space-y-4">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-tight ring-1 ring-border-grey/10">
+                    <Calendar className="w-8 h-8 text-forest/20" />
+                </div>
+                <div className="space-y-1">
+                    <h3 className="text-sm font-black text-charcoal uppercase tracking-[0.2em]">Quiet Period</h3>
+                    <p className="text-[11px] text-slate font-medium max-w-[180px] mx-auto leading-relaxed opacity-70">
+                        No upcoming bookings scheduled for the next 7 days.
+                    </p>
+                </div>
             </div>
         )
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             {(bookings || []).map((booking: any) => {
                 const slotData = Array.isArray(booking.slots) ? booking.slots[0] : (booking.slots || {})
                 const payout = booking.price_breakdown?.studio_fee || (booking.total_price ? Math.max(0, booking.total_price - 100) : 0)
@@ -61,73 +67,70 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                 const qty = booking.price_breakdown?.quantity || 1
 
                 return (
-                    <div key={booking.id} className="p-4 border border-border-grey/40 bg-white rounded-xl hover:bg-off-white transition-all shadow-tight group relative">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="flex flex-col gap-1 w-full">
-                                <div className="flex items-center gap-3">
-                                    <Link href={`/instructors/${booking.instructor_id}`} className="w-10 h-10 rounded-full overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform">
-                                        <img
-                                            src={booking.instructor?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.instructor?.full_name || 'instructor')}`}
-                                            alt="Instructor"
-                                            className="w-full h-full object-cover"
-                                        />
+                    <div key={booking.id} className="p-6 border border-border-grey/50 bg-white rounded-2xl hover:shadow-card hover:-translate-y-1 transition-all duration-500 group relative ring-1 ring-border-grey/10">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="flex items-center gap-4">
+                                <Link href={`/instructors/${booking.instructor_id}`} className="w-12 h-12 rounded-full overflow-hidden border-2 border-white bg-off-white shadow-tight shrink-0 hover:scale-110 transition-transform duration-500 ring-1 ring-border-grey/20">
+                                    <img
+                                        src={booking.instructor?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.instructor?.full_name || 'instructor')}`}
+                                        alt="Instructor"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </Link>
+                                <div className="space-y-1">
+                                    <Link href={`/instructors/${booking.instructor_id}`} className="text-[13px] font-black text-charcoal hover:text-forest transition-colors uppercase tracking-tight">
+                                        {booking.instructor?.full_name || 'N/A'}
                                     </Link>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-start justify-between gap-1">
-                                            <Link href={`/instructors/${booking.instructor_id}`} className="text-sm font-bold text-charcoal truncate hover:text-forest transition-colors">
-                                                {booking.instructor?.full_name || 'N/A'}
-                                            </Link>
-                                            <div className="text-right shrink-0">
-                                                <p className="text-[14px] font-bold text-charcoal leading-none">₱{payout.toLocaleString()}</p>
-                                                <p className="text-[8px] text-slate uppercase font-bold tracking-[0.2em] mt-1">Studio Fee</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-1.5 text-[10px] text-slate font-bold uppercase tracking-tighter mt-1">
-                                            <Calendar className="w-3 h-3 text-forest" />
-                                            <span>{formatManilaDateStr(slotData.date)} • {formatTo12Hour(slotData.start_time)}</span>
-                                        </div>
+                                    <div className="flex items-center gap-1.5 text-[10px] text-slate font-bold uppercase tracking-widest opacity-60">
+                                        <Clock className="w-3 h-3 text-forest" />
+                                        <span>{formatManilaDateStr(slotData.date)} • {formatTo12Hour(slotData.start_time)}</span>
                                     </div>
                                 </div>
                             </div>
+                            <div className="text-right">
+                                <p className="text-lg font-black text-charcoal leading-none tracking-tighter">₱{payout.toLocaleString()}</p>
+                                <p className="text-[8px] text-slate uppercase font-black tracking-[0.2em] mt-1.5 opacity-50">Studio Fee</p>
+                            </div>
                         </div>
 
-                        <div className="pt-4 border-t border-white/40 space-y-3">
+                        <div className="pt-5 border-t border-border-grey/30 space-y-4">
                             <div
-                                className="flex items-center gap-2 cursor-pointer group/client"
+                                className="flex items-center gap-3 cursor-pointer group/client"
                                 onClick={() => setSelectedClient(booking.client)}
                             >
-                                <div className="w-7 h-7 rounded-full overflow-hidden bg-white shrink-0 border border-white shadow-sm group-hover/client:scale-110 transition-transform">
+                                <div className="w-8 h-8 rounded-full overflow-hidden bg-off-white shrink-0 border border-white shadow-tight ring-1 ring-border-grey/10 group-hover/client:scale-110 transition-transform duration-500">
                                     <img src={booking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                 </div>
-                                <div className="text-[11px] text-slate truncate flex-1 group-hover/client:text-forest transition-colors tracking-wide">
-                                    Client: <span className="font-bold text-charcoal">{booking.client?.full_name || 'N/A'}</span>
+                                <div className="text-[11px] text-slate truncate flex-1 group-hover/client:text-forest transition-colors tracking-wide font-medium">
+                                    Client: <span className="font-black text-charcoal">{booking.client?.full_name || 'N/A'}</span>
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between text-[10px] pt-1">
-                                <div className="flex items-center gap-2">
-                                    <Box className="w-3.5 h-3.5 text-forest" />
-                                    <span className="font-bold text-charcoal truncate max-w-[100px] uppercase tracking-tighter">
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-2 bg-off-white/50 px-3 py-1.5 rounded-full border border-border-grey/20">
+                                    <Box className="w-3.5 h-3.5 text-forest opacity-50" />
+                                    <span className="text-[10px] font-black text-charcoal truncate max-w-[120px] uppercase tracking-wider">
                                         {qty} x {equipment}
                                     </span>
                                 </div>
 
                                 <div className="flex items-center gap-3">
                                     <span className={clsx(
-                                        "status-pill-earth shrink-0",
+                                        "status-pill-earth px-3 py-1 flex items-center gap-1.5",
                                         ['approved', 'completed'].includes(booking.status?.toLowerCase())
-                                            ? "status-pill-green"
-                                            : "status-pill-yellow"
+                                            ? "status-pill-green shadow-tight"
+                                            : "status-pill-yellow shadow-tight"
                                     )}>
+                                        <div className={clsx("w-1.5 h-1.5 rounded-full", ['approved', 'completed'].includes(booking.status?.toLowerCase()) ? "bg-green-500" : "bg-yellow-500")} />
                                         {['approved', 'completed'].includes(booking.status?.toLowerCase()) ? 'Confirmed' : 'Pending'}
                                     </span>
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => setCancellingBooking(booking)}
-                                            className="w-7 h-7 bg-off-white text-red-600 border border-border-grey rounded-full hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-tight"
+                                            className="w-8 h-8 bg-white text-red-600 border border-border-grey/50 rounded-full hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-tight active:scale-90"
                                             title="Cancel Booking"
                                         >
-                                            <X className="w-3 h-3" />
+                                            <X className="w-3.5 h-3.5" />
                                         </button>
                                         <StudioChatButton
                                             bookingId={booking.id}
@@ -140,6 +143,9 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                 </div>
                             </div>
                         </div>
+                        
+                        {/* Subtle background highlight */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-forest/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
                     </div>
                 )
             })}

@@ -106,20 +106,33 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
             (b.status === 'approved' && getSlotDateTime(slot.date, slot.start_time) <= now)
     })
 
-    const filteredBookings = [...upcomingBookings, ...pastBookings].sort((a, b) => {
+    // 3. Group filtered bookings by date
+    const groupedBookings: Record<string, any[]> = {}
+    
+    baseFilteredBookings.sort((a, b) => {
         const slotA = getFirst(a.slots)
         const slotB = getFirst(b.slots)
         const dateA = getSlotDateTime(slotA.date, slotA.start_time).getTime()
         const dateB = getSlotDateTime(slotB.date, slotB.start_time).getTime()
         return dateB - dateA // Sort descending by date
+    }).forEach(booking => {
+        const slot = getFirst(booking.slots)
+        if (!slot) return
+        const dateKey = slot.date
+        if (!groupedBookings[dateKey]) {
+            groupedBookings[dateKey] = []
+        }
+        groupedBookings[dateKey].push(booking)
     })
 
+    const sortedDates = Object.keys(groupedBookings).sort((a, b) => b.localeCompare(a))
+
     return (
-        <div className="space-y-6 pb-48">
+        <div className="space-y-8 pb-48">
             <BookingFilter key={resetKey} onFilterChange={setFilters} />
 
-            <div className="space-y-4">
-                {filteredBookings.length === 0 ? (
+            <div className="space-y-10">
+                {sortedDates.length === 0 ? (
                     <div className="min-h-[200px] py-12 flex flex-col items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0 px-4">
                         <div className="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mb-4">
                             <CalendarX2 className="w-6 h-6 text-charcoal/50" />
@@ -145,174 +158,150 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                         </div>
                     </div>
                 ) : (
-                    filteredBookings.map((booking: any) => {
-                        const slot = getFirst(booking.slots)
-                        const studioData = getFirst(slot?.studios)
-                        const instructor = getFirst(booking.instructor)
-                        const client = getFirst(booking.client)
-
-                        const start = new Date(`${slot?.date}T${slot?.start_time}+08:00`)
-
-                        const studioFee = booking.price_breakdown?.studio_fee ?? 0
-                        const instructorFee = (booking.price_breakdown as any)?.instructor_fee ?? 0
-                        const serviceFee = (booking.price_breakdown as any)?.service_fee ?? 0
-                        const fullTotal = booking.total_price ?? ((studioFee + instructorFee + serviceFee) || 0)
-
+                    sortedDates.map((dateKey) => {
+                        const dayBookings = groupedBookings[dateKey]
+                        const dateObj = new Date(`${dateKey}T00:00:00+08:00`)
+                        
                         return (
-                            <div key={booking.id} className="earth-card p-4 sm:p-6 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0">
-                                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-                                    {/* LEFT COLUMN: Date & Time */}
-                                    <div className="flex sm:flex-col items-center sm:items-center gap-4 sm:gap-2 shrink-0">
-                                        {/* Mobile Header: JAN 12 • 9:00 AM */}
-                                        <div className="block sm:hidden w-full bg-forest/5 px-3 py-2 rounded-lg border border-forest/10">
-                                            <span className="text-[10px] font-black text-forest uppercase tracking-widest leading-none">
-                                                {start.toLocaleDateString(undefined, { month: 'short' })} {start.toLocaleDateString(undefined, { day: 'numeric' })}
-                                                <span className="mx-2 text-forest/30">•</span>
-                                                {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                            <div key={dateKey} className="space-y-4">
+                                {/* Sticky Date Header */}
+                                <div className="sticky top-0 z-20 py-2 bg-cream-50/80 backdrop-blur-sm -mx-4 px-4 sm:mx-0 sm:px-0">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex flex-col items-center justify-center bg-forest text-white rounded-lg w-12 h-12 shrink-0 shadow-sm">
+                                            <span className="text-[8px] font-black uppercase tracking-widest leading-none mb-0.5">
+                                                {dateObj.toLocaleDateString(undefined, { month: 'short' })}
+                                            </span>
+                                            <span className="text-lg font-serif font-bold leading-none">
+                                                {dateObj.toLocaleDateString(undefined, { day: 'numeric' })}
                                             </span>
                                         </div>
-
-                                        {/* Desktop Date Block & Time */}
-                                        <div className="hidden sm:flex flex-col items-center">
-                                            <div className="flex flex-col items-center justify-center bg-forest/5 rounded-lg w-16 shrink-0 py-2 border border-forest/10">
-                                                <span className="text-[9px] font-black text-forest uppercase tracking-widest leading-none mb-1">
-                                                    {start.toLocaleDateString(undefined, { month: 'short' })}
-                                                </span>
-                                                <span className="text-lg font-serif text-charcoal leading-none">
-                                                    {start.toLocaleDateString(undefined, { day: 'numeric' })}
-                                                </span>
-                                            </div>
-                                            <span className="text-[10px] font-black uppercase text-charcoal/40 tracking-widest mt-2">
-                                                {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                            </span>
+                                        <div>
+                                            <h2 className="text-sm font-black text-charcoal uppercase tracking-[0.15em]">
+                                                {dateObj.toLocaleDateString(undefined, { weekday: 'long' })}
+                                            </h2>
+                                            <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest">
+                                                {dayBookings.length} {dayBookings.length === 1 ? 'Session' : 'Sessions'}
+                                            </p>
                                         </div>
+                                        <div className="flex-1 h-[1px] bg-charcoal/10" />
                                     </div>
+                                </div>
 
-                                    {/* CENTER & RIGHT CONTENT (Flex-1) */}
-                                    <div className="flex-1 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                                        {/* CENTER: Session Info */}
-                                        <div className="flex flex-col gap-3 min-w-0">
-                                            <div className="flex flex-col gap-0.5">
-                                                <div className="flex items-center gap-2">
-                                                    {client && (
-                                                        <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 py-0.5">
-                                                            <div className="w-6 h-6 rounded-full bg-sage/10 border border-border-grey flex items-center justify-center shrink-0 overflow-hidden">
-                                                                <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=8BA889`} className="w-full h-full object-cover" />
-                                                            </div>
-                                                            <span className="text-sm font-bold text-burgundy/90 truncate mt-0.5">{client.full_name}</span>
-                                                        </button>
-                                                    )}
-                                                    <span className="flex items-center">
-                                                        <span className={clsx(
-                                                            'scale-90 sm:scale-100 px-1.5 py-0.5 text-[8px] font-bold uppercase rounded-md tracking-widest border inline-block whitespace-nowrap',
-                                                            booking.status === 'completed'
-                                                                ? (booking.funds_unlocked
-                                                                    ? 'border-[#b8d49a] text-[#2D4F1E] bg-[#D4E4BC]'
-                                                                    : 'bg-amber-100/50 text-amber-700 border-amber-200')
-                                                                : booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
-                                                                    'bg-red-100/50 text-red-700 border-red-200'
-                                                        )}>
-                                                            {['completed', 'approved'].includes(booking.status)
-                                                                ? (booking.status === 'completed'
-                                                                    ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held (24h)')
-                                                                    : 'Approved')
-                                                                : 'Cancelled'}
+                                <div className="space-y-3">
+                                    {dayBookings.map((booking: any) => {
+                                        const slot = getFirst(booking.slots)
+                                        const instructor = getFirst(booking.instructor)
+                                        const client = getFirst(booking.client)
+                                        const start = new Date(`${slot?.date}T${slot?.start_time}+08:00`)
+                                        const studioFee = booking.price_breakdown?.studio_fee ?? 0
+                                        const isCancelled = !['completed', 'approved'].includes(booking.status)
+
+                                        return (
+                                            <div 
+                                                key={booking.id} 
+                                                className={clsx(
+                                                    "earth-card p-4 border border-border-grey bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0",
+                                                    isCancelled && "opacity-60 grayscale-[0.3]"
+                                                )}
+                                            >
+                                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                                    {/* Time Indicator */}
+                                                    <div className="shrink-0 sm:w-20">
+                                                        <span className="text-[11px] font-black text-charcoal/60 uppercase tracking-widest">
+                                                            {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                         </span>
-                                                    </span>
-                                                </div>
-
-                                                <button onClick={() => handleInstructorClick(instructor)} className="text-[11px] font-bold text-burgundy/70 hover:text-burgundy transition-colors hover:underline underline-offset-2 whitespace-normal break-words text-left flex items-center gap-1.5 py-0.5">
-                                                    <span className="text-[10px] font-normal text-burgundy/50 lowercase tracking-tight">instructor:</span>
-                                                    <span className="font-bold text-burgundy/90">{instructor?.full_name || "Instructor"}</span>
-                                                </button>
-                                            </div>
-
-                                            {/* Tags */}
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                {client?.medical_conditions && (
-                                                    <span className="px-1.5 py-1 bg-red-50 text-red-600 text-[6.5px] sm:text-[7px] font-black uppercase rounded border border-red-200 animate-pulse flex items-center gap-1 tracking-widest shrink-0">
-                                                        <AlertCircle className="w-2.5 h-2.5 -mt-px" /> MEDICAL
-                                                    </span>
-                                                )}
-
-                                                <span className="text-[7.5px] sm:text-[8.5px] font-black text-charcoal/50 uppercase tracking-widest bg-charcoal/5 px-1.5 py-1 rounded border border-charcoal/10 whitespace-nowrap">
-                                                    {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                                                        ? `${slot.equipment[0]} (${booking.quantity || 1})`
-                                                        : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* RIGHT COLUMN (Desktop) / Row 3 (Mobile) split */}
-                                        <div className="hidden sm:flex flex-col items-end justify-between self-stretch gap-4 min-h-[90px]">
-                                            {/* Top Right: Earnings */}
-                                            {['completed', 'approved'].includes(booking.status) ? (
-                                                <div className="flex items-baseline gap-1.5">
-                                                    <span className="text-[9px] font-black text-burgundy/30 uppercase tracking-[0.2em]">EARNED</span>
-                                                    <span className="text-sm font-black text-burgundy tracking-tighter">₱{Number(studioFee || booking.total_price || 0).toLocaleString()}</span>
-                                                </div>
-                                            ) : <div />}
-
-                                            {/* Bottom Right: Action buttons */}
-                                            <div className="flex items-center gap-2">
-                                                {instructor && instructor.id !== currentUserId && (
-                                                    <StudioChatButton
-                                                        bookingId={booking.id}
-                                                        currentUserId={currentUserId}
-                                                        partnerId={instructor.id}
-                                                        partnerName={instructor.full_name || 'Instructor'}
-                                                        label="MESSAGE"
-                                                        variant="antigravity"
-                                                        className="px-6 py-2.5 bg-white hover:bg-off-white border border-border-grey hover:border-burgundy/20 transition-all rounded-xl font-bold text-[9px] tracking-widest text-burgundy/60"
-                                                    />
-                                                )}
-                                                {booking.status === 'approved' && start > now && (
-                                                    <button
-                                                        onClick={() => setCancellingBooking(booking)}
-                                                        className="px-4 py-2.5 bg-off-white text-red-600 border border-border-grey rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-red-50 transition-all shadow-tight"
-                                                        title="Cancel Session"
-                                                    >
-                                                        CANCEL
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Row 3 (Mobile Only) */}
-                                        <div className="flex sm:hidden items-center justify-between gap-4 pt-5 border-t border-border-grey w-full">
-                                            {['completed', 'approved'].includes(booking.status) ? (
-                                                <div className="flex items-baseline gap-1.5">
-                                                    <span className="text-[9px] font-black text-charcoal/50 uppercase tracking-[0.2em]">EARNED</span>
-                                                    <span className="text-sm font-black text-charcoal tracking-tighter">₱{Number(studioFee || booking.total_price || 0).toLocaleString()}</span>
-                                                </div>
-                                            ) : <div className="flex-1" />}
-
-                                            <div className="flex-1 flex items-center gap-2">
-                                                {instructor && instructor.id !== currentUserId && (
-                                                    <div className="flex-1 h-full">
-                                                        <StudioChatButton
-                                                            bookingId={booking.id}
-                                                            currentUserId={currentUserId}
-                                                            partnerId={instructor.id}
-                                                            partnerName={instructor.full_name || 'Instructor'}
-                                                            label="MESSAGE"
-                                                            variant="antigravity"
-                                                            className="h-full w-full bg-white border border-border-grey/50 transition-all flex items-center justify-center rounded-xl font-black text-[8px] tracking-widest text-burgundy/60"
-                                                        />
                                                     </div>
-                                                )}
-                                                {booking.status === 'approved' && start > now && (
-                                                    <button
-                                                        onClick={() => setCancellingBooking(booking)}
-                                                        className="h-full px-2 bg-off-white text-red-600 border border-border-grey rounded text-[8px] font-black uppercase tracking-widest flex items-center justify-center shadow-tight flex-1"
-                                                        title="Cancel Session"
-                                                    >
-                                                        CANCEL
-                                                    </button>
-                                                )}
+
+                                                    {/* Main Content */}
+                                                    <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
+                                                        <div className="min-w-0 flex flex-col gap-1">
+                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                {client && (
+                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0">
+                                                                        <div className="w-7 h-7 rounded-full bg-sage/10 border border-border-grey flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=8BA889`} className="w-full h-full object-cover" />
+                                                                        </div>
+                                                                        <span className="text-sm font-bold text-burgundy/90 truncate">{client.full_name}</span>
+                                                                    </button>
+                                                                )}
+
+                                                                <span className={clsx(
+                                                                    'px-2 py-0.5 text-[8px] font-bold uppercase rounded-md tracking-widest border inline-flex items-center gap-1 shrink-0',
+                                                                    booking.status === 'completed'
+                                                                        ? (booking.funds_unlocked
+                                                                            ? 'border-[#b8d49a] text-[#2D4F1E] bg-[#D4E4BC]'
+                                                                            : 'bg-amber-100/50 text-amber-700 border-amber-200')
+                                                                        : booking.status === 'approved' ? 'bg-blue-100/50 text-blue-700 border-blue-200' :
+                                                                            'bg-red-100/50 text-red-700 border-red-200'
+                                                                )}>
+                                                                    {booking.status === 'completed' && (
+                                                                        booking.funds_unlocked ? <Award className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />
+                                                                    )}
+                                                                    {['completed', 'approved'].includes(booking.status)
+                                                                        ? (booking.status === 'completed'
+                                                                            ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held')
+                                                                            : 'Approved')
+                                                                        : 'Cancelled'}
+                                                                </span>
+
+                                                                {['completed', 'approved'].includes(booking.status) && (
+                                                                    <div className="flex items-baseline gap-1 bg-burgundy/5 px-2 py-0.5 rounded-full border border-burgundy/10">
+                                                                        <span className="text-[8px] font-black text-burgundy/40 uppercase tracking-widest">EARNED</span>
+                                                                        <span className="text-[11px] font-black text-burgundy">₱{Number(studioFee || booking.total_price || 0).toLocaleString()}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                                                <button onClick={() => handleInstructorClick(instructor)} className="text-[10px] font-bold text-burgundy/70 hover:text-burgundy transition-colors hover:underline underline-offset-2 flex items-center gap-1">
+                                                                    <span className="font-normal text-burgundy/40 lowercase">instructor:</span>
+                                                                    <span className="font-bold">{instructor?.full_name || "Instructor"}</span>
+                                                                </button>
+
+                                                                <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest flex items-center gap-1.5">
+                                                                    <span className="w-1 h-1 rounded-full bg-charcoal/20" />
+                                                                    {Array.isArray(slot?.equipment) && slot.equipment.length > 0
+                                                                        ? `${slot.equipment[0]}`
+                                                                        : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'}`)}
+                                                                    <span className="text-[8px] font-normal opacity-60">({booking.quantity || 1}x)</span>
+                                                                </span>
+
+                                                                {client?.medical_conditions && (
+                                                                    <span className="px-1.5 py-0.5 bg-red-50 text-red-600 text-[7px] font-black uppercase rounded border border-red-100 flex items-center gap-1 tracking-widest">
+                                                                        <AlertCircle className="w-2.5 h-2.5" /> MEDICAL
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Actions */}
+                                                        <div className="flex items-center gap-2 shrink-0 sm:self-center">
+                                                            {instructor && instructor.id !== currentUserId && (
+                                                                <StudioChatButton
+                                                                    bookingId={booking.id}
+                                                                    currentUserId={currentUserId}
+                                                                    partnerId={instructor.id}
+                                                                    partnerName={instructor.full_name || 'Instructor'}
+                                                                    label="MESSAGE"
+                                                                    variant="antigravity"
+                                                                    className="px-4 py-2 bg-white hover:bg-off-white border border-border-grey hover:border-burgundy/20 transition-all rounded-lg font-bold text-[9px] tracking-widest text-burgundy/60"
+                                                                />
+                                                            )}
+                                                            {booking.status === 'approved' && start > now && (
+                                                                <button
+                                                                    onClick={() => setCancellingBooking(booking)}
+                                                                    className="px-3 py-2 bg-off-white text-red-600 border border-border-grey rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-red-50 transition-all shadow-tight"
+                                                                    title="Cancel Session"
+                                                                >
+                                                                    CANCEL
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
+                                        )
+                                    })}
                                 </div>
                             </div>
                         )
@@ -442,7 +431,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                             <div className="flex items-center gap-2 mb-1">
                                                                 <img
                                                                     src={reviewer?.avatar_url
-                                                                        ? `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`
+                                                                        ? (reviewer.avatar_url.startsWith('http') ? reviewer.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`)
                                                                         : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=3C2F2F`}
                                                                     className="w-6 h-6 rounded-full object-cover border border-border-grey"
                                                                     alt=""

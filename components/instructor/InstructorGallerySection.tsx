@@ -106,36 +106,39 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
                 )}
 
                 {images.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-24 bg-white/40 rounded-[2.5rem] border-2 border-dashed border-white/60 group hover:border-gold/30 transition-all duration-700">
-                        <div className="p-6 bg-white/60 rounded-full mb-6 group-hover:scale-110 transition-transform duration-700 shadow-sm">
-                            <ImageIcon className="w-12 h-12 text-charcoal/5" />
+                    <div className="flex flex-col items-center justify-center py-32 bg-white/40 rounded-[3rem] border-2 border-dashed border-white/60 group hover:border-gold/30 transition-all duration-1000">
+                        <div className="p-8 bg-white/60 rounded-full mb-8 group-hover:scale-110 group-hover:rotate-12 transition-all duration-700 shadow-sm">
+                            <ImageIcon className="w-16 h-16 text-charcoal/10" />
                         </div>
-                        <p className="text-charcoal/40 text-[10px] font-black uppercase tracking-[0.4em] italic">No visual records captured yet</p>
+                        <p className="text-charcoal/40 text-[10px] font-black uppercase tracking-[0.5em] italic">No visual records captured yet</p>
                     </div>
                 ) : (
                     <div className="relative group/gallery">
-                        <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none no-scrollbar pb-8 sm:pb-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 -mx-4 px-4 sm:mx-0 sm:px-0">
+                        <div className="flex sm:grid overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none no-scrollbar pb-10 sm:pb-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 -mx-4 px-4 sm:mx-0 sm:px-0">
                             {images.map((url, index) => (
-                                <div key={index} className="relative group aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-white/40 border border-white/60 shadow-sm transition-all duration-700 hover:shadow-cloud hover:-translate-y-1 shrink-0 w-[280px] sm:w-auto snap-center">
+                                <div key={index} className="relative group aspect-[4/5] rounded-[3rem] overflow-hidden bg-white/40 border-2 border-white/60 shadow-sm transition-all duration-1000 hover:shadow-2xl hover:shadow-gold/10 hover:-translate-y-2 shrink-0 w-[300px] sm:w-auto snap-center">
                                     <Image
                                         src={url}
                                         alt={`Teaching photo ${index + 1}`}
                                         fill
-                                        quality={92}
-                                        sizes="(max-width: 640px) 280px, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                        className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110"
+                                        quality={95}
+                                        sizes="(max-width: 640px) 300px, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                        className="object-cover transition-transform duration-[2s] cubic-bezier(0.2, 0, 0, 1) group-hover:scale-110"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-br from-charcoal/20 via-transparent to-transparent opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-700">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700">
                                         <button
                                             onClick={() => handleDelete(url)}
-                                            className="absolute top-4 right-4 p-3 bg-white/40 hover:bg-white text-charcoal rounded-full transition-all duration-500 backdrop-blur-md shadow-lg scale-90 group-hover:scale-100 z-20"
+                                            className="absolute top-6 right-6 p-4 bg-white/60 hover:bg-white text-charcoal rounded-full transition-all duration-500 backdrop-blur-md shadow-xl scale-75 group-hover:scale-100 active:scale-95 z-20"
                                             title="Delete photo"
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
+                                        <div className="absolute bottom-8 left-8">
+                                            <p className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Frame {String(index + 1).padStart(2, '0')}</p>
+                                        </div>
                                     </div>
-                                    {/* Subtle overlay gradient */}
-                                    <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-charcoal/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                                    {/* Glass reflection effect */}
+                                    <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
                                 </div>
                             ))}
                         </div>

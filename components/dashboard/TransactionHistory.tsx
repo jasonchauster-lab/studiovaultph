@@ -58,20 +58,25 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                     <div className="w-full">
                         {/* Desktop Table */}
                         <table className="hidden sm:table w-full text-left text-sm text-charcoal-600">
-                            <thead className="bg-cream-50 text-charcoal font-bold uppercase tracking-widest text-[10px] border-b border-cream-200">
+                            <thead className="bg-cream-50/50 text-charcoal/60 font-black uppercase tracking-[0.1em] text-[10px] border-b border-cream-200">
                                 <tr>
-                                    <th className="px-6 py-4">Date</th>
-                                    <th className="px-6 py-4">STUDENT / INSTRUCTOR</th>
-                                    <th className="px-6 py-4">Transaction Details</th>
-                                    <th className="px-6 py-4">Schedule</th>
-                                    <th className="px-6 py-4 text-right">Amount</th>
+                                    <th className="px-6 py-5">Date</th>
+                                    <th className="px-6 py-5 font-black">Student / Instructor</th>
+                                    <th className="px-6 py-5 font-black">Transaction Details</th>
+                                    <th className="px-6 py-5 font-black">Schedule</th>
+                                    <th className="px-6 py-5 text-right font-black">Amount</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-cream-100">
+                            <tbody className="divide-y divide-cream-100/50">
                                 {incomeTransactions.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="px-6 py-12 text-center text-charcoal/40 font-serif italic text-lg">
-                                            No transactions found.
+                                        <td colSpan={5} className="px-6 py-20 text-center">
+                                            <div className="flex flex-col items-center gap-3">
+                                                <div className="w-12 h-12 rounded-full bg-cream-100 flex items-center justify-center">
+                                                    <Clock className="w-6 h-6 text-charcoal/20" />
+                                                </div>
+                                                <p className="text-charcoal/40 font-serif italic text-lg">No transactions found for this period.</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
@@ -81,72 +86,92 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                         const isNegative = tx.total_amount < 0
                                         const isRefunded = tx.type === 'Booking (Refunded)'
                                         const isPenalty = tx.type === 'Cancellation Penalty'
+                                        
+                                        // Dynamic color mapping for types
+                                        const typeColors: Record<string, string> = {
+                                            'Booking': 'bg-forest/5 text-forest',
+                                            'Booking (Refunded)': 'bg-charcoal/5 text-charcoal/40',
+                                            'Cancellation Comp.': 'bg-sage/10 text-sage',
+                                            'Cancellation Penalty': 'bg-rose-gold/10 text-rose-gold-deep',
+                                            'Direct Adjustment': 'bg-indigo-50 text-indigo-600',
+                                            'Late Cancel': 'bg-orange-50 text-orange-600',
+                                        }
+
+                                        const typeClass = typeColors[tx.type] || 'bg-charcoal/5 text-charcoal/60'
 
                                         return (
-                                            <tr key={idx} className="transition-colors hover:bg-off-white/40">
-                                                <td className="px-6 py-5 whitespace-nowrap">
-                                                    <div className="font-bold text-charcoal">{txDate.toLocaleDateString()}</div>
-                                                    <div className="text-[10px] text-charcoal/40 uppercase font-black">
+                                            <tr key={idx} className="group transition-all hover:bg-cream-50/50">
+                                                <td className="px-6 py-6 whitespace-nowrap">
+                                                    <div className="font-bold text-charcoal group-hover:text-forest transition-colors">{txDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                                                    <div className="text-[10px] text-charcoal/40 uppercase font-black tracking-tighter mt-0.5">
                                                         {txDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5">
+                                                <td className="px-6 py-6">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full bg-cream-100 flex items-center justify-center border border-cream-200">
-                                                            <User className="w-4 h-4 text-charcoal/50" />
+                                                        <div className="relative">
+                                                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-cream-200 shadow-sm group-hover:border-forest/20 group-hover:scale-105 transition-all">
+                                                                <User className="w-5 h-5 text-charcoal/30" />
+                                                            </div>
+                                                            {isPositive && (
+                                                                <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-sage border-2 border-white flex items-center justify-center">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <div className="flex flex-col">
-                                                            <span className="font-bold text-charcoal">
+                                                            <span className="font-bold text-charcoal text-base">
                                                                 {tx.client || tx.instructor || 'System'}
                                                             </span>
                                                             {(tx.client && tx.instructor) && (
-                                                                <span className="text-[10px] font-bold text-charcoal/40 uppercase">
-                                                                    with {tx.instructor}
+                                                                <span className="text-[10px] font-black text-charcoal/30 uppercase tracking-widest mt-0.5">
+                                                                    Instructor: {tx.instructor}
                                                                 </span>
                                                             )}
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="flex flex-col gap-1">
+                                                <td className="px-6 py-6">
+                                                    <div className="flex flex-col gap-2">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="font-bold text-charcoal text-xs uppercase tracking-wider">{tx.type}</span>
-                                                            {isRefunded && (
-                                                                <span className="text-[9px] bg-charcoal/5 text-charcoal/40 px-2 py-0.5 rounded-full font-black uppercase">
-                                                                    Refunded
-                                                                </span>
-                                                            )}
+                                                            <span className={clsx(
+                                                                "text-[9px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider",
+                                                                typeClass
+                                                            )}>
+                                                                {tx.type}
+                                                            </span>
                                                         </div>
                                                         {tx.booking_date && (
-                                                            <div className="text-[11px] font-bold text-charcoal/60 leading-tight">
-                                                                Session: {new Date(tx.booking_date).toLocaleDateString()} at {new Date(tx.booking_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            <div className="text-[11px] font-black text-charcoal/60 leading-tight flex items-center gap-1.5 uppercase">
+                                                                <Clock className="w-3 h-3 opacity-40" />
+                                                                {new Date(tx.booking_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} @ {new Date(tx.booking_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                             </div>
                                                         )}
-                                                        <div className="text-[11px] text-charcoal/50 italic leading-tight">
+                                                        <div className="text-[11px] text-charcoal/40 font-bold uppercase tracking-tight leading-tight max-w-[200px] truncate">
                                                             {tx.details}
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5">
+                                                <td className="px-6 py-6 font-black">
                                                     {tx.session_date ? (
                                                         <div className="flex flex-col">
-                                                            <span className="font-bold text-charcoal text-[11px] uppercase whitespace-nowrap">
-                                                                {new Date(tx.session_date).toLocaleDateString()}
+                                                            <span className="text-charcoal text-[11px] uppercase whitespace-nowrap tracking-wider">
+                                                                {new Date(tx.session_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                             </span>
-                                                            <span className="text-[10px] text-charcoal/40 font-black uppercase whitespace-nowrap">
-                                                                {tx.session_time?.slice(0, 5)}
+                                                            <span className="text-[10px] text-charcoal/30 uppercase whitespace-nowrap mt-0.5">
+                                                                {tx.session_time?.slice(0, 5)} {parseInt(tx.session_time?.split(':')[0] || '0') >= 12 ? 'PM' : 'AM'}
                                                             </span>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-[10px] text-charcoal/50 uppercase font-black italic">No session</span>
+                                                        <span className="text-[10px] text-charcoal/20 uppercase font-black italic">--</span>
                                                     )}
                                                 </td>
                                                 <td className={clsx(
-                                                    "px-6 py-5 text-right font-black transition-colors whitespace-nowrap",
-                                                    isRefunded ? "text-charcoal/40" :
-                                                        isPenalty ? "text-red-600" :
-                                                            isPositive ? "text-green-600" :
-                                                                isNegative ? "text-blue-600" : "text-charcoal"
+                                                    "px-6 py-6 text-right font-black text-lg transition-all whitespace-nowrap group-hover:scale-105",
+                                                    isRefunded ? "text-charcoal/30" :
+                                                        isPenalty ? "text-red-500" :
+                                                            isPositive ? "text-sage" :
+                                                                isNegative ? "text-blue-500" : "text-charcoal"
                                                 )}>
                                                     {isRefunded ? "₱0" :
                                                         (isPositive ? '+' : '') + `₱${tx.total_amount.toLocaleString()}`}
@@ -211,47 +236,52 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                     <div className="w-full">
                         {/* Desktop Payouts Table */}
                         <table className="hidden sm:table w-full text-left text-sm text-charcoal-600">
-                            <thead className="bg-cream-50 text-charcoal font-bold uppercase tracking-widest text-[10px] border-b border-cream-200">
+                            <thead className="bg-cream-50/50 text-charcoal/60 font-black uppercase tracking-[0.1em] text-[10px] border-b border-cream-200">
                                 <tr>
-                                    <th className="px-6 py-4">Date Requested</th>
-                                    <th className="px-6 py-4">Details</th>
-                                    <th className="px-6 py-4">Status</th>
-                                    <th className="px-6 py-4 text-right">Amount</th>
+                                    <th className="px-6 py-5">Date Requested</th>
+                                    <th className="px-6 py-5">Details</th>
+                                    <th className="px-6 py-5">Status</th>
+                                    <th className="px-6 py-5 text-right font-black">Amount</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-cream-100">
+                            <tbody className="divide-y divide-cream-100/50">
                                 {payoutTransactions.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="px-6 py-12 text-center text-charcoal/40 font-serif italic text-lg">
-                                            No payout requests found.
+                                        <td colSpan={4} className="px-6 py-20 text-center">
+                                            <div className="flex flex-col items-center gap-3">
+                                                <div className="w-12 h-12 rounded-full bg-cream-100 flex items-center justify-center">
+                                                    <Clock className="w-6 h-6 text-charcoal/20" />
+                                                </div>
+                                                <p className="text-charcoal/40 font-serif italic text-lg">No payout requests found.</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
                                     payoutTransactions.map((tx, idx) => (
-                                        <tr key={idx} className="transition-colors hover:bg-off-white/40">
-                                            <td className="px-6 py-5 font-bold text-charcoal">
-                                                {new Date(tx.date).toLocaleDateString()}
+                                        <tr key={idx} className="group transition-all hover:bg-cream-50/50">
+                                            <td className="px-6 py-6 font-bold text-charcoal group-hover:text-forest transition-colors">
+                                                {new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                             </td>
-                                            <td className="px-6 py-5">
-                                                <p className="text-xs font-medium text-charcoal/60 leading-tight">
+                                            <td className="px-6 py-6">
+                                                <p className="text-[11px] font-black text-charcoal/60 uppercase tracking-tight leading-tight">
                                                     {tx.details}
                                                 </p>
                                             </td>
-                                            <td className="px-6 py-5">
-                                                <span className={`status-pill-frosted inline-flex items-center gap-1.5 ${tx.status === 'paid' ? 'bg-sage/10 text-sage' :
+                                            <td className="px-6 py-6 font-black">
+                                                <span className={`px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 ${tx.status === 'paid' ? 'bg-sage/10 text-sage' :
                                                         tx.status === 'pending' ? 'bg-gold/10 text-gold-deep' :
                                                             tx.status === 'rejected' ? 'bg-rose-gold/10 text-rose-gold-deep' :
-                                                                'bg-gray-100 text-gray-500'
+                                                                'bg-gray-100 text-gray-400'
                                                     }`}>
                                                     {tx.status === 'paid' && <CheckCircle className="w-3 h-3" />}
                                                     {tx.status === 'pending' && <Clock className="w-3 h-3" />}
                                                     {tx.status === 'rejected' && <XCircle className="w-3 h-3" />}
-                                                    <span className="font-black uppercase tracking-widest text-[9px]">
+                                                    <span className="uppercase tracking-widest text-[9px]">
                                                         {tx.status || 'Unknown'}
                                                     </span>
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-5 text-right font-black text-charcoal">
+                                            <td className="px-6 py-6 text-right font-black text-charcoal text-lg group-hover:scale-105 transition-all">
                                                 -₱{Math.abs(tx.total_amount).toLocaleString()}
                                             </td>
                                         </tr>

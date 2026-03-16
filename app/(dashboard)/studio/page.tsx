@@ -198,33 +198,34 @@ export default async function StudioDashboard(props: {
         <div className="pt-24 md:pt-12 space-y-12 pb-20">
             <div className="max-w-7xl mx-auto space-y-12">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
                     <div>
-                        <h1 className="text-2xl sm:text-4xl font-serif font-bold text-charcoal tracking-tight mb-2">Studio Dashboard</h1>
+                        <h1 className="text-4xl sm:text-6xl font-serif font-black text-charcoal tracking-tightest mb-6">Studio Dashboard</h1>
                         {myStudio && (
-                            <div className="flex items-center gap-4 mt-4">
-                                <div className="w-12 h-12 rounded-2xl overflow-hidden border border-white shadow-cloud scale-105">
+                            <div className="flex items-center gap-6 mt-8">
+                                <div className="w-16 h-16 rounded-[24px] overflow-hidden border-2 border-white shadow-cloud scale-110 ring-1 ring-border-grey/10">
                                     <Image
                                         src={myStudio.logo_url || myStudio.space_photos_urls?.[0] || "/logo2.jpg"}
                                         alt={myStudio.name}
-                                        width={48}
-                                        height={48}
+                                        width={64}
+                                        height={64}
                                         className="object-cover w-full h-full mix-blend-multiply"
                                     />
                                 </div>
-                                <div className="space-y-0.5">
-                                    <p className="text-lg font-bold text-charcoal tracking-tight">Welcome, {myStudio.name}</p>
-                                    <p className="text-[10px] text-slate flex items-center gap-1.5 font-bold uppercase tracking-widest">
-                                        <MapPin className="w-3 h-3 text-forest" />
+                                <div className="space-y-1">
+                                    <p className="text-xl font-black text-charcoal tracking-tight">Welcome, {myStudio.name}</p>
+                                    <p className="text-[11px] text-slate/60 flex items-center gap-2 font-black uppercase tracking-[0.3em]">
+                                        <MapPin className="w-3.5 h-3.5 text-forest" />
                                         {myStudio.location}
                                     </p>
                                 </div>
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center gap-2.5 bg-white px-5 py-2.5 rounded-full border border-border-grey shadow-tight">
-                        <Sparkles className="w-3.5 h-3.5 text-forest animate-pulse" />
-                        <span className="text-[10px] font-bold text-slate uppercase tracking-[0.2em]">Verified Partner</span>
+                    <div className="flex items-center gap-3 bg-white/40 backdrop-blur-md px-6 py-3 rounded-full border border-border-grey/50 shadow-tight ring-1 ring-white/20">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+                        <Sparkles className="w-4 h-4 text-forest" />
+                        <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.3em]">Verified Partner</span>
                     </div>
                 </div>
 

@@ -150,7 +150,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest shrink-0 mt-1 sm:mt-1.5" />
                         <div className="flex flex-col justify-center">
                             <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tighter leading-tight">My Sessions</h2>
-                            <div className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.3em] mt-1">{activeBookings.length} SESSIONS FOUND</div>
+                            <div className="text-[8px] sm:text-[9px] font-black text-charcoal/60 uppercase tracking-[0.2em] mt-1">{activeBookings.length} SESSIONS FOUND</div>
                         </div>
                     </div>
                 </div>
@@ -160,25 +160,25 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         <div className="absolute top-0 left-0 w-32 h-32 bg-forest/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl pointer-events-none" />
                         <div className="absolute bottom-0 right-0 w-32 h-32 bg-gold/5 rounded-full translate-x-1/2 translate-y-1/2 blur-2xl pointer-events-none" />
                         
-                        <div className="w-14 h-14 bg-charcoal/5 rounded-full flex items-center justify-center mb-4 relative">
-                            <Calendar className="w-6 h-6 text-charcoal/50" />
+                        <div className="w-16 h-16 bg-charcoal/5 rounded-2xl flex items-center justify-center mb-6 relative">
+                            <Calendar className="w-7 h-7 text-charcoal/40" />
                         </div>
                         <h3 className="text-xl sm:text-2xl font-serif text-charcoal mb-3 tracking-tight">No sessions found for this period.</h3>
-                        <p className="text-[11px] sm:text-xs text-charcoal/60 max-w-[300px] mb-8 leading-relaxed font-bold">Try adjusting your filters or find a studio to book a new availability slot.</p>
+                        <p className="text-[11px] sm:text-xs text-charcoal/70 max-w-[300px] mb-8 leading-relaxed font-bold">Try adjusting your filters or find a studio to book a new availability slot.</p>
 
                         
                         <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10 w-full sm:w-auto">
                             {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
                                 <button 
                                     onClick={() => setResetKey(prev => prev + 1)}
-                                    className="w-full sm:w-auto px-8 py-3 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-125 transition-all shadow-md active:scale-95"
+                                    className="w-full sm:w-auto px-10 py-4 bg-white text-forest border-2 border-forest text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-forest/5 transition-all active:scale-95"
                                 >
                                     Clear Filters
                                 </button>
                             )}
                             <Link
                                 href="/instructor/schedule"
-                                className="w-full sm:w-auto px-8 py-3 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-md active:scale-95 text-center"
+                                className="w-full sm:w-auto px-10 py-4 bg-forest text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:brightness-110 transition-all shadow-tight active:scale-95 text-center"
                             >
                                 Find a Studio / Add Slot
                             </Link>
@@ -220,7 +220,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             {/* Consolidated Session Info */}
                                             <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5">
                                                 {/* Desktop Session Header */}
-                                                <div className="hidden sm:flex items-center gap-2 text-[11px] font-black uppercase text-charcoal/60 tracking-widest flex-wrap">
+                                                <div className="hidden sm:flex items-center gap-2 text-[11px] font-black uppercase text-charcoal/70 tracking-widest flex-wrap">
                                                     <span>{getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
                                                     <span className="text-charcoal/50">•</span>
                                                     <button onClick={() => handleStudioClick(studio)} className="text-sm font-bold text-charcoal/90 truncate hover:text-charcoal transition-colors hover:underline underline-offset-2">
@@ -374,7 +374,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                     {studio?.location && (
                                                         <>
                                                             <span className="text-charcoal/50">•</span>
-                                                            <span className="text-[10px] font-black text-charcoal/60 uppercase tracking-wider truncate">
+                                                            <span className="text-[10px] font-black text-charcoal/80 uppercase tracking-wider truncate">
                                                                 {studio.location}
                                                             </span>
                                                         </>
@@ -411,9 +411,9 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             {/* Action Buttons (Desktop Only) */}
                                             <div className="hidden sm:flex flex-col items-end justify-center gap-1.5 shrink-0 ml-auto pl-2 h-full">
                                                 {booking.price_breakdown?.instructor_fee && (
-                                                    <div className="px-4 py-2 bg-sage/10 border border-sage/20 rounded-xl flex items-center gap-3 shadow-tight">
-                                                        <span className="text-[9px] font-black text-sage/80 uppercase tracking-[0.2em]">Earned</span>
-                                                        <span className="text-[16px] font-black text-sage tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                                                    <div className="px-5 py-2.5 bg-sage/20 border border-sage/30 rounded-2xl flex items-center gap-4 shadow-tight">
+                                                        <span className="text-[10px] font-black text-sage/80 uppercase tracking-[0.2em]">Earned</span>
+                                                        <span className="text-[18px] font-black text-sage tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
                                                     </div>
                                                 )}
                                                 
@@ -425,7 +425,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                                 revieweeId: studio?.owner_id || '',
                                                                 revieweeName: studio?.name || 'Studio'
                                                             })}
-                                                            className="h-8 bg-forest text-white px-4 rounded text-[8px] font-black uppercase tracking-widest hover:brightness-[1.2] transition-all shadow-sm active:scale-95"
+                                                            className="h-10 bg-forest text-white px-6 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] hover:brightness-[1.1] transition-all shadow-tight active:scale-95"
                                                         >
                                                             LEAVE FEEDBACK
                                                         </button>
@@ -588,7 +588,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                                             <div className="flex items-center gap-2 mb-1">
                                                                 <img
                                                                     src={reviewer?.avatar_url
-                                                                        ? `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`
+                                                                        ? (reviewer.avatar_url.startsWith('http') ? reviewer.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`)
                                                                         : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230`}
                                                                     className="w-6 h-6 rounded-full object-cover border border-cream-200"
                                                                     alt=""

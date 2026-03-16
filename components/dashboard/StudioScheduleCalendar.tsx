@@ -318,103 +318,104 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             </div>
 
             {/* Desktop-Only Grid View */}
-            <div className="hidden lg:block space-y-6">
+            <div className="hidden lg:block space-y-8">
                 {/* Header */}
-                <div className="earth-card p-10 bg-white shadow-tight relative overflow-hidden">
+                <div className="earth-card p-12 bg-white shadow-tight relative overflow-hidden ring-1 ring-border-grey/50">
                     {/* Background Tint */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-buttermilk/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-burgundy/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
 
-                    {/* Row 1: Title + Date Navigation */}
-                    <div className="flex flex-wrap items-center gap-4 relative z-10">
-                        <h2 className="text-4xl font-serif text-charcoal hidden md:block min-w-[240px] tracking-tighter">
-                            {format(currentDate, 'MMMM yyyy')}
-                        </h2>
-                        <div className="flex items-center gap-4">
-                            <div className="relative group">
-                                <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate group-focus-within:text-forest transition-colors" />
-                                <input
-                                    type="date"
-                                    value={format(currentDate, 'yyyy-MM-dd')}
-                                    onChange={(e) => { if (e.target.value) router.push(`?date=${e.target.value}`) }}
-                                    className="pl-12 pr-6 py-4 border border-border-grey rounded-lg text-[10px] font-bold bg-white text-charcoal outline-none focus:ring-1 focus:ring-forest transition-all cursor-pointer uppercase tracking-[0.2em]"
-                                    title="Select any specific date"
-                                />
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+                        {/* Title + Nav */}
+                        <div className="space-y-6 flex-1">
+                            <h2 className="text-5xl font-serif text-charcoal tracking-tighter font-black">
+                                {format(currentDate, 'MMMM yyyy')}
+                            </h2>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center bg-off-white rounded-xl p-1.5 border border-border-grey shadow-tight">
+                                    <button onClick={handlePrev} className="flex items-center gap-2 px-5 py-2.5 hover:bg-white rounded-lg transition-all text-slate hover:text-charcoal text-[11px] font-black uppercase tracking-widest group" title="Previous">
+                                        <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" /> PREV
+                                    </button>
+                                    <button onClick={handleToday} className="px-8 py-2.5 text-[11px] font-black text-charcoal uppercase tracking-widest hover:bg-white rounded-lg transition-all border-x border-border-grey/50 mx-1" title="Go to Today">
+                                        TODAY
+                                    </button>
+                                    <button onClick={handleNext} className="flex items-center gap-2 px-5 py-2.5 hover:bg-white rounded-lg transition-all text-slate hover:text-charcoal text-[11px] font-black uppercase tracking-widest group" title="Next">
+                                        NEXT <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                                    </button>
+                                </div>
+                                <div className="relative group">
+                                    <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate transition-colors group-focus-within:text-forest" />
+                                    <input
+                                        type="date"
+                                        value={format(currentDate, 'yyyy-MM-dd')}
+                                        onChange={(e) => { if (e.target.value) router.push(`?date=${e.target.value}`) }}
+                                        className="pl-12 pr-6 py-3.5 border border-border-grey rounded-xl text-[11px] font-black bg-white text-charcoal outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest transition-all cursor-pointer uppercase tracking-widest shadow-tight w-48"
+                                        title="Jump to date"
+                                    />
+                                </div>
                             </div>
-                            <div className="flex items-center bg-off-white rounded-lg p-1 border border-border-grey shadow-tight">
-                                <button onClick={handlePrev} className="flex items-center gap-1.5 px-4 py-2 hover:bg-white rounded-md transition-all text-slate hover:text-charcoal text-[10px] font-bold uppercase tracking-widest" title="Previous">
-                                    <ChevronLeft className="w-3.5 h-3.5" /> PREV
-                                </button>
-                                <button onClick={handleToday} className="px-6 py-2 text-[10px] font-bold text-charcoal uppercase tracking-widest hover:bg-white rounded-md transition-all border-x border-border-grey mx-1" title="Go to Today">
-                                    TODAY
-                                </button>
-                                <button onClick={handleNext} className="flex items-center gap-1.5 px-4 py-2 hover:bg-white rounded-md transition-all text-slate hover:text-charcoal text-[10px] font-bold uppercase tracking-widest" title="Next">
-                                    NEXT <ChevronRight className="w-3.5 h-3.5" />
-                                </button>
-                            </div>
+                        </div>
 
-                            {/* View Switcher */}
-                            <div className="flex items-center bg-white rounded-lg p-1 border border-border-grey shadow-tight ml-4">
+                        {/* View switcher + Actions */}
+                        <div className="flex flex-col items-end gap-6">
+                            <div className="flex items-center bg-white rounded-xl p-1.5 border border-border-grey shadow-tight">
                                 {(['day', 'week', 'month'] as const).map((v) => (
                                     <button
                                         key={v}
                                         onClick={() => setView(v)}
                                         className={clsx(
-                                            "px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all",
+                                            "px-6 py-2.5 text-[11px] font-black uppercase tracking-[0.2em] rounded-lg transition-all duration-300",
                                             view === v
-                                                ? "bg-buttermilk text-burgundy shadow-tight"
-                                                : "text-slate hover:text-burgundy hover:bg-off-white"
+                                                ? "bg-charcoal text-white shadow-card translate-y-[-1px]"
+                                                : "text-slate hover:text-charcoal hover:bg-off-white"
                                         )}
                                     >
                                         {v}
                                     </button>
                                 ))}
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Row 2: Action Buttons — centered */}
-                    <div className="flex justify-center items-center gap-4 mt-6 relative z-10">
-                        <button
-                            onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
-                            className="h-12 border-2 px-8 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-3 shadow-tight active:scale-95 border-burgundy text-burgundy bg-white hover:bg-burgundy/5"
-                        >
-                            <Plus className="w-4 h-4" /> ADD SLOT
-                        </button>
-                        <button
-                            onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
-                            className="px-8 py-3 text-[10px] tracking-[0.2em] rounded-lg font-bold flex items-center gap-3 transition-all bg-forest text-white hover:brightness-110 shadow-tight active:scale-95"
-                        >
-                            <CalendarIcon className="w-4 h-4" /> BULK GENERATE
-                        </button>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
+                                    className="h-12 border-2 border-forest/20 px-8 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 shadow-tight active:scale-95 text-forest bg-white hover:bg-forest hover:text-white hover:border-forest"
+                                >
+                                    <Plus className="w-4 h-4" /> ADD SLOT
+                                </button>
+                                <button
+                                    onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
+                                    className="h-12 px-8 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 bg-forest text-white hover:brightness-110 shadow-card active:scale-95"
+                                >
+                                    <Sparkles className="w-4 h-4" /> BULK GENERATE
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-
-
-
                 {/* Calendar Grid */}
-                <div className="bg-white border border-border-grey shadow-tight overflow-hidden rounded-[8px]">
+                <div className="bg-white border border-border-grey shadow-cloud overflow-hidden rounded-2xl">
                     <div className="overflow-x-auto">
-                    <div className={clsx("min-w-[800px] xl:min-w-full", view === 'month' && "min-w-0")}>
+                        <div className={clsx("min-w-[1000px] xl:min-w-full", view === 'month' && "min-w-0")}>
                             {view !== 'month' && (
-                                <div className={clsx("grid border-b border-border-grey bg-off-white", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>
-                                    <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-[100px] text-center uppercase tracking-[0.3em] flex items-center justify-center"></div>
+                                <div className={clsx("grid border-b border-border-grey/50 bg-off-white/50 backdrop-blur-sm", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>
+                                    <div className="p-6 border-r border-border-grey/50 sticky left-0 bg-white z-20 w-[100px]" />
                                     {days.map((day: Date) => (
-                                        <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 transition-all relative", isSameDay(day, new Date()) ? "bg-buttermilk/20" : "")}>
-                                            <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
-                                            <div className={clsx("text-3xl font-serif font-black tracking-tighter", isSameDay(day, new Date()) ? "text-burgundy" : "text-charcoal")}>{format(day, 'd')}</div>
+                                        <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey/50 last:border-r-0 transition-all relative", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
+                                            <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2 opacity-60">{format(day, 'EEE')}</div>
+                                            <div className={clsx("text-4xl font-serif font-black tracking-tighter leading-none", isSameDay(day, new Date()) ? "text-forest" : "text-charcoal")}>{format(day, 'd')}</div>
                                             {isSameDay(day, new Date()) && (
-                                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-1 bg-forest rounded-t-full" />
+                                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-forest rounded-t-full" />
                                             )}
                                         </div>
                                     ))}
                                 </div>
                             )}
 
-                            <div className="divide-y divide-border-grey relative overflow-hidden">
+                            <div className="divide-y divide-border-grey/50 relative overflow-hidden">
                                 {view !== 'month' && (
                                     <>
-                                        {/* Current Time Indicator — Improved to show only on today */}
+                                        {/* Current Time Indicator */}
                                         {currentTimePosition !== null && days.some(d => isSameDay(d, new Date())) && (
                                             <div
                                                 className="absolute z-30 pointer-events-none flex items-center transition-all duration-1000"
@@ -428,14 +429,14 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                         : `calc((100% - 100px) / 7)`
                                                 }}
                                             >
-                                                <div className="w-[12px] h-[12px] bg-forest rounded-full -ml-[6px] ring-2 ring-white shadow-sm" />
-                                                <div className="h-[3px] w-full bg-forest shadow-[0_0_12px_rgba(67,48,46,0.4)]" />
+                                                <div className="w-3.5 h-3.5 bg-charcoal rounded-full -ml-1.5 ring-4 ring-white shadow-card" />
+                                                <div className="h-0.5 w-full bg-charcoal/30 shadow-sm" />
                                             </div>
                                         )}
 
                                         {hours.map(hour => (
-                                            <div key={hour} className={clsx("grid", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")} style={{ minHeight: "120px" }}>
-                                                <div className="p-4 text-[10px] text-slate font-black border-r border-border-grey text-center sticky left-0 bg-white z-20 w-[100px] flex items-center justify-center tracking-[0.2em]">
+                                            <div key={hour} className={clsx("grid", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")} style={{ minHeight: "140px" }}>
+                                                <div className="p-4 text-[10px] text-slate font-black border-r border-border-grey/50 text-center sticky left-0 bg-white z-20 w-[100px] flex items-center justify-center tracking-[0.2em] opacity-40">
                                                     {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                                 </div>
 
@@ -445,15 +446,13 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                     const isPastCell = isPast(new Date(dayStr + "T" + hour.toString().padStart(2, '0') + ":59:59+08:00"))
                                                     const isToday = isSameDay(day, new Date())
 
-                                                    const ROW_HEIGHT = 120
+                                                    const ROW_HEIGHT = 140
 
                                                     return (
-                                                        <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-1", isPastCell ? "bg-gray-50" : isToday ? "bg-buttermilk/10" : "")} style={{ height: `${ROW_HEIGHT}px` }}>
+                                                        <div key={day.toString() + hour} className={clsx("border-r border-border-grey/50 last:border-r-0 relative group p-1.5 transition-colors duration-300", isPastCell ? "bg-off-white/30" : isToday ? "bg-forest/5" : "hover:bg-off-white/50")} style={{ height: `${ROW_HEIGHT}px` }}>
                                                             <div
                                                                 className={clsx(
-                                                                    "absolute inset-0 transition-all duration-700 bg-forest/5 cursor-pointer z-0 flex items-center justify-center",
-                                                                    "opacity-0 lg:group-hover:opacity-100", // Hidden on large, shown on hover
-                                                                    "md:opacity-10 md:hover:opacity-100" // Always slightly visible on small/tablet
+                                                                    "absolute inset-1.5 rounded-xl transition-all duration-500 bg-forest/10 cursor-pointer z-0 flex items-center justify-center opacity-0 group-hover:opacity-100 border-2 border-dashed border-forest/20 shadow-tight"
                                                                 )}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation()
@@ -464,7 +463,10 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     setIsAddModalOpen(true)
                                                                 }}
                                                             >
-                                                                <Plus className="w-5 h-5 text-forest/20 lg:hidden" />
+                                                                <div className="flex flex-col items-center gap-2">
+                                                                    <Plus className="w-6 h-6 text-forest animate-pulse" />
+                                                                    <span className="text-[10px] font-black text-forest uppercase tracking-widest">Add Slot</span>
+                                                                </div>
                                                             </div>
 
                                                             {cellSlots.length > 0 && (() => {
@@ -508,10 +510,10 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                 return (
                                                                     <div
                                                                         className={clsx(
-                                                                            "absolute top-1 left-1 right-1 bottom-1 p-2 border-l-4 border-solid transition-all duration-300 hover:shadow-card hover:scale-[1.01] shadow-tight group/slot z-10 overflow-hidden cursor-pointer rounded-lg flex flex-col justify-between",
-                                                                                isPastCell ? "bg-off-white border-border-grey" :
-                                                                                    hasPending ? "bg-orange-50/50 border-orange-200" :
-                                                                                        isBooked ? "bg-forest border-forest/20" : "bg-warm-stone border-border-grey"
+                                                                            "absolute top-1.5 left-1.5 right-1.5 bottom-1.5 p-3.5 border-l-4 border-solid transition-all duration-500 hover:shadow-card hover:-translate-y-0.5 group/slot z-10 overflow-hidden cursor-pointer rounded-xl flex flex-col justify-between backdrop-blur-sm",
+                                                                                isPastCell ? "bg-off-white border-border-grey/50 opacity-60" :
+                                                                                    hasPending ? "bg-amber-50 border-amber-300 shadow-tight" :
+                                                                                        isBooked ? "bg-charcoal border-forest shadow-card" : "bg-white border-border-grey ring-1 ring-border-grey/10 shadow-tight"
                                                                         )}
                                                                         onClick={() => {
                                                                             setBucketSlots(cellSlots);
@@ -519,33 +521,38 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                             setIsBucketModalOpen(true);
                                                                         }}
                                                                     >
-                                                                        <div>
+                                                                        <div className="relative z-10">
                                                                             {!isBooked && !hasPending && (
-                                                                                <div className="text-[10px] font-bold text-charcoal mb-1 truncate">
+                                                                                <div className="text-[10px] font-black text-slate mb-1.5 truncate opacity-50 uppercase tracking-widest">
                                                                                     {hour.toString().padStart(2, '0')}:00 - {(hour + 1).toString().padStart(2, '0')}:00
                                                                                 </div>
                                                                             )}
-                                                                            <div className="flex justify-between items-start mb-1 overflow-hidden">
-                                                                                <h4 className={clsx("text-[9.5px] font-semibold uppercase tracking-tight truncate max-w-[85%]", isPastCell || (!isBooked && !hasPending) ? "text-charcoal" : "text-white")}>
+                                                                            <div className="flex justify-between items-start mb-2 overflow-hidden">
+                                                                                <h4 className={clsx("text-[11px] font-bold uppercase tracking-tight truncate max-w-[85%] leading-tight", isPastCell || (!isBooked && !hasPending) ? "text-charcoal" : "text-white")}>
                                                                                     {displayTitle}
                                                                                 </h4>
-                                                                                <Edit2 className={clsx("w-2.5 h-2.5 opacity-0 group-hover/slot:opacity-100 transition-opacity shrink-0", isPastCell || (!isBooked && !hasPending) ? "text-charcoal/40" : "text-white/40")} />
+                                                                                <Edit2 className={clsx("w-3 h-3 opacity-0 group-hover/slot:opacity-100 transition-all duration-300 shrink-0 transform group-hover/slot:scale-110", isPastCell || (!isBooked && !hasPending) ? "text-charcoal/40" : "text-white/40")} />
                                                                             </div>
-                                                                            <div className="flex flex-wrap gap-1 overflow-hidden">
+                                                                            <div className="flex flex-wrap gap-1.5 overflow-hidden">
                                                                                 {Object.entries(equipmentCounts).map(([eq, counts]) => (
-                                                                                    <span key={eq} className={clsx("text-[7.5px] font-bold uppercase tracking-tighter flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell || (!isBooked && !hasPending) ? "text-charcoal/80 border-border-grey bg-white/50" : "text-white/90 border-white/20 bg-white/10")}>
-                                                                                        <Box className="w-2 h-2 opacity-40 shrink-0" />
+                                                                                    <span key={eq} className={clsx("text-[8px] font-black uppercase tracking-tighter flex items-center gap-1 px-2 py-0.5 rounded-full border transition-colors", isPastCell || (!isBooked && !hasPending) ? "text-charcoal/80 border-border-grey bg-off-white" : "text-white/90 border-white/20 bg-white/10")}>
+                                                                                        <Box className="w-2.5 h-2.5 opacity-40 shrink-0" />
                                                                                         <span className="truncate">{counts.booked}/{counts.total} {eq.split(' ')[0]}</span>
                                                                                     </span>
                                                                                 ))}
                                                                             </div>
                                                                         </div>
-                                                                        <div className={clsx("mt-1 pt-1 border-t overflow-hidden", isPastCell || (!isBooked && !hasPending) ? "border-charcoal/5" : "border-white/10")}>
-                                                                            <p className={clsx("text-[8px] font-black uppercase tracking-tight truncate flex items-center gap-1", isPastCell || (!isBooked && !hasPending) ? "text-charcoal/70" : "text-white/80")}>
-                                                                                <User className="w-2 h-2 opacity-50 shrink-0" />
+                                                                        <div className={clsx("mt-2 pt-2 border-t relative z-10", isPastCell || (!isBooked && !hasPending) ? "border-charcoal/5" : "border-white/10")}>
+                                                                            <p className={clsx("text-[9px] font-black uppercase tracking-[0.1em] truncate flex items-center gap-1.5", isPastCell || (!isBooked && !hasPending) ? "text-slate" : "text-white/70")}>
+                                                                                <User className="w-2.5 h-2.5 opacity-40 shrink-0" />
                                                                                 <span className="truncate">{instructors.size > 0 ? Array.from(instructors).join(', ') : 'Unassigned'}</span>
                                                                             </p>
                                                                         </div>
+
+                                                                        {/* Background Highlight for Booked Slots */}
+                                                                        {isBooked && !isPastCell && (
+                                                                            <div className="absolute top-0 right-0 w-24 h-24 bg-forest/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                                                                        )}
                                                                     </div>
                                                                 );
                                                             })()}

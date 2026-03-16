@@ -414,11 +414,11 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                             <div className="flex flex-col items-center mt-2 mb-5 text-center">
                                 <div className="w-20 h-20 rounded-full overflow-hidden mb-3 border border-cream-200 bg-cream-50">
                                     <img
-                                        src={instructorDetails?.instructor?.avatar_url
-                                            ? `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${instructorDetails.instructor.avatar_url}`
-                                            : selectedInstructor?.avatar_url
-                                                ? `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${selectedInstructor.avatar_url}`
-                                                : `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedInstructor.full_name || 'I')}&background=F5F2EB&color=2C3230`}
+                                        src={(() => {
+                                            const url = instructorDetails?.instructor?.avatar_url || selectedInstructor?.avatar_url;
+                                            if (!url) return `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedInstructor.full_name || 'I')}&background=F5F2EB&color=2C3230`;
+                                            return url.startsWith('http') ? url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${url}`;
+                                        })()}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
@@ -487,7 +487,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                     return (
                                                         <div key={r.id} className="bg-cream-50 rounded-xl p-3 border border-cream-100/50">
                                                             <div className="flex items-center gap-2 mb-1">
-                                                                <img src={reviewer?.avatar_url ? `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230`} className="w-6 h-6 rounded-full object-cover border border-cream-200" alt="" />
+                                                                <img src={reviewer?.avatar_url ? (reviewer.avatar_url.startsWith('http') ? reviewer.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230`} className="w-6 h-6 rounded-full object-cover border border-cream-200" alt="" />
                                                                 <span className="text-xs font-semibold text-charcoal/70">{reviewer?.full_name || 'Anonymous'}</span>
                                                                 <div className="flex items-center gap-0.5 ml-auto">
                                                                     {Array.from({ length: 5 }).map((_, i) => (
@@ -594,7 +594,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                     return (
                                                         <div key={r.id} className="bg-cream-50 rounded-xl p-3 border border-cream-100/50">
                                                             <div className="flex items-center gap-2 mb-1">
-                                                                <img src={reviewer?.avatar_url ? `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230`} className="w-6 h-6 rounded-full object-cover border border-cream-200" alt="" />
+                                                                <img src={reviewer?.avatar_url ? (reviewer.avatar_url.startsWith('http') ? reviewer.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230`} className="w-6 h-6 rounded-full object-cover border border-cream-200" alt="" />
                                                                 <span className="text-xs font-semibold text-charcoal/70">{reviewer?.full_name || 'Anonymous'}</span>
                                                                 <div className="flex items-center gap-0.5 ml-auto">
                                                                     {Array.from({ length: 5 }).map((_, i) => (

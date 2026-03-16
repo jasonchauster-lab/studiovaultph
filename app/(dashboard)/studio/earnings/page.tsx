@@ -93,27 +93,38 @@ export default async function EarningsPage({
     }
 
     return (
-        <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="min-h-screen bg-cream-50/30 p-4 sm:p-8 selection:bg-forest/10 selection:text-forest">
+            <div className="max-w-7xl mx-auto space-y-10">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-700 ease-out">
                     <div>
-                        <h1 className="text-3xl font-serif text-charcoal-900 mb-2">Earnings & Payouts</h1>
-                        <p className="text-charcoal-600">Manage your studio income and withdrawals.</p>
+                        <h1 className="text-4xl font-serif text-charcoal-900 mb-2 tracking-tight">Earnings & Payouts</h1>
+                        <p className="text-charcoal-600/80 font-medium">Manage your studio income, track withdrawals, and monitor your wallet balance.</p>
                     </div>
-                    {transactions && <ExportCsvButton data={transactions} filename="studio-earnings" />}
+                    {transactions && (
+                        <div className="hover:scale-105 transition-transform duration-300">
+                            <ExportCsvButton data={transactions} filename="studio-earnings" />
+                        </div>
+                    )}
                 </div>
 
-                <DateRangeFilters />
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 fill-mode-both">
+                    <DateRangeFilters />
+                </div>
 
                 {summary && (
-                    <EarningsOverview
-                        studioId={studio.id}
-                        summary={summary}
-                    />
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 fill-mode-both">
+                        <EarningsOverview
+                            studioId={studio.id}
+                            summary={summary}
+                        />
+                    </div>
                 )}
 
-                <div>
-                    <h2 className="text-xl font-medium text-charcoal-900 mb-4">Transaction History</h2>
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
+                    <div className="flex items-center gap-3 mb-6">
+                        <h2 className="text-2xl font-serif text-charcoal-900 tracking-tight">Transaction History</h2>
+                        <div className="h-px flex-1 bg-cream-200/60" />
+                    </div>
                     <TransactionHistory
                         transactions={transactions || []}
                     />
