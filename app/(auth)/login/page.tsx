@@ -59,6 +59,15 @@ function LoginContent() {
             async (event: string, session: { user?: { id: string } } | null) => {
                 if (event === 'SIGNED_IN' && session?.user && !isRedirecting) {
                     setIsRedirecting(true)
+                    
+                    // If the user wanted to be remembered, set the cookie client-side
+                    // so this specific device/browser skips 2FA for 14 days.
+                    if (rememberDevice) {
+                        const maxAge = 14 * 24 * 60 * 60
+                        document.cookie = `otp_remembered=${session.user.id}; max-age=${maxAge}; path=/; SameSite=Lax`
+                        document.cookie = `remember_me=1; max-age=${maxAge}; path=/; SameSite=Lax`
+                    }
+
                     await redirectByRole(session.user.id)
                 }
             }

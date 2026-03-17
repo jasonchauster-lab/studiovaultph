@@ -93,7 +93,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                         >
                             <span className="flex items-center justify-center gap-3">
                                 <Plus className="w-4 h-4 text-gold stroke-[3px]" />
-                                MANIFEST NEW
+                                ADD NEW
                             </span>
                         </button>
                     )}
@@ -212,7 +212,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                                     </div>
                                     
                                     <div className="flex-1 min-w-0 text-center sm:text-left">
-                                        <h4 className="font-serif text-charcoal text-2xl sm:text-3xl tracking-tighter mb-4 truncate">{cert.certification_body}</h4>
+                                        <h4 className="font-serif text-charcoal text-2xl sm:text-3xl tracking-tighter mb-4">{cert.certification_body}</h4>
                                         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
                                             <div className="flex items-center gap-2.5 text-[9px] font-black text-charcoal/50 uppercase tracking-[0.2em] shrink-0">
                                                 <FileText className="w-3.5 h-3.5" />
