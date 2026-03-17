@@ -166,7 +166,7 @@ function LoginContent() {
 
         // Auth state listener — fires instantly on same-device clicks
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event: string, session) => {
+            async (event: string, session: import('@supabase/supabase-js').Session | null) => {
                 if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
                     subscription.unsubscribe()
                     if (pollRef.current) clearInterval(pollRef.current)
