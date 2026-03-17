@@ -162,7 +162,7 @@ export default async function StudioDetailsPage(props: {
                 <div className="glass-card p-8 rounded-[32px] bg-white flex flex-col md:flex-row items-center gap-8 mb-8 border-border-grey shadow-cloud">
                     <div className="w-32 h-32 bg-off-white rounded-[24px] flex items-center justify-center overflow-hidden border-2 border-white shadow-tight shrink-0">
                         {studio.logo_url ? (
-                            <img src={studio.logo_url} alt={studio.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                            <img src={studio.logo_url} alt={studio.name} className="w-full h-full object-cover" />
                         ) : (() => {
                             const ownerRecord = Array.isArray(studio.profiles) ? studio.profiles[0] : studio.profiles;
                             const avatar = ownerRecord?.avatar_url;
