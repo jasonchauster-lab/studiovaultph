@@ -5,8 +5,8 @@ export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
     const code = searchParams.get('code')
 
-    // `next` is used for email-based auth redirects (e.g. confirmation link → /verified)
     const next = searchParams.get('next') ?? '/verified'
+    const remember = searchParams.get('remember') === '1'
 
     // `role_intent` is optionally passed from the login page when the user has
     // already selected a role on the sign-up tab before clicking "Continue with Google".
@@ -136,14 +136,12 @@ export async function GET(request: Request) {
             const dashboard = getDashboard(profile?.role || '')
             const response = buildRedirect(origin, request, dashboard)
 
-            // If the user ticked "Remember this device", a short-lived
-            // pending_otp_remember cookie was set before the email was sent.
-            const cookies = request.headers.get('cookie') || ''
-            if (cookies.includes('pending_otp_remember=1')) {
+        // If the user ticked "Remember this device", the remember=1 param
+        // was embedded in the email redirect URL — reliable across all devices.
+            if (remember) {
                 const maxAge = 14 * 24 * 60 * 60
                 response.cookies.set('otp_remembered', user.id, { maxAge, path: '/', sameSite: 'lax', httpOnly: false })
                 response.cookies.set('remember_me', '1', { maxAge, path: '/', sameSite: 'lax', httpOnly: false })
-                response.cookies.set('pending_otp_remember', '', { maxAge: 0, path: '/' })
             }
 
             return response
@@ -229,11 +227,10 @@ export async function GET(request: Request) {
             const response = buildRedirect(origin, request, dashboard)
 
             const cookies = request.headers.get('cookie') || ''
-            if (cookies.includes('pending_otp_remember=1')) {
+            if (remember) {
                 const maxAge = 14 * 24 * 60 * 60
                 response.cookies.set('otp_remembered', user.id, { maxAge, path: '/', sameSite: 'lax', httpOnly: false })
                 response.cookies.set('remember_me', '1', { maxAge, path: '/', sameSite: 'lax', httpOnly: false })
-                response.cookies.set('pending_otp_remember', '', { maxAge: 0, path: '/' })
             }
 
             return response

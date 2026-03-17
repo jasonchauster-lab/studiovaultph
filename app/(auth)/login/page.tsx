@@ -164,14 +164,6 @@ function LoginContent() {
         setLoading(true)
         setMessage(null)
 
-        // Stamp the remember-device preference into a short-lived cookie BEFORE
-        // the email link is clicked so the callback can read it.
-        if (rememberDevice) {
-            document.cookie = 'pending_otp_remember=1; max-age=600; path=/; SameSite=Lax'
-        } else {
-            document.cookie = 'pending_otp_remember=; max-age=0; path=/'
-        }
-
         // Use implicit flow so the magic link carries a token_hash (not a PKCE
         // code), making it work when opened on any device or browser.
         const supabaseImplicit = createBrowserClient(
@@ -179,11 +171,14 @@ function LoginContent() {
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
             { auth: { flowType: 'implicit' } }
         )
+        // Embed the remember preference directly in the callback URL so it
+        // works regardless of which device or browser opens the link.
+        const callbackUrl = `${window.location.origin}/auth/callback?next=2fa${rememberDevice ? '&remember=1' : ''}`
         const { error } = await supabaseImplicit.auth.signInWithOtp({
             email,
             options: {
                 shouldCreateUser: false,
-                emailRedirectTo: `${window.location.origin}/auth/callback?next=2fa`,
+                emailRedirectTo: callbackUrl,
             },
         })
 
@@ -198,17 +193,15 @@ function LoginContent() {
     const handleResendOtp = async () => {
         setLoading(true)
         setMessage(null)
-        if (rememberDevice) {
-            document.cookie = 'pending_otp_remember=1; max-age=600; path=/; SameSite=Lax'
-        }
         const supabaseImplicit = createBrowserClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
             { auth: { flowType: 'implicit' } }
         )
+        const callbackUrl = `${window.location.origin}/auth/callback?next=2fa${rememberDevice ? '&remember=1' : ''}`
         const { error } = await supabaseImplicit.auth.signInWithOtp({
             email,
-            options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/auth/callback?next=2fa` },
+            options: { shouldCreateUser: false, emailRedirectTo: callbackUrl },
         })
         setMessage(error
             ? { type: 'error', text: error.message }
