@@ -18,19 +18,23 @@ export default async function DashboardLayout({
     let profile = null
     let studioData = null
     if (user) {
-        const { data } = await supabase
+        const { data, error: pError } = await supabase
             .from('profiles')
             .select('role, avatar_url, full_name')
             .eq('id', user.id)
-            .single()
+            .maybeSingle()
+        
+        if (pError) console.error('[Layout] Profile fetch error:', pError)
         profile = data
 
         if (profile?.role === 'studio') {
-            const { data: sData } = await supabase
+            const { data: sData, error: sError } = await supabase
                 .from('studios')
                 .select('logo_url, name')
                 .eq('owner_id', user.id)
-                .single()
+                .maybeSingle()
+            
+            if (sError) console.error('[Layout] Studio fetch error:', sError)
             studioData = sData
         }
     }

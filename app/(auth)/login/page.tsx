@@ -30,8 +30,19 @@ function LoginContent() {
     const [rememberDevice, setRememberDevice] = useState(false)
 
     const oauthError = searchParams.get('error')
+    const resolveInitialMessage = (raw: string | null): { type: 'error' | 'success', text: string } | null => {
+        if (!raw) return null
+        const decoded = decodeURIComponent(raw)
+        // PKCE verifier errors mean the link was clicked on a different device —
+        // the auth likely succeeded there. Show a friendly prompt instead of
+        // the raw Supabase internal error.
+        if (decoded.toLowerCase().includes('pkce') || decoded.toLowerCase().includes('code verifier')) {
+            return { type: 'success', text: 'Email verified! If you signed in on another device, you\'re all set there. To sign in here, enter your credentials below.' }
+        }
+        return { type: 'error', text: decoded }
+    }
     const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(
-        oauthError ? { type: 'error', text: decodeURIComponent(oauthError) } : null
+        resolveInitialMessage(oauthError)
     )
     const router = useRouter()
     const supabase = createClient()

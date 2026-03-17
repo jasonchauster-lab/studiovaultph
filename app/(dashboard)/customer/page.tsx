@@ -65,14 +65,19 @@ export default async function CustomerDashboard({
         studioQuery = studioQuery.overlaps('amenities', amenityList)
     }
 
-    // Fetch profile + studios + locations in parallel (saves 1 sequential round trip)
-    const [{ data: profile }, { data: allStudiosForLocations }, { data: rawStudios }] = await Promise.all([
-        supabase.from('profiles').select('date_of_birth, contact_number').eq('id', user.id).single(),
+    // Fetch profile + studios + locations in parallel
+    const [{ data: profile, error: profileError }, { data: allStudiosForLocations }, { data: rawStudios }] = await Promise.all([
+        supabase.from('profiles').select('date_of_birth, contact_number').eq('id', user.id).maybeSingle(),
         supabase.from('studios').select('location').eq('verified', true),
         studioQuery
     ])
 
+    if (profileError) {
+        console.error('[CustomerDashboard] Profile fetch error:', profileError)
+    }
+
     if (!profile?.date_of_birth || !profile?.contact_number) {
+        console.log(`[CustomerDashboard] Incomplete profile for ${user.email}. Redirecting to onboarding.`)
         redirect('/customer/onboarding')
     }
 

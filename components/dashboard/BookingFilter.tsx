@@ -53,7 +53,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
     const hasActiveFilters = status !== 'all' || fromDate !== '' || toDate !== ''
 
     return (
-        <div className={clsx("flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 bg-transparent sm:bg-white/50 sm:backdrop-blur-md p-1 sm:p-3 rounded-2xl sm:rounded-[2rem] border-none sm:border sm:border-white/40 shadow-none sm:shadow-tight w-full no-scrollbar", className)}>
+        <div className={clsx("flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 bg-transparent sm:bg-white/50 sm:backdrop-blur-md p-1 sm:p-3 rounded-2xl sm:rounded-[2rem] border-none sm:border sm:border-white/40 shadow-none sm:shadow-tight w-full", className)}>
             <div className="hidden sm:flex items-center gap-3 text-charcoal/40 shrink-0 sticky left-0 bg-transparent pr-2 z-10 transition-colors">
                 <div className="w-8 h-8 rounded-xl bg-charcoal/5 flex items-center justify-center">
                     <Filter className="w-3.5 h-3.5" />
@@ -64,14 +64,14 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
             <div className="grid grid-cols-2 gap-3 sm:gap-2 flex-1 w-full sm:items-center sm:max-w-xl">
                 {/* Status Dropdown */}
                 <div className="w-full relative group min-w-0">
-                    <span className="absolute -top-2 left-3 px-1.5 bg-white text-[7px] font-black text-forest/60 uppercase tracking-[0.15em] z-10 sm:hidden">Filter by Status</span>
-                    <div className="relative h-10 sm:h-10">
+                    <span className="absolute -top-2 left-3 px-1.5 bg-white text-[7px] font-black text-forest/60 uppercase tracking-[0.1em] z-10 sm:hidden whitespace-nowrap">STATUS FILTER</span>
+                    <div className="relative h-11 sm:h-10">
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value as FilterStatus)}
                             className="w-full h-full pl-3 pr-8 bg-white sm:bg-charcoal/5 border border-border-grey/20 sm:border-charcoal/5 text-charcoal text-[10px] sm:text-[11px] font-black uppercase tracking-[0.05em] sm:tracking-[0.2em] rounded-xl focus:ring-forest focus:border-forest block py-2 sm:py-1 outline-none transition-all shadow-sm sm:shadow-none appearance-none hover:bg-forest/5"
                         >
-                            <option value="all">All Stat.</option>
+                            <option value="all">ALL STATUS</option>
                             <option value="approved">Approved</option>
                             <option value="completed">Completed</option>
                             <option value="cancelled">Cancelled</option>
@@ -81,9 +81,9 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                 </div>
 
                 <div className="w-full relative group min-w-0">
-                    <span className="absolute -top-2 left-3 px-1.5 bg-white text-[8px] font-black text-forest/60 uppercase tracking-[0.2em] z-10 sm:hidden">Date Range</span>
+                    <span className="absolute -top-2 left-3 px-1.5 bg-white text-[7px] font-black text-forest/60 uppercase tracking-[0.1em] z-10 sm:hidden whitespace-nowrap">DATE RANGE</span>
                     <div className={clsx(
-                        "flex items-center justify-between gap-1.5 sm:gap-4 border rounded-xl px-2.5 sm:px-4 py-0 shrink-0 sm:shrink transition-all duration-300 overflow-hidden sm:min-w-0 w-full h-10 sm:h-10",
+                        "flex items-center justify-between gap-1 sm:gap-4 border rounded-xl px-2 sm:px-4 py-0 shrink-0 sm:shrink transition-all duration-300 overflow-hidden sm:min-w-0 w-full h-11 sm:h-10",
                         (fromDate || toDate) ? "bg-forest/5 border-forest/20 ring-1 ring-forest/10" : "bg-white sm:bg-charcoal/5 border-border-grey/20 sm:border-charcoal/5"
                     )}>
                         <CalendarIcon className={clsx("hidden sm:block w-3.5 h-3.5 shrink-0 transition-colors", (fromDate || toDate) ? "text-forest" : "text-charcoal/30")} />
@@ -113,7 +113,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                                     type="date"
                                     value={toDate}
                                     onChange={(e) => setToDate(e.target.value)}
-                                    className="bg-transparent text-charcoal text-[10px] sm:text-[11px] font-black uppercase tracking-[0.05em] sm:tracking-[0.15em] focus:outline-none w-full text-right sm:text-left pr-0.5 cursor-pointer"
+                                    className="bg-transparent text-charcoal text-[10px] sm:text-[11px] font-black uppercase tracking-[0.05em] sm:tracking-[0.15em] focus:outline-none w-full text-right sm:text-left pr-0.5 cursor-pointer appearance-none min-w-0"
                                     aria-label="To Date"
                                 />
                                 {toDate && (

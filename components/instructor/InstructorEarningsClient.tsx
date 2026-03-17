@@ -129,15 +129,14 @@ export default function InstructorEarningsClient({
                         <div className="flex sm:hidden items-center gap-2">
                              <button
                                 onClick={() => setShowTopUpModal(true)}
-                                className="w-10 h-10 bg-white text-charcoal rounded-xl flex items-center justify-center border border-border-grey shadow-tight active:scale-95 transition-all"
+                                className="h-10 px-4 bg-white text-charcoal rounded-xl flex items-center justify-center gap-2 border border-border-grey shadow-tight active:scale-95 transition-all text-[9px] font-black uppercase tracking-[0.1em]"
                                 title="TOP UP"
                             >
-                                <Plus className="w-4 h-4 text-forest" />
+                                <Plus className="w-3.5 h-3.5 text-forest" />
+                                TOP UP
                             </button>
                             {recentTransactions && (
-                                <div className="w-10 h-10">
-                                    <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />
-                                </div>
+                                <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />
                             )}
                         </div>
                     </div>
@@ -180,7 +179,7 @@ export default function InstructorEarningsClient({
                 </div>
             </div>
 
-            <div className="py-2 inline-block w-full sm:w-auto overflow-hidden">
+            <div className="py-2 inline-block w-full sm:w-auto">
                 <DateRangeFilters />
             </div>
 

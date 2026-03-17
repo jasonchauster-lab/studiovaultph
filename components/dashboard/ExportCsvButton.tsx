@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { Download } from 'lucide-react'
+import { clsx } from 'clsx'
 
 export interface Transaction {
     date: string
@@ -84,10 +85,13 @@ export default function ExportCsvButton({ data, filename = 'transactions', class
     return (
         <button
             onClick={handleExport}
-            className={className || "h-12 sm:h-14 w-full sm:w-auto bg-white text-charcoal px-8 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 border border-border-grey hover:bg-off-white transition-all shadow-tight active:scale-95 whitespace-nowrap"}
+            className={clsx(
+                "h-10 sm:h-12 w-full sm:w-auto bg-white text-charcoal px-3 sm:px-8 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.3em] flex items-center justify-center gap-2 sm:gap-3 border border-border-grey hover:bg-off-white transition-all shadow-tight active:scale-95 whitespace-nowrap",
+                className
+            )}
         >
             <Download className="w-3.5 h-3.5 sm:w-4 h-4 text-charcoal/40" />
-            Export CSV
+            <span>EXPORT CSV</span>
         </button>
     )
 }
