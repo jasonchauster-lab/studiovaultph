@@ -270,7 +270,7 @@ export default async function CustomerDashboard({
                                     {instructors.map(inst => {
                                         const hasVerifiedCert = inst.certifications?.some((c: any) => c.verified)
                                         return (
-                                            <div key={inst.id} className="marketplace-card earth-card group bg-white rounded-[2.5rem] border border-burgundy/5 overflow-hidden transition-all duration-700 hover:shadow-[0_40px_100px_rgba(81,50,41,0.12)] hover:-translate-y-2 flex flex-col h-full">
+                                            <div key={inst.id} className="marketplace-card earth-card group bg-white rounded-[2.5rem] border border-burgundy/5 overflow-hidden transition-all duration-700 hover:shadow-[0_40px_100px_rgba(81,50,41,0.12)] hover:-translate-y-2 flex flex-col h-full relative">
                                                 {/* ── Banner: gradient lifestyle area ── */}
                                                 <div className="relative h-32 sm:h-44 bg-[#F5F2EB]">
                                                     {/* Premium mesh gradient background */}

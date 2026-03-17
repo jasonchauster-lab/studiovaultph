@@ -57,6 +57,8 @@ function LoginContent() {
             .eq('id', userId)
             .single()
 
+        // If user just successfully bypassed 2FA via a "Remember Me" cookie from the callback,
+        // or if they were already remembered, we simply redirect.
         const roleMap: Record<string, string> = { admin: '/admin', instructor: '/instructor', studio: '/studio', customer: '/customer' }
         const dest = profile?.role ? (roleMap[profile.role] ?? '/welcome') : '/welcome'
 
@@ -171,45 +173,6 @@ function LoginContent() {
         }
         setLoading(false)
     }
-
-    // When "Check Your Email" is visible, listen for the session that the magic
-    // link creates — whether clicked in this tab, a new tab, or the same browser
-    // from a different tab. Also poll every 4 s so a link opened on a completely
-    // different device (e.g. phone) completes the login here too if both are on
-    // the same browser profile (shared storage). If on a truly different device,
-    // that device gets logged in and the user can close this tab.
-    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-    useEffect(() => {
-        if (!otpSent) return
-
-        // Auth state listener — fires instantly on same-device clicks
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event: string, session: import('@supabase/supabase-js').Session | null) => {
-                if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
-                    subscription.unsubscribe()
-                    if (pollRef.current) clearInterval(pollRef.current)
-                    await redirectByRole(session.user.id)
-                }
-            }
-        )
-
-        // Fallback poll every 4 s — handles same browser, different tab
-        pollRef.current = setInterval(async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (session?.user) {
-                subscription.unsubscribe()
-                clearInterval(pollRef.current!)
-                await redirectByRole(session.user.id)
-            }
-        }, 4000)
-
-        return () => {
-            subscription.unsubscribe()
-            if (pollRef.current) clearInterval(pollRef.current)
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [otpSent])
 
     const handleResendOtp = async () => {
         setLoading(true)

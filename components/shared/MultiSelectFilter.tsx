@@ -44,7 +44,7 @@ export default function MultiSelectFilter({ label, options, value, onChange, cla
                 type="button"
                 onClick={() => setOpen(o => !o)}
                 className={clsx(
-                    'flex items-center gap-3 px-4 py-2.5 rounded-xl border text-[11px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-sm h-[42px]',
+                    'flex items-center gap-3 px-4 py-2.5 rounded-xl border text-[11px] font-bold uppercase tracking-widest transition-all whitespace-nowrap shadow-sm h-[50px]',
                     isActive
                         ? 'bg-forest text-white border-forest'
                         : 'bg-off-white text-charcoal border-burgundy/10 hover:border-burgundy/20 hover:bg-white'
