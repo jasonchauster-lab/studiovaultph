@@ -28,6 +28,7 @@ function LoginContent() {
     const [step, setStep] = useState<Step>('credentials')
     const [otpSent, setOtpSent] = useState(false)
     const [rememberDevice, setRememberDevice] = useState(false)
+    const [isRedirecting, setIsRedirecting] = useState(false)
 
     const oauthError = searchParams.get('error')
     const resolveInitialMessage = (raw: string | null): { type: 'error' | 'success', text: string } | null => {
@@ -46,6 +47,26 @@ function LoginContent() {
     )
     const router = useRouter()
     const supabase = createClient()
+
+    // Cross-device 2FA: listen for SIGNED_IN on this tab.
+    // When the user clicks the verification link on ANY device (e.g. desktop),
+    // Supabase broadcasts the session via the storage channel and this fires
+    // on all open tabs — including the mobile that's still on the waiting screen.
+    useEffect(() => {
+        if (!otpSent) return
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            async (event: string, session: { user?: { id: string } } | null) => {
+                if (event === 'SIGNED_IN' && session?.user && !isRedirecting) {
+                    setIsRedirecting(true)
+                    await redirectByRole(session.user.id)
+                }
+            }
+        )
+
+        return () => subscription.unsubscribe()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [otpSent])
 
     const isOtpRemembered = (userId: string) =>
         document.cookie.split(';').some(c => c.trim() === `otp_remembered=${userId}`)
@@ -294,10 +315,18 @@ function LoginContent() {
                             ) : (
                                 // Post-send: awaiting click
                                 <div className="space-y-5">
+                                    {isRedirecting ? (
+                                        <div className="p-8 rounded-xl border border-forest/20 bg-forest/5 text-center space-y-4">
+                                            <Loader2 className="animate-spin w-8 h-8 text-forest mx-auto" />
+                                            <p className="text-[11px] font-bold text-forest uppercase tracking-widest">Redirecting to dashboard...</p>
+                                            <p className="text-[10px] text-slate-500 font-medium">Email verified! Taking you there now.</p>
+                                        </div>
+                                    ) : (
                                     <div className="p-5 rounded-xl border border-forest/20 bg-forest/5 text-center space-y-1">
                                         <p className="text-[10px] font-bold text-forest uppercase tracking-widest">Link expires in 10 minutes</p>
                                         <p className="text-[10px] text-slate-500 font-medium">You can click it on any device — this page will update automatically.</p>
                                     </div>
+                                    )}
 
                                     {message && (
                                         <div className={`text-[10px] font-bold uppercase tracking-widest p-5 rounded-lg flex items-center justify-center animate-in fade-in border shadow-tight ${message.type === 'error' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
