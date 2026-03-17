@@ -143,13 +143,7 @@ export default async function CustomerBookingsPage() {
                     </div>
                 )}
 
-                {/* Upcoming List */}
                 <section>
-                    <h2 className="text-xl font-serif text-charcoal-900 mb-6 flex items-center gap-2">
-                        <Calendar className="w-5 h-5 text-charcoal-500" />
-                        My Sessions
-                    </h2>
-
                     <BookingList bookings={finalBookings} userId={user.id} />
                 </section>
             </div>

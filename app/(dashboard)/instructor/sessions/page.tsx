@@ -29,24 +29,24 @@ export default async function InstructorSessionsPage() {
         .order('created_at', { ascending: false })
 
     return (
-        <div className="px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto space-y-10 sm:space-y-16 py-6 sm:py-12">
+        <div className="px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto space-y-6 sm:space-y-16 py-4 sm:py-12">
             <div className="relative">
                 <Link
                     href="/instructor"
-                    className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-forest text-white text-[9px] font-black uppercase tracking-[0.25em] rounded-xl transition-all mb-8 shadow-tight hover:brightness-110 active:scale-95"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-forest text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-xl transition-all mb-6 shadow-tight hover:brightness-110 active:scale-95"
                 >
-                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <ArrowLeft className="w-3 h-3" />
                     DASHBOARD
                 </Link>
-                <div className="flex flex-col gap-2">
-                    <h1 className="text-3xl sm:text-5xl font-serif text-charcoal tracking-tighter">My Sessions</h1>
-                    <p className="text-[9px] sm:text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em] max-w-xs sm:max-w-none">
-                        Comprehensive registry of past and future engagements.
+                <div className="flex flex-col gap-1">
+                    <h1 className="text-2xl sm:text-5xl font-serif text-charcoal tracking-tighter">My Sessions</h1>
+                    <p className="text-[8px] sm:text-[10px] font-black text-charcoal/40 uppercase tracking-[0.25em] max-w-xs sm:max-w-none">
+                        COMPREHENSIVE REGISTRY OF ENGAGEMENTS
                     </p>
                 </div>
             </div>
 
-            <div className="glass-card p-1 relative overflow-hidden bg-white/10">
+            <div className="glass-card p-0 sm:p-1 relative overflow-hidden bg-transparent sm:bg-white/10 border-none sm:border border-white/40 shadow-none sm:shadow-tight">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] pointer-events-none" />
                 <InstructorSessionList bookings={bookings || []} currentUserId={user.id} />
             </div>

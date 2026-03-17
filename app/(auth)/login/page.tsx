@@ -2,6 +2,7 @@
 
 import { useState, Suspense, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { createBrowserClient } from '@supabase/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -137,7 +138,14 @@ function LoginContent() {
             document.cookie = 'pending_otp_remember=; max-age=0; path=/'
         }
 
-        const { error } = await supabase.auth.signInWithOtp({
+        // Use implicit flow so the magic link carries a token_hash (not a PKCE
+        // code), making it work when opened on any device or browser.
+        const supabaseImplicit = createBrowserClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            { auth: { flowType: 'implicit' } }
+        )
+        const { error } = await supabaseImplicit.auth.signInWithOtp({
             email,
             options: {
                 shouldCreateUser: false,
@@ -198,7 +206,12 @@ function LoginContent() {
         if (rememberDevice) {
             document.cookie = 'pending_otp_remember=1; max-age=600; path=/; SameSite=Lax'
         }
-        const { error } = await supabase.auth.signInWithOtp({
+        const supabaseImplicit = createBrowserClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            { auth: { flowType: 'implicit' } }
+        )
+        const { error } = await supabaseImplicit.auth.signInWithOtp({
             email,
             options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/auth/callback?next=2fa` },
         })

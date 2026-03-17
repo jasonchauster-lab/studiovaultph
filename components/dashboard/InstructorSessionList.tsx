@@ -164,21 +164,23 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
     return (
         <div className="space-y-10 pb-48">
-            <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible mb-8">
-                <BookingFilter key={resetKey} onFilterChange={setFilters} />
+            <div className="px-4 sm:px-0">
+                <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible mb-6 sm:mb-8">
+                    <BookingFilter key={resetKey} onFilterChange={setFilters} />
+                </div>
             </div>
 
             {/* Active Sessions List */}
             <section>
-                <div className="px-6 sm:px-0 flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-12 gap-2">
+                <div className="px-6 sm:px-0 flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-12 gap-2">
                     <div className="flex items-start gap-3 sm:gap-4 h-full">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-forest/5 rounded-2xl flex items-center justify-center shrink-0 border border-forest/10">
-                            <Calendar className="w-5 h-5 sm:w-6 h-6 text-forest" />
+                        <div className="w-9 h-9 sm:w-12 sm:h-12 bg-forest/5 rounded-[1.25rem] flex items-center justify-center shrink-0 border border-forest/10">
+                            <Calendar className="w-4 h-4 sm:w-6 h-6 text-forest" />
                         </div>
                         <div className="flex flex-col justify-center">
-                            <h2 className="text-2xl sm:text-4xl font-serif text-charcoal tracking-tight leading-none">Upcoming Sessions</h2>
-                            <div className="text-[8px] sm:text-[9px] font-black text-forest uppercase tracking-[0.25em] mt-1.5 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 bg-forest rounded-full animate-pulse" />
+                            <h2 className="text-xl sm:text-4xl font-serif text-charcoal tracking-tight leading-none">Upcoming Sessions</h2>
+                            <div className="text-[7.5px] sm:text-[9px] font-black text-forest/60 uppercase tracking-[0.2em] mt-1.5 flex items-center gap-2">
+                                <span className="w-1 h-1 bg-forest rounded-full animate-pulse" />
                                 {activeBookings.length} {activeBookings.length === 1 ? 'Engagement' : 'Engagements'} Found
                             </div>
                         </div>
@@ -186,19 +188,19 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 </div>
 
                 {activeBookings.length === 0 ? (
-                    <div className="py-12 sm:py-20 flex flex-col items-center justify-center text-center bg-white/50 backdrop-blur-sm rounded-[2.5rem] border border-border-grey/30 mx-4 sm:mx-0 px-8 shadow-tight relative overflow-hidden">
+                    <div className="py-12 sm:py-20 flex flex-col items-center justify-center text-center bg-white/50 backdrop-blur-sm rounded-[2.5rem] border border-border-grey/30 mx-4 sm:mx-0 px-6 sm:px-8 shadow-tight relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-64 h-64 bg-forest/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-[100px] pointer-events-none" />
                         <div className="absolute bottom-0 right-0 w-64 h-64 bg-gold/5 rounded-full translate-x-1/2 translate-y-1/2 blur-[100px] pointer-events-none" />
                         
-                        <div className="w-20 h-20 bg-charcoal/5 rounded-[2rem] flex items-center justify-center mb-8 relative border border-charcoal/5">
-                            <Calendar className="w-8 h-8 text-charcoal/20" />
-                            <div className="absolute -top-1 -right-1 w-6 h-6 bg-forest/10 rounded-full flex items-center justify-center animate-bounce">
-                                <div className="w-2 h-2 bg-forest rounded-full" />
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-charcoal/5 rounded-[1.75rem] sm:rounded-[2rem] flex items-center justify-center mb-6 sm:mb-8 relative border border-charcoal/5">
+                            <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-charcoal/20" />
+                            <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-forest/10 rounded-full flex items-center justify-center animate-bounce">
+                                <div className="w-1.5 h-1.5 sm:w-2 h-2 bg-forest rounded-full" />
                             </div>
                         </div>
-                        <h3 className="text-2xl sm:text-4xl font-serif text-charcoal mb-4 tracking-tight">No active schedule yet.</h3>
-                        <p className="text-[11px] sm:text-sm text-charcoal/50 max-w-[320px] mb-10 leading-relaxed font-medium uppercase tracking-wider">
-                            Sync your availability or find a studio node to begin your session regsitry.
+                        <h3 className="text-xl sm:text-4xl font-serif text-charcoal mb-3 sm:mb-4 tracking-tight">No active schedule yet.</h3>
+                        <p className="text-[10px] sm:text-sm text-charcoal/40 max-w-[280px] sm:max-w-[320px] mb-8 sm:mb-10 leading-relaxed font-black uppercase tracking-widest">
+                            Sync your availability or find a studio node to begin your session registry.
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10 w-full sm:w-auto">
@@ -224,18 +226,18 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         {activeGroups.map((group) => (
                             <div key={group.date} className="relative">
                                 {/* Date Header */}
-                                <div className="sticky top-0 z-20 bg-white/60 backdrop-blur-xl px-5 py-3.5 mb-6 rounded-2xl border border-white/40 flex items-center justify-between mx-4 sm:mx-0 shadow-sm ring-1 ring-charcoal/5">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center">
-                                            <Calendar className="w-3.5 h-3.5 text-forest" />
+                                <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl px-4 py-3 mb-4 rounded-[1.25rem] border border-charcoal/5 flex items-center justify-between mx-4 sm:mx-0 shadow-sm ring-1 ring-charcoal/[0.02]">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="w-7 h-7 rounded-lg bg-forest/5 flex items-center justify-center">
+                                            <Calendar className="w-3 h-3 text-forest/60" />
                                         </div>
-                                        <span className="text-[10px] font-black text-charcoal uppercase tracking-[0.3em]">
+                                        <span className="text-[9px] font-black text-charcoal uppercase tracking-[0.25em]">
                                             {new Date(group.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-forest/20" />
-                                        <span className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">{group.bookings.length} {group.bookings.length === 1 ? 'Session' : 'Sessions'}</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="w-1 h-1 rounded-full bg-forest/20" />
+                                        <span className="text-[8px] font-black text-charcoal/30 uppercase tracking-[0.15em]">{group.bookings.length} {group.bookings.length === 1 ? 'Session' : 'Sessions'}</span>
                                     </div>
                                 </div>
 
@@ -246,65 +248,70 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                         const client = getFirst(booking.client)
 
                                         return (
-                                            <div key={booking.id} className="earth-card p-4 sm:p-5 bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0 rounded-[2rem] border-l-[3px] border-l-forest overflow-hidden">
+                                            <div key={booking.id} className="earth-card p-3.5 sm:p-5 bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0 rounded-[1.75rem] border-l-[3px] border-l-forest overflow-hidden">
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-forest/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl pointer-events-none group-hover:bg-forest/10 transition-colors" />
                                                 
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-4 relative z-10">
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 relative z-10">
                                                     {/* Time Indicator */}
-                                                    <div className="flex items-center gap-3 sm:flex-col sm:justify-center sm:bg-forest/5 sm:rounded-[1.5rem] sm:w-20 sm:h-20 sm:shrink-0 sm:border sm:border-forest/10">
-                                                        <div className="flex sm:hidden items-center justify-center w-8 h-8 rounded-full bg-forest/10">
-                                                            <Clock className="w-3.5 h-3.5 text-forest" />
+                                                    <div className="flex items-center justify-between sm:justify-center sm:bg-forest/5 sm:rounded-[1.5rem] sm:w-20 sm:h-20 sm:shrink-0 sm:border sm:border-forest/10">
+                                                        <div className="flex items-center gap-2.5 sm:flex-col sm:items-center sm:gap-1">
+                                                            <div className="flex sm:hidden items-center justify-center w-7 h-7 rounded-lg bg-forest/10">
+                                                                <Clock className="w-3 h-3 text-forest" />
+                                                            </div>
+                                                            <div className="flex flex-col sm:items-center">
+                                                                <span className="text-[15px] sm:text-lg font-serif text-charcoal leading-none tracking-tighter">
+                                                                    {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                                </span>
+                                                                <span className="text-[7px] sm:text-[8px] font-black text-forest/60 uppercase tracking-[0.2em] mt-1 sm:mt-1">START</span>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex flex-col sm:items-center">
-                                                            <span className="text-base sm:text-lg font-serif text-charcoal leading-none tracking-tighter">
-                                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                            </span>
-                                                            <span className="text-[7px] sm:text-[8px] font-black text-forest uppercase tracking-[0.2em] mt-1">START</span>
+
+                                                        {/* Mobile Actions - moved here for better mobile density */}
+                                                        <div className="flex sm:hidden items-center gap-2 shrink-0">
+                                                            {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
+                                                                <button
+                                                                    onClick={() => setCancellingBooking(booking)}
+                                                                    className="w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-100/50 active:scale-95 transition-transform"
+                                                                >
+                                                                    <X className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            )}
+                                                            {client && client.id !== currentUserId && (
+                                                                <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="" variant="antigravity" />
+                                                            )}
                                                         </div>
                                                     </div>
 
                                                     {/* Session Details */}
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="flex flex-col gap-1">
+                                                        <div className="flex flex-col gap-0.5">
                                                             <div className="flex items-center justify-between">
-                                                                <button onClick={() => handleStudioClick(studio)} className="text-lg sm:text-xl font-serif text-charcoal hover:text-forest transition-colors text-left tracking-tight">
+                                                                <button onClick={() => handleStudioClick(studio)} className="text-[17px] sm:text-xl font-serif text-charcoal hover:text-forest transition-colors text-left tracking-tight">
                                                                     {studio?.name || "Studio Node"}
                                                                 </button>
-                                                                <div className="flex sm:hidden items-center gap-2 shrink-0">
-                                                                    {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
-                                                                        <button
-                                                                            onClick={() => setCancellingBooking(booking)}
-                                                                            className="w-9 h-9 flex items-center justify-center rounded-2xl bg-red-50 text-red-600 border border-red-100/50 active:scale-95 transition-transform"
-                                                                        >
-                                                                            <X className="w-4 h-4" />
-                                                                        </button>
-                                                                    )}
-                                                                    {client && client.id !== currentUserId && (
-                                                                        <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="" variant="antigravity" />
-                                                                    )}
-                                                                </div>
                                                             </div>
                                                             
-                                                            <div className="flex items-center gap-2 text-charcoal/40">
-                                                                <MapPin className="w-3 h-3 shrink-0" />
-                                                                <span className="text-[9px] font-black uppercase tracking-[0.15em] truncate">{studio?.location || "REGISTRY N/A"}</span>
+                                                            <div className="flex items-center gap-2 text-charcoal/30">
+                                                                <MapPin className="w-2.5 h-2.5 shrink-0" />
+                                                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] truncate">{studio?.location || "REGISTRY N/A"}</span>
                                                             </div>
 
-                                                            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border-grey/30">
+                                                            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border-grey/30">
                                                                 {client && (
-                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity min-w-0 flex-1">
-                                                                        <div className="w-7 h-7 rounded-full border border-forest/10 p-0.5 shrink-0">
-                                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full rounded-full object-cover" />
+                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
+                                                                        <div className="w-6 h-6 rounded-lg border border-forest/10 p-0.5 shrink-0">
+                                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full rounded-lg object-cover" />
                                                                         </div>
-                                                                        <span className="text-[10px] font-black text-charcoal uppercase tracking-[0.2em] truncate">{client.full_name}</span>
+                                                                        <span className="text-[9px] font-black text-charcoal/60 uppercase tracking-[0.15em] truncate">{client.full_name}</span>
                                                                     </button>
                                                                 )}
                                                                 <div className="flex items-center gap-2 shrink-0">
-                                                                    <span className="px-3 py-1 bg-forest/5 text-forest/70 text-[8px] font-black uppercase tracking-[0.2em] rounded-xl border border-forest/10 flex items-center gap-1.5">
-                                                                        <Box className="w-2.5 h-2.5" />
+                                                                    <span className="px-2 py-0.5 bg-forest/5 text-forest/50 text-[7px] font-black uppercase tracking-[0.15em] rounded-lg border border-forest/5 flex items-center gap-1">
+                                                                        <Box className="w-2 h-2" />
                                                                         {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                                                                            ? `${slot.equipment[0]} (${booking.quantity || 1})`
-                                                                            : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'} (${booking.quantity || 1})`)}
+                                                                            ? `${slot.equipment[0]}`
+                                                                            : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'}`)}
+                                                                        <span className="opacity-40">({booking.quantity || 1})</span>
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -339,31 +346,31 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             {/* Past Sessions List */}
             {historicalBookings.length > 0 && (
                 <section>
-                    <div className="px-6 sm:px-0 flex items-center justify-between mb-8 sm:mb-12">
-                        <div className="flex items-center gap-3 sm:gap-4">
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-charcoal/5 rounded-2xl flex items-center justify-center shrink-0 border border-charcoal/10">
-                                <Clock className="w-5 h-5 sm:w-6 h-6 text-charcoal/60" />
-                            </div>
-                            <h2 className="text-xl sm:text-3xl font-serif text-charcoal/60 tracking-tight">Archive Registry</h2>
+                    <div className="px-6 sm:px-0 flex items-center justify-between mb-6 sm:mb-12">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-9 h-9 sm:w-12 sm:h-12 bg-charcoal/5 rounded-[1.25rem] flex items-center justify-center shrink-0 border border-charcoal/10">
+                            <Clock className="w-4 h-4 sm:w-6 h-6 text-charcoal/40" />
                         </div>
+                        <h2 className="text-xl sm:text-3xl font-serif text-charcoal/40 tracking-tight">Archive Registry</h2>
                     </div>
+                </div>
 
                     <div className="space-y-10">
                         {historicalGroups.map((group) => (
                             <div key={group.date} className="relative">
                                 {/* Date Header */}
-                                <div className="sticky top-0 z-20 bg-charcoal/[0.03] backdrop-blur-xl px-5 py-3.5 mb-6 rounded-2xl border border-charcoal/5 flex items-center justify-between mx-4 sm:mx-0 ring-1 ring-charcoal/[0.02]">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-charcoal/5 flex items-center justify-center">
-                                            <Clock className="w-3.5 h-3.5 text-charcoal/40" />
+                                <div className="sticky top-0 z-20 bg-charcoal/[0.03] backdrop-blur-xl px-4 py-3 mb-4 rounded-[1.25rem] border border-charcoal/5 flex items-center justify-between mx-4 sm:mx-0 ring-1 ring-charcoal/[0.02]">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="w-7 h-7 rounded-lg bg-charcoal/5 flex items-center justify-center">
+                                            <Clock className="w-3 h-3 text-charcoal/30" />
                                         </div>
-                                        <span className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.3em]">
+                                        <span className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.25em]">
                                             {new Date(group.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-charcoal/10" />
-                                        <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.2em]">{group.bookings.length} {group.bookings.length === 1 ? 'Legacy' : 'Legacies'}</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="w-1 h-1 rounded-full bg-charcoal/10" />
+                                        <span className="text-[8px] font-black text-charcoal/20 uppercase tracking-[0.15em]">{group.bookings.length} {group.bookings.length === 1 ? 'Legacy' : 'Legacies'}</span>
                                     </div>
                                 </div>
 
@@ -374,43 +381,43 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                         const client = getFirst(booking.client)
 
                                         return (
-                                            <div key={booking.id} className="glass-card p-4 sm:p-5 border border-white/40 bg-white/5 hover:bg-white/10 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0 rounded-[2rem] overflow-hidden grayscale-[0.5] hover:grayscale-0">
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-4 relative z-10">
+                                            <div key={booking.id} className="glass-card p-3.5 sm:p-5 border border-white/40 bg-white/5 hover:bg-white/10 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0 rounded-[1.75rem] overflow-hidden grayscale-[0.5] hover:grayscale-0">
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 relative z-10">
                                                     {/* Time & Earnings */}
                                                     <div className="flex items-center justify-between sm:flex-col sm:justify-center sm:bg-charcoal/[0.03] sm:rounded-[1.5rem] sm:w-24 sm:h-24 sm:shrink-0 sm:border sm:border-charcoal/5">
                                                         <div className="flex flex-col sm:items-center">
-                                                            <span className="text-sm sm:text-base font-serif text-charcoal/50 leading-none tracking-tight">
+                                                            <span className="text-[13px] sm:text-base font-serif text-charcoal/40 leading-none tracking-tight">
                                                                 {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                             </span>
-                                                            <span className="text-[7px] sm:text-[8px] font-black text-charcoal/30 uppercase tracking-[0.2em] mt-1.5">RECORDED</span>
+                                                            <span className="text-[7px] font-black text-charcoal/20 uppercase tracking-[0.15em] mt-1.5">RECORDED</span>
                                                         </div>
                                                         {booking.price_breakdown?.instructor_fee && (
                                                             <div className="flex flex-col items-end sm:items-center sm:mt-3">
-                                                                <span className="text-sm sm:text-base font-black text-sage tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
-                                                                <span className="text-[7px] font-black text-sage/50 uppercase tracking-[0.25em]">VALUED</span>
+                                                                <span className="text-[13px] sm:text-base font-black text-sage/60 tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                                                                <span className="text-[7px] font-black text-sage/30 uppercase tracking-[0.2em]">VALUED</span>
                                                             </div>
                                                         )}
                                                     </div>
 
                                                     {/* Session Info */}
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="flex flex-col gap-1">
-                                                            <button onClick={() => handleStudioClick(studio)} className="text-base sm:text-lg font-serif text-charcoal/50 hover:text-charcoal transition-colors text-left tracking-tight">
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <button onClick={() => handleStudioClick(studio)} className="text-[15px] sm:text-lg font-serif text-charcoal/40 hover:text-charcoal transition-colors text-left tracking-tight">
                                                                 {studio?.name || "Historical Node"}
                                                             </button>
                                                             
-                                                            <div className="flex items-center gap-2 text-charcoal/30">
-                                                                <MapPin className="w-3 h-3 shrink-0" />
-                                                                <span className="text-[9px] font-black uppercase tracking-[0.15em] truncate">{studio?.location || "ARCHIVE N/A"}</span>
+                                                            <div className="flex items-center gap-2 text-charcoal/20">
+                                                                <MapPin className="w-2.5 h-2.5 shrink-0" />
+                                                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] truncate">{studio?.location || "ARCHIVE N/A"}</span>
                                                             </div>
 
-                                                            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-charcoal/5">
+                                                            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-charcoal/5">
                                                                 {client && (
-                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity min-w-0 flex-1">
-                                                                        <div className="w-7 h-7 rounded-full border border-charcoal/5 p-0.5 shrink-0 opacity-40">
-                                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full rounded-full object-cover" />
+                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
+                                                                        <div className="w-6 h-6 rounded-lg border border-charcoal/5 p-0.5 shrink-0 opacity-40">
+                                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full rounded-lg object-cover" />
                                                                         </div>
-                                                                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em] truncate">{client.full_name}</span>
+                                                                        <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.15em] truncate">{client.full_name}</span>
                                                                     </button>
                                                                 )}
                                                                 {booking.status === 'completed' && !booking.instructor_reviewed_studio && (

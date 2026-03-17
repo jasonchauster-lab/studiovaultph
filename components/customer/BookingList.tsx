@@ -167,25 +167,25 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
             <section>
                 <div className="space-y-4">
                     {upcomingBookings.length === 0 ? (
-                        <div className="min-h-[200px] py-12 flex flex-col items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0 px-4">
-                            <div className="w-12 h-12 bg-burgundy/5 rounded-full flex items-center justify-center mb-4">
-                                <Calendar className="w-6 h-6 text-burgundy/30" />
+                        <div className="min-h-[220px] py-12 flex flex-col items-center justify-center text-center earth-card border-dashed bg-white/40 backdrop-blur-sm mx-0 px-4">
+                            <div className="w-14 h-14 bg-forest/5 rounded-full flex items-center justify-center mb-6 shadow-tight">
+                                <Calendar className="w-7 h-7 text-forest/20" />
                             </div>
-                            <h3 className="text-sm font-bold text-burgundy mb-1">No upcoming sessions booked.</h3>
-                            <p className="text-[11px] text-slate max-w-[240px] mb-6">Try adjusting your filters or browse instructors to book your next class.</p>
+                            <h3 className="text-sm font-bold text-burgundy mb-2">No upcoming sessions booked.</h3>
+                            <p className="text-[11px] text-slate/70 max-w-[240px] mb-8 leading-relaxed">Try adjusting your filters or browse instructors to book your next class.</p>
                             
-                            <div className="flex flex-col sm:flex-row items-center gap-3">
+                            <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-[200px] sm:max-w-none justify-center">
                                 {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
                                     <button 
                                         onClick={() => setResetKey(prev => prev + 1)}
-                                        className="px-4 py-2 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-sm"
+                                        className="w-full sm:w-auto px-6 py-2.5 bg-white text-forest text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-forest/5 transition-all shadow-tight border border-forest/10"
                                     >
                                         Clear Filters
                                     </button>
                                 )}
                                 <Link
                                     href="/customer"
-                                    className="px-4 py-2 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-tight"
+                                    className="w-full sm:w-auto px-6 py-2.5 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-tight"
                                 >
                                     Browse Instructors
                                 </Link>
@@ -320,8 +320,8 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
 
             {/* Past List with Date Grouping */}
             {pastBookings.length > 0 && (
-                <section className="space-y-8">
-                    <h2 className="text-xl font-serif text-charcoal-900 mb-6 sticky top-0 py-4 bg-cream-50 z-20 border-b border-charcoal/5">Session History</h2>
+                <section className="space-y-6">
+                    <h2 className="text-xl font-serif text-charcoal-900 mb-6 sticky top-0 py-6 bg-cream-50/80 backdrop-blur-md z-20 border-b border-charcoal/5">Session History</h2>
                     
                     {(Object.entries(groupedPastBookings) as [string, any[]][]).map(([monthYear, monthBookings]) => (
                         <div key={monthYear} className="space-y-4">
@@ -339,28 +339,28 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                     const canReview = booking.status === 'completed' || (booking.status === 'approved' && isPast)
                                     
                                     return (
-                                        <div key={booking.id} className="earth-card p-4 sm:p-5 bg-white flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-tight hover:shadow-md transition-shadow">
+                                        <div key={booking.id} className="earth-card p-4 sm:p-5 bg-white flex flex-col md:flex-row justify-between md:items-center gap-4 shadow-tight hover:shadow-md transition-shadow">
                                             <div className="flex items-center gap-4">
-                                                <div className="flex flex-col items-center justify-center w-12 h-12 bg-charcoal/5 rounded-xl shrink-0">
-                                                    <span className="text-[10px] uppercase font-black text-charcoal/40 leading-none">
+                                                <div className="flex flex-col items-center justify-center w-12 h-12 bg-charcoal/5 rounded-xl shrink-0 border border-charcoal/5">
+                                                    <span className="text-[9px] uppercase font-black text-charcoal/30 leading-none">
                                                         {getSlotDateTime(booking.slots?.date, booking.slots?.start_time).toLocaleDateString(undefined, { month: 'short' })}
                                                     </span>
-                                                    <span className="text-lg font-serif text-charcoal leading-none mt-0.5">
+                                                    <span className="text-lg font-serif text-charcoal-900 leading-none mt-1">
                                                         {getSlotDateTime(booking.slots?.date, booking.slots?.start_time).toLocaleDateString(undefined, { day: 'numeric' })}
                                                     </span>
                                                 </div>
                                                 
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex flex-col">
-                                                        <button onClick={() => handleStudioClick(studio)} className="text-base font-bold text-burgundy hover:text-sage transition-colors text-left truncate">
+                                                        <button onClick={() => handleStudioClick(studio)} className="text-[15px] font-bold text-burgundy hover:text-sage transition-colors text-left truncate leading-tight">
                                                             {studio?.name || "Studio"}
                                                         </button>
-                                                        <div className="flex items-center gap-2 mt-0.5 min-w-0">
-                                                            <button onClick={() => handleInstructorClick(instructor)} className="text-[12px] text-slate font-medium hover:text-forest transition-colors truncate">
+                                                        <div className="flex items-center gap-2 mt-1 min-w-0">
+                                                            <button onClick={() => handleInstructorClick(instructor)} className="text-[12px] text-slate/70 font-semibold hover:text-forest transition-colors truncate">
                                                                 {instructor?.full_name || 'N/A'}
                                                             </button>
-                                                            <span className="text-charcoal/20 shrink-0">•</span>
-                                                            <span className="text-[11px] text-charcoal/50 shrink-0">
+                                                            <span className="text-charcoal/10 shrink-0">•</span>
+                                                            <span className="text-[11px] text-charcoal/40 font-medium shrink-0">
                                                                 {getSlotDateTime(booking.slots?.date, booking.slots?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
                                                             </span>
                                                         </div>
@@ -368,7 +368,7 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center justify-between sm:justify-end gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-charcoal/5">
+                                            <div className="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-charcoal/5">
                                                 <div className="flex items-center gap-2">
                                                     {canReview && (
                                                         <>
@@ -381,12 +381,12 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                                         revieweeName: instructor?.full_name || 'Instructor',
                                                                         context: 'Instructor'
                                                                     })}
-                                                                    className="px-3 py-1.5 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-full hover:brightness-110 transition-all shadow-tight"
+                                                                    className="px-3 py-1.5 bg-forest text-white text-[9px] font-black uppercase tracking-widest rounded-full hover:brightness-110 transition-all shadow-tight"
                                                                 >
-                                                                    Review Instructor
+                                                                    Review Inst.
                                                                 </button>
                                                             ) : (
-                                                                <span className="status-pill-earth status-pill-green flex items-center gap-1">
+                                                                <span className="px-2.5 py-1 bg-green-50 text-green-700 text-[9px] font-black uppercase tracking-widest rounded-full border border-green-100 flex items-center gap-1 shadow-sm">
                                                                     <CheckCircle2 className="w-3 h-3" /> Inst.
                                                                 </span>
                                                             )}
@@ -399,12 +399,12 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                                         revieweeName: studio.name || 'Studio',
                                                                         context: 'Studio'
                                                                     })}
-                                                                    className="px-3 py-1.5 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-full hover:brightness-110 transition-all shadow-tight"
+                                                                    className="px-3 py-1.5 bg-forest text-white text-[9px] font-black uppercase tracking-widest rounded-full hover:brightness-110 transition-all shadow-tight"
                                                                 >
                                                                     Review Studio
                                                                 </button>
                                                             ) : (
-                                                                <span className="status-pill-earth status-pill-green flex items-center gap-1">
+                                                                <span className="px-2.5 py-1 bg-green-50 text-green-700 text-[9px] font-black uppercase tracking-widest rounded-full border border-green-100 flex items-center gap-1 shadow-sm">
                                                                     <CheckCircle2 className="w-3 h-3" /> Studio
                                                                 </span>
                                                             ))}
@@ -413,10 +413,10 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
                                                 </div>
 
                                                 <span className={clsx(
-                                                    "status-pill-earth shrink-0",
-                                                    (booking.status === 'completed' || booking.status === 'approved') ? "status-pill-green" :
-                                                        ['pending', 'submitted'].includes(booking.status) ? "status-pill-yellow" :
-                                                            ['cancelled', 'cancelled_refunded', 'cancelled_charged', 'rejected', 'expired'].includes(booking.status) ? "status-pill-red" :
+                                                    "px-3 py-1 text-[9px] font-black uppercase tracking-[0.15em] rounded-full border shrink-0 shadow-sm",
+                                                    (booking.status === 'completed' || booking.status === 'approved') ? "bg-green-50 text-green-700 border-green-100" :
+                                                        ['pending', 'submitted'].includes(booking.status) ? "bg-amber-50 text-amber-700 border-amber-100" :
+                                                            ['cancelled', 'cancelled_refunded', 'cancelled_charged', 'rejected', 'expired'].includes(booking.status) ? "bg-rose-50 text-rose-700 border-rose-100" :
                                                                 "bg-off-white text-slate border-border-grey"
                                                 )}>
                                                     {getStatusLabel(booking.status, true)}

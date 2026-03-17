@@ -184,68 +184,95 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                         </table>
 
                         {/* Mobile Stacked View */}
-                        <div className="sm:hidden divide-y divide-cream-100">
+                        <div className="sm:hidden">
                             {incomeTransactions.length === 0 ? (
-                                <div className="px-6 py-12 text-center text-charcoal/40 font-serif italic">
+                                <div className="px-6 py-12 text-center text-charcoal-400 font-serif italic">
                                     No transactions found.
                                 </div>
                             ) : (
-                                incomeTransactions.map((tx, idx) => {
-                                    const txDate = new Date(tx.date)
-                                    const isPositive = tx.total_amount > 0
-                                    const isNegative = tx.total_amount < 0
-                                    const isPenalty = tx.type === 'Cancellation Penalty'
-                                    const isRefunded = tx.type === 'Booking (Refunded)'
-
-                                    const typeColors: Record<string, string> = {
-                                        'Booking': 'bg-forest/8 text-forest',
-                                        'Booking (Refunded)': 'bg-charcoal/5 text-charcoal/40',
-                                        'Cancellation Comp.': 'bg-sage/10 text-sage',
-                                        'Cancellation Penalty': 'bg-rose-gold/10 text-rose-gold-deep',
-                                        'Direct Adjustment': 'bg-indigo-50 text-indigo-600',
-                                        'Late Cancel': 'bg-orange-50 text-orange-600',
-                                    }
-                                    const typeClass = typeColors[tx.type] || 'bg-charcoal/5 text-charcoal/60'
-                                    const amountColor = isRefunded ? 'text-charcoal/30' :
-                                        isPenalty ? 'text-red-500' :
-                                        isPositive ? 'text-forest' :
-                                        isNegative ? 'text-blue-500' : 'text-charcoal'
-
+                                Object.entries(
+                                    incomeTransactions.reduce((groups, tx) => {
+                                        const date = new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+                                        if (!groups[date]) groups[date] = []
+                                        groups[date].push(tx)
+                                        return groups
+                                    }, {} as Record<string, TransactionRecord[]>)
+                                ).map(([date, groupTx]) => {
+                                    const parsedDate = new Date(date)
+                                    const dayName = parsedDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }).toUpperCase()
+                                    
                                     return (
-                                        <div key={idx} className="px-4 py-3.5 flex items-start justify-between gap-3 bg-white hover:bg-cream-50/50 transition-colors duration-200">
-                                            {/* Left: date */}
-                                            <div className="shrink-0 flex flex-col pt-0.5 min-w-[44px]">
-                                                <span className="text-[11px] font-black text-charcoal uppercase tracking-wide whitespace-nowrap">
-                                                    {txDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                </span>
-                                                <span className="text-[9px] text-charcoal/35 font-bold uppercase">
-                                                    {txDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
+                                        <div key={date} className="relative">
+                                            {/* Date Header */}
+                                            <div className="sticky top-0 z-10 bg-cream-50/90 backdrop-blur-md px-4 py-3 border-y border-cream-100/50">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-[11px] font-black text-charcoal-900 uppercase tracking-[0.2em] whitespace-nowrap">
+                                                        {dayName}
+                                                    </span>
+                                                    <div className="h-px flex-1 bg-cream-200/40" />
+                                                </div>
                                             </div>
-                                            {/* Middle: type badge + details */}
-                                            <div className="flex-1 min-w-0">
-                                                <span className={clsx(
-                                                    "inline-block text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider mb-1",
-                                                    typeClass
-                                                )}>
-                                                    {tx.type}
-                                                </span>
-                                                {tx.details && (
-                                                    <p className="text-[10px] text-charcoal/50 font-bold uppercase tracking-tight leading-tight break-words">
-                                                        {tx.details}
-                                                    </p>
-                                                )}
-                                                {tx.session_date && (
-                                                    <p className="text-[9px] text-charcoal/40 font-black uppercase tracking-tighter mt-0.5">
-                                                        Slot: {new Date(tx.session_date).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric', year: '2-digit' })} @ {tx.session_time?.slice(0, 5)}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            {/* Right: amount */}
-                                            <div className="shrink-0 text-right pt-0.5">
-                                                <span className={clsx('text-sm font-black tracking-tight', amountColor)}>
-                                                    {isRefunded ? '₱0' : (isPositive ? '+' : '') + `₱${tx.total_amount.toLocaleString()}`}
-                                                </span>
+
+                                            <div className="divide-y divide-cream-100/30">
+                                                {groupTx.map((tx, idx) => {
+                                                    const txTime = new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                    const isPositive = tx.total_amount > 0
+                                                    const isNegative = tx.total_amount < 0
+                                                    const isPenalty = tx.type === 'Cancellation Penalty'
+                                                    const isRefunded = tx.type === 'Booking (Refunded)'
+
+                                                    const typeColors: Record<string, string> = {
+                                                        'Booking': 'bg-forest/5 text-forest',
+                                                        'Booking (Refunded)': 'bg-charcoal/5 text-charcoal/40',
+                                                        'Cancellation Comp.': 'bg-sage/10 text-sage',
+                                                        'Cancellation Penalty': 'bg-rose-gold/10 text-rose-gold-deep',
+                                                        'Direct Adjustment': 'bg-indigo-50 text-indigo-600',
+                                                        'Late Cancel': 'bg-orange-50 text-orange-600',
+                                                    }
+                                                    const typeClass = typeColors[tx.type] || 'bg-charcoal/5 text-charcoal/60'
+                                                    const amountColor = isRefunded ? 'text-charcoal/30' :
+                                                        isPenalty ? 'text-red-500' :
+                                                        isPositive ? 'text-forest' :
+                                                        isNegative ? 'text-blue-500' : 'text-charcoal'
+
+                                                    return (
+                                                        <div key={idx} className="px-4 py-4 flex items-start justify-between gap-4 bg-white hover:bg-cream-50/30 transition-colors duration-200">
+                                                            {/* Details */}
+                                                            <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className={clsx(
+                                                                        "inline-block text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider",
+                                                                        typeClass
+                                                                    )}>
+                                                                        {tx.type}
+                                                                    </span>
+                                                                    <span className="text-[9px] text-charcoal/30 font-bold uppercase tracking-widest">
+                                                                        {txTime}
+                                                                    </span>
+                                                                </div>
+                                                                
+                                                                {tx.details && (
+                                                                    <p className="text-[11px] text-charcoal-800 font-bold uppercase tracking-tight leading-snug break-words">
+                                                                        {tx.details}
+                                                                    </p>
+                                                                )}
+                                                                
+                                                                {tx.session_date && (
+                                                                    <p className="text-[9px] text-charcoal/40 font-black uppercase tracking-wider flex items-center gap-1.5">
+                                                                        <Clock className="w-2.5 h-2.5 opacity-60" />
+                                                                        SLOT: {new Date(tx.session_date).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric', year: '2-digit' })} @ {tx.session_time?.slice(0, 5)}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                            {/* Amount */}
+                                                            <div className="shrink-0 text-right pt-0.5">
+                                                                <span className={clsx('text-base font-serif font-bold tracking-tight', amountColor)}>
+                                                                    {isRefunded ? '₱0' : (isPositive ? '+' : '') + `₱${tx.total_amount.toLocaleString()}`}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })}
                                             </div>
                                         </div>
                                     )
@@ -312,52 +339,76 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                         </table>
 
                         {/* Mobile Stacked Payouts View */}
-                        <div className="sm:hidden divide-y divide-cream-100">
+                        <div className="sm:hidden">
                             {payoutTransactions.length === 0 ? (
-                                <div className="px-6 py-12 text-center text-charcoal/40 font-serif italic">
+                                <div className="px-6 py-12 text-center text-charcoal-400 font-serif italic">
                                     No payout requests found.
                                 </div>
                             ) : (
-                                payoutTransactions.map((tx, idx) => {
-                                    const txDate = new Date(tx.date)
+                                Object.entries(
+                                    payoutTransactions.reduce((groups, tx) => {
+                                        const date = new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+                                        if (!groups[date]) groups[date] = []
+                                        groups[date].push(tx)
+                                        return groups
+                                    }, {} as Record<string, TransactionRecord[]>)
+                                ).map(([date, groupTx]) => {
+                                    const parsedDate = new Date(date)
+                                    const dayName = parsedDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }).toUpperCase()
+
                                     return (
-                                        <div key={idx} className="px-4 py-3.5 flex items-start justify-between gap-3 bg-white hover:bg-cream-50/50 transition-colors duration-200">
-                                            {/* Left: date */}
-                                            <div className="shrink-0 flex flex-col pt-0.5 min-w-[44px]">
-                                                <span className="text-[11px] font-black text-charcoal uppercase tracking-wide whitespace-nowrap">
-                                                    {txDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                </span>
-                                                <span className="text-[9px] text-charcoal/35 font-bold uppercase">
-                                                    Requested
-                                                </span>
+                                        <div key={date} className="relative">
+                                            {/* Date Header */}
+                                            <div className="sticky top-0 z-10 bg-cream-50/90 backdrop-blur-md px-4 py-3 border-y border-cream-100/50">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-[11px] font-black text-charcoal-900 uppercase tracking-[0.2em] whitespace-nowrap">
+                                                        {dayName}
+                                                    </span>
+                                                    <div className="h-px flex-1 bg-cream-200/40" />
+                                                </div>
                                             </div>
-                                            {/* Middle */}
-                                            <div className="flex-1 min-w-0">
-                                                <span className="inline-block text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider mb-1 bg-charcoal/5 text-charcoal/60">
-                                                    Withdrawal
-                                                </span>
-                                                {tx.details && (
-                                                    <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-tighter leading-tight break-words">
-                                                        {tx.details}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            {/* Right: amount + status */}
-                                            <div className="shrink-0 text-right pt-0.5">
-                                                <span className="text-sm font-black text-charcoal tracking-tight">
-                                                    -₱{Math.abs(tx.total_amount).toLocaleString()}
-                                                </span>
-                                                <span className={clsx(
-                                                    "flex items-center justify-end gap-0.5 text-[9px] font-black uppercase tracking-wider mt-1",
-                                                    tx.status === 'paid' ? 'text-sage' :
-                                                        tx.status === 'pending' ? 'text-gold-deep' :
-                                                            'text-rose-gold-deep'
-                                                )}>
-                                                    {tx.status === 'paid' && <CheckCircle className="w-2.5 h-2.5" />}
-                                                    {tx.status === 'pending' && <Clock className="w-2.5 h-2.5" />}
-                                                    {tx.status === 'rejected' && <XCircle className="w-2.5 h-2.5" />}
-                                                    {tx.status || 'Unknown'}
-                                                </span>
+
+                                            <div className="divide-y divide-cream-100/30">
+                                                {groupTx.map((tx, idx) => {
+                                                    const txDate = new Date(tx.date)
+                                                    return (
+                                                        <div key={idx} className="px-4 py-4 flex items-start justify-between gap-4 bg-white hover:bg-cream-50/30 transition-colors duration-200">
+                                                            {/* Middle */}
+                                                            <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="inline-block text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider bg-charcoal/5 text-charcoal/60">
+                                                                        Withdrawal
+                                                                    </span>
+                                                                    <span className="text-[9px] text-charcoal/30 font-bold uppercase tracking-widest">
+                                                                        Requested
+                                                                    </span>
+                                                                </div>
+                                                                {tx.details && (
+                                                                    <p className="text-[11px] text-charcoal-800 font-bold uppercase tracking-tight leading-snug break-words">
+                                                                        {tx.details}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                            {/* Right: amount + status */}
+                                                            <div className="shrink-0 text-right pt-0.5">
+                                                                <span className="text-base font-serif font-bold text-charcoal tracking-tight">
+                                                                    -₱{Math.abs(tx.total_amount).toLocaleString()}
+                                                                </span>
+                                                                <span className={clsx(
+                                                                    "flex items-center justify-end gap-1 text-[9px] font-black uppercase tracking-wider mt-1.5",
+                                                                    tx.status === 'paid' ? 'text-sage' :
+                                                                        tx.status === 'pending' ? 'text-gold-deep' :
+                                                                            'text-rose-gold-deep'
+                                                                )}>
+                                                                    {tx.status === 'paid' && <CheckCircle className="w-2.5 h-2.5" />}
+                                                                    {tx.status === 'pending' && <Clock className="w-2.5 h-2.5" />}
+                                                                    {tx.status === 'rejected' && <XCircle className="w-2.5 h-2.5" />}
+                                                                    {tx.status || 'Unknown'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })}
                                             </div>
                                         </div>
                                     )

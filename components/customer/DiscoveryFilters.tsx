@@ -51,16 +51,16 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
     }
 
     return (
-        <div className="flex flex-col gap-6 bg-white/70 backdrop-blur-xl p-6 sm:p-8 rounded-[2.5rem] border border-burgundy/5 shadow-[0_20px_50px_rgba(81,50,41,0.04)] overflow-hidden relative group/filters transition-all duration-500 hover:shadow-[0_30px_70px_rgba(81,50,41,0.08)]">
+        <div className="flex flex-col gap-5 sm:gap-6 bg-white/70 backdrop-blur-xl p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] border border-burgundy/5 shadow-[0_20px_50px_rgba(81,50,41,0.04)] overflow-hidden relative group/filters transition-all duration-500 hover:shadow-[0_30px_70px_rgba(81,50,41,0.08)]">
             {/* Header: Label + Clear (on mobile) */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 text-burgundy/60">
-                    <div className="w-12 h-12 rounded-2xl bg-walking-vinnie/10 flex items-center justify-center border border-walking-vinnie/20 shadow-inner group-hover/filters:scale-105 transition-transform duration-500">
-                        <Filter className="w-5 h-5 text-burgundy/40" />
+                <div className="flex items-center gap-3 sm:gap-4 text-burgundy/60">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-walking-vinnie/10 flex items-center justify-center border border-walking-vinnie/20 shadow-inner group-hover/filters:scale-105 transition-transform duration-500">
+                        <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-burgundy/40" />
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[11px] font-black uppercase tracking-[0.3em] text-burgundy leading-none mb-1">Filter Discovery</span>
-                        <p className="text-[10px] font-bold text-burgundy/20 uppercase tracking-[0.15em]">Tailor your search experience</p>
+                        <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-burgundy leading-none mb-1">Filter Discovery</span>
+                        <p className="text-[9px] sm:text-[10px] font-bold text-burgundy/20 uppercase tracking-[0.1em] sm:tracking-[0.15em]">Tailor your search</p>
                     </div>
                 </div>
 
@@ -74,69 +74,69 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                 )}
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:items-end gap-6">
-                {/* Main Categories: Horizontal Scroll on Mobile */}
-                <div className="flex flex-nowrap overflow-x-auto hide-scrollbar gap-3 pb-1 -mb-1 lg:flex-wrap lg:overflow-visible flex-1">
-                    <div className="flex-none">
+            <div className="flex flex-col lg:flex-row lg:items-end gap-5 sm:gap-6">
+                {/* Main Categories: Grid/Wrap on Mobile to prevent cutoff */}
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 flex-1">
+                    <div className="min-w-[140px] flex-1 sm:flex-none">
                         {/* Type Filter */}
-                        <div className="relative group">
+                        <div className="relative group w-full">
                             <select
                                 onChange={(e) => handleFilter('type', e.target.value)}
                                 value={searchParams.get('type') || 'all'}
-                                className="w-auto pl-6 pr-14 py-3 bg-off-white/50 border border-burgundy/5 rounded-2xl text-[11px] font-black uppercase tracking-widest text-burgundy shadow-sm focus:outline-none focus:ring-4 focus:ring-forest/5 focus:border-forest/20 transition-all appearance-none cursor-pointer hover:bg-white hover:border-burgundy/20 whitespace-nowrap h-[50px]"
+                                className="w-full sm:w-auto pl-5 pr-12 py-3 bg-off-white/50 border border-burgundy/5 rounded-xl sm:rounded-2xl text-[11px] font-black uppercase tracking-widest text-burgundy shadow-sm focus:outline-none focus:ring-4 focus:ring-forest/5 focus:border-forest/20 transition-all appearance-none cursor-pointer hover:bg-white hover:border-burgundy/20 whitespace-nowrap h-[48px] sm:h-[50px]"
                             >
-                                <option value="all">Discover All</option>
+                                <option value="all">All Modes</option>
                                 <option value="instructor">Instructors</option>
                                 <option value="studio">Studios</option>
                             </select>
-                            <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-burgundy/30 group-hover:text-forest transition-colors">
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-burgundy/30 group-hover:text-forest transition-colors">
                                 <ChevronDown className="w-4 h-4" />
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex-none">
+                    <div className="min-w-[140px] flex-1 sm:flex-none">
                         <LocationFilterDropdown
                             value={searchParams.get('location') || 'all'}
                             onChange={(val) => handleFilter('location', val)}
                         />
                     </div>
 
-                    <div className="flex-none">
+                    <div className="min-w-[140px] flex-1 sm:flex-none">
                         <MultiSelectFilter
                             label="Equipment"
                             options={['Reformer', 'Cadillac', 'Tower', 'Chair', 'Ladder Barrel', 'Mat']}
                             value={getMultiValue('equipment')}
                             onChange={(vals) => handleMultiFilter('equipment', vals)}
-                            className="w-auto"
+                            className="w-full"
                         />
                     </div>
 
-                    <div className="flex-none">
+                    <div className="min-w-[120px] flex-1 sm:flex-none">
                         <MultiSelectFilter
-                            label="Certification"
+                            label="Cert"
                             options={['STOTT', 'BASI', 'Balanced Body', 'Polestar', 'Classical']}
                             value={getMultiValue('certification')}
                             onChange={(vals) => handleMultiFilter('certification', vals)}
-                            className="w-auto"
+                            className="w-full"
                         />
                     </div>
 
-                    <div className="flex-none">
+                    <div className="min-w-[120px] flex-1 sm:flex-none">
                         <MultiSelectFilter
                             label="Amenities"
                             options={[...STUDIO_AMENITIES]}
                             value={getMultiValue('amenity')}
                             onChange={(vals) => handleMultiFilter('amenity', vals)}
-                            className="w-auto"
+                            className="w-full"
                         />
                     </div>
                 </div>
 
                 {/* Date and Time Group */}
-                <div className="flex gap-4 pt-6 lg:pt-0 border-t lg:border-t-0 border-burgundy/5">
-                    <div className="flex flex-col gap-2.5 flex-1 lg:flex-none">
-                        <label className="text-[10px] font-black text-burgundy/30 uppercase tracking-[0.3em] ml-2">Date</label>
+                <div className="flex gap-3 sm:gap-4 pt-5 sm:pt-6 lg:pt-0 border-t lg:border-t-0 border-burgundy/5">
+                    <div className="flex flex-col gap-2 flex-1 lg:flex-none">
+                        <label className="text-[9px] font-black text-burgundy/30 uppercase tracking-[0.2em] ml-1.5">Date</label>
                         <div className="relative group/input">
                             <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-burgundy/30 group-focus-within/input:text-forest transition-colors pointer-events-none" />
                             <input
@@ -144,13 +144,13 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                                 min={getManilaTodayStr()}
                                 onChange={(e) => handleFilter('date', e.target.value)}
                                 value={searchParams.get('date') || ''}
-                                className="w-full lg:w-48 pl-12 pr-5 py-2.5 bg-off-white/50 border border-burgundy/5 rounded-2xl text-[12px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-4 focus:ring-forest/5 focus:border-forest/20 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20 h-[50px]"
+                                className="w-full lg:w-44 pl-12 pr-4 py-2.5 bg-off-white/50 border border-burgundy/5 rounded-xl sm:rounded-2xl text-[12px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-4 focus:ring-forest/5 focus:border-forest/20 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20 h-[48px] sm:h-[50px]"
                             />
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-2.5 flex-1 lg:flex-none">
-                        <label className="text-[10px] font-black text-burgundy/30 uppercase tracking-[0.3em] ml-2">Time</label>
+                    <div className="flex flex-col gap-2 flex-1 lg:flex-none">
+                        <label className="text-[9px] font-black text-burgundy/30 uppercase tracking-[0.2em] ml-1.5">Time</label>
                         <div className="relative group/input">
                             <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-burgundy/30 group-focus-within/input:text-forest transition-colors pointer-events-none" />
                             <input
@@ -162,7 +162,7 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                                 }
                                 onChange={(e) => handleFilter('time', e.target.value)}
                                 value={searchParams.get('time') || ''}
-                                className="w-full lg:w-40 pl-12 pr-5 py-2.5 bg-off-white/50 border border-burgundy/5 rounded-2xl text-[12px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-4 focus:ring-forest/5 focus:border-forest/20 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20 h-[50px]"
+                                className="w-full lg:w-36 pl-12 pr-4 py-2.5 bg-off-white/50 border border-burgundy/5 rounded-xl sm:rounded-2xl text-[12px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-4 focus:ring-forest/5 focus:border-forest/20 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20 h-[48px] sm:h-[50px]"
                             />
                         </div>
                     </div>

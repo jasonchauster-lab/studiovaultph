@@ -119,21 +119,21 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                 </div>
             )}
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-2">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-2">
                 <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-forest mb-1">
-                        <Wallet className="w-5 h-5" />
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Financial Overview</span>
+                    <div className="flex items-center gap-2 text-forest mb-0.5">
+                        <Wallet className="w-4 h-4" />
+                        <span className="text-[9px] font-bold uppercase tracking-[0.2em]">Financial Overview</span>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-serif text-charcoal-900">My Wallet</h1>
-                    <p className="text-charcoal-500 max-w-md">Manage your studio credit, view transaction history, and withdraw your available balance.</p>
+                    <h1 className="text-3xl md:text-5xl font-serif text-charcoal-900">My Wallet</h1>
+                    <p className="text-charcoal-500 text-sm max-w-md hidden sm:block">Manage your studio credit, view transaction history, and withdraw your available balance.</p>
                 </div>
                 <div className="flex gap-3 w-full md:w-auto">
                     <Link
                         href="/customer/payout"
-                        className="flex-1 md:flex-initial bg-forest text-white px-8 py-4 rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-forest/10 group"
+                        className="flex-1 md:flex-initial bg-forest text-white px-6 py-3.5 rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-forest/10 group text-sm"
                     >
-                        <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                        <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                         Withdraw Funds
                     </Link>
                 </div>
@@ -142,13 +142,13 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Available Balance */}
-                <div className="bg-gradient-to-br from-[#1B3022] via-[#2A4533] to-[#1B3022] text-white p-8 rounded-[2rem] shadow-2xl border border-white/10 relative overflow-hidden flex flex-col justify-between group min-h-[220px]">
+                <div className="bg-gradient-to-br from-[#1B3022] via-[#2A4533] to-[#1B3022] text-white p-6 sm:p-8 rounded-[2rem] shadow-2xl border border-white/10 relative overflow-hidden flex flex-col justify-between group min-h-[160px] sm:min-h-[220px]">
                     <div className="absolute -right-12 -top-12 text-white/[0.03] group-hover:text-white/[0.07] transition-all duration-700">
                         <Wallet className="w-64 h-64 rotate-12" />
                     </div>
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(209,165,124,0.15),transparent_50%)]" />
                     
-                    <div className="relative z-10 space-y-8">
+                    <div className="relative z-10 space-y-6 sm:space-y-8">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2.5 bg-white/10 px-4 py-2 rounded-full backdrop-blur-xl border border-white/10">
                                 <TrendingUp className="w-3.5 h-3.5 text-rose-gold" />
@@ -156,21 +156,21 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                             </div>
                             <button
                                 onClick={() => setShowInfoModal(true)}
-                                className="w-10 h-10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all rounded-full border border-white/5"
+                                className="w-9 h-9 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all rounded-full border border-white/5"
                                 title="Wallet Rules"
                             >
-                                <Info className="w-5 h-5" />
+                                <Info className="w-4 h-4" />
                             </button>
                         </div>
                         
                         <div className="space-y-1">
                             <div className="flex items-baseline gap-2">
-                                <span className="text-2xl md:text-3xl font-serif text-rose-gold/90 font-light">₱</span>
+                                <span className="text-xl md:text-3xl font-serif text-rose-gold/90 font-light">₱</span>
                                 <p className="text-5xl md:text-7xl font-serif tracking-tight leading-none text-white font-medium">
                                     {(available || 0).toLocaleString()}
                                 </p>
                             </div>
-                            <p className="text-white/50 text-[11px] font-bold uppercase tracking-widest flex items-center gap-2">
+                            <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
                                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                                 Secured by StudioVault
                             </p>
@@ -179,12 +179,12 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                 </div>
 
                 {/* Pending Balance */}
-                <div className={`p-8 rounded-[2rem] border transition-all duration-500 relative overflow-hidden flex flex-col justify-between min-h-[220px] ${pending > 0 ? 'bg-[#FFF9F2] border-[#F2E3C9] shadow-inner ring-1 ring-[#F2E3C9]/50' : 'bg-white border-cream-200 shadow-sm'}`}>
+                <div className={`p-6 sm:p-8 rounded-[2rem] border transition-all duration-500 relative overflow-hidden flex flex-col justify-between min-h-[140px] sm:min-h-[220px] ${pending > 0 ? 'bg-[#FFF9F2] border-[#F2E3C9] shadow-inner ring-1 ring-[#F2E3C9]/50' : 'bg-white border-cream-200 shadow-sm'}`}>
                     <div className="absolute -right-8 -top-8 text-charcoal/[0.02] group-hover:rotate-12 transition-transform duration-700">
                         <Clock className="w-48 h-48" />
                     </div>
                     
-                    <div className="relative z-10 space-y-8">
+                    <div className="relative z-10 space-y-4 sm:space-y-8">
                         <div className="flex items-center gap-2.5 px-4 py-2 rounded-full w-fit bg-charcoal/5 border border-charcoal/5">
                             <Clock className={`w-3.5 h-3.5 ${pending > 0 ? 'text-amber-500 animate-pulse' : 'text-charcoal-300'}`} />
                             <span className="text-[10px] font-black tracking-[0.15em] uppercase text-charcoal-600">In Review / Pending</span>
@@ -192,7 +192,7 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                         
                         <div className="space-y-1">
                             <div className="flex items-baseline gap-2">
-                                <span className="text-2xl font-serif text-charcoal-300 font-light">₱</span>
+                                <span className="text-xl md:text-2xl font-serif text-charcoal-300 font-light">₱</span>
                                 <p className="text-4xl md:text-6xl font-serif text-charcoal-900 leading-none">
                                     {(pending || 0).toLocaleString()}
                                 </p>
@@ -200,24 +200,24 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                             {pending > 0 ? (
                                 <div className="mt-4 flex items-center gap-2 px-3 py-1.5 bg-amber-100/50 border border-amber-200/50 rounded-lg w-fit">
                                     <div className="flex gap-0.5">
-                                        <div className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-bounce" />
-                                        <div className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                                        <div className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                                        <div className="w-1 h-1 bg-amber-400 rounded-full animate-bounce" />
+                                        <div className="w-1 h-1 bg-amber-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                                        <div className="w-1 h-1 bg-amber-400 rounded-full animate-bounce [animation-delay:0.4s]" />
                                     </div>
-                                    <p className="text-[10px] text-amber-700 font-black uppercase tracking-widest">Processing</p>
+                                    <p className="text-[9px] text-amber-700 font-black uppercase tracking-widest">Processing</p>
                                 </div>
                             ) : (
-                                <p className="text-charcoal-300 text-[10px] font-bold uppercase tracking-widest">No pending transactions</p>
+                                <p className="text-charcoal-300 text-[9px] font-bold uppercase tracking-widest">No pending transactions</p>
                             )}
                         </div>
                     </div>
                 </div>
 
                 {/* Quick Info - Rules */}
-                <div className="md:col-span-2 lg:col-span-1 bg-white p-8 rounded-[2rem] border border-cream-200 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+                <div className="md:col-span-2 lg:col-span-1 bg-white p-6 sm:p-8 rounded-[2rem] border border-cream-200 shadow-sm flex flex-col justify-between relative overflow-hidden group">
                     <div className="absolute right-0 top-0 w-32 h-32 bg-forest/[0.02] rounded-full -translate-y-1/2 translate-x-1/2" />
                     
-                    <div className="space-y-6 relative z-10">
+                    <div className="space-y-4 sm:space-y-6 relative z-10">
                         <div className="flex items-center justify-between border-b border-cream-100 pb-4">
                             <div className="flex items-center gap-2.5">
                                 <div className="w-8 h-8 bg-forest/10 rounded-lg flex items-center justify-center">
@@ -228,23 +228,23 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                             <Tag className="w-3.5 h-3.5 text-cream-400" />
                         </div>
                         
-                        <div className="space-y-5">
-                            <div className="flex gap-4 group/item">
-                                <div className="shrink-0 mt-1 w-6 h-6 bg-forest/5 rounded-full flex items-center justify-center group-hover/item:bg-forest/10 transition-colors">
+                        <div className="space-y-4 sm:space-y-5">
+                            <div className="flex gap-3 sm:gap-4 group/item">
+                                <div className="shrink-0 mt-1 w-5 h-5 sm:w-6 sm:h-6 bg-forest/5 rounded-full flex items-center justify-center group-hover/item:bg-forest/10 transition-colors">
                                     <div className="w-1.5 h-1.5 bg-forest rounded-full" />
                                 </div>
                                 <div>
-                                    <p className="text-[11px] font-black text-charcoal-900 uppercase tracking-wide mb-1">Instant Refunds</p>
-                                    <p className="text-xs text-charcoal-500 leading-relaxed font-medium">Returns with 24h+ notice are credited to your wallet balance instantly.</p>
+                                    <p className="text-[10px] sm:text-[11px] font-black text-charcoal-900 uppercase tracking-wide mb-0.5 sm:mb-1">Instant Refunds</p>
+                                    <p className="text-[11px] sm:text-xs text-charcoal-500 leading-relaxed font-medium">Returns with 24h+ notice are credited to your wallet balance instantly.</p>
                                 </div>
                             </div>
-                            <div className="flex gap-4 group/item">
-                                <div className="shrink-0 mt-1 w-6 h-6 bg-forest/5 rounded-full flex items-center justify-center group-hover/item:bg-forest/10 transition-colors">
+                            <div className="flex gap-3 sm:gap-4 group/item">
+                                <div className="shrink-0 mt-1 w-5 h-5 sm:w-6 sm:h-6 bg-forest/5 rounded-full flex items-center justify-center group-hover/item:bg-forest/10 transition-colors">
                                     <div className="w-1.5 h-1.5 bg-forest rounded-full" />
                                 </div>
                                 <div>
-                                    <p className="text-[11px] font-black text-charcoal-900 uppercase tracking-wide mb-1">Automatic Credit</p>
-                                    <p className="text-xs text-charcoal-500 leading-relaxed font-medium">Wallet balance is prioritized as your default payment source for new bookings.</p>
+                                    <p className="text-[10px] sm:text-[11px] font-black text-charcoal-900 uppercase tracking-wide mb-0.5 sm:mb-1">Automatic Credit</p>
+                                    <p className="text-[11px] sm:text-xs text-charcoal-500 leading-relaxed font-medium">Wallet balance is prioritized as your default payment source for new bookings.</p>
                                 </div>
                             </div>
                         </div>
@@ -368,47 +368,46 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                                         {group.items.map((tx, i) => {
                                             const isNegative = tx.amount < 0 || tx.status?.includes('CHARGED');
                                             return (
-                                                <div key={i} className="p-5 flex items-start justify-between gap-4 bg-white active:bg-cream-50 transition-colors">
-                                                    <div className="flex-1 min-w-0 space-y-3">
+                                                <div key={i} className="p-4 flex items-start justify-between gap-3 bg-white active:bg-cream-50 transition-colors">
+                                                    <div className="flex-1 min-w-0 space-y-2">
                                                         <div className="flex items-center gap-2">
-                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isNegative ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-500'}`}>
-                                                                {isNegative ? <ArrowDownRight className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
+                                                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isNegative ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-500'}`}>
+                                                                {isNegative ? <ArrowDownRight className="w-3.5 h-3.5" /> : <ArrowUpRight className="w-3.5 h-3.5" />}
                                                             </div>
                                                             <div>
-                                                                <div className="text-[10px] font-black text-charcoal-900 uppercase tracking-widest">
+                                                                <div className="text-[9px] font-black text-charcoal-900 uppercase tracking-[0.1em]">
                                                                     {tx.type}
                                                                 </div>
-                                                                <div className="text-[9px] text-charcoal-400 font-medium">
-                                                                    {new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                <div className="text-[8px] text-charcoal-400 font-medium">
+                                                                    {new Date(tx.date).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         
-                                                        <div className="space-y-1">
-                                                            <p className="text-[11px] font-bold text-charcoal-900 uppercase leading-none">
+                                                        <div className="space-y-0.5">
+                                                            <p className="text-[10px] font-bold text-charcoal-900 uppercase leading-none">
                                                                 {tx.studio || tx.instructor || 'StudioVault System'}
                                                             </p>
-                                                            <p className="text-[10px] text-charcoal-500 font-medium leading-relaxed line-clamp-2">
+                                                            <p className="text-[9px] text-charcoal-500 font-medium leading-relaxed line-clamp-2">
                                                                 {tx.details}
                                                             </p>
                                                         </div>
 
                                                         {tx.session_date && (
-                                                            <div className="flex items-center gap-1.5 text-[9px] text-charcoal-500 font-bold uppercase bg-cream-50 w-fit px-2 py-1 rounded-md border border-cream-100">
-                                                                <Calendar className="w-3 h-3 text-forest/60" />
-                                                                <span>{new Date(tx.session_date).toLocaleDateString()} • {tx.session_time?.slice(0, 5)}</span>
+                                                            <div className="flex items-center gap-1.5 text-[8px] text-charcoal-600 font-bold uppercase bg-cream-50 w-fit px-2 py-0.5 rounded-md border border-cream-100">
+                                                                <Calendar className="w-2.5 h-2.5 text-forest/60" />
+                                                                <span>{new Date(tx.session_date).toLocaleDateString([], { month: 'short', day: 'numeric' })} • {tx.session_time?.slice(0, 5)}</span>
                                                             </div>
                                                         )}
                                                     </div>
                                                     
-                                                    <div className="shrink-0 text-right flex flex-col items-end gap-3">
+                                                    <div className="shrink-0 text-right flex flex-col items-end justify-between self-stretch py-0.5">
                                                         <div className="flex flex-col items-end">
-                                                            <span className="text-[8px] font-black text-charcoal-400 uppercase tracking-widest leading-none mb-1">PHP</span>
-                                                            <span className={`text-lg font-serif font-black tracking-tight leading-none ${!isNegative ? 'text-emerald-600' : 'text-charcoal-900'}`}>
+                                                            <span className={`text-base font-serif font-black tracking-tight leading-none ${!isNegative ? 'text-emerald-600' : 'text-charcoal-900'}`}>
                                                                 {!isNegative ? '+' : ''}{tx.amount.toLocaleString()}
                                                             </span>
                                                         </div>
-                                                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.05em] ring-1 ring-inset ${
+                                                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.05em] ring-1 ring-inset ${
                                                             tx.status?.toUpperCase().includes('COMPLETED') ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 
                                                             tx.status?.toUpperCase().includes('PENDING') ? 'bg-amber-50 text-amber-700 ring-amber-600/20' : 
                                                             'bg-rose-50 text-rose-700 ring-rose-600/20'

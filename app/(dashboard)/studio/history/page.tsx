@@ -74,17 +74,18 @@ export default async function StudioHistoryPage() {
             <div className="max-w-6xl mx-auto space-y-6">
 
                 {/* Header */}
-                <div className="flex items-start justify-between gap-4 flex-wrap px-0 sm:px-0">
+                <div className="flex items-center justify-between gap-4 px-0 sm:px-0">
                     <div>
-                        <h1 className="text-2xl sm:text-4xl font-serif font-bold text-charcoal-900 mb-0.5">Rental History</h1>
-                        <p className="text-charcoal-500 text-sm">Past sessions and earnings for your studio.</p>
+                        <h1 className="text-xl sm:text-4xl font-serif font-bold text-charcoal-900 mb-0.5">Rental History</h1>
+                        <p className="text-charcoal-500 text-[10px] sm:text-sm">Past sessions and earnings for your studio.</p>
                     </div>
                     <Link
                         href="/studio"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-forest text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-forest/90 active:scale-95 transition-all"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-forest text-white text-[10px] sm:text-sm font-bold rounded-lg shadow-sm hover:bg-forest/90 active:scale-95 transition-all shrink-0"
                     >
-                        <PlusCircle className="w-4 h-4" />
-                        Add Slot
+                        <PlusCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Add Slot</span>
+                        <span className="sm:hidden">Slot</span>
                     </Link>
                 </div>
 

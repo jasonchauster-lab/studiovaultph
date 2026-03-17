@@ -133,27 +133,27 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
 
             <div className="space-y-10">
                 {sortedDates.length === 0 ? (
-                    <div className="min-h-[200px] py-12 flex flex-col items-center justify-center text-center earth-card border-dashed bg-off-white mx-6 sm:mx-0 px-4">
-                        <div className="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mb-4">
-                            <CalendarX2 className="w-6 h-6 text-charcoal/50" />
+                    <div className="min-h-[220px] py-12 flex flex-col items-center justify-center text-center bg-white/40 backdrop-blur-sm rounded-[2rem] border-2 border-dashed border-charcoal/10 mx-4 sm:mx-0 px-6">
+                        <div className="w-14 h-14 bg-forest/5 rounded-full flex items-center justify-center mb-5 ring-1 ring-forest/10">
+                            <CalendarX2 className="w-7 h-7 text-forest/40" />
                         </div>
-                        <h3 className="text-sm font-bold text-charcoal mb-1">No sessions found for this period.</h3>
-                        <p className="text-[11px] text-charcoal/50 max-w-[240px] mb-6">Try adjusting your filters or adding a new availability slot.</p>
+                        <h3 className="text-base font-serif font-bold text-charcoal-900 mb-2">No sessions found</h3>
+                        <p className="text-[11px] text-charcoal/50 max-w-[240px] mb-8 leading-relaxed">Try adjusting your filters or adding a new availability slot to your studio.</p>
                         
-                        <div className="flex flex-col sm:flex-row items-center gap-3">
+                        <div className="flex flex-col sm:flex-row items-center gap-4">
                             {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
                                 <button 
                                     onClick={() => setResetKey(prev => prev + 1)}
-                                    className="px-4 py-2 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-charcoal/80 transition-all shadow-sm"
+                                    className="px-5 py-2.5 bg-off-white text-charcoal/60 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-forest/5 transition-all border border-border-grey shadow-sm"
                                 >
                                     Clear Filters
                                 </button>
                             )}
                             <Link
                                 href="/studio"
-                                className="px-4 py-2 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-tight"
+                                className="px-5 py-2.5 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-tight"
                             >
-                                Add Availability Slot
+                                Add Slot
                             </Link>
                         </div>
                     </div>
@@ -165,26 +165,26 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                         return (
                             <div key={dateKey} className="space-y-4">
                                 {/* Sticky Date Header */}
-                                <div className="sticky top-0 z-20 py-2.5 bg-cream-50/90 backdrop-blur-sm -mx-4 px-4 sm:mx-0 sm:px-0">
+                                <div className="sticky top-0 z-20 py-3 bg-cream-50/95 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex flex-col items-center justify-center bg-forest text-white rounded-xl w-11 h-11 shrink-0 shadow-md">
-                                            <span className="text-[7px] font-black uppercase tracking-widest leading-none opacity-70">
+                                        <div className="flex flex-col items-center justify-center bg-forest text-white rounded-xl w-10 h-10 shrink-0 shadow-md ring-1 ring-white/20">
+                                            <span className="text-[7px] font-black uppercase tracking-widest leading-none opacity-80">
                                                 {dateObj.toLocaleDateString('en-PH', { month: 'short' })}
                                             </span>
-                                            <span className="text-base font-serif font-bold leading-none">
+                                            <span className="text-sm font-serif font-bold leading-none mt-0.5">
                                                 {dateObj.toLocaleDateString('en-PH', { day: 'numeric' })}
                                             </span>
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-baseline gap-2">
-                                                <h2 className="text-[11px] font-black text-charcoal uppercase tracking-[0.18em]">
+                                            <div className="flex items-center gap-2">
+                                                <h2 className="text-[10px] font-black text-charcoal uppercase tracking-[0.2em]">
                                                     {dateObj.toLocaleDateString('en-PH', { weekday: 'long' })}
                                                 </h2>
-                                                <span className="text-[9px] text-charcoal/35 font-bold uppercase tracking-widest">
-                                                    · {dayBookings.length} {dayBookings.length === 1 ? 'session' : 'sessions'}
+                                                <div className="h-px flex-1 bg-gradient-to-r from-charcoal/10 via-charcoal/5 to-transparent" />
+                                                <span className="text-[8px] text-charcoal/30 font-bold uppercase tracking-widest bg-charcoal/5 px-2 py-0.5 rounded-full shrink-0">
+                                                    {dayBookings.length} {dayBookings.length === 1 ? 'SESSION' : 'SESSIONS'}
                                                 </span>
                                             </div>
-                                            <div className="mt-1 h-px bg-gradient-to-r from-charcoal/15 to-transparent" />
                                         </div>
                                     </div>
                                 </div>
@@ -215,34 +215,37 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                     'bg-red-300'
                                                 )} />
 
-                                                <div className="p-4">
+                                                <div className="p-3.5">
                                                     {/* Row 1: Time + Status Badge */}
                                                     <div className="flex items-center justify-between gap-2 mb-3">
-                                                        <span className="text-[10px] font-black text-charcoal/50 uppercase tracking-widest">
-                                                            {start.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                        </span>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <div className="w-1 h-1 rounded-full bg-forest/40" />
+                                                            <span className="text-[10px] font-black text-charcoal/60 uppercase tracking-widest">
+                                                                {start.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                            </span>
+                                                        </div>
                                                         <div className="flex items-center gap-1.5">
                                                             {['completed', 'approved'].includes(booking.status) && (
-                                                                <div className="flex items-baseline gap-1 bg-forest/5 px-2.5 py-1 rounded-full border border-forest/10">
-                                                                    <span className="text-[7px] font-black text-forest/50 uppercase tracking-widest">EARNED</span>
-                                                                    <span className="text-[11px] font-black text-forest">₱{Number(studioFee || booking.total_price || 0).toLocaleString()}</span>
+                                                                <div className="flex items-baseline gap-1 bg-forest/5 px-2 py-0.5 rounded-full border border-forest/10">
+                                                                    <span className="text-[6px] font-black text-forest/40 uppercase tracking-widest">EARNED</span>
+                                                                    <span className="text-[10px] font-black text-forest">₱{Number(studioFee || booking.total_price || 0).toLocaleString()}</span>
                                                                 </div>
                                                             )}
                                                             <span className={clsx(
-                                                                'px-2.5 py-1 text-[8px] font-bold uppercase rounded-full tracking-widest border inline-flex items-center gap-1 shrink-0',
+                                                                'px-2 py-0.5 text-[7px] font-bold uppercase rounded-full tracking-widest border inline-flex items-center gap-1 shrink-0',
                                                                 booking.status === 'completed'
                                                                     ? (booking.funds_unlocked
-                                                                        ? 'border-[#b8d49a] text-[#2D4F1E] bg-[#D4E4BC]'
+                                                                        ? 'border-[#b8d49a] text-forest bg-sage/20'
                                                                         : 'bg-amber-100/70 text-amber-700 border-amber-200')
                                                                     : booking.status === 'approved' ? 'bg-blue-100/70 text-blue-700 border-blue-200' :
                                                                         'bg-red-100/70 text-red-600 border-red-200'
                                                             )}>
                                                                 {booking.status === 'completed' && (
-                                                                    booking.funds_unlocked ? <Award className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />
+                                                                    booking.funds_unlocked ? <Award className="w-2 h-2" /> : <Clock className="w-2 h-2" />
                                                                 )}
                                                                 {['completed', 'approved'].includes(booking.status)
                                                                     ? (booking.status === 'completed'
-                                                                        ? (booking.funds_unlocked ? 'Funds Unlocked' : 'Funds Held')
+                                                                        ? (booking.funds_unlocked ? 'Unlocked' : 'Funds Held')
                                                                         : 'Upcoming')
                                                                     : 'Cancelled'}
                                                             </span>
@@ -251,31 +254,31 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
 
                                                     {/* Row 2: Client Name */}
                                                     {client && (
-                                                        <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-75 transition-opacity mb-2 min-w-0 group/client">
-                                                            <div className="w-7 h-7 rounded-full bg-sage/10 border border-border-grey flex items-center justify-center shrink-0 overflow-hidden">
+                                                        <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-75 transition-opacity mb-2.5 min-w-0 group/client">
+                                                            <div className="w-6 h-6 rounded-full bg-sage/10 border border-border-grey flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-charcoal/5">
                                                                 <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=8BA889`} className="w-full h-full object-cover" />
                                                             </div>
-                                                            <span className="text-sm font-bold text-charcoal-900 truncate group-hover/client:text-burgundy transition-colors">{client.full_name}</span>
+                                                            <span className="text-sm font-bold text-charcoal-900 truncate group-hover/client:text-forest transition-colors">{client.full_name}</span>
                                                             {client?.medical_conditions && (
-                                                                <span className="ml-1 px-1.5 py-0.5 bg-red-50 text-red-500 text-[7px] font-black uppercase rounded border border-red-100 flex items-center gap-0.5 tracking-widest shrink-0">
-                                                                    <AlertCircle className="w-2.5 h-2.5" /> MEDICAL
+                                                                <span className="ml-1 px-1.5 py-0.5 bg-red-50 text-red-500 text-[6px] font-black uppercase rounded border border-red-100 flex items-center gap-0.5 tracking-widest shrink-0">
+                                                                    <AlertCircle className="w-2 h-2" /> MEDICAL
                                                                 </span>
                                                             )}
                                                         </button>
                                                     )}
 
                                                     {/* Row 3: Instructor + Equipment */}
-                                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-3">
-                                                        <button onClick={() => handleInstructorClick(instructor)} className="text-[10px] font-semibold text-charcoal/50 hover:text-burgundy transition-colors flex items-center gap-1">
-                                                            <span className="opacity-70">instructor:</span>
-                                                            <span className="font-bold text-charcoal/70">{instructor?.full_name || 'Instructor'}</span>
+                                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-4">
+                                                        <button onClick={() => handleInstructorClick(instructor)} className="text-[10px] font-semibold text-charcoal/50 hover:text-forest transition-colors flex items-center gap-1 group/inst">
+                                                            <span className="opacity-60">instructor:</span>
+                                                            <span className="font-bold text-charcoal/70 group-hover/inst:text-forest">{instructor?.full_name || 'Instructor'}</span>
                                                         </button>
                                                         <span className="text-charcoal/20 text-[10px]">·</span>
-                                                        <span className="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">
+                                                        <span className="text-[9px] font-bold text-charcoal/50 uppercase tracking-wider bg-off-white px-1.5 py-0.5 rounded border border-border-grey/30">
                                                             {Array.isArray(slot?.equipment) && slot.equipment.length > 0
                                                                 ? slot.equipment[0]
                                                                 : (booking.price_breakdown?.equipment || booking.equipment || 'Session')}
-                                                            <span className="font-normal opacity-60 ml-0.5">({booking.quantity || 1}x)</span>
+                                                            <span className="font-medium opacity-50 ml-0.5">({booking.quantity || 1}x)</span>
                                                         </span>
                                                     </div>
 
@@ -289,7 +292,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                                                 partnerName={instructor.full_name || 'Instructor'}
                                                                 label="Message"
                                                                 variant="antigravity"
-                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-off-white hover:bg-cream-100 border border-border-grey hover:border-charcoal/20 transition-all rounded-lg font-semibold text-[9px] tracking-wide text-charcoal/60"
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-forest hover:text-white border border-border-grey hover:border-forest transition-all rounded-lg font-bold text-[9px] uppercase tracking-wider text-charcoal/50 shadow-sm active:scale-95"
                                                             />
                                                         )}
                                                         {booking.status === 'approved' && start > now && (

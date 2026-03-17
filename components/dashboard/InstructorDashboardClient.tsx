@@ -251,13 +251,13 @@ export default function InstructorDashboardClient({
     }, [cancellingBooking, selectedProfile, selectedStudio, activeChat, selectedBooking, isEditModalOpen, isAddModalOpen]);
 
     return (
-        <div className="space-y-16 pb-20">
+        <div className="space-y-8 sm:space-y-16 pb-20">
             {/* Sticky Header */}
-            <div className="sticky-header-antigravity -mx-4 sm:-mx-8 lg:-mx-12 mb-12 px-6 sm:px-8 lg:px-12 py-8 sm:py-0">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8">
+            <div className="sticky-header-antigravity -mx-4 sm:-mx-8 lg:-mx-12 mb-8 sm:mb-12 px-6 sm:px-8 lg:px-12 py-6 sm:py-8 lg:py-0">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-8">
                     <div>
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-charcoal tracking-tighter mb-4">Instructor Dashboard</h1>
-                        <p className="text-[10px] font-bold text-charcoal/40 uppercase tracking-[0.4em] max-w-[90%] sm:max-w-none leading-relaxed">Manage your professional schedule and earnings with grounded precision.</p>
+                        <h1 className="text-2xl sm:text-4xl md:text-5xl font-serif text-charcoal tracking-tighter mb-2 sm:mb-4">Instructor Dashboard</h1>
+                        <p className="text-[9px] sm:text-[10px] font-bold text-charcoal/40 uppercase tracking-[0.3em] sm:tracking-[0.4em] max-w-[90%] sm:max-w-none leading-relaxed">Manage your professional schedule and earnings with grounded precision.</p>
                     </div>
                 </div>
             </div>
@@ -365,135 +365,135 @@ export default function InstructorDashboardClient({
 
                                 if (upcomingBookings.length === 0) {
                                     return (
-                                        <div className="py-16 text-center bg-off-white shadow-inner rounded-2xl border border-border-grey/50 flex flex-col items-center justify-center relative overflow-hidden group/empty">
-                                            <div className="absolute inset-0 bg-gradient-to-b from-buttermilk/10 to-transparent pointer-events-none" />
-                                            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-tight border border-border-grey/50 mb-8 relative z-10 group-hover/empty:scale-110 transition-transform duration-700">
-                                                <Calendar className="w-8 h-8 text-burgundy/40" />
+                                            <div className="py-12 sm:py-16 text-center bg-off-white shadow-inner rounded-2xl border border-border-grey/50 flex flex-col items-center justify-center relative overflow-hidden group/empty mx-1">
+                                                <div className="absolute inset-0 bg-gradient-to-b from-buttermilk/10 to-transparent pointer-events-none" />
+                                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center shadow-tight border border-border-grey/50 mb-6 sm:mb-8 relative z-10 group-hover/empty:scale-110 transition-transform duration-700">
+                                                    <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-burgundy/40" />
+                                                </div>
+                                                <h3 className="text-[10px] sm:text-[11px] font-black text-burgundy uppercase tracking-[0.3em] sm:tracking-[0.4em] mb-2 sm:mb-3 relative z-10">Quiet Week</h3>
+                                                <p className="text-[9px] sm:text-[10px] text-charcoal/50 font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] max-w-[200px] sm:max-w-[220px] mx-auto mb-6 sm:mb-8 relative z-10 leading-relaxed">No bookings yet—your schedule is clear.</p>
+                                                <button 
+                                                    onClick={() => setIsAddModalOpen(true)}
+                                                    className="px-6 sm:px-8 py-3 sm:py-3.5 bg-forest text-white text-[8px] sm:text-[9px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-tight flex items-center gap-2 relative z-10 active:scale-95"
+                                                >
+                                                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Quick Add
+                                                </button>
                                             </div>
-                                            <h3 className="text-[11px] font-black text-burgundy uppercase tracking-[0.4em] mb-3 relative z-10">Quiet Week</h3>
-                                            <p className="text-[10px] text-charcoal/50 font-bold uppercase tracking-[0.2em] max-w-[220px] mx-auto mb-8 relative z-10 leading-relaxed">No bookings yet—your schedule is clear.</p>
-                                            <button 
-                                                onClick={() => setIsAddModalOpen(true)}
-                                                className="px-8 py-3.5 bg-forest text-white text-[9px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-tight flex items-center gap-2.5 relative z-10 active:scale-95"
-                                            >
-                                                <Plus className="w-4 h-4" /> Quick Add Availability
-                                            </button>
-                                        </div>
                                     );
                                 }
 
                                 return (
-                                    <div className="space-y-6">
-                                        {upcomingBookings.map(session => (
-                                            <div key={session.id} className="p-6 border border-border-grey/40 bg-white rounded-xl hover:bg-off-white transition-all duration-300 shadow-tight group relative">
-                                                <div className="flex justify-between items-start mb-6">
-                                                    <div className="flex flex-col gap-1 w-full">
-                                                        <div className="flex items-center gap-4">
-                                                            <button
-                                                                onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
-                                                                className="w-12 h-12 rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700"
-                                                            >
-                                                                <img
-                                                                    src={session.slots?.studios?.logo_url || "/logo2.jpg"}
-                                                                    alt=""
-                                                                    className="w-full h-full object-cover mix-blend-multiply"
-                                                                />
-                                                            </button>
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="flex items-start justify-between gap-2">
-                                                                    <button
-                                                                        onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
-                                                                        className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] truncate hover:text-forest transition-colors text-left"
-                                                                    >
-                                                                        {session.slots?.studios?.name || 'Unknown Studio'}
-                                                                    </button>
-                                                                    <div className="flex items-center gap-2 bg-[#FFF1B5]/40 px-2 py-0.5 rounded border border-charcoal/5 whitespace-nowrap">
-                                                                        <span className="text-[9px] font-black text-charcoal">1/1</span>
+                                        <div className="space-y-4 sm:space-y-6">
+                                            {upcomingBookings.map(session => (
+                                                <div key={session.id} className="p-4 sm:p-6 border border-border-grey/40 bg-white rounded-xl hover:bg-off-white transition-all duration-300 shadow-tight group relative">
+                                                    <div className="flex justify-between items-start mb-4 sm:mb-6">
+                                                        <div className="flex flex-col gap-1 w-full">
+                                                            <div className="flex items-center gap-3 sm:gap-4">
+                                                                <button
+                                                                    onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
+                                                                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-[10px] sm:rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700"
+                                                                >
+                                                                    <img
+                                                                        src={session.slots?.studios?.logo_url || "/logo2.jpg"}
+                                                                        alt=""
+                                                                        className="w-full h-full object-cover mix-blend-multiply"
+                                                                    />
+                                                                </button>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className="flex items-start justify-between gap-2">
+                                                                        <button
+                                                                            onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
+                                                                            className="text-[10px] sm:text-[11px] font-black text-charcoal uppercase tracking-[0.15em] sm:tracking-[0.2em] truncate hover:text-forest transition-colors text-left"
+                                                                        >
+                                                                            {session.slots?.studios?.name || 'Unknown Studio'}
+                                                                        </button>
+                                                                        <div className="flex items-center gap-1 bg-[#FFF1B5]/40 px-1.5 py-0.5 rounded border border-charcoal/5 whitespace-nowrap">
+                                                                            <span className="text-[8px] sm:text-[9px] font-black text-charcoal">1/1</span>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <div className="flex items-center gap-2 text-[10px] text-charcoal/50 font-black uppercase tracking-[0.1em] mt-1.5">
-                                                                    <Calendar className="w-3.5 h-3.5 text-forest/40" />
-                                                                    <span>{session.slots?.date ? formatManilaDateStr(session.slots.date) : 'No Date'} • {session.slots?.start_time ? formatTo12Hour(session.slots.start_time) : 'No Time'}</span>
+                                                                    <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] text-charcoal/50 font-black uppercase tracking-[0.1em] mt-1 sm:mt-1.5">
+                                                                        <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-forest/40" />
+                                                                        <span className="truncate">{session.slots?.date ? formatManilaDateStr(session.slots.date) : 'No Date'} • {session.slots?.start_time ? formatTo12Hour(session.slots.start_time) : 'No Time'}</span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                <div className="pt-6 border-t border-white/60 space-y-4">
-                                                    <button
-                                                        className="flex items-center gap-3 cursor-pointer group/client w-full text-left focus:outline-none focus:ring-1 focus:ring-forest rounded-lg p-1 -m-1"
-                                                        onClick={() => setSelectedProfile(session.client)}
-                                                        aria-label={`View record for ${session.client?.full_name}`}
-                                                    >
-                                                        <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shrink-0 border border-border-grey shadow-tight group-hover/client:scale-110 transition-transform duration-300">
-                                                            <img alt="" src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
-                                                        </div>
-                                                        <div className="text-[10px] text-charcoal/50 uppercase tracking-[0.2em] truncate flex-1 group-hover/client:text-forest transition-colors">
-                                                            CLIENT: <span className="font-black text-charcoal">{session.client?.full_name}</span>
-                                                        </div>
-                                                    </button>
+                                                    <div className="pt-4 sm:pt-6 border-t border-white/60 space-y-3 sm:space-y-4">
+                                                        <button
+                                                            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group/client w-full text-left focus:outline-none focus:ring-1 focus:ring-forest rounded-lg p-1 -m-1"
+                                                            onClick={() => setSelectedProfile(session.client)}
+                                                            aria-label={`View record for ${session.client?.full_name}`}
+                                                        >
+                                                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg overflow-hidden bg-white shrink-0 border border-border-grey shadow-tight group-hover/client:scale-110 transition-transform duration-300">
+                                                                <img alt="" src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+                                                            </div>
+                                                            <div className="text-[9px] sm:text-[10px] text-charcoal/50 uppercase tracking-[0.15em] sm:tracking-[0.2em] truncate flex-1 group-hover/client:text-forest transition-colors">
+                                                                CLIENT: <span className="font-black text-charcoal">{session.client?.full_name}</span>
+                                                            </div>
+                                                        </button>
 
-                                                    <div className="flex items-center justify-between text-[10px] pt-1">
-                                                        <div className="flex items-center gap-3">
-                                                            <Box className="w-4 h-4 text-forest/40" />
-                                                            <span className="font-black text-slate truncate max-w-[120px] uppercase tracking-[0.2em]">
-                                                                {Array.isArray(session.slots?.equipment) && session.slots.equipment.length > 0
-                                                                    ? `${session.slots.equipment[0]}`
-                                                                    : (`${session.price_breakdown?.equipment || 'Standard'}`)
-                                                                } ({session.quantity || 1})
-                                                            </span>
-                                                        </div>
+                                                        <div className="flex items-center justify-between text-[9px] sm:text-[10px] pt-1">
+                                                            <div className="flex items-center gap-2.5 sm:gap-3">
+                                                                <Box className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-forest/40" />
+                                                                <span className="font-black text-slate truncate max-w-[100px] sm:max-w-[120px] uppercase tracking-[0.15em] sm:tracking-[0.2em]">
+                                                                    {Array.isArray(session.slots?.equipment) && session.slots.equipment.length > 0
+                                                                        ? `${session.slots.equipment[0]}`
+                                                                        : (`${session.price_breakdown?.equipment || 'Standard'}`)
+                                                                    } ({session.quantity || 1})
+                                                                </span>
+                                                            </div>
 
-                                                        <div className="flex gap-3">
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.preventDefault();
-                                                                    setActiveChat({
-                                                                        id: session.id,
-                                                                        recipientId: session.client_id,
-                                                                        name: session.client?.full_name || 'Client',
-                                                                        isExpired: isChatExpired(session)
-                                                                    })
-                                                                }}
-                                                                className="w-9 h-9 bg-white text-forest border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn"
-                                                                title="Message Client"
-                                                                aria-label={`Message client ${session.client?.full_name || 'Client'}`}
-                                                            >
-                                                                <MessageSquare className="w-3.5 h-3.5" />
-                                                                <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.client_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.client_id} />
-                                                            </button>
-
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.preventDefault();
-                                                                    setActiveChat({
-                                                                        id: session.id,
-                                                                        recipientId: session.slots?.studios?.owner_id,
-                                                                        name: session.slots?.studios?.name || 'Studio',
-                                                                        isExpired: isChatExpired(session)
-                                                                    })
-                                                                }}
-                                                                className="w-9 h-9 bg-white text-charcoal border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn2"
-                                                                title="Message Studio"
-                                                                aria-label={`Message studio ${session.slots?.studios?.name || 'Studio'}`}
-                                                            >
-                                                                <MessageSquare className="w-3.5 h-3.5" />
-                                                                <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.slots?.studios?.owner_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.slots?.studios?.owner_id} />
-                                                            </button>
-
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.preventDefault();
-                                                                    setCancellingBooking(session);
-                                                                }}
-                                                                className="w-9 h-9 bg-white text-red-600 border border-border-grey rounded-full hover:bg-red-600 hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight"
-                                                                title="Cancel Session"
-                                                                aria-label="Cancel session"
-                                                            >
-                                                                <X className="w-3.5 h-3.5" />
-                                                            </button>
-                                                        </div>
+                                                            <div className="flex gap-2 sm:gap-3">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        setActiveChat({
+                                                                            id: session.id,
+                                                                            recipientId: session.client_id,
+                                                                            name: session.client?.full_name || 'Client',
+                                                                            isExpired: isChatExpired(session)
+                                                                        })
+                                                                    }}
+                                                                    className="w-8 h-8 sm:w-9 sm:h-9 bg-white text-forest border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn"
+                                                                    title="Message Client"
+                                                                    aria-label={`Message client ${session.client?.full_name || 'Client'}`}
+                                                                >
+                                                                    <MessageSquare className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                                                    <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.client_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.client_id} />
+                                                                </button>
+    
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        setActiveChat({
+                                                                            id: session.id,
+                                                                            recipientId: session.slots?.studios?.owner_id,
+                                                                            name: session.slots?.studios?.name || 'Studio',
+                                                                            isExpired: isChatExpired(session)
+                                                                        })
+                                                                    }}
+                                                                    className="w-8 h-8 sm:w-9 sm:h-9 bg-white text-charcoal border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn2"
+                                                                    title="Message Studio"
+                                                                    aria-label={`Message studio ${session.slots?.studios?.name || 'Studio'}`}
+                                                                >
+                                                                    <MessageSquare className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                                                    <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.slots?.studios?.owner_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.slots?.studios?.owner_id} />
+                                                                </button>
+    
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        setCancellingBooking(session);
+                                                                    }}
+                                                                    className="w-8 h-8 sm:w-9 sm:h-9 bg-white text-red-600 border border-border-grey rounded-full hover:bg-red-600 hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight"
+                                                                    title="Cancel Session"
+                                                                    aria-label="Cancel session"
+                                                                >
+                                                                    <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                                                </button>
+                                                            </div>
                                                     </div>
                                                 </div>
                                             </div>

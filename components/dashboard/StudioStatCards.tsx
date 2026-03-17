@@ -55,23 +55,23 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6 mb-6 sm:mb-12">
                 {cardData.map((card, index) => (
                     <div key={index} className="earth-card p-3.5 sm:p-6 group transition-all duration-500 hover:shadow-card hover:-translate-y-1.5 relative overflow-hidden bg-white/50 backdrop-blur-sm">
-                        <div className="flex justify-between items-start mb-2 sm:mb-6">
+                        <div className="flex justify-between items-start mb-3 sm:mb-6">
                             <div className={clsx(
-                                "w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all duration-500 shadow-tight border border-border-grey/50 bg-white group-hover:scale-110 group-hover:shadow-card",
+                                "w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all duration-500 shadow-tight border border-border-grey/50 bg-white group-hover:scale-110 group-hover:shadow-card",
                                 card.bgIcon
                             )}>
-                                <card.icon className={clsx("w-3.5 h-3.5 sm:w-5 sm:h-5", card.iconColor)} />
+                                <card.icon className={clsx("w-4 h-4 sm:w-5 sm:h-5", card.iconColor)} />
                             </div>
                             <span className={clsx(
-                                "text-[7px] sm:text-[9px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-full border border-border-grey/30 bg-white/80 shadow-tight backdrop-blur-sm",
+                                "text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-border-grey/30 bg-white/80 shadow-tight backdrop-blur-sm",
                                 card.trendColor
                             )}>
                                 {card.trend}
                             </span>
                         </div>
                         <div>
-                            <p className="text-[7px] sm:text-[10px] font-bold text-slate uppercase tracking-[0.1em] sm:tracking-[0.2em] mb-1 sm:mb-2 opacity-70 truncate">{card.label}</p>
-                            <h3 className="text-lg sm:text-3xl font-serif font-black text-charcoal tracking-tight truncate leading-none" title={card.value}>{card.value}</h3>
+                            <p className="text-[9px] sm:text-[10px] font-black text-charcoal/40 uppercase tracking-[0.15em] mb-1 sm:mb-2 truncate leading-none">{card.label}</p>
+                            <h3 className="text-xl sm:text-3xl font-serif font-black text-charcoal tracking-tight truncate leading-none" title={card.value}>{card.value}</h3>
                         </div>
                         
                         {/* Decorative background element */}

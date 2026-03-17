@@ -179,12 +179,12 @@ export default async function StudioDashboard(props: {
     }
 
     return (
-        <div className="pt-24 md:pt-12 space-y-12 pb-20">
+        <div className="pt-20 md:pt-12 space-y-12 pb-20">
             <div className="max-w-7xl mx-auto space-y-12">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 sm:gap-10">
-                    <div className="w-full">
-                        <h1 className="text-3xl sm:text-6xl font-serif font-black text-charcoal tracking-tightest mb-4 sm:mb-6">Studio Dashboard</h1>
+                    <div className="w-full flex flex-col sm:block">
+                        <h1 className="text-3xl sm:text-6xl font-serif font-black text-charcoal tracking-tightest mb-4 sm:mb-6 leading-none order-2 sm:order-1">Studio Dashboard</h1>
                         {myStudio && (
                             <div className="flex items-center gap-4 sm:gap-6 mt-6 sm:mt-8">
                                 <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-[20px] sm:rounded-[24px] overflow-hidden border-2 border-white shadow-cloud scale-100 sm:scale-110 ring-1 ring-border-grey/10 shrink-0">
@@ -206,10 +206,10 @@ export default async function StudioDashboard(props: {
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center gap-2 sm:gap-3 bg-white/40 backdrop-blur-md px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-border-grey/50 shadow-tight ring-1 ring-white/20 w-fit">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                        <Sparkles className="w-3.5 h-3.5 sm:w-4 h-4 text-forest" />
-                        <span className="text-[9px] sm:text-[11px] font-black text-charcoal uppercase tracking-[0.2em] sm:tracking-[0.3em]">Verified Partner</span>
+                    <div className="flex items-center gap-2 sm:gap-3 bg-white/60 backdrop-blur-md px-3.5 sm:px-6 py-2 sm:py-3 rounded-full border border-border-grey/30 shadow-tight ring-1 ring-white/20 w-fit order-1 sm:order-2 mb-4 sm:mb-0">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+                        <Sparkles className="w-3 h-3 sm:w-4 h-4 text-forest" />
+                        <span className="text-[8px] sm:text-[11px] font-black text-charcoal uppercase tracking-[0.2em] sm:tracking-[0.3em]">Verified Partner</span>
                     </div>
                 </div>
 
