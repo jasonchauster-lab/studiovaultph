@@ -71,7 +71,7 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
                         </div>
                         <div>
                             <p className="text-[9px] sm:text-[10px] font-black text-charcoal/40 uppercase tracking-[0.15em] mb-1 sm:mb-2 truncate leading-none">{card.label}</p>
-                            <h3 className="text-xl sm:text-3xl font-serif font-black text-charcoal tracking-tight truncate leading-none" title={card.value}>{card.value}</h3>
+                            <h3 className="text-xl sm:text-2xl font-serif font-black text-charcoal tracking-tight truncate leading-none" title={card.value}>{card.value}</h3>
                         </div>
                         
                         {/* Decorative background element */}

@@ -320,7 +320,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
             {/* Desktop-Only Grid View */}
             <div className="hidden lg:block space-y-8">
                 {/* Header */}
-                <div className="earth-card p-12 bg-white shadow-tight relative overflow-hidden ring-1 ring-border-grey/50">
+                <div className="earth-card p-10 bg-white shadow-tight relative overflow-hidden ring-1 ring-border-grey/50">
                     {/* Background Tint */}
                     <div className="absolute top-0 right-0 w-80 h-80 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-burgundy/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
@@ -333,13 +333,13 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                             </h2>
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center bg-off-white rounded-xl p-1.5 border border-border-grey shadow-tight">
-                                    <button onClick={handlePrev} className="flex items-center gap-2 px-5 py-2.5 hover:bg-white rounded-lg transition-all text-slate hover:text-charcoal text-[11px] font-black uppercase tracking-widest group" title="Previous">
+                                    <button onClick={handlePrev} className="flex items-center gap-2 px-4 py-2.5 hover:bg-white rounded-lg transition-all text-slate hover:text-charcoal text-[11px] font-black uppercase tracking-widest group" title="Previous">
                                         <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" /> PREV
                                     </button>
-                                    <button onClick={handleToday} className="px-8 py-2.5 text-[11px] font-black text-charcoal uppercase tracking-widest hover:bg-white rounded-lg transition-all border-x border-border-grey/50 mx-1" title="Go to Today">
+                                    <button onClick={handleToday} className="px-6 py-2.5 text-[11px] font-black text-charcoal uppercase tracking-widest hover:bg-white rounded-lg transition-all border-x border-border-grey/50 mx-1" title="Go to Today">
                                         TODAY
                                     </button>
-                                    <button onClick={handleNext} className="flex items-center gap-2 px-5 py-2.5 hover:bg-white rounded-lg transition-all text-slate hover:text-charcoal text-[11px] font-black uppercase tracking-widest group" title="Next">
+                                    <button onClick={handleNext} className="flex items-center gap-2 px-4 py-2.5 hover:bg-white rounded-lg transition-all text-slate hover:text-charcoal text-[11px] font-black uppercase tracking-widest group" title="Next">
                                         NEXT <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                                     </button>
                                 </div>
@@ -364,7 +364,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                         key={v}
                                         onClick={() => setView(v)}
                                         className={clsx(
-                                            "px-6 py-2.5 text-[11px] font-black uppercase tracking-[0.2em] rounded-lg transition-all duration-300",
+                                            "px-4 py-2.5 text-[11px] font-black uppercase tracking-tight rounded-lg transition-all duration-300",
                                             view === v
                                                 ? "bg-charcoal text-white shadow-card translate-y-[-1px]"
                                                 : "text-slate hover:text-charcoal hover:bg-off-white"
@@ -378,13 +378,13 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
-                                    className="h-12 border-2 border-forest/20 px-8 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 shadow-tight active:scale-95 text-forest bg-white hover:bg-forest hover:text-white hover:border-forest"
+                                    className="h-12 border-2 border-forest/20 px-6 rounded-xl text-[11px] font-black uppercase tracking-tight transition-all flex items-center gap-3 shadow-tight active:scale-95 text-forest bg-white hover:bg-forest hover:text-white hover:border-forest"
                                 >
                                     <Plus className="w-4 h-4" /> ADD SLOT
                                 </button>
                                 <button
                                     onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
-                                    className="h-12 px-8 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 bg-forest text-white hover:brightness-110 shadow-card active:scale-95"
+                                    className="h-12 px-6 rounded-xl text-[11px] font-black uppercase tracking-tight transition-all flex items-center gap-3 bg-forest text-white hover:brightness-110 shadow-card active:scale-95"
                                 >
                                     <Sparkles className="w-4 h-4" /> BULK GENERATE
                                 </button>
