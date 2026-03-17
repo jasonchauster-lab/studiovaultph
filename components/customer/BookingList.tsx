@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, MapPin, Clock, MessageCircle, XCircle, Box, Navigation, X, Star, Award, Instagram, CheckCircle2 } from 'lucide-react'
+import { Calendar, MapPin, Clock, MessageCircle, XCircle, Box, Navigation, X, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import ChatWindow from '@/components/dashboard/ChatWindow'
@@ -10,6 +10,8 @@ import { cancelBooking } from '@/app/(dashboard)/customer/actions'
 import BookingFilter, { FilterState } from '@/components/dashboard/BookingFilter'
 import ReviewModal from '@/components/reviews/ReviewModal'
 import CancelBookingModal from '@/components/dashboard/CancelBookingModal'
+import StudioPreviewModal from '@/components/dashboard/StudioPreviewModal'
+import InstructorPreviewModal from '@/components/dashboard/InstructorPreviewModal'
 import { getInstructorProfile, getStudioProfile } from '@/app/(dashboard)/instructors/actions'
 
 interface BookingListProps {
@@ -460,229 +462,20 @@ export default function BookingList({ bookings, userId }: BookingListProps) {
             />
 
             {/* Instructor Profile Modal */}
-            {selectedInstructor && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-burgundy/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }}>
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }} className="absolute top-4 right-4 z-10 text-burgundy/40 hover:text-burgundy transition-colors"><X className="w-5 h-5" /></button>
-
-                        <div className="overflow-y-auto flex-1 p-6">
-                            <div className="flex flex-col items-center mt-2 mb-5 text-center">
-                                <div className="w-20 h-20 rounded-full overflow-hidden mb-3 border border-cream-200 bg-cream-50">
-                                    <img
-                                        src={(() => {
-                                            const url = instructorDetails?.instructor?.avatar_url || selectedInstructor?.avatar_url;
-                                            if (!url) return `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedInstructor.full_name || 'I')}&background=F5F2EB&color=2C3230`;
-                                            return url.startsWith('http') ? url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${url}`;
-                                        })()}
-                                        onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedInstructor.full_name || 'I')}&background=F5F2EB&color=2C3230` }}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <h3 className="text-xl font-serif text-charcoal-900">{selectedInstructor.full_name}</h3>
-                                {instructorDetails?.instructor?.instagram_handle && (
-                                    <a href={`https://instagram.com/${instructorDetails.instructor.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 mt-1 text-xs text-burgundy/40 hover:text-burgundy/70 transition-colors">
-                                        <Instagram className="w-3 h-3" />
-                                        @{instructorDetails.instructor.instagram_handle}
-                                    </a>
-                                )}
-                                {!loadingInstructor && instructorDetails && (
-                                    <div className="flex items-center gap-1 mt-2">
-                                        {Array.from({ length: 5 }).map((_, i) => (
-                                            <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(instructorDetails.averageRating || 0) ? 'fill-gold text-gold' : 'text-burgundy/20'}`} />
-                                        ))}
-                                        {instructorDetails.totalCount > 0 && <span className="text-xs text-burgundy/40 ml-1">({instructorDetails.totalCount})</span>}
-                                    </div>
-                                )}
-                            </div>
-
-                            {loadingInstructor && <div className="flex items-center justify-center py-8 text-charcoal/40 text-sm">Loading profile...</div>}
-
-                            {!loadingInstructor && instructorDetails && (
-                                <>
-                                    {instructorDetails.instructor?.bio && (
-                                        <div className="bg-pastel-blue p-4 rounded-xl border border-border-grey mb-3">
-                                            <h4 className="text-sm font-bold text-burgundy/70 mb-1">About</h4>
-                                            <p className="text-sm text-slate leading-relaxed italic">"{instructorDetails.instructor.bio}"</p>
-                                        </div>
-                                    )}
-                                    {instructorDetails.certifications.length > 0 && (
-                                        <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50 mb-3">
-                                            <h4 className="text-sm font-bold text-charcoal/70 mb-2 flex items-center gap-1.5"><Award className="w-4 h-4 text-sage" /> Certifications</h4>
-                                            <div className="flex flex-wrap gap-2">
-                                                {instructorDetails.certifications.map((cert: any, i: number) => (
-                                                    <span key={i} className="px-2.5 py-1 bg-sage/10 text-sage text-xs font-semibold rounded-full border border-sage/20">
-                                                        {cert.certification_name}{cert.certification_body ? ` — ${cert.certification_body}` : ''}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {instructorDetails.instructor?.gallery_images?.length > 0 && (
-                                        <div className="mb-3">
-                                            <h4 className="text-sm font-bold text-charcoal/70 mb-2">Teaching Gallery</h4>
-                                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory -mx-1 px-1">
-                                                {instructorDetails.instructor.gallery_images.map((img: string, i: number) => (
-                                                    <div key={i} className="flex-none w-32 aspect-[4/5] bg-cream-100 overflow-hidden rounded-lg snap-start border border-cream-200">
-                                                        <img src={img} className="w-full h-full object-cover" alt="" />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <div className="flex items-center justify-center gap-1.5 mt-1">
-                                                {instructorDetails.instructor.gallery_images.length > 1 && (
-                                                    <span className="text-[8px] font-black text-gold/40 uppercase tracking-[0.2em] animate-pulse">Swipe to see more</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {instructorDetails.reviews?.length > 0 && (
-                                        <div className="mb-2">
-                                            <h4 className="text-sm font-bold text-charcoal/70 mb-2 flex items-center gap-1.5"><Star className="w-4 h-4 text-amber-400" /> Client Reviews</h4>
-                                            <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-                                                {instructorDetails.reviews.slice(0, 5).map((r: any) => {
-                                                    const reviewer = Array.isArray(r.reviewer) ? r.reviewer[0] : r.reviewer
-                                                    return (
-                                                        <div key={r.id} className="bg-cream-50 rounded-xl p-3 border border-cream-100/50">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <img src={reviewer?.avatar_url ? (reviewer.avatar_url.startsWith('http') ? reviewer.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230`} onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230` }} className="w-6 h-6 rounded-full object-cover border border-cream-200" alt="" />
-                                                                <span className="text-xs font-semibold text-charcoal/70">{reviewer?.full_name || 'Anonymous'}</span>
-                                                                <div className="flex items-center gap-0.5 ml-auto">
-                                                                    {Array.from({ length: 5 }).map((_, i) => (
-                                                                        <Star key={i} className={`w-3 h-3 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-charcoal/50'}`} />
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                            {r.comment && <p className="text-xs text-charcoal/50 leading-relaxed italic">"{r.comment}"</p>}
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {!instructorDetails.reviews?.length && !instructorDetails.instructor?.bio && !instructorDetails.certifications.length && (
-                                        <p className="text-sm text-charcoal/40 italic text-center py-4">No additional profile info available.</p>
-                                    )}
-                                </>
-                            )}
-                        </div>
-
-                        <div className="p-4 border-t border-cream-100 flex gap-2">
-                            <Link href={`/instructors/${selectedInstructor.id}`} target="_blank" className="flex-1 py-2.5 text-center bg-charcoal/5 text-charcoal/70 rounded-xl font-bold text-sm hover:bg-charcoal/10 transition-colors">
-                                View Full Profile
-                            </Link>
-                            <button onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }} className="flex-1 py-2.5 bg-forest text-white rounded-xl font-bold text-sm hover:brightness-110 transition-colors">
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <InstructorPreviewModal 
+                instructor={selectedInstructor}
+                details={instructorDetails}
+                loading={loadingInstructor}
+                onClose={() => { setSelectedInstructor(null); setInstructorDetails(null) }}
+            />
 
             {/* Studio Profile Modal */}
-            {selectedStudio && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-burgundy/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => { setSelectedStudio(null); setStudioDetails(null) }}>
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => { setSelectedStudio(null); setStudioDetails(null) }} className="absolute top-4 right-4 z-10 text-burgundy/40 hover:text-burgundy transition-colors"><X className="w-5 h-5" /></button>
-
-                        <div className="overflow-y-auto flex-1 p-6">
-                            <div className="flex flex-col items-center mt-2 mb-5 text-center">
-                                <div className="w-20 h-20 rounded-2xl overflow-hidden mb-3 border border-cream-200 bg-cream-50">
-                                    {studioDetails?.studio?.logo_url || selectedStudio?.logo_url ? (
-                                        <img src={studioDetails?.studio?.logo_url || selectedStudio.logo_url} className="w-full h-full object-cover" alt="" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-charcoal/5 text-charcoal/50 text-2xl font-serif">
-                                            {(studioDetails?.studio?.name || selectedStudio.name || 'S')[0]}
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-2 flex-wrap justify-center">
-                                    <h3 className="text-xl font-serif text-charcoal-900">{selectedStudio.name}</h3>
-                                    {studioDetails?.studio?.verified && <CheckCircle2 className="w-4 h-4 text-sage shrink-0" />}
-                                </div>
-                                {(studioDetails?.studio?.location || selectedStudio.location) && (
-                                    <p className="text-xs text-charcoal/50 mt-1 flex items-center gap-1">
-                                        <MapPin className="w-3 h-3" />
-                                        {studioDetails?.studio?.location || selectedStudio.location}
-                                    </p>
-                                )}
-                                {!loadingStudio && studioDetails && (
-                                    <div className="flex items-center gap-1 mt-2">
-                                        {Array.from({ length: 5 }).map((_, i) => (
-                                            <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(studioDetails.averageRating || 0) ? 'fill-amber-400 text-amber-400' : 'text-charcoal/50'}`} />
-                                        ))}
-                                        {studioDetails.totalCount > 0 && <span className="text-xs text-charcoal/40 ml-1">({studioDetails.totalCount})</span>}
-                                    </div>
-                                )}
-                            </div>
-
-                            {loadingStudio && <div className="flex items-center justify-center py-8 text-charcoal/40 text-sm">Loading studio info...</div>}
-
-                            {!loadingStudio && studioDetails && (
-                                <>
-                                    {studioDetails.studio?.bio && (
-                                        <div className="bg-pastel-blue p-4 rounded-xl border border-border-grey mb-3">
-                                            <h4 className="text-sm font-bold text-burgundy/70 mb-1">About</h4>
-                                            <p className="text-sm text-slate leading-relaxed italic">"{studioDetails.studio.bio}"</p>
-                                        </div>
-                                    )}
-                                    {studioDetails.studio?.space_photos_urls?.length > 0 && (
-                                        <div className="mb-3">
-                                            <h4 className="text-sm font-bold text-charcoal/70 mb-2">The Space</h4>
-                                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory -mx-1 px-1">
-                                                {studioDetails.studio.space_photos_urls.map((img: string, i: number) => (
-                                                    <div key={i} className="flex-none w-32 aspect-square bg-cream-100 overflow-hidden rounded-lg snap-start border border-cream-200">
-                                                        <img src={img} className="w-full h-full object-cover" alt="" />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <div className="flex items-center justify-center gap-1.5 mt-1">
-                                                {studioDetails.studio.space_photos_urls.length > 1 && (
-                                                    <span className="text-[8px] font-black text-gold/40 uppercase tracking-[0.2em] animate-pulse">Swipe to see more</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {studioDetails.reviews?.length > 0 && (
-                                        <div className="mb-2">
-                                            <h4 className="text-sm font-bold text-charcoal/70 mb-2 flex items-center gap-1.5"><Star className="w-4 h-4 text-amber-400" /> Member Reviews</h4>
-                                            <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-                                                {studioDetails.reviews.slice(0, 5).map((r: any) => {
-                                                    const reviewer = Array.isArray(r.reviewer) ? r.reviewer[0] : r.reviewer
-                                                    return (
-                                                        <div key={r.id} className="bg-cream-50 rounded-xl p-3 border border-cream-100/50">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <img src={reviewer?.avatar_url ? (reviewer.avatar_url.startsWith('http') ? reviewer.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230`} onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230` }} className="w-6 h-6 rounded-full object-cover border border-cream-200" alt="" />
-                                                                <span className="text-xs font-semibold text-charcoal/70">{reviewer?.full_name || 'Anonymous'}</span>
-                                                                <div className="flex items-center gap-0.5 ml-auto">
-                                                                    {Array.from({ length: 5 }).map((_, i) => (
-                                                                        <Star key={i} className={`w-3 h-3 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-charcoal/50'}`} />
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                            {r.comment && <p className="text-xs text-charcoal/50 leading-relaxed italic">"{r.comment}"</p>}
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {!studioDetails.reviews?.length && !studioDetails.studio?.bio && !studioDetails.studio?.space_photos_urls?.length && (
-                                        <p className="text-sm text-charcoal/40 italic text-center py-4">No additional studio info available.</p>
-                                    )}
-                                </>
-                            )}
-                        </div>
-
-                        <div className="p-4 border-t border-border-grey flex gap-2">
-                            <Link href={`/studios/${selectedStudio.id}`} target="_blank" className="flex-1 py-2.5 text-center bg-burgundy/5 text-burgundy/70 rounded-xl font-bold text-sm hover:bg-burgundy/10 transition-colors">
-                                View Full Profile
-                            </Link>
-                            <button onClick={() => { setSelectedStudio(null); setStudioDetails(null) }} className="flex-1 py-2.5 bg-forest text-white rounded-xl font-bold text-sm hover:brightness-110 transition-colors">
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <StudioPreviewModal 
+                studio={selectedStudio}
+                details={studioDetails}
+                loading={loadingStudio}
+                onClose={() => { setSelectedStudio(null); setStudioDetails(null) }}
+            />
 
             {/* Review Modal */}
             {reviewTarget && (

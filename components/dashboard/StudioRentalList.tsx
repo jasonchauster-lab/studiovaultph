@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { CalendarX2, PlusCircle, MapPin, Box, X, AlertCircle, Clock, Star, Award, Instagram } from 'lucide-react'
+import { CalendarX2, PlusCircle, MapPin, Box, X, AlertCircle, Clock, Award } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
 import BookingFilter, { FilterState } from '@/components/dashboard/BookingFilter'
 import CancelBookingModal from './CancelBookingModal'
+import InstructorPreviewModal from './InstructorPreviewModal'
 import { cancelBookingByStudio } from '@/app/(dashboard)/studio/actions'
 import { formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
 import { getInstructorProfile } from '@/app/(dashboard)/instructors/actions'
@@ -341,142 +342,12 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
             />
 
             {/* Instructor Profile Modal */}
-            {selectedInstructor && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-burgundy/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }}>
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }} className="absolute top-4 right-4 z-10 text-burgundy/40 hover:text-burgundy transition-colors"><X className="w-5 h-5" /></button>
-
-                        <div className="overflow-y-auto flex-1 p-6">
-                            {/* Header */}
-                            <div className="flex flex-col items-center mt-2 mb-5 text-center">
-                                <div className="w-20 h-20 rounded-full overflow-hidden mb-3 border border-cream-200 bg-cream-50">
-                                    <img
-                                        src={(() => {
-                                            const url = instructorDetails?.instructor?.avatar_url || selectedInstructor?.avatar_url
-                                            if (!url) return `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedInstructor.full_name || 'I')}&background=F5F2EB&color=2C3230`
-                                            if (url.startsWith('http')) return url
-                                            return `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${url}`
-                                        })()}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <h3 className="text-xl font-serif text-charcoal-900">{selectedInstructor.full_name}</h3>
-                                {instructorDetails?.instructor?.instagram_handle && (
-                                    <a href={`https://instagram.com/${instructorDetails.instructor.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 mt-1 text-xs text-burgundy/40 hover:text-burgundy/70 transition-colors">
-                                        <Instagram className="w-3 h-3" />
-                                        @{instructorDetails.instructor.instagram_handle}
-                                    </a>
-                                )}
-                                {!loadingInstructor && instructorDetails && (
-                                    <div className="flex items-center gap-1 mt-2">
-                                        {Array.from({ length: 5 }).map((_, i) => (
-                                            <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(instructorDetails.averageRating || 0) ? 'fill-gold text-gold' : 'text-burgundy/20'}`} />
-                                        ))}
-                                        {instructorDetails.totalCount > 0 && (
-                                            <span className="text-xs text-burgundy/40 ml-1">({instructorDetails.totalCount})</span>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            {loadingInstructor && (
-                                <div className="flex items-center justify-center py-8 text-charcoal-400 text-sm">Loading profile...</div>
-                            )}
-
-                            {!loadingInstructor && instructorDetails && (
-                                <>
-                                    {/* Bio */}
-                                    {instructorDetails.instructor?.bio && (
-                                        <div className="bg-pastel-blue p-4 rounded-xl border border-border-grey mb-3">
-                                            <h4 className="text-sm font-bold text-burgundy/70 mb-1">About</h4>
-                                            <p className="text-sm text-slate leading-relaxed italic">"{instructorDetails.instructor.bio}"</p>
-                                        </div>
-                                    )}
-
-                                    {/* Certifications */}
-                                    {instructorDetails.certifications.length > 0 && (
-                                        <div className="bg-cream-50 p-4 rounded-xl border border-cream-100/50 mb-3">
-                                            <h4 className="text-sm font-bold text-charcoal-700 mb-2 flex items-center gap-1.5"><Award className="w-4 h-4 text-sage" /> Certifications</h4>
-                                            <div className="flex flex-wrap gap-2">
-                                                {instructorDetails.certifications.map((cert: any, i: number) => (
-                                                    <span key={i} className="px-2.5 py-1 bg-sage/10 text-sage text-xs font-semibold rounded-full border border-sage/20">
-                                                        {cert.certification_name}{cert.certification_body ? ` — ${cert.certification_body}` : ''}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Gallery */}
-                                    {instructorDetails.instructor?.gallery_images?.length > 0 && (
-                                        <div className="mb-3">
-                                            <h4 className="text-sm font-bold text-charcoal-700 mb-2">Teaching Gallery</h4>
-                                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory -mx-1 px-1">
-                                                {instructorDetails.instructor.gallery_images.map((img: string, i: number) => (
-                                                    <div key={i} className="flex-none w-32 aspect-[4/5] bg-cream-100 overflow-hidden rounded-lg snap-start border border-cream-200">
-                                                        <img src={img} className="w-full h-full object-cover" alt="" />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <div className="flex items-center justify-center gap-1.5 mt-1">
-                                                {instructorDetails.instructor.gallery_images.length > 1 && (
-                                                    <span className="text-[8px] font-black text-gold/40 uppercase tracking-[0.2em] animate-pulse">Swipe to see more</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Reviews */}
-                                    {instructorDetails.reviews?.length > 0 && (
-                                        <div className="mb-2">
-                                            <h4 className="text-sm font-bold text-charcoal-700 mb-2 flex items-center gap-1.5"><Star className="w-4 h-4 text-amber-400" /> Client Reviews</h4>
-                                            <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-                                                {instructorDetails.reviews.slice(0, 5).map((r: any) => {
-                                                    const reviewer = Array.isArray(r.reviewer) ? r.reviewer[0] : r.reviewer
-                                                    return (
-                                                        <div key={r.id} className="bg-pastel-blue rounded-xl p-3 border border-border-grey">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <img
-                                                                    src={reviewer?.avatar_url
-                                                                        ? (reviewer.avatar_url.startsWith('http') ? reviewer.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`)
-                                                                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=3C2F2F`}
-                                                                    onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=3C2F2F` }}
-                                                                    className="w-6 h-6 rounded-full object-cover border border-border-grey"
-                                                                    alt=""
-                                                                />
-                                                                <span className="text-xs font-semibold text-burgundy/70">{reviewer?.full_name || 'Anonymous'}</span>
-                                                                <div className="flex items-center gap-0.5 ml-auto">
-                                                                    {Array.from({ length: 5 }).map((_, i) => (
-                                                                        <Star key={i} className={`w-3 h-3 ${i < r.rating ? 'fill-gold text-gold' : 'text-burgundy/20'}`} />
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                            {r.comment && <p className="text-xs text-slate leading-relaxed italic">"{r.comment}"</p>}
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {!instructorDetails.reviews?.length && !instructorDetails.instructor?.bio && !instructorDetails.certifications.length && (
-                                        <p className="text-sm text-charcoal-400 italic text-center py-4">No additional profile info available.</p>
-                                    )}
-                                </>
-                            )}
-                        </div>
-
-                        <div className="p-4 border-t border-border-grey">
-                            <button
-                                onClick={() => { setSelectedInstructor(null); setInstructorDetails(null) }}
-                                className="w-full py-2.5 bg-forest text-white rounded-xl font-bold text-sm hover:brightness-110 transition-colors"
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <InstructorPreviewModal 
+                instructor={selectedInstructor}
+                details={instructorDetails}
+                loading={loadingInstructor}
+                onClose={() => { setSelectedInstructor(null); setInstructorDetails(null) }}
+            />
 
             {/* Client Medical Modal */}
             {
