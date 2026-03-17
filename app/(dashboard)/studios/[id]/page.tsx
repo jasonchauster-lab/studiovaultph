@@ -186,10 +186,10 @@ export default async function StudioDetailsPage(props: {
                                 href={`https://maps.google.com/?q=${encodeURIComponent((studio.address || studio.location) + ', Philippines')}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 text-xs font-bold text-sage hover:text-sage/80 border border-sage/30 hover:border-sage/60 px-3 py-1 rounded-full transition-all duration-200 bg-sage/5 hover:bg-sage/10"
+                                className="flex items-center gap-1.5 text-xs font-bold text-sage hover:text-sage/80 border border-sage/50 hover:border-sage/80 px-4 py-1.5 rounded-full transition-all duration-200 bg-sage/10 hover:bg-sage/20"
                             >
-                                <ExternalLink className="w-3 h-3" />
-                                Maps
+                                <MapPin className="w-3 h-3" />
+                                Open in Google Maps
                             </a>
                             <div className="flex items-center gap-1.5">
                                 <StarRating rating={averageRating} count={totalCount} size="sm" />
