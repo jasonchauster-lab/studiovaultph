@@ -61,6 +61,7 @@ export default async function StudioDetailsPage(props: {
     params: Promise<{ id: string }>,
     searchParams: Promise<{ month?: string }>
 }) {
+    try {
     const { id } = await props.params
     const searchParams = await props.searchParams
     const supabase = await createClient()
@@ -277,5 +278,9 @@ export default async function StudioDetailsPage(props: {
             </div>
         </div >
     )
+    } catch (e: any) {
+        console.error('[StudioDetailsPage] CRASH:', e?.message, e?.stack)
+        throw e
+    }
 }
 
