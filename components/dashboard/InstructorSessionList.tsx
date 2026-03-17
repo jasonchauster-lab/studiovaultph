@@ -321,8 +321,8 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         const isLate = diffInHours < 24
 
                         if (isLate) {
-                            const studioFee = cancellingBooking.price_breakdown?.studio_fee || 0
-                            return `LATE TERMINATION PENALTY: \u20B1${studioFee.toLocaleString()} will be liquidated from your vault to reconcile the studio allocation.`
+                            const studioFee = Number(cancellingBooking.price_breakdown?.studio_fee || 0)
+                            return `LATE TERMINATION PENALTY: ₱${studioFee.toLocaleString()} will be liquidated from your vault to reconcile the studio allocation.`
                         }
                         return null
                     })() || undefined
@@ -543,7 +543,7 @@ const ArchiveSessionCard = memo(({ booking, onStudioClick, onClientClick, onRevi
                     </div>
                     {booking.price_breakdown?.instructor_fee && (
                         <div className="flex flex-col items-end sm:items-center sm:mt-3">
-                            <span className="text-[13px] sm:text-base font-black text-sage/60 tracking-tighter">\u20B1{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                            <span className="text-[13px] sm:text-base font-black text-sage/60 tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
                             <span className="text-[7px] font-black text-sage/30 uppercase tracking-[0.2em]">VALUED</span>
                         </div>
                     )}
