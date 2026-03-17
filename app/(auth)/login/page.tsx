@@ -27,6 +27,7 @@ function LoginContent() {
     const [loading, setLoading] = useState(false)
     const [step, setStep] = useState<Step>('credentials')
     const [otpSent, setOtpSent] = useState(false)
+    const [lastOtpSentAt, setLastOtpSentAt] = useState<number | null>(null)
     const [rememberDevice, setRememberDevice] = useState(false)
     const [isRedirecting, setIsRedirecting] = useState(false)
 
@@ -48,6 +49,22 @@ function LoginContent() {
     const router = useRouter()
     const supabase = createClient()
 
+    // 0. Auto-redirect if already logged in (client-side backup to middleware)
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session?.user && !isRedirecting) {
+                // If they are on /login but have a session, middleware should have caught it, 
+                // but we handle it here too for robustness.
+                if (isOtpRemembered(session.user.id)) {
+                   setIsRedirecting(true)
+                   await redirectByRole(session.user.id)
+                }
+            }
+        }
+        checkSession()
+    }, [])
+
     // Cross-device 2FA: listen for SIGNED_IN on this tab.
     // When the user clicks the verification link on ANY device (e.g. desktop),
     // Supabase broadcasts the session via the storage channel and this fires
@@ -57,7 +74,21 @@ function LoginContent() {
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event: string, session: { user?: { id: string } } | null) => {
+                // Only act on SIGNED_IN if we either haven't sent an OTP yet (initial login)
+                // or if enough time has passed since sending the OTP that this is likely
+                // the verification link being clicked, NOT the password session auto-firing.
+                const isFreshOtp = lastOtpSentAt && (Date.now() - lastOtpSentAt > 2000)
+
                 if (event === 'SIGNED_IN' && session?.user && !isRedirecting) {
+                    // Logic: 
+                    // 1. If we are waiting for OTP (otpSent=true)
+                    // 2. AND we just sent it (lastOtpSentAt is set)
+                    // 3. AND it hasn't been 2 seconds (it's the password session firing)
+                    // -> IGNORE IT.
+                    if (otpSent && lastOtpSentAt && !isFreshOtp) {
+                        return
+                    }
+
                     setIsRedirecting(true)
                     
                     // If the user wanted to be remembered, set the cookie client-side
@@ -77,8 +108,15 @@ function LoginContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [otpSent])
 
-    const isOtpRemembered = (userId: string) =>
-        document.cookie.split(';').some(c => c.trim() === `otp_remembered=${userId}`)
+    const isOtpRemembered = (userId: string) => {
+        const cookies = document.cookie.split(';').map(c => c.trim())
+        return cookies.some(c => {
+            const [name, val] = c.split('=')
+            // Handle possibility of quoted values e.g. otp_remembered="uuid"
+            const cleanVal = val?.replace(/"/g, '')
+            return name === 'otp_remembered' && cleanVal === userId
+        })
+    }
 
     const redirectByRole = async (userId: string) => {
         const { data: profile } = await supabase
@@ -195,6 +233,7 @@ function LoginContent() {
             setMessage({ type: 'error', text: error.message })
         } else {
             setOtpSent(true)
+            setLastOtpSentAt(Date.now())
         }
         setLoading(false)
     }
@@ -212,10 +251,13 @@ function LoginContent() {
             email,
             options: { shouldCreateUser: false, emailRedirectTo: callbackUrl },
         })
-        setMessage(error
-            ? { type: 'error', text: error.message }
-            : { type: 'success', text: 'A new verification link was sent.' }
-        )
+        if (error) {
+            setMessage({ type: 'error', text: error.message })
+        } else {
+            setOtpSent(true)
+            setLastOtpSentAt(Date.now())
+            setMessage({ type: 'success', text: 'A new verification link was sent.' })
+        }
         setLoading(false)
     }
 

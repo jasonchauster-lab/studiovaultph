@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { Calendar, MapPin, Box, X, AlertCircle, Clock, Navigation } from 'lucide-react'
+import { useState, useEffect, useMemo, memo } from 'react'
+import { Calendar, MapPin, Box, X, AlertCircle, Clock, Navigation, Award } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
@@ -23,13 +23,16 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
         dateRange: { from: null, to: null }
     })
     const [selectedClient, setSelectedClient] = useState<any>(null)
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [error, setError] = useState<string | null>(null)
     const [cancellingBooking, setCancellingBooking] = useState<any>(null)
     const [selectedStudio, setSelectedStudio] = useState<any>(null)
     const [studioDetails, setStudioDetails] = useState<any>(null)
     const [loadingStudio, setLoadingStudio] = useState(false)
     const [resetKey, setResetKey] = useState(0)
+    const [reviewTarget, setReviewTarget] = useState<{
+        booking: any,
+        revieweeId: string,
+        revieweeName: string
+    } | null>(null)
 
     const handleStudioClick = async (studio: any) => {
         if (!studio?.id) return
@@ -40,14 +43,11 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             const data = await getStudioProfile(studio.id)
             setStudioDetails(data)
         } finally {
-            setLoadingStudio(false)
+            setLoadingInstructor(false)
         }
     }
-    const [reviewTarget, setReviewTarget] = useState<{
-        booking: any,
-        revieweeId: string,
-        revieweeName: string
-    } | null>(null)
+
+    const { setLoadingInstructor } = { setLoadingInstructor: setLoadingStudio }; // Alias fix for consistency with copy-paste from other files
 
     // Implement scroll lock
     useEffect(() => {
@@ -116,7 +116,6 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     }), [bookings, filters]);
 
     // 2. Split filtered bookings into active/past
-    // "Active" includes anything today (even if started) or in the future that is approved
     const activeBookings = useMemo(() => filteredBookings.filter((b: any) => {
         const slot = getFirst(b.slots)
         if (!slot) return false
@@ -124,19 +123,22 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
         return b.status === 'approved' && endDateTime > now
     }), [filteredBookings, now]);
 
-    const historicalBookings = useMemo(() => filteredBookings.filter((b: any) => {
-        const slot = getFirst(b.slots)
-        if (!slot) return false
-        const endDateTime = getSlotEndDateTime(slot.date, slot.end_time || slot.start_time)
-        return (b.status !== 'approved' || endDateTime <= now)
-    }).sort((a: any, b: any) => {
-        const slotA = getFirst(a.slots)
-        const slotB = getFirst(b.slots)
-        if (!slotA || !slotB) return 0
-        const dateA = getSlotDateTime(slotA.date, slotA.start_time).getTime()
-        const dateB = getSlotDateTime(slotB.date, slotB.start_time).getTime()
-        return dateB - dateA // Date descending
-    }), [filteredBookings, now]);
+    const historicalBookings = useMemo(() => {
+        const historic = filteredBookings.filter((b: any) => {
+            const slot = getFirst(b.slots)
+            if (!slot) return false
+            const endDateTime = getSlotEndDateTime(slot.date, slot.end_time || slot.start_time)
+            return (b.status !== 'approved' || endDateTime <= now)
+        })
+        return [...historic].sort((a: any, b: any) => {
+            const slotA = getFirst(a.slots)
+            const slotB = getFirst(b.slots)
+            if (!slotA || !slotB) return 0
+            const dateA = getSlotDateTime(slotA.date, slotA.start_time).getTime()
+            const dateB = getSlotDateTime(slotB.date, slotB.start_time).getTime()
+            return dateB - dateA
+        })
+    }, [filteredBookings, now]);
 
     // Grouping helper
     const groupBookingsByDate = (bookingsList: any[]) => {
@@ -147,18 +149,12 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             if (!groups[slot.date]) groups[slot.date] = []
             groups[slot.date].push(b)
         })
-        return Object.keys(groups).sort((a, b) => {
-            // Sort dates based on whether they are future or past
-            return new Date(a).getTime() - new Date(b).getTime()
-        }).map(date => ({
-            date,
-            bookings: groups[date]
-        }))
+        return Object.keys(groups).sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+            .map(date => ({ date, bookings: groups[date] }))
     }
 
     const activeGroups = useMemo(() => groupBookingsByDate(activeBookings), [activeBookings])
     const historicalGroups = useMemo(() => {
-        // Sort historical groups by date descending
         const groups = groupBookingsByDate(historicalBookings)
         return groups.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     }, [historicalBookings])
@@ -243,100 +239,17 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                 </div>
 
                                 <div className="space-y-4">
-                                    {group.bookings.map((booking: any) => {
-                                        const slot = getFirst(booking.slots)
-                                        const studio = getFirst(slot?.studios)
-                                        const client = getFirst(booking.client)
-
-                                        return (
-                                            <div key={booking.id} className="earth-card p-3.5 sm:p-5 bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0 rounded-[1.75rem] border-l-[3px] border-l-forest overflow-hidden">
-                                                <div className="absolute top-0 right-0 w-32 h-32 bg-forest/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl pointer-events-none group-hover:bg-forest/10 transition-colors" />
-                                                
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 relative z-10">
-                                                    {/* Time Indicator */}
-                                                    <div className="flex items-center justify-between sm:justify-center sm:bg-forest/5 sm:rounded-[1.5rem] sm:w-20 sm:h-20 sm:shrink-0 sm:border sm:border-forest/10">
-                                                        <div className="flex items-center gap-2.5 sm:flex-col sm:items-center sm:gap-1">
-                                                            <div className="flex sm:hidden items-center justify-center w-7 h-7 rounded-lg bg-forest/10">
-                                                                <Clock className="w-3 h-3 text-forest" />
-                                                            </div>
-                                                            <div className="flex flex-col sm:items-center">
-                                                                <span className="text-[15px] sm:text-lg font-serif text-charcoal leading-none tracking-tighter">
-                                                                    {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                                </span>
-                                                                <span className="text-[7px] sm:text-[8px] font-black text-forest/60 uppercase tracking-[0.2em] mt-1 sm:mt-1">START</span>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Mobile Actions - moved here for better mobile density */}
-                                                        <div className="flex sm:hidden items-center gap-2 shrink-0">
-                                                            {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
-                                                                <button
-                                                                    onClick={() => setCancellingBooking(booking)}
-                                                                    className="w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-100/50 active:scale-95 transition-transform"
-                                                                >
-                                                                    <X className="w-3.5 h-3.5" />
-                                                                </button>
-                                                            )}
-                                                            {client && client.id !== currentUserId && (
-                                                                <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="" variant="antigravity" />
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Session Details */}
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex flex-col gap-0.5">
-                                                            <div className="flex items-center justify-between">
-                                                                <button onClick={() => handleStudioClick(studio)} className="text-[17px] sm:text-xl font-serif text-charcoal hover:text-forest transition-colors text-left tracking-tight">
-                                                                    {studio?.name || "Studio Node"}
-                                                                </button>
-                                                            </div>
-                                                            
-                                                            <div className="flex items-center gap-2 text-charcoal/30">
-                                                                <MapPin className="w-2.5 h-2.5 shrink-0" />
-                                                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] truncate">{studio?.location || "REGISTRY N/A"}</span>
-                                                            </div>
-
-                                                            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border-grey/30">
-                                                                {client && (
-                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
-                                                                        <div className="w-6 h-6 rounded-lg border border-forest/10 p-0.5 shrink-0">
-                                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full rounded-lg object-cover" />
-                                                                        </div>
-                                                                        <span className="text-[9px] font-black text-charcoal/60 uppercase tracking-[0.15em] truncate">{client.full_name}</span>
-                                                                    </button>
-                                                                )}
-                                                                <div className="flex items-center gap-2 shrink-0">
-                                                                    <span className="px-2 py-0.5 bg-forest/5 text-forest/50 text-[7px] font-black uppercase tracking-[0.15em] rounded-lg border border-forest/5 flex items-center gap-1">
-                                                                        <Box className="w-2 h-2" />
-                                                                        {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                                                                            ? `${slot.equipment[0]}`
-                                                                            : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'}`)}
-                                                                        <span className="opacity-40">({booking.quantity || 1})</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Desktop Actions */}
-                                                    <div className="hidden sm:flex items-center gap-2 ml-auto">
-                                                        {booking.status === 'approved' && getSlotDateTime(slot?.date, slot?.start_time) > now && (
-                                                            <button
-                                                                onClick={() => setCancellingBooking(booking)}
-                                                                className="h-10 px-4 bg-off-white text-red-600 border border-border-grey rounded-xl hover:bg-red-600 hover:text-white transition-all text-[9px] font-black uppercase tracking-[0.2em] shadow-tight"
-                                                            >
-                                                                CANCEL
-                                                            </button>
-                                                        )}
-                                                        {client && client.id !== currentUserId && (
-                                                            <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="CHAT" variant="antigravity" />
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )
-                                    })}
+                                    {group.bookings.map((booking: any) => (
+                                        <ActiveSessionCard
+                                            key={booking.id}
+                                            booking={booking}
+                                            currentUserId={currentUserId}
+                                            onStudioClick={handleStudioClick}
+                                            onClientClick={setSelectedClient}
+                                            onCancelClick={setCancellingBooking}
+                                            now={now}
+                                        />
+                                    ))}
                                 </div>
                             </div>
                         ))}
@@ -348,13 +261,13 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             {historicalBookings.length > 0 && (
                 <section>
                     <div className="px-6 sm:px-0 flex items-center justify-between mb-6 sm:mb-12">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                        <div className="w-9 h-9 sm:w-12 sm:h-12 bg-charcoal/5 rounded-[1.25rem] flex items-center justify-center shrink-0 border border-charcoal/10">
-                            <Clock className="w-4 h-4 sm:w-6 h-6 text-charcoal/40" />
+                        <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="w-9 h-9 sm:w-12 sm:h-12 bg-charcoal/5 rounded-[1.25rem] flex items-center justify-center shrink-0 border border-charcoal/10">
+                                <Clock className="w-4 h-4 sm:w-6 h-6 text-charcoal/40" />
+                            </div>
+                            <h2 className="text-xl sm:text-3xl font-serif text-charcoal/40 tracking-tight">Archive Registry</h2>
                         </div>
-                        <h2 className="text-xl sm:text-3xl font-serif text-charcoal/40 tracking-tight">Archive Registry</h2>
                     </div>
-                </div>
 
                     <div className="space-y-10">
                         {historicalGroups.map((group) => (
@@ -376,73 +289,15 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                 </div>
 
                                 <div className="space-y-4">
-                                    {group.bookings.map((booking: any) => {
-                                        const slot = getFirst(booking.slots)
-                                        const studio = getFirst(slot?.studios)
-                                        const client = getFirst(booking.client)
-
-                                        return (
-                                            <div key={booking.id} className="glass-card p-3.5 sm:p-5 border border-white/40 bg-white/5 hover:bg-white/10 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0 rounded-[1.75rem] overflow-hidden grayscale-[0.5] hover:grayscale-0">
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 relative z-10">
-                                                    {/* Time & Earnings */}
-                                                    <div className="flex items-center justify-between sm:flex-col sm:justify-center sm:bg-charcoal/[0.03] sm:rounded-[1.5rem] sm:w-24 sm:h-24 sm:shrink-0 sm:border sm:border-charcoal/5">
-                                                        <div className="flex flex-col sm:items-center">
-                                                            <span className="text-[13px] sm:text-base font-serif text-charcoal/40 leading-none tracking-tight">
-                                                                {getSlotDateTime(slot?.date, slot?.start_time).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                            </span>
-                                                            <span className="text-[7px] font-black text-charcoal/20 uppercase tracking-[0.15em] mt-1.5">RECORDED</span>
-                                                        </div>
-                                                        {booking.price_breakdown?.instructor_fee && (
-                                                            <div className="flex flex-col items-end sm:items-center sm:mt-3">
-                                                                <span className="text-[13px] sm:text-base font-black text-sage/60 tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
-                                                                <span className="text-[7px] font-black text-sage/30 uppercase tracking-[0.2em]">VALUED</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Session Info */}
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex flex-col gap-0.5">
-                                                            <button onClick={() => handleStudioClick(studio)} className="text-[15px] sm:text-lg font-serif text-charcoal/40 hover:text-charcoal transition-colors text-left tracking-tight">
-                                                                {studio?.name || "Historical Node"}
-                                                            </button>
-                                                            
-                                                            <div className="flex items-center gap-2 text-charcoal/20">
-                                                                <MapPin className="w-2.5 h-2.5 shrink-0" />
-                                                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] truncate">{studio?.location || "ARCHIVE N/A"}</span>
-                                                            </div>
-
-                                                            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-charcoal/5">
-                                                                {client && (
-                                                                    <button onClick={() => setSelectedClient(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
-                                                                        <div className="w-6 h-6 rounded-lg border border-charcoal/5 p-0.5 shrink-0 opacity-40">
-                                                                            <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full rounded-lg object-cover" />
-                                                                        </div>
-                                                                        <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.15em] truncate">{client.full_name}</span>
-                                                                    </button>
-                                                                )}
-                                                                {booking.status === 'completed' && !booking.instructor_reviewed_studio && (
-                                                                    <button
-                                                                        onClick={() => setReviewTarget({
-                                                                            booking,
-                                                                            revieweeId: studio?.owner_id || '',
-                                                                            revieweeName: studio?.name || 'Studio'
-                                                                        })}
-                                                                        className="h-8 px-5 bg-sage/[0.08] text-sage border border-sage/20 rounded-xl text-[9px] font-black uppercase tracking-[0.25em] hover:bg-sage hover:text-white transition-all shadow-sm active:scale-95"
-                                                                    >
-                                                                        FEEDBACK
-                                                                    </button>
-                                                                )}
-                                                                {booking.instructor_reviewed_studio && (
-                                                                    <span className="text-[8px] text-charcoal/30 font-black uppercase tracking-[0.25em] bg-charcoal/[0.03] px-3 py-1.5 rounded-xl border border-charcoal/5">SUBMITTED</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )
-                                    })}
+                                    {group.bookings.map((booking: any) => (
+                                        <ArchiveSessionCard
+                                            key={booking.id}
+                                            booking={booking}
+                                            onStudioClick={handleStudioClick}
+                                            onClientClick={setSelectedClient}
+                                            onReviewClick={setReviewTarget}
+                                        />
+                                    ))}
                                 </div>
                             </div>
                         ))}
@@ -467,7 +322,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
                         if (isLate) {
                             const studioFee = cancellingBooking.price_breakdown?.studio_fee || 0
-                            return `LATE TERMINATION PENALTY: ₱${studioFee.toLocaleString()} will be liquidated from your vault to reconcile the studio allocation.`
+                            return `LATE TERMINATION PENALTY: \u20B1${studioFee.toLocaleString()} will be liquidated from your vault to reconcile the studio allocation.`
                         }
                         return null
                     })() || undefined
@@ -485,10 +340,10 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             {/* Client Detail Modal overhaul */}
             {selectedClient && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 will-change-transform" onClick={e => e.stopPropagation()}>
                         <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
-                        <div className="flex flex-col items-center text-center mb-10">
+                        <div className="flex flex-col items-center text-center mb-10 pt-10">
                             <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
                                 <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
                             </div>
@@ -503,48 +358,50 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             </div>
                         </div>
 
-                        {selectedClient.bio && (
-                            <div className="bg-white/40 p-6 rounded-[2rem] border border-white/60 mb-6 relative z-10">
-                                <h4 className="text-[9px] font-black text-charcoal/50 uppercase tracking-[0.4em] mb-3">BIO</h4>
-                                <p className="text-[11px] text-charcoal/60 leading-relaxed italic uppercase tracking-wider">"{selectedClient.bio}"</p>
+                        <div className="px-10 pb-10">
+                            {selectedClient.bio && (
+                                <div className="bg-white/40 p-6 rounded-[2rem] border border-white/60 mb-6 relative z-10">
+                                    <h4 className="text-[9px] font-black text-charcoal/50 uppercase tracking-[0.4em] mb-3">BIO</h4>
+                                    <p className="text-[11px] text-charcoal/60 leading-relaxed italic uppercase tracking-wider">"{selectedClient.bio}"</p>
+                                </div>
+                            )}
+
+                            <div className="mb-8">
+                                {(() => {
+                                    const conditions = typeof selectedClient.medical_conditions === 'string'
+                                        ? selectedClient.medical_conditions.split(',').map((c: string) => c.trim())
+                                        : Array.isArray(selectedClient.medical_conditions)
+                                            ? selectedClient.medical_conditions
+                                            : [];
+
+                                    const displayConditions = conditions
+                                        .map((c: string) => c === 'Others' ? selectedClient.other_medical_condition : c)
+                                        .filter(Boolean)
+                                        .join(', ');
+
+                                    return displayConditions ? (
+                                        <div className="bg-red-50 p-6 rounded-2xl border border-red-200 relative z-10">
+                                            <h4 className="text-[10px] font-black text-red-800 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
+                                                <AlertCircle className="w-4 h-4" /> PHYSICAL CONDITIONS
+                                            </h4>
+                                            <p className="text-[11px] text-red-900 font-black uppercase tracking-[0.2em] leading-relaxed">{displayConditions}</p>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-green-50 p-6 rounded-2xl border border-green-200 relative z-10">
+                                            <h4 className="text-[10px] font-black text-forest uppercase tracking-[0.4em] mb-2">HEALTH STATUS</h4>
+                                            <p className="text-[10px] text-forest/40 uppercase tracking-[0.2em] italic">No reported conditions.</p>
+                                        </div>
+                                    );
+                                })()}
                             </div>
-                        )}
 
-                        <div className="mb-8">
-                            {(() => {
-                                const conditions = typeof selectedClient.medical_conditions === 'string'
-                                    ? selectedClient.medical_conditions.split(',').map((c: string) => c.trim())
-                                    : Array.isArray(selectedClient.medical_conditions)
-                                        ? selectedClient.medical_conditions
-                                        : [];
-
-                                const displayConditions = conditions
-                                    .map((c: string) => c === 'Others' ? selectedClient.other_medical_condition : c)
-                                    .filter(Boolean)
-                                    .join(', ');
-
-                                return displayConditions ? (
-                                    <div className="bg-red-50 p-8 rounded-lg border border-red-200 relative z-10">
-                                        <h4 className="text-[10px] font-black text-red-800 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
-                                            <AlertCircle className="w-4 h-4" /> PHYSICAL CONDITIONS
-                                        </h4>
-                                        <p className="text-[11px] text-red-900 font-black uppercase tracking-[0.2em] leading-relaxed">{displayConditions}</p>
-                                    </div>
-                                ) : (
-                                    <div className="bg-green-50 p-8 rounded-lg border border-green-200 relative z-10">
-                                        <h4 className="text-[10px] font-black text-forest uppercase tracking-[0.4em] mb-2">HEALTH STATUS</h4>
-                                        <p className="text-[10px] text-forest/40 uppercase tracking-[0.2em] italic">No reported conditions.</p>
-                                    </div>
-                                );
-                            })()}
+                            <button
+                                onClick={() => setSelectedClient(null)}
+                                className="w-full py-5 bg-forest text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95"
+                            >
+                                CLOSE
+                            </button>
                         </div>
-
-                        <button
-                            onClick={() => setSelectedClient(null)}
-                            className="w-full py-6 bg-forest text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95"
-                        >
-                            CLOSE
-                        </button>
                     </div>
                 </div>
             )}
@@ -568,3 +425,170 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
         </div>
     )
 }
+
+const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClientClick, onCancelClick, now }: any) => {
+    const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
+    const slot = getFirst(booking.slots)
+    const studio = getFirst(slot?.studios)
+    const client = getFirst(booking.client)
+    const startDateTime = new Date(`${slot?.date}T${slot?.start_time}+08:00`)
+
+    return (
+        <div className="earth-card p-3.5 sm:p-5 bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0 rounded-[1.75rem] border-l-[3px] border-l-forest overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-forest/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl pointer-events-none group-hover:bg-forest/10 transition-colors" />
+            
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 relative z-10">
+                {/* Time Indicator */}
+                <div className="flex items-center justify-between sm:justify-center sm:bg-forest/5 sm:rounded-[1.5rem] sm:w-20 sm:h-20 sm:shrink-0 sm:border sm:border-forest/10">
+                    <div className="flex items-center gap-2.5 sm:flex-col sm:items-center sm:gap-1">
+                        <div className="flex sm:hidden items-center justify-center w-7 h-7 rounded-lg bg-forest/10">
+                            <Clock className="w-3 h-3 text-forest" />
+                        </div>
+                        <div className="flex flex-col sm:items-center">
+                            <span className="text-[15px] sm:text-lg font-serif text-charcoal leading-none tracking-tighter">
+                                {startDateTime.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                            </span>
+                            <span className="text-[7px] sm:text-[8px] font-black text-forest/60 uppercase tracking-[0.2em] mt-1 sm:mt-1">START</span>
+                        </div>
+                    </div>
+
+                    {/* Mobile Actions */}
+                    <div className="flex sm:hidden items-center gap-2 shrink-0">
+                        {booking.status === 'approved' && startDateTime > now && (
+                            <button
+                                onClick={() => onCancelClick(booking)}
+                                className="w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-100/50 active:scale-95 transition-transform"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        )}
+                        {client && client.id !== currentUserId && (
+                            <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="" variant="antigravity" />
+                        )}
+                    </div>
+                </div>
+
+                {/* Session Details */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex flex-col gap-0.5">
+                        <div className="flex items-center justify-between">
+                            <button onClick={() => onStudioClick(studio)} className="text-[17px] sm:text-xl font-serif text-charcoal hover:text-forest transition-colors text-left tracking-tight">
+                                {studio?.name || "Studio Node"}
+                            </button>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 text-charcoal/30">
+                            <MapPin className="w-2.5 h-2.5 shrink-0" />
+                            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] truncate">{studio?.location || "REGISTRY N/A"}</span>
+                        </div>
+
+                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border-grey/30">
+                            {client && (
+                                <button onClick={() => onClientClick(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
+                                    <div className="w-6 h-6 rounded-lg border border-forest/10 p-0.5 shrink-0">
+                                        <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full rounded-lg object-cover" />
+                                    </div>
+                                    <span className="text-[9px] font-black text-charcoal/60 uppercase tracking-[0.15em] truncate">{client.full_name}</span>
+                                </button>
+                            )}
+                            <div className="flex items-center gap-2 shrink-0">
+                                <span className="px-2 py-0.5 bg-forest/5 text-forest/50 text-[7px] font-black uppercase tracking-[0.15em] rounded-lg border border-forest/5 flex items-center gap-1">
+                                    <Box className="w-2 h-2" />
+                                    {Array.isArray(slot?.equipment) && slot.equipment.length > 0
+                                        ? `${slot.equipment[0]}`
+                                        : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'}`)}
+                                    <span className="opacity-40">({booking.quantity || 1})</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Desktop Actions */}
+                <div className="hidden sm:flex items-center gap-2 ml-auto">
+                    {booking.status === 'approved' && startDateTime > now && (
+                        <button
+                            onClick={() => onCancelClick(booking)}
+                            className="h-10 px-4 bg-off-white text-red-600 border border-border-grey rounded-xl hover:bg-red-600 hover:text-white transition-all text-[9px] font-black uppercase tracking-[0.2em] shadow-tight"
+                        >
+                            CANCEL
+                        </button>
+                    )}
+                    {client && client.id !== currentUserId && (
+                        <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="CHAT" variant="antigravity" />
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+})
+
+const ArchiveSessionCard = memo(({ booking, onStudioClick, onClientClick, onReviewClick }: any) => {
+    const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
+    const slot = getFirst(booking.slots)
+    const studio = getFirst(slot?.studios)
+    const client = getFirst(booking.client)
+    const startDateTime = new Date(`${slot?.date}T${slot?.start_time}+08:00`)
+
+    return (
+        <div className="glass-card p-3.5 sm:p-5 border border-white/40 bg-white/5 hover:bg-white/10 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0 rounded-[1.75rem] overflow-hidden grayscale-[0.5] hover:grayscale-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 relative z-10">
+                {/* Time & Earnings */}
+                <div className="flex items-center justify-between sm:flex-col sm:justify-center sm:bg-charcoal/[0.03] sm:rounded-[1.5rem] sm:w-24 sm:h-24 sm:shrink-0 sm:border sm:border-charcoal/5">
+                    <div className="flex flex-col sm:items-center">
+                        <span className="text-[13px] sm:text-base font-serif text-charcoal/40 leading-none tracking-tight">
+                            {startDateTime.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                        </span>
+                        <span className="text-[7px] font-black text-charcoal/20 uppercase tracking-[0.15em] mt-1.5">RECORDED</span>
+                    </div>
+                    {booking.price_breakdown?.instructor_fee && (
+                        <div className="flex flex-col items-end sm:items-center sm:mt-3">
+                            <span className="text-[13px] sm:text-base font-black text-sage/60 tracking-tighter">\u20B1{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
+                            <span className="text-[7px] font-black text-sage/30 uppercase tracking-[0.2em]">VALUED</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Session Info */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex flex-col gap-0.5">
+                        <button onClick={() => onStudioClick(studio)} className="text-[15px] sm:text-lg font-serif text-charcoal/40 hover:text-charcoal transition-colors text-left tracking-tight">
+                            {studio?.name || "Historical Node"}
+                        </button>
+                        
+                        <div className="flex items-center gap-2 text-charcoal/20">
+                            <MapPin className="w-2.5 h-2.5 shrink-0" />
+                            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] truncate">{studio?.location || "ARCHIVE N/A"}</span>
+                        </div>
+
+                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-charcoal/5">
+                            {client && (
+                                <button onClick={() => onClientClick(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
+                                    <div className="w-6 h-6 rounded-lg border border-charcoal/5 p-0.5 shrink-0 opacity-40">
+                                        <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full rounded-lg object-cover" />
+                                    </div>
+                                    <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.15em] truncate">{client.full_name}</span>
+                                </button>
+                            )}
+                            {booking.status === 'completed' && !booking.instructor_reviewed_studio && (
+                                <button
+                                    onClick={() => onReviewClick({
+                                        booking,
+                                        revieweeId: studio?.owner_id || '',
+                                        revieweeName: studio?.name || 'Studio'
+                                    })}
+                                    className="h-8 px-5 bg-sage/[0.08] text-sage border border-sage/20 rounded-xl text-[9px] font-black uppercase tracking-[0.25em] hover:bg-sage hover:text-white transition-all shadow-sm active:scale-95"
+                                >
+                                    FEEDBACK
+                                </button>
+                            )}
+                            {booking.instructor_reviewed_studio && (
+                                <span className="text-[8px] text-charcoal/30 font-black uppercase tracking-[0.25em] bg-charcoal/[0.03] px-3 py-1.5 rounded-xl border border-charcoal/5">SUBMITTED</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+})

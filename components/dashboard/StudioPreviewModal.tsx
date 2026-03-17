@@ -1,8 +1,8 @@
 'use client'
 
+import { memo } from 'react'
 import { X, MapPin, Star, CheckCircle2, Navigation } from 'lucide-react'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
 
 interface StudioPreviewModalProps {
     studio: any
@@ -11,7 +11,7 @@ interface StudioPreviewModalProps {
     onClose: () => void
 }
 
-export default function StudioPreviewModal({ studio, details, loading, onClose }: StudioPreviewModalProps) {
+const StudioPreviewModal = ({ studio, details, loading, onClose }: StudioPreviewModalProps) => {
     if (!studio) return null
 
     // Generate Google Maps URL
@@ -24,8 +24,14 @@ export default function StudioPreviewModal({ studio, details, loading, onClose }
     const mapsUrl = getMapsUrl()
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-charcoal/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
-            <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+        <div 
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-charcoal/40 backdrop-blur-[2px] animate-in fade-in duration-300" 
+            onClick={onClose}
+        >
+            <div 
+                className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300 will-change-transform" 
+                onClick={e => e.stopPropagation()}
+            >
                 <button 
                     onClick={onClose} 
                     className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/80 backdrop-blur-sm text-charcoal/40 hover:text-charcoal hover:bg-white transition-all shadow-sm"
@@ -189,3 +195,5 @@ export default function StudioPreviewModal({ studio, details, loading, onClose }
         </div>
     )
 }
+
+export default memo(StudioPreviewModal)

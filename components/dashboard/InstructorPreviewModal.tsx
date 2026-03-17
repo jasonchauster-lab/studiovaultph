@@ -1,7 +1,7 @@
 'use client'
 
+import { memo } from 'react'
 import { X, Star, Award, Instagram } from 'lucide-react'
-import Link from 'next/link'
 
 interface InstructorPreviewModalProps {
     instructor: any
@@ -10,7 +10,7 @@ interface InstructorPreviewModalProps {
     onClose: () => void
 }
 
-export default function InstructorPreviewModal({ instructor, details, loading, onClose }: InstructorPreviewModalProps) {
+const InstructorPreviewModal = ({ instructor, details, loading, onClose }: InstructorPreviewModalProps) => {
     if (!instructor) return null
 
     const avatarUrl = (() => {
@@ -21,8 +21,14 @@ export default function InstructorPreviewModal({ instructor, details, loading, o
     })()
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-charcoal/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}>
-            <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+        <div 
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-charcoal/40 backdrop-blur-[2px] animate-in fade-in duration-300" 
+            onClick={onClose}
+        >
+            <div 
+                className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300 will-change-transform" 
+                onClick={e => e.stopPropagation()}
+            >
                 <button 
                     onClick={onClose} 
                     className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/80 backdrop-blur-sm text-charcoal/40 hover:text-charcoal hover:bg-white transition-all shadow-sm"
@@ -93,7 +99,7 @@ export default function InstructorPreviewModal({ instructor, details, loading, o
                                     <div className="flex flex-wrap gap-2">
                                         {details.certifications.map((cert: any, i: number) => (
                                             <span key={i} className="px-3 py-1.5 bg-white text-charcoal/70 text-[10px] font-black uppercase tracking-widest rounded-lg border border-charcoal/5 shadow-sm">
-                                                {cert.certification_name}{cert.certification_body ? ` — ${cert.certification_body}` : ''}
+                                                {cert.certification_name}{cert.certification_body ? ` \u2014 ${cert.certification_body}` : ''}
                                             </span>
                                         ))}
                                     </div>
@@ -175,3 +181,5 @@ export default function InstructorPreviewModal({ instructor, details, loading, o
         </div>
     )
 }
+
+export default memo(InstructorPreviewModal)

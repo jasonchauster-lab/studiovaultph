@@ -39,7 +39,6 @@ export async function updateSession(request: NextRequest) {
 
     // Protected Routes Logic
     if (
-        !request.nextUrl.pathname.startsWith('/login') &&
         !request.nextUrl.pathname.startsWith('/auth') &&
         !request.nextUrl.pathname.startsWith('/register') &&
         !request.nextUrl.pathname.startsWith('/verified') && // Allow verification success page
@@ -47,7 +46,23 @@ export async function updateSession(request: NextRequest) {
         !request.nextUrl.pathname.startsWith('/favicon.ico') && // Static asset
         request.nextUrl.pathname !== '/' // Landing page
     ) {
-        // 1. Enforce Login for protected areas
+        // 1. If user IS logged in but hitting /login, redirect to dashboard
+        if (user && request.nextUrl.pathname.startsWith('/login')) {
+            let role = user.user_metadata?.role;
+            if (!role) {
+                const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+                role = profile?.role;
+            }
+            const url = request.nextUrl.clone()
+            if (role === 'admin') url.pathname = '/admin'
+            else if (role === 'instructor') url.pathname = '/instructor'
+            else if (role === 'studio') url.pathname = '/studio'
+            else if (role === 'customer') url.pathname = '/customer'
+            else url.pathname = '/welcome'
+            return NextResponse.redirect(url)
+        }
+
+        // 2. Enforce Login for protected areas
         if (!user) {
             const protectedPrefixes = ['/instructor', '/studio', '/admin', '/customer', '/welcome', '/instructors', '/studios'];
             if (protectedPrefixes.some(prefix => request.nextUrl.pathname.startsWith(prefix))) {
