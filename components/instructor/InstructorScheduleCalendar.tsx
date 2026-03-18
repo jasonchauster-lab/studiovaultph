@@ -723,14 +723,13 @@ export default function InstructorScheduleCalendar({
                                                                             }}
                                                                         >
                                                                                 <div className={clsx("flex flex-col items-start gap-1 overflow-hidden w-full", duration < 30 && "justify-center")}>
-                                                                                    <div className="flex justify-between items-start w-full gap-2">
-                                                                                        <div className={clsx("text-[9px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
+                                                                                    <div className="flex flex-col items-start w-full pr-7">
+                                                                                        <div className={clsx("text-[9px] font-black text-charcoal truncate", isPastCell && "opacity-50")}>
                                                                                             {formatTo12Hour(slot.start_time).replace(':00', '')}-{formatTo12Hour(slot.end_time).replace(':00', '')}
                                                                                         </div>
-                                                                                      <div className="text-[8px] font-black text-charcoal bg-white/80 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap ml-2 shrink-0 shadow-sm">
-                                                              0/1
-                                                          </div>
-
+                                                                                    </div>
+                                                                                    <div className="absolute top-1 right-1 text-[8px] font-black text-charcoal bg-white/80 px-1 py-0.5 rounded border border-charcoal/10 whitespace-nowrap z-20 shadow-sm scale-90 origin-right">
+                                                                                        0/1
                                                                                     </div>
 
                                                                                     <div className="flex flex-wrap items-center gap-1 overflow-hidden">
@@ -776,9 +775,9 @@ export default function InstructorScheduleCalendar({
                                                                                 setSelectedBooking(booking);
                                                                             }}
                                                                         >
-                                                                            <div className={clsx("flex justify-between items-start w-full overflow-hidden", duration < 30 && "items-center")}>
+                                                                            <div className={clsx("flex flex-col items-start w-full overflow-hidden pr-7", duration < 30 && "justify-center")}>
                                                                                 <div className="flex flex-col min-w-0 flex-1 overflow-hidden">
-                                                                                     <span className="text-[9px] font-black text-white tracking-tight truncate leading-none">
+                                                                                     <span className="text-[9.5px] font-black text-white tracking-tight truncate leading-tight">
                                                                                          {booking.client?.full_name || 'Session'}
                                                                                      </span>
                                                                                      {duration >= 30 && (
@@ -786,11 +785,11 @@ export default function InstructorScheduleCalendar({
                                                                                              <span className="text-[8px] font-bold text-white uppercase tracking-tighter mt-0.5 truncate">
                                                                                                 {studioName}
                                                                                             </span>
-                                                                                            <div className="flex flex-wrap items-center gap-1 mt-1.5 overflow-hidden">
+                                                                                            <div className="flex flex-wrap items-center gap-1 mt-1 overflow-hidden">
                                                                                                 {slotData.studios?.location && (
-                                                                                                    <div className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-white/90 px-1.5 py-0.5 rounded border border-white/20 bg-white/10 truncate">
+                                                                                                    <div className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-white/90 px-1 py-0.5 rounded border border-white/20 bg-white/10 truncate">
                                                                                                         <MapPin className="w-2.5 h-2.5 shrink-0 text-white/40" />
-                                                                                                        <span className="truncate max-w-[60px]">{slotData.studios.location.split(' - ')[0] || 'Studio'}</span>
+                                                                                                        <span className="truncate max-w-[50px]">{slotData.studios.location.split(' - ')[0] || 'Studio'}</span>
                                                                                                     </div>
                                                                                                 )}
                                                                                                 {/* Booked Equipment from price_breakdown */}
@@ -808,9 +807,9 @@ export default function InstructorScheduleCalendar({
                                                                                         </>
                                                                                     )}
                                                                                 </div>
-                                                                              <div className="text-[8px] font-black text-burgundy bg-buttermilk/60 px-1.5 py-0.5 rounded border border-burgundy/10 whitespace-nowrap ml-2 shrink-0">
-                                                      {Math.min(booking.quantity || 1, 1)}/1
-                                                  </div>
+                                                                            </div>
+                                                                            <div className="absolute top-1 right-1 text-[8px] font-black text-burgundy bg-buttermilk/60 px-1 py-0.5 rounded border border-burgundy/10 whitespace-nowrap z-20 shadow-sm scale-90 origin-right">
+                                                                                {Math.min(booking.quantity || 1, 1)}/1
                                                                             </div>
                                                                         </div>
                                                                     )
