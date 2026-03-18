@@ -1157,8 +1157,13 @@ export async function completeBooking(bookingId: string) {
 
     if (result.success) {
         const supabase = await createClient()
-        const { data: booking } = await supabase.from('bookings').select('client_id, instructor_id').eq('id', bookingId).single()
-        await logAdminAction(supabase, 'COMPLETE_BOOKING', 'bookings', bookingId, `Booking manually completed by Admin. Participant status updated.`)
+        const { data: booking } = await supabase.from('bookings').select('client_id, instructor_id, client:profiles!client_id(full_name, email), instructor:profiles!instructor_id(full_name, email)').eq('id', bookingId).single()
+        
+        const client = booking?.client as any;
+        const instructor = booking?.instructor as any;
+        const details = `Booking manually completed by Admin. Client: ${client?.full_name || 'N/A'} (${client?.email || 'no email'}), Instructor: ${instructor?.full_name || 'N/A'} (${instructor?.email || 'no email'}). Participant status updated.`
+        
+        await logAdminAction(supabase, 'COMPLETE_BOOKING', 'bookings', bookingId, details)
 
         revalidatePath('/admin')
         revalidatePath('/instructor/sessions')
@@ -1371,7 +1376,17 @@ export async function updatePartnerFeeSettings(
         return { error: 'Failed to update partner fee settings.' };
     }
 
-    await logAdminAction(supabase, 'UPDATE_PARTNER_FEES', table, id, `Updated partner fee settings for ${type} ID ${id}: Founding Partner = ${isFoundingPartner}, Fee = ${customFeePercentage}%`)
+    let targetInfo = '';
+    if (type === 'profile') {
+        const { data: profile } = await supabase.from('profiles').select('full_name, email').eq('id', id).single();
+        targetInfo = `${profile?.full_name || 'Unknown'} (${profile?.email || 'no email'})`;
+    } else {
+        const { data: studio } = await supabase.from('studios').select('name, profiles(email)').eq('id', id).single();
+        const email = (Array.isArray(studio?.profiles) ? studio.profiles[0] : studio?.profiles)?.email;
+        targetInfo = `Studio "${studio?.name || 'Unknown'}" (${email || 'no email'})`;
+    }
+
+    await logAdminAction(supabase, 'UPDATE_PARTNER_FEES', table, id, `Updated partner fee settings for ${type} ${targetInfo}: Founding Partner = ${isFoundingPartner}, Fee = ${customFeePercentage}%`)
 
     revalidatePath('/admin');
     revalidatePath('/admin/partners');
@@ -1565,7 +1580,7 @@ export async function approveTopUp(id: string) {
     }
 
     const { data: userProfile } = await supabase.from('profiles').select('full_name, email').eq('id', topUp.user_id).single()
-    await logAdminAction(supabase, 'APPROVE_TOP_UP', 'wallet_top_ups', id, `Wallet top-up of ₱${topUp.amount} approved for ${userProfile?.full_name || 'Unknown User'}`)
+    await logAdminAction(supabase, 'APPROVE_TOP_UP', 'wallet_top_ups', id, `Wallet top-up of ₱${topUp.amount} approved for ${userProfile?.full_name || 'Unknown User'} (${userProfile?.email || 'no email'})`)
 
     // 4. Send Approval Email
     if (userProfile?.email) {
@@ -1608,7 +1623,7 @@ export async function rejectTopUp(id: string, reason?: string) {
     }
 
     const { data: userProfile } = await supabase.from('profiles').select('full_name, email').eq('id', topUp.user_id).single()
-    await logAdminAction(supabase, 'REJECT_TOP_UP', 'wallet_top_ups', id, `Wallet top-up of ₱${topUp.amount} rejected for ${userProfile?.full_name || 'Unknown User'} — Reason: ${reason || 'Receipt unreadable or incorrect amount.'}`)
+    await logAdminAction(supabase, 'REJECT_TOP_UP', 'wallet_top_ups', id, `Wallet top-up of ₱${topUp.amount} rejected for ${userProfile?.full_name || 'Unknown User'} (${userProfile?.email || 'no email'}) — Reason: ${reason || 'Receipt unreadable or incorrect amount.'}`)
 
     // Send Rejection Email
     if (userProfile?.email) {

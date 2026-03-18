@@ -17,12 +17,26 @@ import UserSearchBar from '@/components/admin/UserSearchBar'
 import { Search } from 'lucide-react'
 
 // Since this is a server component, we fetch data directly
+import * as fs from 'fs'
+
 export default async function AdminDashboard({
     searchParams
 }: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
+    console.log('[AdminDashboard] ENTERED COMPONENT')
+    const logFile = 'c:\\Users\\jason\\Downloads\\pilatesBridgeWebsite\\tmp\\admin_debug.log'
+    const log = (msg: string) => {
+        console.log(`[AdminDashboard] ${msg}`)
+        try {
+            fs.appendFileSync(logFile, `[${new Date().toISOString()}] ${msg}\n`)
+        } catch (e) {
+            console.error('[AdminDashboard] Failed to write to log file:', e)
+        }
+    }
+    
     try {
+        log('Started render')
         const { range, tab, search } = await searchParams
         const activeTab = (tab as string) || 'overview'
         const searchQuery = (search as string) || ''
@@ -53,6 +67,7 @@ export default async function AdminDashboard({
 
         const supabase = createAdminClient() // This is the admin client, now named 'supabase'
         console.log('Analytics: Triggering fetch...')
+        log('AdminDashboard: Initial fetches triggered')
         const results = await Promise.all([
             // 1. Certification verification queue
             supabase.from('certifications')
@@ -159,6 +174,8 @@ export default async function AdminDashboard({
                 return query
             })(),
         ])
+        log('AdminDashboard: Initial fetches completed')
+        log('AdminDashboard: Initial fetches completed')
 
         const [
             pendingCertsResult,
@@ -525,7 +542,7 @@ export default async function AdminDashboard({
                                                                 <span className="truncate">{b.client?.email}</span>
                                                             </div>
                                                             <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-wider mt-1">
-                                                                {new Date(b.slots?.date).toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} @ {b.slots?.start_time}
+                                                                {b.slots?.date ? new Date(b.slots.date).toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'No Date'} @ {b.slots?.start_time || 'No Time'}
                                                             </p>
                                                         </div>
 
@@ -860,6 +877,7 @@ export default async function AdminDashboard({
             </div>
         )
     } catch (err: any) {
+        log(`AdminDashboard: GLOBAL ERROR: ${err.message}\n${err.stack}`)
         console.error('GLOBAL DASHBOARD ERROR:', err)
         return (
             <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-alabaster flex items-center justify-center">
