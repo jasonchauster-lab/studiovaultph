@@ -24,16 +24,8 @@ export default async function AdminDashboard({
 }: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-    console.log('[AdminDashboard] ENTERED COMPONENT')
-    const logFile = 'c:\\Users\\jason\\Downloads\\pilatesBridgeWebsite\\tmp\\admin_debug.log'
-    const log = (msg: string) => {
-        console.log(`[AdminDashboard] ${msg}`)
-        try {
-            fs.appendFileSync(logFile, `[${new Date().toISOString()}] ${msg}\n`)
-        } catch (e) {
-            console.error('[AdminDashboard] Failed to write to log file:', e)
-        }
-    }
+    const log = (msg: string) => console.log(`[AdminDashboard] ${msg}`)
+    log('Entered component')
     
     try {
         log('Started render')
@@ -194,29 +186,29 @@ export default async function AdminDashboard({
         ] = results
 
         // ── Data Prep ──────────────────────────────────────────────
-        const pendingCerts = pendingCertsResult.data ?? []
-        const pendingStudios = pendingStudiosResult.data ?? []
-        const pendingStudioPayouts = pendingStudioPayoutsResult.data ?? []
-        const pendingBookings = pendingBookingsResult.data ?? []
+        const pendingCerts = pendingCertsResult?.data ?? []
+        const pendingStudios = pendingStudiosResult?.data ?? []
+        const pendingStudioPayouts = pendingStudioPayoutsResult?.data ?? []
+        const pendingBookings = pendingBookingsResult?.data ?? []
 
-        const payoutRequests = (payoutRequestsResult.data ?? []).map((p: any) => ({
+        const payoutRequests = (payoutRequestsResult?.data ?? []).map((p: any) => ({
             ...p,
             instructor_name: (Array.isArray(p.instructor) ? p.instructor[0] : p.instructor)?.full_name ?? null,
         }))
 
-        const studioPayouts = studioPayoutsResult.data ?? []
+        const studioPayouts = studioPayoutsResult?.data ?? []
 
-        const customerPayouts = (rawUserPayoutsResult.data ?? []).filter((p: any) => {
+        const customerPayouts = (rawUserPayoutsResult?.data ?? []).filter((p: any) => {
             const profile = Array.isArray(p.profile) ? p.profile[0] : p.profile
             return profile?.role === 'customer'
         })
 
-        const pendingTopUps = pendingTopUpsResult.data ?? []
-        const suspendedStudios = suspendedStudiosResult.data ?? []
+        const pendingTopUps = pendingTopUpsResult?.data ?? []
+        const suspendedStudios = suspendedStudiosResult?.data ?? []
         const analytics = analyticsResult
-        const negativeBalanceInstructors = negativeBalanceResult.data ?? []
-        const activityLogs = activityLogsResult.data ?? []
-        const allUsers = allUsersResult.data ?? []
+        const negativeBalanceInstructors = negativeBalanceResult?.data ?? []
+        const activityLogs = activityLogsResult?.data ?? []
+        const allUsers = allUsersResult?.data ?? []
 
         // ── Signed URLs ──────────────────────────────────────────────
         const certUrlPaths = pendingCerts.flatMap((cert: any) =>
@@ -250,7 +242,7 @@ export default async function AdminDashboard({
         const paymentUrlMap = mkMap(paymentSignedRes)
         const waiverUrlMap = mkMap(waiverSignedRes)
 
-        const getDisplayUrl = (original: string) => {
+        const getDisplayUrl = (original: string): string => {
             if (!original) return original
             if (!isStoragePath(original)) return original
             
@@ -263,6 +255,25 @@ export default async function AdminDashboard({
             }
             
             return url
+        }
+
+        const safeFormatDate = (dateStr: string | null | undefined, options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }): string => {
+            if (!dateStr) return 'No Date'
+            try {
+                const d = new Date(dateStr)
+                if (isNaN(d.getTime())) return 'No Date'
+                return d.toLocaleDateString('en-PH', options)
+            } catch (e) {
+                return 'No Date'
+            }
+        }
+
+        const safeFormatCurrency = (val: any): string => {
+            try {
+                return Number(val || 0).toLocaleString()
+            } catch (e) {
+                return '0'
+            }
         }
 
         const certsWithUrls = pendingCerts.map((cert: any) => ({
@@ -542,7 +553,7 @@ export default async function AdminDashboard({
                                                                 <span className="truncate">{b.client?.email}</span>
                                                             </div>
                                                             <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-wider mt-1">
-                                                                {b.slots?.date ? new Date(b.slots.date).toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'No Date'} @ {b.slots?.start_time || 'No Time'}
+                                                                {safeFormatDate(b.slots?.date)} @ {b.slots?.start_time || 'No Time'}
                                                             </p>
                                                         </div>
 
@@ -560,25 +571,25 @@ export default async function AdminDashboard({
                                                         <div className="bg-white/40 border border-white/60 p-5 rounded-2xl shadow-sm space-y-4">
                                                             <div className="flex justify-between items-end">
                                                                 <p className="text-[10px] font-black text-charcoal/50 tracking-widest uppercase">Financial Breakdown</p>
-                                                                <p className="text-xl font-serif text-charcoal">₱{(b.total_price || 0).toLocaleString()}</p>
+                                                                <p className="text-xl font-serif text-charcoal">₱{safeFormatCurrency(b.total_price)}</p>
                                                             </div>
                                                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                                                 <div className="space-y-0.5">
                                                                     <p className="text-[8px] text-charcoal/50 uppercase font-black tracking-widest leading-none">Studio</p>
-                                                                    <p className="text-sm font-bold text-charcoal/80 leading-none">₱{(breakdown.studio_fee || 0).toLocaleString()}</p>
+                                                                    <p className="text-sm font-bold text-charcoal/80 leading-none">₱{safeFormatCurrency(breakdown.studio_fee)}</p>
                                                                 </div>
                                                                 <div className="space-y-0.5">
                                                                     <p className="text-[8px] text-charcoal/50 uppercase font-black tracking-widest leading-none">Instructor</p>
-                                                                    <p className="text-sm font-bold text-charcoal/80 leading-none">₱{(breakdown.instructor_fee || 0).toLocaleString()}</p>
+                                                                    <p className="text-sm font-bold text-charcoal/80 leading-none">₱{safeFormatCurrency(breakdown.instructor_fee)}</p>
                                                                 </div>
                                                                 <div className="space-y-0.5">
                                                                     <p className="text-[8px] text-charcoal/50 uppercase font-black tracking-widest leading-none">Service</p>
-                                                                    <p className="text-sm font-bold text-charcoal/80 leading-none">₱{(breakdown.service_fee || 0).toLocaleString()}</p>
+                                                                    <p className="text-sm font-bold text-charcoal/80 leading-none">₱{safeFormatCurrency(breakdown.service_fee)}</p>
                                                                 </div>
                                                                 {breakdown.wallet_deduction > 0 && (
                                                                     <div className="space-y-0.5">
                                                                         <p className="text-[8px] text-sage uppercase font-black tracking-widest leading-none">Wallet</p>
-                                                                        <p className="text-sm font-bold text-sage leading-none">-₱{(breakdown.wallet_deduction || 0).toLocaleString()}</p>
+                                                                        <p className="text-sm font-bold text-sage leading-none">-₱{safeFormatCurrency(breakdown.wallet_deduction)}</p>
                                                                     </div>
                                                                 )}
                                                             </div>

@@ -256,7 +256,7 @@ export default function PartnerFeeClient({
                     <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-widest italic">No entities detected in this sector</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
                     {list.map(p => <Card key={p.id} p={p} />)}
                 </div>
             )}

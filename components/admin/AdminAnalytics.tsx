@@ -265,7 +265,15 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                                             className="absolute text-center -translate-x-1/2 whitespace-nowrap"
                                             style={{ left: `${(leftOffset / ((stats.dailyData.length - 1) * pointPadding)) * 100}%` }}
                                         >
-                                            {new Date(d.date).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' }).toUpperCase()}
+                                            {(() => {
+                                                try {
+                                                    const dateObj = new Date(d.date)
+                                                    if (isNaN(dateObj.getTime())) return '—'
+                                                    return dateObj.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' }).toUpperCase()
+                                                } catch (e) {
+                                                    return '—'
+                                                }
+                                            })()}
                                         </span>
                                     )
                                 })}

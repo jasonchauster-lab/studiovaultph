@@ -202,12 +202,23 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
     const resetPage = () => setPage(1)
 
     // ── CSV Exports ───────────────────────────────────────────────────────────
+    const safeFormatDate = (dateStr: string | null | undefined, options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) => {
+        if (!dateStr) return '—'
+        try {
+            const d = new Date(dateStr)
+            if (isNaN(d.getTime())) return '—'
+            return d.toLocaleString('en-PH', { timeZone: 'Asia/Manila', ...options }).toUpperCase()
+        } catch (e) {
+            return '—'
+        }
+    }
+
     function exportActivityCSV() {
         const header = 'Date & Time,Admin,Admin Email,Category,Action,Details'
         const rows = filteredLogs.map(l => {
             const { name, email } = getAdmin(l)
             const category = ACTION_CATEGORIES[l.action_type] || 'Other'
-            const date = new Date(l.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })
+            const date = safeFormatDate(l.created_at, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
             const details = (l.details || '').replace(/,/g, ';').replace(/\n/g, ' ')
             return `"${date}","${name}","${email}","${category}","${l.action_type}","${details}"`
         })
@@ -218,7 +229,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
     function exportFinancialCSV() {
         const header = 'Date & Time,Type,List,Studio Email,Instructor Email,Amount,Platform Fee,Studio Share,Instructor Share,Status'
         const rows = filteredTransactions.map(t => {
-            const date = new Date(t.date).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })
+            const date = safeFormatDate(t.date, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
             const list = t.type === 'Booking' ? `${t.client} @ ${t.studio}` : (t.type === 'Payout' ? (t.studio !== '-' ? t.studio : t.instructor) : t.client)
             const studioEmail = t.type === 'Booking' ? t.studio_email : (t.type === 'Payout' && t.studio !== '-' ? t.instructor_email : '-')
             const instructorEmail = t.type === 'Booking' ? t.instructor_email : (t.type === 'Payout' && t.studio === '-' ? t.instructor_email : '-')
@@ -448,7 +459,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                         return (
                                             <tr key={log.id} className="hover:bg-sage/5 transition-colors group">
                                                 <td className="px-8 py-6 text-[10px] font-bold text-charcoal/60 whitespace-nowrap">
-                                                    {new Date(log.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).toUpperCase()}
+                                                    {safeFormatDate(log.created_at)}
                                                 </td>
                                                 <td className="px-8 py-6">
                                                     <p className="text-xs font-black text-charcoal uppercase tracking-widest">{name}</p>
@@ -507,7 +518,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                     (paginated as Transaction[]).map(tx => (
                                         <tr key={tx.id} className="hover:bg-sage/5 transition-colors group">
                                             <td className="px-8 py-6 text-[10px] font-bold text-charcoal/60 whitespace-nowrap">
-                                                {new Date(tx.date).toLocaleString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).toUpperCase()}
+                                                {safeFormatDate(tx.date)}
                                             </td>
                                             <td className="px-8 py-6">
                                                 <span className={clsx(
