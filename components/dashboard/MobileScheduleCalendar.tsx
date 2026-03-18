@@ -280,7 +280,7 @@ export default function MobileScheduleCalendar({
                                             </h3>
                                         </div>
                                         {session.displayRatio ? (
-                                            <div className="bg-buttermilk text-charcoal px-3 py-1 rounded-full text-[9px] font-black tracking-widest shadow-sm shrink-0 border border-charcoal/5">
+                                            <div className="bg-buttermilk text-charcoal px-3 py-1 rounded-full text-[9px] font-black tracking-widest shadow-sm shrink-0 border border-charcoal/10">
                                                 {session.displayRatio}
                                             </div>
                                         ) : session.is_booked ? (
@@ -288,7 +288,7 @@ export default function MobileScheduleCalendar({
                                                 1/1
                                             </div>
                                         ) : (
-                                            <div className="bg-off-white/70 text-charcoal/40 border border-border-grey/60 px-3 py-1 rounded-full text-[9px] font-black tracking-widest shrink-0 shadow-sm">
+                                            <div className="bg-off-white/70 text-charcoal/80 border border-border-grey/60 px-3 py-1 rounded-full text-[9px] font-black tracking-widest shrink-0 shadow-sm">
                                                 0/1
                                             </div>
                                         )}
@@ -307,7 +307,7 @@ export default function MobileScheduleCalendar({
                                                         "flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-all text-[8px] font-bold uppercase tracking-wider",
                                                         session.is_booked 
                                                             ? "text-white/70 bg-white/10 border-white/20 hover:bg-forest hover:text-white"
-                                                            : "text-slate bg-white/60 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
+                                                            : "text-charcoal/80 bg-white/60 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
                                                     )}
                                                 >
                                                     <MapPin className="w-3 h-3" />
@@ -324,7 +324,7 @@ export default function MobileScheduleCalendar({
                                                     "flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-all text-[8px] font-bold uppercase tracking-wider",
                                                     session.is_booked 
                                                         ? "text-white/70 bg-white/10 border-white/20 hover:bg-white/20" 
-                                                        : "text-muted-burgundy bg-white/60 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
+                                                        : "text-charcoal/80 bg-white/60 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
                                                 )}
                                             >
                                                 <MapPin className="w-3 h-3" />

@@ -140,8 +140,8 @@ export async function GET(request: Request) {
         // was embedded in the email redirect URL — reliable across all devices.
             if (remember) {
                 const maxAge = 14 * 24 * 60 * 60
-                response.cookies.set('otp_remembered', user.id, { maxAge, path: '/', sameSite: 'lax', secure: process.env.NODE_ENV === 'production' })
-                response.cookies.set('remember_me', '1', { maxAge, path: '/', sameSite: 'lax', secure: process.env.NODE_ENV === 'production' })
+                response.cookies.set('otp_remembered', user.id, { maxAge, path: '/', sameSite: 'lax', secure: process.env.NODE_ENV === 'production', httpOnly: false })
+                response.cookies.set('remember_me', '1', { maxAge, path: '/', sameSite: 'lax', secure: process.env.NODE_ENV === 'production', httpOnly: false })
             }
 
             return response
@@ -229,8 +229,8 @@ export async function GET(request: Request) {
             const cookies = request.headers.get('cookie') || ''
             if (remember) {
                 const maxAge = 14 * 24 * 60 * 60
-                response.cookies.set('otp_remembered', user.id, { maxAge, path: '/', sameSite: 'lax', secure: process.env.NODE_ENV === 'production' })
-                response.cookies.set('remember_me', '1', { maxAge, path: '/', sameSite: 'lax', secure: process.env.NODE_ENV === 'production' })
+                response.cookies.set('otp_remembered', user.id, { maxAge, path: '/', sameSite: 'lax', secure: process.env.NODE_ENV === 'production', httpOnly: false })
+                response.cookies.set('remember_me', '1', { maxAge, path: '/', sameSite: 'lax', secure: process.env.NODE_ENV === 'production', httpOnly: false })
             }
 
             return response

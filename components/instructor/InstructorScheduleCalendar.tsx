@@ -691,7 +691,7 @@ export default function InstructorScheduleCalendar({
                                                                             className={clsx(
                                                                                 "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-2 py-1 group/slot flex flex-col justify-start shadow-tight",
                                                                                 isPastCell
-                                                                                    ? "bg-white border-border-grey text-slate"
+                                                                                    ? "bg-white border-border-grey text-charcoal/80"
                                                                                     : "bg-warm-stone border-border-grey text-charcoal",
                                                                                 duration < 45 && "py-1 px-2 justify-center"
                                                                             )}
@@ -718,7 +718,7 @@ export default function InstructorScheduleCalendar({
                                                                                         <div className={clsx("text-[10px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
                                                                                             {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
                                                                                         </div>
-                                                                                      <div className="text-[8px] font-black text-charcoal/60 bg-white/80 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap ml-2 shrink-0 shadow-sm">
+                                                                                      <div className="text-[8px] font-black text-charcoal bg-white/80 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap ml-2 shrink-0 shadow-sm">
                                                               0/1
                                                           </div>
 
@@ -726,8 +726,8 @@ export default function InstructorScheduleCalendar({
 
                                                                                     <div className="flex flex-wrap items-center gap-1 overflow-hidden">
                                                                                         {locations.map((loc, idx) => (
-                                                                                            <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell ? "text-slate border-border-grey bg-off-white" : "text-charcoal border-charcoal/20 bg-buttermilk/10")}>
-                                                                                              <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-charcoal/30" : "text-charcoal/40")} />
+                                                                                            <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell ? "text-charcoal border-border-grey bg-off-white" : "text-charcoal border-charcoal/20 bg-buttermilk/10")}>
+                                                                                              <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-charcoal/60" : "text-charcoal/60")} />
                                                                   <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || 'Studio'}</span>
 
                                                                                             </div>

@@ -511,7 +511,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     <div
                                                                         className={clsx(
                                                                             "absolute top-1.5 left-1.5 right-1.5 bottom-1.5 p-3.5 border-l-4 border-solid transition-all duration-500 hover:shadow-card hover:-translate-y-0.5 group/slot z-10 overflow-hidden cursor-pointer rounded-xl flex flex-col justify-between backdrop-blur-sm",
-                                                                                isPastCell ? "bg-off-white border-border-grey/50 opacity-60" :
+                                                                                isPastCell ? "bg-off-white border-border-grey/50 opacity-80" :
                                                                                     hasPending ? "bg-amber-50 border-amber-300 shadow-tight" :
                                                                                         isBooked ? "bg-charcoal border-forest shadow-card" : "bg-white border-border-grey ring-1 ring-border-grey/10 shadow-tight"
                                                                         )}
@@ -523,20 +523,20 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     >
                                                                         <div className="relative z-10">
                                                                             {!isBooked && !hasPending && (
-                                                                                <div className="text-[10px] font-black text-slate mb-1.5 truncate opacity-50 uppercase tracking-widest">
-                                                                                    {hour.toString().padStart(2, '0')}:00 - {(hour + 1).toString().padStart(2, '0')}:00
-                                                                                </div>
+                                                                                 <div className="text-[10px] font-black text-charcoal mb-1.5 truncate opacity-70 uppercase tracking-widest">
+                                                                                      {hour.toString().padStart(2, '0')}:00 - {(hour + 1).toString().padStart(2, '0')}:00
+                                                                                  </div>
                                                                             )}
                                                                             <div className="flex justify-between items-start mb-2 overflow-hidden">
                                                                                 <h4 className={clsx("text-[11px] font-bold uppercase tracking-tight truncate max-w-[85%] leading-tight", isPastCell || (!isBooked && !hasPending) ? "text-charcoal" : "text-white")}>
                                                                                     {displayTitle}
                                                                                 </h4>
-                                                                                <Edit2 className={clsx("w-3 h-3 opacity-0 group-hover/slot:opacity-100 transition-all duration-300 shrink-0 transform group-hover/slot:scale-110", isPastCell || (!isBooked && !hasPending) ? "text-charcoal/40" : "text-white/40")} />
+                                                                                 <Edit2 className={clsx("w-3 h-3 opacity-0 group-hover/slot:opacity-100 transition-all duration-300 shrink-0 transform group-hover/slot:scale-110", isPastCell || (!isBooked && !hasPending) ? "text-charcoal/60" : "text-white/40")} />
                                                                             </div>
                                                                             <div className="flex flex-wrap gap-1.5 overflow-hidden">
                                                                                 {Object.entries(equipmentCounts).map(([eq, counts]) => (
-                                                                                    <span key={eq} className={clsx("text-[8px] font-black uppercase tracking-tighter flex items-center gap-1 px-2 py-0.5 rounded-full border transition-colors", isPastCell || (!isBooked && !hasPending) ? "text-charcoal/80 border-border-grey bg-off-white" : "text-white/90 border-white/20 bg-white/10")}>
-                                                                                        <Box className="w-2.5 h-2.5 opacity-40 shrink-0" />
+                                                                                     <span key={eq} className={clsx("text-[8px] font-black uppercase tracking-tighter flex items-center gap-1 px-2 py-0.5 rounded-full border transition-colors", isPastCell || (!isBooked && !hasPending) ? "text-charcoal border-border-grey bg-off-white" : "text-white/90 border-white/20 bg-white/10")}>
+                                                                                         <Box className="w-2.5 h-2.5 opacity-60 shrink-0" />
                                                                                         <span className="truncate">{counts.booked}/{counts.total} {eq.split(' ')[0]}</span>
                                                                                     </span>
                                                                                 ))}
@@ -544,8 +544,8 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                         </div>
                                                                         <div className={clsx("mt-2 pt-2 border-t relative z-10", isPastCell || (!isBooked && !hasPending) ? "border-charcoal/5" : "border-white/10")}>
                                                                             <p className={clsx("text-[9px] font-black uppercase tracking-[0.1em] truncate flex items-center gap-1.5", isPastCell || (!isBooked && !hasPending) ? "text-slate" : "text-white/70")}>
-                                                                                <User className="w-2.5 h-2.5 opacity-40 shrink-0" />
-                                                                                <span className="truncate">{instructors.size > 0 ? Array.from(instructors).join(', ') : 'Unassigned'}</span>
+                                                                                 <User className="w-2.5 h-2.5 opacity-60 shrink-0" />
+                                                                                  <span className="truncate">{instructors.size > 0 ? Array.from(instructors).join(', ') : 'Unassigned'}</span>
                                                                             </p>
                                                                         </div>
 
@@ -614,8 +614,8 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                     key={day.toString()}
                                                     className={clsx(
                                                         "min-h-[140px] p-4 transition-all hover:bg-forest/5 cursor-pointer",
-                                                        !isCurrentMonth && "bg-off-white opacity-40",
-                                                        isSameDay(day, new Date()) && "bg-forest/5"
+                                                         !isCurrentMonth && "bg-off-white opacity-60",
+                                                         isSameDay(day, new Date()) && "bg-forest/5"
                                                     )}
                                                     onClick={() => {
                                                         const targetDate = format(day, 'yyyy-MM-dd')
@@ -633,9 +633,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                     </div>
                                                     <div className="space-y-1">
                                                         {uniqueDisplaySlots.slice(0, 3).map((s: any) => (
-                                                            <div 
-                                                                key={s.key} 
-                                                                className="text-[8px] font-bold text-slate truncate uppercase tracking-tighter flex items-center justify-between gap-1 hover:bg-burgundy/10 p-0.5 rounded transition-colors cursor-pointer"
+                                                             <div 
+                                                                 key={s.key} 
+                                                                 className="text-[8px] font-bold text-charcoal truncate uppercase tracking-tighter flex items-center justify-between gap-1 hover:bg-burgundy/10 p-0.5 rounded transition-colors cursor-pointer"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     const matchingSlots = daySlotsData.filter(slot => 
@@ -647,10 +647,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     setIsBucketModalOpen(true);
                                                                 }}
                                                             >
-                                                                <span className="truncate">• {s.start_time.slice(0, 5)} {s.displayType}</span>
-                                                                <span className="shrink-0 font-bold text-charcoal/60 uppercase tracking-tighter bg-charcoal/5 px-1 rounded">
-                                                                    {s.booked}/{s.total}
-                                                                </span>
+                                                                <span className="truncate">• {s.start_time.slice(0, 5)} {s.displayType}</span>                                                                 <span className="shrink-0 font-bold text-charcoal/80 uppercase tracking-tighter bg-charcoal/5 px-1 rounded">
+                                                                     {s.booked}/{s.total}
+                                                                 </span>
                                                             </div>
                                                         ))}
                                                         {displaySlotsCount > 3 && (
