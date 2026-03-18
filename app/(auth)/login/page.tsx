@@ -191,7 +191,7 @@ function LoginContent() {
         if (isSignUp && role) params.set('role_intent', role)
         const ref = searchParams.get('ref')
         if (ref) params.set('ref', ref)
-        const callbackUrl = `${window.location.origin}/auth/callback${params.toString() ? '?' + params.toString() : ''}`
+        const callbackUrl = `${window.location.origin}/auth/callback?next=dashboard${params.toString() ? '&' + params.toString() : ''}`
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: { redirectTo: callbackUrl },

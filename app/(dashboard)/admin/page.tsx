@@ -13,6 +13,8 @@ import AdminExportButtons from '@/components/admin/AdminExportButtons'
 import TriggerFundsUnlockButton from '@/components/admin/TriggerFundsUnlockButton'
 import BalanceAdjustmentTool from '@/components/admin/BalanceAdjustmentTool'
 import ReportsTab from '@/components/admin/ReportsTab'
+import UserSearchBar from '@/components/admin/UserSearchBar'
+import { Search } from 'lucide-react'
 
 // Since this is a server component, we fetch data directly
 export default async function AdminDashboard({
@@ -21,8 +23,9 @@ export default async function AdminDashboard({
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
     try {
-        const { range, tab } = await searchParams
+        const { range, tab, search } = await searchParams
         const activeTab = (tab as string) || 'overview'
+        const searchQuery = (search as string) || ''
         const publicSupabase = await createClient()
 
         // --- DATE FILTER LOGIC ---
@@ -143,10 +146,18 @@ export default async function AdminDashboard({
                 .limit(500),
 
             // 13. All users (capped at 1000 — prevents unbounded fetch on large platforms)
-            supabase.from('profiles')
-                .select('id, full_name, email, role, created_at, available_balance, is_suspended, contact_number, waiver_url, waiver_signed_at')
-                .order('created_at', { ascending: false })
-                .limit(1000),
+            (() => {
+                let query = supabase.from('profiles')
+                    .select('id, full_name, email, role, created_at, available_balance, is_suspended, contact_number, waiver_url, waiver_signed_at')
+                    .order('created_at', { ascending: false })
+                    .limit(1000)
+                
+                if (searchQuery) {
+                    query = query.or(`email.ilike.%${searchQuery}%,contact_number.ilike.%${searchQuery}%`)
+                }
+                
+                return query
+            })(),
         ])
 
         const [
@@ -225,7 +236,16 @@ export default async function AdminDashboard({
         const getDisplayUrl = (original: string) => {
             if (!original) return original
             if (!isStoragePath(original)) return original
-            return paymentUrlMap[original] || waiverUrlMap[original] || original
+            
+            // Check in order of priority, fallback to original if not found in maps
+            const url = paymentUrlMap[original] || waiverUrlMap[original] || original
+            
+            // Helpful logging for admins to see which paths failed to sign
+            if (url === original && isStoragePath(original)) {
+                console.warn(`[AdminDashboard] Storage path not found in signed maps: ${original}. Check bucket permissions or existence.`);
+            }
+            
+            return url
         }
 
         const certsWithUrls = pendingCerts.map((cert: any) => ({
@@ -489,8 +509,8 @@ export default async function AdminDashboard({
 
                                             return (
                                                 <div key={b.id} className="group p-6 bg-alabaster/30 border border-cream-100 rounded-2xl hover:bg-white hover:shadow-cloud transition-all duration-300 flex flex-col lg:flex-row justify-between items-start gap-8">
-                                                    <div className="flex-1 space-y-4">
-                                                        <div className="space-y-1">
+                                                    <div className="flex-1 min-w-0 space-y-4">
+                                                        <div className="space-y-1 overflow-hidden">
                                                             <div className="flex items-center gap-3">
                                                                 <p className="font-serif text-2xl text-charcoal">
                                                                     {instructor?.full_name || 'Instructor'} <span className="text-charcoal/50 font-sans text-lg mx-1">→</span> {studio?.name || 'Studio'}
@@ -499,10 +519,10 @@ export default async function AdminDashboard({
                                                                     {breakdown.equipment || 'Session'}
                                                                 </span>
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-xs text-charcoal/50 font-medium">
-                                                                <span className="font-bold text-charcoal/80">Client: {b.client?.full_name}</span>
-                                                                <span className="opacity-40">•</span>
-                                                                <span>{b.client?.email}</span>
+                                                            <div className="flex items-center gap-2 text-xs text-charcoal/50 font-medium overflow-hidden">
+                                                                <span className="font-bold text-charcoal/80 truncate">Client: {b.client?.full_name}</span>
+                                                                <span className="opacity-40 flex-shrink-0">•</span>
+                                                                <span className="truncate">{b.client?.email}</span>
                                                             </div>
                                                             <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-wider mt-1">
                                                                 {new Date(b.slots?.date).toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} @ {b.slots?.start_time}
@@ -576,10 +596,10 @@ export default async function AdminDashboard({
                                     {payoutRequests.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending requests.</p> : (
                                         <div className="space-y-4">
                                             {payoutRequests.map((r: any) => (
-                                                <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center transition-all hover:bg-white hover:shadow-cloud group">
-                                                    <div className="space-y-1">
-                                                        <p className="text-lg font-serif text-charcoal">₱{r.amount.toLocaleString()}</p>
-                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest">{r.instructor_name}</p>
+                                                <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center gap-4 transition-all hover:bg-white hover:shadow-cloud group">
+                                                    <div className="space-y-1 min-w-0 flex-1">
+                                                        <p className="text-lg font-serif text-charcoal truncate">₱{r.amount.toLocaleString()}</p>
+                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest truncate">{r.instructor_name}</p>
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
@@ -600,10 +620,10 @@ export default async function AdminDashboard({
                                     {studioPayouts.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending payouts.</p> : (
                                         <div className="space-y-4">
                                             {studioPayouts.map((r: any) => (
-                                                <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center transition-all hover:bg-white hover:shadow-cloud group">
-                                                    <div className="space-y-1">
-                                                        <p className="text-lg font-serif text-charcoal">₱{r.amount.toLocaleString()}</p>
-                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest">{r.studios?.name} ({r.studios?.profiles?.full_name})</p>
+                                                <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center gap-4 transition-all hover:bg-white hover:shadow-cloud group">
+                                                    <div className="space-y-1 min-w-0 flex-1">
+                                                        <p className="text-lg font-serif text-charcoal truncate">₱{r.amount.toLocaleString()}</p>
+                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest truncate">{r.studios?.name} ({r.studios?.profiles?.full_name})</p>
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
@@ -652,22 +672,35 @@ export default async function AdminDashboard({
                                                 <div key={t.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 transition-all hover:bg-white hover:shadow-cloud group">
                                                     <div className="flex items-start gap-4">
                                                         {t.payment_proof_url && (
-                                                            <a href={getDisplayUrl(t.payment_proof_url)} target="_blank" className="relative w-20 h-20 rounded-xl overflow-hidden border border-cream-200 bg-white flex-shrink-0 group-hover:border-sage/30 transition-colors">
+                                                            <a href={getDisplayUrl(t.payment_proof_url)} target="_blank" className="relative w-20 h-20 rounded-xl overflow-hidden border border-cream-200 bg-white flex-shrink-0 group-hover:border-sage/30 transition-colors shadow-sm">
                                                                 <img 
                                                                     src={getDisplayUrl(t.payment_proof_url)} 
                                                                     alt="Payment Proof" 
                                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                                    onError={(e) => {
+                                                                        // Fallback UI if image fails to load (likely due to missing bucket/permissions)
+                                                                        const target = e.target as HTMLImageElement;
+                                                                        target.style.display = 'none';
+                                                                        const parent = target.parentElement;
+                                                                        if (parent) {
+                                                                            parent.classList.add('flex', 'items-center', 'justify-center', 'bg-alabaster');
+                                                                            const iconDiv = document.createElement('div');
+                                                                            iconDiv.className = 'text-[9px] font-black text-charcoal/30 text-center px-2 uppercase tracking-tight';
+                                                                            iconDiv.innerText = 'IMAGE ERROR';
+                                                                            parent.appendChild(iconDiv);
+                                                                        }
+                                                                    }}
                                                                 />
                                                                 <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/10 flex items-center justify-center transition-colors">
                                                                     <BarChart3 className="w-5 h-5 text-white opacity-0 group-hover:opacity-100" />
                                                                 </div>
                                                             </a>
                                                         )}
-                                                        <div className="space-y-1">
-                                                            <p className="text-xl font-serif text-charcoal">₱{t.amount.toLocaleString()}</p>
-                                                            <div className="space-y-0.5">
-                                                                <p className="text-[10px] text-charcoal font-black uppercase tracking-widest">{t.profiles?.full_name}</p>
-                                                                <p className="text-[9px] text-charcoal/40 font-bold uppercase tracking-wider">{t.profiles?.email}</p>
+                                                        <div className="space-y-1 min-w-0 flex-1">
+                                                            <p className="text-xl font-serif text-charcoal truncate">₱{t.amount.toLocaleString()}</p>
+                                                            <div className="space-y-0.5 overflow-hidden">
+                                                                <p className="text-[10px] text-charcoal font-black uppercase tracking-widest truncate">{t.profiles?.full_name}</p>
+                                                                <p className="text-[9px] text-charcoal/40 font-bold uppercase tracking-wider truncate">{t.profiles?.email}</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -734,11 +767,12 @@ export default async function AdminDashboard({
 
                     {activeTab === 'customers' && (
                         <div className="glass-card overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
-                            <div className="p-8 border-b border-cream-100 flex justify-between items-end">
+                            <div className="p-8 border-b border-cream-100 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
                                 <div className="space-y-1">
                                     <h2 className="text-sm font-black tracking-[0.2em] text-charcoal uppercase">USER ARCHIVE</h2>
-                                    <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest">{allUsers.length} TOTAL REGISTRATIONS</p>
+                                    <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest">{allUsers.length} {searchQuery ? 'MATCHES FOUND' : 'TOTAL REGISTRATIONS'}</p>
                                 </div>
+                                <UserSearchBar />
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">

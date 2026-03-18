@@ -28,8 +28,8 @@ export async function GET(request: Request) {
         const user = data?.session?.user
 
         if (user) {
-            const provider = user.app_metadata?.provider
-            const isOAuth = provider && provider !== 'email'
+            const provider = user.app_metadata?.provider || (user.identities && user.identities[0]?.provider)
+            const isOAuth = (provider && provider !== 'email') || user.app_metadata?.providers?.some((p: string) => p !== 'email')
 
             // ── OAuth Flow (Google, GitHub, etc.) ────────────────────────────
             if (isOAuth) {
@@ -136,8 +136,8 @@ export async function GET(request: Request) {
             const dashboard = getDashboard(profile?.role || '')
             const response = buildRedirect(origin, request, dashboard)
 
-        // If the user ticked "Remember this device", the remember=1 param
-        // was embedded in the email redirect URL — reliable across all devices.
+            // If the user ticked "Remember this device", the remember=1 param
+            // was embedded in the email redirect URL — reliable across all devices.
             if (remember) {
                 const maxAge = 14 * 24 * 60 * 60
                 response.cookies.set('otp_remembered', user.id, { maxAge, path: '/', sameSite: 'lax', secure: process.env.NODE_ENV === 'production', httpOnly: false })
@@ -145,6 +145,20 @@ export async function GET(request: Request) {
             }
 
             return response
+        }
+
+        // ── Explicit Dashboard Redirect ─────────────────────────────────────
+        // If next=dashboard is passed, resolve the specific dashboard for this user
+        // (Bypasses the generic /verified success page)
+        if (next === 'dashboard' && user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single()
+
+            const dashboard = getDashboard(profile?.role || '')
+            return buildRedirect(origin, request, dashboard)
         }
 
         // ── Security: Never redirect to /2fa ────────────────────────────────

@@ -37,7 +37,7 @@ export const AccountReactivatedEmail = ({
                         Hi {studioName},
                     </Text>
                     <Text style={text}>
-                        Following our review, your account has been successfully reinstated. Your studio is now visible on the marketplace, and you can resume creating slots.
+                        Following our review, your account has been successfully reinstated. You can now resume your activities and manage your presence on the platform.
                     </Text>
 
                     <Section style={probationSection}>

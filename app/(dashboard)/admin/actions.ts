@@ -1473,28 +1473,36 @@ export async function reinstateStudio(profileId: string) {
         return { error: 'Unauthorized: Admin access required.' }
     }
 
-    // 2. Clear strikes and suspension
-    // Get the studio first to clear its strikes
+    // 1. Fetch profile to know the role and name
+    const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('full_name, email, role')
+        .eq('id', profileId)
+        .single()
+    
+    if (profileError || !profile) return { error: 'User profile not found.' }
+
+    // 2. Clear strikes if studio exists
     const { data: studio } = await supabase
         .from('studios')
         .select('id, name')
         .eq('owner_id', profileId)
         .single()
 
-    if (!studio) return { error: 'Studio not found.' }
+    if (studio) {
+        // Delete strikes
+        const { error: deleteError } = await supabase
+            .from('studio_strikes')
+            .delete()
+            .eq('studio_id', studio.id)
 
-    // Delete strikes
-    const { error: deleteError } = await supabase
-        .from('studio_strikes')
-        .delete()
-        .eq('studio_id', studio.id)
-
-    if (deleteError) {
-        console.error('Error clearing strikes:', deleteError)
-        return { error: 'Failed to clear strikes.' }
+        if (deleteError) {
+            console.error('Error clearing strikes:', deleteError)
+            return { error: 'Failed to clear strikes.' }
+        }
     }
 
-    // Reset suspension
+    // 3. Reset suspension
     const { error: resetError } = await supabase
         .from('profiles')
         .update({ is_suspended: false })
@@ -1505,27 +1513,23 @@ export async function reinstateStudio(profileId: string) {
         return { error: 'Failed to reset suspension.' }
     }
 
-    const { data: ownerProfile } = await supabase.from('profiles').select('full_name, email').eq('id', profileId).single()
-    await logAdminAction(supabase, 'REINSTATE_STUDIO', 'profiles', profileId, `Suspended studio owner ${ownerProfile?.full_name || 'Unknown'} (${ownerProfile?.email || 'no email'}) reinstated — strikes cleared for studio "${studio.name}"`)
+    const displayName = studio?.name || profile.full_name || 'Unknown'
+    await logAdminAction(supabase, 'REINSTATE_USER', 'profiles', profileId, `User ${profile.full_name} (${profile.email}) reinstated. ${studio ? `Strikes cleared for studio "${studio.name}"` : 'No studio strikes to clear.'}`)
 
-    // 3. Send Reactivation Email
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('email, full_name')
-        .eq('id', profileId)
-        .single()
-
-    if (profile?.email) {
+    // 4. Send Reactivation Email
+    if (profile.email) {
         const host = (await headers()).get('host')
         const protocol = host?.includes('localhost') ? 'http' : 'https'
         const siteUrl = `${protocol}://${host}`
+        
+        const dashboardUrl = profile.role === 'studio' ? `${siteUrl}/studio` : `${siteUrl}/instructor`
 
         await sendEmail({
             to: profile.email,
-            subject: 'Your Studio Vault PH Listing is Now Active',
+            subject: profile.role === 'studio' ? 'Your Studio Vault PH Listing is Now Active' : 'Your Studio Vault PH Account is Now Active',
             react: AccountReactivatedEmail({
-                studioName: studio.name,
-                dashboardUrl: `${siteUrl}/studio`
+                studioName: displayName,
+                dashboardUrl: dashboardUrl
             })
         })
     }
