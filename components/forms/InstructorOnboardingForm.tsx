@@ -246,7 +246,19 @@ export default function InstructorOnboardingForm() {
                         <p className="text-sm font-medium text-charcoal-700">
                             {selectedFileName || 'Click to upload or drag and drop'}
                         </p>
-                        <p className="text-xs text-charcoal-500 mt-1">PDF, JPG, or PNG (max 5MB)</p>
+                    <p className="text-xs text-charcoal-500 mt-1">PDF, JPG, or PNG (max 5MB)</p>
+                    </div>
+                    <div className="space-y-2 mt-4">
+                        <label htmlFor="certExpiry" className="block text-sm font-medium text-charcoal-800">
+                            Certification Expiration Date <span className="text-charcoal-400 font-normal">(Optional)</span>
+                        </label>
+                        <input
+                            type="date"
+                            id="certExpiry"
+                            name="certExpiry"
+                            className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400"
+                        />
+                        <p className="text-[10px] text-charcoal-500 italic">Leave blank if your certification does not expire.</p>
                     </div>
                 </div>
 
@@ -382,6 +394,17 @@ export default function InstructorOnboardingForm() {
                                 </>
                             )}
                         </div>
+                        <div className="space-y-2 mt-4">
+                            <label htmlFor="birExpiry" className="block text-sm font-medium text-charcoal-800">
+                                BIR Expiration Date <span className="text-charcoal-400 font-normal">(Optional)</span>
+                            </label>
+                            <input
+                                type="date"
+                                id="birExpiry"
+                                name="birExpiry"
+                                className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400"
+                            />
+                        </div>
                         <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
                             <ShieldCheck className="w-3 h-3 text-rose-gold" />
                             Used only for secure identity verification and automated payouts.
@@ -391,6 +414,7 @@ export default function InstructorOnboardingForm() {
                         </p>
                     </div>
                 </div>
+
                 {/* Cancellation & Wallet Policy */}
                 <div className="pt-6 border-t border-cream-200">
                     <h3 className="text-sm font-semibold text-charcoal-900 uppercase tracking-wider mb-4">Cancellation & Wallet Policy</h3>

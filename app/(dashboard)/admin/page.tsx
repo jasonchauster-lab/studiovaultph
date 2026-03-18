@@ -65,7 +65,7 @@ export default async function AdminDashboard({
 
             // 3. Studio payout setup queue
             supabase.from('studios')
-                .select('id, name, mayors_permit_url, secretary_certificate_url, mayors_permit_expiry, secretary_certificate_expiry, bir_certificate_url, bir_certificate_expiry, insurance_url, insurance_expiry, created_at, profiles(full_name)')
+                .select('id, name, mayors_permit_url, secretary_certificate_url, mayors_permit_expiry, bir_certificate_url, bir_certificate_expiry, insurance_url, insurance_expiry, created_at, profiles(full_name)')
                 .eq('payout_approval_status', 'pending')
                 .order('created_at', { ascending: false }),
 
@@ -448,10 +448,15 @@ export default async function AdminDashboard({
                                                     <div className="space-y-1">
                                                         <p className="font-bold text-charcoal text-sm">{s.name}</p>
                                                         <p className="text-[10px] text-charcoal/50 font-black uppercase tracking-wider">{s.profiles?.full_name}</p>
-                                                        <div className="pt-2 flex gap-3">
-                                                            {s.permitSignedUrl && <a href={s.permitSignedUrl} target="_blank" className="text-[10px] font-black text-sage uppercase tracking-widest">PERMIT</a>}
-                                                            {s.certSignedUrl && <a href={s.certSignedUrl} target="_blank" className="text-[10px] font-black text-sage uppercase tracking-widest">SEC CERT</a>}
-                                                        </div>
+                                                         <div className="pt-2 flex flex-wrap gap-x-4 gap-y-1">
+                                                             {s.permitSignedUrl && (
+                                                                 <div className="flex items-center gap-1.5">
+                                                                     <a href={s.permitSignedUrl} target="_blank" className="text-[10px] font-black text-sage uppercase tracking-widest hover:text-charcoal transition-colors">PERMIT</a>
+                                                                     {s.mayors_permit_expiry && <span className="text-[8px] text-charcoal/40 font-bold uppercase tracking-[0.1em]">Exp: {s.mayors_permit_expiry}</span>}
+                                                                 </div>
+                                                             )}
+                                                             {s.certSignedUrl && <a href={s.certSignedUrl} target="_blank" className="text-[10px] font-black text-sage uppercase tracking-widest hover:text-charcoal transition-colors">SEC CERT</a>}
+                                                         </div>
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={s.id} action="rejectStudioPayout" label="REJECT" className="px-3 py-1 bg-red-50 text-red-700 text-[10px] font-black rounded-lg" />

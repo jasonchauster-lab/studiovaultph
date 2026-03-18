@@ -404,7 +404,6 @@ export async function submitPayoutApplication(prevState: any, formData: FormData
     const mayorsPermit = formData.get('mayorsPermit') as File
     const secretaryCertificate = formData.get('secretaryCertificate') as File
     const mayorsPermitExpiry = formData.get('mayorsPermitExpiry') as string
-    const secretaryCertificateExpiry = formData.get('secretaryCertificateExpiry') as string
 
     if (!studioId || !mayorsPermit || !secretaryCertificate) {
         return { error: 'All documents are required.' }
@@ -442,8 +441,7 @@ export async function submitPayoutApplication(prevState: any, formData: FormData
             payout_approval_status: 'pending',
             mayors_permit_url: permitPath,
             secretary_certificate_url: certPath,
-            mayors_permit_expiry: mayorsPermitExpiry,
-            secretary_certificate_expiry: secretaryCertificateExpiry
+            mayors_permit_expiry: mayorsPermitExpiry
         })
         .eq('id', studioId)
 

@@ -162,22 +162,13 @@ export default function PayoutRequestModal({
                                             />
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                    <div className="grid grid-cols-1 gap-4 mt-4">
                                         <div>
                                             <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Secretary's Certificate <span className="text-red-500">*</span></label>
                                             <input
                                                 name="secretaryCertificate"
                                                 type="file"
                                                 accept="image/*,.pdf"
-                                                required
-                                                className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900 text-sm bg-white"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Certificate Expiry Date <span className="text-red-500">*</span></label>
-                                            <input
-                                                name="secretaryCertificateExpiry"
-                                                type="date"
                                                 required
                                                 className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-charcoal-900 outline-none transition-all text-charcoal-900 text-sm bg-white"
                                             />

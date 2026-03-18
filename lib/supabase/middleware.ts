@@ -37,6 +37,15 @@ export async function updateSession(request: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser()
 
+    // ── Diagnostic Logging (Server-side) ──────────────────────────────
+    const path = request.nextUrl.pathname
+    const otpCookie = request.cookies.get('otp_remembered')?.value
+    const isVerified = user && otpCookie?.toLowerCase() === user.id.toLowerCase()
+
+    if (user && !path.startsWith('/_next') && !path.startsWith('/favicon.ico')) {
+        console.log(`[Middleware] Path: ${path} | User: ${user.id} | OTP Cookie: ${otpCookie || 'MISSING'} | Verified: ${isVerified}`)
+    }
+
     // Protected Routes Logic
     if (
         !request.nextUrl.pathname.startsWith('/auth') &&
@@ -46,20 +55,30 @@ export async function updateSession(request: NextRequest) {
         !request.nextUrl.pathname.startsWith('/favicon.ico') && // Static asset
         request.nextUrl.pathname !== '/' // Landing page
     ) {
+        // ── 2FA Enforcement ──────────────────────────────────────────────
+        // If they have a session but aren't remembered on this device/browser,
+        // force them to /login (where they will land on the OTP step).
+        if (user && !request.nextUrl.pathname.startsWith('/login')) {
+            if (!isVerified) {
+                const url = request.nextUrl.clone()
+                url.pathname = '/login'
+                return mergeResponseCookies(response, NextResponse.redirect(url))
+            }
+        }
+
         // 1. If user IS logged in but hitting /login, redirect to dashboard
         if (user && request.nextUrl.pathname.startsWith('/login')) {
-            let role = user.user_metadata?.role;
-            if (!role) {
-                const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-                role = profile?.role;
+            // Skip redirect if they still need 2FA
+            if (isVerified) {
+                let role = user.user_metadata?.role;
+                if (!role) {
+                    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+                    role = profile?.role;
+                }
+                const url = request.nextUrl.clone()
+                url.pathname = getDashboard(role);
+                return mergeResponseCookies(response, NextResponse.redirect(url))
             }
-            const url = request.nextUrl.clone()
-            if (role === 'admin') url.pathname = '/admin'
-            else if (role === 'instructor') url.pathname = '/instructor'
-            else if (role === 'studio') url.pathname = '/studio'
-            else if (role === 'customer') url.pathname = '/customer'
-            else url.pathname = '/welcome'
-            return NextResponse.redirect(url)
         }
 
         // 2. Enforce Login for protected areas
@@ -68,14 +87,12 @@ export async function updateSession(request: NextRequest) {
             if (protectedPrefixes.some(prefix => request.nextUrl.pathname.startsWith(prefix))) {
                 const url = request.nextUrl.clone()
                 url.pathname = '/login'
-                return NextResponse.redirect(url)
+                return mergeResponseCookies(response, NextResponse.redirect(url))
             }
         } else {
             // 2. Enforce Role Locking (User is logged in)
 
-            // Optimization: Check role in metadata first to avoid DB call/RLS recursion
             let role = user.user_metadata?.role;
-
             if (!role) {
                 const { data: profile } = await supabase
                     .from('profiles')
@@ -84,61 +101,65 @@ export async function updateSession(request: NextRequest) {
                     .single()
                 role = profile?.role;
             }
-            const path = request.nextUrl.pathname;
 
             // A. No Role -> Force Welcome/Onboarding
             if (!role) {
                 if (!path.startsWith('/welcome') && !path.startsWith('/api')) {
                     const url = request.nextUrl.clone()
                     url.pathname = '/welcome'
-                    return NextResponse.redirect(url)
+                    return mergeResponseCookies(response, NextResponse.redirect(url))
                 }
-                // Allow /welcome
             }
             // B. Check Restrictions based on Role
             else {
-                // Prevent access to /welcome if role is already set
                 if (path.startsWith('/welcome')) {
                     const url = request.nextUrl.clone()
-                    // Redirect to their default dashboard
-                    if (role === 'admin') url.pathname = '/admin'
-                    else if (role === 'instructor') url.pathname = '/instructor'
-                    else if (role === 'studio') url.pathname = '/studio'
-                    else url.pathname = '/customer'
-                    return NextResponse.redirect(url)
+                    url.pathname = getDashboard(role);
+                    return mergeResponseCookies(response, NextResponse.redirect(url))
                 }
 
-                // Customer: Cannot access /instructor (dashboard), /studio (dashboard), /admin
-                // But CAN access /instructors/[id] and /studios/[id] (public profile pages)
                 if (role === 'customer') {
                     if (path.startsWith('/instructor/') || path === '/instructor' || path.startsWith('/studio/') || path === '/studio' || path.startsWith('/admin')) {
                         const url = request.nextUrl.clone()
                         url.pathname = '/customer'
-                        return NextResponse.redirect(url)
+                        return mergeResponseCookies(response, NextResponse.redirect(url))
                     }
                 }
-                // Instructor: Cannot access /studio (dashboard) or /admin
-                // But CAN access /instructors/[id], /studios/[id], /customer
                 else if (role === 'instructor') {
                     if (path.startsWith('/studio/') || path === '/studio' || path.startsWith('/admin')) {
                         const url = request.nextUrl.clone()
                         url.pathname = '/instructor'
-                        return NextResponse.redirect(url)
+                        return mergeResponseCookies(response, NextResponse.redirect(url))
                     }
                 }
-                // Studio: Cannot access /instructor (dashboard) or /admin
-                // But CAN access /instructors/[id], /studios/[id], /customer
                 else if (role === 'studio') {
                     if (path.startsWith('/instructor/') || path === '/instructor' || path.startsWith('/admin')) {
                         const url = request.nextUrl.clone()
                         url.pathname = '/studio'
-                        return NextResponse.redirect(url)
+                        return mergeResponseCookies(response, NextResponse.redirect(url))
                     }
                 }
-                // Admin: (Usually allows all, or restrict purely strictly)
             }
         }
     }
 
     return response
+}
+
+/**
+ * Merges cookies from a source response into a destination response (e.g. a redirect).
+ * This ensures that Supabase session refreshes are not lost during redirects.
+ */
+function mergeResponseCookies(source: NextResponse, dest: NextResponse) {
+    source.cookies.getAll().forEach(cookie => {
+        const { name, value, ...options } = cookie
+        // @ts-ignore - options matches the expected shape but TS is strict about the exact interface
+        dest.cookies.set(name, value, options)
+    })
+    return dest
+}
+
+function getDashboard(role: string | undefined | null): string {
+    const map: Record<string, string> = { admin: '/admin', instructor: '/instructor', studio: '/studio', customer: '/customer' }
+    return map[role ?? ''] ?? '/welcome'
 }

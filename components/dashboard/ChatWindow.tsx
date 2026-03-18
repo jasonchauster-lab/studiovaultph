@@ -154,15 +154,15 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
                 {/* Header */}
                 <div className="bg-forest text-white p-4 flex justify-between items-center shrink-0">
                     <div>
-                        <h3 className="font-serif font-bold text-lg">Chat with {recipientName}</h3>
-                        {!isExpired && <UserPresenceIndicator userId={recipientId} className="mt-1" />}
+                        <h3 className="font-serif font-bold text-lg text-white">Chat with {recipientName}</h3>
+                        {!isExpired && <UserPresenceIndicator userId={recipientId} className="mt-1" textColor="text-white/80" />}
                         {isExpired && (
-                            <p className="text-xs text-yellow-400 flex items-center gap-1 mt-1">
+                            <p className="text-xs text-yellow-200 flex items-center gap-1 mt-1">
                                 <Clock className="w-3 h-3" /> Session Expired
                             </p>
                         )}
                     </div>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+                    <button onClick={onClose} className="text-white/60 hover:text-white transition-colors">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -172,7 +172,7 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
                     {loading ? (
                         <div className="text-center text-gray-500 text-sm py-4">Loading messages...</div>
                     ) : messages.length === 0 ? (
-                        <div className="text-center text-gray-400 text-sm py-8">
+                        <div className="text-center text-gray-500 text-sm py-8">
                             No messages yet. Start the conversation!
                         </div>
                     ) : (
@@ -188,7 +188,7 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
                                                 }`}
                                         >
                                             <p className={isMe ? 'text-white' : 'text-gray-900'}>{msg.content}</p>
-                                            <p className={`text-[10px] mt-1 ${isMe ? 'text-gray-400' : 'text-gray-400'}`}>
+                                            <p className={`text-[10px] mt-1 ${isMe ? 'text-white/60' : 'text-gray-400'}`}>
                                                 {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>

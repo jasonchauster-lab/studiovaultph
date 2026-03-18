@@ -102,7 +102,7 @@ export async function GET(request: Request) {
         // --- 2. PROCESS STUDIOS ---
         const { data: studios, error: studioError } = await supabase
             .from('studios')
-            .select('id, name, owner_id, payout_lock, mayors_permit_expiry, secretary_certificate_expiry, bir_certificate_expiry, gov_id_expiry, insurance_expiry, profiles(email, full_name)');
+            .select('id, name, owner_id, payout_lock, mayors_permit_expiry, bir_certificate_expiry, gov_id_expiry, insurance_expiry, profiles(email, full_name)');
 
         if (studioError) throw studioError;
 
@@ -119,7 +119,6 @@ export async function GET(request: Request) {
             };
 
             checkDoc(studio.mayors_permit_expiry, "Mayor's Permit");
-            checkDoc(studio.secretary_certificate_expiry, "Secretary's Certificate");
             checkDoc(studio.bir_certificate_expiry, "BIR Form 2303");
             checkDoc(studio.gov_id_expiry, "Valid Government ID");
             checkDoc(studio.insurance_expiry, "Insurance Policy");

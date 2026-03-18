@@ -35,6 +35,7 @@ interface UserPresenceIndicatorProps {
     initialLastSeenAt?: string
     showText?: boolean
     className?: string
+    textColor?: string
 }
 
 export default function UserPresenceIndicator({
@@ -42,7 +43,8 @@ export default function UserPresenceIndicator({
     initialIsOnline = false,
     initialLastSeenAt,
     showText = true,
-    className = ''
+    className = '',
+    textColor
 }: UserPresenceIndicatorProps) {
     // Stable ref to the singleton client — avoids re-running the effect every render
     // because createClient() previously returned a new object each call.
@@ -108,7 +110,9 @@ export default function UserPresenceIndicator({
                 <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isOnline ? 'bg-green-500' : 'bg-gray-300'}`}></span>
             </span>
             {showText && (
-                <span className={`text-xs ${isOnline ? 'text-green-600 font-medium' : 'text-gray-400 flex items-center gap-1'}`}>
+                <span className={`text-xs ${isOnline 
+                    ? (textColor || 'text-green-600 font-medium') 
+                    : (textColor || 'text-gray-400') + ' flex items-center gap-1'}`}>
                     {isOnline ? (
                         'Online'
                     ) : (

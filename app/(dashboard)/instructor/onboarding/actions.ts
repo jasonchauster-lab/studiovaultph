@@ -33,6 +33,8 @@ export async function submitInstructorOnboarding(formData: FormData) {
     const certificateFile = formData.get('certificateFile') as File
     const tin = formData.get('tin') as string
     const govIdExpiry = formData.get('govIdExpiry') as string
+    const birExpiry = formData.get('birExpiry') as string
+    const certExpiry = formData.get('certExpiry') as string || null
     const govIdFile = formData.get('govIdFile') as File
     const birFile = formData.get('birFile') as File
 
@@ -64,6 +66,7 @@ export async function submitInstructorOnboarding(formData: FormData) {
             date_of_birth: dateOfBirth,
             tin: tin,
             gov_id_expiry: govIdExpiry,
+            bir_expiry: birExpiry || null,
             role: newRole,
             updated_at: new Date().toISOString()
         })
@@ -130,6 +133,7 @@ export async function submitInstructorOnboarding(formData: FormData) {
             certification_body: certificationBody,
             certification_name: 'Instructor Certification', // Generic name or derived
             proof_url: certificatePath,
+            expiry_date: certExpiry,
             verified: false // Defaults to false in DB, but being explicit
         })
 

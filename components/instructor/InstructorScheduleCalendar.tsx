@@ -691,8 +691,8 @@ export default function InstructorScheduleCalendar({
                                                                             className={clsx(
                                                                                 "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-2 py-1 group/slot flex flex-col justify-start shadow-tight",
                                                                                 isPastCell
-                                                                                    ? "bg-white border-border-grey text-charcoal/80"
-                                                                                    : "bg-warm-stone border-border-grey text-charcoal",
+                                                                                     ? "bg-white/50 border-border-grey/50 text-charcoal/40"
+                                                                                     : "bg-buttermilk border-border-grey text-charcoal",
                                                                                 duration < 45 && "py-1 px-2 justify-center"
                                                                             )}
                                                                             style={{
@@ -747,7 +747,8 @@ export default function InstructorScheduleCalendar({
                                                                         <div
                                                                             key={booking.id}
                                                                             className={clsx(
-                                                                                "absolute rounded-lg text-[10px] z-20 p-2 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border-l-4 bg-forest border-forest/20",
+                                                                                 "absolute rounded-lg text-[10px] z-20 p-2 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border-l-4",
+                                                                                 isPastCell ? "bg-forest/40 border-forest/20 opacity-80" : "bg-forest border-forest/20",
                                                                                 duration < 45 && "flex-row items-center justify-between py-2 px-3"
                                                                             )}
                                                                             style={{
@@ -768,12 +769,12 @@ export default function InstructorScheduleCalendar({
                                                                         >
                                                                             <div className={clsx("flex justify-between items-start w-full overflow-hidden", duration < 45 && "items-center")}>
                                                                                 <div className="flex flex-col min-w-0 flex-1 overflow-hidden">
-                                                                                    <span className="text-[8.5px] font-semibold text-white uppercase tracking-tight truncate">
-                                                                                        {booking.client?.full_name || 'Session'}
-                                                                                    </span>
-                                                                                    {duration >= 45 && (
-                                                                                        <>
-                                                                                            <span className="text-[7px] font-black text-white/60 uppercase tracking-tighter mt-0.5 truncate">
+                                                                                     <span className="text-[8.5px] font-semibold text-white uppercase tracking-tight truncate">
+                                                                                         {booking.client?.full_name || 'Session'}
+                                                                                     </span>
+                                                                                     {duration >= 45 && (
+                                                                                         <>
+                                                                                             <span className="text-[7px] font-black text-white/80 uppercase tracking-tighter mt-0.5 truncate">
                                                                                                 {studioName}
                                                                                             </span>
                                                                                             <div className="flex flex-wrap items-center gap-1 mt-1.5 overflow-hidden">

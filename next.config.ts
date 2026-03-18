@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'wzacmyemiljzpdskyvie.supabase.co',
+        port: '',
+        pathname: '/storage/v1/render/image/public/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'api.dicebear.com',
         port: '',
         pathname: '/**',

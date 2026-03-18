@@ -30,6 +30,11 @@ export type SearchResult = {
         insurance?: string | null;
         insuranceExpiry?: string | null;
         spacePhotos?: string[];
+        certifications?: {
+            name: string;
+            url: string | null;
+            expiry: string | null;
+        }[];
     };
 };
 
@@ -276,27 +281,31 @@ export default function GlobalSearch({ onOpenBookings }: { onOpenBookings: (id: 
                                                 {result.role === 'instructor' && result.documents && (
                                                     <div className="mt-3 pt-3 border-t border-cream-200">
                                                         <p className="text-[10px] uppercase tracking-wider text-charcoal-400 mb-2 font-medium">Legal Documents</p>
-                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                            <div className="flex items-center justify-between bg-white border border-cream-100 rounded px-2 py-1 text-xs">
-                                                                <span className="text-charcoal-500">TIN:</span>
-                                                                <span className="font-mono text-charcoal-900">{result.documents.tin || '—'}</span>
-                                                            </div>
-                                                            <div className="flex items-center justify-between bg-white border border-cream-100 rounded px-2 py-1 text-xs">
-                                                                <div className="flex items-center gap-1">
-                                                                    <span className="text-charcoal-500">Gov ID:</span>
-                                                                    {result.documents.govId ? (
-                                                                        <a href={result.documents.govId} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium">View</a>
-                                                                    ) : <span className="text-red-400">Missing</span>}
+                                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                            {[
+                                                                { title: 'Certification', url: result.documents.certifications?.[0]?.url, expiry: result.documents.certifications?.[0]?.expiry },
+                                                                { title: 'BIR Form 2303', url: result.documents.bir, expiry: result.documents.birExpiry },
+                                                                { title: 'Gov ID', url: result.documents.govId, expiry: result.documents.govIdExpiry },
+                                                            ].map((doc, idx) => (
+                                                                <div key={idx} className="flex flex-col justify-between gap-1 p-2 bg-white border border-cream-100 rounded-lg text-xs">
+                                                                    <div className="flex items-center justify-between gap-2">
+                                                                        <span className="text-charcoal-600 font-medium truncate">{doc.title}</span>
+                                                                        {doc.url ? (
+                                                                            <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline text-[10px]">View</a>
+                                                                        ) : (
+                                                                            <span className="text-red-400 text-[10px]">Missing</span>
+                                                                        )}
+                                                                    </div>
+                                                                    {doc.url && (
+                                                                        <div className="text-[10px] text-charcoal-500 mt-0.5">
+                                                                            {doc.expiry ? `Exp: ${new Date(doc.expiry).toLocaleDateString()}` : <span className="italic text-charcoal-400">No expiry provided</span>}
+                                                                        </div>
+                                                                    )}
                                                                 </div>
-                                                                <span className="text-charcoal-600">
-                                                                    {result.documents.govIdExpiry ? `Exp: ${new Date(result.documents.govIdExpiry).toLocaleDateString()}` : 'No date'}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex items-center justify-between bg-white border border-cream-100 rounded px-2 py-1 text-xs h-fit">
-                                                                <span className="text-charcoal-500">BIR 2303:</span>
-                                                                {result.documents.bir ? (
-                                                                    <a href={result.documents.bir} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium">View Form</a>
-                                                                ) : <span className="text-charcoal-400 italic">Not provided</span>}
+                                                            ))}
+                                                            <div className="flex flex-col justify-center p-2 bg-white border border-cream-100 rounded-lg text-xs">
+                                                                <span className="text-charcoal-500 text-[10px] uppercase tracking-tighter">TIN</span>
+                                                                <span className="font-mono text-charcoal-900 truncate">{result.documents.tin || '—'}</span>
                                                             </div>
                                                         </div>
                                                     </div>

@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { User } from 'lucide-react'
 import { clsx } from 'clsx'
 
+import { getTransformedImageUrl } from '@/lib/utils/image-utils'
+
 interface AvatarProps {
     src?: string | null
     alt?: string
@@ -42,6 +44,12 @@ export default function Avatar({
     }
 
     const showFallback = error || !src || src === '/default-avatar.svg'
+    const isHeic = src?.toLowerCase().endsWith('.heic') || src?.toLowerCase().endsWith('.heif')
+    
+    // If it's HEIC, try to transform it to JPEG via Supabase Render Engine
+    const finalSrc = (src && isHeic && src.includes('supabase.co')) 
+        ? getTransformedImageUrl(src, { width: size * 2, format: 'jpg' }) // 2x for retina
+        : src;
 
     if (!isMounted) {
         return <div style={{ width: size, height: size }} className={clsx("rounded-full bg-cream-100 animate-pulse", className)} />
@@ -66,16 +74,17 @@ export default function Avatar({
                 )
             ) : (
                 <Image
-                    src={src}
+                    src={finalSrc || ''}
                     alt={alt}
                     width={size}
                     height={size}
                     className="object-cover w-full h-full"
-                    onError={() => {
-                        console.warn(`[Avatar] Failed to load image: ${src}`)
+                    onError={(e) => {
+                        console.warn(`[Avatar] Failed to load image: ${finalSrc}. Falling back to initials.`, e)
                         setError(true)
                     }}
-                    unoptimized={src?.includes('.heic') || src?.includes('.HEIC')} // Temporary measure if it's still HEIC
+                    // Only use unoptimized for HEIC if it's NOT a Supabase URL (already transformed)
+                    unoptimized={isHeic && !src?.includes('supabase.co')}
                 />
             )}
         </div>

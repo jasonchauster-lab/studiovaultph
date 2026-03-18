@@ -1207,7 +1207,7 @@ export async function searchAllUsers(query: string) {
     }
 
     // Search Profiles
-    let profileQuery = supabase.from('profiles').select('id, full_name, role, contact_number, is_founding_partner, gov_id_url, gov_id_expiry, bir_url, tin');
+    let profileQuery = supabase.from('profiles').select('id, full_name, role, contact_number, is_founding_partner, gov_id_url, gov_id_expiry, bir_url, bir_expiry, tin, certifications(proof_url, expiry_date, certification_name)');
 
     if (isStatusQuery) {
         profileQuery = profileQuery.in('id', statusMatchUserIds.length > 0 ? statusMatchUserIds : ['00000000-0000-0000-0000-000000000000']);
@@ -1224,6 +1224,12 @@ export async function searchAllUsers(query: string) {
             if (p.role === 'instructor') {
                 if (p.gov_id_url) profilePathsToSign.push(p.gov_id_url);
                 if (p.bir_url) profilePathsToSign.push(p.bir_url);
+                if (p.certifications) {
+                    const certs = Array.isArray(p.certifications) ? p.certifications : [p.certifications];
+                    certs.forEach((c: any) => {
+                        if (c.proof_url) profilePathsToSign.push(c.proof_url);
+                    });
+                }
             }
         });
     }
@@ -1252,14 +1258,20 @@ export async function searchAllUsers(query: string) {
                     govId: p.gov_id_url ? profileSignedUrlsMap[p.gov_id_url] : null,
                     govIdExpiry: p.gov_id_expiry,
                     bir: p.bir_url ? profileSignedUrlsMap[p.bir_url] : null,
-                    tin: p.tin
+                    birExpiry: p.bir_expiry,
+                    tin: p.tin,
+                    certifications: p.certifications ? (Array.isArray(p.certifications) ? p.certifications : [p.certifications]).map((c: any) => ({
+                        name: c.certification_name,
+                        url: c.proof_url ? profileSignedUrlsMap[c.proof_url] : null,
+                        expiry: c.expiry_date
+                    })) : []
                 } : null
             });
         });
     }
 
     // Search Studios
-    let studioQuery = supabase.from('studios').select('id, name, location, contact_number, is_founding_partner, bir_certificate_url, bir_certificate_expiry, gov_id_url, gov_id_expiry, mayors_permit_url, mayors_permit_expiry, secretary_certificate_url, secretary_certificate_expiry, insurance_url, insurance_expiry, space_photos_urls');
+    let studioQuery = supabase.from('studios').select('id, name, location, contact_number, is_founding_partner, bir_certificate_url, bir_certificate_expiry, gov_id_url, gov_id_expiry, mayors_permit_url, mayors_permit_expiry, secretary_certificate_url, insurance_url, insurance_expiry, space_photos_urls');
 
     if (isStatusQuery) {
         studioQuery = studioQuery.in('id', statusMatchStudioIds.length > 0 ? statusMatchStudioIds : ['00000000-0000-0000-0000-000000000000']);
@@ -1307,7 +1319,6 @@ export async function searchAllUsers(query: string) {
                     mayorsPermit: s.mayors_permit_url ? signedUrlsMap[s.mayors_permit_url] : null,
                     mayorsPermitExpiry: s.mayors_permit_expiry,
                     secretaryCert: s.secretary_certificate_url ? signedUrlsMap[s.secretary_certificate_url] : null,
-                    secretaryCertExpiry: s.secretary_certificate_expiry,
                     insurance: s.insurance_url ? signedUrlsMap[s.insurance_url] : null,
                     insuranceExpiry: s.insurance_expiry,
                     spacePhotos: s.space_photos_urls || []

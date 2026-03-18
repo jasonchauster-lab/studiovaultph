@@ -148,3 +148,28 @@ export const uploadContentType = (file: File): string => {
     if (name.endsWith('.heic') || name.endsWith('.heif')) return 'image/heic';
     return 'application/octet-stream';
 };
+
+/**
+ * Transforms a Supabase public URL into a transformation URL.
+ * Used to convert HEIC to JPEG on-the-fly via Supabase's transformation engine.
+ */
+export const getTransformedImageUrl = (url: string, options: { width?: number; format?: string } = {}) => {
+    if (!url || !url.includes('supabase.co')) return url;
+    
+    // Check if it's already a transformation URL or not a public object URL
+    if (url.includes('/render/image/public/') || !url.includes('/storage/v1/object/public/')) {
+        return url;
+    }
+
+    const { width, format = 'jpg' } = options;
+    
+    // Convert object/public to render/image/public
+    let transformedUrl = url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
+    
+    const params = new URLSearchParams();
+    if (width) params.append('width', width.toString());
+    if (format) params.append('format', format);
+    
+    const queryString = params.toString();
+    return queryString ? `${transformedUrl}?${queryString}` : transformedUrl;
+};

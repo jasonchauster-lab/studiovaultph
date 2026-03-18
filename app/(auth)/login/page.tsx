@@ -54,16 +54,19 @@ function LoginContent() {
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession()
             if (session?.user && !isRedirecting) {
-                // If they are on /login but have a session, middleware should have caught it, 
-                // but we handle it here too for robustness.
+                // Check if they were already remembered
                 if (isOtpRemembered(session.user.id)) {
                    setIsRedirecting(true)
                    await redirectByRole(session.user.id)
                 } else {
-                    // Already passed password step, but not remembered -> show OTP step
-                    console.log('[Auth] Session exists but not remembered, jumping to OTP step')
+                    // Passed password but not 2FA -> jump to OTP step
+                    console.log('[Auth] session exists but not remembered, showing OTP step')
                     setStep('otp')
                     if (session.user.email) setEmail(session.user.email)
+                    
+                    // Restore "Remember me" preference from cookie if it was set
+                    const rememberMePref = document.cookie.split('; ').find(row => row.startsWith('remember_me_pref='))?.split('=')[1]
+                    if (rememberMePref === '1') setRememberDevice(true)
                 }
             }
         }
@@ -75,22 +78,22 @@ function LoginContent() {
     // Supabase broadcasts the session via the storage channel and this fires
     // on all open tabs — including the mobile that's still on the waiting screen.
     useEffect(() => {
-        if (!otpSent) return
-
+        // Start listening for auth changes once we are at the OTP step
+        // OR if we already have a session (cross-tab sync).
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event: string, session: { user?: { id: string } } | null) => {
-                // Only act on SIGNED_IN if we either haven't sent an OTP yet (initial login)
-                // or if enough time has passed since sending the OTP that this is likely
-                // the verification link being clicked, NOT the password session auto-firing.
-                const isFreshOtp = lastOtpSentAt && (Date.now() - lastOtpSentAt > 2000)
+                // 1. Avoid infinite redirect loops if we are already redirecting
+                if (isRedirecting) return
 
-                if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user && !isRedirecting) {
-                    // Logic: 
-                    // 1. If we are waiting for OTP (otpSent=true)
-                    // 2. AND we just sent it (lastOtpSentAt is set)
-                    // 3. AND it hasn't been 2 seconds (it's the password session firing)
-                    // -> IGNORE IT.
-                    if (otpSent && lastOtpSentAt && !isFreshOtp) {
+                // 2. Filter for events that imply a full verification or fresh session
+                const isVerificationEvent = event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED'
+                
+                if (isVerificationEvent && session?.user) {
+                    // 3. Skip if this is just the INITIAL password-only session event
+                    // (we know if it's the password event if we JUST sent an OTP 
+                    // and it hasn't been 2 seconds yet).
+                    const isTooFresh = lastOtpSentAt && (Date.now() - lastOtpSentAt < 2000)
+                    if (otpSent && isTooFresh) {
                         console.log('[Auth] Ignoring event (too fresh):', event)
                         return
                     }
@@ -98,14 +101,16 @@ function LoginContent() {
                     console.log('[Auth] Valid verification event detected:', event)
                     setIsRedirecting(true)
                     
-                    // If the user wanted to be remembered, set the cookie client-side
-                    // so this specific device/browser skips 2FA for 14 days.
-                    if (rememberDevice) {
+                    // Read "Remember Me" preference from cookie (survives refreshes)
+                    const rememberMePref = document.cookie.split('; ').find(row => row.startsWith('remember_me_pref='))?.split('=')[1]
+                    const shouldRemember = rememberDevice || (rememberMePref === '1')
+
+                    if (shouldRemember) {
                         const maxAge = 14 * 24 * 60 * 60
                         const cookieOptions = `; max-age=${maxAge}; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
                         document.cookie = `otp_remembered=${session.user.id}${cookieOptions}`
                         document.cookie = `remember_me=1${cookieOptions}`
-                        console.log('[Auth] Set "Remember Me" cookies client-side')
+                        console.log('[Auth] Set "Remember Me" cookies client-side via listener')
                     }
 
                     await redirectByRole(session.user.id)
@@ -115,17 +120,25 @@ function LoginContent() {
 
         return () => subscription.unsubscribe()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [otpSent])
+    }, [otpSent, lastOtpSentAt]) // Re-bind if OTP timing reference changes
 
     const isOtpRemembered = (userId: string) => {
+        if (typeof document === 'undefined') return false
         const cookies = document.cookie.split(';').map(c => c.trim())
+        
+        // Log all cookies for debugging (excluding Supabase tokens for security)
+        const debugCookies = cookies
+            .filter(c => !c.toLowerCase().includes('auth-token'))
+            .join(', ')
+        console.log('[Auth] Visible non-auth cookies:', debugCookies)
+
         const found = cookies.some(c => {
             const [name, val] = c.split('=')
-            // Handle possibility of quoted values e.g. otp_remembered="uuid"
             const cleanVal = val?.replace(/"/g, '')
             return name === 'otp_remembered' && cleanVal?.toLowerCase() === userId?.toLowerCase()
         })
-        console.log('[Auth] isOtpRemembered check:', found)
+        
+        console.log(`[Auth] 2FA Check for user ${userId.slice(0, 5)}... result: ${found}`)
         return found
     }
 
@@ -340,7 +353,12 @@ function LoginContent() {
                                         <input
                                             type="checkbox"
                                             checked={rememberDevice}
-                                            onChange={(e) => setRememberDevice(e.target.checked)}
+                                            onChange={(e) => {
+                                                const checked = e.target.checked
+                                                setRememberDevice(checked)
+                                                // Persist preference to a temporary cookie for 10 mins (link lifetime)
+                                                document.cookie = `remember_me_pref=${checked ? '1' : '0'}; max-age=600; path=/; SameSite=Lax`
+                                            }}
                                             className="w-4 h-4 rounded border-border-grey cursor-pointer accent-forest"
                                         />
                                         <div>
