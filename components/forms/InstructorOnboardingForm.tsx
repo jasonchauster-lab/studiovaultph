@@ -5,6 +5,7 @@ import { submitInstructorOnboarding } from '@/app/(dashboard)/instructor/onboard
 import Link from 'next/link'
 import { Upload, CheckCircle, AlertCircle, Loader2, ShieldCheck, ArrowRight } from 'lucide-react'
 import { normalizeImageFile } from '@/lib/utils/image-utils'
+import ImageCropper from '@/components/shared/ImageCropper'
 import clsx from 'clsx'
 import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
 
@@ -18,6 +19,20 @@ export default function InstructorOnboardingForm() {
     const [govIdPreviewUrl, setGovIdPreviewUrl] = useState<string | null>(null)
     const [birFileName, setBirFileName] = useState<string | null>(null)
     const [birPreviewUrl, setBirPreviewUrl] = useState<string | null>(null)
+
+    // Actual files to be submitted
+    const [certFile, setCertFile] = useState<File | null>(null)
+    const [govIdFile, setGovIdFile] = useState<File | null>(null)
+    const [birFile, setBirFile] = useState<File | null>(null)
+
+    // Cropper State
+    const [cropperConfig, setCropperConfig] = useState<{
+        isOpen: boolean;
+        image: string;
+        aspectRatio: number;
+        onCrop: (file: File) => void;
+        title: string;
+    } | null>(null)
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -34,19 +49,9 @@ export default function InstructorOnboardingForm() {
         }
 
         try {
-            // Normalize all files before submission
-            const certFile = formData.get('certificateFile') as File
-            if (certFile && certFile.size > 0) {
-                formData.set('certificateFile', await normalizeImageFile(certFile))
-            }
-            const govIdFile = formData.get('govIdFile') as File
-            if (govIdFile && govIdFile.size > 0) {
-                formData.set('govIdFile', await normalizeImageFile(govIdFile))
-            }
-            const birFile = formData.get('birFile') as File
-            if (birFile && birFile.size > 0) {
-                formData.set('birFile', await normalizeImageFile(birFile))
-            }
+            if (certFile) formData.set('certificateFile', certFile)
+            if (govIdFile) formData.set('govIdFile', govIdFile)
+            if (birFile) formData.set('birFile', birFile)
 
             const result = await submitInstructorOnboarding(formData)
             if (result?.error) {
@@ -206,13 +211,25 @@ export default function InstructorOnboardingForm() {
                             name="certificateFile"
                             accept=".pdf,.jpg,.jpeg,.png"
                             required
-                            onChange={(e) => {
+                            onChange={async (e) => {
                                 const file = e.target.files?.[0]
-                                setSelectedFileName(file ? file.name : null)
-                                if (file && file.type.startsWith('image/')) {
-                                    const url = URL.createObjectURL(file)
-                                    setPreviewUrl(url)
+                                if (!file) return
+                                
+                                setSelectedFileName(file.name)
+                                if (file.type.startsWith('image/')) {
+                                    const processed = await normalizeImageFile(file)
+                                    setCropperConfig({
+                                        isOpen: true,
+                                        image: URL.createObjectURL(processed),
+                                        aspectRatio: 3 / 4,
+                                        title: 'Crop Certificate',
+                                        onCrop: (cropped) => {
+                                            setCertFile(cropped)
+                                            setPreviewUrl(URL.createObjectURL(cropped))
+                                        }
+                                    })
                                 } else {
+                                    setCertFile(file)
                                     setPreviewUrl(null)
                                 }
                             }}
@@ -296,13 +313,25 @@ export default function InstructorOnboardingForm() {
                                     name="govIdFile"
                                     accept=".jpg,.jpeg,.png,.pdf"
                                     required
-                                    onChange={(e) => {
+                                    onChange={async (e) => {
                                         const file = e.target.files?.[0]
-                                        setGovIdFileName(file ? file.name : null)
-                                        if (file && file.type.startsWith('image/')) {
-                                            const url = URL.createObjectURL(file)
-                                            setGovIdPreviewUrl(url)
+                                        if (!file) return
+
+                                        setGovIdFileName(file.name)
+                                        if (file.type.startsWith('image/')) {
+                                            const processed = await normalizeImageFile(file)
+                                            setCropperConfig({
+                                                isOpen: true,
+                                                image: URL.createObjectURL(processed),
+                                                aspectRatio: 4 / 3,
+                                                title: 'Crop Government ID',
+                                                onCrop: (cropped) => {
+                                                    setGovIdFile(cropped)
+                                                    setGovIdPreviewUrl(URL.createObjectURL(cropped))
+                                                }
+                                            })
                                         } else {
+                                            setGovIdFile(file)
                                             setGovIdPreviewUrl(null)
                                         }
                                     }}
@@ -360,13 +389,25 @@ export default function InstructorOnboardingForm() {
                                 type="file"
                                 name="birFile"
                                 accept=".jpg,.jpeg,.png,.pdf"
-                                onChange={(e) => {
+                                onChange={async (e) => {
                                     const file = e.target.files?.[0]
-                                    setBirFileName(file ? file.name : null)
-                                    if (file && file.type.startsWith('image/')) {
-                                        const url = URL.createObjectURL(file)
-                                        setBirPreviewUrl(url)
+                                    if (!file) return
+
+                                    setBirFileName(file.name)
+                                    if (file.type.startsWith('image/')) {
+                                        const processed = await normalizeImageFile(file)
+                                        setCropperConfig({
+                                            isOpen: true,
+                                            image: URL.createObjectURL(processed),
+                                            aspectRatio: 3 / 4,
+                                            title: 'Crop BIR Form',
+                                            onCrop: (cropped) => {
+                                                setBirFile(cropped)
+                                                setBirPreviewUrl(URL.createObjectURL(cropped))
+                                            }
+                                        })
                                     } else {
+                                        setBirFile(file)
                                         setBirPreviewUrl(null)
                                     }
                                 }}
@@ -480,6 +521,20 @@ export default function InstructorOnboardingForm() {
                     )}
                 </button>
             </form>
+
+            {cropperConfig && (
+                <ImageCropper
+                    isOpen={cropperConfig.isOpen}
+                    image={cropperConfig.image}
+                    aspectRatio={cropperConfig.aspectRatio}
+                    title={cropperConfig.title}
+                    onClose={() => setCropperConfig(null)}
+                    onCrop={(file) => {
+                        cropperConfig.onCrop(file)
+                        setCropperConfig(null)
+                    }}
+                />
+            )}
         </div>
     )
 }

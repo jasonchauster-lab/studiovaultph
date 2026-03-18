@@ -6,6 +6,7 @@ import { Plus, X, Loader2, Image as ImageIcon, Camera } from 'lucide-react'
 import Image from 'next/image'
 import { clsx } from 'clsx'
 import { normalizeImageFile } from '@/lib/utils/image-utils'
+import ImageCropper from '@/components/shared/ImageCropper'
 
 interface InstructorGallerySectionProps {
     images: string[]
@@ -16,40 +17,76 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
     const [error, setError] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
+    // Cropper State
+    const [cropperConfig, setCropperConfig] = useState<{
+        isOpen: boolean;
+        image: string;
+        aspectRatio: number;
+        onCrop: (file: File) => void;
+        title: string;
+    } | null>(null)
+
     const isUploading = uploadProgress !== null
+
+    const uploadFile = async (file: File, current: number, total: number) => {
+        setUploadProgress({ current, total })
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            const result = await uploadGalleryImage(formData)
+            if (result.error) {
+                const simpleError = result.error.includes('Payload Too Large')
+                    ? 'Image is too large.'
+                    : result.error
+                setError(prev => prev ? `${prev} • ${file.name}: ${simpleError}` : `${file.name}: ${simpleError}`)
+            }
+        } catch (err) {
+            console.error('Upload error:', err)
+            setError(prev => prev ? `${prev} • ${file.name}: Upload failed` : `${file.name}: Upload failed`)
+        }
+    }
+
+    const processNextInQueue = async (queue: File[], completed: number, total: number) => {
+        if (queue.length === 0) {
+            setUploadProgress(null)
+            if (fileInputRef.current) fileInputRef.current.value = ''
+            return
+        }
+
+        const [nextFile, ...remaining] = queue
+        const url = URL.createObjectURL(nextFile)
+
+        setCropperConfig({
+            isOpen: true,
+            image: url,
+            aspectRatio: 4 / 5,
+            title: `Crop Photo (${completed + 1} of ${total})`,
+            onCrop: async (croppedFile) => {
+                await uploadFile(croppedFile, completed + 1, total)
+                processNextInQueue(remaining, completed + 1, total)
+            }
+        })
+    }
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || [])
         if (files.length === 0) return
 
         setError(null)
-        setUploadProgress({ current: 0, total: files.length })
+        const validFiles: File[] = []
 
-        const errors: string[] = []
-
-        for (let i = 0; i < files.length; i++) {
-            setUploadProgress({ current: i + 1, total: files.length })
+        for (const file of files) {
             try {
-                const processedFile = await normalizeImageFile(files[i])
-                const formData = new FormData()
-                formData.append('file', processedFile)
-                const result = await uploadGalleryImage(formData)
-                if (result.error) {
-                    // Check for specific common errors
-                    const simpleError = result.error.includes('Payload Too Large') 
-                        ? 'Image is too large. Even after resizing, it exceeds the limit.'
-                        : result.error;
-                    errors.push(`${files[i].name}: ${simpleError}`)
-                }
+                const normalized = await normalizeImageFile(file)
+                validFiles.push(normalized)
             } catch (err) {
                 console.error('File processing error:', err)
-                errors.push(`${files[i].name}: Failed to process image. Please try another photo.`)
             }
         }
 
-        setUploadProgress(null)
-        if (fileInputRef.current) fileInputRef.current.value = ''
-        if (errors.length > 0) setError(errors.join(' • '))
+        if (validFiles.length > 0) {
+            processNextInQueue(validFiles, 0, validFiles.length)
+        }
     }
 
     const handleDelete = async (url: string) => {
@@ -158,6 +195,24 @@ export default function InstructorGallerySection({ images }: InstructorGallerySe
                     </div>
                 )}
             </div>
+
+            {cropperConfig && (
+                <ImageCropper
+                    isOpen={cropperConfig.isOpen}
+                    image={cropperConfig.image}
+                    aspectRatio={cropperConfig.aspectRatio}
+                    title={cropperConfig.title}
+                    onClose={() => {
+                        setCropperConfig(null)
+                        setUploadProgress(null)
+                        if (fileInputRef.current) fileInputRef.current.value = ''
+                    }}
+                    onCrop={(file) => {
+                        cropperConfig.onCrop(file)
+                        setCropperConfig(null)
+                    }}
+                />
+            )}
         </div>
     )
 }

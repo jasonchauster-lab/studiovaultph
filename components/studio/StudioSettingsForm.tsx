@@ -8,6 +8,7 @@ import { STUDIO_AMENITIES } from '@/types'
 import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
 import { normalizeImageFile, uploadContentType } from '@/lib/utils/image-utils'
+import ImageCropper from '@/components/shared/ImageCropper'
 
 export default function StudioSettingsForm({ studio }: { studio: any }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -27,13 +28,34 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
     const [existingPhotos, setExistingPhotos] = useState<string[]>(studio.space_photos_urls || studio.space_photos || [])
     const [newSpacePhotos, setNewSpacePhotos] = useState<File[]>([])
 
+    // Cropper State
+    const [cropperConfig, setCropperConfig] = useState<{
+        isOpen: boolean;
+        image: string;
+        aspectRatio: number;
+        onCrop: (file: File) => void;
+        title: string;
+    } | null>(null)
+
+    // Queue for multiple photos cropping
+    const [uploadQueue, setUploadQueue] = useState<File[]>([])
+
     const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
             try {
                 const normalized = await normalizeImageFile(file)
-                setLogo(normalized)
-                setLogoPreview(URL.createObjectURL(normalized))
+                const url = URL.createObjectURL(normalized)
+                setCropperConfig({
+                    isOpen: true,
+                    image: url,
+                    aspectRatio: 1,
+                    title: 'Crop Studio Logo',
+                    onCrop: (croppedFile) => {
+                        setLogo(croppedFile)
+                        setLogoPreview(URL.createObjectURL(croppedFile))
+                    }
+                })
             } catch (err) {
                 console.error('Logo processing error:', err)
                 setError('Failed to process logo image.')
@@ -46,13 +68,40 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
         if (file) {
             try {
                 const normalized = await normalizeImageFile(file)
-                setBanner(normalized)
-                setBannerPreview(URL.createObjectURL(normalized))
+                const url = URL.createObjectURL(normalized)
+                setCropperConfig({
+                    isOpen: true,
+                    image: url,
+                    aspectRatio: 21 / 9,
+                    title: 'Crop Studio Banner',
+                    onCrop: (croppedFile) => {
+                        setBanner(croppedFile)
+                        setBannerPreview(URL.createObjectURL(croppedFile))
+                    }
+                })
             } catch (err) {
                 console.error('Banner processing error:', err)
                 setError('Failed to process banner image.')
             }
         }
+    }
+
+    const processNextInQueue = (queue: File[], completed: number, total: number) => {
+        if (queue.length === 0) return
+
+        const [nextFile, ...remaining] = queue
+        const url = URL.createObjectURL(nextFile)
+
+        setCropperConfig({
+            isOpen: true,
+            image: url,
+            aspectRatio: 4 / 5,
+            title: `Crop Photo (${completed + 1} of ${total})`,
+            onCrop: (croppedFile) => {
+                setNewSpacePhotos(prev => [...prev, croppedFile])
+                processNextInQueue(remaining, completed + 1, total)
+            }
+        })
     }
 
     const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,8 +118,9 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
         }
 
         if (validFiles.length > 0) {
-            setNewSpacePhotos(prev => [...prev, ...validFiles])
+            processNextInQueue(validFiles, 0, validFiles.length)
         }
+
         if (spacePhotosInputRef.current) {
             spacePhotosInputRef.current.value = ''
         }
@@ -580,6 +630,20 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                     {isLoading ? 'Processing' : 'Commit Changes'}
                 </button>
             </div>
+
+            {cropperConfig && (
+                <ImageCropper
+                    isOpen={cropperConfig.isOpen}
+                    image={cropperConfig.image}
+                    aspectRatio={cropperConfig.aspectRatio}
+                    title={cropperConfig.title}
+                    onClose={() => setCropperConfig(null)}
+                    onCrop={(file) => {
+                        cropperConfig.onCrop(file)
+                        setCropperConfig(null)
+                    }}
+                />
+            )}
         </form>
     )
 }

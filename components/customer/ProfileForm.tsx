@@ -9,6 +9,7 @@ import WaiverUpload from '@/components/customer/WaiverUpload'
 import { normalizeImageFile } from '@/lib/utils/image-utils'
 import { clsx } from 'clsx'
 import Avatar from '@/components/shared/Avatar'
+import ImageCropper from '@/components/shared/ImageCropper'
 
 export default function ProfileForm({ profile }: { profile: any }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -25,20 +26,35 @@ export default function ProfileForm({ profile }: { profile: any }) {
     const [bannerFile, setBannerFile] = useState<File | null>(null)
     const bannerInputRef = useRef<HTMLInputElement>(null)
 
+    // Cropper State
+    const [cropperConfig, setCropperConfig] = useState<{
+        isOpen: boolean;
+        image: string;
+        aspectRatio: number;
+        onCrop: (file: File) => void;
+        title: string;
+    } | null>(null)
+
     const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            setIsLoading(true)
             try {
                 const processedFile = await normalizeImageFile(file)
-                setAvatarFile(processedFile)
                 const url = URL.createObjectURL(processedFile)
-                setPreviewUrl(url)
+                
+                setCropperConfig({
+                    isOpen: true,
+                    image: url,
+                    aspectRatio: 1,
+                    title: 'Crop Profile Picture',
+                    onCrop: (croppedFile) => {
+                        setAvatarFile(croppedFile)
+                        setPreviewUrl(URL.createObjectURL(croppedFile))
+                    }
+                })
             } catch (err) {
                 console.error('Avatar processing failed', err)
-                setMessage('Failed to process image format. Please try another photo.')
-            } finally {
-                setIsLoading(false)
+                setMessage('Failed to process image format.')
             }
         }
     }
@@ -46,17 +62,23 @@ export default function ProfileForm({ profile }: { profile: any }) {
     const handleBannerChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            setIsLoading(true)
             try {
                 const processedFile = await normalizeImageFile(file)
-                setBannerFile(processedFile)
                 const url = URL.createObjectURL(processedFile)
-                setBannerPreviewUrl(url)
+
+                setCropperConfig({
+                    isOpen: true,
+                    image: url,
+                    aspectRatio: 21 / 9, // Wide banner
+                    title: 'Crop Profile Banner',
+                    onCrop: (croppedFile) => {
+                        setBannerFile(croppedFile)
+                        setBannerPreviewUrl(URL.createObjectURL(croppedFile))
+                    }
+                })
             } catch (err) {
                 console.error('Banner processing failed', err)
                 setMessage('Failed to process banner image.')
-            } finally {
-                setIsLoading(false)
             }
         }
     }
@@ -482,6 +504,20 @@ export default function ProfileForm({ profile }: { profile: any }) {
                     {isLoading ? 'Processing' : 'Commit Changes'}
                 </button>
             </div>
+
+            {cropperConfig && (
+                <ImageCropper
+                    isOpen={cropperConfig.isOpen}
+                    image={cropperConfig.image}
+                    aspectRatio={cropperConfig.aspectRatio}
+                    title={cropperConfig.title}
+                    onClose={() => setCropperConfig(null)}
+                    onCrop={(file) => {
+                        cropperConfig.onCrop(file)
+                        setCropperConfig(null)
+                    }}
+                />
+            )}
         </form>
     )
 }
