@@ -399,7 +399,7 @@ export default async function AdminDashboard({
                                             <div key={instructor.id} className="border border-orange-100 rounded-lg p-4 bg-orange-50/30 flex justify-between items-center">
                                                 <div>
                                                     <p className="font-bold text-charcoal-900">{instructor.full_name}</p>
-                                                    <p className="text-xs text-charcoal-600 font-bold text-red-600 mt-1">₱{(instructor.available_balance || 0).toLocaleString()}</p>
+                                                    <p className="text-xs text-charcoal-600 font-bold text-red-600 mt-1">₱{safeFormatCurrency(instructor.available_balance)}</p>
                                                 </div>
                                                 <VerifyButton id={instructor.id} action="settleInstructorDebt" label="Settle" className="px-4 py-2 bg-forest text-white text-xs rounded-lg font-bold" />
                                             </div>
@@ -626,7 +626,7 @@ export default async function AdminDashboard({
                                             {payoutRequests.map((r: any) => (
                                                 <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center gap-4 transition-all hover:bg-white hover:shadow-cloud group">
                                                     <div className="space-y-1 min-w-0 flex-1">
-                                                        <p className="text-lg font-serif text-charcoal truncate">₱{r.amount.toLocaleString()}</p>
+                                                        <p className="text-lg font-serif text-charcoal truncate">₱{safeFormatCurrency(r.amount)}</p>
                                                         <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest truncate">{r.instructor_name}</p>
                                                     </div>
                                                     <div className="flex gap-2">
@@ -650,7 +650,7 @@ export default async function AdminDashboard({
                                             {studioPayouts.map((r: any) => (
                                                 <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center gap-4 transition-all hover:bg-white hover:shadow-cloud group">
                                                     <div className="space-y-1 min-w-0 flex-1">
-                                                        <p className="text-lg font-serif text-charcoal truncate">₱{r.amount.toLocaleString()}</p>
+                                                        <p className="text-lg font-serif text-charcoal truncate">₱{safeFormatCurrency(r.amount)}</p>
                                                         <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest truncate">{r.studios?.name} ({r.studios?.profiles?.full_name})</p>
                                                     </div>
                                                     <div className="flex gap-2">
@@ -674,7 +674,7 @@ export default async function AdminDashboard({
                                             {customerPayouts.map((r: any) => (
                                                 <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center transition-all hover:bg-white hover:shadow-cloud group">
                                                     <div className="space-y-1">
-                                                        <p className="text-lg font-serif text-charcoal">₱{r.amount.toLocaleString()}</p>
+                                                        <p className="text-lg font-serif text-charcoal">₱{safeFormatCurrency(r.amount)}</p>
                                                         <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest">{r.profile?.full_name}</p>
                                                         <p className="text-[9px] text-charcoal/50 font-bold uppercase">{r.profile?.email}</p>
                                                     </div>
@@ -725,7 +725,7 @@ export default async function AdminDashboard({
                                                             </a>
                                                         )}
                                                         <div className="space-y-1 min-w-0 flex-1">
-                                                            <p className="text-xl font-serif text-charcoal truncate">₱{t.amount.toLocaleString()}</p>
+                                                            <p className="text-xl font-serif text-charcoal truncate">₱{safeFormatCurrency(t.amount)}</p>
                                                             <div className="space-y-0.5 overflow-hidden">
                                                                 <p className="text-[10px] text-charcoal font-black uppercase tracking-widest truncate">{t.profiles?.full_name}</p>
                                                                 <p className="text-[9px] text-charcoal/40 font-bold uppercase tracking-wider truncate">{t.profiles?.email}</p>
@@ -833,7 +833,7 @@ export default async function AdminDashboard({
                                                     </span>
                                                 </td>
                                                 <td className="px-8 py-6">
-                                                    <p className="font-serif text-charcoal text-sm">₱{(u.available_balance || 0).toLocaleString()}</p>
+                                                    <p className="font-serif text-charcoal text-sm">₱{safeFormatCurrency(u.available_balance)}</p>
                                                     <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2">
                                                         <BalanceAdjustmentTool initialProfile={u} variant="minimal" />
                                                     </div>
