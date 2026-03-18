@@ -5,7 +5,7 @@ export default async function AdminDebugPage() {
     const supabase = createAdminClient()
     const diagnostics: any = {}
 
-    const runQuery = async (name: string, p: Promise<any>) => {
+    const runQuery = async (name: string, p: any) => {
         try {
             console.log(`[Debug] Running ${name}...`)
             const res = await p

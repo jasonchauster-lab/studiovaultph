@@ -540,17 +540,17 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                             </td>
                                             <td className="px-8 py-6">
                                                 <p className={clsx("font-serif text-sm", tx.total_amount < 0 ? "text-red-500" : "text-charcoal")}>
-                                                    ₱{tx.total_amount.toLocaleString()}
+                                                        ₱{(Number(tx.total_amount) || 0).toLocaleString()}
                                                 </p>
                                             </td>
                                             <td className="px-8 py-6 font-serif text-sm text-blue-600">
-                                                {tx.platform_fee > 0 ? `₱${tx.platform_fee.toLocaleString()}` : <span className="text-charcoal/50">—</span>}
+                                                    {tx.platform_fee > 0 ? `₱${(Number(tx.platform_fee) || 0).toLocaleString()}` : <span className="text-charcoal/50">—</span>}
                                             </td>
                                             <td className="px-8 py-6 font-serif text-sm text-purple-600">
-                                                {tx.studio_fee > 0 ? `₱${tx.studio_fee.toLocaleString()}` : <span className="text-charcoal/50">—</span>}
+                                                    {tx.studio_fee > 0 ? `₱${(Number(tx.studio_fee) || 0).toLocaleString()}` : <span className="text-charcoal/50">—</span>}
                                             </td>
                                             <td className="px-8 py-6 font-serif text-sm text-indigo-600">
-                                                {tx.instructor_fee > 0 ? `₱${tx.instructor_fee.toLocaleString()}` : <span className="text-charcoal/50">—</span>}
+                                                    {tx.instructor_fee > 0 ? `₱${(Number(tx.instructor_fee) || 0).toLocaleString()}` : <span className="text-charcoal/50">—</span>}
                                             </td>
                                         </tr>
                                     ))
