@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { TrendingUp, Users, DollarSign, Percent } from 'lucide-react'
+import { TrendingUp, Users, DollarSign, Percent, AlertTriangle } from 'lucide-react'
 
 interface DailyData {
     date: string
@@ -19,8 +19,22 @@ interface Stats {
     dailyData: (DailyData & { platformFees: number })[]
 }
 
-export default function AdminAnalytics({ stats }: { stats: Stats }) {
-    const maxRevenue = Math.max(...stats.dailyData.map(d => d.revenue), 1)
+export default function AdminAnalytics({ stats }: { stats: any }) {
+    if (!stats || stats.error || !stats.dailyData) {
+        return (
+            <div className="glass-card p-12 text-center space-y-4">
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <AlertTriangle className="w-8 h-8 text-red-600" />
+                </div>
+                <p className="text-charcoal font-serif text-xl">Operational Intelligence Offline</p>
+                <p className="text-charcoal/40 text-sm italic">
+                    {stats?.error || "We're currently unable to retrieve analytics data. Other dashboard functions remain active."}
+                </p>
+            </div>
+        )
+    }
+
+    const maxRevenue = Math.max(...stats.dailyData.map((d: any) => d.revenue), 1)
     const chartHeight = 120
     const pointPadding = 40
 
@@ -191,14 +205,14 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
 
                                 {/* Area Fill */}
                                 <path
-                                    d={`M 0,${chartHeight} ${stats.dailyData.map((d, i) => `${i * pointPadding},${chartHeight - (d.revenue / maxRevenue) * chartHeight}`).join(' L ')} L ${(stats.dailyData.length - 1) * pointPadding},${chartHeight} Z`}
+                                    d={`M 0,${chartHeight} ${stats.dailyData.map((d: any, i: number) => `${i * pointPadding},${chartHeight - (d.revenue / maxRevenue) * chartHeight}`).join(' L ')} L ${(stats.dailyData.length - 1) * pointPadding},${chartHeight} Z`}
                                     fill="url(#revenueGradient)"
                                     opacity="0.08"
                                 />
 
                                 {/* Platform Fee Path */}
                                 <path
-                                    d={`M ${stats.dailyData.map((d, i) => `${i * pointPadding},${chartHeight - (d.platformFees / maxRevenue) * chartHeight}`).join(' L ')}`}
+                                    d={`M ${stats.dailyData.map((d: any, i: number) => `${i * pointPadding},${chartHeight - (d.platformFees / maxRevenue) * chartHeight}`).join(' L ')}`}
                                     fill="none"
                                     stroke="#3B82F6"
                                     strokeWidth="1.5"
@@ -209,7 +223,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
 
                                 {/* Main Line Path */}
                                 <path
-                                    d={`M ${stats.dailyData.map((d, i) => `${i * pointPadding},${chartHeight - (d.revenue / maxRevenue) * chartHeight}`).join(' L ')}`}
+                                    d={`M ${stats.dailyData.map((d: any, i: number) => `${i * pointPadding},${chartHeight - (d.revenue / maxRevenue) * chartHeight}`).join(' L ')}`}
                                     fill="none"
                                     stroke="#1F2937"
                                     strokeWidth="2"
@@ -225,7 +239,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                                 </defs>
 
                                 {/* Data Points */}
-                                {stats.dailyData.map((d, i) => (
+                                {stats.dailyData.map((d: any, i: number) => (
                                     <g key={i} className="group cursor-pointer">
                                         <circle
                                             cx={i * pointPadding}
@@ -254,7 +268,7 @@ export default function AdminAnalytics({ stats }: { stats: Stats }) {
                     <div className="relative flex-1">
                         {stats.dailyData.length > 1 && (
                             <div className="absolute top-0 left-0 w-full flex text-[9px] font-black text-charcoal/50 uppercase tracking-[0.15em]">
-                                {stats.dailyData.map((d, i) => {
+                                {stats.dailyData.map((d: any, i: number) => {
                                     const leftOffset = (i * pointPadding)
                                     const showLabel = i === 0 || i === stats.dailyData.length - 1 || stats.dailyData.length <= 7 || i % Math.ceil(stats.dailyData.length / 5) === 0
                                     if (!showLabel) return null
