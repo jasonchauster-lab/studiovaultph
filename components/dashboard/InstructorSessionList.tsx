@@ -489,7 +489,7 @@ const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClien
                             </button>
                         )}
                         {client && client.id !== currentUserId && (
-                            <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="" variant="antigravity" />
+                            <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="" variant="antigravity" iconType="client" />
                         )}
                     </div>
                 </div>
@@ -497,10 +497,22 @@ const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClien
                 {/* Session Details */}
                 <div className="flex-1 min-w-0">
                     <div className="flex flex-col gap-0.5">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
                             <button onClick={() => onStudioClick(studio)} className="text-[17px] sm:text-xl font-serif text-charcoal hover:text-forest transition-colors text-left tracking-tight">
                                 {studio?.name || "Studio Node"}
                             </button>
+                            {studio?.owner_id && (
+                                <StudioChatButton
+                                    bookingId={booking.id}
+                                    currentUserId={currentUserId}
+                                    partnerId={studio.owner_id}
+                                    partnerName={studio.name || 'Studio'}
+                                    label="CHAT WITH STUDIO"
+                                    variant="antigravity"
+                                    iconType="studio"
+                                    className="!h-7 !px-2.5 opacity-60 hover:opacity-100"
+                                />
+                            )}
                         </div>
                         
                         <div className="flex items-center gap-2 text-charcoal/30">
@@ -558,7 +570,7 @@ const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClien
                         </button>
                     )}
                     {client && client.id !== currentUserId && (
-                        <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="CHAT" variant="antigravity" />
+                        <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="CHAT" variant="antigravity" iconType="client" />
                     )}
                 </div>
 

@@ -418,7 +418,8 @@ const SessionCard = memo(({ booking, currentUserId, onInstructorClick, onClientC
                             partnerName={instructor.full_name || 'Instructor'}
                             label="Message"
                             variant="antigravity"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-forest hover:text-white border border-border-grey hover:border-forest transition-all rounded-lg font-bold text-[9px] uppercase tracking-wider text-charcoal/50 shadow-sm active:scale-95"
+                            iconType="instructor"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-forest hover:text-white border border-border-grey hover:border-forest transition-all rounded-lg font-bold text-[9px] uppercase tracking-wider text-charcoal-500 shadow-sm active:scale-95"
                         />
                     )}
                     {booking.status === 'approved' && start > now && (

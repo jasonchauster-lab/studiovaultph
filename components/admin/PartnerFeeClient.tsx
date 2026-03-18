@@ -17,9 +17,16 @@ type PartnerProps = {
     phone?: string
     documents?: {
         bir: string | null;
+        birExpiry?: string | null;
         govId: string | null;
+        govIdExpiry?: string | null;
         mayorsPermit: string | null;
+        mayorsPermitExpiry?: string | null;
         secretaryCert: string | null;
+        cert?: string | null;
+        certExpiry?: string | null;
+        insurance?: string | null;
+        insuranceExpiry?: string | null;
         spacePhotos: string[];
     };
 }
@@ -42,7 +49,8 @@ export default function PartnerFeeClient({
             is_founding_partner: i.is_founding_partner || false,
             custom_fee_percentage: i.custom_fee_percentage || 20,
             email: i.email,
-            phone: i.contact_number
+            phone: i.contact_number,
+            documents: i.documents
         })),
         ...studios.map(s => {
             const ownerObj = Array.isArray(s.owner) ? s.owner[0] : s.owner;
@@ -170,36 +178,52 @@ export default function PartnerFeeClient({
                     </div>
                 </div>
 
-                {/* Studio Documents section */}
-                {p.type === 'studio' && p.documents && (
+                {/* Documents section */}
+                {p.documents && (
                     <div className="mt-8 pt-8 border-t border-cream-100 relative z-10">
-                        <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-4 ml-1">Studio Documents</p>
+                        <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] mb-4 ml-1">
+                            {p.type === 'studio' ? 'Studio Documents' : 'Instructor Documents'}
+                        </p>
                         <div className="grid grid-cols-2 gap-2 mb-4">
-                            {[
-                                { link: p.documents.bir, label: 'BIR 2303' },
-                                { link: p.documents.govId, label: 'GOV ID' },
-                                { link: p.documents.mayorsPermit, label: 'PERMIT' },
-                                { link: p.documents.secretaryCert, label: 'CERT' }
-                            ].map((doc, i) => (
-                                doc.link ? (
-                                    <a
-                                        key={i}
-                                        href={doc.link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-3 py-2 bg-white text-charcoal font-black text-[8px] uppercase tracking-widest rounded-lg border border-cream-100 hover:border-gold/30 hover:text-gold transition-all shadow-sm text-center"
-                                    >
-                                        {doc.label}
-                                    </a>
-                                ) : (
-                                    <div key={i} className="px-3 py-2 bg-red-50/10 text-red-600/30 font-black text-[8px] uppercase tracking-widest rounded-lg border border-red-100/20 text-center cursor-not-allowed">
-                                        N/A
-                                    </div>
-                                )
+                            {(p.type === 'studio' ? [
+                                { link: p.documents.bir, label: 'BIR 2303', expiry: p.documents.birExpiry },
+                                { link: p.documents.govId, label: 'GOV ID', expiry: p.documents.govIdExpiry },
+                                { link: p.documents.mayorsPermit, label: 'PERMIT', expiry: p.documents.mayorsPermitExpiry },
+                                { link: p.documents.secretaryCert, label: 'CERT' },
+                                { link: p.documents.insurance, label: 'INSURANCE', expiry: p.documents.insuranceExpiry }
+                            ] : [
+                                { link: p.documents.govId, label: 'GOV ID', expiry: p.documents.govIdExpiry },
+                                { link: p.documents.bir, label: 'BIR 2303', expiry: p.documents.birExpiry },
+                                { link: p.documents.cert, label: 'CERT PROOF', expiry: p.documents.certExpiry }
+                            ]).map((doc, i) => (
+                                <div key={i} className="flex flex-col gap-1">
+                                    {doc.link ? (
+                                        <a
+                                            href={doc.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-3 py-2 bg-white text-charcoal font-black text-[8px] uppercase tracking-widest rounded-lg border border-cream-100 hover:border-gold/30 hover:text-gold transition-all shadow-sm text-center"
+                                        >
+                                            {doc.label}
+                                        </a>
+                                    ) : (
+                                        <div className="px-3 py-2 bg-red-50/10 text-red-600/30 font-black text-[8px] uppercase tracking-widest rounded-lg border border-red-100/20 text-center cursor-not-allowed">
+                                            N/A
+                                        </div>
+                                    )}
+                                    {doc.expiry && (
+                                        <p className={clsx(
+                                            "text-[7px] font-black uppercase tracking-tighter text-center",
+                                            new Date(doc.expiry) < new Date() ? "text-red-500" : "text-charcoal/30"
+                                        )}>
+                                            EXP: {doc.expiry}
+                                        </p>
+                                    )}
+                                </div>
                             ))}
                         </div>
 
-                        {p.documents.spacePhotos && p.documents.spacePhotos.length > 0 && (
+                        {p.type === 'studio' && p.documents.spacePhotos && p.documents.spacePhotos.length > 0 && (
                             <div className="flex flex-wrap gap-2 pt-2">
                                 {p.documents.spacePhotos.slice(0, 5).map((photo, i) => (
                                     <a key={i} href={photo} target="_blank" rel="noopener noreferrer" className="block w-10 h-10 rounded-xl border border-cream-100 overflow-hidden hover:scale-110 transition-transform duration-300 group/photo relative shadow-sm">

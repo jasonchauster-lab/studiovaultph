@@ -2,8 +2,11 @@ import { getCustomerWalletDetails } from '../actions'
 import PayoutForm from './PayoutForm'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function CustomerPayoutPage() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     const { available, error } = await getCustomerWalletDetails()
 
     if (error) {
@@ -17,7 +20,7 @@ export default async function CustomerPayoutPage() {
                 Back to Wallet
             </Link>
 
-            <PayoutForm availableBalance={available || 0} />
+            <PayoutForm availableBalance={available || 0} userEmail={user?.email} />
         </div>
     )
 }

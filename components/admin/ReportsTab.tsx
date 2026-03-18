@@ -91,6 +91,12 @@ function extractAmount(details: string): string | null {
     return match ? `₱${match[1]}` : null
 }
 
+function extractEmail(details: string): string | null {
+    // Look for a standard email pattern anywhere in the string
+    const match = details.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)
+    return match ? match[1] : null
+}
+
 const PAGE_SIZE = 20
 
 export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], transactions?: Transaction[] }) {
@@ -467,6 +473,11 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                                     )}>
                                                         {log.action_type.replace(/_/g, ' ')}
                                                     </div>
+                                                    {extractEmail(log.details || '') && (
+                                                        <p className="text-[9px] text-sage font-bold uppercase tracking-wider mt-1 truncate max-w-[150px]">
+                                                            Target: {extractEmail(log.details || '')}
+                                                        </p>
+                                                    )}
                                                 </td>
                                                 <td className="px-8 py-6">
                                                     <p className="font-serif text-sm text-charcoal">{extractAmount(log.details || '') ?? '—'}</p>
@@ -513,7 +524,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                                     {tx.type === 'Booking' ? `${tx.client} @ ${tx.studio}` : tx.type === 'Payout' ? (tx.studio !== '-' ? tx.studio : tx.instructor) : tx.client}
                                                 </p>
                                                 <p className="text-[9px] text-charcoal/50 font-bold uppercase mt-0.5">
-                                                    {tx.type === 'Booking' ? tx.studio_email : (tx.type === 'Payout' && tx.studio !== '-' ? tx.instructor_email : (tx.client_email || '-'))}
+                                                    {tx.type === 'Booking' ? tx.studio_email : (tx.type === 'Payout' ? (tx.studio !== '-' ? tx.studio_email : tx.instructor_email) : (tx.client_email || '-'))}
                                                 </p>
                                             </td>
                                             <td className="px-8 py-6">

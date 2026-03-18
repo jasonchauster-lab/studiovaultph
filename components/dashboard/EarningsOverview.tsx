@@ -19,9 +19,10 @@ interface EarningsOverviewProps {
         pendingBalance: number
         payoutApprovalStatus?: string
     }
+    userEmail?: string | null
 }
 
-export default function EarningsOverview({ studioId, summary }: EarningsOverviewProps) {
+export default function EarningsOverview({ studioId, summary, userEmail }: EarningsOverviewProps) {
     const [showInfoModal, setShowInfoModal] = useState(false)
     const [showTopUpModal, setShowTopUpModal] = useState(false)
     const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false)
@@ -347,6 +348,7 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                 isOpen={isPayoutModalOpen}
                 onClose={() => setIsPayoutModalOpen(false)}
                 showTrigger={false}
+                userEmail={userEmail}
             />
             {/* Top-Up Modal */}
             <TopUpModal

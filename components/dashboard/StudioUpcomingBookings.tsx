@@ -108,8 +108,22 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                 <div className="w-8 h-8 rounded-full overflow-hidden bg-off-white shrink-0 border border-white shadow-tight ring-1 ring-border-grey/10 group-hover/client:scale-110 transition-transform duration-500">
                                     <img src={booking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                 </div>
-                                <div className="text-[11px] text-slate flex-1 group-hover/client:text-forest transition-colors tracking-wide font-bold break-words">
-                                    Client: <span className="font-black text-charcoal">{booking.client?.full_name || 'N/A'}</span>
+                                <div className="text-[11px] text-slate font-bold tracking-wide break-words flex items-center gap-3 group/client">
+                                    <div className="flex-1">
+                                        Client: <span className="font-black text-charcoal">{booking.client?.full_name || 'N/A'}</span>
+                                    </div>
+                                    {booking.client_id && (
+                                        <StudioChatButton
+                                            bookingId={booking.id}
+                                            currentUserId={currentUserId}
+                                            partnerId={booking.client_id}
+                                            partnerName={booking.client?.full_name || 'Client'}
+                                            label="CHAT WITH CLIENT"
+                                            variant="antigravity"
+                                            iconType="client"
+                                            className="!h-7 !px-2.5 opacity-60 hover:opacity-100"
+                                        />
+                                    )}
                                 </div>
                             </div>
 
@@ -166,6 +180,7 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                             partnerId={booking.instructor_id}
                                             partnerName={booking.instructor?.full_name || 'Instructor'}
                                             label=""
+                                            iconType="instructor"
                                         />
                                     </div>
                                 </div>

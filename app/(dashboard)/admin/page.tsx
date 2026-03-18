@@ -649,19 +649,31 @@ export default async function AdminDashboard({
                                     {pendingTopUps.length === 0 ? <p className="text-charcoal/40 text-xs italic">No pending top-ups.</p> : (
                                         <div className="space-y-4">
                                             {pendingTopUps.map((t: any) => (
-                                                <div key={t.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center transition-all hover:bg-white hover:shadow-cloud group">
-                                                    <div className="space-y-1">
-                                                        <p className="text-lg font-serif text-charcoal">₱{t.amount.toLocaleString()}</p>
-                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest">{t.profiles?.full_name}</p>
+                                                <div key={t.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 transition-all hover:bg-white hover:shadow-cloud group">
+                                                    <div className="flex items-start gap-4">
                                                         {t.payment_proof_url && (
-                                                            <a href={getDisplayUrl(t.payment_proof_url)} target="_blank" className="text-[9px] font-black text-blue-500 hover:text-blue-600 uppercase tracking-widest pt-1 block">
-                                                                View Receipt
+                                                            <a href={getDisplayUrl(t.payment_proof_url)} target="_blank" className="relative w-20 h-20 rounded-xl overflow-hidden border border-cream-200 bg-white flex-shrink-0 group-hover:border-sage/30 transition-colors">
+                                                                <img 
+                                                                    src={getDisplayUrl(t.payment_proof_url)} 
+                                                                    alt="Payment Proof" 
+                                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                                />
+                                                                <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/10 flex items-center justify-center transition-colors">
+                                                                    <BarChart3 className="w-5 h-5 text-white opacity-0 group-hover:opacity-100" />
+                                                                </div>
                                                             </a>
                                                         )}
+                                                        <div className="space-y-1">
+                                                            <p className="text-xl font-serif text-charcoal">₱{t.amount.toLocaleString()}</p>
+                                                            <div className="space-y-0.5">
+                                                                <p className="text-[10px] text-charcoal font-black uppercase tracking-widest">{t.profiles?.full_name}</p>
+                                                                <p className="text-[9px] text-charcoal/40 font-bold uppercase tracking-wider">{t.profiles?.email}</p>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex gap-2">
-                                                        <VerifyButton id={t.id} action="rejectTopUp" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
-                                                        <VerifyButton id={t.id} action="approveTopUp" label="APPROVE" className="px-4 py-2 bg-forest text-white text-[10px] font-black rounded-xl shadow-sm" />
+                                                    <div className="flex gap-2 w-full sm:w-auto">
+                                                        <VerifyButton id={t.id} action="rejectTopUp" label="REJECT" className="flex-1 sm:flex-none px-6 py-2.5 bg-red-50 text-red-600 text-[10px] font-black rounded-xl hover:bg-red-100 transition-colors tracking-widest uppercase" />
+                                                        <VerifyButton id={t.id} action="approveTopUp" label="APPROVE" className="flex-1 sm:flex-none px-6 py-2.5 bg-forest text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest uppercase shadow-md shadow-forest/20" />
                                                     </div>
                                                 </div>
                                             ))}

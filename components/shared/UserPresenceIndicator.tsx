@@ -112,7 +112,7 @@ export default function UserPresenceIndicator({
             {showText && (
                 <span className={`text-xs ${isOnline 
                     ? (textColor || 'text-green-600 font-medium') 
-                    : (textColor || 'text-gray-400') + ' flex items-center gap-1'}`}>
+                    : `${textColor || 'text-gray-400'} flex items-center gap-1`}`}>
                     {isOnline ? (
                         'Online'
                     ) : (

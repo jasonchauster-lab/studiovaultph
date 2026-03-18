@@ -5,7 +5,7 @@ import { requestPayout } from '../actions'
 import { Loader2, AlertCircle, CheckCircle, Wallet } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export default function PayoutForm({ availableBalance }: { availableBalance: number }) {
+export default function PayoutForm({ availableBalance, userEmail }: { availableBalance: number, userEmail?: string | null }) {
     const [amount, setAmount] = useState<string>('')
     const [method, setMethod] = useState<'bank' | 'gcash'>('bank')
     const [details, setDetails] = useState({
@@ -93,9 +93,14 @@ export default function PayoutForm({ availableBalance }: { availableBalance: num
                 </div>
             </div>
 
-            <div className="bg-cream-50 p-4 rounded-lg mb-8 flex justify-between items-center border border-cream-200">
+            <div className="bg-cream-50 p-4 rounded-lg mb-4 flex justify-between items-center border border-cream-200">
                 <span className="text-charcoal-600 font-medium">Available to Withdraw</span>
                 <span className="text-xl font-bold text-charcoal-900">₱{availableBalance.toLocaleString()}</span>
+            </div>
+
+            <div className="bg-cream-50/50 p-4 rounded-lg mb-8 border border-cream-200/50">
+                <p className="text-[10px] font-black uppercase tracking-widest text-charcoal-400 mb-1">Requesting Account</p>
+                <p className="text-sm font-medium text-charcoal-900">{userEmail || 'N/A'}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">

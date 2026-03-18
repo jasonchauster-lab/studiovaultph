@@ -118,6 +118,7 @@ export default async function EarningsPage({
                         <EarningsOverview
                             studioId={studio.id}
                             summary={summary}
+                            userEmail={user.email}
                         />
                     </div>
                 )}

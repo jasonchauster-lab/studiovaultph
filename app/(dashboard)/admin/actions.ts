@@ -356,7 +356,7 @@ export async function approveStudioPayout(studioId: string) {
         return { error: 'Failed to approve studio payout' }
     }
 
-    await logAdminAction(supabase, 'APPROVE_STUDIO_PAYOUT_SETUP', 'studios', studioId, `Approved studio payout setup for "${studio.name}" (Owner: ${studio.profiles?.full_name || 'Unknown'})`)
+    await logAdminAction(supabase, 'APPROVE_STUDIO_PAYOUT_SETUP', 'studios', studioId, `Approved studio payout setup for "${studio.name}" (Owner: ${studio.profiles?.full_name || 'Unknown'}, ${studio.profiles?.email || 'no email'})`)
 
     if (studio.profiles?.email) {
         const host = (await headers()).get('host')
@@ -406,7 +406,7 @@ export async function rejectStudioPayout(studioId: string, customReason?: string
         return { error: 'Failed to reject studio payout' }
     }
 
-    await logAdminAction(supabase, 'REJECT_STUDIO_PAYOUT_SETUP', 'studios', studioId, `Rejected studio payout setup for ${studio?.name || 'Unknown'}`)
+    await logAdminAction(supabase, 'REJECT_STUDIO_PAYOUT_SETUP', 'studios', studioId, `Rejected studio payout setup for ${studio?.name || 'Unknown'} (Owner: ${studio?.profiles?.full_name || 'Unknown'}, ${studio?.profiles?.email || 'no email'})`)
 
     // Send rejection email
     if (studio?.profiles?.email) {
@@ -806,7 +806,17 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         // 2. Fetch all completed payouts
         let payoutsQuery = supabase
             .from('payout_requests')
-            .select('amount, created_at, instructor_id, studio_id')
+            .select(`
+                id,
+                amount, 
+                created_at, 
+                instructor_id, 
+                studio_id, 
+                user_id,
+                instructor:profiles!instructor_id(full_name, email),
+                user:profiles!user_id(full_name, email),
+                studios(name, profiles!owner_id(full_name, email))
+            `)
             .eq('status', 'paid')
 
         if (startDate) payoutsQuery = payoutsQuery.gte('created_at', startDate)
@@ -915,16 +925,21 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
 
         // 4. Add payouts to transactions
         payouts?.forEach((p: any) => {
+            const instructor = getFirst(p.instructor)
+            const user = getFirst(p.user)
+            const studio = getFirst(p.studios)
+            const studioOwner = getFirst(studio?.profiles)
+
             stats.transactions.push({
                 id: `payout-${p.id}`,
                 date: p.created_at,
                 type: 'Payout',
-                client: '-',
-                client_email: '-',
-                studio: p.studio_id ? 'Studio Payout' : '-',
-                studio_email: '-',
-                instructor: p.instructor_id ? 'Instructor Payout' : '-',
-                instructor_email: '-',
+                client: user?.full_name || '-',
+                client_email: user?.email || '-',
+                studio: studio?.name || '-',
+                studio_email: studioOwner?.email || '-',
+                instructor: instructor?.full_name || '-',
+                instructor_email: instructor?.email || '-',
                 total_amount: -Number(p.amount),
                 platform_fee: 0,
                 studio_fee: 0,

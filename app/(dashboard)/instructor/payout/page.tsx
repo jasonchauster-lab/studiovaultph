@@ -3,8 +3,11 @@ import PayoutForm from './PayoutForm'
 import Link from 'next/link'
 import { ArrowLeft, Clock } from 'lucide-react'
 import { clsx } from 'clsx'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function PayoutPage() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     const { availableBalance, error: balanceError } = await getInstructorEarnings()
     const { payouts, error: historyError } = await getPayoutHistory()
 
@@ -21,7 +24,7 @@ export default async function PayoutPage() {
 
             <h1 className="text-3xl sm:text-4xl font-serif text-charcoal-900 mb-6 px-2">Payouts</h1>
 
-            <PayoutForm availableBalance={availableBalance || 0} />
+            <PayoutForm availableBalance={availableBalance || 0} userEmail={user?.email} />
 
             <div className="mt-12">
                 <h3 className="text-xl font-serif text-charcoal-900 mb-6 flex items-center gap-2">

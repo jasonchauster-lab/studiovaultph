@@ -13,6 +13,7 @@ interface PayoutRequestModalProps {
     isOpen?: boolean
     onClose?: () => void
     showTrigger?: boolean
+    userEmail?: string | null
 }
 
 export default function PayoutRequestModal({ 
@@ -21,7 +22,8 @@ export default function PayoutRequestModal({
     payoutApprovalStatus = 'none',
     isOpen: controlledIsOpen,
     onClose: controlledOnClose,
-    showTrigger = true
+    showTrigger = true,
+    userEmail
 }: PayoutRequestModalProps) {
     const [internalIsOpen, setInternalIsOpen] = useState(false)
     
@@ -177,6 +179,10 @@ export default function PayoutRequestModal({
                                 </>
                             ) : (
                                 <>
+                                    <div className="bg-cream-50 p-3 rounded-lg border border-cream-200 mb-2">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-charcoal-400 mb-1">Requesting Account</p>
+                                        <p className="text-sm font-medium text-charcoal-900">{userEmail || 'N/A'}</p>
+                                    </div>
                                     <div>
                                         <label className="block text-sm font-medium text-charcoal-700 mb-1.5">Amount (₱)</label>
                                         <div className="relative">

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, Home, User, MessageCircle } from 'lucide-react'
 import clsx from 'clsx'
 import ChatWindow from './ChatWindow'
 import MessageCountBadge from './MessageCountBadge'
@@ -14,9 +14,10 @@ interface DashboardChatButtonProps {
     label: string
     variant?: 'default' | 'antigravity' | 'antigravity-gold'
     className?: string
+    iconType?: 'studio' | 'instructor' | 'client'
 }
 
-export default function StudioChatButton({ bookingId, currentUserId, partnerId, partnerName, label, variant = 'default', className }: DashboardChatButtonProps) {
+export default function StudioChatButton({ bookingId, currentUserId, partnerId, partnerName, label, variant = 'default', className, iconType }: DashboardChatButtonProps) {
     const [isOpen, setIsOpen] = useState(false)
 
     const getStyles = () => {
@@ -36,7 +37,15 @@ export default function StudioChatButton({ bookingId, currentUserId, partnerId, 
                 className={clsx(getStyles(), className)}
                 title={label}
             >
-                <MessageSquare className="w-4 h-4 shrink-0" />
+                {iconType === 'studio' ? (
+                    <Home className="w-4 h-4 shrink-0" />
+                ) : iconType === 'instructor' ? (
+                    <User className="w-4 h-4 shrink-0" />
+                ) : iconType === 'client' ? (
+                    <MessageCircle className="w-4 h-4 shrink-0" />
+                ) : (
+                    <MessageSquare className="w-4 h-4 shrink-0" />
+                )}
                 {variant.startsWith('antigravity') && (
                     <span className="text-[9px] font-black uppercase tracking-[0.2em] whitespace-nowrap">{label}</span>
                 )}

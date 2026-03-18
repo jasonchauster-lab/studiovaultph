@@ -154,15 +154,15 @@ export default function ChatWindow({ bookingId, currentUserId, recipientId, reci
                 {/* Header */}
                 <div className="bg-forest text-white p-4 flex justify-between items-center shrink-0">
                     <div>
-                        <h3 className="font-serif font-bold text-lg text-white">Chat with {recipientName}</h3>
-                        {!isExpired && <UserPresenceIndicator userId={recipientId} className="mt-1" textColor="text-white/80" />}
+                        <h3 className="font-serif font-bold text-lg !text-white">Chat with {recipientName}</h3>
+                        {!isExpired && <UserPresenceIndicator userId={recipientId} className="mt-1" textColor="!text-white/80" />}
                         {isExpired && (
                             <p className="text-xs text-yellow-200 flex items-center gap-1 mt-1">
                                 <Clock className="w-3 h-3" /> Session Expired
                             </p>
                         )}
                     </div>
-                    <button onClick={onClose} className="text-white/60 hover:text-white transition-colors">
+                    <button onClick={onClose} className="!text-white/60 hover:!text-white transition-colors">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
