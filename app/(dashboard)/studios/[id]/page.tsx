@@ -11,6 +11,7 @@ import NextImage from 'next/image'
 import { getManilaTodayStr, toManilaTimeString } from '@/lib/timezone'
 
 import { startOfMonth, endOfMonth, format } from 'date-fns'
+import { clsx } from 'clsx'
 
 // Cache studio + instructor data for 2 minutes.
 // Slots, pending bookings, and reviews stay dynamic (user-specific or time-sensitive).
@@ -156,8 +157,22 @@ export default async function StudioDetailsPage(props: {
     })
 
     return (
-        <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
-            <div className="max-w-5xl mx-auto space-y-8">
+        <div className="min-h-screen bg-cream-50">
+            {/* Banner Section */}
+            {studio.banner_url && (
+                <div className="relative w-full h-[200px] sm:h-[400px] bg-cream-100 overflow-hidden">
+                    <NextImage
+                        src={studio.banner_url}
+                        alt={`${studio.name} Banner`}
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
+            )}
+
+            <div className={clsx("max-w-5xl mx-auto space-y-8 p-4 sm:p-8", studio.banner_url && "-mt-12 sm:-mt-20 relative z-10")}>
                 {/* Studio Header */}
                 <div className="glass-card p-8 rounded-[32px] bg-white flex flex-col md:flex-row items-center gap-8 mb-8 border-border-grey shadow-cloud">
                     <div className="w-32 h-32 bg-off-white rounded-[24px] flex items-center justify-center overflow-hidden border-2 border-white shadow-tight shrink-0">

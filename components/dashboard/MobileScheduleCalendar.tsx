@@ -15,6 +15,7 @@ interface Session {
     is_booked: boolean;
     displayRatio?: string;
     displayTitle?: string;
+    equipment?: string;
 }
 
 interface MobileScheduleCalendarProps {
@@ -330,6 +331,12 @@ export default function MobileScheduleCalendar({
                                                 <MapPin className="w-3 h-3" />
                                                 {session.location?.split(' - ')[0] || session.location || 'Studio'}
                                             </a>
+                                        )}
+                                        {session.is_booked && session.equipment && (
+                                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[8px] font-bold uppercase tracking-wider text-white/90 bg-white/10 border-white/20">
+                                                <Sparkles className="w-3 h-3 text-white/40" />
+                                                {session.equipment}
+                                            </div>
                                         )}
                                     </div>
                                 </div>

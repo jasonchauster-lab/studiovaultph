@@ -48,6 +48,7 @@ export interface Studio {
     space_photos_urls?: string[];
     google_maps_url?: string;
     amenities?: string[];
+    banner_url?: string;
 }
 
 export interface Profile {
@@ -73,6 +74,7 @@ export interface Profile {
     wallet_balance?: number;
     is_founding_partner?: boolean;
     custom_fee_percentage?: number;
+    banner_url?: string;
 }
 
 export interface Slot {

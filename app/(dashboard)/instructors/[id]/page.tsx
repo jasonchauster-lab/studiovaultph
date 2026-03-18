@@ -8,6 +8,8 @@ import ReviewList from '@/components/reviews/ReviewList'
 import PublicInstructorGallery from '@/components/instructor/PublicInstructorGallery'
 import InstructorProfileCard from '@/components/instructor/InstructorProfileCard'
 import { getPublicReviews } from '@/app/(dashboard)/reviews/actions'
+import NextImage from 'next/image'
+import { clsx } from 'clsx'
 
 
 import { startOfMonth, endOfMonth, format } from 'date-fns'
@@ -81,7 +83,21 @@ export default async function InstructorProfilePage(props: {
         <div className="min-h-screen bg-alabaster relative selection:bg-sage/20">
             <div className="fixed inset-0 bg-white/50 animate-mesh -z-10 pointer-events-none" />
 
-            <div className="p-4 sm:p-8 md:p-12">
+            {/* Banner Section */}
+            {instructor.banner_url && (
+                <div className="relative w-full h-[200px] sm:h-[350px] bg-cream-100 overflow-hidden">
+                    <NextImage
+                        src={instructor.banner_url}
+                        alt={`${instructor.full_name} Banner`}
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
+            )}
+
+            <div className={clsx("p-4 sm:p-8 md:p-12", instructor.banner_url && "-mt-16 sm:-mt-24 relative z-10")}>
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12">
 
                     {/* Sidebar: Profile Info */}

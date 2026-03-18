@@ -598,6 +598,25 @@ export async function updateStudio(formData: FormData) {
         }
     }
 
+    // Upload banner via admin client
+    let newBannerUrl: string | null = null
+    const bannerFile = formData.get('banner') as File
+    if (bannerFile && bannerFile.size > 0) {
+        const ext = bannerFile.name.split('.').pop() || 'jpg'
+        const path = `studios/${studioId}/banner_${timestamp}.${ext}`
+        const { error: bannerErr } = await adminSupabase.storage.from('avatars').upload(path, bannerFile, {
+            contentType: uploadContentType(bannerFile),
+            upsert: true,
+        })
+        if (!bannerErr) {
+            const { data: { publicUrl } } = adminSupabase.storage.from('avatars').getPublicUrl(path)
+            newBannerUrl = publicUrl
+        } else {
+            console.error('Banner upload error:', bannerErr)
+            return { error: `Banner upload failed: ${bannerErr.message}` }
+        }
+    }
+
     // Upload new space photos via admin client
     const existingPhotosJson = formData.get('existingPhotos') as string
     const existingPhotos: string[] = existingPhotosJson ? JSON.parse(existingPhotosJson) : []
@@ -639,6 +658,10 @@ export async function updateStudio(formData: FormData) {
 
     if (newLogoUrl) {
         updateData.logo_url = newLogoUrl
+    }
+
+    if (newBannerUrl) {
+        updateData.banner_url = newBannerUrl
     }
 
     updateData.space_photos_urls = [...existingPhotos, ...additionalPhotoUrls]

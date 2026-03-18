@@ -19,6 +19,7 @@ export async function updateProfile(formData: FormData) {
     const birthday = formData.get('birthday') as string
     const email = formData.get('email') as string
     const avatarFile = formData.get('avatar') as File
+    const bannerFile = formData.get('banner') as File
     const otherMedicalCondition = formData.get('otherMedicalCondition') as string
 
     // Extract all values for teaching_equipment (checkboxes)
@@ -71,6 +72,27 @@ export async function updateProfile(formData: FormData) {
                 .getPublicUrl(filePath)
 
             updates.avatar_url = publicUrl
+        }
+    }
+
+    // Handle Banner Upload
+    if (bannerFile && bannerFile.size > 0) {
+        const fileExt = bannerFile.name.split('.').pop()
+        const filePath = `${user.id}/banner_${Date.now()}.${fileExt}`
+
+        const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(filePath, bannerFile, { contentType: uploadContentType(bannerFile) })
+
+        if (uploadError) {
+            console.error('Banner upload error:', uploadError)
+        } else {
+            // Get Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(filePath)
+
+            updates.banner_url = publicUrl
         }
     }
 

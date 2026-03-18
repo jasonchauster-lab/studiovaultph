@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, Clock, X, AlertCircle, Box } from 'lucide-react'
+import { Calendar, Clock, X, AlertCircle, Box, UserCheck } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import CancelBookingModal from './CancelBookingModal'
-import { cancelBookingByStudio } from '@/app/(dashboard)/studio/actions'
+import { cancelBookingByStudio, checkInInstructor } from '@/app/(dashboard)/studio/actions'
 import { formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
 import StudioChatButton from './StudioChatButton'
 
@@ -67,10 +67,10 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                 const qty = booking.price_breakdown?.quantity || 1
 
                 return (
-                    <div key={booking.id} className="p-4 sm:p-5 border border-border-grey/50 bg-white rounded-2xl hover:shadow-card hover:-translate-y-1 transition-all duration-500 group relative ring-1 ring-border-grey/10">
+                    <div key={booking.id} className="p-5 sm:p-6 border border-border-grey/50 bg-white rounded-2xl hover:shadow-card hover:-translate-y-1 transition-all duration-500 group relative ring-1 ring-border-grey/10">
                         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-5">
-                            <div className="flex items-center gap-3 min-w-0">
-                                <Link href={`/instructors/${booking.instructor_id}`} className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-off-white shadow-tight shrink-0 hover:scale-110 transition-transform duration-500 ring-1 ring-border-grey/20">
+                            <div className="flex items-center gap-4 min-w-0">
+                                <Link href={`/instructors/${booking.instructor_id}`} className="w-12 h-12 rounded-full overflow-hidden border-2 border-white bg-off-white shadow-tight shrink-0 hover:scale-110 transition-transform duration-500 ring-1 ring-border-grey/20">
                                     <img
                                         src={booking.instructor?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.instructor?.full_name || 'instructor')}`}
                                         alt="Instructor"
@@ -78,45 +78,45 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                     />
                                 </Link>
                                 <div className="space-y-0.5 min-w-0">
-                                    <Link href={`/instructors/${booking.instructor_id}`} className="text-[12px] font-black text-charcoal hover:text-forest transition-colors uppercase tracking-tight block truncate">
+                                    <Link href={`/instructors/${booking.instructor_id}`} className="text-sm font-black text-charcoal hover:text-forest transition-colors uppercase tracking-tight block truncate">
                                         {booking.instructor?.full_name || 'N/A'}
                                     </Link>
-                                    <div className="flex items-center gap-1.5 text-[9px] text-slate font-bold uppercase tracking-widest opacity-60">
-                                        <Clock className="w-2.5 h-2.5 text-forest" />
+                                    <div className="flex items-center gap-2 text-xs text-slate font-bold uppercase tracking-wider opacity-60">
+                                        <Clock className="w-3 h-3 text-forest" />
                                         <span className="truncate">{formatManilaDateStr(slotData.date)} • {formatTo12Hour(slotData.start_time)}</span>
                                     </div>
                                 </div>
                             </div>
                             <div className="text-left sm:text-right shrink-0">
                                 <p className="text-base font-black text-charcoal leading-none tracking-tighter">₱{payout.toLocaleString()}</p>
-                                <p className="text-[7px] text-slate uppercase font-black tracking-[0.2em] mt-1 opacity-50">Studio Fee</p>
+                                <p className="text-[9px] text-slate uppercase font-black tracking-[0.2em] mt-1 opacity-50">Studio Fee</p>
                             </div>
                         </div>
 
-                        <div className="pt-4 border-t border-border-grey/30 space-y-4">
+                        <div className="pt-5 border-t border-border-grey/30 space-y-5">
                             <div
                                 className="flex items-center gap-2.5 cursor-pointer group/client"
                                 onClick={() => setSelectedClient(booking.client)}
                             >
-                                <div className="w-7 h-7 rounded-full overflow-hidden bg-off-white shrink-0 border border-white shadow-tight ring-1 ring-border-grey/10 group-hover/client:scale-110 transition-transform duration-500">
+                                <div className="w-8 h-8 rounded-full overflow-hidden bg-off-white shrink-0 border border-white shadow-tight ring-1 ring-border-grey/10 group-hover/client:scale-110 transition-transform duration-500">
                                     <img src={booking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                 </div>
-                                <div className="text-[10px] text-slate truncate flex-1 group-hover/client:text-forest transition-colors tracking-wide font-medium">
+                                <div className="text-[11px] text-slate truncate flex-1 group-hover/client:text-forest transition-colors tracking-wide font-bold">
                                     Client: <span className="font-black text-charcoal">{booking.client?.full_name || 'N/A'}</span>
                                 </div>
                             </div>
 
                             <div className="flex flex-col @[300px]:flex-row @[300px]:items-center justify-between gap-3">
-                                <div className="flex items-center gap-2 bg-off-white/50 px-2.5 py-1 rounded-full border border-border-grey/20 w-fit">
-                                    <Box className="w-3 h-3 text-forest opacity-50" />
-                                    <span className="text-[9px] font-black text-charcoal truncate max-w-[100px] uppercase tracking-wider">
+                                <div className="flex items-center gap-2.5 bg-off-white/50 px-3 py-1.5 rounded-full border border-border-grey/20 w-fit">
+                                    <Box className="w-4 h-4 text-forest opacity-50" />
+                                    <span className="text-[10px] sm:text-xs font-black text-charcoal truncate max-w-[120px] uppercase tracking-wider">
                                         {qty} x {equipment}
                                     </span>
                                 </div>
 
                                 <div className="flex items-center gap-2.5 self-end @[300px]:self-auto">
                                     <span className={clsx(
-                                        "status-pill-earth px-2.5 py-0.5 flex items-center gap-1 text-[9px]",
+                                        "status-pill-earth px-2.5 py-1 flex items-center gap-1.5 text-[10px] sm:text-xs",
                                         ['approved', 'completed'].includes(booking.status?.toLowerCase())
                                             ? "status-pill-green shadow-tight"
                                             : "status-pill-yellow shadow-tight"
@@ -124,13 +124,34 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                         <div className={clsx("w-1 h-1 rounded-full", ['approved', 'completed'].includes(booking.status?.toLowerCase()) ? "bg-green-500" : "bg-yellow-500")} />
                                         {['approved', 'completed'].includes(booking.status?.toLowerCase()) ? 'Confirmed' : 'Pending'}
                                     </span>
-                                    <div className="flex gap-1.5">
+                                    <div className="flex gap-1.5 items-center">
+                                        {['approved', 'completed'].includes(booking.status?.toLowerCase()) && !booking.instructor_checked_in_at && (
+                                            <button
+                                                onClick={async () => {
+                                                    if (confirm('Check in this instructor?')) {
+                                                        await checkInInstructor(booking.id)
+                                                    }
+                                                }}
+                                                className="w-8 h-8 bg-forest/5 text-forest border border-forest/20 rounded-full hover:bg-forest hover:text-white transition-all flex items-center justify-center shadow-tight group/check"
+                                                title="Check In Instructor"
+                                            >
+                                                <UserCheck className="w-3.5 h-3.5" />
+                                            </button>
+                                        )}
+                                        {booking.instructor_checked_in_at && (
+                                            <div 
+                                                className="w-8 h-8 bg-forest text-white rounded-full flex items-center justify-center shadow-tight"
+                                                title={`Instructor checked in at ${new Date(booking.instructor_checked_in_at).toLocaleTimeString()}`}
+                                            >
+                                                <UserCheck className="w-3.5 h-3.5" />
+                                            </div>
+                                        )}
                                         <button
                                             onClick={() => setCancellingBooking(booking)}
-                                            className="w-7 h-7 bg-white text-red-600 border border-border-grey/50 rounded-full hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-tight active:scale-90"
+                                            className="w-8 h-8 bg-white text-red-600 border border-border-grey/50 rounded-full hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-tight active:scale-90"
                                             title="Cancel Booking"
                                         >
-                                            <X className="w-3 h-3" />
+                                            <X className="w-3.5 h-3.5" />
                                         </button>
                                         <StudioChatButton
                                             bookingId={booking.id}

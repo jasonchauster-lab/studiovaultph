@@ -54,8 +54,11 @@ function LoginContent() {
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession()
             if (session?.user && !isRedirecting) {
+                // Check if they are an OAuth user (already verified)
+                const isOAuth = session.user.app_metadata?.provider && session.user.app_metadata.provider !== 'email'
+                
                 // Check if they were already remembered
-                if (isOtpRemembered(session.user.id)) {
+                if (isOAuth || isOtpRemembered(session.user.id)) {
                    setIsRedirecting(true)
                    await redirectByRole(session.user.id)
                 } else {
@@ -81,7 +84,7 @@ function LoginContent() {
         // Start listening for auth changes once we are at the OTP step
         // OR if we already have a session (cross-tab sync).
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event: string, session: { user?: { id: string } } | null) => {
+            async (event: string, session: any) => {
                 // 1. Avoid infinite redirect loops if we are already redirecting
                 if (isRedirecting) return
 
@@ -90,10 +93,24 @@ function LoginContent() {
                 
                 if (isVerificationEvent && session?.user) {
                     // 3. Skip if this is just the INITIAL password-only session event
-                    // (we know if it's the password event if we JUST sent an OTP 
-                    // and it hasn't been 2 seconds yet).
+                    // AND the user hasn't clicked "Send Link" yet (otpSent is false).
+                    // We let handleAuth manage the transition to the OTP step.
+                    if (!otpSent) {
+                        // Check if they are an OAuth user (already verified)
+                        const isOAuth = session.user.app_metadata?.provider && session.user.app_metadata.provider !== 'email'
+
+                        // However, if they are ALREADY remembered, we CAN redirect
+                        if (isOAuth || isOtpRemembered(session.user.id)) {
+                             console.log('[Auth] Already remembered or OAuth, listener proceeding with redirect')
+                        } else {
+                            console.log('[Auth] Password login detected, letting handleAuth show OTP step')
+                            return
+                        }
+                    }
+
+                    // 4. Skip if the magic link was JUST sent (cooldown to avoid double-firing)
                     const isTooFresh = lastOtpSentAt && (Date.now() - lastOtpSentAt < 2000)
-                    if (otpSent && isTooFresh) {
+                    if (isTooFresh) {
                         console.log('[Auth] Ignoring event (too fresh):', event)
                         return
                     }
@@ -143,19 +160,28 @@ function LoginContent() {
     }
 
     const redirectByRole = async (userId: string) => {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', userId)
-            .single()
+        try {
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', userId)
+                .single()
 
-        // If user just successfully bypassed 2FA via a "Remember Me" cookie from the callback,
-        // or if they were already remembered, we simply redirect.
-        const roleMap: Record<string, string> = { admin: '/admin', instructor: '/instructor', studio: '/studio', customer: '/customer' }
-        const dest = profile?.role ? (roleMap[profile.role] ?? '/welcome') : '/welcome'
+            if (error) console.error('[Auth] Error fetching profile:', error)
 
-        router.push(dest)
-        router.refresh()
+            // If user just successfully bypassed 2FA via a "Remember Me" cookie from the callback,
+            // or if they were already remembered, we simply redirect.
+            const roleMap: Record<string, string> = { admin: '/admin', instructor: '/instructor', studio: '/studio', customer: '/customer' }
+            const dest = profile?.role ? (roleMap[profile.role] ?? '/welcome') : '/welcome'
+
+            console.log('[Auth] Redirecting user to:', dest)
+            router.push(dest)
+            router.refresh()
+        } catch (err) {
+            console.error('[Auth] Redirect failed:', err)
+            setLoading(false)
+            setIsRedirecting(false)
+        }
     }
 
     const handleGoogleAuth = async () => {
@@ -210,23 +236,35 @@ function LoginContent() {
         }
 
         // Sign-in: check password
-        const { data: { user }, error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) {
-            setMessage({ type: 'error', text: error.message })
+        try {
+            const { data: { user }, error } = await supabase.auth.signInWithPassword({ email, password })
+            if (error) {
+                setMessage({ type: 'error', text: error.message })
+                setLoading(false)
+                return
+            }
+            if (!user) { 
+                setLoading(false)
+                router.push('/welcome')
+                router.refresh()
+                return 
+            }
+
+            // Skip 2FA if this device is already remembered for this specific user
+            if (isOtpRemembered(user.id)) {
+                await redirectByRole(user.id)
+                // Note: redirectByRole handles its own cleanup or keeps loading until navigation
+                return
+            }
+
+            // Show 2FA step
+            setStep('otp')
             setLoading(false)
-            return
+        } catch (err) {
+            console.error('[Auth] Login unexpected error:', err)
+            setMessage({ type: 'error', text: 'An unexpected error occurred. Please try again.' })
+            setLoading(false)
         }
-        if (!user) { router.push('/welcome'); router.refresh(); return }
-
-        // Skip 2FA if this device is already remembered for this specific user
-        if (isOtpRemembered(user.id)) {
-            await redirectByRole(user.id)
-            return
-        }
-
-        // Show 2FA step
-        setStep('otp')
-        setLoading(false)
     }
 
     // Step 2a: send the magic link (called when user clicks "Send Verification Link")

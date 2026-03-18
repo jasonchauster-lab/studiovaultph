@@ -20,14 +20,14 @@ const GROUPED_AREAS = AREAS.reduce((acc: Record<string, string[]>, loc: string) 
 }, {})
 
 import { useEffect, useState } from 'react';
-import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2, Pencil, Copy, Trash2, AlertTriangle, CheckCircle, Plus, RefreshCcw } from 'lucide-react'
+import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2, Pencil, Copy, Trash2, AlertTriangle, CheckCircle, Plus, RefreshCcw, UserCheck } from 'lucide-react'
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ChatWindow from '@/components/dashboard/ChatWindow';
 import MessageCountBadge from '@/components/dashboard/MessageCountBadge';
 import { formatManilaDateStr, formatTo12Hour, getManilaTodayStr } from '@/lib/timezone';
 import CancelBookingModal from './CancelBookingModal';
-import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions';
+import { cancelBookingByInstructor, checkInClient } from '@/app/(dashboard)/instructor/actions';
 import InstructorScheduleCalendar from '@/components/instructor/InstructorScheduleCalendar';
 import InstructorStatCards from './InstructorStatCards';
 import MobileScheduleCalendar from '@/components/dashboard/MobileScheduleCalendar';
@@ -385,13 +385,13 @@ export default function InstructorDashboardClient({
                                 return (
                                         <div className="space-y-4 sm:space-y-6">
                                             {upcomingBookings.map(session => (
-                                                <div key={session.id} className="p-4 sm:p-6 border border-border-grey/40 bg-white rounded-xl hover:bg-off-white transition-all duration-300 shadow-tight group relative">
-                                                    <div className="flex justify-between items-start mb-4 sm:mb-6">
+                                                <div key={session.id} className="p-5 sm:p-7 border border-border-grey/50 bg-white rounded-2xl hover:bg-off-white transition-all duration-500 shadow-tight group relative ring-1 ring-border-grey/10">
+                                                    <div className="flex justify-between items-start mb-5 sm:mb-7">
                                                         <div className="flex flex-col gap-1 w-full">
                                                             <div className="flex items-center gap-3 sm:gap-4">
                                                                 <button
                                                                     onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
-                                                                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-[10px] sm:rounded-[12px] overflow-hidden border border-white bg-white shadow-sm shrink-0 hover:scale-105 transition-transform duration-700"
+                                                                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-[12px] sm:rounded-[14px] overflow-hidden border border-white bg-white shadow-tight shrink-0 hover:scale-110 transition-transform duration-700"
                                                                 >
                                                                     <img
                                                                         src={session.slots?.studios?.logo_url || "/logo2.jpg"}
@@ -403,16 +403,16 @@ export default function InstructorDashboardClient({
                                                                     <div className="flex items-start justify-between gap-2">
                                                                         <button
                                                                             onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
-                                                                            className="text-[10px] sm:text-[11px] font-black text-charcoal uppercase tracking-[0.15em] sm:tracking-[0.2em] truncate hover:text-forest transition-colors text-left"
+                                                                            className="text-xs sm:text-sm font-black text-charcoal uppercase tracking-tight truncate hover:text-forest transition-colors text-left"
                                                                         >
                                                                             {session.slots?.studios?.name || 'Unknown Studio'}
                                                                         </button>
                                                                         <div className="flex items-center gap-1 bg-[#FFF1B5]/40 px-1.5 py-0.5 rounded border border-charcoal/5 whitespace-nowrap">
-                                                                            <span className="text-[8px] sm:text-[9px] font-black text-charcoal">1/1</span>
+                                                                            <span className="text-[9px] sm:text-[10px] font-black text-charcoal">1/1</span>
                                                                         </div>
                                                                     </div>
-                                                                    <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] text-charcoal/50 font-black uppercase tracking-[0.1em] mt-1 sm:mt-1.5">
-                                                                        <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-forest/40" />
+                                                                    <div className="flex items-center gap-1.5 text-xs text-charcoal/50 font-black uppercase tracking-[0.1em] mt-1 sm:mt-1.5">
+                                                                        <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-forest/50" />
                                                                         <span className="truncate">{session.slots?.date ? formatManilaDateStr(session.slots.date) : 'No Date'} • {session.slots?.start_time ? formatTo12Hour(session.slots.start_time) : 'No Time'}</span>
                                                                     </div>
                                                                 </div>
@@ -420,24 +420,24 @@ export default function InstructorDashboardClient({
                                                         </div>
                                                     </div>
 
-                                                    <div className="pt-4 sm:pt-6 border-t border-white/60 space-y-3 sm:space-y-4">
+                                                    <div className="pt-5 sm:pt-7 border-t border-border-grey/30 space-y-4 sm:space-y-5">
                                                         <button
-                                                            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group/client w-full text-left focus:outline-none focus:ring-1 focus:ring-forest rounded-lg p-1 -m-1"
+                                                            className="flex items-center gap-3 sm:gap-4 cursor-pointer group/client w-full text-left focus:outline-none focus:ring-2 focus:ring-forest/20 rounded-xl p-1.5 -m-1.5 hover:bg-white transition-all"
                                                             onClick={() => setSelectedProfile(session.client)}
                                                             aria-label={`View record for ${session.client?.full_name}`}
                                                         >
-                                                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg overflow-hidden bg-white shrink-0 border border-border-grey shadow-tight group-hover/client:scale-110 transition-transform duration-300">
+                                                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden bg-white shrink-0 border border-border-grey/50 shadow-tight group-hover/client:scale-110 transition-transform duration-500">
                                                                 <img alt="" src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                                             </div>
-                                                            <div className="text-[9px] sm:text-[10px] text-charcoal/50 uppercase tracking-[0.15em] sm:tracking-[0.2em] truncate flex-1 group-hover/client:text-forest transition-colors">
+                                                            <div className="text-[10px] sm:text-[11px] text-charcoal/40 uppercase tracking-[0.2em] truncate flex-1 group-hover/client:text-forest transition-colors font-bold">
                                                                 CLIENT: <span className="font-black text-charcoal">{session.client?.full_name}</span>
                                                             </div>
                                                         </button>
 
-                                                        <div className="flex items-center justify-between text-[9px] sm:text-[10px] pt-1">
-                                                            <div className="flex items-center gap-2.5 sm:gap-3">
-                                                                <Box className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-forest/40" />
-                                                                <span className="font-black text-slate truncate max-w-[100px] sm:max-w-[120px] uppercase tracking-[0.15em] sm:tracking-[0.2em]">
+                                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+                                                            <div className="flex items-center gap-3">
+                                                                <Box className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-forest/40" />
+                                                                <span className="font-black text-slate truncate max-w-[140px] uppercase tracking-[0.2em] text-[10px] sm:text-xs">
                                                                     {Array.isArray(session.slots?.equipment) && session.slots.equipment.length > 0
                                                                         ? `${session.slots.equipment[0]}`
                                                                         : (`${session.price_breakdown?.equipment || 'Standard'}`)
@@ -445,7 +445,29 @@ export default function InstructorDashboardClient({
                                                                 </span>
                                                             </div>
 
-                                                            <div className="flex gap-2 sm:gap-3">
+                                                            <div className="flex gap-2 sm:gap-2.5 items-center self-end sm:self-auto">
+                                                                {session.status === 'approved' && !session.client_checked_in_at && (
+                                                                    <button
+                                                                        onClick={async (e) => {
+                                                                            e.preventDefault();
+                                                                            if (confirm('Check in this client?')) {
+                                                                                await checkInClient(session.id);
+                                                                            }
+                                                                        }}
+                                                                        className="w-8 h-8 sm:w-10 sm:h-10 bg-forest/5 text-forest border border-forest/20 rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight group/check"
+                                                                        title="Check In Client"
+                                                                    >
+                                                                        <UserCheck className="w-4 h-4" />
+                                                                    </button>
+                                                                )}
+                                                                {session.client_checked_in_at && (
+                                                                    <div 
+                                                                        className="w-8 h-8 sm:w-10 sm:h-10 bg-forest text-white rounded-full flex items-center justify-center shadow-tight"
+                                                                        title={`Checked in at ${new Date(session.client_checked_in_at).toLocaleTimeString()}`}
+                                                                    >
+                                                                        <UserCheck className="w-4 h-4" />
+                                                                    </div>
+                                                                )}
                                                                 <button
                                                                     onClick={(e) => {
                                                                         e.preventDefault();
@@ -456,11 +478,11 @@ export default function InstructorDashboardClient({
                                                                             isExpired: isChatExpired(session)
                                                                         })
                                                                     }}
-                                                                    className="w-8 h-8 sm:w-9 sm:h-9 bg-white text-forest border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn"
+                                                                    className="w-8 h-8 sm:w-10 sm:h-10 bg-white text-forest border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn"
                                                                     title="Message Client"
                                                                     aria-label={`Message client ${session.client?.full_name || 'Client'}`}
                                                                 >
-                                                                    <MessageSquare className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                                                    <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                                     <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.client_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.client_id} />
                                                                 </button>
     
@@ -474,11 +496,11 @@ export default function InstructorDashboardClient({
                                                                             isExpired: isChatExpired(session)
                                                                         })
                                                                     }}
-                                                                    className="w-8 h-8 sm:w-9 sm:h-9 bg-white text-charcoal border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn2"
+                                                                    className="w-8 h-8 sm:w-10 sm:h-10 bg-white text-charcoal border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn2"
                                                                     title="Message Studio"
                                                                     aria-label={`Message studio ${session.slots?.studios?.name || 'Studio'}`}
                                                                 >
-                                                                    <MessageSquare className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                                                    <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                                     <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.slots?.studios?.owner_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.slots?.studios?.owner_id} />
                                                                 </button>
     
@@ -487,11 +509,11 @@ export default function InstructorDashboardClient({
                                                                         e.preventDefault();
                                                                         setCancellingBooking(session);
                                                                     }}
-                                                                    className="w-8 h-8 sm:w-9 sm:h-9 bg-white text-red-600 border border-border-grey rounded-full hover:bg-red-600 hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight"
+                                                                    className="w-8 h-8 sm:w-10 sm:h-10 bg-white text-red-600 border border-border-grey rounded-full hover:bg-red-600 hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight"
                                                                     title="Cancel Session"
                                                                     aria-label="Cancel session"
                                                                 >
-                                                                    <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                                                    <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                                 </button>
                                                             </div>
                                                     </div>

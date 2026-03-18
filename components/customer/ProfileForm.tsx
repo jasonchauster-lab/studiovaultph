@@ -21,6 +21,10 @@ export default function ProfileForm({ profile }: { profile: any }) {
     const [avatarFile, setAvatarFile] = useState<File | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
+    const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(profile?.banner_url || null)
+    const [bannerFile, setBannerFile] = useState<File | null>(null)
+    const bannerInputRef = useRef<HTMLInputElement>(null)
+
     const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
@@ -33,6 +37,24 @@ export default function ProfileForm({ profile }: { profile: any }) {
             } catch (err) {
                 console.error('Avatar processing failed', err)
                 setMessage('Failed to process image format. Please try another photo.')
+            } finally {
+                setIsLoading(false)
+            }
+        }
+    }
+
+    const handleBannerChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            setIsLoading(true)
+            try {
+                const processedFile = await normalizeImageFile(file)
+                setBannerFile(processedFile)
+                const url = URL.createObjectURL(processedFile)
+                setBannerPreviewUrl(url)
+            } catch (err) {
+                console.error('Banner processing failed', err)
+                setMessage('Failed to process banner image.')
             } finally {
                 setIsLoading(false)
             }
@@ -65,6 +87,11 @@ export default function ProfileForm({ profile }: { profile: any }) {
             formData.set('avatar', avatarFile)
         }
 
+        // Overwrite banner if we have a processed one
+        if (bannerFile) {
+            formData.set('banner', bannerFile)
+        }
+
         setIsLoading(true)
         setMessage(null)
 
@@ -85,6 +112,47 @@ export default function ProfileForm({ profile }: { profile: any }) {
 
     return (
         <form action={handleSubmit} className="space-y-8">
+
+            {/* Banner Upload (Instructors Only) */}
+            {profile?.role === 'instructor' && (
+                <div className="space-y-4 pb-10 border-b border-cream-200/60">
+                    <div className="flex items-center gap-3 border-b border-cream-200/60 pb-3">
+                        <h3 className="text-xl font-serif font-bold text-charcoal-900 tracking-tight">Profile Banner</h3>
+                        <div className="h-px flex-1 bg-cream-100/50" />
+                    </div>
+                    <div 
+                        className="relative w-full aspect-[21/9] sm:aspect-[4/1] rounded-2xl overflow-hidden bg-cream-50 border-2 border-dashed border-cream-200 cursor-pointer group transition-all"
+                        onClick={() => bannerInputRef.current?.click()}
+                    >
+                        {bannerPreviewUrl ? (
+                            <Image
+                                src={bannerPreviewUrl}
+                                alt="Profile Banner"
+                                fill
+                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                        ) : (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-charcoal-300">
+                                <Camera className="w-8 h-8 mb-2" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Upload Banner Photo</span>
+                            </div>
+                        )}
+                        <div className="absolute inset-0 bg-charcoal-900/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                            <div className="bg-white/90 p-3 rounded-full shadow-lg">
+                                <Camera className="w-6 h-6 text-charcoal-900" />
+                            </div>
+                        </div>
+                    </div>
+                    <input
+                        type="file"
+                        ref={bannerInputRef}
+                        className="hidden"
+                        onChange={handleBannerChange}
+                        accept="image/*,.heic,.heif"
+                    />
+                    <p className="text-[10px] text-charcoal-400 italic">Recommended: A wide horizontal photo (e.g. 1920x480) showing you in action.</p>
+                </div>
+            )}
 
             {/* Avatar Upload */}
             <div className="flex flex-col items-center sm:flex-row gap-8 pb-10 border-b border-cream-200/60">

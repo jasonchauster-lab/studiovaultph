@@ -40,7 +40,8 @@ export async function updateSession(request: NextRequest) {
     // ── Diagnostic Logging (Server-side) ──────────────────────────────
     const path = request.nextUrl.pathname
     const otpCookie = request.cookies.get('otp_remembered')?.value
-    const isVerified = user && otpCookie?.toLowerCase() === user.id.toLowerCase()
+    const isOAuth = user?.app_metadata?.provider && user.app_metadata.provider !== 'email'
+    const isVerified = user && (isOAuth || otpCookie?.toLowerCase() === user.id.toLowerCase())
 
     if (user && !path.startsWith('/_next') && !path.startsWith('/favicon.ico')) {
         console.log(`[Middleware] Path: ${path} | User: ${user.id} | OTP Cookie: ${otpCookie || 'MISSING'} | Verified: ${isVerified}`)

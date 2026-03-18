@@ -15,10 +15,14 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
     const [success, setSuccess] = useState(false)
 
     const logoInputRef = useRef<HTMLInputElement>(null)
+    const bannerInputRef = useRef<HTMLInputElement>(null)
     const spacePhotosInputRef = useRef<HTMLInputElement>(null)
 
     const [logo, setLogo] = useState<File | null>(null)
     const [logoPreview, setLogoPreview] = useState<string | null>(studio.logo_url)
+
+    const [banner, setBanner] = useState<File | null>(null)
+    const [bannerPreview, setBannerPreview] = useState<string | null>(studio.banner_url)
 
     const [existingPhotos, setExistingPhotos] = useState<string[]>(studio.space_photos_urls || studio.space_photos || [])
     const [newSpacePhotos, setNewSpacePhotos] = useState<File[]>([])
@@ -33,6 +37,20 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
             } catch (err) {
                 console.error('Logo processing error:', err)
                 setError('Failed to process logo image.')
+            }
+        }
+    }
+
+    const handleBannerChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            try {
+                const normalized = await normalizeImageFile(file)
+                setBanner(normalized)
+                setBannerPreview(URL.createObjectURL(normalized))
+            } catch (err) {
+                console.error('Banner processing error:', err)
+                setError('Failed to process banner image.')
             }
         }
     }
@@ -93,6 +111,11 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                 formData.set('logo', logo)
             }
 
+            // Append banner if changed
+            if (banner) {
+                formData.set('banner', banner)
+            }
+
             const result = await updateStudio(formData)
             if (result?.error) {
                 setError(result.error)
@@ -100,6 +123,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                 setSuccess(true)
                 setNewSpacePhotos([])
                 setLogo(null)
+                setBanner(null)
             }
         } catch (err: any) {
             console.error('Settings update error:', err)
@@ -113,6 +137,45 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
         <form action={handleSubmit} className="space-y-8 bg-white p-4 sm:p-8 rounded-2xl border border-cream-200 shadow-sm">
 
             <input type="hidden" name="studioId" value={studio.id} />
+
+            {/* Banner Upload */}
+            <div className="space-y-4 border-b border-cream-200/60 pb-10">
+                <div className="flex items-center gap-3 border-b border-cream-200/60 pb-3">
+                    <h2 className="text-xl font-serif font-bold text-charcoal-900">Profile Banner</h2>
+                    <div className="h-px flex-1 bg-cream-100/50" />
+                </div>
+                <div 
+                    className="relative w-full aspect-[21/9] sm:aspect-[4/1] rounded-2xl overflow-hidden bg-cream-50 border-2 border-dashed border-cream-200 cursor-pointer group transition-all"
+                    onClick={() => bannerInputRef.current?.click()}
+                >
+                    {bannerPreview ? (
+                        <Image
+                            src={bannerPreview}
+                            alt="Studio Banner"
+                            fill
+                            className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                    ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-charcoal-300">
+                            <Upload className="w-8 h-8 mb-2" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Upload Banner Photo</span>
+                        </div>
+                    )}
+                    <div className="absolute inset-0 bg-charcoal-900/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                        <div className="bg-white/90 p-3 rounded-full shadow-lg">
+                            <Camera className="w-6 h-6 text-charcoal-900" />
+                        </div>
+                    </div>
+                </div>
+                <input
+                    type="file"
+                    accept="image/*,.heic,.heif"
+                    ref={bannerInputRef}
+                    className="hidden"
+                    onChange={handleBannerChange}
+                />
+                <p className="text-[10px] text-charcoal-400 italic">Recommended size: 1920x480 or similar wide aspect ratio.</p>
+            </div>
 
             {/* Logo Upload */}
             <div className="flex flex-col items-center gap-6 border-b border-cream-200/60 pb-10">

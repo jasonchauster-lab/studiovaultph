@@ -391,6 +391,8 @@ export default function InstructorScheduleCalendar({
                                     start_time: b.slots.start_time,
                                     end_time: b.slots.end_time,
                                     type: b.type || 'Session',
+                                    location: b.slots.studios?.name || 'Studio',
+                                    equipment: (b.price_breakdown as any)?.equipment,
                                     is_booked: true,
                                     status: b.status
                                 });
@@ -693,7 +695,7 @@ export default function InstructorScheduleCalendar({
                                                                                 isPastCell
                                                                                      ? "bg-white/50 border-border-grey/50 text-charcoal/40"
                                                                                      : "bg-buttermilk border-border-grey text-charcoal",
-                                                                                duration < 45 && "py-1 px-2 justify-center"
+                                                                                duration < 30 && "py-1 px-2 justify-center"
                                                                             )}
                                                                             style={{
                                                                                 top: `${topOffset}px`,
@@ -713,7 +715,7 @@ export default function InstructorScheduleCalendar({
                                                                                 setIsEditModalOpen(true);
                                                                             }}
                                                                         >
-                                                                                <div className={clsx("flex flex-col items-start gap-1 overflow-hidden w-full", duration < 45 && "justify-center")}>
+                                                                                <div className={clsx("flex flex-col items-start gap-1 overflow-hidden w-full", duration < 30 && "justify-center")}>
                                                                                     <div className="flex justify-between items-start w-full gap-2">
                                                                                         <div className={clsx("text-[10px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
                                                                                             {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
@@ -767,14 +769,14 @@ export default function InstructorScheduleCalendar({
                                                                                 setSelectedBooking(booking);
                                                                             }}
                                                                         >
-                                                                            <div className={clsx("flex justify-between items-start w-full overflow-hidden", duration < 45 && "items-center")}>
+                                                                            <div className={clsx("flex justify-between items-start w-full overflow-hidden", duration < 30 && "items-center")}>
                                                                                 <div className="flex flex-col min-w-0 flex-1 overflow-hidden">
                                                                                      <span className="text-[8.5px] font-semibold text-white uppercase tracking-tight truncate">
                                                                                          {booking.client?.full_name || 'Session'}
                                                                                      </span>
-                                                                                     {duration >= 45 && (
+                                                                                     {duration >= 30 && (
                                                                                          <>
-                                                                                             <span className="text-[7px] font-black text-white/80 uppercase tracking-tighter mt-0.5 truncate">
+                                                                                             <span className="text-[8px] font-bold text-white uppercase tracking-tighter mt-0.5 truncate">
                                                                                                 {studioName}
                                                                                             </span>
                                                                                             <div className="flex flex-wrap items-center gap-1 mt-1.5 overflow-hidden">
@@ -784,12 +786,17 @@ export default function InstructorScheduleCalendar({
                                                                                                         <span className="truncate max-w-[60px]">{slotData.studios.location.split(' - ')[0] || 'Studio'}</span>
                                                                                                     </div>
                                                                                                 )}
-                                                                                                {Array.isArray(slotData.equipment) && slotData.equipment.map((eq: string, idx: number) => (
-                                                                                                    <div key={eq + idx} className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-white/90 px-1.5 py-0.5 rounded border border-white/20 bg-white/10 truncate">
+                                                                                                {/* Booked Equipment from price_breakdown */}
+                                                                                                {booking.price_breakdown?.equipment && (
+                                                                                                    <div className="text-[7.5px] font-bold uppercase tracking-tight flex items-center gap-1 text-white/90 px-1.5 py-0.5 rounded border border-white/20 bg-white/10 truncate">
                                                                                                         <Box className="w-2.5 h-2.5 shrink-0 text-white/40" />
-                                                                                                        <span className="truncate max-w-[60px]">{eq}</span>
+                                                                                                        <span className="truncate max-w-[60px]">
+                                                                                                            {Array.isArray(booking.price_breakdown.equipment) 
+                                                                                                                ? booking.price_breakdown.equipment[0] 
+                                                                                                                : booking.price_breakdown.equipment}
+                                                                                                        </span>
                                                                                                     </div>
-                                                                                                ))}
+                                                                                                )}
                                                                                             </div>
                                                                                         </>
                                                                                     )}
