@@ -169,9 +169,9 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                 <td className={clsx(
                                                     "px-6 py-6 text-right font-black text-lg transition-all whitespace-nowrap group-hover:scale-105",
                                                     isRefunded ? "text-charcoal/30" :
-                                                        isPenalty ? "text-red-500" :
-                                                            isPositive ? "text-sage" :
-                                                                isNegative ? "text-blue-500" : "text-charcoal"
+                                                        isPenalty ? "text-rose-500" :
+                                                            isPositive ? "text-emerald-600" :
+                                                                isNegative ? "text-rose-500" : "text-charcoal"
                                                 )}>
                                                     {isRefunded ? "₱0" :
                                                         (isPositive ? '+' : '') + `₱${tx.total_amount.toLocaleString()}`}
@@ -231,9 +231,9 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                     }
                                                     const typeClass = typeColors[tx.type] || 'bg-charcoal/5 text-charcoal/60'
                                                     const amountColor = isRefunded ? 'text-charcoal/30' :
-                                                        isPenalty ? 'text-red-500' :
-                                                        isPositive ? 'text-forest' :
-                                                        isNegative ? 'text-blue-500' : 'text-charcoal'
+                                                        isPenalty ? 'text-rose-500' :
+                                                        isPositive ? 'text-emerald-600' :
+                                                        isNegative ? 'text-rose-500' : 'text-charcoal'
 
                                                     return (
                                                         <div key={idx} className="px-4 py-4 flex items-start justify-between gap-4 bg-white hover:bg-cream-50/30 transition-colors duration-200">
@@ -329,7 +329,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                     </span>
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-6 text-right font-black text-charcoal text-lg group-hover:scale-105 transition-all">
+                                            <td className="px-6 py-6 text-right font-black text-rose-500 text-lg group-hover:scale-105 transition-all">
                                                 -₱{Math.abs(tx.total_amount).toLocaleString()}
                                             </td>
                                         </tr>
@@ -391,7 +391,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                             </div>
                                                             {/* Right: amount + status */}
                                                             <div className="shrink-0 text-right pt-0.5">
-                                                                <span className="text-base font-serif font-bold text-charcoal tracking-tight">
+                                                                <span className="text-base font-serif font-bold text-rose-500 tracking-tight">
                                                                     -₱{Math.abs(tx.total_amount).toLocaleString()}
                                                                 </span>
                                                                 <span className={clsx(

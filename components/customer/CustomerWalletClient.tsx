@@ -350,7 +350,7 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                                                                     {formatStatus(tx.status)}
                                                                 </span>
                                                             </td>
-                                                            <td className={`px-8 py-6 text-right font-serif whitespace-nowrap text-base ${!isNegative ? 'text-emerald-600' : 'text-charcoal-900'}`}>
+                                                            <td className={`px-8 py-6 text-right font-serif whitespace-nowrap text-base ${!isNegative ? 'text-emerald-600' : 'text-rose-500'}`}>
                                                                 <div className="flex items-center justify-end gap-1.5">
                                                                     <span className="text-xs font-sans text-charcoal-400 font-bold uppercase">PHP</span>
                                                                     <span className="font-black tracking-tight">{!isNegative ? '+' : ''}{tx.amount.toLocaleString()}</span>
@@ -403,7 +403,7 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                                                     
                                                     <div className="shrink-0 text-right flex flex-col items-end justify-between self-stretch py-0.5">
                                                         <div className="flex flex-col items-end">
-                                                            <span className={`text-base font-serif font-black tracking-tight leading-none ${!isNegative ? 'text-emerald-600' : 'text-charcoal-900'}`}>
+                                                            <span className={`text-base font-serif font-black tracking-tight leading-none ${!isNegative ? 'text-emerald-600' : 'text-rose-500'}`}>
                                                                 {!isNegative ? '+' : ''}{tx.amount.toLocaleString()}
                                                             </span>
                                                         </div>

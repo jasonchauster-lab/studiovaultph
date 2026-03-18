@@ -353,7 +353,7 @@ export default function InstructorEarningsClient({
                                                 {tx.status}
                                             </span>
                                         </td>
-                                        <td className={`px-6 py-4 text-[11px] font-bold uppercase tracking-[0.1em] text-right ${tx.total_amount > 0 ? 'text-forest' : tx.total_amount < 0 ? 'text-red-500' : 'text-charcoal'}`}>
+                                        <td className={`px-6 py-4 text-[11px] font-bold uppercase tracking-[0.1em] text-right ${tx.total_amount > 0 ? 'text-emerald-600' : tx.total_amount < 0 ? 'text-rose-500' : 'text-charcoal'}`}>
                                             <div className="flex items-center justify-end gap-1.5">
                                                 {tx.total_amount > 0 ? <Plus className="w-3 h-3 stroke-[3px]" /> : tx.total_amount < 0 ? <Minus className="w-3 h-3 stroke-[3px]" /> : null}
                                                 ₱{Math.abs(tx.total_amount).toLocaleString()}
@@ -418,7 +418,7 @@ export default function InstructorEarningsClient({
                                                     </div>
                                                 </div>
                                                 <div className="shrink-0 text-right flex flex-col items-end gap-0.5">
-                                                    <span className={`text-base font-serif tracking-tight ${tx.total_amount > 0 ? 'text-forest' : tx.total_amount < 0 ? 'text-red-500' : 'text-charcoal'}`}>
+                                                    <span className={`text-base font-serif tracking-tight ${tx.total_amount > 0 ? 'text-emerald-600' : tx.total_amount < 0 ? 'text-rose-500' : 'text-charcoal'}`}>
                                                         {tx.total_amount > 0 ? '+' : tx.total_amount < 0 ? '-' : ''}
                                                         ₱{Math.abs(tx.total_amount).toLocaleString()}
                                                     </span>
