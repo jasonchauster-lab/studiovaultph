@@ -165,13 +165,13 @@ export default function InstructorEarningsClient({
                                         RESTRICTED
                                     </button>
                                 ) : (
-                                    <Link
-                                        href="/instructor/payout"
-                                        className="h-11 sm:h-12 w-full px-8 bg-forest text-white rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-tight active:scale-95"
-                                    >
-                                        <Wallet className="w-3.5 h-3.5" />
-                                        CASH OUT
-                                    </Link>
+                                        <Link
+                                            href="/instructor/payout"
+                                            className="h-11 sm:h-12 w-full px-8 bg-forest text-white rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-tight active:scale-95 text-center"
+                                        >
+                                            <Wallet className="w-3.5 h-3.5" />
+                                            WITHDRAW
+                                        </Link>
                                 )}
                             </div>
                         </div>
@@ -204,7 +204,18 @@ export default function InstructorEarningsClient({
                     </div>
                     <div className="space-y-1">
                         <h2 className="text-xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate">₱{(availableBalance || 0).toLocaleString()}</h2>
-                        <div className="text-[7px] sm:text-[8px] font-black text-forest uppercase tracking-widest bg-sage/10 w-fit px-2 py-0.5 rounded border border-forest/10">LIQUID</div>
+                        <div className="flex items-center justify-between gap-2 mt-2">
+                            <div className="text-[7px] sm:text-[8px] font-black text-forest uppercase tracking-widest bg-sage/10 w-fit px-2 py-0.5 rounded border border-forest/10">LIQUID</div>
+                            {availableBalance > 0 && (
+                                <Link
+                                    href="/instructor/payout"
+                                    className="text-[7px] sm:text-[8px] font-black text-white uppercase tracking-widest bg-forest px-3 py-1 rounded-lg border border-forest shadow-sm hover:brightness-110 transition-all active:scale-95 flex items-center gap-1"
+                                >
+                                    <ArrowUpRight className="w-2.5 h-2.5" />
+                                    WITHDRAW
+                                </Link>
+                            )}
+                        </div>
                     </div>
                 </div>
 

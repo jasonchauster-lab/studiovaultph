@@ -54,46 +54,50 @@ export async function updateProfile(formData: FormData) {
     })
     updates.rates = rates
 
+    const adminSupabase = createAdminClient()
+
     // Handle Avatar Upload
     if (avatarFile && avatarFile.size > 0) {
-        const fileExt = avatarFile.name.split('.').pop()
+        const fileExt = avatarFile.name.split('.').pop() || 'jpg'
         const filePath = `${user.id}/avatar_${Date.now()}.${fileExt}`
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await adminSupabase.storage
             .from('avatars')
-            .upload(filePath, avatarFile, { contentType: uploadContentType(avatarFile) })
+            .upload(filePath, avatarFile, { contentType: uploadContentType(avatarFile), upsert: true })
 
         if (uploadError) {
             console.error('Avatar upload error:', uploadError)
-        } else {
-            // Get Public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(filePath)
-
-            updates.avatar_url = publicUrl
+            return { error: `Avatar upload failed: ${uploadError.message}` }
         }
+
+        // Get Public URL
+        const { data: { publicUrl } } = adminSupabase.storage
+            .from('avatars')
+            .getPublicUrl(filePath)
+
+        updates.avatar_url = publicUrl
     }
 
     // Handle Banner Upload
     if (bannerFile && bannerFile.size > 0) {
-        const fileExt = bannerFile.name.split('.').pop()
+        const fileExt = bannerFile.name.split('.').pop() || 'jpg'
         const filePath = `${user.id}/banner_${Date.now()}.${fileExt}`
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await adminSupabase.storage
             .from('avatars')
-            .upload(filePath, bannerFile, { contentType: uploadContentType(bannerFile) })
+            .upload(filePath, bannerFile, { contentType: uploadContentType(bannerFile), upsert: true })
 
         if (uploadError) {
             console.error('Banner upload error:', uploadError)
-        } else {
-            // Get Public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(filePath)
-
-            updates.banner_url = publicUrl
+            return { error: `Banner upload failed: ${uploadError.message}` }
         }
+
+        // Get Public URL
+        const { data: { publicUrl } } = adminSupabase.storage
+            .from('avatars')
+            .getPublicUrl(filePath)
+
+        updates.banner_url = publicUrl
     }
 
     const { error } = await supabase

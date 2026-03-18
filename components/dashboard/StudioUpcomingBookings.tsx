@@ -85,12 +85,12 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                     />
                                 </Link>
                                 <div className="space-y-0.5 min-w-0">
-                                    <Link href={`/instructors/${booking.instructor_id}`} className="text-sm font-black text-charcoal hover:text-forest transition-colors uppercase tracking-tight block truncate">
+                                    <Link href={`/instructors/${booking.instructor_id}`} className="text-sm font-black text-charcoal hover:text-forest transition-colors uppercase tracking-tight block leading-tight">
                                         {booking.instructor?.full_name || 'N/A'}
                                     </Link>
-                                    <div className="flex items-center gap-2 text-xs text-slate font-bold uppercase tracking-wider opacity-60">
-                                        <Clock className="w-3 h-3 text-forest" />
-                                        <span className="truncate">{formatManilaDateStr(slotData.date)} • {formatTo12Hour(slotData.start_time)}</span>
+                                    <div className="flex items-start gap-2 text-xs text-slate font-bold uppercase tracking-wider opacity-60">
+                                        <Clock className="w-3 h-3 text-forest shrink-0 mt-0.5" />
+                                        <span className="">{formatManilaDateStr(slotData.date)} • {formatTo12Hour(slotData.start_time)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -108,7 +108,7 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                 <div className="w-8 h-8 rounded-full overflow-hidden bg-off-white shrink-0 border border-white shadow-tight ring-1 ring-border-grey/10 group-hover/client:scale-110 transition-transform duration-500">
                                     <img src={booking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                 </div>
-                                <div className="text-[11px] text-slate truncate flex-1 group-hover/client:text-forest transition-colors tracking-wide font-bold">
+                                <div className="text-[11px] text-slate flex-1 group-hover/client:text-forest transition-colors tracking-wide font-bold break-words">
                                     Client: <span className="font-black text-charcoal">{booking.client?.full_name || 'N/A'}</span>
                                 </div>
                             </div>
@@ -116,7 +116,7 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                             <div className="flex flex-col @[300px]:flex-row @[300px]:items-center justify-between gap-3">
                                 <div className="flex items-center gap-2.5 bg-off-white/50 px-3 py-1.5 rounded-full border border-border-grey/20 w-fit">
                                     <Box className="w-4 h-4 text-forest opacity-50" />
-                                    <span className="text-[10px] sm:text-xs font-black text-charcoal truncate max-w-[120px] uppercase tracking-wider">
+                                    <span className="text-[10px] sm:text-xs font-black text-charcoal uppercase tracking-wider">
                                         {qty} x {equipment}
                                     </span>
                                 </div>

@@ -279,8 +279,8 @@ export default function InstructorDashboardClient({
             />
 
             {/* Dashboard Grid Container */}
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-10">
-                <div className="xl:col-span-3">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <div className="lg:col-span-2">
                     {/* Desktop Calendar */}
                     <div className="hidden lg:block border border-border-grey rounded-xl overflow-hidden bg-white">
                         <InstructorScheduleCalendar
@@ -349,7 +349,7 @@ export default function InstructorDashboardClient({
                 </div>
 
                 {/* Upcoming Bookings Sidebar */}
-                <div className="space-y-10">
+                <div className="space-y-10 lg:col-span-1">
                     <div className="earth-card overflow-hidden">
                         <div className="bg-buttermilk p-5 flex items-center justify-between border-b border-burgundy/10">
                             <h2 className="text-[11px] font-bold !text-burgundy uppercase tracking-[0.2em] flex items-center gap-2">
@@ -388,10 +388,10 @@ export default function InstructorDashboardClient({
                                 }
 
                                 return (
-                                        <div className="space-y-4 sm:space-y-6">
+                                        <div className="space-y-4 sm:space-y-5">
                                             {upcomingBookings.map(session => (
-                                                <div key={session.id} className="p-5 sm:p-7 border border-border-grey/50 bg-white rounded-2xl hover:bg-off-white transition-all duration-500 shadow-tight group relative ring-1 ring-border-grey/10">
-                                                    <div className="flex justify-between items-start mb-5 sm:mb-7">
+                                                <div key={session.id} className="p-4 sm:p-5 border border-border-grey/50 bg-white rounded-2xl hover:bg-off-white transition-all duration-500 shadow-tight group relative ring-1 ring-border-grey/10">
+                                                    <div className="flex justify-between items-start mb-4 sm:mb-5">
                                                         <div className="flex flex-col gap-1 w-full">
                                                             <div className="flex items-center gap-3 sm:gap-4">
                                                                 <button
@@ -408,7 +408,7 @@ export default function InstructorDashboardClient({
                                                                     <div className="flex items-start justify-between gap-2">
                                                                         <button
                                                                             onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
-                                                                            className="text-xs sm:text-sm font-black text-charcoal uppercase tracking-tight truncate hover:text-forest transition-colors text-left"
+                                                                            className="text-xs sm:text-sm font-black text-charcoal uppercase tracking-tight hover:text-forest transition-colors text-left leading-tight"
                                                                         >
                                                                             {session.slots?.studios?.name || 'Unknown Studio'}
                                                                         </button>
@@ -416,9 +416,9 @@ export default function InstructorDashboardClient({
                                                                             <span className="text-[9px] sm:text-[10px] font-black text-charcoal">1/1</span>
                                                                         </div>
                                                                     </div>
-                                                                    <div className="flex items-center gap-1.5 text-xs text-charcoal/50 font-black uppercase tracking-[0.1em] mt-1 sm:mt-1.5">
-                                                                        <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-forest/50" />
-                                                                        <span className="truncate">{session.slots?.date ? formatManilaDateStr(session.slots.date) : 'No Date'} • {session.slots?.start_time ? formatTo12Hour(session.slots.start_time) : 'No Time'}</span>
+                                                                    <div className="flex items-start gap-1.5 text-xs text-charcoal/50 font-black uppercase tracking-[0.1em] mt-1 sm:mt-1.5">
+                                                                        <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-forest/50 shrink-0" />
+                                                                        <span className="">{session.slots?.date ? formatManilaDateStr(session.slots.date) : 'No Date'} • {session.slots?.start_time ? formatTo12Hour(session.slots.start_time) : 'No Time'}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -434,7 +434,7 @@ export default function InstructorDashboardClient({
                                                             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden bg-white shrink-0 border border-border-grey/50 shadow-tight group-hover/client:scale-110 transition-transform duration-500">
                                                                 <img alt="" src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
                                                             </div>
-                                                            <div className="text-[10px] sm:text-[11px] text-charcoal/40 uppercase tracking-[0.2em] truncate flex-1 group-hover/client:text-forest transition-colors font-bold">
+                                                            <div className="text-[10px] sm:text-[11px] text-charcoal/40 uppercase tracking-[0.2em] flex-1 group-hover/client:text-forest transition-colors font-bold break-words">
                                                                 CLIENT: <span className="font-black text-charcoal">{session.client?.full_name}</span>
                                                             </div>
                                                         </button>
@@ -442,7 +442,7 @@ export default function InstructorDashboardClient({
                                                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
                                                             <div className="flex items-center gap-3">
                                                                 <Box className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-forest/40" />
-                                                                <span className="font-black text-slate truncate max-w-[140px] uppercase tracking-[0.2em] text-[10px] sm:text-xs">
+                                                                <span className="font-black text-slate uppercase tracking-[0.2em] text-[10px] sm:text-xs">
                                                                     {Array.isArray(session.slots?.equipment) && session.slots.equipment.length > 0
                                                                         ? `${session.slots.equipment[0]}`
                                                                         : (`${session.price_breakdown?.equipment || 'Standard'}`)

@@ -89,7 +89,7 @@ export default function InstructorStatCards({ stats, hasPendingPayout }: Instruc
                                     className="w-full h-9 sm:h-11 bg-forest text-white rounded-lg sm:rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-tight active:scale-95"
                                 >
                                     <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/60 stroke-[3px]" />
-                                    CASH OUT
+                                    WITHDRAW
                                 </Link>
                             </div>
                         )}

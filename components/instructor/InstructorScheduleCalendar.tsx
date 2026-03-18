@@ -698,17 +698,17 @@ export default function InstructorScheduleCalendar({
                                                                         <div
                                                                             key={slot.id}
                                                                             className={clsx(
-                                                                                "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-2 py-1 group/slot flex flex-col justify-start shadow-tight",
+                                                                                "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-1.5 py-1 group/slot flex flex-col justify-start shadow-tight",
                                                                                 isPastCell
                                                                                      ? "bg-white/50 border-border-grey/50 text-charcoal/40"
                                                                                      : "bg-buttermilk border-border-grey text-charcoal",
-                                                                                duration < 30 && "py-1 px-2 justify-center"
+                                                                                duration < 30 && "py-0.5 px-1 justify-center"
                                                                             )}
                                                                             style={{
                                                                                 top: `${topOffset}px`,
                                                                                 height: `${heightPx}px`,
-                                                                                width: `calc(${widthPercent}% - 8px)`,
-                                                                                left: `calc(${leftPercent}% + 4px)`
+                                                                                width: `calc(${widthPercent}% - 6px)`,
+                                                                                left: `calc(${leftPercent}% + 3px)`
                                                                             }}
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation()
@@ -724,8 +724,8 @@ export default function InstructorScheduleCalendar({
                                                                         >
                                                                                 <div className={clsx("flex flex-col items-start gap-1 overflow-hidden w-full", duration < 30 && "justify-center")}>
                                                                                     <div className="flex justify-between items-start w-full gap-2">
-                                                                                        <div className={clsx("text-[10px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
-                                                                                            {formatTo12Hour(slot.start_time)} - {formatTo12Hour(slot.end_time)}
+                                                                                        <div className={clsx("text-[9px] font-bold text-charcoal truncate", isPastCell && "opacity-50")}>
+                                                                                            {formatTo12Hour(slot.start_time).replace(':00', '')}-{formatTo12Hour(slot.end_time).replace(':00', '')}
                                                                                         </div>
                                                                                       <div className="text-[8px] font-black text-charcoal bg-white/80 px-1.5 py-0.5 rounded border border-charcoal/10 whitespace-nowrap ml-2 shrink-0 shadow-sm">
                                                               0/1
@@ -737,7 +737,7 @@ export default function InstructorScheduleCalendar({
                                                                                         {locations.map((loc, idx) => (
                                                                                             <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell ? "text-charcoal border-border-grey bg-off-white" : "text-charcoal border-charcoal/20 bg-buttermilk/10")}>
                                                                                               <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-charcoal/60" : "text-charcoal/60")} />
-                                                                  <span className="truncate max-w-[80px]">{loc?.split(' - ')[0] || 'Studio'}</span>
+                                                                  <span className="truncate max-w-[65px]">{loc?.split(' - ')[0] || 'Studio'}</span>
 
                                                                                             </div>
                                                                                         ))}
@@ -763,8 +763,8 @@ export default function InstructorScheduleCalendar({
                                                                             style={{
                                                                                 top: `${topOffset}px`,
                                                                                 height: `${heightPx}px`,
-                                                                                width: `calc(${widthPercent}% - 8px)`,
-                                                                                left: `calc(${leftPercent}% + 4px)`
+                                                                                width: `calc(${widthPercent}% - 6px)`,
+                                                                                left: `calc(${leftPercent}% + 3px)`
                                                                             }}
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
@@ -778,7 +778,7 @@ export default function InstructorScheduleCalendar({
                                                                         >
                                                                             <div className={clsx("flex justify-between items-start w-full overflow-hidden", duration < 30 && "items-center")}>
                                                                                 <div className="flex flex-col min-w-0 flex-1 overflow-hidden">
-                                                                                     <span className="text-[8.5px] font-semibold text-white uppercase tracking-tight truncate">
+                                                                                     <span className="text-[9px] font-black text-white tracking-tight truncate leading-none">
                                                                                          {booking.client?.full_name || 'Session'}
                                                                                      </span>
                                                                                      {duration >= 30 && (
@@ -1719,3 +1719,4 @@ export default function InstructorScheduleCalendar({
         </div>
     )
 }
+
