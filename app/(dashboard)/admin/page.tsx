@@ -88,6 +88,7 @@ export default async function AdminDashboard({
                     )
                 `)
                 .eq('status', 'pending')
+                .or('total_price.eq.0,payment_proof_url.not.is.null')
                 .order('created_at', { ascending: false }),
 
             // 5. Instructor payout requests

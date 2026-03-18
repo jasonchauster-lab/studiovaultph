@@ -59,6 +59,11 @@ function LoginContent() {
                 if (isOtpRemembered(session.user.id)) {
                    setIsRedirecting(true)
                    await redirectByRole(session.user.id)
+                } else {
+                    // Already passed password step, but not remembered -> show OTP step
+                    console.log('[Auth] Session exists but not remembered, jumping to OTP step')
+                    setStep('otp')
+                    if (session.user.email) setEmail(session.user.email)
                 }
             }
         }
@@ -79,24 +84,28 @@ function LoginContent() {
                 // the verification link being clicked, NOT the password session auto-firing.
                 const isFreshOtp = lastOtpSentAt && (Date.now() - lastOtpSentAt > 2000)
 
-                if (event === 'SIGNED_IN' && session?.user && !isRedirecting) {
+                if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user && !isRedirecting) {
                     // Logic: 
                     // 1. If we are waiting for OTP (otpSent=true)
                     // 2. AND we just sent it (lastOtpSentAt is set)
                     // 3. AND it hasn't been 2 seconds (it's the password session firing)
                     // -> IGNORE IT.
                     if (otpSent && lastOtpSentAt && !isFreshOtp) {
+                        console.log('[Auth] Ignoring event (too fresh):', event)
                         return
                     }
 
+                    console.log('[Auth] Valid verification event detected:', event)
                     setIsRedirecting(true)
                     
                     // If the user wanted to be remembered, set the cookie client-side
                     // so this specific device/browser skips 2FA for 14 days.
                     if (rememberDevice) {
                         const maxAge = 14 * 24 * 60 * 60
-                        document.cookie = `otp_remembered=${session.user.id}; max-age=${maxAge}; path=/; SameSite=Lax`
-                        document.cookie = `remember_me=1; max-age=${maxAge}; path=/; SameSite=Lax`
+                        const cookieOptions = `; max-age=${maxAge}; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
+                        document.cookie = `otp_remembered=${session.user.id}${cookieOptions}`
+                        document.cookie = `remember_me=1${cookieOptions}`
+                        console.log('[Auth] Set "Remember Me" cookies client-side')
                     }
 
                     await redirectByRole(session.user.id)
@@ -110,12 +119,14 @@ function LoginContent() {
 
     const isOtpRemembered = (userId: string) => {
         const cookies = document.cookie.split(';').map(c => c.trim())
-        return cookies.some(c => {
+        const found = cookies.some(c => {
             const [name, val] = c.split('=')
             // Handle possibility of quoted values e.g. otp_remembered="uuid"
             const cleanVal = val?.replace(/"/g, '')
-            return name === 'otp_remembered' && cleanVal === userId
+            return name === 'otp_remembered' && cleanVal?.toLowerCase() === userId?.toLowerCase()
         })
+        console.log('[Auth] isOtpRemembered check:', found)
+        return found
     }
 
     const redirectByRole = async (userId: string) => {

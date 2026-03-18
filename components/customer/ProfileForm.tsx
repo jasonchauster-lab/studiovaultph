@@ -8,6 +8,7 @@ import Image from 'next/image'
 import WaiverUpload from '@/components/customer/WaiverUpload'
 import { normalizeImageFile } from '@/lib/utils/image-utils'
 import { clsx } from 'clsx'
+import Avatar from '@/components/shared/Avatar'
 
 export default function ProfileForm({ profile }: { profile: any }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -92,19 +93,12 @@ export default function ProfileForm({ profile }: { profile: any }) {
                     onClick={() => fileInputRef.current?.click()}
                 >
                     <div className="w-36 h-36 rounded-full overflow-hidden border-[6px] border-white shadow-xl bg-cream-50 flex items-center justify-center relative z-10 transition-all duration-300 group-hover:shadow-2xl">
-                        {previewUrl ? (
-                            <Image
-                                src={previewUrl}
-                                alt="Profile"
-                                width={144}
-                                height={144}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                        ) : (
-                            <div className="text-center p-6 flex flex-col items-center">
-                                <User className="w-12 h-12 text-charcoal-200" />
-                            </div>
-                        )}
+                        <Avatar
+                            src={previewUrl}
+                            fallbackName={profile?.fullName || profile?.full_name}
+                            size={144}
+                            className="w-full h-full transition-transform duration-700 group-hover:scale-110"
+                        />
                         <div className="absolute inset-0 bg-charcoal-900/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-full backdrop-blur-[2px]">
                             <div className="bg-white/90 p-3 rounded-full shadow-lg">
                                 <Camera className="w-6 h-6 text-charcoal-900" />

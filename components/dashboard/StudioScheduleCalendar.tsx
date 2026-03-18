@@ -513,7 +513,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                             "absolute top-1.5 left-1.5 right-1.5 bottom-1.5 p-3.5 border-l-4 border-solid transition-all duration-500 hover:shadow-card hover:-translate-y-0.5 group/slot z-10 overflow-hidden cursor-pointer rounded-xl flex flex-col justify-between backdrop-blur-sm",
                                                                                 isPastCell ? "bg-off-white border-border-grey/50 opacity-80" :
                                                                                     hasPending ? "bg-amber-50 border-amber-300 shadow-tight" :
-                                                                                        isBooked ? "bg-charcoal border-forest shadow-card" : "bg-white border-border-grey ring-1 ring-border-grey/10 shadow-tight"
+                                                                                        isBooked ? "bg-forest border-forest/20 shadow-card" : "bg-white border-border-grey ring-1 ring-border-grey/10 shadow-tight"
                                                                         )}
                                                                         onClick={() => {
                                                                             setBucketSlots(cellSlots);

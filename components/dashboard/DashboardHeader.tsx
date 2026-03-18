@@ -7,6 +7,7 @@ import { LogOut } from 'lucide-react'
 import Navigation from './Navigation'
 import { signOut } from '@/app/auth/actions'
 import clsx from 'clsx'
+import Avatar from '@/components/shared/Avatar'
 
 interface DashboardHeaderProps {
     profile: any
@@ -52,7 +53,6 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                     </Link>
 
                     {/* Right: Avatar */}
-                    <div className="flex-1 flex justify-end">
                         <Link
                             href={
                                 profile?.role === 'customer' ? '/customer/profile' :
@@ -62,17 +62,15 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                                                 '#'
                             }
                             aria-label="View and Edit Profile"
-                            className="w-10 h-10 rounded-full overflow-hidden border-2 border-burgundy/20 shadow-tight transition-all hover:scale-110 hover:border-burgundy/40 block"
+                            className="transition-all hover:scale-110 block"
                         >
-                            <Image
+                            <Avatar
                                 src={avatarUrl}
-                                alt="User Profile"
-                                width={40}
-                                height={40}
-                                className="object-cover w-full h-full"
+                                fallbackName={profile?.full_name || (profile?.role === 'studio' ? studioData?.name : null)}
+                                size={40}
+                                className="border-2 border-burgundy/20 shadow-tight hover:border-burgundy/40"
                             />
                         </Link>
-                    </div>
                 </div>
 
                 {/* Desktop: Standard Layout */}
@@ -117,14 +115,13 @@ export default function DashboardHeader({ profile, studioData, avatarUrl }: Dash
                                                     '#'
                                 }
                                 aria-label="View and Edit Profile"
-                                className="w-10 h-10 rounded-full overflow-hidden border-2 border-burgundy/20 shadow-tight transition-all hover:scale-110 hover:border-burgundy/40 block"
+                                className="transition-all hover:scale-110 block"
                             >
-                                <Image
+                                <Avatar
                                     src={avatarUrl}
-                                    alt="User Profile"
-                                    width={40}
-                                    height={40}
-                                    className="object-cover w-full h-full"
+                                    fallbackName={profile?.full_name || (profile?.role === 'studio' ? studioData?.name : null)}
+                                    size={40}
+                                    className="border-2 border-burgundy/20 shadow-tight hover:border-burgundy/40"
                                 />
                             </Link>
                             <form action={signOut} className="hidden sm:block">

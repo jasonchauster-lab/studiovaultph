@@ -799,3 +799,46 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
     revalidatePath('/instructor')
     return { success: true }
 }
+
+export async function checkInClient(bookingId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    // 1. Fetch booking and verify instructor identity
+    const { data: booking, error: fetchError } = await supabase
+        .from('bookings')
+        .select('id, instructor_id, client_id, status')
+        .eq('id', bookingId)
+        .single()
+
+    if (fetchError || !booking) {
+        return { error: 'Booking not found.' }
+    }
+
+    if (booking.instructor_id !== user.id) {
+        return { error: 'Unauthorized to check in this client.' }
+    }
+
+    if (booking.status !== 'approved' && booking.status !== 'completed') {
+        return { error: 'Only approved or completed sessions can be checked in.' }
+    }
+
+    const { error: updateError } = await supabase
+        .from('bookings')
+        .update({
+            client_checked_in_at: new Date().toISOString()
+        })
+        .eq('id', bookingId)
+
+    if (updateError) {
+        console.error('Error checking in client:', updateError)
+        return { error: 'Failed to record check-in.' }
+    }
+
+    revalidatePath('/instructor/sessions')
+    revalidatePath('/instructor')
+    return { success: true }
+}
+
+

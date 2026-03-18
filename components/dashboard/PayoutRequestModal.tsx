@@ -9,10 +9,30 @@ interface PayoutRequestModalProps {
     studioId: string
     availableBalance: number
     payoutApprovalStatus?: string
+    // Controlled props
+    isOpen?: boolean
+    onClose?: () => void
+    showTrigger?: boolean
 }
 
-export default function PayoutRequestModal({ studioId, availableBalance, payoutApprovalStatus = 'none' }: PayoutRequestModalProps) {
-    const [isOpen, setIsOpen] = useState(false)
+export default function PayoutRequestModal({ 
+    studioId, 
+    availableBalance, 
+    payoutApprovalStatus = 'none',
+    isOpen: controlledIsOpen,
+    onClose: controlledOnClose,
+    showTrigger = true
+}: PayoutRequestModalProps) {
+    const [internalIsOpen, setInternalIsOpen] = useState(false)
+    
+    const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
+    const setIsOpen = (val: boolean) => {
+        if (controlledOnClose && !val) {
+            controlledOnClose()
+        } else {
+            setInternalIsOpen(val)
+        }
+    }
     const [isLoading, setIsLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
     const [paymentMethod, setPaymentMethod] = useState('bank_transfer')
@@ -64,20 +84,22 @@ export default function PayoutRequestModal({ studioId, availableBalance, payoutA
 
     return (
         <>
-            <button
-                onClick={() => setIsOpen(true)}
-                disabled={availableBalance <= 0}
-                style={availableBalance > 0 ? { background: '#BC926E' } : {}}
-                className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-all text-sm ${availableBalance > 0
-                    ? 'text-white hover:brightness-110'
-                    : 'bg-white/20 text-white/50 cursor-not-allowed'
-                    }`}
-            >
-                Request Payout
-            </button>
+            {showTrigger && (
+                <button
+                    onClick={() => setIsOpen(true)}
+                    disabled={availableBalance <= 0}
+                    style={availableBalance > 0 ? { background: '#BC926E' } : {}}
+                    className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-all text-sm ${availableBalance > 0
+                        ? 'text-white hover:brightness-110'
+                        : 'bg-white/20 text-white/50 cursor-not-allowed'
+                        }`}
+                >
+                    Request Payout
+                </button>
+            )}
 
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
                     {/* Backdrop */}
                     <div
                         className="absolute inset-0 bg-black/60 backdrop-blur-sm"

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, memo } from 'react'
-import { Calendar, MapPin, Box, X, AlertCircle, Clock, Navigation, Award } from 'lucide-react'
+import { Calendar, MapPin, Box, X, AlertCircle, Clock, Navigation, Award, UserCheck } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
@@ -9,7 +9,7 @@ import ReviewModal from '@/components/reviews/ReviewModal'
 import BookingFilter, { FilterState } from '@/components/dashboard/BookingFilter'
 import CancelBookingModal from './CancelBookingModal'
 import StudioPreviewModal from './StudioPreviewModal'
-import { cancelBookingByInstructor } from '@/app/(dashboard)/instructor/actions'
+import { cancelBookingByInstructor, checkInClient } from '@/app/(dashboard)/instructor/actions'
 import { getStudioProfile } from '@/app/(dashboard)/instructors/actions'
 
 interface InstructorSessionListProps {
@@ -454,7 +454,26 @@ const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClien
 
                     {/* Mobile Actions */}
                     <div className="flex sm:hidden items-center gap-2 shrink-0">
+                        {booking.status === 'approved' && !booking.client_checked_in_at && (
+                            <button
+                                onClick={async () => {
+                                    if (confirm('Check in this client?')) {
+                                        await checkInClient(booking.id)
+                                    }
+                                }}
+                                className="w-8 h-8 flex items-center justify-center rounded-xl bg-forest/10 text-forest border border-forest/20 active:scale-95 transition-transform"
+                                title="Check In Client"
+                            >
+                                <UserCheck className="w-3.5 h-3.5" />
+                            </button>
+                        )}
+                        {booking.client_checked_in_at && (
+                            <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-forest text-white" title="Checked In">
+                                <UserCheck className="w-3.5 h-3.5" />
+                            </div>
+                        )}
                         {booking.status === 'approved' && startDateTime > now && (
+
                             <button
                                 onClick={() => onCancelClick(booking)}
                                 className="w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-100/50 active:scale-95 transition-transform"
@@ -506,6 +525,23 @@ const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClien
 
                 {/* Desktop Actions */}
                 <div className="hidden sm:flex items-center gap-2 ml-auto">
+                    {booking.status === 'approved' && !booking.client_checked_in_at && (
+                        <button
+                            onClick={async () => {
+                                if (confirm('Check in this client?')) {
+                                    await checkInClient(booking.id)
+                                }
+                            }}
+                            className="h-10 px-4 bg-forest text-white border border-forest rounded-xl hover:brightness-110 transition-all text-[9px] font-black uppercase tracking-[0.2em] shadow-tight"
+                        >
+                            CHECK IN
+                        </button>
+                    )}
+                    {booking.client_checked_in_at && (
+                        <div className="h-10 px-4 flex items-center bg-forest/10 text-forest border border-forest/20 rounded-xl text-[9px] font-black uppercase tracking-[0.2em]">
+                            CHECKED IN
+                        </div>
+                    )}
                     {booking.status === 'approved' && startDateTime > now && (
                         <button
                             onClick={() => onCancelClick(booking)}
@@ -518,6 +554,7 @@ const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClien
                         <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="CHAT" variant="antigravity" />
                     )}
                 </div>
+
             </div>
         </div>
     )
@@ -570,7 +607,11 @@ const ArchiveSessionCard = memo(({ booking, onStudioClick, onClientClick, onRevi
                                     <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.15em] truncate">{client.full_name}</span>
                                 </button>
                             )}
+                            {booking.client_checked_in_at && (
+                                <span className="text-[8px] text-forest font-black uppercase tracking-[0.25em] bg-forest/5 px-3 py-1.5 rounded-xl border border-forest/10">CHECKED IN</span>
+                            )}
                             {booking.status === 'completed' && !booking.instructor_reviewed_studio && (
+
                                 <button
                                     onClick={() => onReviewClick({
                                         booking,

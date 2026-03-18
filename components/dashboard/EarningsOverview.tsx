@@ -24,6 +24,7 @@ interface EarningsOverviewProps {
 export default function EarningsOverview({ studioId, summary }: EarningsOverviewProps) {
     const [showInfoModal, setShowInfoModal] = useState(false)
     const [showTopUpModal, setShowTopUpModal] = useState(false)
+    const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false)
     const router = useRouter()
 
     const handleTopUp = () => {
@@ -153,11 +154,17 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                                 <ArrowUpRight className="w-3.5 h-3.5" />
                                 Top-Up
                             </button>
-                            <PayoutRequestModal
-                                studioId={studioId}
-                                availableBalance={summary.availableBalance}
-                                payoutApprovalStatus={summary.payoutApprovalStatus}
-                            />
+                                <button
+                                    onClick={() => setIsPayoutModalOpen(true)}
+                                    disabled={summary.availableBalance <= 0}
+                                    style={summary.availableBalance > 0 ? { background: '#BC926E' } : {}}
+                                    className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-all text-sm ${summary.availableBalance > 0
+                                        ? 'text-white hover:brightness-110'
+                                        : 'bg-white/20 text-white/50 cursor-not-allowed'
+                                        }`}
+                                >
+                                    Request Payout
+                                </button>
                         </div>
                     </div>
 
@@ -273,11 +280,17 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                                     </button>
                                 </div>
                                 <div className="flex flex-col gap-2 items-end">
-                                    <PayoutRequestModal
-                                        studioId={studioId}
-                                        availableBalance={summary.availableBalance}
-                                        payoutApprovalStatus={summary.payoutApprovalStatus}
-                                    />
+                                    <button
+                                        onClick={() => setIsPayoutModalOpen(true)}
+                                        disabled={summary.availableBalance <= 0}
+                                        style={summary.availableBalance > 0 ? { background: '#BC926E' } : {}}
+                                        className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-all text-sm ${summary.availableBalance > 0
+                                            ? 'text-white hover:brightness-110'
+                                            : 'bg-white/20 text-white/50 cursor-not-allowed'
+                                            }`}
+                                    >
+                                        Request Payout
+                                    </button>
                                     <button
                                         onClick={() => setShowTopUpModal(true)}
                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all backdrop-blur-md border border-white/10"
@@ -327,6 +340,14 @@ export default function EarningsOverview({ studioId, summary }: EarningsOverview
                     </p>
                 </div>
             </div>
+            <PayoutRequestModal
+                studioId={studioId}
+                availableBalance={summary.availableBalance}
+                payoutApprovalStatus={summary.payoutApprovalStatus}
+                isOpen={isPayoutModalOpen}
+                onClose={() => setIsPayoutModalOpen(false)}
+                showTrigger={false}
+            />
             {/* Top-Up Modal */}
             <TopUpModal
                 isOpen={showTopUpModal}

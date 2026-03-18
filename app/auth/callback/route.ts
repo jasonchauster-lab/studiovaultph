@@ -147,6 +147,11 @@ export async function GET(request: Request) {
             return response
         }
 
+        // ── Security: Never redirect to /2fa ────────────────────────────────
+        if (next === '2fa') {
+            return buildRedirect(origin, request, '/login')
+        }
+
         // ── Sign-up email confirmation → route to onboarding/dashboard ─────
         // `next=confirm` is set by the sign-up form so new users land in the
         // right place instead of the generic /verified page.
@@ -234,6 +239,11 @@ export async function GET(request: Request) {
             }
 
             return response
+        }
+
+        // ── Security: Never redirect to /2fa ────────────────────────────────
+        if (next === '2fa') {
+            return buildRedirect(origin, request, '/login')
         }
 
         return buildRedirect(origin, request, next)

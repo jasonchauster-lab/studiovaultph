@@ -116,7 +116,15 @@ export const normalizeImageFile = async (file: File): Promise<File> => {
         }
 
         // --- STAGE 3: LAST RESORT (Faked Content Type) ---
-        console.log(`${logPrefix} Returning original as JPEG fallback`);
+        // CAUTION: Only do this if it's NOT a HEIC file. 
+        // If it's HEIC and we reached here, both Canvas and heic2any failed.
+        // Returning it as a .jpg will likely result in a broken image on the web.
+        if (isHeic) {
+            console.error(`${logPrefix} All HEIC conversion stages failed. Returning original file.`);
+            return file;
+        }
+
+        console.log(`${logPrefix} Returning original with JPEG type fallback`);
         const finalName = file.name.match(/\.(jpg|jpeg|png)$/i) ? file.name : `${file.name.split('.')[0]}.jpg`;
         return new File([file], finalName, { 
             type: 'image/jpeg', 
