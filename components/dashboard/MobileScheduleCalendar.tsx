@@ -28,14 +28,19 @@ interface MobileScheduleCalendarProps {
 
 export default function MobileScheduleCalendar({
     initialSessions = [],
-    currentDate = new Date(),
+    currentDate,
     onAddSlot,
     onRecurringSchedule,
     onSlotClick
 }: MobileScheduleCalendarProps) {
-    const [selectedDate, setSelectedDate] = useState(startOfDay(currentDate));
+    const [selectedDate, setSelectedDate] = useState(() => startOfDay(currentDate || new Date()));
+    const [isMounted, setIsMounted] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const agendaRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Generate current week for horizontal scroll
     const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
@@ -100,11 +105,11 @@ export default function MobileScheduleCalendar({
     };
 
     const currentTimeIndex = useMemo(() => {
-        if (!isSameDay(selectedDate, new Date())) return -1;
+        if (!isMounted || !isSameDay(selectedDate, new Date())) return -1;
         const nowStr = format(new Date(), 'HH:mm');
         const index = agendaSessions.findIndex(s => s.start_time > nowStr);
         return index === -1 ? agendaSessions.length : index;
-    }, [agendaSessions, selectedDate]);
+    }, [agendaSessions, selectedDate, isMounted]);
 
     // Auto-scroll logic for selected date (Weekly Strip)
     useEffect(() => {
@@ -144,7 +149,7 @@ export default function MobileScheduleCalendar({
                 <div className="flex items-center justify-between mb-4 sm:mb-5">
                     <div className="flex flex-col">
                         <h2 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tightest leading-none">
-                            {format(selectedDate, 'MMMM yyyy')}
+                            {isMounted && format(selectedDate, 'MMMM yyyy')}
                         </h2>
                         <p className="text-[9px] sm:text-[10px] font-black tracking-[0.3em] sm:tracking-[0.4em] text-charcoal/30 uppercase mt-1 sm:mt-2">Schedule View</p>
                     </div>
@@ -194,7 +199,7 @@ export default function MobileScheduleCalendar({
                 >
                     {weekDays.map((day) => {
                         const isSelected = isSameDay(day, selectedDate);
-                        const isToday = isSameDay(day, new Date());
+                        const isToday = isMounted && isSameDay(day, new Date());
                         const status = getDateStatus(day);
 
                         return (
@@ -239,7 +244,7 @@ export default function MobileScheduleCalendar({
                 <div className="flex items-center gap-3 mb-2">
                     <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-[#E5E7EB]" />
                     <span className="text-[9px] font-black text-burgundy uppercase tracking-[0.35em] px-3">
-                        {format(selectedDate, 'EEEE, MMM d')}
+                        {isMounted && format(selectedDate, 'EEEE, MMM d')}
                     </span>
                     <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-[#E5E7EB]" />
                 </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Calendar, Clock, X, AlertCircle, Box, UserCheck } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
@@ -18,6 +18,13 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
     const [bookings, setBookings] = useState(initialBookings)
     const [cancellingBooking, setCancellingBooking] = useState<any>(null)
     const [selectedClient, setSelectedClient] = useState<any>(null)
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
+    
+    const now = useMemo(() => isMounted ? new Date() : new Date(0), [isMounted])
 
     const calculateAge = (birthday: string) => {
         if (!birthday) return null
@@ -141,7 +148,7 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                         {booking.instructor_checked_in_at && (
                                             <div 
                                                 className="w-8 h-8 bg-forest text-white rounded-full flex items-center justify-center shadow-tight"
-                                                title={`Instructor checked in at ${new Date(booking.instructor_checked_in_at).toLocaleTimeString()}`}
+                                                title={isMounted ? `Instructor checked in at ${new Date(booking.instructor_checked_in_at).toLocaleTimeString()}` : "Checked in"}
                                             >
                                                 <UserCheck className="w-3.5 h-3.5" />
                                             </div>
@@ -182,7 +189,6 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                         if (!cancellingBooking) return null
                         const slotData = Array.isArray(cancellingBooking.slots) ? cancellingBooking.slots[0] : cancellingBooking.slots
                         const startTime = new Date(`${slotData.date}T${slotData.start_time}+08:00`)
-                        const now = new Date()
                         const diffInHours = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60)
                         const isLate = diffInHours < 24
 

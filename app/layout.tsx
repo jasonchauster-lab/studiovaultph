@@ -51,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* next/font automatically inserts preconnect hints for fonts.googleapis.com
             and fonts.gstatic.com — manual duplicates removed to avoid double hints. */}
@@ -60,6 +60,7 @@ export default function RootLayout({
       </head>
       <body
         className={`${playfairDisplay.variable} ${inter.variable} ${lexend.variable} antialiased`}
+        suppressHydrationWarning
       >
         {children}
       </body>

@@ -25,7 +25,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ChatWindow from '@/components/dashboard/ChatWindow';
 import MessageCountBadge from '@/components/dashboard/MessageCountBadge';
-import { formatManilaDateStr, formatTo12Hour, getManilaTodayStr } from '@/lib/timezone';
+import { formatManilaDateStr, formatTo12Hour, getManilaTodayStr, toManilaTimeString } from '@/lib/timezone';
 import CancelBookingModal from './CancelBookingModal';
 import { cancelBookingByInstructor, checkInClient } from '@/app/(dashboard)/instructor/actions';
 import InstructorScheduleCalendar from '@/components/instructor/InstructorScheduleCalendar';
@@ -73,6 +73,11 @@ export default function InstructorDashboardClient({
     const [calendarBookings, setCalendarBookings] = useState<any[]>(() => normalizeBookings(initialCalendarBookings));
     const [upcomingBookings, setUpcomingBookings] = useState<any[]>(() => normalizeBookings(initialUpcomingBookings));
     const [isLoading, setIsLoading] = useState(false); // No longer loading initially
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Sync state when props change (e.g., when user navigates to a new week)
     useEffect(() => {
@@ -91,7 +96,7 @@ export default function InstructorDashboardClient({
     const [currentSlotHistory, setCurrentSlotHistory] = useState<any[]>([]);
 
     // State for Add/Edit Form
-    const [singleDate, setSingleDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+    const [singleDate, setSingleDate] = useState(currentDateStr || '');
     const [singleTime, setSingleTime] = useState('09:00');
     const [singleEndTime, setSingleEndTime] = useState('10:00');
     const [locations, setLocations] = useState<string[]>([]);
@@ -463,7 +468,7 @@ export default function InstructorDashboardClient({
                                                                 {session.client_checked_in_at && (
                                                                     <div 
                                                                         className="w-8 h-8 sm:w-10 sm:h-10 bg-forest text-white rounded-full flex items-center justify-center shadow-tight"
-                                                                        title={`Checked in at ${new Date(session.client_checked_in_at).toLocaleTimeString()}`}
+                                                                        title={isMounted ? `Checked in at ${formatTo12Hour(toManilaTimeString(session.client_checked_in_at))}` : "Checked in"}
                                                                     >
                                                                         <UserCheck className="w-4 h-4" />
                                                                     </div>

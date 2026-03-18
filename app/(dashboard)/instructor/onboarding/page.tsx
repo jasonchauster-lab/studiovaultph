@@ -94,7 +94,7 @@ export default async function InstructorOnboardingPage() {
                     <InstructorOnboardingForm />
 
                     <div className="mt-12 pt-8 border-t border-cream-100 text-center text-xs text-charcoal-400">
-                        &copy; {new Date().getFullYear()} StudioVaultPH. All rights reserved.
+                        &copy; 2026 StudioVaultPH. All rights reserved.
                     </div>
                 </div>
             </div>

@@ -28,6 +28,11 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     const [studioDetails, setStudioDetails] = useState<any>(null)
     const [loadingStudio, setLoadingStudio] = useState(false)
     const [resetKey, setResetKey] = useState(0)
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
     const [reviewTarget, setReviewTarget] = useState<{
         booking: any,
         revieweeId: string,
@@ -91,7 +96,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
         return new Date(`${date}T${time}+08:00`)
     }
 
-    const now = new Date()
+    const now = useMemo(() => isMounted ? new Date() : new Date(0), [isMounted])
 
     // 1. Filter ALL bookings based on local state
     const filteredBookings = useMemo(() => bookings.filter((b: any) => {
@@ -229,7 +234,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             <Calendar className="w-3 h-3 text-forest/60" />
                                         </div>
                                         <span className="text-[9px] font-black text-charcoal uppercase tracking-[0.25em]">
-                                            {new Date(group.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                            {isMounted && new Date(group.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
@@ -248,6 +253,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             onClientClick={setSelectedClient}
                                             onCancelClick={setCancellingBooking}
                                             now={now}
+                                            isMounted={isMounted}
                                         />
                                     ))}
                                 </div>
@@ -279,7 +285,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             <Clock className="w-3 h-3 text-charcoal/30" />
                                         </div>
                                         <span className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.25em]">
-                                            {new Date(group.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                            {isMounted && new Date(group.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
@@ -296,6 +302,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                             onStudioClick={handleStudioClick}
                                             onClientClick={setSelectedClient}
                                             onReviewClick={setReviewTarget}
+                                            isMounted={isMounted}
                                         />
                                     ))}
                                 </div>
@@ -426,7 +433,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     )
 }
 
-const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClientClick, onCancelClick, now }: any) => {
+const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClientClick, onCancelClick, now, isMounted }: any) => {
     const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
     const slot = getFirst(booking.slots)
     const studio = getFirst(slot?.studios)
@@ -446,7 +453,7 @@ const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClien
                         </div>
                         <div className="flex flex-col sm:items-center">
                             <span className="text-[15px] sm:text-lg font-serif text-charcoal leading-none tracking-tighter">
-                                {startDateTime.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                {isMounted && startDateTime.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                             </span>
                             <span className="text-[7px] sm:text-[8px] font-black text-forest/60 uppercase tracking-[0.2em] mt-1 sm:mt-1">START</span>
                         </div>
@@ -560,7 +567,7 @@ const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClien
     )
 })
 
-const ArchiveSessionCard = memo(({ booking, onStudioClick, onClientClick, onReviewClick }: any) => {
+const ArchiveSessionCard = memo(({ booking, onStudioClick, onClientClick, onReviewClick, isMounted }: any) => {
     const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
     const slot = getFirst(booking.slots)
     const studio = getFirst(slot?.studios)
@@ -574,7 +581,7 @@ const ArchiveSessionCard = memo(({ booking, onStudioClick, onClientClick, onRevi
                 <div className="flex items-center justify-between sm:flex-col sm:justify-center sm:bg-charcoal/[0.03] sm:rounded-[1.5rem] sm:w-24 sm:h-24 sm:shrink-0 sm:border sm:border-charcoal/5">
                     <div className="flex flex-col sm:items-center">
                         <span className="text-[13px] sm:text-base font-serif text-charcoal/40 leading-none tracking-tight">
-                            {startDateTime.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                            {isMounted && startDateTime.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                         </span>
                         <span className="text-[7px] font-black text-charcoal/20 uppercase tracking-[0.15em] mt-1.5">RECORDED</span>
                     </div>

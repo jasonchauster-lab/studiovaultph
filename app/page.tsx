@@ -286,7 +286,7 @@ export default function LandingPage() {
               className="h-10 md:h-12 w-auto object-contain" 
             />
             <p className="text-[10px] font-bold text-muted-burgundy uppercase tracking-[0.3em] text-center md:text-left">
-              &copy; {new Date().getFullYear()} STUDIO VAULT. ALL RIGHTS RESERVED.
+              &copy; 2026 STUDIO VAULT. ALL RIGHTS RESERVED.
             </p>
           </div>
           <div className="flex flex-wrap justify-center md:justify-end gap-6 md:gap-10 text-[10px] font-bold text-muted-burgundy uppercase tracking-[0.4em]">

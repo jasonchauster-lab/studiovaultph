@@ -70,7 +70,7 @@ export default async function DashboardLayout({
                         height={48} 
                         className="h-10 md:h-12 w-auto object-contain" 
                     />
-                    <p className="text-[10px] font-bold text-burgundy uppercase tracking-widest">© {new Date().getFullYear()} STUDIO VAULT. ALL RIGHTS RESERVED.</p>
+                    <p className="text-[10px] font-bold text-burgundy uppercase tracking-widest">© 2026 STUDIO VAULT. ALL RIGHTS RESERVED.</p>
                 </div>
                     <div className="flex gap-8">
                         <Link href="/terms-of-service" className="text-[10px] font-bold text-burgundy hover:text-forest transition-all uppercase tracking-widest underline decoration-forest/0 hover:decoration-forest underline-offset-8">Terms of Service</Link>

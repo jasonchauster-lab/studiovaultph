@@ -40,9 +40,10 @@ export default function InstructorScheduleCalendar({
     availability, 
     bookings = [], 
     currentUserId, 
-    currentDate = new Date(),
+    currentDate,
     instructorProfile
 }: InstructorScheduleCalendarProps) {
+    const safeDate = currentDate || new Date();
     const router = useRouter()
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [addMode, setAddMode] = useState<'single' | 'bulk'>('single')
@@ -52,9 +53,14 @@ export default function InstructorScheduleCalendar({
     const [selectedStudio, setSelectedStudio] = useState<any>(null)
     const [activeChat, setActiveChat] = useState<{ id: string, recipientId: string, name: string } | null>(null)
     const [view, setView] = useState<'day' | 'week' | 'month'>('week')
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
 
     // Single Add Form State
-    const [singleDate, setSingleDate] = useState(format(new Date(), 'yyyy-MM-dd'))
+    const [singleDate, setSingleDate] = useState(currentDate ? format(currentDate, 'yyyy-MM-dd') : '')
     const [singleTime, setSingleTime] = useState('09:00')
     const [singleEndTime, setSingleEndTime] = useState('10:00')
     const [locations, setLocations] = useState<string[]>([])
@@ -103,15 +109,16 @@ export default function InstructorScheduleCalendar({
 
     // Calendar Calculations
     const days = useMemo(() => {
-        if (view === 'day') return [startOfDay(currentDate)]
+        const d = currentDate || new Date();
+        if (view === 'day') return [startOfDay(d)]
         if (view === 'week') {
-            const start = startOfWeek(currentDate, { weekStartsOn: 1 })
-            const end = endOfWeek(currentDate, { weekStartsOn: 1 })
+            const start = startOfWeek(d, { weekStartsOn: 1 })
+            const end = endOfWeek(d, { weekStartsOn: 1 })
             return eachDayOfInterval({ start, end })
         }
         if (view === 'month') {
-            const start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 1 })
-            const end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 1 })
+            const start = startOfWeek(startOfMonth(d), { weekStartsOn: 1 })
+            const end = endOfWeek(endOfMonth(d), { weekStartsOn: 1 })
             return eachDayOfInterval({ start, end })
         }
         return []
@@ -226,17 +233,17 @@ export default function InstructorScheduleCalendar({
 
     const handlePrev = () => {
         let newDate;
-        if (view === 'day') newDate = subDays(currentDate, 1)
-        else if (view === 'week') newDate = subWeeks(currentDate, 1)
-        else newDate = subWeeks(currentDate, 4) // Simplified month jump
+        if (view === 'day') newDate = subDays(safeDate, 1)
+        else if (view === 'week') newDate = subWeeks(safeDate, 1)
+        else newDate = subWeeks(safeDate, 4) // Simplified month jump
         router.push(`?date=${toManilaDateStr(newDate)}`)
     }
 
     const handleNext = () => {
         let newDate;
-        if (view === 'day') newDate = addDays(currentDate, 1)
-        else if (view === 'week') newDate = addWeeks(currentDate, 1)
-        else newDate = addWeeks(currentDate, 4) // Simplified month jump
+        if (view === 'day') newDate = addDays(safeDate, 1)
+        else if (view === 'week') newDate = addWeeks(safeDate, 1)
+        else newDate = addWeeks(safeDate, 4) // Simplified month jump
         router.push(`?date=${toManilaDateStr(newDate)}`)
     }
 
@@ -309,7 +316,7 @@ export default function InstructorScheduleCalendar({
 
     const openEditModal = (slot: Availability) => {
         setEditingSlot(slot)
-        setSingleDate(slot.date || format(new Date(), 'yyyy-MM-dd'))
+        setSingleDate(slot.date || (currentDate ? format(currentDate, 'yyyy-MM-dd') : ''))
         setSingleTime(slot.start_time)
         setSingleEndTime(slot.end_time)
         setLocations([slot.location_area])
@@ -370,7 +377,7 @@ export default function InstructorScheduleCalendar({
                             const slot = availability.find(s => s.id === session.id);
                             if (slot) {
                                 setEditingSlot(slot);
-                                setSingleDate(slot.date || format(new Date(), 'yyyy-MM-dd'));
+                                setSingleDate(slot.date || (currentDate ? format(currentDate, 'yyyy-MM-dd') : ''));
                                 setSingleTime(slot.start_time.slice(0, 5));
                                 setSingleEndTime(slot.end_time.slice(0, 5));
                                 setIsEditModalOpen(true);
@@ -428,14 +435,14 @@ export default function InstructorScheduleCalendar({
                 {/* Row 1: Title + Date Navigation */}
                 <div className="flex flex-wrap items-center gap-4 relative z-10">
                     <h2 className="text-4xl font-serif text-charcoal hidden md:block min-w-[240px] tracking-tighter">
-                        {format(currentDate, 'MMMM yyyy')}
+                        {isMounted && format(safeDate, 'MMMM yyyy')}
                     </h2>
                     <div className="flex items-center gap-4">
                         <div className="relative group">
                             <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate group-focus-within:text-forest transition-colors" />
                             <input
                                 type="date"
-                                value={format(currentDate, 'yyyy-MM-dd')}
+                                value={isMounted ? format(safeDate, 'yyyy-MM-dd') : ''}
                                 onChange={(e) => { if (e.target.value) router.push(`?date=${e.target.value}`) }}
                                 className="pl-12 pr-6 py-4 border border-border-grey rounded-lg text-[10px] font-bold bg-white text-charcoal outline-none focus:ring-1 focus:ring-forest transition-all cursor-pointer uppercase tracking-[0.2em]"
                                 title="Select any specific date"
@@ -516,10 +523,10 @@ export default function InstructorScheduleCalendar({
                             <div className={clsx("grid border-b border-border-grey bg-off-white", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>
                                 <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-[100px] text-center uppercase tracking-[0.3em] flex items-center justify-center"></div>
                                 {days.map(day => (
-                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 transition-all relative", isSameDay(day, new Date()) ? "bg-buttermilk/20" : "")}>
+                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 transition-all relative", isMounted && isSameDay(day, new Date()) ? "bg-buttermilk/20" : "")}>
                                         <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
-                                        <div className={clsx("text-3xl font-serif font-black tracking-tighter", isSameDay(day, new Date()) ? "text-burgundy" : "text-charcoal")}>{format(day, 'd')}</div>
-                                        {isSameDay(day, new Date()) && (
+                                        <div className={clsx("text-3xl font-serif font-black tracking-tighter", isMounted && isSameDay(day, new Date()) ? "text-burgundy" : "text-charcoal")}>{format(day, 'd')}</div>
+                                        {isMounted && isSameDay(day, new Date()) && (
                                             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-1 bg-forest rounded-t-full" />
                                         )}
                                     </div>
@@ -540,7 +547,7 @@ export default function InstructorScheduleCalendar({
                                 <>
                                     {/* Current Time Indicator */}
                                     {(() => {
-                                        if (currentTimePosition === null) return null
+                                        if (currentTimePosition === null || !isMounted) return null
                                         const todayIdx = days.findIndex(day => isSameDay(day, new Date()))
                                         if (todayIdx === -1) return null
 
@@ -640,7 +647,7 @@ export default function InstructorScheduleCalendar({
                                                     })
                                                 ];
 
-                                                const isToday = isSameDay(day, new Date())
+                                                const isToday = isMounted && isSameDay(day, new Date())
 
                                                     return (
                                                         <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-1 overflow-hidden", isPastCell ? "bg-gray-50" : isToday ? "bg-buttermilk/10" : "")} style={{ height: `${ROW_HEIGHT}px` }}>
@@ -822,7 +829,7 @@ export default function InstructorScheduleCalendar({
                                 <div className="grid grid-cols-7 divide-x divide-y divide-border-grey">
                                     {days.map((day) => {
                                         const dayStr = toManilaDateStr(day);
-                                        const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+                                        const isCurrentMonth = day.getMonth() === safeDate.getMonth();
 
                                         // 1. Get all availability entries ("The Plan")
                                         const dayAvailability = availability.filter(a => a.date === dayStr);
