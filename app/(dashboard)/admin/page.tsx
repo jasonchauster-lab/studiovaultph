@@ -111,21 +111,21 @@ export default async function AdminDashboard({
 
             // 5. Instructor payout requests
             supabase.from('payout_requests')
-                .select('*, instructor:profiles!instructor_id(id, full_name, email)')
+                .select('*, instructor:profiles!instructor_id(id, full_name, email, available_balance)')
                 .eq('status', 'pending')
                 .not('instructor_id', 'is', null)
                 .order('created_at', { ascending: false }),
 
             // 6. Studio payout requests
             supabase.from('payout_requests')
-                .select('*, studios(name, profiles(full_name))')
+                .select('*, studios(name, profiles(full_name, email, available_balance))')
                 .eq('status', 'pending')
                 .not('studio_id', 'is', null)
                 .order('created_at', { ascending: false }),
 
             // 7. Customer payout requests
             supabase.from('payout_requests')
-                .select('*, profile:profiles!user_id(id, full_name, role, email)')
+                .select('*, profile:profiles!user_id(id, full_name, role, email, available_balance)')
                 .eq('status', 'pending')
                 .not('user_id', 'is', null)
                 .is('instructor_id', null)
@@ -134,7 +134,7 @@ export default async function AdminDashboard({
 
             // 8. Pending wallet top-ups
             supabase.from('wallet_top_ups')
-                .select('*, profiles:profiles!user_id(full_name, email, role)')
+                .select('*, profiles:profiles!user_id(full_name, email, role, available_balance)')
                 .eq('status', 'pending')
                 .eq('type', 'top_up')
                 .order('created_at', { ascending: false }),
@@ -199,10 +199,15 @@ export default async function AdminDashboard({
         const pendingStudioPayouts = pendingStudioPayoutsResult?.data ?? []
         const pendingBookings = pendingBookingsResult?.data ?? []
 
-        const payoutRequests = (payoutRequestsResult?.data ?? []).map((p: any) => ({
-            ...p,
-            instructor_name: (Array.isArray(p.instructor) ? p.instructor[0] : p.instructor)?.full_name ?? null,
-        }))
+        const payoutRequests = (payoutRequestsResult?.data ?? []).map((p: any) => {
+            const inst = Array.isArray(p.instructor) ? p.instructor[0] : p.instructor
+            return {
+                ...p,
+                instructor_name: inst?.full_name ?? null,
+                instructor_email: inst?.email ?? null,
+                instructor_balance: inst?.available_balance ?? 0
+            }
+        })
 
         const studioPayouts = studioPayoutsResult?.data ?? []
 
@@ -635,7 +640,11 @@ export default async function AdminDashboard({
                                                 <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center gap-4 transition-all hover:bg-white hover:shadow-cloud group">
                                                     <div className="space-y-1 min-w-0 flex-1">
                                                         <p className="text-lg font-serif text-charcoal truncate">₱{safeFormatCurrency(r.amount)}</p>
-                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest truncate">{r.instructor_name}</p>
+                                                        <div className="space-y-0.5">
+                                                            <p className="text-[10px] text-charcoal font-black uppercase tracking-widest truncate">{r.instructor_name}</p>
+                                                            <p className="text-[9px] text-charcoal/40 font-bold uppercase tracking-wider truncate">{r.instructor_email}</p>
+                                                            <p className="text-[9px] text-forest font-black uppercase tracking-widest">Balance: ₱{safeFormatCurrency(r.instructor_balance)}</p>
+                                                        </div>
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
@@ -659,10 +668,19 @@ export default async function AdminDashboard({
                                                 <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center gap-4 transition-all hover:bg-white hover:shadow-cloud group">
                                                     <div className="space-y-1 min-w-0 flex-1">
                                                         <p className="text-lg font-serif text-charcoal truncate">₱{safeFormatCurrency(r.amount)}</p>
-                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest truncate">
-                                                            {(Array.isArray(r.studios) ? r.studios[0] : r.studios)?.name || 'Unknown Studio'} 
-                                                            ({(Array.isArray((Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles) ? (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles[0] : (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles)?.full_name || 'No Owner'})
-                                                        </p>
+                                                        <div className="space-y-0.5">
+                                                            <p className="text-[10px] text-charcoal font-black uppercase tracking-widest truncate">
+                                                                {(Array.isArray(r.studios) ? r.studios[0] : r.studios)?.name || 'Unknown Studio'} 
+                                                            </p>
+                                                            <p className="text-[9px] text-charcoal/40 font-bold uppercase tracking-wider truncate">
+                                                                {(Array.isArray((Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles) ? (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles[0] : (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles)?.full_name || 'No Owner'}
+                                                                {` • `}
+                                                                {(Array.isArray((Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles) ? (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles[0] : (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles)?.email || '-'}
+                                                            </p>
+                                                            <p className="text-[9px] text-forest font-black uppercase tracking-widest">
+                                                                Balance: ₱{safeFormatCurrency((Array.isArray((Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles) ? (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles[0] : (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles)?.available_balance)}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
@@ -686,8 +704,11 @@ export default async function AdminDashboard({
                                                 <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center transition-all hover:bg-white hover:shadow-cloud group">
                                                     <div className="space-y-1">
                                                         <p className="text-lg font-serif text-charcoal">₱{safeFormatCurrency(r.amount)}</p>
-                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest">{r.profile?.full_name}</p>
-                                                        <p className="text-[9px] text-charcoal/50 font-bold uppercase">{r.profile?.email}</p>
+                                                        <div className="space-y-0.5">
+                                                            <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest">{r.profile?.full_name}</p>
+                                                            <p className="text-[9px] text-charcoal/50 font-bold uppercase">{r.profile?.email}</p>
+                                                            <p className="text-[9px] text-forest font-black uppercase tracking-widest">Balance: ₱{safeFormatCurrency(r.profile?.available_balance)}</p>
+                                                        </div>
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
@@ -727,6 +748,7 @@ export default async function AdminDashboard({
                                                             <div className="space-y-0.5 overflow-hidden">
                                                                 <p className="text-[10px] text-charcoal font-black uppercase tracking-widest truncate">{t.profiles?.full_name}</p>
                                                                 <p className="text-[9px] text-charcoal/40 font-bold uppercase tracking-wider truncate">{t.profiles?.email}</p>
+                                                                <p className="text-[9px] text-forest font-black uppercase tracking-widest">Current Balance: ₱{safeFormatCurrency(t.profiles?.available_balance)}</p>
                                                             </div>
                                                         </div>
                                                     </div>
