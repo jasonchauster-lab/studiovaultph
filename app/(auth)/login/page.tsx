@@ -125,9 +125,9 @@ function LoginContent() {
                     if (shouldRemember) {
                         const maxAge = 14 * 24 * 60 * 60
                         const cookieOptions = `; max-age=${maxAge}; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
-                        document.cookie = `otp_remembered=${session.user.id}${cookieOptions}`
-                        document.cookie = `remember_me=1${cookieOptions}`
-                        console.log('[Auth] Set "Remember Me" cookies client-side via listener')
+                        document.cookie = `otp_rem_${session.user.id.toLowerCase()}=1${cookieOptions}`
+                        document.cookie = `rem_me_${session.user.id.toLowerCase()}=1${cookieOptions}`
+                        console.log('[Auth] Set user-specific "Remember Me" cookies client-side via listener')
                     }
 
                     await redirectByRole(session.user.id)
@@ -140,19 +140,13 @@ function LoginContent() {
     }, [otpSent, lastOtpSentAt]) // Re-bind if OTP timing reference changes
 
     const isOtpRemembered = (userId: string) => {
-        if (typeof document === 'undefined') return false
+        if (typeof document === 'undefined' || !userId) return false
         const cookies = document.cookie.split(';').map(c => c.trim())
         
-        // Log all cookies for debugging (excluding Supabase tokens for security)
-        const debugCookies = cookies
-            .filter(c => !c.toLowerCase().includes('auth-token'))
-            .join(', ')
-        console.log('[Auth] Visible non-auth cookies:', debugCookies)
-
+        const cookieName = `otp_rem_${userId.toLowerCase()}`
         const found = cookies.some(c => {
             const [name, val] = c.split('=')
-            const cleanVal = val?.replace(/"/g, '')
-            return name === 'otp_remembered' && cleanVal?.toLowerCase() === userId?.toLowerCase()
+            return name === cookieName && (val === '1' || val?.toLowerCase() === userId.toLowerCase())
         })
         
         console.log(`[Auth] 2FA Check for user ${userId.slice(0, 5)}... result: ${found}`)

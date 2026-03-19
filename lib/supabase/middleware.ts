@@ -23,8 +23,20 @@ export async function updateSession(request: NextRequest) {
                             headers: request.headers,
                         },
                     })
-                    const rememberMe = request.cookies.get('remember_me')?.value === '1'
-                    cookiesToSet.forEach(({ name, value, options }) => {
+                    const userPromise = userId ? Promise.resolve({ data: { user } }) : supabase.auth.getUser()
+                    
+                    cookiesToSet.forEach(async ({ name, value, options }) => {
+                        // Attempt to find a user-specific remember_me preference if we have a user
+                        let rememberMe = request.cookies.get('remember_me')?.value === '1'
+                        
+                        if (userId) {
+                            const userRemMe = request.cookies.get(`rem_me_${userId.toLowerCase()}`)?.value
+                            if (userRemMe !== undefined) rememberMe = userRemMe === '1'
+                        } else {
+                            // Backup: if no userId yet (e.g. during sign in), check for a generic one
+                            // then once user is known in the next call, it will be specific.
+                        }
+
                         const finalOptions = (rememberMe && name.includes('auth-token'))
                             ? { ...options, maxAge: 14 * 24 * 60 * 60 }
                             : options
@@ -36,15 +48,16 @@ export async function updateSession(request: NextRequest) {
     )
 
     const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
 
     // ── Diagnostic Logging (Server-side) ──────────────────────────────
     const path = request.nextUrl.pathname
-    const otpCookie = request.cookies.get('otp_remembered')?.value
+    const otpCookie = userId ? request.cookies.get(`otp_rem_${userId.toLowerCase()}`)?.value : null
     const isOAuth = user?.app_metadata?.provider && user.app_metadata.provider !== 'email'
-    const isVerified = user && (isOAuth || otpCookie?.toLowerCase() === user.id.toLowerCase())
+    const isVerified = user && (isOAuth || otpCookie === '1' || otpCookie?.toLowerCase() === userId?.toLowerCase())
 
     if (user && !path.startsWith('/_next') && !path.startsWith('/favicon.ico')) {
-        console.log(`[Middleware] Path: ${path} | User: ${user.id} | OTP Cookie: ${otpCookie || 'MISSING'} | Verified: ${isVerified}`)
+        console.log(`[Middleware] Path: ${path} | User: ${userId} | OTP Cookie: ${otpCookie || 'MISSING'} | Verified: ${isVerified}`)
     }
 
     // Protected Routes Logic
