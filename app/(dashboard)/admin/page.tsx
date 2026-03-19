@@ -716,21 +716,8 @@ export default async function AdminDashboard({
                                                                     src={getDisplayUrl(t.payment_proof_url)} 
                                                                     alt="Payment Proof" 
                                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                                    onError={(e) => {
-                                                                        // Fallback UI if image fails to load (likely due to missing bucket/permissions)
-                                                                        const target = e.target as HTMLImageElement;
-                                                                        target.style.display = 'none';
-                                                                        const parent = target.parentElement;
-                                                                        if (parent) {
-                                                                            parent.classList.add('flex', 'items-center', 'justify-center', 'bg-alabaster');
-                                                                            const iconDiv = document.createElement('div');
-                                                                            iconDiv.className = 'text-[9px] font-black text-charcoal/30 text-center px-2 uppercase tracking-tight';
-                                                                            iconDiv.innerText = 'IMAGE ERROR';
-                                                                            parent.appendChild(iconDiv);
-                                                                        }
-                                                                    }}
                                                                 />
-                                                                <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/10 flex items-center justify-center transition-colors">
+                                                                <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/10 flex items-center justify-center transition-colors shadow-inner shadow-black/10 transition-all">
                                                                     <BarChart3 className="w-5 h-5 text-white opacity-0 group-hover:opacity-100" />
                                                                 </div>
                                                             </a>
