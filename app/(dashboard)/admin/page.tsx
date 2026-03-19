@@ -32,7 +32,15 @@ export default async function AdminDashboard({
         const { range, tab, search } = await searchParams
         const activeTab = (tab as string) || 'overview'
         const searchQuery = (search as string) || ''
-        const publicSupabase = await createClient()
+        
+        let publicSupabase: any = null;
+        try {
+            publicSupabase = await createClient()
+            log('Public Supabase client initialized')
+        } catch (e: any) {
+            log(`CRITICAL: Public Supabase init failed: ${e.message}`)
+            throw e; // Re-throw to be caught by global catch
+        }
 
         // --- DATE FILTER LOGIC ---
         let startDate: string | undefined

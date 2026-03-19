@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageSquare, Home, User, MessageCircle } from 'lucide-react'
+import { MessageSquare, User, Building2, GraduationCap } from 'lucide-react'
 import clsx from 'clsx'
 import ChatWindow from './ChatWindow'
 import MessageCountBadge from './MessageCountBadge'
@@ -38,11 +38,11 @@ export default function StudioChatButton({ bookingId, currentUserId, partnerId, 
                 title={label}
             >
                 {iconType === 'studio' ? (
-                    <Home className="w-4 h-4 shrink-0" />
+                    <Building2 className="w-4 h-4 shrink-0" />
                 ) : iconType === 'instructor' ? (
-                    <User className="w-4 h-4 shrink-0" />
+                    <GraduationCap className="w-4 h-4 shrink-0" />
                 ) : iconType === 'client' ? (
-                    <MessageCircle className="w-4 h-4 shrink-0" />
+                    <User className="w-4 h-4 shrink-0" />
                 ) : (
                     <MessageSquare className="w-4 h-4 shrink-0" />
                 )}

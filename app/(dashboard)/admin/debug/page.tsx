@@ -20,28 +20,19 @@ export default async function AdminDebugPage() {
     }
 
     await Promise.all([
-        runQuery('Certifications', supabase.from('certifications').select('id').eq('verified', false).limit(1)),
-        runQuery('Studios_Verify', supabase.from('studios').select('id').eq('verified', false).limit(1)),
-        runQuery('Studio_Payout_Setup', supabase.from('studios').select('id').eq('payout_approval_status', 'pending').limit(1)),
-        runQuery('Bookings', supabase.from('bookings').select('id').eq('status', 'pending').limit(1)),
-        runQuery('Payout_Requests', supabase.from('payout_requests').select('id').eq('status', 'pending').limit(1)),
-        runQuery('Top_Ups', supabase.from('wallet_top_ups').select('id').eq('status', 'pending').limit(1)),
-        runQuery('Suspended_Profiles', supabase.from('profiles').select('id').eq('is_suspended', true).limit(1)),
-        runQuery('Analytics_Action', getAdminAnalytics()),
-        runQuery('Activity_Logs', supabase.from('admin_activity_logs').select('id').limit(1)),
-        runQuery('Profiles_All', supabase.from('profiles').select('id').limit(1)),
-        runQuery('Detailed_Bookings_Join', supabase.from('bookings').select(`
-            id,
-            client:profiles!client_id(full_name),
-            instructor:profiles!instructor_id(full_name),
-            slots(
-                date,
-                studios(
-                    name,
-                    profiles!owner_id(full_name)
-                )
-            )
-        `).limit(1)),
+        runQuery('1_Certs', supabase.from('certifications').select('*, profiles(full_name)').eq('verified', false).limit(1)),
+        runQuery('2_Studios', supabase.from('studios').select('*, profiles(full_name)').eq('verified', false).limit(1)),
+        runQuery('3_PayoutSetup', supabase.from('studios').select('id, profiles(full_name)').eq('payout_approval_status', 'pending').limit(1)),
+        runQuery('4_BookingsComplex', supabase.from('bookings').select(`*, client:profiles!client_id(full_name), instructor:profiles!instructor_id(full_name), slots(date, studios(name, profiles!owner_id(full_name)))`).eq('status', 'pending').limit(1)),
+        runQuery('5_InstrPayouts', supabase.from('payout_requests').select('*, instructor:profiles!instructor_id(full_name)').eq('status', 'pending').not('instructor_id', 'is', null).limit(1)),
+        runQuery('6_StudioPayouts', supabase.from('payout_requests').select('*, studios(name, profiles(full_name))').eq('status', 'pending').not('studio_id', 'is', null).limit(1)),
+        runQuery('7_CustPayouts', supabase.from('payout_requests').select('*, profile:profiles!user_id(full_name)').eq('status', 'pending').not('user_id', 'is', null).is('instructor_id', null).limit(1)),
+        runQuery('8_TopUps', supabase.from('wallet_top_ups').select('*, profiles:profiles!user_id(full_name)').eq('status', 'pending').limit(1)),
+        runQuery('9_Suspended', supabase.from('profiles').select('id').eq('is_suspended', true).limit(1)),
+        runQuery('10_Analytics', getAdminAnalytics()),
+        runQuery('11_NegBalance', supabase.from('profiles').select('id').eq('role', 'instructor').lt('available_balance', 0).limit(1)),
+        runQuery('12_ActivityLogs', supabase.from('admin_activity_logs').select('id, admin:profiles!admin_id(full_name)').limit(1)),
+        runQuery('13_AllUsers', supabase.from('profiles').select('id').limit(1)),
     ])
 
     return (
