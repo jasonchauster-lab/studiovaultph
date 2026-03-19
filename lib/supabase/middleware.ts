@@ -8,6 +8,8 @@ export async function updateSession(request: NextRequest) {
         },
     })
 
+    let userId: string | undefined
+
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -23,21 +25,21 @@ export async function updateSession(request: NextRequest) {
                             headers: request.headers,
                         },
                     })
-                    const userPromise = userId ? Promise.resolve({ data: { user } }) : supabase.auth.getUser()
+
+                    // We need to decide whether to extend the session lifetime.
+                    // If we have a userId, we check for a user-specific cookie.
+                    // If we don't have it yet (e.g. initial login), we fall back to a generic one.
+                    const genericRememberMe = request.cookies.get('remember_me')?.value === '1'
                     
-                    cookiesToSet.forEach(async ({ name, value, options }) => {
-                        // Attempt to find a user-specific remember_me preference if we have a user
-                        let rememberMe = request.cookies.get('remember_me')?.value === '1'
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        let shouldExtend = genericRememberMe
                         
                         if (userId) {
                             const userRemMe = request.cookies.get(`rem_me_${userId.toLowerCase()}`)?.value
-                            if (userRemMe !== undefined) rememberMe = userRemMe === '1'
-                        } else {
-                            // Backup: if no userId yet (e.g. during sign in), check for a generic one
-                            // then once user is known in the next call, it will be specific.
+                            if (userRemMe !== undefined) shouldExtend = userRemMe === '1'
                         }
 
-                        const finalOptions = (rememberMe && name.includes('auth-token'))
+                        const finalOptions = (shouldExtend && name.includes('auth-token'))
                             ? { ...options, maxAge: 14 * 24 * 60 * 60 }
                             : options
                         response.cookies.set(name, value, finalOptions)
@@ -48,7 +50,7 @@ export async function updateSession(request: NextRequest) {
     )
 
     const { data: { user } } = await supabase.auth.getUser()
-    const userId = user?.id
+    userId = user?.id
 
     // ── Diagnostic Logging (Server-side) ──────────────────────────────
     const path = request.nextUrl.pathname
