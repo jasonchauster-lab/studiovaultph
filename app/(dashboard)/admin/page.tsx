@@ -561,7 +561,12 @@ export default async function AdminDashboard({
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center gap-2 text-xs text-charcoal/50 font-medium overflow-hidden">
-                                                                <span className="font-bold text-charcoal/80 truncate">Client: {b.client?.full_name}</span>
+                                                                <Link 
+                                                                    href={`/admin?tab=customers&search=${encodeURIComponent(b.client?.email || '')}`}
+                                                                    className="font-bold text-charcoal/80 truncate hover:text-forest transition-colors"
+                                                                >
+                                                                    Client: {b.client?.full_name}
+                                                                </Link>
                                                                 <span className="opacity-40 flex-shrink-0">•</span>
                                                                 <span className="truncate">{b.client?.email}</span>
                                                             </div>
@@ -573,11 +578,21 @@ export default async function AdminDashboard({
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-cream-100/50">
                                                             <div className="space-y-1.5">
                                                                 <p className="text-[8px] uppercase tracking-widest font-black text-charcoal/50">Instructor Contact</p>
-                                                                <p className="text-xs font-bold text-charcoal/70">{instructor?.email}</p>
+                                                                <Link 
+                                                                    href={`/admin?tab=customers&search=${encodeURIComponent(instructor?.email || '')}`}
+                                                                    className="text-xs font-bold text-charcoal/70 hover:text-forest transition-colors block"
+                                                                >
+                                                                    {instructor?.email}
+                                                                </Link>
                                                             </div>
                                                             <div className="space-y-1.5">
                                                                 <p className="text-[8px] uppercase tracking-widest font-black text-charcoal/50">Studio Contact</p>
-                                                                <p className="text-xs font-bold text-charcoal/70">{studioOwner?.email || 'N/A'}</p>
+                                                                <Link 
+                                                                    href={`/admin?tab=customers&search=${encodeURIComponent(studioOwner?.email || '')}`}
+                                                                    className="text-xs font-bold text-charcoal/70 hover:text-forest transition-colors block"
+                                                                >
+                                                                    {studioOwner?.email || 'N/A'}
+                                                                </Link>
                                                             </div>
                                                         </div>
 
@@ -641,7 +656,12 @@ export default async function AdminDashboard({
                                                     <div className="space-y-1 min-w-0 flex-1">
                                                         <p className="text-lg font-serif text-charcoal truncate">₱{safeFormatCurrency(r.amount)}</p>
                                                         <div className="space-y-0.5">
-                                                            <p className="text-[10px] text-charcoal font-black uppercase tracking-widest truncate">{r.instructor_name}</p>
+                                                            <Link 
+                                                                href={`/admin?tab=customers&search=${encodeURIComponent(r.instructor_email || '')}`}
+                                                                className="text-[10px] text-charcoal font-black uppercase tracking-widest truncate block hover:text-forest transition-colors"
+                                                            >
+                                                                {r.instructor_name}
+                                                            </Link>
                                                             <p className="text-[9px] text-charcoal/40 font-bold uppercase tracking-wider truncate">{r.instructor_email}</p>
                                                             <p className="text-[9px] text-forest font-black uppercase tracking-widest">Balance: ₱{safeFormatCurrency(r.instructor_balance)}</p>
                                                         </div>
@@ -672,11 +692,14 @@ export default async function AdminDashboard({
                                                             <p className="text-[10px] text-charcoal font-black uppercase tracking-widest truncate">
                                                                 {(Array.isArray(r.studios) ? r.studios[0] : r.studios)?.name || 'Unknown Studio'} 
                                                             </p>
-                                                            <p className="text-[9px] text-charcoal/40 font-bold uppercase tracking-wider truncate">
+                                                            <Link 
+                                                                href={`/admin?tab=customers&search=${encodeURIComponent((Array.isArray((Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles) ? (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles[0] : (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles)?.email || '')}`}
+                                                                className="text-[9px] text-charcoal/40 font-bold uppercase tracking-wider truncate block hover:text-forest transition-colors"
+                                                            >
                                                                 {(Array.isArray((Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles) ? (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles[0] : (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles)?.full_name || 'No Owner'}
                                                                 {` • `}
                                                                 {(Array.isArray((Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles) ? (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles[0] : (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles)?.email || '-'}
-                                                            </p>
+                                                            </Link>
                                                             <p className="text-[9px] text-forest font-black uppercase tracking-widest">
                                                                 Balance: ₱{safeFormatCurrency((Array.isArray((Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles) ? (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles[0] : (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles)?.available_balance)}
                                                             </p>
@@ -705,7 +728,12 @@ export default async function AdminDashboard({
                                                     <div className="space-y-1">
                                                         <p className="text-lg font-serif text-charcoal">₱{safeFormatCurrency(r.amount)}</p>
                                                         <div className="space-y-0.5">
-                                                            <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest">{r.profile?.full_name}</p>
+                                                            <Link 
+                                                                href={`/admin?tab=customers&search=${encodeURIComponent(r.profile?.email || '')}`}
+                                                                className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest block hover:text-forest transition-colors"
+                                                            >
+                                                                {r.profile?.full_name}
+                                                            </Link>
                                                             <p className="text-[9px] text-charcoal/50 font-bold uppercase">{r.profile?.email}</p>
                                                             <p className="text-[9px] text-forest font-black uppercase tracking-widest">Balance: ₱{safeFormatCurrency(r.profile?.available_balance)}</p>
                                                         </div>
@@ -746,7 +774,12 @@ export default async function AdminDashboard({
                                                         <div className="space-y-1 min-w-0 flex-1">
                                                             <p className="text-xl font-serif text-charcoal truncate">₱{safeFormatCurrency(t.amount)}</p>
                                                             <div className="space-y-0.5 overflow-hidden">
-                                                                <p className="text-[10px] text-charcoal font-black uppercase tracking-widest truncate">{t.profiles?.full_name}</p>
+                                                                <Link 
+                                                                    href={`/admin?tab=customers&search=${encodeURIComponent(t.profiles?.email || '')}`}
+                                                                    className="text-[10px] text-charcoal font-black uppercase tracking-widest truncate block hover:text-forest transition-colors"
+                                                                >
+                                                                    {t.profiles?.full_name}
+                                                                </Link>
                                                                 <p className="text-[9px] text-charcoal/40 font-bold uppercase tracking-wider truncate">{t.profiles?.email}</p>
                                                                 <p className="text-[9px] text-forest font-black uppercase tracking-widest">Current Balance: ₱{safeFormatCurrency(t.profiles?.available_balance)}</p>
                                                             </div>

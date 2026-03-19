@@ -208,7 +208,7 @@ export default function PartnerFeeClient({
                                         </a>
                                     ) : (
                                         <div className="px-3 py-2 bg-red-50/10 text-red-600/30 font-black text-[8px] uppercase tracking-widest rounded-lg border border-red-100/20 text-center cursor-not-allowed">
-                                            N/A
+                                            {doc.label} (N/A)
                                         </div>
                                     )}
                                     {doc.expiry && (
