@@ -30,6 +30,18 @@ export default async function AdminDebugPage() {
         runQuery('Analytics_Action', getAdminAnalytics()),
         runQuery('Activity_Logs', supabase.from('admin_activity_logs').select('id').limit(1)),
         runQuery('Profiles_All', supabase.from('profiles').select('id').limit(1)),
+        runQuery('Detailed_Bookings_Join', supabase.from('bookings').select(`
+            id,
+            client:profiles!client_id(full_name),
+            instructor:profiles!instructor_id(full_name),
+            slots(
+                date,
+                studios(
+                    name,
+                    profiles!owner_id(full_name)
+                )
+            )
+        `).limit(1)),
     ])
 
     return (

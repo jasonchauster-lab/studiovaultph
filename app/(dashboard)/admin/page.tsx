@@ -198,10 +198,10 @@ export default async function AdminDashboard({
 
         const studioPayouts = studioPayoutsResult?.data ?? []
 
-        const customerPayouts = (rawUserPayoutsResult?.data ?? []).filter((p: any) => {
-            const profile = Array.isArray(p.profile) ? p.profile[0] : p.profile
-            return profile?.role === 'customer'
-        })
+        const customerPayouts = (rawUserPayoutsResult?.data ?? []).map((p: any) => ({
+            ...p,
+            profile: Array.isArray(p.profile) ? p.profile[0] : p.profile
+        })).filter((p: any) => p.profile?.role === 'customer')
 
         const pendingTopUps = pendingTopUpsResult?.data ?? []
         const suspendedStudios = suspendedStudiosResult?.data ?? []
@@ -370,20 +370,20 @@ export default async function AdminDashboard({
                                         Analytics Engine
                                     </h2>
                                     <div className="flex items-center gap-3">
-                                        {!('error' in analytics) && <ExportCsvButton data={analytics.transactions} />}
+                                        {analytics && !('error' in analytics) && <ExportCsvButton data={analytics.transactions || []} />}
                                         <DateRangeFilters />
                                     </div>
                                 </div>
                                 <div className="glass-card p-8">
                                     <AdminExportButtons startDate={startDate} endDate={endDate} />
                                 </div>
-                                {!('error' in analytics) ? (
-                                    <AdminAnalytics stats={analytics} />
-                                ) : (
+                                {!analytics || ('error' in analytics) ? (
                                     <div className="bg-red-50 text-red-700 p-4 rounded-lg border border-red-100">
-                                        <p className="font-bold">Failed to load analytics</p>
-                                        <p className="text-xs mt-1">{(analytics as any).error}</p>
+                                        <p className="font-bold">Operational Intelligence Unavailable</p>
+                                        <p className="text-xs mt-1">{analytics ? (analytics as any).error : 'Data stream timeout'}</p>
                                     </div>
+                                ) : (
+                                    <AdminAnalytics stats={analytics} />
                                 )}
                             </div>
 
@@ -651,7 +651,10 @@ export default async function AdminDashboard({
                                                 <div key={r.id} className="p-5 bg-alabaster/50 border border-cream-100 rounded-2xl flex justify-between items-center gap-4 transition-all hover:bg-white hover:shadow-cloud group">
                                                     <div className="space-y-1 min-w-0 flex-1">
                                                         <p className="text-lg font-serif text-charcoal truncate">₱{safeFormatCurrency(r.amount)}</p>
-                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest truncate">{r.studios?.name} ({r.studios?.profiles?.full_name})</p>
+                                                        <p className="text-[10px] text-charcoal/40 font-black uppercase tracking-widest truncate">
+                                                            {(Array.isArray(r.studios) ? r.studios[0] : r.studios)?.name || 'Unknown Studio'} 
+                                                            ({(Array.isArray((Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles) ? (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles[0] : (Array.isArray(r.studios) ? r.studios[0] : r.studios)?.profiles)?.full_name || 'No Owner'})
+                                                        </p>
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <VerifyButton id={r.id} action="rejectPayout" label="REJECT" className="px-4 py-2 bg-red-50 text-red-600 text-[10px] font-black rounded-xl" />
@@ -881,7 +884,7 @@ export default async function AdminDashboard({
                     {activeTab === 'reports' && (
                         <ReportsTab
                             logs={activityLogs as any}
-                            transactions={!('error' in analytics) ? analytics.transactions : []}
+                            transactions={(analytics && !('error' in analytics)) ? (analytics.transactions || []) : []}
                         />
                     )}
                 </div>
