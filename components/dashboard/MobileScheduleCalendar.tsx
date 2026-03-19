@@ -275,13 +275,13 @@ export default function MobileScheduleCalendar({
                                     )}
                                     <div className="flex justify-between items-start gap-3">
                                         <div className="space-y-2 flex-1 min-w-0">
-                                            <div className={clsx("flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]", session.is_booked ? "text-white/70" : "text-charcoal/30")}>
-                                                <div className={clsx("px-3 py-1.5 rounded-xl border flex items-center gap-2.5 w-full sm:w-auto", session.is_booked ? "bg-white/10 border-white/10" : "bg-off-white/50 border-border-grey/40")}>
+                                            <div className={clsx("flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]", session.is_booked ? "text-white" : "text-charcoal/30")}>
+                                                <div className={clsx("px-3 py-1.5 rounded-xl border flex items-center gap-2.5 w-full sm:w-auto", session.is_booked ? "bg-white/20 border-white/20 shadow-inner" : "bg-off-white/50 border-border-grey/40")}>
                                                     <Clock className="w-3.5 h-3.5 shrink-0" />
                                                     <span className="truncate">{formatTo12Hour(session.start_time)} — {formatTo12Hour(session.end_time)}</span>
                                                 </div>
                                             </div>
-                                            <h3 className={clsx("text-lg font-serif text-charcoal tracking-tight leading-none truncate", session.is_booked && "text-white")}>
+                                            <h3 className={clsx("text-lg font-serif tracking-tight leading-none truncate", session.is_booked ? "!text-white" : "text-charcoal")}>
                                                 {session.displayTitle || (session.is_booked ? session.type : 'Available Opening')}
                                             </h3>
                                         </div>
@@ -312,7 +312,7 @@ export default function MobileScheduleCalendar({
                                                     className={clsx(
                                                         "flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-all text-[8px] font-bold uppercase tracking-wider",
                                                         session.is_booked 
-                                                            ? "text-white/90 bg-white/10 border-white/20 hover:bg-forest hover:text-white"
+                                                            ? "!text-white bg-white/10 border-white/20 hover:bg-white/20"
                                                             : "text-charcoal/80 bg-white/60 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
                                                     )}
                                                 >
@@ -329,7 +329,7 @@ export default function MobileScheduleCalendar({
                                                 className={clsx(
                                                     "flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-all text-[8px] font-bold uppercase tracking-wider",
                                                     session.is_booked 
-                                                        ? "text-white/90 bg-white/10 border-white/20 hover:bg-white/20" 
+                                                        ? "!text-white bg-white/10 border-white/20 hover:bg-white/20" 
                                                         : "text-charcoal/80 bg-white/60 border-border-grey hover:bg-forest hover:text-white hover:border-forest"
                                                 )}
                                             >
