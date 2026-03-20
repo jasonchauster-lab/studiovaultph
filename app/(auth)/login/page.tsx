@@ -57,11 +57,8 @@ function LoginContent() {
                 // Check if they are an OAuth user (already verified)
                 const isOAuth = session.user.app_metadata?.provider && session.user.app_metadata.provider !== 'email'
                 
-                const testEmails = ['clubpilatesph@gmail.com', 'jchau199@gmail.com', 'tracymeck35@gmail.com']
-                const isTest = session.user.email && testEmails.includes(session.user.email.toLowerCase())
-
                 // Check if they were already remembered
-                if (isOAuth || isOtpRemembered(session.user.id) || isTest) {
+                if (isOAuth || isOtpRemembered(session.user.id)) {
                    setIsRedirecting(true)
                    await redirectByRole(session.user.id)
                 } else {
@@ -240,8 +237,7 @@ function LoginContent() {
             }
 
             // Skip 2FA if this device is already remembered for this specific user
-            const testEmails = ['clubpilatesph@gmail.com', 'jchau199@gmail.com', 'tracymeck35@gmail.com']
-            if (isOtpRemembered(user.id) || (user.email && testEmails.includes(user.email.toLowerCase()))) {
+            if (isOtpRemembered(user.id)) {
                 await redirectByRole(user.id)
                 // Note: redirectByRole handles its own cleanup or keeps loading until navigation
                 return

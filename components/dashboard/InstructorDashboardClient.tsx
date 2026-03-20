@@ -261,7 +261,7 @@ export default function InstructorDashboardClient({
             <div className="sticky-header-antigravity -mx-4 sm:-mx-8 lg:-mx-12 mb-8 sm:mb-12 px-6 sm:px-8 lg:px-12 py-6 sm:py-8 lg:py-0">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-8">
                     <div>
-                        <h1 className="text-2xl sm:text-4xl md:text-5xl font-serif text-charcoal tracking-tighter mb-2 sm:mb-4">Instructor Dashboard</h1>
+                        <h1 className="text-xl sm:text-4xl md:text-5xl font-serif text-charcoal tracking-tighter mb-2 sm:mb-4">Instructor Dashboard</h1>
                         <p className="text-[9px] sm:text-[10px] font-bold text-charcoal/40 uppercase tracking-[0.3em] sm:tracking-[0.4em] max-w-[90%] sm:max-w-none leading-relaxed">Manage your professional schedule and earnings with grounded precision.</p>
                     </div>
                 </div>

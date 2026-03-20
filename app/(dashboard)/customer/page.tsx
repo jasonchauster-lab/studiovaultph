@@ -241,8 +241,8 @@ export default async function CustomerDashboard({
                             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-8 mb-8 sm:mb-16 border-b border-burgundy/5 pb-6 sm:pb-10">
                                 <div className="space-y-2 sm:space-y-3">
                                     <div className="flex items-center gap-3 sm:gap-5">
-                                        <h2 className="text-3xl sm:text-5xl font-serif font-bold text-burgundy tracking-tight">Verified Instructors</h2>
-                                        <div className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-forest text-[9px] sm:text-[10px] font-black text-white uppercase tracking-[0.2em] sm:tracking-[0.25em] shadow-lg shadow-forest/20">
+                                        <h2 className="text-2xl sm:text-5xl font-serif font-bold text-burgundy tracking-tight">Verified Instructors</h2>
+                                        <div className="px-3 sm:px-4 py-1.5 rounded-full bg-forest text-[9px] sm:text-[10px] font-black text-white uppercase tracking-[0.2em] sm:tracking-[0.25em] shadow-lg shadow-forest/20">
                                             {instructors.length} Available
                                         </div>
                                     </div>
@@ -382,7 +382,7 @@ export default async function CustomerDashboard({
                             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-8 mb-8 sm:mb-16 border-b border-burgundy/5 pb-6 sm:pb-10">
                                 <div className="space-y-2 sm:space-y-3">
                                     <div className="flex items-center gap-3 sm:gap-5">
-                                        <h2 className="text-3xl sm:text-5xl font-serif font-bold text-burgundy tracking-tight">Partner Studios</h2>
+                                        <h2 className="text-2xl sm:text-5xl font-serif font-bold text-burgundy tracking-tight">Partner Studios</h2>
                                         <div className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-buttermilk/20 border border-buttermilk/40 text-[9px] sm:text-[10px] font-black text-burgundy/50 uppercase tracking-[0.2em] sm:tracking-[0.25em] shadow-sm">
                                             {studios?.length || 0} Registered
                                         </div>

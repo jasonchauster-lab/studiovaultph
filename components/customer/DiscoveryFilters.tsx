@@ -134,7 +134,7 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                 </div>
 
                 {/* Date and Time Group */}
-                <div className="flex gap-4 sm:gap-6 pt-6 sm:pt-8 lg:pt-0 border-t lg:border-t-0 border-burgundy/5">
+                <div className="flex gap-6 sm:gap-6 pt-6 sm:pt-8 lg:pt-0 border-t lg:border-t-0 border-burgundy/5">
                     <div className="flex flex-col gap-2.5 flex-1 lg:flex-none">
                         <label className="text-[9px] font-black text-burgundy/30 uppercase tracking-[0.2em] ml-1.5">Date</label>
                         <div className="relative group/input">
