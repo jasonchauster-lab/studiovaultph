@@ -1,28 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  /* Elevated Wellness Design System */
-  --off-white: #F9F8F6;      /* Soft Alabaster — app backgrounds */
-  --burgundy: #1A1C1E;       /* Rich Charcoal — primary text */
-  --muted-burgundy: #6B7280; /* Muted Slate — secondary text */
-  --buttermilk: #EAE6DF;     /* Warm Stone — secondary surfaces & highlights */
-  --pastel-blue: #EAE6DF;    /* Warm Stone — neutral secondary */
-  --walking-vinnie: #3D6B57; /* Deep Sage — success / verified indicators */
-  --border-grey: #E3E3DC;    /* Subtle warm border */
-  --sage: #2D4A3E;            /* Deep Forest Slate — accents */
-  --forest: #2D4A3E;          /* Deep Forest Slate — primary buttons & active states */
-  --gold: #2D4A3E;            /* Deep Forest Slate — replaces all yellow-gold accent */
-  --rose-gold: #2D4A3E;       /* Deep Forest Slate — replaces rose-gold */
+  /* Digital Atelier Design System */
+  --surface: #fbf9f3;              /* Warm Paper White — primary background */
+  --surface-container-low: #f5f3ee;  /* Soft Elevation level 1 */
+  --surface-container-highest: #e4e2dd; /* Soft Elevation level 2 / Interactive */
+  
+  --primary: #183329;              /* Deep Forest Green — authoritative primary */
+  --primary-container: #2f4a3f;    /* Muted Forest — accent/gradient primary */
+  --on-primary: #ffffff;           /* Pure White text on dark backgrounds */
+  
+  --on-surface: #1b1c19;           /* Soft Charcoal — high contrast text */
+  --muted-surface: #6B7280;         /* Muted Slate — secondary text */
+  
+  --secondary-fixed: #ffdbd1;      /* Vault Badge — soft coral/peach accent */
+  --on-secondary-fixed: #1b1c19;   /* Text for Vault Badge */
+  
+  --outline-variant: rgba(27, 28, 25, 0.2); /* For "Ghost Borders" fallback */
+  
+  --background: var(--surface);
+  --foreground: var(--on-surface);
 
-  --background: var(--off-white);
-  --foreground: var(--burgundy);
+  /* Elevation & Shadows */
+  --shadow-ambient: 0px 20px 40px rgba(27, 28, 25, 0.06);
+  --glass-blur: 16px;
 
-  --radius: 8px;
-  --radius-pill: 9999px;
-
-  /* Crisp, high-contrast shadows */
-  --shadow-tight: 0 1px 2px 0 rgba(26, 28, 30, 0.04);
-  --shadow-card: 0 10px 15px -3px rgba(26, 28, 30, 0.06), 0 4px 6px -2px rgba(26, 28, 30, 0.03);
+  /* Corner Radius */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
 }
 
 @theme inline {
@@ -30,311 +37,160 @@
   --color-foreground: var(--foreground);
 
   /* Brand Palette */
-  --color-off-white: var(--off-white);
-  --color-burgundy: var(--burgundy);
-  --color-muted-burgundy: var(--muted-burgundy);
-  --color-buttermilk: var(--buttermilk);
-  --color-pastel-blue: var(--pastel-blue);
-  --color-walking-vinnie: var(--walking-vinnie);
-  --color-border-grey: var(--border-grey);
+  --color-surface: var(--surface);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-primary: var(--primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary: var(--on-primary);
+  --color-on-surface: var(--on-surface);
+  --color-muted-surface: var(--muted-surface);
+  --color-secondary-fixed: var(--secondary-fixed);
+  --color-on-secondary-fixed: var(--on-secondary-fixed);
 
-  /* Additional tokens */
-  --color-gold: var(--gold);
-  --color-rose-gold: var(--rose-gold);
-  --color-forest: var(--forest);
-
-  /* Legacy Mappings & Palettes for V3 Compatibility */
-  --color-charcoal: var(--burgundy);
-  --color-charcoal-50: #F9FAFB;
-  --color-charcoal-100: #F3F4F6;
-  --color-charcoal-200: #E5E7EB;
-  --color-charcoal-300: #D1D5DB;
-  --color-charcoal-400: #9CA3AF;
-  --color-charcoal-500: #6B7280;
-  --color-charcoal-600: #4B5563;
-  --color-charcoal-700: #374151;
-  --color-charcoal-800: #1F2937;
-  --color-charcoal-900: var(--burgundy);
-
-  --color-cream: var(--buttermilk);
-  --color-cream-50: var(--off-white);
-  --color-cream-100: #F3F1EE;
-  --color-cream-200: var(--buttermilk);
-  --color-cream-300: #D8D2C7;
-
-  --color-slate: var(--muted-burgundy);
-  --color-slate-500: var(--muted-burgundy);
+  /* Shadow & Blur */
+  --shadow-ambient: var(--shadow-ambient);
   
-  --color-sage: var(--sage);
-  --color-sage-50: #F1F5F2;
-  --color-sage-100: #E3EBE6;
-  --color-sage-200: #C7D7CD;
-  --color-sage-300: #ABBDAD;
-  --color-sage-400: #8FA28F;
-  --color-sage-500: var(--sage);
-  --color-sage-600: #243B32;
-  --color-sage-700: #1C2E27;
+  /* Radii */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-xl: var(--radius-xl);
+  --radius-full: var(--radius-full);
 
-  /* System Mappings */
-  --color-primary: var(--burgundy);
-  --color-primary-foreground: #ffffff;
-  --color-secondary: var(--pastel-blue);
-  --color-secondary-foreground: var(--burgundy);
-
-  --radius-xl: var(--radius);
-  --radius-2xl: calc(var(--radius) + 4px);
-
-  --shadow-tight: var(--shadow-tight);
-  --shadow-card: var(--shadow-card);
-  --shadow-cloud: var(--shadow-card);
-
-  --radius-pill: var(--radius-pill);
-
-  /* Selection color */
-  --color-selection: rgba(234, 230, 223, 0.50);
-
-  /* ─── Typography: Playfair Display (Serif) + Inter (Sans) ─── */
-  --font-serif: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-inter), var(--font-lexend), system-ui, -apple-system, sans-serif;
-}
-
-/* ─────────────────────────────────────────
-   BROWSER AUTOFILL OVERRIDE
-   Prevents Chrome/Safari from applying the
-   pale-blue autofill background on inputs.
-───────────────────────────────────────── */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
-  box-shadow: 0 0 0 1000px #ffffff inset !important;
-  -webkit-text-fill-color: #1A1C1E !important;
-  caret-color: #1A1C1E;
-  transition: background-color 9999s ease-in-out 0s;
+  /* Typography: Inter (Sans) + Playfair Display (Serif) */
+  --font-serif: var(--font-playfair), "Playfair Display", Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
 }
 
 /* ─────────────────────────────────────────
    BASE STYLES
 ───────────────────────────────────────── */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), var(--font-lexend), system-ui, -apple-system, sans-serif;
+  background: var(--surface);
+  color: var(--on-surface);
+  font-family: var(--font-sans);
   font-weight: 400;
   line-height: 1.65;
   overflow-x: hidden;
-  position: relative;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Headings — Playfair Display Serif for elegance and readability */
-h1,
-h2,
-h3,
-h4 {
-  font-family: var(--font-playfair), "Playfair Display", Georgia, serif;
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
   font-weight: 700;
-  @apply text-burgundy;
+  color: var(--primary);
   letter-spacing: -0.01em;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
-h5,
-h6 {
-  font-family: var(--font-inter), var(--font-lexend), system-ui, sans-serif;
-  font-weight: 600;
-  @apply text-burgundy;
-}
-
-/* Accessible Focus States */
-:focus-visible {
-  outline: 2px solid var(--burgundy);
-  outline-offset: 2px;
-}
-
+/* ─────────────────────────────────────────
+   UTILITIES & COMPONENTS
+───────────────────────────────────────── */
 @layer utilities {
-
-  /* ─── Card Surfaces ─── */
-  .glass-card,
-  .earth-card {
-    @apply bg-white border border-border-grey;
-    box-shadow: var(--shadow-tight);
-    border-radius: var(--radius);
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Tonal Architecture: Surface shifts instead of borders */
+  .surface-elevated {
+    background-color: var(--surface-container-low);
+  }
+  
+  .surface-overlay {
+    background-color: #ffffff;
+    box-shadow: var(--shadow-ambient);
   }
 
-  .glass-card:hover,
-  .earth-card:hover {
-    box-shadow: var(--shadow-card);
-    transform: translateY(-1px);
-    border-color: rgba(26, 28, 30, 0.10);
+  /* "No-Line" Card Style */
+  .atelier-card {
+    background-color: #ffffff;
+    border-radius: var(--radius-xl);
+    padding: 2.5rem;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  
+  .atelier-card:hover {
+    transform: translateY(-4px);
   }
 
-  /* Prevent hover transforms when a modal is open */
-  body[style*="overflow: hidden"] .glass-card:hover,
-  body[style*="overflow: hidden"] .earth-card:hover {
-    transform: none !important;
+  /* Glassmorphism Navigation */
+  .glass-nav {
+    background-color: rgba(251, 249, 243, 0.7);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    z-index: 100;
   }
 
-  /* ─── Sticky Header ─── */
-  .sticky-header-antigravity {
-    @apply sticky top-0 z-[60];
-    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+  /* Signature Gradient Button */
+  .btn-primary-atelier {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%);
+    color: var(--on-primary);
+    padding: 1.25rem 2.5rem;
+    border-radius: var(--radius-md);
+    font-size: 0.625rem; /* 10px */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    box-shadow: 0 4px 12px rgba(24, 51, 41, 0.15);
   }
 
-  /* ─── Navbar ─── */
-  .glass-navbar {
-    background: white;
-    border-bottom: 1px solid var(--border-grey);
-    box-shadow: var(--shadow-tight);
-    z-index: 50;
-    transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  .btn-primary-atelier:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(24, 51, 41, 0.2);
   }
 
-  /* ─── PRIMARY BUTTONS — Deep Forest Slate ─── */
-  .btn-primary,
-  .btn-forest,
-  .btn-antigravity,
-  .btn-sage-glow,
-  .btn-rose {
-    background: var(--forest);
-    color: #ffffff;
-    font-family: var(--font-inter), var(--font-lexend), system-ui, sans-serif;
-    @apply rounded-lg font-semibold shadow-sm px-6 py-2.5 inline-flex items-center justify-center gap-2;
-    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  .btn-secondary-atelier {
+    background-color: var(--surface-container-highest);
+    color: var(--primary);
+    padding: 1rem 2rem;
+    border-radius: var(--radius-md);
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    transition: background-color 0.2s ease;
+  }
+  
+  .btn-secondary-atelier:hover {
+    background-color: #d8d6d1;
   }
 
-  .btn-primary:hover,
-  .btn-forest:hover,
-  .btn-antigravity:hover,
-  .btn-sage-glow:hover,
-  .btn-rose:hover {
-    filter: brightness(1.12);
-    box-shadow: var(--shadow-card);
+  /* Label / Eyebrow Text */
+  .label-atelier {
+    font-family: var(--font-sans);
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4em;
+    color: var(--muted-surface);
   }
 
-  .btn-primary:active,
-  .btn-forest:active {
-    transform: scale(0.98);
+  /* Minimalism Inputs: Bottom border only */
+  .input-atelier {
+    background-color: var(--surface-container-low);
+    border: none;
+    border-bottom: 1px solid var(--outline-variant);
+    padding: 1rem 0;
+    width: 100%;
+    transition: border-color 0.3s ease;
+    outline: none;
+  }
+  
+  .input-atelier:focus {
+    border-color: var(--primary);
   }
 
-  /* ─── Book Now CTA — high contrast, marketplace action ─── */
-  .btn-book-now {
-    background: var(--forest);
-    color: #ffffff;
-    font-family: var(--font-inter), var(--font-lexend), system-ui, sans-serif;
-    @apply rounded-lg font-bold shadow-sm px-5 py-2.5 inline-flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider;
-    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
-  }
-
-  .btn-book-now:hover {
-    filter: brightness(1.12);
-    box-shadow: var(--shadow-card);
-    transform: translateY(-1px);
-  }
-
-  .btn-book-now:active {
-    transform: scale(0.98);
-  }
-
-  /* ─── Status Pills ─── */
-  .status-pill-earth,
-  .status-pill-frosted {
-    @apply px-3 py-1 text-[10px] font-bold uppercase rounded-full tracking-widest border;
-    font-family: var(--font-inter), var(--font-lexend), system-ui, sans-serif;
-  }
-
-  /* Walking Vinnie — Completed / Verified */
-  .status-pill-green {
-    @apply bg-green-50 text-green-700 border-green-100;
-  }
-
-  .status-pill-yellow {
-    @apply bg-amber-50 text-amber-700 border-amber-100;
-  }
-
-  .status-pill-red {
-    @apply bg-red-50 text-red-700 border-red-100;
-  }
-
-  /* Warm Stone — active/highlighted */
-  .status-pill-bay {
-    background: var(--buttermilk);
-    @apply text-burgundy border-burgundy/10;
-  }
-
-  .status-pill-grey {
-    background: var(--pastel-blue);
-    @apply text-burgundy border-burgundy/10;
-  }
-
-  /* ─── Session Block ─── */
-  .session-block-earth {
-    @apply border border-border-grey bg-white shadow-tight rounded-lg;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  }
-
-  .session-block-earth:hover {
-    @apply shadow-card border-burgundy/10;
-  }
-
-  /* ─── Secondary link ─── */
-  .link-secondary {
-    color: var(--muted-burgundy);
-    @apply underline-offset-4 hover:underline;
-    transition: color 0.2s ease, text-decoration-color 0.2s ease;
-  }
-
-  /* ─── Marketplace Banner Cards ─── */
-  /* The top image area for class/studio/instructor discovery cards */
-  .marketplace-card-banner {
-    @apply relative overflow-hidden;
-    aspect-ratio: 16 / 9;
-  }
-
-  .marketplace-card-banner img {
-    @apply w-full h-full object-cover transition-transform duration-700;
-  }
-
-  .marketplace-card:hover .marketplace-card-banner img {
-    transform: scale(1.05);
-  }
-
-  /* Circular instructor trust avatar overlapping banner */
-  .instructor-trust-avatar {
-    @apply absolute -bottom-6 left-5 w-12 h-12 rounded-full border-4 border-white overflow-hidden;
-    box-shadow: var(--shadow-card);
-    z-index: 10;
-  }
-
-  /* ─── Price Highlight — Warm Stone accent ─── */
-  .price-highlight {
-    background: var(--buttermilk);
-    color: var(--burgundy);
-    @apply px-3 py-1 rounded-full text-sm font-bold;
-  }
-
-  /* ─── Last Minute tag ─── */
-  .tag-last-minute {
-    background: var(--buttermilk);
-    color: var(--burgundy);
-    @apply px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border border-burgundy/10;
-  }
-
-  /* ─── Verified / Completed badge ─── */
-  .badge-verified {
-    background: var(--walking-vinnie);
-    color: #ffffff;
-    @apply px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest;
-  }
-
-  /* ─── No scrollbar ─── */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  /* Vault Badge */
+  .vault-badge {
+    background-color: var(--secondary-fixed);
+    color: var(--on-secondary-fixed);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 }

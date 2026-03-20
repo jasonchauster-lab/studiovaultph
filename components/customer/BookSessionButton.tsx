@@ -56,7 +56,7 @@ export default function BookSessionButton({
 
     if (status === 'success') {
         return (
-            <div className="w-full py-4 px-6 bg-sage/10 text-sage rounded-[20px] text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 border border-sage/20 shadow-sm animate-in fade-in zoom-in duration-500">
+            <div className="w-full py-4 px-6 bg-primary/10 text-primary rounded-xl label-atelier flex items-center justify-center gap-3 shadow-sm animate-in fade-in zoom-in duration-500">
                 <Check className="w-4 h-4" />
                 {message}
             </div>
@@ -64,11 +64,11 @@ export default function BookSessionButton({
     }
 
     return (
-        <div className="w-full space-y-3">
+        <div className="w-full space-y-4">
             <button
                 onClick={handleBook}
                 disabled={isLoading}
-                className="w-full py-4 px-6 bg-forest text-white rounded-[20px] text-[11px] font-bold uppercase tracking-widest hover:brightness-110 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-cloud"
+                className="w-full btn-primary-atelier disabled:opacity-50 disabled:cursor-not-allowed shadow-ambient"
             >
                 {isLoading ? (
                     <>
