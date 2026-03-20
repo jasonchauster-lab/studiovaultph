@@ -282,7 +282,7 @@ export default function MobileScheduleCalendar({
                                                 </div>
                                             </div>
                                             <h3 className={clsx("text-lg font-serif tracking-tight leading-none truncate", session.is_booked ? "!text-white" : "text-charcoal")}>
-                                                {session.displayTitle || (session.is_booked ? session.type : 'Available Opening')}
+                                                {session.is_booked ? (session.displayTitle || session.type) : 'Available Opening'}
                                             </h3>
                                         </div>
                                         {session.displayRatio ? (

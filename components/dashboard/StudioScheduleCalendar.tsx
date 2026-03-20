@@ -527,16 +527,12 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                                       {hour.toString().padStart(2, '0')}:00 - {(hour + 1).toString().padStart(2, '0')}:00
                                                                                   </div>
                                                                             )}
-                                                                            <div className="flex justify-between items-start mb-2.5 gap-2">
-                                                                                <h4 className={clsx("text-[11px] font-bold uppercase tracking-tight line-clamp-2 leading-tight flex-1", 
-                                                                                    (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-charcoal" : 
-                                                                                    hasPending ? "text-amber-900" : "text-white")}>
-                                                                                    {displayTitle}
-                                                                                </h4>
-                                                                                 <Edit2 className={clsx("w-3.5 h-3.5 opacity-0 group-hover/slot:opacity-100 transition-all duration-300 shrink-0 transform group-hover/slot:scale-110 mt-0.5", 
-                                                                                    (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-charcoal/40" : 
-                                                                                    hasPending ? "text-amber-900/30" : "text-white/40")} />
-                                                                            </div>
+                                                                             <div className="flex justify-between items-start mb-2.5 gap-2">
+                                                                                  <div className="flex-1 opacity-0 group-hover/slot:opacity-0" />
+                                                                                  <Edit2 className={clsx("w-3.5 h-3.5 opacity-0 group-hover/slot:opacity-100 transition-all duration-300 shrink-0 transform group-hover/slot:scale-110 mt-0.5", 
+                                                                                     (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-charcoal/40" : 
+                                                                                     hasPending ? "text-amber-900/30" : "text-white/40")} />
+                                                                             </div>
                                                                             <div className="flex flex-wrap gap-2">
                                                                                 {Object.entries(equipmentCounts).map(([eq, counts]) => (
                                                                                      <span key={eq} className={clsx("text-[8px] font-black uppercase tracking-tighter flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-colors", 
@@ -986,6 +982,36 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {/* Equipment Availability Summary */}
+                                        <div className="flex flex-wrap gap-3 mt-6">
+                                            {(() => {
+                                                const equipmentSummary: Record<string, { booked: number, total: number }> = {};
+                                                bucketSlots.forEach(s => {
+                                                    if (s.equipment && typeof s.equipment === 'object') {
+                                                        Object.entries(s.equipment).forEach(([eq, qty]) => {
+                                                            if (!equipmentSummary[eq]) equipmentSummary[eq] = { booked: 0, total: qty };
+                                                            else equipmentSummary[eq].total += qty;
+                                                            
+                                                            const bookedForEq = s.bookings?.filter(b => 
+                                                                ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase() || '') &&
+                                                                (b.price_breakdown?.equipment?.toUpperCase() === eq.toUpperCase() || b.equipment?.toUpperCase() === eq.toUpperCase())
+                                                            ).length || 0;
+                                                            equipmentSummary[eq].booked += bookedForEq;
+                                                        });
+                                                    }
+                                                });
+
+                                                return Object.entries(equipmentSummary).map(([eq, counts]) => (
+                                                    <div key={eq} className="bg-white border border-border-grey px-4 py-2.5 rounded-xl shadow-tight flex flex-col gap-1 min-w-[120px]">
+                                                        <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-widest">{eq}</p>
+                                                        <p className="text-[14px] font-bold text-charcoal">
+                                                            {counts.booked} <span className="text-charcoal/30">/</span> {counts.total} <span className="text-[10px] font-black text-forest/60 ml-1">CAPACITY</span>
+                                                        </p>
+                                                    </div>
+                                                ));
+                                            })()}
+                                        </div>
                                     </div>
 
                                     <div className="flex items-center gap-2">
@@ -1080,10 +1106,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                     </div>
                                 </div>
 
-                                <div className="mt-12 pt-10 border-t border-border-grey flex justify-between items-center">
-                                    <p className="text-[10px] text-slate font-bold uppercase tracking-widest">
-                                        {bucketSlots.length} Active Slot(s) in this block
-                                    </p>
+                                <div className="mt-12 pt-10 border-t border-border-grey flex justify-end items-center">
                                     <button
                                         onClick={() => {
                                             setIsBucketModalOpen(false);
