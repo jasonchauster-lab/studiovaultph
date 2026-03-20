@@ -9,6 +9,8 @@ import MessageCountBadge from '@/components/dashboard/MessageCountBadge'
 import { cancelBooking } from '@/app/(dashboard)/customer/actions'
 import BookingFilter, { FilterState } from '@/components/dashboard/BookingFilter'
 import ReviewModal from '@/components/reviews/ReviewModal'
+import Avatar from '@/components/shared/Avatar'
+
 import CancelBookingModal from '@/components/dashboard/CancelBookingModal'
 import StudioPreviewModal from '@/components/dashboard/StudioPreviewModal'
 import InstructorPreviewModal from '@/components/dashboard/InstructorPreviewModal'
@@ -353,8 +355,13 @@ const UpcomingBookingCard = memo(({ booking, userId, onStudioClick, onInstructor
             <div className="pt-4 border-t border-border-grey/50 space-y-3">
                 <div className="flex items-center gap-3 group/inst">
                     <button onClick={() => onInstructorClick(instructor)} className="w-7 h-7 rounded-full overflow-hidden bg-off-white shrink-0 border border-border-grey group-hover/inst:border-sage transition-colors">
-                        <img src={instructor?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(instructor?.full_name || 'I')}&background=FAFAFA&color=3C2F2F`} className="w-full h-full object-cover" />
+                        <Avatar 
+                            src={instructor?.avatar_url} 
+                            fallbackName={instructor?.full_name} 
+                            size={28} 
+                        />
                     </button>
+
                     <div className="text-sm text-slate truncate flex-1">
                         Instructor: <button onClick={() => onInstructorClick(instructor)} className="font-bold text-burgundy hover:text-sage transition-colors hover:underline underline-offset-2">{instructor?.full_name || 'N/A'}</button>
                     </div>

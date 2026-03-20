@@ -5,6 +5,8 @@ import { Calendar, MapPin, Box, X, AlertCircle, Clock, Navigation, Award, UserCh
 import Link from 'next/link'
 import clsx from 'clsx'
 import StudioChatButton from '@/components/dashboard/StudioChatButton'
+import Avatar from '@/components/shared/Avatar'
+
 import ReviewModal from '@/components/reviews/ReviewModal'
 import BookingFilter, { FilterState } from '@/components/dashboard/BookingFilter'
 import CancelBookingModal from './CancelBookingModal'
@@ -351,9 +353,12 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
                         <div className="flex flex-col items-center text-center mb-10 pt-10">
-                            <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
-                                <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
-                            </div>
+                                <Avatar 
+                                    src={selectedClient.avatar_url} 
+                                    fallbackName={selectedClient.full_name} 
+                                    size={96} 
+                                />
+
                             <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedClient.full_name}</h3>
                             <div className="space-y-1">
                                 <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedClient.email}</p>
@@ -523,9 +528,14 @@ const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClien
                         <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border-grey/30">
                             {client && (
                                 <button onClick={() => onClientClick(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
-                                    <div className="w-6 h-6 rounded-lg border border-forest/10 p-0.5 shrink-0">
-                                        <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full rounded-lg object-cover" />
+                                    <div className="w-6 h-6 rounded-lg border border-forest/10 p-0.5 shrink-0 overflow-hidden">
+                                        <Avatar 
+                                            src={client.avatar_url} 
+                                            fallbackName={client.full_name} 
+                                            size={24} 
+                                        />
                                     </div>
+
                                     <span className="text-[9px] font-black text-charcoal/60 uppercase tracking-[0.15em] truncate">{client.full_name}</span>
                                 </button>
                             )}
@@ -620,9 +630,14 @@ const ArchiveSessionCard = memo(({ booking, onStudioClick, onClientClick, onRevi
                         <div className="flex items-center gap-3 mt-3 pt-3 border-t border-charcoal/5">
                             {client && (
                                 <button onClick={() => onClientClick(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
-                                    <div className="w-6 h-6 rounded-lg border border-charcoal/5 p-0.5 shrink-0 opacity-40">
-                                        <img src={client.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full rounded-lg object-cover" />
+                                    <div className="w-6 h-6 rounded-lg border border-charcoal/5 p-0.5 shrink-0 opacity-40 overflow-hidden">
+                                        <Avatar 
+                                            src={client.avatar_url} 
+                                            fallbackName={client.full_name} 
+                                            size={24} 
+                                        />
                                     </div>
+
                                     <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.15em] truncate">{client.full_name}</span>
                                 </button>
                             )}

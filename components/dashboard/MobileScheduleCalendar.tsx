@@ -266,7 +266,7 @@ export default function MobileScheduleCalendar({
                                     className={clsx(
                                         "w-full rounded-2xl p-4.5 shadow-tight active:scale-[0.98] transition-all duration-300 flex flex-col gap-4 relative overflow-hidden group cursor-pointer border",
                                         session.is_booked
-                                            ? "bg-forest text-white border-white/20 shadow-md"
+                                            ? "bg-[#1e4438] text-white border-white/20 shadow-md"
                                             : "bg-white border-border-grey/30 text-charcoal"
                                     )}
                                 >

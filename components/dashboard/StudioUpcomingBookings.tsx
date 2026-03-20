@@ -8,6 +8,8 @@ import CancelBookingModal from './CancelBookingModal'
 import { cancelBookingByStudio, checkInInstructor } from '@/app/(dashboard)/studio/actions'
 import { formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
 import StudioChatButton from './StudioChatButton'
+import Avatar from '@/components/shared/Avatar'
+
 
 interface StudioUpcomingBookingsProps {
     bookings: any[]
@@ -78,11 +80,12 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-5">
                             <div className="flex items-center gap-4 min-w-0">
                                 <Link href={`/instructors/${booking.instructor_id}`} className="w-12 h-12 rounded-full overflow-hidden border-2 border-white bg-off-white shadow-tight shrink-0 hover:scale-110 transition-transform duration-500 ring-1 ring-border-grey/20">
-                                    <img
-                                        src={booking.instructor?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(booking.instructor?.full_name || 'instructor')}`}
-                                        alt="Instructor"
-                                        className="w-full h-full object-cover"
+                                    <Avatar 
+                                        src={booking.instructor?.avatar_url} 
+                                        fallbackName={booking.instructor?.full_name} 
+                                        size={48} 
                                     />
+
                                 </Link>
                                 <div className="space-y-0.5 min-w-0">
                                     <Link href={`/instructors/${booking.instructor_id}`} className="text-sm font-black text-charcoal hover:text-forest transition-colors uppercase tracking-tight block leading-tight">
@@ -106,7 +109,12 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                 onClick={() => setSelectedClient(booking.client)}
                             >
                                 <div className="w-8 h-8 rounded-full overflow-hidden bg-off-white shrink-0 border border-white shadow-tight ring-1 ring-border-grey/10 group-hover/client:scale-110 transition-transform duration-500">
-                                    <img src={booking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+                                    <Avatar 
+                                        src={booking.client?.avatar_url} 
+                                        fallbackName={booking.client?.full_name} 
+                                        size={32} 
+                                    />
+
                                 </div>
                                 <div className="text-[11px] text-slate font-bold tracking-wide break-words flex items-center gap-3 group/client">
                                     <div className="flex-1">
@@ -222,7 +230,12 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                         <button onClick={() => setSelectedClient(null)} className="absolute top-6 right-6 text-charcoal/50 hover:text-charcoal transition-colors"><X className="w-5 h-5" /></button>
                         <div className="flex flex-col items-center mt-4 mb-8 text-center">
                             <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-white shadow-cloud scale-110">
-                                <img src={selectedClient.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+                                <Avatar 
+                                    src={selectedClient.avatar_url} 
+                                    fallbackName={selectedClient.full_name} 
+                                    size={96} 
+                                />
+
                             </div>
                             <h3 className="text-2xl font-serif font-bold text-charcoal tracking-tight">{selectedClient.full_name}</h3>
                             <div className="flex items-center gap-2 mt-1">

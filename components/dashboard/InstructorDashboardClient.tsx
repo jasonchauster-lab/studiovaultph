@@ -21,6 +21,8 @@ const GROUPED_AREAS = AREAS.reduce((acc: Record<string, string[]>, loc: string) 
 
 import { useEffect, useState } from 'react';
 import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2, Pencil, Copy, Trash2, AlertTriangle, CheckCircle, Plus, RefreshCcw, UserCheck } from 'lucide-react'
+import Avatar from '@/components/shared/Avatar';
+
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ChatWindow from '@/components/dashboard/ChatWindow';
@@ -394,16 +396,17 @@ export default function InstructorDashboardClient({
                                                     <div className="flex justify-between items-start mb-4 sm:mb-5">
                                                         <div className="flex flex-col gap-1 w-full">
                                                             <div className="flex items-center gap-3 sm:gap-4">
-                                                                <button
+                                                                 <button
                                                                     onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
                                                                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-[12px] sm:rounded-[14px] overflow-hidden border border-white bg-white shadow-tight shrink-0 hover:scale-110 transition-transform duration-700"
                                                                 >
-                                                                    <img
-                                                                        src={session.slots?.studios?.logo_url || "/logo2.jpg"}
-                                                                        alt=""
-                                                                        className="w-full h-full object-cover mix-blend-multiply"
+                                                                    <Avatar 
+                                                                        src={session.slots?.studios?.logo_url} 
+                                                                        fallbackName={session.slots?.studios?.name} 
+                                                                        size={56} 
                                                                     />
                                                                 </button>
+
                                                                 <div className="flex-1 min-w-0">
                                                                     <div className="flex items-start justify-between gap-2">
                                                                         <button
@@ -432,8 +435,13 @@ export default function InstructorDashboardClient({
                                                             aria-label={`View record for ${session.client?.full_name}`}
                                                         >
                                                             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden bg-white shrink-0 border border-border-grey/50 shadow-tight group-hover/client:scale-110 transition-transform duration-500">
-                                                                <img alt="" src={session.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.client?.full_name || 'C')}&background=F5F2EB&color=2C3230`} className="w-full h-full object-cover" />
+                                                                <Avatar 
+                                                                    src={session.client?.avatar_url} 
+                                                                    fallbackName={session.client?.full_name} 
+                                                                    size={40} 
+                                                                />
                                                             </div>
+
                                                             <div className="text-[10px] sm:text-[11px] text-charcoal/40 uppercase tracking-[0.2em] flex-1 group-hover/client:text-forest transition-colors font-bold break-words">
                                                                 CLIENT: <span className="font-black text-charcoal">{session.client?.full_name}</span>
                                                             </div>
@@ -563,9 +571,14 @@ export default function InstructorDashboardClient({
                         <button onClick={() => setSelectedProfile(null)} className="absolute top-8 right-8 p-3 hover:bg-charcoal/5 rounded-2xl transition-all text-charcoal/30 hover:text-charcoal border border-transparent hover:border-border-grey"><X className="w-5 h-5" /></button>
                         <div className="absolute top-0 right-0 w-64 h-64 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
                         <div className="flex flex-col items-center text-center mb-10">
-                            <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
-                                <img src={selectedProfile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedProfile.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
+                             <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
+                                <Avatar 
+                                    src={selectedProfile.avatar_url} 
+                                    fallbackName={selectedProfile.full_name} 
+                                    size={96} 
+                                />
                             </div>
+
                             <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedProfile.full_name}</h3>
                             <div className="space-y-1">
                                 <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.35em]">{selectedProfile.email}</p>
@@ -637,21 +650,15 @@ export default function InstructorDashboardClient({
                             {/* Client Info */}
                             <div className="flex items-center gap-6 bg-white/40 backdrop-blur-sm p-6 sm:p-8 rounded-[2rem] border border-border-grey/40 shadow-tight">
                                 <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-tight shrink-0">
-                                    {selectedBooking.client?.avatar_url ? (
-                                        <img
-                                            src={selectedBooking.client.avatar_url.startsWith('http') ? selectedBooking.client.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${selectedBooking.client.avatar_url}`}
-                                            alt={selectedBooking.client.full_name}
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.client.full_name || 'C')}&background=F5F2EB&color=2C3230` }}
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full bg-buttermilk flex items-center justify-center">
-                                            <User className="w-8 h-8 text-burgundy/40" />
-                                        </div>
-                                    )}
+                                    <Avatar 
+                                        src={selectedBooking.client?.avatar_url} 
+                                        fallbackName={selectedBooking.client?.full_name} 
+                                        size={80} 
+                                    />
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <h4 className="text-2xl font-serif text-charcoal truncate tracking-tight">{selectedBooking.client?.full_name}</h4>
+
                                     <div className="mt-5 flex flex-wrap gap-3">
                                         <button 
                                             onClick={() => setSelectedProfile(selectedBooking.client)}
@@ -994,8 +1001,13 @@ export default function InstructorDashboardClient({
                         <button onClick={() => setSelectedStudio(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/50 hover:text-charcoal"><X className="w-5 h-5" /></button>
                         <div className="flex flex-col items-center text-center mb-10">
                             <div className="w-24 h-24 rounded-2xl overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10 bg-white">
-                                <img src={selectedStudio.logo_url || "/logo.png"} className="w-full h-full object-contain p-2" />
+                                <Avatar 
+                                    src={selectedStudio.logo_url} 
+                                    fallbackName={selectedStudio.name} 
+                                    size={96} 
+                                />
                             </div>
+
                             <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedStudio.name}</h3>
                             <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedStudio.location}</p>
                         </div>

@@ -2,6 +2,8 @@
 
 import { memo } from 'react'
 import { X, Star, Award, Instagram } from 'lucide-react'
+import Avatar from '@/components/shared/Avatar'
+
 
 interface InstructorPreviewModalProps {
     instructor: any
@@ -13,12 +15,8 @@ interface InstructorPreviewModalProps {
 const InstructorPreviewModal = ({ instructor, details, loading, onClose }: InstructorPreviewModalProps) => {
     if (!instructor) return null
 
-    const avatarUrl = (() => {
-        const url = details?.instructor?.avatar_url || instructor?.avatar_url
-        if (!url) return `https://ui-avatars.com/api/?name=${encodeURIComponent(instructor.full_name || 'I')}&background=F5F2EB&color=2C3230`
-        if (url.startsWith('http')) return url
-        return `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${url}`
-    })()
+    const instructorAvatar = details?.instructor?.avatar_url || instructor?.avatar_url
+
 
     return (
         <div 
@@ -41,11 +39,10 @@ const InstructorPreviewModal = ({ instructor, details, loading, onClose }: Instr
                     {/* Header */}
                     <div className="flex flex-col items-center mt-2 mb-5 text-center">
                         <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-white shadow-tight relative z-10 bg-cream-50">
-                            <img 
-                                src={avatarUrl} 
-                                className="w-full h-full object-cover" 
-                                alt={instructor.full_name} 
-                                loading="lazy"
+                            <Avatar 
+                                src={instructorAvatar} 
+                                fallbackName={instructor.full_name} 
+                                size={96} 
                             />
                         </div>
                         <h3 className="text-2xl font-serif text-charcoal tracking-tight leading-tight">{instructor.full_name}</h3>
@@ -134,15 +131,13 @@ const InstructorPreviewModal = ({ instructor, details, loading, onClose }: Instr
                                             return (
                                                 <div key={r.id} className="bg-off-white rounded-2xl p-4 border border-charcoal/5 hover:border-burgundy/10 transition-colors">
                                                     <div className="flex items-center gap-3 mb-2">
-                                                        <img
-                                                            src={reviewer?.avatar_url
-                                                                ? (reviewer.avatar_url.startsWith('http') ? reviewer.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`)
-                                                                : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230`}
-                                                            onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230` }}
-                                                            className="w-8 h-8 rounded-full object-cover border border-white shadow-sm"
-                                                            alt=""
-                                                            loading="lazy"
+                                                        <Avatar 
+                                                            src={reviewer?.avatar_url} 
+                                                            fallbackName={reviewer?.full_name || 'A'} 
+                                                            size={32} 
+                                                            className="border border-white shadow-sm"
                                                         />
+
                                                         <div className="flex-1">
                                                             <div className="flex items-center justify-between">
                                                                 <span className="text-[11px] font-black text-charcoal uppercase tracking-widest">{reviewer?.full_name || 'Anonymous'}</span>

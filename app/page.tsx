@@ -203,7 +203,7 @@ export default function LandingPage() {
             <div className="relative z-10 flex flex-col gap-y-12 items-center">
               <p className="label-atelier">The Philosophy</p>
               <blockquote className="text-3xl md:text-5xl lg:text-6xl text-primary font-serif italic leading-[1.15] tracking-tight max-w-4xl">
-                &ldquo;We built Studio Vault PH because professional movement shouldn&rsquo;t be limited by logistics. It&rsquo;s a tool built for the industry, by the industry.&rdquo;
+                &ldquo;We built Studio Vault PH to help studios book their idle equipment, instructors find consistent work, and clients discover affordable professional classes.&rdquo;
               </blockquote>
               <div className="flex flex-col items-center gap-6">
                 <p className="label-atelier text-primary tracking-[0.5em]">STUDIO VAULT PH FOUNDERS</p>
@@ -221,21 +221,21 @@ export default function LandingPage() {
                 title: "For Clients",
                 subtitle: "UNPARALLELED ACCESS",
                 icon: Sparkles,
-                items: ["Curated Instructor Network", "High-End Studio Settings", "Seamless Booking Flow"],
+                items: ["Affordable Professional Classes", "Curated Instructor Network", "Seamless Booking Flow"],
                 image: "/images/homepage/client.png"
               },
               {
                 title: "For Instructors",
                 subtitle: "PROFESSIONAL AUTONOMY",
                 icon: User,
-                items: ["Book Premium Studio Spaces", "Keep 100% of Your Client Fees", "Manage Your Schedule on the Go"],
+                items: ["Find Consistent Work", "Book Premium Studio Spaces", "Manage Your Schedule on the Go"],
                 image: "/images/homepage/instructor.png"
               },
               {
                 title: "For Studios",
-                subtitle: "DENSITY OPTIMIZATION",
+                subtitle: "EQUIPMENT OPTIMIZATION",
                 icon: DollarSign,
-                items: ["Automated Revenue Recovery", "Absolute Schedule Control", "Verified Staff Access"],
+                items: ["Monetize Idle Equipment", "Automated Revenue Recovery", "Absolute Schedule Control"],
                 image: "/images/homepage/studio.png"
               }
             ].map((v, i) => (

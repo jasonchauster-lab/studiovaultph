@@ -12,6 +12,8 @@ import CancelBookingModal from './CancelBookingModal'
 import InstructorPreviewModal from './InstructorPreviewModal'
 import { cancelBookingByStudio, checkInInstructor } from '@/app/(dashboard)/studio/actions'
 import { getInstructorProfile } from '@/app/(dashboard)/instructors/actions'
+import Avatar from '@/components/shared/Avatar'
+
 
 interface StudioRentalListProps {
     bookings: any[]
@@ -239,12 +241,10 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                         <button onClick={() => setSelectedClient(null)} className="absolute top-4 right-4 text-burgundy/40 hover:text-burgundy transition-colors"><X className="w-5 h-5" /></button>
                         <div className="flex flex-col items-center mt-2 mb-6 text-center">
                             <div className="relative w-20 h-20 rounded-full overflow-hidden mb-3 border border-cream-200 bg-cream-50">
-                                <Image
-                                    src={getSupabaseAssetUrl(selectedClient.avatar_url, 'avatars') || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedClient.full_name || 'C')}&background=F5F2EB&color=2C3230`}
-                                    fill
-                                    className="object-cover"
-                                    alt=""
-                                    sizes="80px"
+                                <Avatar 
+                                    src={selectedClient.avatar_url} 
+                                    fallbackName={selectedClient.full_name} 
+                                    size={80} 
                                 />
                             </div>
                             <h3 className="text-xl font-serif text-burgundy">{selectedClient.full_name}</h3>
@@ -368,13 +368,11 @@ const SessionCard = memo(({ booking, currentUserId, onInstructorClick, onClientC
                 {/* Row 2: Client Name */}
                 {client && (
                     <button onClick={() => onClientClick(client)} className="flex items-center gap-2 hover:opacity-75 transition-opacity mb-2.5 min-w-0 group/client">
-                        <div className="relative w-6 h-6 rounded-full bg-sage/10 border border-border-grey flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-charcoal/5">
-                            <Image
-                                src={getSupabaseAssetUrl(client.avatar_url, 'avatars') || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.full_name || 'C')}&background=FDFDFD&color=8BA889`}
-                                fill
-                                className="object-cover"
-                                alt=""
-                                sizes="24px"
+                        <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0 ring-1 ring-charcoal/5">
+                            <Avatar 
+                                src={client.avatar_url} 
+                                fallbackName={client.full_name} 
+                                size={24} 
                             />
                         </div>
                         <span className="text-sm font-bold text-charcoal-900 truncate group-hover/client:text-forest transition-colors">{client.full_name}</span>

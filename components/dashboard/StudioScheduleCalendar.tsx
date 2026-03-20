@@ -8,6 +8,8 @@ import clsx from 'clsx'
 import { createSlot, deleteSlot, updateSlot } from '@/app/(dashboard)/studio/actions' // For single slot
 import ScheduleManager from './ScheduleManager' // Bulk generator
 import Image from 'next/image'
+import Avatar from '@/components/shared/Avatar'
+
 import { toManilaDateStr, getManilaTodayStr, toManilaDate } from '@/lib/timezone'
 import MobileScheduleCalendar from './MobileScheduleCalendar'
 import { useEffect } from 'react'
@@ -509,13 +511,13 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                         ? (allActiveBookings[0].client?.full_name || "Booked Session")
                                                                         : `${allActiveBookings[0].client?.full_name || "Client"} + ${allActiveBookings.length - 1} more`;
 
-                                                                return (
+                                                                 return (
                                                                     <div
                                                                          className={clsx(
                                                                             "absolute top-1 left-1 right-1 bottom-1 p-2 border-l-2 border-solid transition-all duration-500 hover:shadow-card hover:-translate-y-0.5 group/slot z-10 overflow-hidden cursor-pointer rounded-lg flex flex-col justify-between",
-                                                                                 isPastCell ? (isBooked ? "bg-forest border-white/20 shadow-none" : "bg-off-white border-slate/20 opacity-90") :
+                                                                                 isPastCell ? (isBooked ? "bg-[#1e4438] border-white/20 shadow-none" : "bg-off-white border-slate/20 opacity-90") :
                                                                                      hasPending ? "bg-amber-100 border-amber-400 shadow-tight" :
-                                                                                         isBooked ? "bg-forest border-white/20 shadow-card ring-1 ring-white/10" : "bg-white border-slate/10 ring-1 ring-slate/5 shadow-tight"
+                                                                                         isBooked ? "bg-[#1e4438] border-white/20 shadow-card ring-1 ring-white/10" : "bg-white border-slate/10 ring-1 ring-slate/5 shadow-tight"
                                                                         )}
                                                                         onClick={() => {
                                                                             setBucketSlots(cellSlots);
@@ -524,11 +526,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                         }}
                                                                     >
                                                                         <div className="relative z-10">
-                                                                            {!isBooked && !hasPending && (
-                                                                                 <div className="text-[10px] font-black text-charcoal mb-1.5 truncate opacity-70 uppercase tracking-widest">
-                                                                                      {hour.toString().padStart(2, '0')}:00 - {(hour + 1).toString().padStart(2, '0')}:00
-                                                                                  </div>
-                                                                            )}
+                                                                            <div className={clsx("text-[10px] font-black mb-1.5 truncate uppercase tracking-widest", isBooked ? "text-white/70" : "text-charcoal opacity-70")}>
+                                                                                 {hour.toString().padStart(2, '0')}:00 - {(hour + 1).toString().padStart(2, '0')}:00
+                                                                             </div>
                                                                              <div className="flex justify-between items-start mb-2.5 gap-2">
                                                                                   <div className="flex-1 opacity-0 group-hover/slot:opacity-0" />
                                                                                   <Edit2 className={clsx("w-3.5 h-3.5 opacity-0 group-hover/slot:opacity-100 transition-all duration-300 shrink-0 transform group-hover/slot:scale-110 mt-0.5", 
@@ -552,7 +552,6 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                                   {instructors.size > 0 ? Array.from(instructors).join(', ') : 'Unassigned'}
                                                                              </p>
                                                                          </div>
-
                                                                         {/* Background Highlight for Booked Slots */}
                                                                         {isBooked && !isPastCell && (
                                                                             <div className="absolute top-0 right-0 w-24 h-24 bg-forest/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
@@ -816,13 +815,13 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                 <div className="space-y-3">
                                                     <p className="text-[10px] text-slate font-bold uppercase tracking-widest">Instructor</p>
                                                     <div className="flex items-center gap-3">
-                                                        {activeBooking.instructor.avatar_url ? (
-                                                            <Image src={activeBooking.instructor.avatar_url} alt="Instructor" width={32} height={32} className="rounded-lg w-8 h-8 object-cover border border-border-grey shadow-tight" />
-                                                        ) : (
-                                                            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center border border-border-grey shadow-tight">
-                                                                <User className="w-4 h-4 text-slate" />
-                                                            </div>
-                                                        )}
+                                                        <Avatar 
+                                                            src={activeBooking.instructor.avatar_url} 
+                                                            fallbackName={activeBooking.instructor.full_name} 
+                                                            size={32} 
+                                                            className="rounded-lg border border-border-grey shadow-tight"
+                                                        />
+
                                                         <span className="text-sm font-bold text-charcoal">{activeBooking.instructor.full_name}</span>
                                                     </div>
                                                 </div>
@@ -831,13 +830,13 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                 <div className="space-y-3">
                                                     <p className="text-[10px] text-slate font-bold uppercase tracking-widest">Client</p>
                                                     <div className="flex items-center gap-3">
-                                                        {activeBooking.client.avatar_url ? (
-                                                            <Image src={activeBooking.client.avatar_url} alt="Client" width={32} height={32} className="rounded-lg w-8 h-8 object-cover border border-border-grey shadow-tight" />
-                                                        ) : (
-                                                            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center border border-border-grey shadow-tight">
-                                                                <Users className="w-4 h-4 text-slate" />
-                                                            </div>
-                                                        )}
+                                                        <Avatar 
+                                                            src={activeBooking.client.avatar_url} 
+                                                            fallbackName={activeBooking.client.full_name} 
+                                                            size={32} 
+                                                            className="rounded-lg border border-border-grey shadow-tight"
+                                                        />
+
                                                         <span className="text-sm font-bold text-charcoal">{activeBooking.client.full_name}</span>
                                                     </div>
                                                 </div>
@@ -1044,18 +1043,14 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                         className="flex items-center justify-between p-4 bg-white border border-border-grey rounded-xl shadow-tight group hover:border-forest/40 hover:bg-forest/5 transition-all cursor-pointer"
                                                     >
                                                         <div className="flex items-center gap-4">
-                                                            <div className="w-10 h-10 rounded-full bg-off-white flex items-center justify-center overflow-hidden border border-border-grey shadow-inner">
-                                                                {b.client?.avatar_url ? (
-                                                                    <img
-                                                                        src={b.client.avatar_url.startsWith('http') ? b.client.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${b.client.avatar_url}`}
-                                                                        alt=""
-                                                                        className="object-cover w-full h-full"
-                                                                        onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(b.client?.full_name || 'C')}&background=F5F2EB&color=2C3230` }}
-                                                                    />
-                                                                ) : (
-                                                                    <User className="w-5 h-5 text-slate" />
-                                                                )}
+                                                            <div className="w-10 h-10 rounded-full bg-off-white shrink-0 overflow-hidden border border-border-grey shadow-inner">
+                                                                <Avatar 
+                                                                    src={b.client?.avatar_url} 
+                                                                    fallbackName={b.client?.full_name} 
+                                                                    size={40} 
+                                                                />
                                                             </div>
+
                                                             <div>
                                                                 <p className="text-[13px] font-bold text-charcoal">{b.client?.full_name || 'Anonymous Client'}</p>
                                                                 <div className="flex items-center gap-2 mt-0.5">
@@ -1138,8 +1133,13 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                             <div className="flex flex-col items-center text-center mb-10">
                                 <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
-                                    <img src={selectedProfile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedProfile.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
+                                    <Avatar 
+                                        src={selectedProfile.avatar_url} 
+                                        fallbackName={selectedProfile.full_name} 
+                                        size={96} 
+                                    />
                                 </div>
+
                                 <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedProfile.full_name}</h3>
                                 <div className="space-y-1">
                                     <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedProfile.email}</p>

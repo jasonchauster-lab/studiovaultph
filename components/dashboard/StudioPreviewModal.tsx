@@ -3,6 +3,8 @@ import { X, MapPin, Star, CheckCircle2, Navigation } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
+import Avatar from '@/components/shared/Avatar'
+
 
 interface StudioPreviewModalProps {
     studio: any
@@ -44,20 +46,13 @@ const StudioPreviewModal = ({ studio, details, loading, onClose }: StudioPreview
                     {/* Header */}
                     <div className="flex flex-col items-center mt-2 mb-5 text-center">
                         <div className="relative w-20 h-20 rounded-2xl overflow-hidden mb-3 border border-cream-200 bg-cream-50 shadow-sm">
-                            {details?.studio?.logo_url || studio?.logo_url ? (
-                                <Image 
-                                    src={getSupabaseAssetUrl(details?.studio?.logo_url || studio.logo_url, 'avatars') || '/default-studio.svg'} 
-                                    fill
-                                    className="object-cover" 
-                                    alt={studio.name} 
-                                    sizes="80px"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-charcoal/5 text-charcoal/50 text-2xl font-serif">
-                                    {(details?.studio?.name || studio.name || 'S')[0]}
-                                </div>
-                            )}
+                            <Avatar 
+                                src={details?.studio?.logo_url || studio?.logo_url} 
+                                fallbackName={details?.studio?.name || studio.name} 
+                                size={80} 
+                            />
                         </div>
+
                         <div className="flex items-center gap-2 flex-wrap justify-center">
                             <h3 className="text-xl font-serif text-charcoal tracking-tight">{studio.name}</h3>
                             {details?.studio?.verified && (
@@ -144,14 +139,13 @@ const StudioPreviewModal = ({ studio, details, loading, onClose }: StudioPreview
                                                 <div key={r.id} className="bg-off-white rounded-2xl p-4 border border-charcoal/5 hover:border-burgundy/10 transition-colors">
                                                     <div className="flex items-center gap-3 mb-2">
                                                 <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white shadow-sm shrink-0">
-                                                    <Image
-                                                        src={getSupabaseAssetUrl(reviewer?.avatar_url, 'avatars') || `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230`}
-                                                        fill
-                                                        className="object-cover"
-                                                        alt=""
-                                                        sizes="32px"
+                                                    <Avatar 
+                                                        src={reviewer?.avatar_url} 
+                                                        fallbackName={reviewer?.full_name || 'A'} 
+                                                        size={32} 
                                                     />
                                                 </div>
+
                                                         <div className="flex-1">
                                                             <div className="flex items-center justify-between">
                                                                 <span className="text-[11px] font-black text-charcoal uppercase tracking-widest">{reviewer?.full_name || 'Anonymous'}</span>

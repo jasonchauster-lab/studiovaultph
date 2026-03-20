@@ -9,7 +9,9 @@ import { toManilaDateStr, getManilaTodayStr, toManilaDate, getSlotDateTime, form
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
 import InstructorScheduleGenerator from './InstructorScheduleGenerator'
 import ChatWindow from '@/components/dashboard/ChatWindow'
+import Avatar from '@/components/shared/Avatar'
 import Link from 'next/link'
+
 import MobileScheduleCalendar from '@/components/dashboard/MobileScheduleCalendar'
 
 interface Availability {
@@ -1486,11 +1488,13 @@ export default function InstructorScheduleCalendar({
                                     >
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm group-hover:scale-105 transition-transform">
-                                                <img
-                                                    src={selectedBooking.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.client?.full_name || 'C')}&background=F5F2EB&color=43302E`}
-                                                    className="w-full h-full object-cover"
+                                                <Avatar 
+                                                    src={selectedBooking.client?.avatar_url} 
+                                                    fallbackName={selectedBooking.client?.full_name} 
+                                                    size={40} 
                                                 />
                                             </div>
+
                                             <div>
                                                 <p className="text-[11px] font-black text-charcoal uppercase tracking-wider group-hover:text-forest transition-colors">{selectedBooking.client?.full_name}</p>
                                                 <p className="text-[9px] font-medium text-charcoal/50 uppercase tracking-tighter">Verified Client</p>
@@ -1594,8 +1598,13 @@ export default function InstructorScheduleCalendar({
                         <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
                         <div className="flex flex-col items-center text-center mb-10">
                             <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
-                                <img src={selectedProfile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedProfile.full_name || 'C')}&background=FDFDFD&color=D4AF37`} className="w-full h-full object-cover" />
+                                <Avatar 
+                                    src={selectedProfile.avatar_url} 
+                                    fallbackName={selectedProfile.full_name} 
+                                    size={96} 
+                                />
                             </div>
+
                             <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedProfile.full_name}</h3>
                             <div className="space-y-1">
                                 <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedProfile.email}</p>
@@ -1656,8 +1665,13 @@ export default function InstructorScheduleCalendar({
                         <button onClick={() => setSelectedStudio(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/50 hover:text-charcoal"><X className="w-5 h-5" /></button>
                         <div className="flex flex-col items-center text-center mb-10">
                             <div className="w-24 h-24 rounded-2xl overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10 bg-white">
-                                <img src={selectedStudio.logo_url || "/logo2.jpg"} className="w-full h-full object-contain p-2 mix-blend-multiply" />
+                                <Avatar 
+                                    src={selectedStudio.logo_url} 
+                                    fallbackName={selectedStudio.name} 
+                                    size={96} 
+                                />
                             </div>
+
                             <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedStudio.name}</h3>
                             <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedStudio.location}</p>
                         </div>
