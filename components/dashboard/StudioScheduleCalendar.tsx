@@ -509,11 +509,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                                                                 return (
                                                                     <div
-                                                                        className={clsx(
-                                                                            "absolute top-1.5 left-1.5 right-1.5 bottom-1.5 p-4 border-l-4 border-solid transition-all duration-500 hover:shadow-card hover:-translate-y-0.5 group/slot z-10 overflow-hidden cursor-pointer rounded-xl flex flex-col justify-between backdrop-blur-md",
-                                                                                 isPastCell ? (isBooked ? "bg-forest/20 border-forest/30 shadow-none" : "bg-off-white border-slate/20 opacity-90") :
-                                                                                     hasPending ? "bg-amber-50 border-amber-400 shadow-tight" :
-                                                                                         isBooked ? "bg-forest border-forest-muted/50 shadow-card ring-1 ring-white/10" : "bg-white border-slate/20 ring-1 ring-slate/5 shadow-tight"
+                                                                         className={clsx(
+                                                                            "absolute top-1 left-1 right-1 bottom-1 p-2 border-l-2 border-solid transition-all duration-500 hover:shadow-card hover:-translate-y-0.5 group/slot z-10 overflow-hidden cursor-pointer rounded-lg flex flex-col justify-between backdrop-blur-md",
+                                                                                 isPastCell ? (isBooked ? "bg-forest/30 border-forest/40 shadow-none" : "bg-off-white border-slate/20 opacity-90") :
+                                                                                     hasPending ? "bg-amber-100 border-amber-400 shadow-tight" :
+                                                                                         isBooked ? "bg-[#183329] border-white/20 shadow-card ring-1 ring-white/10" : "bg-white border-slate/10 ring-1 ring-slate/5 shadow-tight"
                                                                         )}
                                                                         onClick={() => {
                                                                             setBucketSlots(cellSlots);
@@ -533,25 +533,23 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                                      (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-charcoal/40" : 
                                                                                      hasPending ? "text-amber-900/30" : "text-white/40")} />
                                                                              </div>
-                                                                            <div className="flex flex-wrap gap-2">
-                                                                                {Object.entries(equipmentCounts).map(([eq, counts]) => (
-                                                                                     <span key={eq} className={clsx("text-[8px] font-black uppercase tracking-tighter flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-colors", 
-                                                                                         (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-charcoal border-charcoal/10 bg-off-white" : 
-                                                                                         hasPending ? "text-amber-900 border-amber-200 bg-amber-100/50" : "text-white border-white/20 bg-white/10")}>
-                                                                                         <Box className="w-2.5 h-2.5 opacity-70 shrink-0" />
-                                                                                        <span className="truncate">{counts.booked}/{counts.total} {eq.split(' ')[0]}</span>
-                                                                                    </span>
-                                                                                ))}
-                                                                            </div>
+                                                                             <div className="flex flex-wrap gap-1">
+                                                                                 {Object.entries(equipmentCounts).map(([eq, counts]) => (
+                                                                                      <span key={eq} className={clsx("text-[7px] font-black uppercase tracking-tight flex items-center justify-center px-1.5 py-0.5 rounded-md border transition-colors", 
+                                                                                          (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-charcoal border-charcoal/10 bg-off-white" : 
+                                                                                          hasPending ? "text-amber-900 border-amber-200 bg-amber-100/50" : "text-white border-white/20 bg-white/10")}>
+                                                                                         {counts.booked}/{counts.total} {eq.split(' ')[0]}
+                                                                                     </span>
+                                                                                 ))}
+                                                                             </div>
                                                                         </div>
-                                                                        <div className={clsx("mt-2 pt-2 border-t relative z-10", isPastCell || (!isBooked && !hasPending) ? "border-charcoal/5" : "border-white/10")}>
-                                                                            <p className={clsx("text-[9px] font-black uppercase tracking-[0.1em] truncate flex items-center gap-1.5", 
-                                                                                (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-slate" : 
-                                                                                hasPending ? "text-amber-900/60" : "!text-white")}>
-                                                                                 <User className="w-2.5 h-2.5 opacity-60 shrink-0" />
-                                                                                  <span className="truncate">{instructors.size > 0 ? Array.from(instructors).join(', ') : 'Unassigned'}</span>
-                                                                            </p>
-                                                                        </div>
+                                                                         <div className={clsx("mt-1.5 pt-1.5 border-t relative z-10", isPastCell || (!isBooked && !hasPending) ? "border-charcoal/5" : "border-white/10")}>
+                                                                             <p className={clsx("text-[8px] font-black uppercase tracking-tight flex items-center", 
+                                                                                 (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-slate" : 
+                                                                                 hasPending ? "text-amber-900/60" : "!text-white")}>
+                                                                                  {instructors.size > 0 ? Array.from(instructors).join(', ') : 'Unassigned'}
+                                                                             </p>
+                                                                         </div>
 
                                                                         {/* Background Highlight for Booked Slots */}
                                                                         {isBooked && !isPastCell && (

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import Cropper from 'react-easy-crop'
+import 'react-easy-crop/react-easy-crop.css'
 import getCroppedImg from '@/lib/utils/crop-utils'
 import Modal from './Modal'
 import { Loader2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
@@ -54,7 +55,7 @@ export default function ImageCropper({
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={title} className="max-w-3xl">
             <div className="flex flex-col gap-6">
-                <div className="relative w-full h-[300px] sm:h-[400px] bg-charcoal-900 rounded-2xl overflow-hidden shadow-inner border border-cream-100/20">
+                <div className="relative w-full h-[300px] sm:h-[400px] bg-charcoal rounded-2xl overflow-hidden shadow-inner border border-cream-100/20">
                     <Cropper
                         image={image}
                         crop={crop}
@@ -66,7 +67,7 @@ export default function ImageCropper({
                         onZoomChange={setZoom}
                         onRotationChange={setRotation}
                         classes={{
-                            containerClassName: "bg-charcoal-900",
+                            containerClassName: "bg-charcoal",
                             mediaClassName: "object-contain",
                             cropAreaClassName: "border-2 border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]"
                         }}
