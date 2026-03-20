@@ -150,7 +150,7 @@ export default function CustomerWalletClient({ data }: CustomerWalletClientProps
                     
                     <div className="relative z-10 space-y-6 sm:space-y-8">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2.5 bg-white/10 px-4 py-2 rounded-full backdrop-blur-xl border border-white/10">
+                            <div className="flex items-center gap-2.5 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md border border-white/10">
                                 <TrendingUp className="w-3.5 h-3.5 text-rose-gold" />
                                 <span className="text-[10px] font-black tracking-[0.15em] uppercase text-white/90">Available Balance</span>
                             </div>

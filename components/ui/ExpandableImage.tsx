@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { X, Maximize2 } from 'lucide-react'
 
+import Image from 'next/image'
+import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
+
 interface ExpandableImageProps {
     src: string
     alt: string
@@ -16,14 +19,15 @@ export default function ExpandableImage({ src, alt, className }: ExpandableImage
         <>
             {/* Thumbnail */}
             <div
-                className={`relative group cursor-pointer ${className}`}
+                className={`relative group cursor-pointer overflow-hidden ${className}`}
                 onClick={() => setIsOpen(true)}
                 title="Click to expand"
             >
-                <img
-                    src={src}
+                <Image
+                    src={getSupabaseAssetUrl(src, 'avatars') || '/default-image.svg'}
                     alt={alt}
-                    className="w-full h-full object-contain rounded-lg"
+                    fill
+                    className="object-cover rounded-lg"
                 />
 
                 {/* Hover Overlay */}
@@ -40,7 +44,7 @@ export default function ExpandableImage({ src, alt, className }: ExpandableImage
                 >
                     <div className="relative max-w-4xl max-h-[90vh] bg-white p-2 rounded-xl shadow-2xl overflow-hidden">
                         <button
-                            className="absolute top-4 right-4 bg-charcoal-900/50 hover:bg-forest text-white p-2 rounded-full transition-colors"
+                            className="absolute top-4 right-4 z-10 bg-charcoal-900/50 hover:bg-forest text-white p-2 rounded-full transition-colors"
                             onClick={(e) => {
                                 e.stopPropagation()
                                 setIsOpen(false)
@@ -49,11 +53,15 @@ export default function ExpandableImage({ src, alt, className }: ExpandableImage
                             <X className="w-5 h-5" />
                         </button>
 
-                        <img
-                            src={src}
-                            alt={alt}
-                            className="max-w-full max-h-[85vh] object-contain"
-                        />
+                        <div className="relative w-full h-full min-w-[300px] min-h-[300px]">
+                            <Image
+                                src={getSupabaseAssetUrl(src, 'avatars') || '/default-image.svg'}
+                                alt={alt}
+                                width={1200}
+                                height={800}
+                                className="max-w-full max-h-[85vh] object-contain"
+                            />
+                        </div>
                         <p className="text-center text-charcoal-600 mt-2 font-medium">{alt}</p>
                     </div>
                 </div>

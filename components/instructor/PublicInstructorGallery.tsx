@@ -2,6 +2,8 @@
 
 import { useState, useRef } from 'react'
 import { Image as ImageIcon, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import Image from 'next/image'
+import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
 
 interface PublicInstructorGalleryProps {
     images: string[]
@@ -71,10 +73,12 @@ export default function PublicInstructorGallery({ images }: PublicInstructorGall
                             className="relative flex-none w-64 aspect-square rounded-2xl overflow-hidden border border-cream-100 bg-cream-50 cursor-zoom-in group snap-start"
                             onClick={() => openLightbox(index)}
                         >
-                            <img
-                                src={url}
+                            <Image
+                                src={getSupabaseAssetUrl(url, 'avatars') || '/default-image.svg'}
                                 alt={`Gallery photo ${index + 1}`}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                sizes="256px"
                             />
                             <div className="absolute inset-0 bg-charcoal-900/0 group-hover:brightness-110/10 transition-colors" />
                         </div>
@@ -128,10 +132,13 @@ export default function PublicInstructorGallery({ images }: PublicInstructorGall
                         className="relative max-w-5xl max-h-[85vh] w-full h-full flex items-center justify-center"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <img
-                            src={images[activeIndex]}
+                        <Image
+                            src={getSupabaseAssetUrl(images[activeIndex], 'avatars') || '/default-image.svg'}
                             alt={`Gallery photo ${activeIndex + 1}`}
-                            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                            fill
+                            className="object-contain rounded-lg shadow-2xl"
+                            priority
+                            unoptimized // Large lightbox images are often better unoptimized to avoid wait
                         />
 
                         {/* Mobile Controls */}

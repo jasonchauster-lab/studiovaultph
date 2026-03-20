@@ -3,6 +3,8 @@
 import React from 'react'
 import { Award, Instagram, CheckCircle } from 'lucide-react'
 import StarRating from '@/components/reviews/StarRating'
+import Image from 'next/image'
+import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
 
 interface InstructorProfileCardProps {
     instructor: {
@@ -34,14 +36,14 @@ export default function InstructorProfileCard({
     return (
         <div className={`glass-card p-8 rounded-[32px] text-center border-border-grey shadow-cloud bg-white ${isSticky ? 'sticky top-24' : ''}`}>
             {/* Avatar Section */}
-            <div className="w-32 h-32 bg-white/40 rounded-full flex items-center justify-center mx-auto mb-6 overflow-hidden border-2 border-white/80 shadow-cloud ring-1 ring-border-grey/10">
-                <img
-                    src={instructor.avatar_url
-                        ? (instructor.avatar_url.startsWith('http') ? instructor.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${instructor.avatar_url}`)
-                        : '/default-avatar.svg'}
+            <div className="relative w-32 h-32 bg-white/40 rounded-full flex items-center justify-center mx-auto mb-6 overflow-hidden border-2 border-white/80 shadow-cloud ring-1 ring-border-grey/10">
+                <Image
+                    src={getSupabaseAssetUrl(instructor.avatar_url, 'avatars') || '/default-avatar.svg'}
                     alt={instructor.full_name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/default-avatar.svg' }}
+                    fill
+                    className="object-cover"
+                    sizes="128px"
+                    priority={true}
                 />
             </div>
 

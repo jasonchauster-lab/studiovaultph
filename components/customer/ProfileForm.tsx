@@ -143,7 +143,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                         <div className="h-px flex-1 bg-cream-100/50" />
                     </div>
                     <div 
-                        className="relative w-full aspect-[21/9] sm:aspect-[4/1] rounded-2xl overflow-hidden bg-cream-50 border-2 border-dashed border-cream-200 cursor-pointer group transition-all"
+                        className="relative w-full aspect-[3/1] sm:aspect-[4/1] rounded-2xl overflow-hidden bg-cream-50 border-2 border-dashed border-cream-200 cursor-pointer group transition-all"
                         onClick={() => bannerInputRef.current?.click()}
                     >
                         {bannerPreviewUrl ? (

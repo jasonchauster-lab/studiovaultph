@@ -224,31 +224,35 @@ export async function getPublicReviews(profileId: string, viewerId?: string) {
     const now = Date.now()
     const cutoffMs = DOUBLE_BLIND_HOURS * 60 * 60 * 1000
 
-    // For each review, check if the counterpart review exists (mutual) to apply double-blind
-    const visibleReviews = await Promise.all(
-        reviews.map(async (review) => {
-            // IF the current viewer is the reviewer, they can always see it
-            if (viewerId && review.reviewer_id === viewerId) return review
+    // Optimize: Fetch all counterpart reviews for these bookings in one go
+    const bookingIds = reviews.map(r => r.booking_id)
+    const { data: counterparts } = await supabase
+        .from('reviews')
+        .select('booking_id, reviewer_id')
+        .in('booking_id', bookingIds)
 
-            const createdAt = new Date(review.created_at).getTime()
-            const isExpired = now - createdAt >= cutoffMs
+    const counterpartMap = new Map<string, string[]>()
+    counterparts?.forEach(cp => {
+        const list = counterpartMap.get(cp.booking_id) || []
+        list.push(cp.reviewer_id)
+        counterpartMap.set(cp.booking_id, list)
+    })
 
-            if (isExpired) return review // 48h passed - show it
+    const filtered = reviews.filter(review => {
+        // IF the current viewer is the reviewer, they can always see it
+        if (viewerId && review.reviewer_id === viewerId) return true
 
-            // Check if the counterpart has also reviewed this booking
-            const { count } = await supabase
-                .from('reviews')
-                .select('id', { count: 'exact', head: true })
-                .eq('booking_id', review.booking_id)
-                .neq('reviewer_id', review.reviewer_id) // The other party's review
+        const createdAt = new Date(review.created_at).getTime()
+        const isExpired = now - createdAt >= cutoffMs
+        if (isExpired) return true // 48h passed - show it
 
-            if ((count ?? 0) > 0) return review // Mutual - show it
+        // Check mutual review from map
+        const others = counterpartMap.get(review.booking_id) || []
+        const hasMutual = others.some(rid => rid !== review.reviewer_id)
+        if (hasMutual) return true
 
-            return null // Still blinded
-        })
-    )
-
-    const filtered = visibleReviews.filter(Boolean) as typeof reviews
+        return false // Still blinded
+    })
 
     const totalCount = filtered.length
     const averageRating =

@@ -1,8 +1,8 @@
-'use client'
-
 import { memo } from 'react'
 import { X, MapPin, Star, CheckCircle2, Navigation } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
 
 interface StudioPreviewModalProps {
     studio: any
@@ -43,13 +43,14 @@ const StudioPreviewModal = ({ studio, details, loading, onClose }: StudioPreview
                 <div className="overflow-y-auto flex-1 p-6 scrollbar-hide">
                     {/* Header */}
                     <div className="flex flex-col items-center mt-2 mb-5 text-center">
-                        <div className="w-20 h-20 rounded-2xl overflow-hidden mb-3 border border-cream-200 bg-cream-50 shadow-sm">
+                        <div className="relative w-20 h-20 rounded-2xl overflow-hidden mb-3 border border-cream-200 bg-cream-50 shadow-sm">
                             {details?.studio?.logo_url || studio?.logo_url ? (
-                                <img 
-                                    src={details?.studio?.logo_url || studio.logo_url} 
-                                    className="w-full h-full object-cover" 
+                                <Image 
+                                    src={getSupabaseAssetUrl(details?.studio?.logo_url || studio.logo_url, 'avatars') || '/default-studio.svg'} 
+                                    fill
+                                    className="object-cover" 
                                     alt={studio.name} 
-                                    loading="lazy"
+                                    sizes="80px"
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-charcoal/5 text-charcoal/50 text-2xl font-serif">
@@ -119,12 +120,13 @@ const StudioPreviewModal = ({ studio, details, loading, onClose }: StudioPreview
                                     <h4 className="text-[9px] font-black text-charcoal uppercase tracking-[0.3em] mb-3 opacity-40 px-1">THE FACILITY</h4>
                                     <div className="grid grid-cols-3 gap-2">
                                         {details.studio.space_photos_urls.slice(0, 6).map((img: string, i: number) => (
-                                            <div key={i} className="aspect-square bg-cream-50 overflow-hidden rounded-xl border border-cream-100 group">
-                                                <img 
-                                                    src={img} 
-                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                                            <div key={i} className="relative aspect-square bg-cream-50 overflow-hidden rounded-xl border border-cream-100 group">
+                                                <Image 
+                                                    src={getSupabaseAssetUrl(img, 'avatars') || '/default-image.svg'} 
+                                                    fill
+                                                    className="object-cover transition-transform duration-500 group-hover:scale-110" 
                                                     alt="" 
-                                                    loading="lazy"
+                                                    sizes="(max-width: 768px) 33vw, 150px"
                                                 />
                                             </div>
                                         ))}
@@ -141,15 +143,15 @@ const StudioPreviewModal = ({ studio, details, loading, onClose }: StudioPreview
                                             return (
                                                 <div key={r.id} className="bg-off-white rounded-2xl p-4 border border-charcoal/5 hover:border-burgundy/10 transition-colors">
                                                     <div className="flex items-center gap-3 mb-2">
-                                                        <img
-                                                            src={reviewer?.avatar_url
-                                                                ? (reviewer.avatar_url.startsWith('http') ? reviewer.avatar_url : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${reviewer.avatar_url}`)
-                                                                : `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230`}
-                                                            onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230` }}
-                                                            className="w-8 h-8 rounded-full object-cover border border-white shadow-sm"
-                                                            alt=""
-                                                            loading="lazy"
-                                                        />
+                                                <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white shadow-sm shrink-0">
+                                                    <Image
+                                                        src={getSupabaseAssetUrl(reviewer?.avatar_url, 'avatars') || `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewer?.full_name || 'A')}&background=F5F2EB&color=2C3230`}
+                                                        fill
+                                                        className="object-cover"
+                                                        alt=""
+                                                        sizes="32px"
+                                                    />
+                                                </div>
                                                         <div className="flex-1">
                                                             <div className="flex items-center justify-between">
                                                                 <span className="text-[11px] font-black text-charcoal uppercase tracking-widest">{reviewer?.full_name || 'Anonymous'}</span>

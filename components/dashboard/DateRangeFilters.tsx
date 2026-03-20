@@ -31,7 +31,7 @@ export default function DateRangeFilters() {
 
     return (
         <div className="flex flex-col gap-3">
-            <div className="flex flex-nowrap overflow-x-auto snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 hide-scrollbar gap-2 w-full lg:w-auto">
+            <div className="flex flex-nowrap overflow-x-auto snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar gap-2 w-full lg:w-auto">
                 {RANGES.map((r) => (
                     <button
                         key={r.value}

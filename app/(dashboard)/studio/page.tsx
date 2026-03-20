@@ -184,7 +184,7 @@ export default async function StudioDashboard(props: {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 sm:gap-10">
                     <div className="w-full flex flex-col sm:block">
-                        <h1 className="text-3xl sm:text-6xl font-serif font-black text-charcoal tracking-tightest mb-4 sm:mb-6 leading-none order-2 sm:order-1">Studio Dashboard</h1>
+                        <h1 className="text-2xl sm:text-6xl font-serif font-black text-charcoal tracking-tightest mb-4 sm:mb-6 leading-none order-2 sm:order-1">Studio Dashboard</h1>
                         {myStudio && (
                             <div className="flex items-center gap-4 sm:gap-6 mt-6 sm:mt-8">
                                 <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-[20px] sm:rounded-[24px] overflow-hidden border-2 border-white shadow-cloud scale-100 sm:scale-110 ring-1 ring-border-grey/10 shrink-0">

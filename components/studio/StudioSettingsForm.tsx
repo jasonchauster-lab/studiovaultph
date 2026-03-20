@@ -7,6 +7,7 @@ import clsx from 'clsx'
 import { STUDIO_AMENITIES } from '@/types'
 import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
+import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
 import { normalizeImageFile, uploadContentType } from '@/lib/utils/image-utils'
 import ImageCropper from '@/components/shared/ImageCropper'
 
@@ -195,15 +196,16 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                     <div className="h-px flex-1 bg-cream-100/50" />
                 </div>
                 <div 
-                    className="relative w-full aspect-[21/9] sm:aspect-[4/1] rounded-2xl overflow-hidden bg-cream-50 border-2 border-dashed border-cream-200 cursor-pointer group transition-all"
+                    className="relative w-full aspect-[3/1] sm:aspect-[4/1] rounded-2xl overflow-hidden bg-cream-50 border-2 border-dashed border-cream-200 cursor-pointer group transition-all"
                     onClick={() => bannerInputRef.current?.click()}
                 >
                     {bannerPreview ? (
                         <Image
-                            src={bannerPreview}
+                            src={getSupabaseAssetUrl(bannerPreview, 'avatars') || '/default-banner.svg'}
                             alt="Studio Banner"
                             fill
                             className="object-cover transition-transform duration-700 group-hover:scale-105"
+                            sizes="100vw"
                         />
                     ) : (
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-charcoal-300">
@@ -236,7 +238,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                     <div className="w-36 h-36 rounded-3xl overflow-hidden border-[6px] border-white shadow-xl bg-cream-50 flex items-center justify-center transition-all duration-300 group-hover:shadow-2xl group-hover:border-cream-50">
                         {logoPreview ? (
                             <Image
-                                src={logoPreview}
+                                src={getSupabaseAssetUrl(logoPreview, 'avatars') || '/default-studio.svg'}
                                 alt="Studio Logo"
                                 width={144}
                                 height={144}
@@ -433,10 +435,12 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                                     <div className="absolute top-4 left-4 z-20 bg-charcoal-900/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">
                                         Pending Upload
                                     </div>
-                                    <img
+                                    <Image
                                         src={objectUrl}
                                         alt={`New Photo ${index + 1}`}
+                                        fill
                                         className="w-full h-full object-cover opacity-70"
+                                        unoptimized // Blob URLs work best with unoptimized
                                     />
                                     <button
                                         onClick={(e) => removeNewPhoto(e, index)}
@@ -452,7 +456,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                         {existingPhotos.map((url, index) => (
                             <div key={'ext_' + index} className="relative flex-none w-[260px] aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-cream-100 shadow-xl snap-center group">
                                 <Image
-                                    src={url}
+                                    src={getSupabaseAssetUrl(url, 'avatars') || '/default-image.svg'}
                                     alt={`Space Photo ${index + 1}`}
                                     fill
                                     quality={92}

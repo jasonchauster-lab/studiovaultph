@@ -51,7 +51,7 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
     }
 
     return (
-        <div className="flex flex-col gap-5 sm:gap-6 bg-white/70 backdrop-blur-xl p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] border border-burgundy/5 shadow-[0_20px_50px_rgba(81,50,41,0.04)] overflow-hidden relative group/filters transition-all duration-500 hover:shadow-[0_30px_70px_rgba(81,50,41,0.08)]">
+        <div className="flex flex-col gap-5 sm:gap-6 bg-white/70 backdrop-blur-md p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] border border-burgundy/5 shadow-[0_20px_50px_rgba(81,50,41,0.04)] overflow-hidden relative group/filters transition-all duration-500 hover:shadow-[0_30px_70px_rgba(81,50,41,0.08)]">
             {/* Header: Label + Clear (on mobile) */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 sm:gap-4 text-burgundy/60">

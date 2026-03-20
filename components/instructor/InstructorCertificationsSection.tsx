@@ -100,7 +100,7 @@ export default function InstructorCertificationsSection({ certifications }: Inst
                 </div>
 
                 {showForm && (
-                    <form onSubmit={handleSubmit} className="bg-white/40 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/60 space-y-10 mb-12 animate-in slide-in-from-top-4 duration-700 shadow-sm">
+                    <form onSubmit={handleSubmit} className="bg-white/40 backdrop-blur-md p-10 rounded-[2.5rem] border border-white/60 space-y-10 mb-12 animate-in slide-in-from-top-4 duration-700 shadow-sm">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             <div>
                                 <label className="block text-[10px] font-black text-charcoal/60 uppercase tracking-[0.3em] mb-4 ml-6">Certification Body</label>

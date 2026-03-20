@@ -517,7 +517,7 @@ export default function InstructorScheduleCalendar({
 
             {/* Calendar Grid */}
             <div className="bg-white border border-border-grey shadow-tight overflow-hidden rounded-[8px]">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto no-scrollbar">
                     <div className={clsx("min-w-[800px] xl:min-w-full", view === 'month' && "min-w-0")}>
                         {view !== 'month' ? (
                             <div className={clsx("grid border-b border-border-grey bg-off-white", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>

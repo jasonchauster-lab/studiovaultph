@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { getTransformedImageUrl } from '@/lib/utils/image-utils'
+import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
 
 interface AvatarWithFallbackProps {
   src: string | null | undefined
@@ -13,10 +14,15 @@ interface AvatarWithFallbackProps {
 export default function AvatarWithFallback({ src, alt }: AvatarWithFallbackProps) {
   const [errored, setErrored] = useState(false)
   
-  const isHeic = src?.toLowerCase().endsWith('.heic') || src?.toLowerCase().endsWith('.heif')
-  const finalSrc = (src && isHeic && src.includes('supabase.co'))
-    ? getTransformedImageUrl(src, { width: 96, format: 'jpg' })
-    : src;
+  // Try to resolve Supabase paths to full URLs if they aren't already
+  // We don't know the exact bucket here, but 'avatars' is a safe default for profiles.
+  // getSupabaseAssetUrl will return the string as-is if it already starts with http.
+  const supabaseUrl = getSupabaseAssetUrl(src, 'avatars')
+  
+  const isHeic = supabaseUrl?.toLowerCase().endsWith('.heic') || supabaseUrl?.toLowerCase().endsWith('.heif')
+  const finalSrc = (supabaseUrl && isHeic && supabaseUrl.includes('supabase.co'))
+    ? getTransformedImageUrl(supabaseUrl, { width: 96, format: 'jpg' })
+    : supabaseUrl;
 
   const displaySrc = (finalSrc && !errored) ? finalSrc : '/default-avatar.svg'
 

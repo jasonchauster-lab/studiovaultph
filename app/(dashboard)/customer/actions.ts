@@ -21,9 +21,10 @@ export async function requestBooking(
     if (!user) return { error: 'Unauthorized' }
 
     // 1. Fetch available slot (WITHOUT JOIN first to be safe)
+    // 1. Fetch available slot with joined studio details for efficiency
     const { data: slot, error: slotError } = await supabase
         .from('slots')
-        .select('*')
+        .select('*, studios!inner(pricing, hourly_rate, id, is_founding_partner, custom_fee_percentage, location, profiles!owner_id(available_balance, is_suspended, full_name, email))')
         .eq('id', slotId)
         .eq('is_available', true)
         .single()
@@ -33,25 +34,7 @@ export async function requestBooking(
         return { error: `This slot is no longer available. (ID: ${slotId})` }
     }
 
-    // 2. Fetch Studio Details
-    const { data: studio, error: studioError } = await supabase
-        .from('studios')
-        .select(`
-            pricing, hourly_rate, id, is_founding_partner, custom_fee_percentage, location,
-            profiles!owner_id(available_balance, is_suspended, full_name, email)
-        `)
-        .eq('id', slot.studio_id)
-        .single()
-
-    // Note: If studio is missing/hidden, we might default pricing or fail
-    if (studioError) {
-        console.error('Studio fetch error:', studioError);
-        return { error: `Database Error: ${studioError.message} (Code: ${studioError.code})` }
-    }
-    if (!studio) {
-        console.error('Studio not found (after slot fetch). ID:', slot.studio_id);
-        return { error: `Studio details not found. The studio might be deleted or permission is denied. (Studio ID: ${slot.studio_id})` }
-    }
+    const studio = (slot as any)?.studios;
 
     // 2.1 Check Studio Owner's Status
     const studioOwnerProfile = Array.isArray(studio.profiles) ? studio.profiles[0] : studio.profiles;
@@ -703,22 +686,15 @@ export async function bookInstructorSession(
     }
 
     // 3. Double-Booking Check & Selection
-    // Even if is_available is true, double check `bookings` just in case (optional but requested)
-    // We iterate to find the first truly free one.
-    let selectedSlot = null;
+    const filteredSlotIds = filteredSlots.map(s => s.id);
+    const { data: activeBookings } = await supabase
+        .from('bookings')
+        .select('slot_id')
+        .in('slot_id', filteredSlotIds)
+        .neq('status', 'rejected');
 
-    for (const slot of filteredSlots) {
-        const { count } = await supabase
-            .from('bookings')
-            .select('*', { count: 'exact', head: true })
-            .eq('slot_id', slot.id)
-            .neq('status', 'rejected') // Ignore rejected bookings
-
-        if (count === 0) {
-            selectedSlot = slot;
-            break;
-        }
-    }
+    const bookedSlotIds = new Set(activeBookings?.map(b => b.slot_id) || []);
+    let selectedSlot = filteredSlots.find(s => !bookedSlotIds.has(s.id)) || null;
 
     if (!selectedSlot) {
         return { error: 'All matching slots are currently booked.' }

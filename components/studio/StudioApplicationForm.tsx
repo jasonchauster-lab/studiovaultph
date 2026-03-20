@@ -8,6 +8,7 @@ import { normalizeImageFile, uploadContentType } from '@/lib/utils/image-utils'
 import clsx from 'clsx'
 import { createClient } from '@/lib/supabase/client'
 import { STUDIO_AMENITIES } from '@/types'
+import Image from 'next/image'
 
 function FileUploadBox({ name, label, required, fileName, previewUrl, accept, setFileState }: any) {
     return (
@@ -27,8 +28,8 @@ function FileUploadBox({ name, label, required, fileName, previewUrl, accept, se
                 />
                 {previewUrl ? (
                     <div className="relative w-full h-full z-20 group/preview block">
-                        <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
-                            <img src={previewUrl} alt="Preview" className="h-full w-full object-contain cursor-pointer" />
+                        <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full relative">
+                            <Image src={previewUrl} alt="Preview" fill className="object-contain cursor-pointer" unoptimized />
                         </a>
                         <div className="absolute top-1 right-1 bg-charcoal-900/70 p-1 rounded-full text-white cursor-pointer opacity-0 group-hover/preview:opacity-100 transition-opacity pointer-events-auto z-30" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setFileState(null, null); }}>
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -367,8 +368,8 @@ export default function StudioApplicationForm() {
                                     const url = URL.createObjectURL(file)
                                     return (
                                         <div key={i} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm z-30">
-                                            <a href={url} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
-                                                <img src={url} className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity" alt={`Space Photo ${i + 1}`} />
+                                            <a href={url} target="_blank" rel="noopener noreferrer" className="block w-full h-full relative">
+                                                <Image src={url} fill className="object-cover cursor-pointer hover:opacity-90 transition-opacity" alt={`Space Photo ${i + 1}`} unoptimized />
                                             </a>
                                             <button
                                                 onClick={(e) => removeSpacePhoto(e, i)}

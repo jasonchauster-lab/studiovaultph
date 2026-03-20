@@ -228,7 +228,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         {activeGroups.map((group) => (
                             <div key={group.date} className="relative">
                                 {/* Date Header */}
-                                <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl px-4 py-3 mb-4 rounded-[1.25rem] border border-charcoal/5 flex items-center justify-between mx-4 sm:mx-0 shadow-sm ring-1 ring-charcoal/[0.02]">
+                                <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md px-4 py-3 mb-4 rounded-[1.25rem] border border-charcoal/5 flex items-center justify-between mx-4 sm:mx-0 shadow-sm ring-1 ring-charcoal/[0.02]">
                                     <div className="flex items-center gap-2.5">
                                         <div className="w-7 h-7 rounded-lg bg-forest/5 flex items-center justify-center">
                                             <Calendar className="w-3 h-3 text-forest/60" />
@@ -279,7 +279,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                         {historicalGroups.map((group) => (
                             <div key={group.date} className="relative">
                                 {/* Date Header */}
-                                <div className="sticky top-0 z-20 bg-charcoal/[0.03] backdrop-blur-xl px-4 py-3 mb-4 rounded-[1.25rem] border border-charcoal/5 flex items-center justify-between mx-4 sm:mx-0 ring-1 ring-charcoal/[0.02]">
+                                <div className="sticky top-0 z-20 bg-charcoal/[0.03] backdrop-blur-md px-4 py-3 mb-4 rounded-[1.25rem] border border-charcoal/5 flex items-center justify-between mx-4 sm:mx-0 ring-1 ring-charcoal/[0.02]">
                                     <div className="flex items-center gap-2.5">
                                         <div className="w-7 h-7 rounded-lg bg-charcoal/5 flex items-center justify-center">
                                             <Clock className="w-3 h-3 text-charcoal/30" />

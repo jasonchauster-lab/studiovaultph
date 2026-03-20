@@ -8,6 +8,7 @@ import ReviewList from '@/components/reviews/ReviewList'
 import { getPublicReviews } from '@/app/(dashboard)/reviews/actions'
 import PublicInstructorGallery from '@/components/instructor/PublicInstructorGallery'
 import NextImage from 'next/image'
+import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
 import { getManilaTodayStr, toManilaTimeString } from '@/lib/timezone'
 
 import { startOfMonth, endOfMonth, format } from 'date-fns'
@@ -162,7 +163,7 @@ export default async function StudioDetailsPage(props: {
             {studio.banner_url && (
                 <div className="relative w-full h-[200px] sm:h-[400px] bg-cream-100 overflow-hidden">
                     <NextImage
-                        src={studio.banner_url}
+                        src={getSupabaseAssetUrl(studio.banner_url, 'avatars') || '/default-banner.svg'}
                         alt={`${studio.name} Banner`}
                         fill
                         className="object-cover"
@@ -177,13 +178,29 @@ export default async function StudioDetailsPage(props: {
                 <div className="glass-card p-8 rounded-[32px] bg-white flex flex-col md:flex-row items-center gap-8 mb-8 border-border-grey shadow-cloud">
                     <div className="w-32 h-32 bg-off-white rounded-[24px] flex items-center justify-center overflow-hidden border-2 border-white shadow-tight shrink-0">
                         {studio.logo_url ? (
-                            <img src={studio.logo_url} alt={studio.name} className="w-full h-full object-cover" />
+                            <div className="relative w-full h-full">
+                                <NextImage
+                                    src={getSupabaseAssetUrl(studio.logo_url, 'avatars') || '/default-studio.svg'}
+                                    alt={studio.name}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
                         ) : (() => {
                             const ownerRecord = Array.isArray(studio.profiles) ? studio.profiles[0] : studio.profiles;
                             const avatar = ownerRecord?.avatar_url;
                             if (avatar) {
-                                const fullUrl = avatar.startsWith('http') ? avatar : `https://wzacmyemiljzpdskyvie.supabase.co/storage/v1/object/public/avatars/${avatar}`;
-                                return <img src={fullUrl} alt={studio.name} className="w-full h-full object-cover" />;
+                                const fullUrl = getSupabaseAssetUrl(avatar, 'avatars') || '/default-studio.svg';
+                                return (
+                                    <div className="relative w-full h-full">
+                                        <NextImage
+                                            src={fullUrl}
+                                            alt={studio.name}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                );
                             }
                             return <Users className="w-12 h-12 text-burgundy/10" />;
                         })()}

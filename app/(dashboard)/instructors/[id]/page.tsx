@@ -9,6 +9,7 @@ import PublicInstructorGallery from '@/components/instructor/PublicInstructorGal
 import InstructorProfileCard from '@/components/instructor/InstructorProfileCard'
 import { getPublicReviews } from '@/app/(dashboard)/reviews/actions'
 import NextImage from 'next/image'
+import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
 import { clsx } from 'clsx'
 
 
@@ -81,13 +82,13 @@ export default async function InstructorProfilePage(props: {
 
     return (
         <div className="min-h-screen bg-alabaster relative selection:bg-sage/20">
-            <div className="fixed inset-0 bg-white/50 animate-mesh -z-10 pointer-events-none" />
+            <div className="fixed inset-0 bg-white/50 -z-10 pointer-events-none" />
 
             {/* Banner Section */}
             {instructor.banner_url && (
                 <div className="relative w-full h-[200px] sm:h-[350px] bg-cream-100 overflow-hidden">
                     <NextImage
-                        src={instructor.banner_url}
+                        src={getSupabaseAssetUrl(instructor.banner_url, 'avatars') || '/default-banner.svg'}
                         alt={`${instructor.full_name} Banner`}
                         fill
                         className="object-cover"
