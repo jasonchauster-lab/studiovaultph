@@ -228,7 +228,7 @@ export default function LandingPage() {
                 title: "For Instructors",
                 subtitle: "PROFESSIONAL AUTONOMY",
                 icon: User,
-                items: ["Find Consistent Work", "Book Premium Studio Spaces", "Manage Your Schedule on the Go"],
+                items: ["Find Consistent Work", "Rent Professional Studio Equipment", "Manage Your Schedule on the Go"],
                 image: "/images/homepage/instructor.png"
               },
               {
