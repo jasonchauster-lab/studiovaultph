@@ -5,14 +5,12 @@ import { getManilaTodayStr } from '@/lib/timezone'
 import { revalidatePath } from 'next/cache'
 
 export async function getEarningsData(studioId: string, startDate?: string, endDate?: string) {
-    console.log(`[getEarningsData] Fetching for studio: ${studioId}, range: ${startDate} - ${endDate}`)
     const supabase = await createClient()
 
     try {
 
 
         // 1. Get Studio & Owner details
-        console.log('[getEarningsData] Fetching studio info...')
         const { data: studio, error: studioErr } = await supabase
             .from('studios')
             .select('owner_id, payout_approval_status')
@@ -25,7 +23,6 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
         }
 
         const ownerId = studio?.owner_id
-        console.log(`[getEarningsData] Owner ID: ${ownerId}`)
 
         const { data: profile, error: profileErr } = ownerId
             ? await supabase.from('profiles').select('available_balance, pending_balance').eq('id', ownerId).maybeSingle()
@@ -36,7 +33,6 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
         }
 
         // 2. Fetch slot IDs
-        console.log('[getEarningsData] Fetching slots...')
         const { data: studioSlots, error: slotsError } = await supabase
             .from('slots')
             .select('id')
@@ -49,7 +45,6 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
 
         const slotIds = studioSlots?.map((s: any) => s.id) ?? []
         if (slotIds.length === 0) {
-            console.log('[getEarningsData] No slots found for studio.')
             return {
                 bookings: [],
                 payouts: [],
@@ -69,7 +64,6 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
         }
 
         // 3. Get all relevant bookings (active + late cancelled with potential charges)
-        console.log(`[getEarningsData] Fetching bookings for studio ${studioId}...`)
         let bookingsQuery = supabase
             .from('bookings')
             .select(`
@@ -93,7 +87,6 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
         }
 
         // 4. Get all payout requests
-        console.log('[getEarningsData] Fetching payouts...')
         let payoutsQuery = supabase
             .from('payout_requests')
             .select('*')
@@ -288,7 +281,6 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
 
         transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-        console.log('[getEarningsData] Success.')
         return {
             bookings: [...(bookings || []), ...mappedWalletActions].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
             payouts,

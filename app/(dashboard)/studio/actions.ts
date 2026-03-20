@@ -122,7 +122,6 @@ export async function createSlot(formData: FormData) {
         .insert(slotsToInsert)
 
     if (error) {
-        console.error('Error creating slots:', error)
         return { error: 'Failed to create slots' }
     }
 
@@ -149,7 +148,6 @@ export async function deleteSlot(slotId: string) {
         .eq('id', slotId)
 
     if (error) {
-        console.error('Error deleting slot:', error)
         return { error: 'Failed to delete slot.' }
     }
 
@@ -205,7 +203,6 @@ export async function updateSlot(slotId: string, formData: FormData) {
         .eq('id', slotId)
 
     if (error) {
-        console.error('Error updating slot:', error)
         return { error: `Failed to update slot: ${error.message} (Code: ${error.code})` }
     }
 
@@ -215,8 +212,6 @@ export async function updateSlot(slotId: string, formData: FormData) {
 
 export async function createStudio(formData: FormData) {
     try {
-        console.log('--- createStudio action started ---');
-        console.log('FormData size:', Array.from(formData.keys()).length, 'keys');
         const supabase = await createClient()
 
         const { data: { user } } = await supabase.auth.getUser()

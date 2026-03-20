@@ -24,11 +24,8 @@ export default async function AdminDashboard({
 }: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-    const log = (msg: string) => console.log(`[AdminDashboard] ${msg}`)
-    log('Entered component')
     
     try {
-        log('Started render')
         const { range, tab, search } = await searchParams
         const activeTab = (tab as string) || 'overview'
         const searchQuery = (search as string) || ''
@@ -36,9 +33,7 @@ export default async function AdminDashboard({
         let publicSupabase: any = null;
         try {
             publicSupabase = await createClient()
-            log('Public Supabase client initialized')
         } catch (e: any) {
-            log(`CRITICAL: Public Supabase init failed: ${e.message}`)
             throw e; // Re-throw to be caught by global catch
         }
 
@@ -66,8 +61,6 @@ export default async function AdminDashboard({
         // --- END DATE FILTER LOGIC ---
 
         const supabase = createAdminClient() // This is the admin client, now named 'supabase'
-        console.log('Analytics: Triggering fetch...')
-        log('AdminDashboard: Initial fetches triggered')
         const results = await Promise.all([
             // 1. Certification verification queue
             supabase.from('certifications')
@@ -174,8 +167,6 @@ export default async function AdminDashboard({
                 return query
             })(),
         ])
-        log('AdminDashboard: Initial fetches completed')
-        log('AdminDashboard: Initial fetches completed')
 
         const [
             pendingCertsResult,
@@ -941,7 +932,6 @@ export default async function AdminDashboard({
             </div>
         )
     } catch (err: any) {
-        log(`AdminDashboard: GLOBAL ERROR: ${err.message}\n${err.stack}`)
         console.error('GLOBAL DASHBOARD ERROR:', err)
         return (
             <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-alabaster flex items-center justify-center">

@@ -63,7 +63,6 @@ function LoginContent() {
                    await redirectByRole(session.user.id)
                 } else {
                     // Passed password but not 2FA -> jump to OTP step
-                    console.log('[Auth] session exists but not remembered, showing OTP step')
                     setStep('otp')
                     if (session.user.email) setEmail(session.user.email)
                     
@@ -101,9 +100,7 @@ function LoginContent() {
 
                         // However, if they are ALREADY remembered, we CAN redirect
                         if (isOAuth || isOtpRemembered(session.user.id)) {
-                             console.log('[Auth] Already remembered or OAuth, listener proceeding with redirect')
                         } else {
-                            console.log('[Auth] Password login detected, letting handleAuth show OTP step')
                             return
                         }
                     }
@@ -111,11 +108,9 @@ function LoginContent() {
                     // 4. Skip if the magic link was JUST sent (cooldown to avoid double-firing)
                     const isTooFresh = lastOtpSentAt && (Date.now() - lastOtpSentAt < 2000)
                     if (isTooFresh) {
-                        console.log('[Auth] Ignoring event (too fresh):', event)
                         return
                     }
 
-                    console.log('[Auth] Valid verification event detected:', event)
                     setIsRedirecting(true)
                     
                     // Read "Remember Me" preference from cookie (survives refreshes)
@@ -127,7 +122,6 @@ function LoginContent() {
                         const cookieOptions = `; max-age=${maxAge}; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
                         document.cookie = `otp_rem_${session.user.id.toLowerCase()}=1${cookieOptions}`
                         document.cookie = `rem_me_${session.user.id.toLowerCase()}=1${cookieOptions}`
-                        console.log('[Auth] Set user-specific "Remember Me" cookies client-side via listener')
                     }
 
                     await redirectByRole(session.user.id)
@@ -149,7 +143,6 @@ function LoginContent() {
             return name === cookieName && (val === '1' || val?.toLowerCase() === userId.toLowerCase())
         })
         
-        console.log(`[Auth] 2FA Check for user ${userId.slice(0, 5)}... result: ${found}`)
         return found
     }
 
@@ -168,7 +161,6 @@ function LoginContent() {
             const roleMap: Record<string, string> = { admin: '/admin', instructor: '/instructor', studio: '/studio', customer: '/customer' }
             const dest = profile?.role ? (roleMap[profile.role] ?? '/welcome') : '/welcome'
 
-            console.log('[Auth] Redirecting user to:', dest)
             router.push(dest)
             router.refresh()
         } catch (err) {
