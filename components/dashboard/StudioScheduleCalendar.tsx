@@ -450,24 +450,26 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                                                     return (
                                                         <div key={day.toString() + hour} className={clsx("border-r border-border-grey/50 last:border-r-0 relative group p-1.5 transition-colors duration-300", isPastCell ? "bg-off-white/30" : isToday ? "bg-forest/5" : "hover:bg-off-white/50")} style={{ height: `${ROW_HEIGHT}px` }}>
-                                                            <div
-                                                                className={clsx(
-                                                                    "absolute inset-1.5 rounded-xl transition-all duration-500 bg-forest/10 cursor-pointer z-0 flex items-center justify-center opacity-0 group-hover:opacity-100 border-2 border-dashed border-forest/20 shadow-tight"
-                                                                )}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    setSingleDate(toManilaDateStr(day))
-                                                                    setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
-                                                                    setSingleEndTime(`${(hour + 1).toString().padStart(2, '0')}:00`)
-                                                                    setAddMode('single')
-                                                                    setIsAddModalOpen(true)
-                                                                }}
-                                                            >
-                                                                <div className="flex flex-col items-center gap-2">
-                                                                    <Plus className="w-6 h-6 text-forest animate-pulse" />
-                                                                    <span className="text-[10px] font-black text-forest uppercase tracking-widest">Add Slot</span>
+                                                            {cellSlots.length === 0 && (
+                                                                <div
+                                                                    className={clsx(
+                                                                        "absolute inset-1.5 rounded-xl transition-all duration-500 bg-forest/10 cursor-pointer z-0 flex items-center justify-center opacity-0 group-hover:opacity-100 border-2 border-dashed border-forest/20 shadow-tight"
+                                                                    )}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation()
+                                                                        setSingleDate(toManilaDateStr(day))
+                                                                        setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
+                                                                        setSingleEndTime(`${(hour + 1).toString().padStart(2, '0')}:00`)
+                                                                        setAddMode('single')
+                                                                        setIsAddModalOpen(true)
+                                                                    }}
+                                                                >
+                                                                    <div className="flex flex-col items-center gap-2">
+                                                                        <Plus className="w-6 h-6 text-forest animate-pulse" />
+                                                                        <span className="text-[10px] font-black text-forest uppercase tracking-widest">Add Slot</span>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                            )}
 
                                                             {cellSlots.length > 0 && (() => {
                                                                 const allActiveBookings = cellSlots.flatMap(s => s.bookings || []).filter(b =>
@@ -511,9 +513,9 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     <div
                                                                          className={clsx(
                                                                             "absolute top-1 left-1 right-1 bottom-1 p-2 border-l-2 border-solid transition-all duration-500 hover:shadow-card hover:-translate-y-0.5 group/slot z-10 overflow-hidden cursor-pointer rounded-lg flex flex-col justify-between",
-                                                                                 isPastCell ? (isBooked ? "bg-forest/50 border-forest/40 shadow-none" : "bg-off-white border-slate/20 opacity-90") :
+                                                                                 isPastCell ? (isBooked ? "bg-forest border-white/20 shadow-none" : "bg-off-white border-slate/20 opacity-90") :
                                                                                      hasPending ? "bg-amber-100 border-amber-400 shadow-tight" :
-                                                                                         isBooked ? "!bg-[#183329] border-white/20 shadow-card ring-1 ring-white/10" : "bg-white border-slate/10 ring-1 ring-slate/5 shadow-tight"
+                                                                                         isBooked ? "bg-forest border-white/20 shadow-card ring-1 ring-white/10" : "bg-white border-slate/10 ring-1 ring-slate/5 shadow-tight"
                                                                         )}
                                                                         onClick={() => {
                                                                             setBucketSlots(cellSlots);

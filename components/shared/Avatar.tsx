@@ -84,7 +84,8 @@ export default function Avatar({
                         setError(true)
                     }}
                     // Only use unoptimized for HEIC if it's NOT a Supabase URL (already transformed)
-                    unoptimized={isHeic && !src?.includes('supabase.co')}
+                    // or for blob URLs
+                    unoptimized={(isHeic && !src?.includes('supabase.co')) || src?.startsWith('blob:')}
                 />
             )}
         </div>

@@ -4,7 +4,7 @@
  */
 export function getSupabaseAssetUrl(path: string | null | undefined, bucket: 'avatars' | 'studios' | 'certifications' = 'avatars') {
     if (!path) return null
-    if (path.startsWith('http')) return path
+    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) return path
     
     const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://wzacmyemiljzpdskyvie.supabase.co'
     

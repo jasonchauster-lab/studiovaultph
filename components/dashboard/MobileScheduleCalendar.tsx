@@ -266,12 +266,12 @@ export default function MobileScheduleCalendar({
                                     className={clsx(
                                         "w-full rounded-2xl p-4.5 shadow-tight active:scale-[0.98] transition-all duration-300 flex flex-col gap-4 relative overflow-hidden group cursor-pointer border",
                                         session.is_booked
-                                            ? "bg-forest text-white border-forest/20"
+                                            ? "bg-forest text-white border-white/20 shadow-md"
                                             : "bg-white border-border-grey/30 text-charcoal"
                                     )}
                                 >
                                     {session.is_booked && (
-                                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none" />
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none" />
                                     )}
                                     <div className="flex justify-between items-start gap-3">
                                         <div className="space-y-2 flex-1 min-w-0">

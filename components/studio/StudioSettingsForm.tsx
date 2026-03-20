@@ -206,6 +206,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                             fill
                             className="object-cover transition-transform duration-700 group-hover:scale-105"
                             sizes="100vw"
+                            unoptimized
                         />
                     ) : (
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-charcoal-300">
@@ -243,6 +244,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                                 width={144}
                                 height={144}
                                 className="w-full h-full object-cover"
+                                unoptimized
                             />
                         ) : (
                             <div className="text-center p-6 flex flex-col items-center">

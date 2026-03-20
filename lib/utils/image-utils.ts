@@ -24,7 +24,7 @@ const convertViaCanvas = (file: File): Promise<File> => {
             URL.revokeObjectURL(url);
             
             // Maximum dimension constraint (e.g., 2560px for 2K-ish quality)
-            const MAX_SIZE = 2560;
+            const MAX_SIZE = 1920;
             let width = img.naturalWidth;
             let height = img.naturalHeight;
 
