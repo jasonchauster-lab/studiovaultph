@@ -18,8 +18,9 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             icon: TrendingUp,
             trend: 'Last 30 Days',
             trendColor: 'text-forest',
-            bgIcon: 'bg-forest/5',
-            iconColor: 'text-forest'
+            bgIcon: 'bg-forest/10',
+            iconColor: 'text-forest',
+            borderColor: 'border-forest'
         },
         {
             label: 'Active Listings',
@@ -27,8 +28,9 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             icon: Calendar,
             trend: 'This week',
             trendColor: 'text-charcoal',
-            bgIcon: 'bg-charcoal/5',
-            iconColor: 'text-charcoal'
+            bgIcon: 'bg-charcoal/10',
+            iconColor: 'text-charcoal',
+            borderColor: 'border-charcoal/20'
         },
         {
             label: 'Average Occupancy',
@@ -36,8 +38,9 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             icon: Zap,
             trend: 'Current Week',
             trendColor: 'text-forest',
-            bgIcon: 'bg-forest/5',
-            iconColor: 'text-forest'
+            bgIcon: 'bg-forest/10',
+            iconColor: 'text-forest',
+            borderColor: 'border-forest'
         },
         {
             label: 'Top Instructor',
@@ -45,8 +48,9 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
             icon: Star,
             trend: 'Most Bookings',
             trendColor: 'text-sage',
-            bgIcon: 'bg-sage/10',
-            iconColor: 'text-sage'
+            bgIcon: 'bg-sage/20',
+            iconColor: 'text-sage',
+            borderColor: 'border-sage'
         }
     ]
 
@@ -54,10 +58,13 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
         <div className="max-w-7xl mx-auto px-0">
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6 mb-6 sm:mb-12">
                 {cardData.map((card, index) => (
-                    <div key={index} className="earth-card p-3.5 sm:p-6 group transition-all duration-500 hover:shadow-card hover:-translate-y-1.5 relative overflow-hidden bg-white/50 backdrop-blur-sm">
+                    <div key={index} className={clsx(
+                        "earth-card p-3.5 sm:p-6 group transition-all duration-500 hover:shadow-card hover:-translate-y-1.5 relative overflow-hidden bg-white border-l-4",
+                        card.borderColor
+                    )}>
                         <div className="flex justify-between items-start mb-3 sm:mb-6">
                             <div className={clsx(
-                                "w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all duration-500 shadow-tight border border-border-grey/50 bg-white group-hover:scale-110 group-hover:shadow-card",
+                                "w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all duration-500 shadow-tight bg-white border border-charcoal/5 group-hover:scale-110 group-hover:shadow-card",
                                 card.bgIcon
                             )}>
                                 <card.icon className={clsx("w-4 h-4 sm:w-5 sm:h-5", card.iconColor)} />
@@ -69,9 +76,13 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
                                 {card.trend}
                             </span>
                         </div>
-                        <div>
-                            <p className="text-[9px] sm:text-[10px] font-black text-charcoal/40 uppercase tracking-[0.15em] mb-1 sm:mb-2 truncate leading-none">{card.label}</p>
-                            <h3 className="text-xl sm:text-2xl font-serif font-black text-charcoal tracking-tight truncate leading-none" title={card.value}>{card.value}</h3>
+                        <div className="relative z-10">
+                            <p className="text-[9px] sm:text-[10px] font-black text-charcoal/60 uppercase tracking-[0.2em] mb-1 sm:mb-2 truncate leading-none">
+                                {card.label}
+                            </p>
+                            <h3 className="text-xl sm:text-2xl font-serif font-black text-charcoal tracking-tight truncate leading-none" title={card.value}>
+                                {card.value}
+                            </h3>
                         </div>
                         
                         {/* Decorative background element */}

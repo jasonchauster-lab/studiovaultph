@@ -16,13 +16,16 @@
   --secondary-fixed: #ffdbd1;      /* Vault Badge — soft coral/peach accent */
   --on-secondary-fixed: #1b1c19;   /* Text for Vault Badge */
   
-  --outline-variant: rgba(27, 28, 25, 0.2); /* For "Ghost Borders" fallback */
+  --outline-variant: rgba(27, 28, 25, 0.3); /* Darkened for better visibility */
+  --border-grey: #e5e7eb;           /* Defined for explicit borders */
   
   --background: var(--surface);
   --foreground: var(--on-surface);
 
   /* Elevation & Shadows */
-  --shadow-ambient: 0px 20px 40px rgba(27, 28, 25, 0.06);
+  --shadow-ambient: 0px 20px 40px rgba(27, 28, 25, 0.08); /* Slightly deeper */
+  --shadow-tight: 0px 4px 12px rgba(27, 28, 25, 0.04);   /* New tight shadow */
+  --shadow-card: 0px 8px 16px rgba(27, 28, 25, 0.08);    /* Deep card shadow */
   --glass-blur: 16px;
 
   /* Corner Radius */
@@ -48,8 +51,20 @@
   --color-secondary-fixed: var(--secondary-fixed);
   --color-on-secondary-fixed: var(--on-secondary-fixed);
 
+  /* Brand Accents Mapping */
+  --color-forest: var(--primary);
+  --color-forest-muted: var(--primary-container);
+  --color-sage: #4a665a;
+  --color-charcoal: var(--on-surface);
+  --color-slate: var(--muted-surface);
+  --color-off-white: var(--surface-container-low);
+  --color-burgundy: #4a1d1d;
+  --color-buttermilk: #fdf6e3;
+
   /* Shadow & Blur */
   --shadow-ambient: var(--shadow-ambient);
+  --shadow-tight: var(--shadow-tight);
+  --shadow-card: var(--shadow-card);
   
   /* Radii */
   --radius-sm: var(--radius-sm);
@@ -97,16 +112,33 @@ h1, h2, h3, h4 {
     box-shadow: var(--shadow-ambient);
   }
 
-  /* "No-Line" Card Style */
+  /* "No-Line" Card Style — but with a subtle border for definition */
   .atelier-card {
     background-color: #ffffff;
+    border: 1px solid var(--outline-variant);
     border-radius: var(--radius-xl);
     padding: 2.5rem;
-    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   
   .atelier-card:hover {
     transform: translateY(-4px);
+    box-shadow: var(--shadow-ambient);
+    border-color: var(--primary);
+  }
+
+  /* Compact Earth Card for Dashboards */
+  .earth-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-grey);
+    border-radius: var(--radius-xl);
+    transition: all 0.4s ease;
+    box-shadow: var(--shadow-tight);
+  }
+
+  .earth-card:hover {
+    border-color: var(--primary-container);
+    box-shadow: var(--shadow-card);
   }
 
   /* Glassmorphism Navigation */

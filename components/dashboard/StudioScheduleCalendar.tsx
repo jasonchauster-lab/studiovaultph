@@ -510,10 +510,10 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                 return (
                                                                     <div
                                                                         className={clsx(
-                                                                            "absolute top-1.5 left-1.5 right-1.5 bottom-1.5 p-3.5 border-l-4 border-solid transition-all duration-500 hover:shadow-card hover:-translate-y-0.5 group/slot z-10 overflow-hidden cursor-pointer rounded-xl flex flex-col justify-between backdrop-blur-sm",
-                                                                                 isPastCell ? (isBooked ? "bg-forest/20 border-forest/30" : "bg-off-white border-border-grey/50 opacity-80") :
-                                                                                     hasPending ? "bg-amber-50 border-amber-300 shadow-tight" :
-                                                                                         isBooked ? "bg-forest border-forest/20 shadow-card" : "bg-white border-border-grey ring-1 ring-border-grey/10 shadow-tight"
+                                                                            "absolute top-1.5 left-1.5 right-1.5 bottom-1.5 p-4 border-l-4 border-solid transition-all duration-500 hover:shadow-card hover:-translate-y-0.5 group/slot z-10 overflow-hidden cursor-pointer rounded-xl flex flex-col justify-between backdrop-blur-md",
+                                                                                 isPastCell ? (isBooked ? "bg-forest/20 border-forest/30 shadow-none" : "bg-off-white border-slate/20 opacity-90") :
+                                                                                     hasPending ? "bg-amber-50 border-amber-400 shadow-tight" :
+                                                                                         isBooked ? "bg-forest border-forest-muted/50 shadow-card ring-1 ring-white/10" : "bg-white border-slate/20 ring-1 ring-slate/5 shadow-tight"
                                                                         )}
                                                                         onClick={() => {
                                                                             setBucketSlots(cellSlots);
@@ -527,22 +527,22 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                                       {hour.toString().padStart(2, '0')}:00 - {(hour + 1).toString().padStart(2, '0')}:00
                                                                                   </div>
                                                                             )}
-                                                                            <div className="flex justify-between items-start mb-2 overflow-hidden">
-                                                                                <h4 className={clsx("text-[11px] font-bold uppercase tracking-tight truncate max-w-[85%] leading-tight", 
+                                                                            <div className="flex justify-between items-start mb-2.5 gap-2">
+                                                                                <h4 className={clsx("text-[11px] font-bold uppercase tracking-tight line-clamp-2 leading-tight flex-1", 
                                                                                     (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-charcoal" : 
-                                                                                    hasPending ? "text-amber-900" : "!text-white")}>
+                                                                                    hasPending ? "text-amber-900" : "text-white")}>
                                                                                     {displayTitle}
                                                                                 </h4>
-                                                                                 <Edit2 className={clsx("w-3 h-3 opacity-0 group-hover/slot:opacity-100 transition-all duration-300 shrink-0 transform group-hover/slot:scale-110", 
-                                                                                    (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-charcoal/60" : 
-                                                                                    hasPending ? "text-amber-900/40" : "text-white/40")} />
+                                                                                 <Edit2 className={clsx("w-3.5 h-3.5 opacity-0 group-hover/slot:opacity-100 transition-all duration-300 shrink-0 transform group-hover/slot:scale-110 mt-0.5", 
+                                                                                    (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-charcoal/40" : 
+                                                                                    hasPending ? "text-amber-900/30" : "text-white/40")} />
                                                                             </div>
-                                                                            <div className="flex flex-wrap gap-1.5 overflow-hidden">
+                                                                            <div className="flex flex-wrap gap-2">
                                                                                 {Object.entries(equipmentCounts).map(([eq, counts]) => (
-                                                                                     <span key={eq} className={clsx("text-[8px] font-black uppercase tracking-tighter flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-colors", 
-                                                                                         (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-charcoal border-border-grey bg-off-white" : 
-                                                                                         hasPending ? "text-amber-900 border-amber-200 bg-amber-100/50" : "!text-white border-white/20 bg-white/10")}>
-                                                                                         <Box className="w-2.5 h-2.5 opacity-60 shrink-0" />
+                                                                                     <span key={eq} className={clsx("text-[8px] font-black uppercase tracking-tighter flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-colors", 
+                                                                                         (isPastCell && !isBooked) || (!isBooked && !hasPending) ? "text-charcoal border-charcoal/10 bg-off-white" : 
+                                                                                         hasPending ? "text-amber-900 border-amber-200 bg-amber-100/50" : "text-white border-white/20 bg-white/10")}>
+                                                                                         <Box className="w-2.5 h-2.5 opacity-70 shrink-0" />
                                                                                         <span className="truncate">{counts.booked}/{counts.total} {eq.split(' ')[0]}</span>
                                                                                     </span>
                                                                                 ))}
