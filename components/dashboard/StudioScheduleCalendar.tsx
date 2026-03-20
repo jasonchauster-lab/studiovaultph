@@ -436,7 +436,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                                         {hours.map(hour => (
                                             <div key={hour} className={clsx("grid", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")} style={{ minHeight: "140px" }}>
-                                                <div className="p-4 text-[10px] text-slate font-black border-r border-border-grey/50 text-center sticky left-0 bg-white z-20 w-[100px] flex items-center justify-center tracking-[0.2em] opacity-40">
+                                                <div className="p-4 text-[10px] text-charcoal font-black border-r border-border-grey sticky left-0 bg-[#F5F2EB] z-20 w-[100px] flex items-center justify-center tracking-[0.2em]">
                                                     {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                                 </div>
 
@@ -510,10 +510,10 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                 return (
                                                                     <div
                                                                          className={clsx(
-                                                                            "absolute top-1 left-1 right-1 bottom-1 p-2 border-l-2 border-solid transition-all duration-500 hover:shadow-card hover:-translate-y-0.5 group/slot z-10 overflow-hidden cursor-pointer rounded-lg flex flex-col justify-between backdrop-blur-md",
-                                                                                 isPastCell ? (isBooked ? "bg-forest/30 border-forest/40 shadow-none" : "bg-off-white border-slate/20 opacity-90") :
+                                                                            "absolute top-1 left-1 right-1 bottom-1 p-2 border-l-2 border-solid transition-all duration-500 hover:shadow-card hover:-translate-y-0.5 group/slot z-10 overflow-hidden cursor-pointer rounded-lg flex flex-col justify-between",
+                                                                                 isPastCell ? (isBooked ? "bg-forest/50 border-forest/40 shadow-none" : "bg-off-white border-slate/20 opacity-90") :
                                                                                      hasPending ? "bg-amber-100 border-amber-400 shadow-tight" :
-                                                                                         isBooked ? "bg-[#183329] border-white/20 shadow-card ring-1 ring-white/10" : "bg-white border-slate/10 ring-1 ring-slate/5 shadow-tight"
+                                                                                         isBooked ? "!bg-[#183329] border-white/20 shadow-card ring-1 ring-white/10" : "bg-white border-slate/10 ring-1 ring-slate/5 shadow-tight"
                                                                         )}
                                                                         onClick={() => {
                                                                             setBucketSlots(cellSlots);

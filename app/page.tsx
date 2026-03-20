@@ -27,6 +27,22 @@ export default function LandingPage() {
               priority
             />
           </Link>
+          <div className="hidden md:flex gap-10 items-center">
+            {[
+              { name: 'Features', href: '#features' },
+              { name: 'Methodology', href: '#methodology' },
+              { name: 'Philosophy', href: '#philosophy' },
+              { name: 'For Everyone', href: '#audience' }
+            ].map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                className="label-atelier hover:text-primary transition-colors cursor-pointer"
+              >
+                {link.name}
+              </a>
+            ))}
+          </div>
           <div className="flex gap-8 items-center">
             <Link href="/login" className="label-atelier hover:text-primary transition-colors">
               Log In
@@ -118,7 +134,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Tonal Architecture: Features Section ─── */}
-        <section className="px-6 md:px-12 py-32 md:py-48 surface-elevated">
+        <section id="features" className="px-6 md:px-12 py-32 md:py-48 surface-elevated">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
               {[
@@ -153,7 +169,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── How It Works: Professional Workflow ─── */}
-        <section className="px-6 md:px-12 py-32 md:py-48 bg-surface">
+        <section id="methodology" className="px-6 md:px-12 py-32 md:py-48 bg-surface">
           <div className="max-w-7xl mx-auto space-y-20 relative z-10 text-center">
             <div className="space-y-6">
               <p className="label-atelier">The Methodology</p>
@@ -182,7 +198,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Philosophy Quote ─── */}
-        <section className="px-6 md:px-12 py-32 md:py-48 surface-elevated">
+        <section id="philosophy" className="px-6 md:px-12 py-32 md:py-48 surface-elevated">
           <div className="max-w-5xl mx-auto text-center p-12 md:p-32 rounded-3xl surface-overlay relative overflow-hidden">
             <div className="relative z-10 flex flex-col gap-y-12 items-center">
               <p className="label-atelier">The Philosophy</p>
@@ -198,7 +214,7 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Target Audience: Tonal Layering ─── */}
-        <section className="px-6 md:px-12 py-32 md:py-48 bg-surface">
+        <section id="audience" className="px-6 md:px-12 py-32 md:py-48 bg-surface">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16">
             {[
               {

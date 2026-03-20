@@ -117,12 +117,12 @@ function LoginContent() {
                     const rememberMePref = document.cookie.split('; ').find(row => row.startsWith('remember_me_pref='))?.split('=')[1]
                     const shouldRemember = rememberDevice || (rememberMePref === '1')
 
-                    if (shouldRemember) {
-                        const maxAge = 14 * 24 * 60 * 60
-                        const cookieOptions = `; max-age=${maxAge}; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
-                        document.cookie = `otp_rem_${session.user.id.toLowerCase()}=1${cookieOptions}`
-                        document.cookie = `rem_me_${session.user.id.toLowerCase()}=1${cookieOptions}`
-                    }
+                    const cookieOptions = (shouldRemember) 
+                        ? `; max-age=${14 * 24 * 60 * 60}; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
+                        : `; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
+                    
+                    document.cookie = `otp_rem_${session.user.id.toLowerCase()}=1${cookieOptions}`
+                    document.cookie = `rem_me_${session.user.id.toLowerCase()}=1${cookieOptions}`
 
                     await redirectByRole(session.user.id)
                 }
@@ -454,10 +454,10 @@ function LoginContent() {
                             </div>
 
                             {isSignUp && (
-                                <div role="radiogroup" aria-label="Selection Role" className="mb-10 p-1 bg-white rounded-lg flex gap-1 border border-border-grey shadow-tight">
+                                <div role="radiogroup" aria-label="Selection Role" className="mb-10 p-1 bg-white rounded-xl flex gap-1 border border-border-grey shadow-tight">
                                     {[{ id: 'customer', label: 'Client' }, { id: 'instructor', label: 'Instructor' }, { id: 'studio', label: 'Studio' }].map((opt) => (
                                         <button key={opt.id} type="button" role="radio" aria-checked={role === opt.id} onClick={() => setRole(opt.id)}
-                                            className={`flex-1 py-3 px-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${role === opt.id ? 'bg-forest text-white shadow-tight' : 'text-slate-600 hover:text-charcoal hover:bg-off-white'}`}>
+                                            className={`flex-1 py-4 px-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${role === opt.id ? 'bg-forest text-white shadow-md' : 'text-slate-600 hover:text-charcoal hover:bg-off-white hover:shadow-sm'}`}>
                                             {opt.label}
                                         </button>
                                     ))}
@@ -465,7 +465,7 @@ function LoginContent() {
                             )}
 
                             <button type="button" onClick={handleGoogleAuth} disabled={loading}
-                                className="w-full flex items-center justify-center gap-3 px-5 h-14 border border-border-grey bg-white rounded-xl text-[13px] font-bold uppercase tracking-widest text-charcoal hover:bg-off-white transition-all shadow-tight disabled:opacity-50 mb-12">
+                                className="w-full flex items-center justify-center gap-3 px-5 h-14 border border-charcoal/20 bg-white rounded-xl text-[13px] font-bold uppercase tracking-widest text-charcoal hover:bg-off-white hover:border-charcoal/40 hover:shadow-md transition-all shadow-tight disabled:opacity-50 mb-12 active:scale-[0.98] cursor-pointer">
                                 <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                     <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.658 14.013 17.64 11.706 17.64 9.2z" fill="#4285F4"/>
                                     <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
@@ -530,10 +530,10 @@ function LoginContent() {
                                 <div className="text-center pt-8">
                                     <button type="button"
                                         onClick={() => { setIsSignUp(!isSignUp); setMessage(null); setFullName(''); setEmail(''); setPassword('') }}
-                                        className="text-slate-600 hover:text-charcoal text-[10px] font-bold uppercase tracking-[0.3em] transition-all group">
+                                        className="text-slate-600 hover:text-charcoal text-[11px] font-bold uppercase tracking-[0.3em] transition-all group p-2">
                                         {isSignUp
-                                            ? <>Already have an account? <span className="text-burgundy border-b border-burgundy/20 group-hover:border-burgundy transition-all pb-1">Log in.</span></>
-                                            : <>Don&apos;t have an account? <span className="text-burgundy border-b border-burgundy/20 group-hover:border-burgundy transition-all pb-1">Sign up.</span></>
+                                            ? <>Already have an account? <span className="text-burgundy border-b-2 border-burgundy/30 group-hover:border-burgundy transition-all pb-1 ml-1">Log in.</span></>
+                                            : <>Don&apos;t have an account? <span className="text-burgundy border-b-2 border-burgundy/30 group-hover:border-burgundy transition-all pb-1 ml-1">Sign up.</span></>
                                         }
                                     </button>
                                 </div>
