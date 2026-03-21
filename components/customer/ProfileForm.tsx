@@ -2,19 +2,25 @@
 
 import { useState, useRef } from 'react'
 import { updateProfile } from '@/app/(dashboard)/customer/profile/actions'
-import { Loader2, Camera, Save, User, FileText } from 'lucide-react'
+import { 
+    Loader2, 
+    Camera, 
+    Save, 
+    User, 
+    FileText, 
+    MapPin, 
+    Search, 
+    Navigation 
+} from 'lucide-react'
 import { isValidPhone, isValidEmail, phoneErrorMessage } from '@/lib/validation'
 import Image from 'next/image'
 import WaiverUpload from '@/components/customer/WaiverUpload'
 import { normalizeImageFile } from '@/lib/utils/image-utils'
 import { clsx } from 'clsx'
 import { geocodeAddress, getAutocompleteSuggestions } from '@/lib/utils/location'
-import { MapPin, Search, Loader2 as LoaderIcon } from 'lucide-react'
 import Avatar from '@/components/shared/Avatar'
 import ImageCropper from '@/components/shared/ImageCropper'
 import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
-import { geocodeAddress } from '@/lib/utils/location'
-import { Search, MapPin, Navigation } from 'lucide-react'
 
 export default function ProfileForm({ profile }: { profile: any }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -392,7 +398,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                 
                                 {isSearching && (
                                     <div className="absolute right-5 top-5">
-                                        <LoaderIcon className="w-5 h-5 animate-spin text-forest/40" />
+                                        <Loader2 className="w-5 h-5 animate-spin text-forest/40" />
                                     </div>
                                 )}
 
