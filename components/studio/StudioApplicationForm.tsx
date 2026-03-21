@@ -282,12 +282,20 @@ export default function StudioApplicationForm() {
                 </select>
             </div>
             <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Detailed Address <span className="text-rose-gold font-bold">*</span></label>
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">Display Address <span className="text-rose-gold font-bold">*</span></label>
                 <textarea
                     name="address"
                     required
-                    placeholder="e.g. Unit 302, One Building, Ayala Ave"
-                    className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 h-24 transition-all"
+                    placeholder="e.g. One Building, Ayala Ave"
+                    className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 h-20 transition-all"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-charcoal-700 mb-1">Floor or Unit <span className="text-charcoal-400 font-normal ml-1">(Optional)</span></label>
+                <input
+                    name="floorOrUnit"
+                    placeholder="e.g. Unit 302, 3rd Floor"
+                    className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 transition-all"
                 />
             </div>
             <div>

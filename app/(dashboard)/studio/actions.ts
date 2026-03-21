@@ -7,6 +7,7 @@ import { sendEmail } from '@/lib/email'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import AccountFrozenEmail from '@/components/emails/AccountFrozenEmail'
 import { formatManilaDate, formatManilaTime, toManilaTimeString, formatManilaDateStr, formatTo12Hour, toManilaDateStr } from '@/lib/timezone'
+import { getGeocodeAction } from '@/lib/actions/location'
 
 export async function createSlot(formData: FormData) {
     const supabase = await createClient()
@@ -233,7 +234,17 @@ export async function createStudio(formData: FormData) {
         const contactNumber = formData.get('contactNumber') as string
         const dateOfBirth = formData.get('dateOfBirth') as string
         const address = formData.get('address') as string
+        const floorOrUnit = formData.get('floorOrUnit') as string
         const googleMapsUrl = formData.get('googleMapsUrl') as string
+
+        // Auto-geocode if coordinates are missing (Studio Onboarding doesn't have lat/lng inputs yet)
+        let lat = null;
+        let lng = null;
+        const geoResult = await getGeocodeAction(`${address}, ${location}`);
+        if (geoResult?.data?.location) {
+            lat = geoResult.data.location.lat;
+            lng = geoResult.data.location.lng;
+        }
 
         const birPath = formData.get('birCertificateUrl') as string
         const govIdPath = formData.get('govIdUrl') as string
@@ -359,6 +370,9 @@ export async function createStudio(formData: FormData) {
                 inventory: inventory,
                 pricing: pricing,
                 google_maps_url: googleMapsUrl || null,
+                floor_or_unit: floorOrUnit || null,
+                lat: lat,
+                lng: lng,
                 amenities: formData.getAll('amenities') as string[]
             })
 
@@ -504,9 +518,20 @@ export async function updateStudio(formData: FormData) {
     const location = formData.get('location') as string
     const contactNumber = formData.get('contactNumber') as string
     const address = formData.get('address') as string
+    const floorOrUnit = formData.get('floorOrUnit') as string
     const description = formData.get('description') as string
-    const lat = parseFloat(formData.get('lat') as string)
-    const lng = parseFloat(formData.get('lng') as string)
+    let lat = parseFloat(formData.get('lat') as string)
+    let lng = parseFloat(formData.get('lng') as string)
+
+    // Check if address changed to trigger re-geocoding
+    const { data: currentStudio } = await supabase.from('studios').select('address, location').eq('id', studioId).single()
+    if (currentStudio && (currentStudio.address !== address || currentStudio.location !== location)) {
+        const geoResult = await getGeocodeAction(`${address}, ${location}`);
+        if (geoResult?.data?.location) {
+            lat = geoResult.data.location.lat;
+            lng = geoResult.data.location.lng;
+        }
+    }
 
     // Parse equipment
     // Parse inventory quantities first to know the amounts
@@ -575,7 +600,7 @@ export async function updateStudio(formData: FormData) {
     // Pricing was parsed successfully via replaced block
 
     if (!studioId || !name || !location || !contactNumber || !address || !formData.get('googleMapsUrl')) {
-        return { error: 'All fields are required (including Full Address and Google Maps Link)' }
+        return { error: 'All fields are required (including Display Address and Google Maps Link)' }
     }
 
     const adminSupabase = createAdminClient()
@@ -655,6 +680,7 @@ export async function updateStudio(formData: FormData) {
         pricing: pricing,
         inventory: inventory,
         google_maps_url: formData.get('googleMapsUrl') as string || null,
+        floor_or_unit: floorOrUnit || null,
         amenities: formData.getAll('amenities') as string[],
         lat: isNaN(lat) ? null : lat,
         lng: isNaN(lng) ? null : lng

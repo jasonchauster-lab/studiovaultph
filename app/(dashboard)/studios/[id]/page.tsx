@@ -1,7 +1,7 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 import { notFound } from 'next/navigation'
-import { MapPin, Clock, Users, Star, ShowerHead, Droplets, Car, Wifi, Square, Lock, Shirt, CheckCircle2, Image as ImageIcon, ExternalLink } from 'lucide-react'
+import { MapPin, Clock, Users, Star, ShowerHead, Droplets, Car, Wifi, Square, Lock, Shirt, CheckCircle2, Image as ImageIcon, ExternalLink, Navigation } from 'lucide-react'
 import BookingSection from '@/components/customer/BookingSection'
 import StarRating from '@/components/reviews/StarRating'
 import ReviewList from '@/components/reviews/ReviewList'
@@ -216,18 +216,21 @@ export default async function StudioDetailsPage(props: {
                             )}
                         </div>
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-burgundy/60 font-medium whitespace-nowrap">
-                            <div className="flex items-center gap-1.5">
-                                <MapPin className="w-4 h-4 text-sage" />
-                                {studio.location}
+                            <div className="flex items-center gap-1.5 flex-wrap justify-center md:justify-start">
+                                <MapPin className="w-4 h-4 text-sage shrink-0" />
+                                <span className="font-bold text-burgundy/80">
+                                    {studio.floor_or_unit ? `${studio.floor_or_unit}, ` : ''}
+                                    {studio.address || studio.location}
+                                </span>
                             </div>
                             <a
-                                href={`https://maps.google.com/?q=${encodeURIComponent((studio.address || studio.location) + ', Philippines')}`}
+                                href={studio.google_maps_url || `https://maps.google.com/?q=${encodeURIComponent((studio.floor_or_unit ? studio.floor_or_unit + ', ' : '') + (studio.address || studio.location) + ', Philippines')}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 text-xs font-bold text-sage hover:text-sage/80 border border-sage/50 hover:border-sage/80 px-4 py-1.5 rounded-full transition-all duration-200 bg-sage/10 hover:bg-sage/20"
+                                className="flex items-center gap-1.5 text-xs font-bold text-sage hover:text-sage/80 border border-sage/50 hover:border-sage/80 px-4 py-1.5 rounded-full transition-all duration-200 bg-sage/10 hover:bg-sage/20 shadow-sm active:scale-95"
                             >
-                                <MapPin className="w-3 h-3" />
-                                Open in Google Maps
+                                <Navigation className="w-3.5 h-3.5" />
+                                <span>Directions</span>
                             </a>
                             <div className="flex items-center gap-1.5">
                                 <StarRating rating={averageRating} count={totalCount} size="sm" />

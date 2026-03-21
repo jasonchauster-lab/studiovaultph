@@ -18,9 +18,11 @@ const StudioPreviewModal = ({ studio, details, loading, onClose }: StudioPreview
 
     // Generate Google Maps URL
     const getMapsUrl = () => {
-        const address = details?.studio?.address || studio.address || details?.studio?.location || studio.location
-        if (!address) return null
-        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+        const addr = details?.studio?.address || studio.address || details?.studio?.location || studio.location
+        const floor = details?.studio?.floor_or_unit || studio.floor_or_unit
+        if (!addr) return null
+        const fullQuery = floor ? `${floor}, ${addr}` : addr
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullQuery)}`
     }
 
     const mapsUrl = getMapsUrl()
@@ -62,9 +64,14 @@ const StudioPreviewModal = ({ studio, details, loading, onClose }: StudioPreview
                         
                         {(details?.studio?.location || studio.location) && (
                             <div className="flex flex-col items-center gap-3 mt-2">
-                                <p className="text-xs text-charcoal/50 flex items-center gap-1 font-medium italic">
-                                    <MapPin className="w-3 h-3 text-burgundy/40" />
-                                    {details?.studio?.location || studio.location}
+                                <p className="text-[11px] text-charcoal/70 flex items-center justify-center gap-1.5 font-bold leading-tight">
+                                    <MapPin className="w-3.5 h-3.5 text-burgundy/60 shrink-0" />
+                                    <span>
+                                        {details?.studio?.floor_or_unit || studio.floor_or_unit ? (
+                                            <span className="text-burgundy/80">{(details?.studio?.floor_or_unit || studio.floor_or_unit)}, </span>
+                                        ) : null}
+                                        {details?.studio?.address || studio.address || details?.studio?.location || studio.location}
+                                    </span>
                                 </p>
                                 
                                 {mapsUrl && (
