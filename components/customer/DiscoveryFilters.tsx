@@ -198,43 +198,17 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                     </div>
                 </div>
 
-                {/* Distance and Location Group */}
-                <div className="flex flex-col sm:flex-row gap-6 pt-6 sm:pt-8 lg:pt-0 border-t lg:border-t-0 border-burgundy/5 lg:border-l lg:pl-8">
-                    <div className="flex flex-col gap-2.5 min-w-[140px] flex-1 lg:flex-none">
-                        <label className="text-[9px] font-black text-burgundy/30 uppercase tracking-[0.2em] ml-1.5 flex items-center justify-between">
-                            Distance
-                            {hasLocation && <span className="text-forest lowercase italic font-medium">Active</span>}
-                        </label>
-                        <div className="flex items-center gap-3">
-                            <div className="relative group/select flex-1 min-w-[130px]">
-                                <select
-                                    onChange={(e) => handleFilter('radius', e.target.value)}
-                                    value={currentRadius}
-                                    className="w-full pl-5 pr-10 py-3 bg-off-white/50 border border-burgundy/5 rounded-xl sm:rounded-2xl text-[11px] font-black uppercase tracking-widest text-burgundy shadow-sm appearance-none cursor-pointer hover:bg-white hover:border-burgundy/20 h-[50px] sm:h-[54px]"
-                                >
-                                    <option value="all">Any Dist.</option>
-                                    <option value="5">Within 5km</option>
-                                    <option value="10">Within 10km</option>
-                                    <option value="20">Within 20km</option>
-                                    <option value="50">Within 50km</option>
-                                </select>
-                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-burgundy/30 pointer-events-none" />
-                            </div>
-
-                            <button
-                                onClick={handleLocationDetect}
-                                type="button"
-                                className={clsx(
-                                    "p-4 rounded-xl sm:rounded-2xl border transition-all shadow-sm active:scale-95 h-[50px] sm:h-[54px] flex items-center justify-center w-[54px]",
-                                    hasLocation ? "bg-forest text-white border-forest" : "bg-off-white/50 border-burgundy/5 text-burgundy/40 hover:bg-white hover:border-burgundy/20"
-                                )}
-                                title="Detect My Location"
-                            >
-                                {isDetecting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
-                            </button>
-                        </div>
+                {/* Clear Filters (Desktop Only) */}
+                {hasFilters && (
+                    <div className="pt-6 sm:pt-8 lg:pt-0 lg:border-l lg:pl-8 hidden lg:block">
+                        <button
+                            onClick={clearAllFilters}
+                            className="text-[10px] font-black text-burgundy/60 hover:text-white hover:bg-burgundy transition-all duration-500 uppercase tracking-[0.2em] flex items-center gap-2 px-8 py-4.5 rounded-2xl bg-off-white border border-burgundy/10 hover:border-burgundy shadow-sm transform active:scale-95"
+                        >
+                            Clear All Filters
+                        </button>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     )

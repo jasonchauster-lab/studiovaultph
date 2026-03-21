@@ -51,6 +51,9 @@ interface InstructorDashboardClientProps {
         id: string;
         teaching_equipment?: string[];
         rates?: Record<string, number>;
+        home_base_address?: string | null;
+        offers_home_sessions?: boolean;
+        max_travel_km?: number;
     } | null;
 }
 
@@ -268,6 +271,30 @@ export default function InstructorDashboardClient({
                     </div>
                 </div>
             </div>
+
+            {/* Service Area Setup Prompt */}
+            {!instructorProfile?.home_base_address && (
+                <div className="bg-forest/5 border border-forest/10 rounded-[32px] p-8 sm:p-12 mb-12 relative overflow-hidden group/service transition-all hover:bg-forest/10">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                    <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                        <div className="w-20 h-20 bg-forest text-white rounded-[24px] flex items-center justify-center shadow-cloud shrink-0 group-hover/service:scale-110 transition-transform duration-700">
+                            <MapPin className="w-8 h-8" />
+                        </div>
+                        <div className="flex-1 text-center md:text-left">
+                            <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tight mb-2">Connect with Clients at Home</h2>
+                            <p className="text-[11px] font-bold text-charcoal/40 uppercase tracking-widest leading-relaxed max-w-2xl">
+                                You haven't set your service area yet. Pin your home base and define your travel radius to appear in "Home Session" searches and grow your reach.
+                            </p>
+                        </div>
+                        <Link 
+                            href="/instructor/profile"
+                            className="px-10 py-5 bg-forest text-white text-[11px] font-black uppercase tracking-widest rounded-2xl hover:brightness-110 transition-all shadow-cloud active:scale-95 whitespace-nowrap"
+                        >
+                            Setup Service Area
+                        </Link>
+                    </div>
+                </div>
+            )}
 
             {/* Analytics Cards */}
             <InstructorStatCards

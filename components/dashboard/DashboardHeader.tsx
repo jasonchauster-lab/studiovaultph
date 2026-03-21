@@ -46,7 +46,6 @@ export default function DashboardHeader({ profile, studioData, avatarUrl, onOpen
                     >
                         <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
-                    
                     <Link href="/welcome" aria-label="Go to Welcome Dashboard" className="group">
                         <Image
                             src="/logo4.png"
@@ -63,7 +62,11 @@ export default function DashboardHeader({ profile, studioData, avatarUrl, onOpen
                 </div>
 
                 {/* Center: Search Pill (Desktop Search Only) */}
-                {isCustomer && <HeaderSearchPill />}
+                {(profile?.role === 'customer' || profile?.role === 'instructor') && (
+                    <div className="flex-1 max-w-2xl px-4 hidden md:block">
+                        <HeaderSearchPill />
+                    </div>
+                )}
 
                 {/* Right: Profile / Notifications */}
                 <div className="flex items-center gap-3 sm:gap-6">
