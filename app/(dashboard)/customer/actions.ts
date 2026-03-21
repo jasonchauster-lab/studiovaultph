@@ -16,8 +16,8 @@ export async function requestBooking(
     bookingEnd?: string,
     bookingType: 'studio' | 'home' = 'studio',
     clientAddress?: string,
-    clientLat?: number,
-    clientLng?: number
+    clientLat?: number | null,
+    clientLng?: number | null
 ) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
