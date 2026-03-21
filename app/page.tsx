@@ -60,7 +60,7 @@ export default function LandingPage() {
 
       <main>
         {/* ─── Hero Section — Asymmetrical Digital Atelier ─── */}
-        <section className="relative px-6 md:px-12 py-20 md:py-32 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 lg:gap-24 overflow-hidden">
+        <section className="relative px-6 md:px-12 py-24 md:py-48 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 lg:gap-24 overflow-hidden">
           
           {/* Left: Content with Asymmetric Breathing Room */}
           <div className="flex-1 w-full flex flex-col gap-y-10 relative z-10 lg:pr-12">
@@ -112,7 +112,7 @@ export default function LandingPage() {
           <div className="flex-1 relative w-full lg:h-[700px] animate-in fade-in zoom-in duration-1000 delay-300 lg:-mr-20">
             <div className="w-full h-full min-h-[450px] lg:min-h-[700px] rounded-xl overflow-hidden shadow-ambient group bg-surface-container-low relative">
               <Image
-                src="/images/homepage/hero_lifestyle_reformer.png"
+                src="/images/homepage/hero_pilates_lifestyle.png"
                 alt="Instructor and client using a Pilates reformer together"
                 fill
                 className="object-cover transition-transform duration-1000 group-hover:scale-105"

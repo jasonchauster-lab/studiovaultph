@@ -151,14 +151,14 @@ export default async function AdminDashboard({
             supabase.from('admin_activity_logs')
                 .select('id, action_type, entity_type, entity_id, details, created_at, admin:profiles!admin_id(full_name, email)')
                 .order('created_at', { ascending: false })
-                .limit(500),
+                .limit(100),
 
             // 13. All users (capped at 1000 — prevents unbounded fetch on large platforms)
             (() => {
                 let query = supabase.from('profiles')
                     .select('id, full_name, email, role, created_at, available_balance, is_suspended, contact_number, waiver_url, waiver_signed_at')
                     .order('created_at', { ascending: false })
-                    .limit(1000)
+                    .limit(100)
                 
                 if (searchQuery) {
                     query = query.or(`email.ilike.%${searchQuery}%,contact_number.ilike.%${searchQuery}%`)

@@ -1,8 +1,17 @@
 /**
- * Validates if a file is an HEIC or HEIF image.
- * Also catches files with empty MIME types that have HEIC/HEIF extensions.
+ * Validates if a file or URL/path is an HEIC or HEIF image.
+ * Supports File objects and string URLs/paths.
  */
-export const isHeicFile = (file: File): boolean => {
+export const isHeicFile = (file: File | string | null | undefined): boolean => {
+    if (!file) return false;
+    
+    if (typeof file === 'string') {
+        const lower = file.toLowerCase();
+        // Handle URLs with query parameters safely
+        const pathPart = lower.split('?')[0];
+        return pathPart.endsWith('.heic') || pathPart.endsWith('.heif');
+    }
+
     const name = file.name.toLowerCase();
     return (
         file.type === 'image/heic' ||

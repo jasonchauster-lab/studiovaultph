@@ -1,11 +1,10 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { User } from 'lucide-react'
 import { clsx } from 'clsx'
 
-import { getTransformedImageUrl } from '@/lib/utils/image-utils'
+import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
+import { isHeicFile } from '@/lib/utils/image-utils'
 
 interface AvatarProps {
     src?: string | null
@@ -44,12 +43,15 @@ export default function Avatar({
     }
 
     const showFallback = error || !src || src === '/default-avatar.svg'
-    const isHeic = src?.toLowerCase().endsWith('.heic') || src?.toLowerCase().endsWith('.heif')
+    const isHeic = isHeicFile(src)
     
-    // If it's HEIC, try to transform it to JPEG via Supabase Render Engine
-    const finalSrc = (src && isHeic && src.includes('supabase.co')) 
-        ? getTransformedImageUrl(src, { width: size * 2, format: 'jpg' }) // 2x for retina
-        : src;
+    // Use the centralized Supabase Render Engine transformation for all Supabase assets
+    // This handles HEIC to WebP/JPG conversion and resizing automatically
+    const finalSrc = (src && src.includes('supabase.co')) 
+        ? getSupabaseAssetUrl(src, 'avatars', { width: size * 2, quality: 80, format: 'webp' })
+        : (src && !src.startsWith('http') && !src.startsWith('blob:'))
+            ? getSupabaseAssetUrl(src, 'avatars', { width: size * 2, quality: 80 })
+            : src;
 
     if (!isMounted) {
         return <div style={{ width: size, height: size }} className={clsx("rounded-full bg-cream-100 animate-pulse", className)} />
