@@ -505,6 +505,8 @@ export async function updateStudio(formData: FormData) {
     const contactNumber = formData.get('contactNumber') as string
     const address = formData.get('address') as string
     const description = formData.get('description') as string
+    const lat = parseFloat(formData.get('lat') as string)
+    const lng = parseFloat(formData.get('lng') as string)
 
     // Parse equipment
     // Parse inventory quantities first to know the amounts
@@ -653,7 +655,9 @@ export async function updateStudio(formData: FormData) {
         pricing: pricing,
         inventory: inventory,
         google_maps_url: formData.get('googleMapsUrl') as string || null,
-        amenities: formData.getAll('amenities') as string[]
+        amenities: formData.getAll('amenities') as string[],
+        lat: isNaN(lat) ? null : lat,
+        lng: isNaN(lng) ? null : lng
     }
 
     if (newLogoUrl) {

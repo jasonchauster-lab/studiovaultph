@@ -21,6 +21,11 @@ export async function updateProfile(formData: FormData) {
     const avatarFile = formData.get('avatar') as File
     const bannerFile = formData.get('banner') as File
     const otherMedicalCondition = formData.get('otherMedicalCondition') as string
+    const offersHomeSessions = formData.get('offersHomeSessions') === 'on'
+    const homeBaseAddress = formData.get('homeBaseAddress') as string
+    const homeBaseLat = parseFloat(formData.get('homeBaseLat') as string)
+    const homeBaseLng = parseFloat(formData.get('homeBaseLng') as string)
+    const maxTravelKm = parseInt(formData.get('maxTravelKm') as string)
 
     // Extract all values for teaching_equipment (checkboxes)
     const teachingEquipment = formData.getAll('teaching_equipment') as string[]
@@ -38,6 +43,11 @@ export async function updateProfile(formData: FormData) {
         teaching_equipment: teachingEquipment, // Save array
         medical_conditions: medicalConditions, // Save medical conditions
         other_medical_condition: otherMedicalCondition, // Save other medical conditions
+        offers_home_sessions: offersHomeSessions,
+        home_base_address: homeBaseAddress,
+        home_base_lat: isNaN(homeBaseLat) ? null : homeBaseLat,
+        home_base_lng: isNaN(homeBaseLng) ? null : homeBaseLng,
+        max_travel_km: isNaN(maxTravelKm) ? 10 : maxTravelKm,
         rates: {} // Initialize
     }
 

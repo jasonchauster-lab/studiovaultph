@@ -8,264 +8,159 @@ import BookingNotificationEmail from '@/components/emails/BookingNotificationEma
 import { formatManilaDate, formatManilaTime, roundToISOString, formatManilaDateStr, formatTo12Hour, toManilaDateStr, getManilaTodayStr, normalizeTimeTo24h, toManilaTimeString } from '@/lib/timezone'
 
 export async function requestBooking(
-    slotId: string,
+    slotId: string | null,
     instructorId: string,
     quantity: number = 1,
     equipment?: string,
     bookingStart?: string, // optional custom range
-    bookingEnd?: string
+    bookingEnd?: string,
+    bookingType: 'studio' | 'home' = 'studio',
+    clientAddress?: string,
+    clientLat?: number,
+    clientLng?: number
 ) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-
     if (!user) return { error: 'Unauthorized' }
 
-    // 1. Fetch available slot (WITHOUT JOIN first to be safe)
-    // 1. Fetch available slot with joined studio details for efficiency
-    const { data: slot, error: slotError } = await supabase
-        .from('slots')
-        .select('*, studios!inner(pricing, hourly_rate, id, is_founding_partner, custom_fee_percentage, location, profiles!owner_id(available_balance, is_suspended, full_name, email))')
-        .eq('id', slotId)
-        .eq('is_available', true)
-        .single()
+    let actualBookingId: string | null = null;
+    let studioOwnerProfile: any = null;
 
-    if (slotError || !slot) {
-        console.error(`Slot fetch error. ID: ${slotId}`, slotError);
-        return { error: `This slot is no longer available. (ID: ${slotId})` }
-    }
+    // --- CASE A: STUDIO BOOKING ---
+    if (bookingType === 'studio') {
+        if (!slotId) return { error: 'Slot ID is required for studio bookings.' };
 
-    const studio = (slot as any)?.studios;
+        // 1. Fetch available slot
+        const { data: slot, error: slotError } = await supabase
+            .from('slots')
+            .select('*, studios!inner(pricing, hourly_rate, id, is_founding_partner, custom_fee_percentage, location, profiles!owner_id(available_balance, is_suspended, full_name, email))')
+            .eq('id', slotId)
+            .eq('is_available', true)
+            .single()
 
-    // 2.1 Check Studio Owner's Status
-    const studioOwnerProfile = Array.isArray(studio.profiles) ? studio.profiles[0] : studio.profiles;
-    if (studioOwnerProfile?.is_suspended) {
-        return { error: `The studio "${studioOwnerProfile.full_name || 'Partner Studio'}" is currently not accepting new bookings.` }
-    }
-    if (studioOwnerProfile && (studioOwnerProfile.available_balance ?? 0) < 0) {
-        return { error: `The studio "${studioOwnerProfile.full_name || 'Partner Studio'}" is currently not accepting new bookings due to a pending balance settlement.` }
-    }
+        if (slotError || !slot) return { error: `Slot no longer available.` }
 
-    // Fetch Instructor Rates and Balance
-    const { data: instructor } = await supabase
-        .from('profiles')
-        .select('full_name, rates, is_founding_partner, custom_fee_percentage, available_balance')
-        .eq('id', instructorId)
-        .single()
-
-    if (instructor && (instructor.available_balance ?? 0) < 0) {
-        return { error: `${instructor.full_name || 'The instructor'} is currently not accepting new bookings due to a pending balance settlement.` }
-    }
-
-    // --- EQUIPMENT DETERMINATION START ---
-    let equipmentObj: Record<string, number> = {};
-    if (slot.equipment && typeof slot.equipment === 'object') {
-        if (Array.isArray(slot.equipment)) {
-            slot.equipment.forEach((item: any) => {
-                if (typeof item === 'string') {
-                    equipmentObj[item.trim().toUpperCase()] = 1;
-                }
-            });
-        } else {
-            equipmentObj = slot.equipment as Record<string, number>;
+        const studio = (slot as any)?.studios;
+        studioOwnerProfile = Array.isArray(studio.profiles) ? studio.profiles[0] : studio.profiles;
+        if (studioOwnerProfile?.is_suspended || (studioOwnerProfile?.available_balance ?? 0) < 0) {
+            return { error: `Studio is not accepting new bookings.` }
         }
-    }
 
-    const requestedEqStripped = (equipment || '').trim().toLowerCase();
-    const actualKey = Object.keys(equipmentObj).find(k => k.trim().toLowerCase() === requestedEqStripped)
-        || Object.keys(equipmentObj)[0]
-        || '';
+        // Fetch Instructor
+        const { data: instructor } = await supabase.from('profiles').select('full_name, rates, is_founding_partner, custom_fee_percentage, available_balance').eq('id', instructorId).single()
+        if (instructor && (instructor.available_balance ?? 0) < 0) return { error: `Instructor is not accepting bookings.` }
 
-    const selectedEquipment = actualKey;
-    // --- EQUIPMENT DETERMINATION END ---
+        // --- DOUBLE BOOKING CHECK ---
+        const timeStr = normalizeTimeTo24h(slot.start_time);
+        const { data: overlapping } = await supabase.from('bookings').select('id').eq('instructor_id', instructorId).in('status', ['pending', 'approved']).eq('booking_date', slot.date).eq('booking_start_time', timeStr);
+        if (overlapping && overlapping.length > 0) return { error: 'Instructor already booked for this time.' }
 
-    // ✅ Derive date & day using the new date and start_time columns (pure strings)
-    const manilaDateStr = slot.date;
-    const tempDate = new Date(`${slot.date}T${slot.start_time}+08:00`);
-    const manilaDayOfWeek = tempDate.getDay();
-    // Normalize to HH:mm:ss for consistent instructor_availability comparison
-    const timeStr = normalizeTimeTo24h(slot.start_time);
+        // --- PRICE CALCULATION ---
+        const studioPricing = studio.pricing as Record<string, number> | null;
+        const sKey = Object.keys(studioPricing || {}).find(k => k.toLowerCase() === (equipment || '').toLowerCase());
+        const studioFee = sKey ? (studioPricing?.[sKey] || 0) : (Number(studio.hourly_rate) || 0);
 
-    // ✅ Run TWO separate queries instead of .or() to avoid PostgREST NULL ambiguity:
-    // Both studio.location and instructor location_area are trimmed to avoid whitespace mismatch.
-    const trimmedLocation = studio.location?.trim()
+        const instructorRates = instructor?.rates as Record<string, number> | null;
+        const instructorKey = Object.keys(instructorRates || {}).find(k => k.toUpperCase() === 'REFORMER');
+        const instructorFee = instructorKey ? (instructorRates?.[instructorKey] || 0) : 0;
 
-    // Query A: date-specific availability (instructor set a specific date)
-    const { data: availByDate } = await supabase
-        .from('instructor_availability')
-        .select('id, group_id, location_area')
-        .eq('instructor_id', instructorId)
-        .eq('date', manilaDateStr)
-        .lte('start_time', timeStr)
-        .gt('end_time', timeStr);
+        const baseFee = studioFee + instructorFee;
+        let feePercentage = 20;
+        if (studio?.custom_fee_percentage !== undefined) feePercentage = studio.custom_fee_percentage;
+        else if (instructor?.custom_fee_percentage !== undefined) feePercentage = instructor.custom_fee_percentage;
 
-    // Query B: weekly recurring availability (instructor set a day_of_week)
-    const { data: availByDay } = await supabase
-        .from('instructor_availability')
-        .select('id, group_id, location_area')
-        .eq('instructor_id', instructorId)
-        .eq('day_of_week', manilaDayOfWeek)
-        .is('date', null) // Only weekly-recurring entries (not date-specific)
-        .lte('start_time', timeStr)
-        .gt('end_time', timeStr);
+        const calculatedServiceFee = baseFee * (feePercentage / 100);
+        const serviceFee = Math.max(100, calculatedServiceFee);
+        const totalPrice = (baseFee + serviceFee) * quantity;
 
-    const matchingTimeBlocks = [...(availByDate || []), ...(availByDay || [])];
+        // --- WALLET DEDUCTION ---
+        const { data: profile } = await supabase.from('profiles').select('available_balance').eq('id', user.id).single();
+        const deduction = Math.min(profile?.available_balance ?? 0, totalPrice);
+        const finalPrice = totalPrice - deduction;
 
-    // Fuzzy Location Match
-    let isValidLocation = false;
-
-    if (matchingTimeBlocks.length > 0) {
-        const studioLocLower = (trimmedLocation || '').toLowerCase();
-        isValidLocation = matchingTimeBlocks.some(block => {
-            const blockLocLower = (block.location_area || '').toLowerCase();
-            return !blockLocLower || studioLocLower.includes(blockLocLower) || blockLocLower.includes(studioLocLower);
+        // --- ATOMIC RPC ---
+        const { data: rpcResult, error: rpcError } = await supabase.rpc('book_slot_atomic', {
+            p_slot_id: slotId, p_instructor_id: instructorId, p_client_id: user.id, p_equipment_key: equipment?.toUpperCase() || 'MAT',
+            p_quantity: quantity, p_db_price: finalPrice, p_price_breakdown: { studio_fee: studioFee, instructor_fee: instructorFee, service_fee: serviceFee },
+            p_wallet_deduction: deduction
         });
 
-        if (!isValidLocation) {
-            return { error: `${instructor?.full_name || 'The instructor'} is not available at ${trimmedLocation} during this time. (Location mismatch)` }
+        if (rpcError || !rpcResult?.success) return { error: 'Booking failed.' };
+        actualBookingId = rpcResult.booking_id;
+
+        // Update home-specific columns for unified search
+        await supabase.from('bookings').update({ 
+            booking_date: slot.date, 
+            booking_start_time: slot.start_time, 
+            booking_end_time: slot.end_time 
+        }).eq('id', actualBookingId);
+    }
+    // --- CASE B: HOME BOOKING ---
+    else {
+        // Fetch Instructor
+        const { data: instructor } = await supabase.from('profiles').select('*').eq('id', instructorId).single();
+        if (!instructor?.offers_home_sessions) return { error: 'Instructor does not offer home sessions.' };
+        if (instructor.available_balance < 0) return { error: 'Instructor not accepting bookings.' };
+
+        // Distance Check
+        if (instructor.home_base_lat && instructor.home_base_lng && clientLat && clientLng) {
+            const { calculateDistance } = await import('@/lib/utils/location');
+            const dist = calculateDistance(Number(instructor.home_base_lat), Number(instructor.home_base_lng), clientLat, clientLng);
+            if (dist > (instructor.max_travel_km || 10)) return { error: 'Outside of travel range.' };
         }
-    } else {
-        // If there are no matching time blocks, check if they have ANY blocks globally
-        const { count: globalBlockCount } = await supabase
-            .from('instructor_availability')
-            .select('*', { count: 'exact', head: true })
-            .eq('instructor_id', instructorId);
 
-        if (globalBlockCount && globalBlockCount > 0) {
-            return { error: `${instructor?.full_name || 'The instructor'} is not available at this date and time.` }
+        // Availability (Basic check using date & time from strings)
+        const dateStr = bookingStart?.split('T')[0];
+        const timeStr = bookingStart?.split('T')[1]?.split('.')[0]; // HH:mm:ss
+        if (!dateStr || !timeStr) return { error: 'Invalid date/time.' };
+
+        // Double Booking Check
+        const { data: overlapping } = await supabase.from('bookings').select('id').eq('instructor_id', instructorId).in('status', ['pending', 'approved']).eq('booking_date', dateStr).eq('booking_start_time', timeStr);
+        if (overlapping && overlapping.length > 0) return { error: 'Instructor already booked for this time.' }
+
+        // Price Calculation (Instructor Rate only)
+        const instructorRates = (instructor?.rates as any) || {};
+        const instructorFee = instructorRates['MAT'] || 1500;
+        const serviceFee = Math.max(100, instructorFee * 0.2);
+        const totalPrice = (instructorFee + serviceFee) * quantity;
+
+        // Wallet Deduction
+        const { data: profile } = await supabase.from('profiles').select('available_balance').eq('id', user.id).single();
+        const deduction = Math.min(profile?.available_balance ?? 0, totalPrice);
+        const finalPrice = totalPrice - deduction;
+
+        if (deduction > 0) {
+            await supabase.rpc('deduct_available_balance', { p_user_id: user.id, p_amount: deduction });
         }
-        // If 0 blocks globally, we allow the booking (fallback)
+
+        // Insert Booking
+        const { data: newBooking, error: insertError } = await supabase.from('bookings').insert({
+            instructor_id: instructorId,
+            client_id: user.id,
+            status: 'pending',
+            total_price: finalPrice,
+            location_type: 'home',
+            home_address: clientAddress,
+            home_lat: clientLat,
+            home_lng: clientLng,
+            booking_date: dateStr,
+            booking_start_time: timeStr,
+            booking_end_time: bookingEnd?.split('T')[1]?.split('.')[0],
+            price_breakdown: { instructor_fee: instructorFee, service_fee: serviceFee, wallet_deduction: deduction },
+            expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString()
+        }).select().single();
+
+        if (insertError) return { error: insertError.message };
+        actualBookingId = newBooking.id;
     }
 
-    // --- DOUBLE BOOKING VALIDATION START ---
-    const { data: overlappingBookings } = await supabase
-        .from('bookings')
-        .select('id, slots!inner(start_time, date)')
-        .eq('instructor_id', instructorId)
-        .in('status', ['pending', 'approved'])
-        .eq('slots.date', slot.date)
-        .eq('slots.start_time', slot.start_time);
+    if (!actualBookingId) return { error: 'Booking failed.' };
 
-    if (overlappingBookings && overlappingBookings.length > 0) {
-        return { error: 'The instructor is already booked for this time slot.' }
-    }
-    // --- DOUBLE BOOKING VALIDATION END ---
-    // --- AVAILABILITY VALIDATION END ---
-
-    // --- PRICE CALCULATION START ---
-    if (!selectedEquipment) {
-        return { error: 'No equipment type could be determined for this slot. Please select an equipment type and try again.' }
-    }
-
-    if (!equipmentObj[selectedEquipment] || equipmentObj[selectedEquipment] <= 0) {
-        const available = Object.keys(equipmentObj).join(', ') || 'none';
-        return { error: `"${selectedEquipment}" is not available in this slot. Available equipment: ${available}.` }
-    }
-
-    // 2. Studio Price: Use the specific equipment rate, fallback to hourly_rate
-    const studioPricing = studio.pricing as Record<string, number> | null;
-    const sKey = Object.keys(studioPricing || {}).find(k => k.toLowerCase() === selectedEquipment.toLowerCase());
-    const studioFee = sKey ? (studioPricing?.[sKey] || 0) : (Number(studio.hourly_rate) || 0);
-
-    // 3. Instructor Price: Always use the REFORMER rate as their base fee
-    const instructorRates = instructor?.rates as Record<string, number> | null;
-    const instructorKey = Object.keys(instructorRates || {}).find(k => k.toUpperCase() === 'REFORMER');
-    const instructorFee = instructorKey ? (instructorRates?.[instructorKey] || 0) : 0;
-
-    // 4. Calculate Service Fee
-    const baseFee = studioFee + instructorFee;
-
-    // Determine the fee percentage
-    let feePercentage = 20;
-    if (studio?.custom_fee_percentage !== undefined) {
-        feePercentage = studio.custom_fee_percentage;
-    } else if (instructor?.custom_fee_percentage !== undefined) {
-        feePercentage = instructor.custom_fee_percentage;
-    }
-
-    const calculatedServiceFee = baseFee * (feePercentage / 100);
-    const serviceFee = Math.max(100, calculatedServiceFee);
-
-    const pricePerSlot = baseFee + serviceFee;
-    const totalPrice = pricePerSlot * quantity;
-
-    // --- WALLET AUTO-DEDUCTION START ---
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('available_balance')
-        .eq('id', user.id)
-        .single();
-
-    const walletBalance = profile?.available_balance ?? 0;
-    const deduction = Math.min(walletBalance, totalPrice);
-    const finalPrice = totalPrice - deduction;
-    // --- WALLET AUTO-DEDUCTION END ---
-
-    const breakdown = {
-        studio_fee: studioFee * quantity,
-        instructor_fee: instructorFee * quantity,
-        service_fee: serviceFee * quantity,
-        equipment: selectedEquipment,
-        quantity: quantity,
-        wallet_deduction: deduction > 0 ? deduction : undefined,
-        original_price: deduction > 0 ? totalPrice : undefined
-    };
-
-    // --- ATOMIC BOOKING VIA RPC START ---
-    // 1. Resolve exact Key matching (case-insensitive) to prevent "REFORMER" vs "Reformer" mismatch
-    const currentEquipment = equipmentObj;
-    const exactDbKey = Object.keys(currentEquipment).find(
-        key => key.trim().toUpperCase() === selectedEquipment.trim().toUpperCase()
-    );
-
-    if (!exactDbKey || (currentEquipment[exactDbKey] ?? 0) < quantity) {
-        return { error: `Failed to extract equipment for booking. Requested: ${selectedEquipment}` };
-    }
-
-    // Prepare time parameters if it's a partial time booking
-    let reqStartTime: string | null = null;
-    let reqEndTime: string | null = null;
-
-    if (bookingStart && bookingEnd) {
-        const rStart = new Date(bookingStart + '+08:00');
-        const rEnd = new Date(bookingEnd + '+08:00');
-        // Extract just the HH:MM:SS for the RPC
-        reqStartTime = toManilaTimeString(rStart);
-        reqEndTime = toManilaTimeString(rEnd);
-    }
-
-    // 2. Execute Atomic RPC
-    const { data: rpcResult, error: rpcError } = await supabase.rpc('book_slot_atomic', {
-        p_slot_id: slotId,
-        p_instructor_id: instructorId,
-        p_client_id: user.id,
-        p_equipment_key: exactDbKey,
-        p_quantity: quantity,
-        p_db_price: finalPrice,
-        p_price_breakdown: breakdown,
-        p_wallet_deduction: deduction,
-        p_req_start_time: reqStartTime,
-        p_req_end_time: reqEndTime
-    });
-
-    if (rpcError) {
-        console.error('Atomic Booking RPC Error:', rpcError);
-        return { error: `Booking failed. Please try again. (${rpcError.message})` };
-    }
-
-    if (!rpcResult?.success) {
-        console.error('Atomic Booking RPC Error returned false:', rpcResult);
-        return { error: `Booking failed. Please try again.` };
-    }
-
-    const { booking_id: actualBookingId } = rpcResult;
-    // --- ATOMIC BOOKING VIA RPC END ---
-
-    // Fetch the enriched booking to send emails
+    // --- ENRICHED BOOKING FETCH AND EMAILS ---
     const { data: booking, error: fetchBookingError } = await supabase
         .from('bookings')
         .select(`
             *,
-            price_breakdown,
             slots (
                 date,
                 start_time,
@@ -285,88 +180,71 @@ export async function requestBooking(
         .eq('id', actualBookingId)
         .single();
 
-    if (fetchBookingError || !booking) {
-        console.error('Enriched Booking fetch error:', fetchBookingError);
-        // We log and return success because the booking *actually* succeeded!
-        // We just skip emails if this fails gracefully.
+    if (booking && !fetchBookingError) {
+        const clientEmail = user.email;
+        const instructorEmail = (booking.profiles as any)?.email;
+        const instructorName = (booking.profiles as any)?.full_name || 'Instructor';
+        const studioName = (booking.slots as any)?.studios?.name || 'Home Session';
+        const studioAddress = (booking.slots as any)?.studios?.address || booking.home_address;
+        const date = formatManilaDateStr(booking.booking_date || (booking.slots as any)?.date);
+        const time = formatTo12Hour(booking.booking_start_time || (booking.slots as any)?.start_time);
+
+        if (clientEmail) {
+            await sendEmail({
+                to: clientEmail,
+                subject: `Booking Requested: ${studioName}`,
+                react: BookingNotificationEmail({
+                    recipientName: 'Valued Client',
+                    bookingType: 'New Booking',
+                    studioName,
+                    address: studioAddress,
+                    instructorName,
+                    date,
+                    time,
+                    equipment: (booking.price_breakdown as any)?.equipment || 'MAT',
+                    quantity: (booking.price_breakdown as any)?.quantity || 1
+                })
+            });
+        }
+
+        if (instructorEmail) {
+            await sendEmail({
+                to: instructorEmail,
+                subject: `New Client Booking Request`,
+                react: BookingNotificationEmail({
+                    recipientName: instructorName,
+                    bookingType: 'New Booking',
+                    studioName,
+                    clientName: 'A Client',
+                    date,
+                    time,
+                    equipment: (booking.price_breakdown as any)?.equipment || 'MAT',
+                    quantity: (booking.price_breakdown as any)?.quantity || 1
+                })
+            });
+        }
+
+        if (studioOwnerProfile?.email) {
+            await sendEmail({
+                to: studioOwnerProfile.email,
+                subject: `New Session Booked at your Studio`,
+                react: BookingNotificationEmail({
+                    recipientName: 'Studio Owner',
+                    bookingType: 'New Booking',
+                    studioName,
+                    instructorName,
+                    date,
+                    time,
+                    equipment: (booking.price_breakdown as any)?.equipment,
+                    quantity: (booking.price_breakdown as any)?.quantity
+                })
+            });
+        }
     }
-    // --- First Come, First Served logic ---
-    // Removed old deletion logic that wiped the instructor's recurring availability.
-    // The overlap validation above + UI filtering prevents double bookings.
-
-    // --- EMAIL NOTIFICATION START ---
-    const clientEmail = user.email; // Auth email
-    const clientName = 'Valued Client'; // We could fetch from profile if needed
-    const studioName = booking.slots.studios.name;
-    const studioAddress = booking.slots.studios.address;
-    const instructorName = booking.profiles?.full_name || 'Instructor';
-    const instructorEmail = booking.profiles?.email;
-    const date = formatManilaDateStr(booking.slots.date);
-    const time = formatTo12Hour(booking.slots.start_time);
-
-    // 1. Notify Client
-    if (clientEmail) {
-        await sendEmail({
-            to: clientEmail,
-            subject: `Booking Requested: ${studioName}`,
-            react: BookingNotificationEmail({
-                recipientName: clientName,
-                bookingType: 'New Booking',
-                studioName,
-                address: studioAddress,
-                instructorName,
-                date,
-                time,
-                equipment: (booking.price_breakdown as any)?.equipment,
-                quantity: (booking.price_breakdown as any)?.quantity
-            })
-        });
-    }
-
-    // 2. Notify Instructor (who is being booked)
-    if (instructorEmail) {
-        await sendEmail({
-            to: instructorEmail,
-            subject: `New Client Booking Request`,
-            react: BookingNotificationEmail({
-                recipientName: instructorName,
-                bookingType: 'New Booking',
-                studioName,
-                clientName: 'A Client', // Privacy or use name
-                date,
-                time,
-                equipment: booking.price_breakdown?.equipment,
-                quantity: booking.price_breakdown?.quantity
-            })
-        });
-    }
-
-    // 3. Notify Studio (Optional? "send an email confirmation to an instructor and a studio")
-    // If Customer books Instructor, Studio should probably know too.
-    const studioOwnerId = booking.slots.studios.owner_id;
-    const studioOwner = studioOwnerProfile; // Use the profile we fetched earlier
-
-    if (studioOwner?.email) {
-        await sendEmail({
-            to: studioOwner.email,
-            subject: `New Session Booked at your Studio`,
-            react: BookingNotificationEmail({
-                recipientName: 'Studio Owner',
-                bookingType: 'New Booking',
-                studioName,
-                instructorName,
-                date,
-                time,
-                equipment: (booking.price_breakdown as any)?.equipment,
-                quantity: (booking.price_breakdown as any)?.quantity
-            })
-        });
-    }
-    // --- EMAIL NOTIFICATION END ---
 
     revalidatePath('/customer')
     revalidatePath(`/instructors/${instructorId}`)
-    return { success: true, bookingId: booking.id }
+    return { success: true, bookingId: actualBookingId }
 }
 
 export async function submitPaymentProof(

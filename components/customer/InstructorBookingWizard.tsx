@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { findMatchingStudios } from '@/app/(dashboard)/instructors/actions'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
 import { getManilaTodayStr, toManilaDate, formatTo12Hour, normalizeTimeTo24h } from '@/lib/timezone'
+import { calculateDistance, geocodeAddress } from '@/lib/utils/location'
 import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info, Calendar, ChevronDown } from 'lucide-react'
 import clsx from 'clsx'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays, isPast, eachDayOfInterval, addHours, parse, isAfter } from 'date-fns'
@@ -66,6 +67,14 @@ export default function InstructorBookingWizard({
     const [isBooking, setIsBooking] = useState(false)
     const [success, setSuccess] = useState(false)
     const [bookingId, setBookingId] = useState<string | null>(null)
+    
+    // Home Booking States
+    const [bookingType, setBookingType] = useState<'studio' | 'home'>('studio')
+    const [clientAddress, setClientAddress] = useState('')
+    const [clientLat, setClientLat] = useState<number | null>(null)
+    const [clientLng, setClientLng] = useState<number | null>(null)
+    const [isDetectingLocation, setIsDetectingLocation] = useState(false)
+    const [homeBookingPrice, setHomeBookingPrice] = useState(0)
     const router = useRouter()
     const searchParams = useSearchParams()
     const filterLocation = searchParams.get('location')
@@ -253,10 +262,15 @@ export default function InstructorBookingWizard({
         setSelectedEquipment('')
         setQuantity(1)
         setStep(2)
+        setBookingType('studio') // Default to studio
 
         try {
-            const { studios } = await findMatchingStudios(dateStr, slot.start_time, slot.end_time, slot.location_area)
+            // New signature: findMatchingStudios(dateStr, startTime, endTime)
+            const { studios } = await findMatchingStudios(dateStr, slot.start_time, slot.end_time)
             setMatchingStudios(studios || [])
+            
+            // Calculate base home price if needed (using instructor's rate for selected slot equipment)
+            // For now, we'll wait for step 2 selection.
         } catch (error) {
             console.error(error)
         } finally {
@@ -350,17 +364,24 @@ export default function InstructorBookingWizard({
     }
 
     const handleBooking = async () => {
-        if (!selectedStudioSlot || !selectedSlot) return
+        if (!selectedSlot) return
+        if (bookingType === 'studio' && !selectedStudioSlot) return
+        if (bookingType === 'home' && (!clientLat || !clientLng)) return
+        
         setIsBooking(true)
 
         try {
             const result = await requestBooking(
-                selectedStudioSlot,
+                bookingType === 'studio' ? selectedStudioSlot : null,
                 instructorId,
                 quantity,
-                selectedEquipment,
+                selectedEquipment || 'MAT', // Default to Mat if home and nothing selected
                 selectedDate + 'T' + selectedSlot.start_time,
-                selectedDate + 'T' + selectedSlot.end_time
+                selectedDate + 'T' + selectedSlot.end_time,
+                bookingType,
+                clientAddress,
+                clientLat,
+                clientLng
             )
             if (result.success && result.bookingId) {
                 setSuccess(true)
@@ -689,8 +710,28 @@ export default function InstructorBookingWizard({
             {/* Step 2: Select Studio + Equipment + Quantity */}
             {step === 2 && (
                 <div className="space-y-8 animate-in slide-in-from-right-8 duration-500">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-serif font-bold text-charcoal">2. Select Your Studio Sanctuary</h3>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h3 className="text-xl font-serif font-bold text-charcoal">2. Choose Your Venue</h3>
+                        <div className="flex bg-off-white p-1 rounded-2xl border border-border-grey w-fit">
+                            <button 
+                                onClick={() => setBookingType('studio')}
+                                className={clsx(
+                                    "px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                                    bookingType === 'studio' ? "bg-forest text-white shadow-md" : "text-charcoal/40 hover:text-charcoal"
+                                )}
+                            >
+                                Studio
+                            </button>
+                            <button 
+                                onClick={() => setBookingType('home')}
+                                className={clsx(
+                                    "px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                                    bookingType === 'home' ? "bg-sage text-white shadow-md" : "text-charcoal/40 hover:text-charcoal"
+                                )}
+                            >
+                                Home
+                            </button>
+                        </div>
                         <button
                             onClick={() => setStep(1)}
                             className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em] hover:text-sage transition-colors flex items-center gap-2"
@@ -699,245 +740,341 @@ export default function InstructorBookingWizard({
                         </button>
                     </div>
 
-                    <div className="bg-sage/5 border border-sage/10 p-6 rounded-[24px] flex items-start gap-4 shadow-sm">
-                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0">
-                            <Info className="w-5 h-5 text-sage" />
-                        </div>
-                        <div className="text-[11px] font-medium text-charcoal/60 leading-relaxed uppercase tracking-widest pt-1">
-                            Searching for spaces in <span className="text-charcoal font-bold">{selectedSlot?.location_area}</span> on <span className="text-charcoal font-bold">{selectedDate}</span> at <span className="text-charcoal font-bold">{formatTo12Hour(selectedSlot?.start_time)}</span>
-                        </div>
-                    </div>
+                    {bookingType === 'home' ? (
+                        <div className="space-y-8 animate-in fade-in zoom-in-95 duration-300">
+                            <div className="bg-sage/5 border border-sage/10 p-8 rounded-[32px] space-y-8">
+                                <div className="space-y-2">
+                                    <h4 className="font-serif text-xl font-bold text-charcoal">Home Session Details</h4>
+                                    <p className="text-[10px] font-bold text-charcoal/40 uppercase tracking-widest">The instructor will travel to your residence.</p>
+                                </div>
 
-                    {isSearching ? (
-                        <div className="text-center py-20">
-                            <Loader2 className="w-10 h-10 animate-spin mx-auto text-sage/40" />
-                            <p className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.3em] mt-6">Consulting the Vault...</p>
-                        </div>
-                    ) : matchingStudios.length === 0 ? (
-                        <div className="text-center py-20 bg-off-white rounded-[32px] border border-dashed border-border-grey">
-                            <p className="text-[11px] font-bold text-charcoal/50 uppercase tracking-widest italic font-serif">No studios available for this specific criteria.</p>
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <button 
+                                            onClick={() => {
+                                                if (!navigator.geolocation) return alert('Geolocation not supported');
+                                                setIsDetectingLocation(true);
+                                                navigator.geolocation.getCurrentPosition(
+                                                    async (pos) => {
+                                                        const lat = pos.coords.latitude;
+                                                        const lng = pos.coords.longitude;
+                                                        setClientLat(lat);
+                                                        setClientLng(lng);
+                                                        setClientAddress(`Current Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+                                                        setIsDetectingLocation(false);
+                                                    },
+                                                    (err) => {
+                                                        console.error(err);
+                                                        alert('Could not detect location. Please enter address manually.');
+                                                        setIsDetectingLocation(false);
+                                                    }
+                                                );
+                                            }}
+                                            className="flex items-center justify-center gap-3 bg-white p-5 rounded-2xl border-2 border-border-grey hover:border-forest/30 transition-all group"
+                                        >
+                                            {isDetectingLocation ? <Loader2 className="w-5 h-5 animate-spin text-forest" /> : <MapPin className="w-5 h-5 text-forest" />}
+                                            <span className="text-[11px] font-black uppercase tracking-widest text-charcoal">Use My GPS Location</span>
+                                        </button>
+
+                                        <div className="relative">
+                                            <input 
+                                                type="text"
+                                                placeholder="Enter address manually..."
+                                                value={clientAddress}
+                                                onChange={(e) => setClientAddress(e.target.value)}
+                                                className="w-full bg-white p-5 rounded-2xl border-2 border-border-grey text-[11px] font-bold focus:border-forest/30 outline-none pr-12"
+                                            />
+                                            <button 
+                                                type="button"
+                                                onClick={async () => {
+                                                    if (!clientAddress) return;
+                                                    setIsDetectingLocation(true);
+                                                    const coords = await geocodeAddress(clientAddress);
+                                                    if (coords) {
+                                                        setClientLat(coords.lat);
+                                                        setClientLng(coords.lng);
+                                                    } else {
+                                                        alert('Could not verify address.');
+                                                    }
+                                                    setIsDetectingLocation(false);
+                                                }}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-forest hover:bg-forest/5 rounded-lg transition-colors"
+                                            >
+                                                {isDetectingLocation ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className={clsx("w-5 h-5", clientLat && "text-green-500")} />}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {clientLat && (
+                                        <div className="p-4 bg-green-50 border border-green-100 rounded-2xl flex items-center gap-3 animate-in fade-in">
+                                            <CheckCircle className="w-4 h-4 text-green-600" />
+                                            <span className="text-[10px] font-bold text-green-700 uppercase tracking-widest">Location Verified — Instructor can travel to you</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-8 rounded-[32px] border border-border-grey shadow-cloud space-y-8">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <h4 className="font-serif text-xl font-bold text-charcoal">Home Session Summary</h4>
+                                        <p className="text-[10px] font-bold text-charcoal/40 uppercase tracking-widest">Instructor: {instructorId.slice(0, 8)}...</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[10px] font-bold text-charcoal/50 uppercase tracking-widest">Session Rate</p>
+                                        <p className="text-2xl font-serif font-black text-forest">₱{instructorRates['MAT'] || '1,500'}</p>
+                                    </div>
+                                </div>
+
+                                <button 
+                                    onClick={handleBooking}
+                                    disabled={!clientLat || isBooking}
+                                    className="w-full bg-forest text-white py-5 rounded-[20px] text-[11px] font-black uppercase tracking-[0.3em] hover:brightness-110 disabled:opacity-50 disabled:grayscale transition-all shadow-cloud flex items-center justify-center gap-3"
+                                >
+                                    {isBooking ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
+                                    Confirm Home Booking
+                                </button>
+                            </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-8">
-                            {matchingStudios.map(result => (
-                                <div key={result.studio.id} className="bg-white p-8 rounded-[32px] border border-border-grey shadow-cloud space-y-8">
-                                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                                        <div className="space-y-1">
-                                            <h4 className="font-serif text-2xl font-bold text-charcoal">{result.studio.name}</h4>
-                                            <p className="text-[11px] font-bold text-charcoal/40 uppercase tracking-widest flex items-center gap-2">
-                                                <MapPin className="w-3 h-3" />
-                                                {result.studio.location}
-                                            </p>
-                                        </div>
-                                        <div className="bg-sage/10 px-4 py-2 rounded-2xl border border-sage/20">
-                                            <span className="text-[10px] font-bold text-sage uppercase tracking-widest">Verified Venue</span>
-                                        </div>
-                                    </div>
+                        <div className="space-y-8">
+                            <div className="bg-sage/5 border border-sage/10 p-6 rounded-[24px] flex items-start gap-4 shadow-sm">
+                                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0">
+                                    <Info className="w-5 h-5 text-sage" />
+                                </div>
+                                <div className="text-[11px] font-medium text-charcoal/60 leading-relaxed uppercase tracking-widest pt-1">
+                                    Searching for spaces near your home area on <span className="text-charcoal font-bold">{selectedDate}</span> at <span className="text-charcoal font-bold">{formatTo12Hour(selectedSlot?.start_time)}</span>
+                                </div>
+                            </div>
 
-                                    <div className="space-y-4">
-                                        <p className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em]">Available Start Times</p>
-                                        <div className="flex flex-wrap gap-3">
-                                            {(() => {
-                                                const uniqueTimes = Array.from(new Set(result.matchingSlots.map((s: any) => s.start_time))).sort();
-                                                return (uniqueTimes as string[]).map(startTime => {
-                                                    const isSelected = result.matchingSlots.some((s: any) => s.id === selectedStudioSlot && s.start_time === startTime);
-                                                    return (
-                                                        <button
-                                                            key={startTime}
-                                                            onClick={() => handleSelectStudioTime(result.studio.id, startTime)}
-                                                            className={clsx(
-                                                                "px-6 py-3 rounded-[16px] text-xs font-bold uppercase tracking-widest transition-all border",
-                                                                isSelected
-                                                                    ? "bg-sage text-white border-sage shadow-md scale-105"
-                                                                    : "bg-off-white text-charcoal/60 border-border-grey hover:bg-white hover:text-charcoal"
-                                                            )}
-                                                        >
-                                                            {formatTo12Hour(startTime)}
-                                                        </button>
-                                                    );
+                            {isSearching ? (
+                                <div className="text-center py-20">
+                                    <Loader2 className="w-10 h-10 animate-spin mx-auto text-sage/40" />
+                                    <p className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.3em] mt-6">Consulting the Vault...</p>
+                                </div>
+                            ) : matchingStudios.length === 0 ? (
+                                <div className="text-center py-20 bg-off-white rounded-[32px] border border-dashed border-border-grey">
+                                    <p className="text-[11px] font-bold text-charcoal/50 uppercase tracking-widest italic font-serif">No studios available for this specific criteria.</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 gap-8">
+                                    {matchingStudios.map(result => (
+                                        <div key={result.studio.id} className="bg-white p-8 rounded-[32px] border border-border-grey shadow-cloud space-y-8">
+                                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                                <div className="space-y-1">
+                                                    <h4 className="font-serif text-2xl font-bold text-charcoal">{result.studio.name}</h4>
+                                                    <p className="text-[11px] font-bold text-charcoal/40 uppercase tracking-widest flex items-center gap-2">
+                                                        <MapPin className="w-3 h-3" />
+                                                        {result.studio.location}
+                                                    </p>
+                                                </div>
+                                                <div className="bg-sage/10 px-4 py-2 rounded-2xl border border-sage/20">
+                                                    <span className="text-[10px] font-bold text-sage uppercase tracking-widest">Verified Venue</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <p className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em]">Available Start Times</p>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {(() => {
+                                                        const uniqueTimes = Array.from(new Set(result.matchingSlots.map((s: any) => s.start_time))).sort();
+                                                        return (uniqueTimes as string[]).map(startTime => {
+                                                            const isSelected = result.matchingSlots.some((s: any) => s.id === selectedStudioSlot && s.start_time === startTime);
+                                                            return (
+                                                                <button
+                                                                    key={startTime}
+                                                                    onClick={() => handleSelectStudioTime(result.studio.id, startTime)}
+                                                                    className={clsx(
+                                                                        "px-6 py-3 rounded-[16px] text-xs font-bold uppercase tracking-widest transition-all border",
+                                                                        isSelected
+                                                                            ? "bg-sage text-white border-sage shadow-md scale-105"
+                                                                            : "bg-off-white text-charcoal/60 border-border-grey hover:bg-white hover:text-charcoal"
+                                                                    )}
+                                                                >
+                                                                    {formatTo12Hour(startTime)}
+                                                                </button>
+                                                            );
+                                                        });
+                                                    })()}
+                                                </div>
+                                            </div>
+
+                                            {selectedStudioSlot && result.matchingSlots.some((s: any) => s.id === selectedStudioSlot) && (() => {
+                                                const primarySlot = result.matchingSlots.find((ms: any) => ms.id === selectedStudioSlot);
+                                                const primaryNormTime = normalizeTimeTo24h(primarySlot?.start_time || '');
+                                                const slotsAtTime = result.matchingSlots.filter((s: any) =>
+                                                    normalizeTimeTo24h(s.start_time) === primaryNormTime
+                                                );
+
+                                                const aggregatedEq: Record<string, number> = {};
+                                                slotsAtTime.forEach((s: any) => {
+                                                    const eq = s.equipment;
+                                                    if (!eq || typeof eq !== 'object') return;
+
+                                                    if (Array.isArray(eq)) {
+                                                        eq.forEach((item) => {
+                                                            if (typeof item === 'string') {
+                                                                const key = item.trim().toUpperCase();
+                                                                aggregatedEq[key] = (aggregatedEq[key] || 0) + 1;
+                                                            }
+                                                        });
+                                                        return;
+                                                    }
+
+                                                    Object.entries(eq).forEach(([k, v]) => {
+                                                        const key = k.trim().toUpperCase();
+                                                        const qty = typeof v === 'number' ? v : parseInt(v as string, 10) || 0;
+                                                        if (qty > 0) aggregatedEq[key] = (aggregatedEq[key] || 0) + qty;
+                                                    });
                                                 });
+                                                const allEq = Object.keys(aggregatedEq);
+
+                                                return (
+                                                    <div className="pt-8 border-t border-charcoal/5 space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                                            <div className="space-y-5">
+                                                                <label className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em]">Select Equipment</label>
+                                                                <div className="flex flex-col gap-3">
+                                                                    {allEq.length === 0 ? (
+                                                                        <div className="bg-off-white text-charcoal/50 px-6 py-4 rounded-[20px] text-[11px] font-medium italic border border-border-grey">
+                                                                            No specialized equipment listed.
+                                                                        </div>
+                                                                    ) : (
+                                                                        allEq.map((eq: string) => {
+                                                                            const count = aggregatedEq[eq] ?? 0;
+                                                                            const isSelected = selectedEquipment === eq;
+                                                                            return (
+                                                                                <button
+                                                                                    key={eq as string}
+                                                                                    type="button"
+                                                                                    onClick={() => handleEquipmentChange(eq as string)}
+                                                                                    className={clsx(
+                                                                                        "px-6 py-4 rounded-[20px] border transition-all flex items-center justify-between group",
+                                                                                        isSelected
+                                                                                            ? "bg-forest text-white border-forest shadow-cloud-lg scale-[1.02]"
+                                                                                            : "bg-off-white border-border-grey text-charcoal/60 hover:bg-white hover:text-charcoal"
+                                                                                    )}
+                                                                                >
+                                                                                    <div className="text-left">
+                                                                                        <div className="uppercase tracking-widest text-[10px] font-bold mb-0.5">{eq as string}</div>
+                                                                                        <div className={clsx("text-[9px] font-medium uppercase tracking-[0.1em]", isSelected ? "text-sage" : "text-charcoal/50")}>
+                                                                                            {count} Units Available
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    {isSelected ? <CheckCircle className="w-5 h-5 text-sage" /> : <div className="w-5 h-5 rounded-full border border-charcoal/10 group-hover:border-sage transition-colors" />}
+                                                                                </button>
+                                                                            );
+                                                                        })
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="space-y-5">
+                                                                <label className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em]">Number of Attendees</label>
+                                                                <div className="bg-off-white p-6 rounded-[28px] border border-border-grey space-y-6">
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="flex items-center gap-4">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                                                                className="w-12 h-12 rounded-2xl bg-white border border-charcoal/5 flex items-center justify-center hover:shadow-sm active:scale-90 transition-all text-charcoal"
+                                                                            >
+                                                                                <Minus className="w-5 h-5" />
+                                                                            </button>
+                                                                            <div className="w-12 text-center">
+                                                                                <span className="text-3xl font-serif font-bold text-charcoal">{quantity}</span>
+                                                                            </div>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}
+                                                                                className="w-12 h-12 rounded-2xl bg-white border border-charcoal/5 flex items-center justify-center hover:shadow-sm active:scale-90 transition-all text-charcoal"
+                                                                            >
+                                                                                <Plus className="w-5 h-5" />
+                                                                            </button>
+                                                                        </div>
+                                                                        <div className="text-right">
+                                                                            <div className="text-[9px] font-bold text-charcoal/50 uppercase tracking-widest">Capacity</div>
+                                                                            <div className="text-sm font-serif font-bold text-sage">{maxQuantity} Max</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <p className="text-[9px] font-medium text-charcoal/40 uppercase tracking-widest leading-relaxed">
+                                                                        Quantity applies the session fee per person. For individual sessions, keep at 1.
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {(() => {
+                                                            const studioPricing = result.studio.pricing || {};
+                                                            const sKey = Object.keys(studioPricing).find(k => k.toLowerCase() === selectedEquipment.toLowerCase());
+                                                            const studioRate = sKey ? (studioPricing[sKey] || 0) : (Number(result.studio.hourly_rate) || 0);
+
+                                                            const reformerKey = Object.keys(instructorRates).find(k => k.toUpperCase() === 'REFORMER');
+                                                            const instructorRate = reformerKey ? (instructorRates[reformerKey] || 0) : 0;
+
+                                                            const sessionFee = studioRate + instructorRate;
+                                                            const serviceFee = Math.max(100, sessionFee * 0.2);
+
+                                                            const total = (sessionFee + serviceFee) * quantity;
+
+                                                            return (
+                                                                <div className="bg-forest text-white p-8 rounded-[32px] shadow-cloud-lg space-y-5 relative overflow-hidden">
+                                                                    <div className="absolute top-0 right-0 w-32 h-32 bg-sage/10 blur-[60px] rounded-full" />
+
+                                                                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+                                                                        <span>Session Investment</span>
+                                                                        <span>{quantity} Person{quantity > 1 ? 's' : ''}</span>
+                                                                    </div>
+
+                                                                    <div className="space-y-3 pt-4 border-t border-white/5">
+                                                                        <div className="flex justify-between text-xs font-medium">
+                                                                            <span className="text-white/60 font-bold uppercase tracking-widest text-[9px]">Base Fee <span className="text-white/20 italic font-normal ml-2">({selectedEquipment})</span></span>
+                                                                            <span className="text-sage">₱{sessionFee.toLocaleString()}</span>
+                                                                        </div>
+                                                                        <div className="flex justify-between text-[10px] text-white/20 font-bold uppercase tracking-widest pl-4">
+                                                                            <span>↳ Instructor Portfolio</span>
+                                                                            <span>₱{instructorRate.toLocaleString()}</span>
+                                                                        </div>
+                                                                        <div className="flex justify-between text-[10px] text-white/20 font-bold uppercase tracking-widest pl-4">
+                                                                            <span>↳ Studio Curation</span>
+                                                                            <span>₱{studioRate.toLocaleString()}</span>
+                                                                        </div>
+                                                                        <div className="flex justify-between text-xs font-medium pt-2">
+                                                                            <span className="text-white/60 font-bold uppercase tracking-widest text-[9px]">Platform Curation</span>
+                                                                            <span className="text-sage">₱{serviceFee.toLocaleString()}</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="flex justify-between items-end pt-6 border-t border-white/10 mt-6">
+                                                                        <div>
+                                                                            <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 mb-1">Grand Total</div>
+                                                                            <div className="text-4xl font-serif font-bold text-white tracking-tighter">₱{total.toLocaleString()}</div>
+                                                                        </div>
+                                                                        <button
+                                                                            onClick={handleBooking}
+                                                                            disabled={isBooking || !selectedEquipment}
+                                                                            className="bg-sage text-white px-10 py-5 rounded-[24px] text-[11px] font-bold uppercase tracking-widest hover:bg-white hover:text-charcoal transition-all shadow-cloud-lg active:scale-95 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-3"
+                                                                        >
+                                                                            {isBooking ? (
+                                                                                <>
+                                                                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                                                                    Authenticating...
+                                                                                </>
+                                                                            ) : (
+                                                                                <>Confirm Request <ArrowRight className="w-4 h-4" /></>
+                                                                            )}
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })()}
+                                                    </div>
+                                                );
                                             })()}
                                         </div>
-                                    </div>
-
-                                    {/* Booking Details — only for selected studio */}
-                                    {selectedStudioSlot && result.matchingSlots.some((s: any) => s.id === selectedStudioSlot) && (() => {
-                                        const primarySlot = result.matchingSlots.find((ms: any) => ms.id === selectedStudioSlot);
-                                        const primaryNormTime = normalizeTimeTo24h(primarySlot?.start_time || '');
-                                        const slotsAtTime = result.matchingSlots.filter((s: any) =>
-                                            normalizeTimeTo24h(s.start_time) === primaryNormTime
-                                        );
-
-                                        // Aggregate equipment from ALL slots at this time, summing JSONB values
-                                        const aggregatedEq: Record<string, number> = {};
-                                        slotsAtTime.forEach((s: any) => {
-                                            const eq = s.equipment;
-                                            if (!eq || typeof eq !== 'object') return;
-
-                                            if (Array.isArray(eq)) {
-                                                eq.forEach((item) => {
-                                                    if (typeof item === 'string') {
-                                                        const key = item.trim().toUpperCase();
-                                                        aggregatedEq[key] = (aggregatedEq[key] || 0) + 1;
-                                                    }
-                                                });
-                                                return;
-                                            }
-
-                                            Object.entries(eq).forEach(([k, v]) => {
-                                                const key = k.trim().toUpperCase();
-                                                const qty = typeof v === 'number' ? v : parseInt(v as string, 10) || 0;
-                                                if (qty > 0) aggregatedEq[key] = (aggregatedEq[key] || 0) + qty;
-                                            });
-                                        });
-                                        const allEq = Object.keys(aggregatedEq);
-
-                                        return (
-                                            <div className="pt-8 border-t border-charcoal/5 space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
-                                                {/* Equipment & Quantity */}
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                                    <div className="space-y-5">
-                                                        <label className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em]">Select Equipment</label>
-                                                        <div className="flex flex-col gap-3">
-                                                            {allEq.length === 0 ? (
-                                                                <div className="bg-off-white text-charcoal/50 px-6 py-4 rounded-[20px] text-[11px] font-medium italic border border-border-grey">
-                                                                    No specialized equipment listed.
-                                                                </div>
-                                                            ) : (
-                                                                allEq.map((eq: string) => {
-                                                                    const count = aggregatedEq[eq] ?? 0;
-                                                                    const isSelected = selectedEquipment === eq;
-                                                                    return (
-                                                                        <button
-                                                                            key={eq as string}
-                                                                            type="button"
-                                                                            onClick={() => handleEquipmentChange(eq as string)}
-                                                                            className={clsx(
-                                                                                "px-6 py-4 rounded-[20px] border transition-all flex items-center justify-between group",
-                                                                                isSelected
-                                                                                    ? "bg-forest text-white border-forest shadow-cloud-lg scale-[1.02]"
-                                                                                    : "bg-off-white border-border-grey text-charcoal/60 hover:bg-white hover:text-charcoal"
-                                                                            )}
-                                                                        >
-                                                                            <div className="text-left">
-                                                                                <div className="uppercase tracking-widest text-[10px] font-bold mb-0.5">{eq as string}</div>
-                                                                                <div className={clsx("text-[9px] font-medium uppercase tracking-[0.1em]", isSelected ? "text-sage" : "text-charcoal/50")}>
-                                                                                    {count} Units Available
-                                                                                </div>
-                                                                            </div>
-                                                                            {isSelected ? <CheckCircle className="w-5 h-5 text-sage" /> : <div className="w-5 h-5 rounded-full border border-charcoal/10 group-hover:border-sage transition-colors" />}
-                                                                        </button>
-                                                                    );
-                                                                })
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="space-y-5">
-                                                        <label className="text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em]">Number of Attendees</label>
-                                                        <div className="bg-off-white p-6 rounded-[28px] border border-border-grey space-y-6">
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-4">
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                                                        className="w-12 h-12 rounded-2xl bg-white border border-charcoal/5 flex items-center justify-center hover:shadow-sm active:scale-90 transition-all text-charcoal"
-                                                                    >
-                                                                        <Minus className="w-5 h-5" />
-                                                                    </button>
-                                                                    <div className="w-12 text-center">
-                                                                        <span className="text-3xl font-serif font-bold text-charcoal">{quantity}</span>
-                                                                    </div>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}
-                                                                        className="w-12 h-12 rounded-2xl bg-white border border-charcoal/5 flex items-center justify-center hover:shadow-sm active:scale-90 transition-all text-charcoal"
-                                                                    >
-                                                                        <Plus className="w-5 h-5" />
-                                                                    </button>
-                                                                </div>
-                                                                <div className="text-right">
-                                                                    <div className="text-[9px] font-bold text-charcoal/50 uppercase tracking-widest">Capacity</div>
-                                                                    <div className="text-sm font-serif font-bold text-sage">{maxQuantity} Max</div>
-                                                                </div>
-                                                            </div>
-                                                            <p className="text-[9px] font-medium text-charcoal/40 uppercase tracking-widest leading-relaxed">
-                                                                Quantity applies the session fee per person. For individual sessions, keep at 1.
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Pricing Summary */}
-                                                {(() => {
-                                                    const studioPricing = result.studio.pricing || {};
-                                                    const sKey = Object.keys(studioPricing).find(k => k.toLowerCase() === selectedEquipment.toLowerCase());
-                                                    const studioRate = sKey ? (studioPricing[sKey] || 0) : (Number(result.studio.hourly_rate) || 0);
-
-                                                    const reformerKey = Object.keys(instructorRates).find(k => k.toUpperCase() === 'REFORMER');
-                                                    const instructorRate = reformerKey ? (instructorRates[reformerKey] || 0) : 0;
-
-                                                    const sessionFee = studioRate + instructorRate;
-                                                    const serviceFee = Math.max(100, sessionFee * 0.2);
-
-                                                    const total = (sessionFee + serviceFee) * quantity;
-
-                                                    return (
-                                                        <div className="bg-forest text-white p-8 rounded-[32px] shadow-cloud-lg space-y-5 relative overflow-hidden">
-                                                            <div className="absolute top-0 right-0 w-32 h-32 bg-sage/10 blur-[60px] rounded-full" />
-
-                                                            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                                                                <span>Session Investment</span>
-                                                                <span>{quantity} Person{quantity > 1 ? 's' : ''}</span>
-                                                            </div>
-
-                                                            <div className="space-y-3 pt-4 border-t border-white/5">
-                                                                <div className="flex justify-between text-xs font-medium">
-                                                                    <span className="text-white/60 font-bold uppercase tracking-widest text-[9px]">Base Fee <span className="text-white/20 italic font-normal ml-2">({selectedEquipment})</span></span>
-                                                                    <span className="text-sage">₱{sessionFee.toLocaleString()}</span>
-                                                                </div>
-                                                                <div className="flex justify-between text-[10px] text-white/20 font-bold uppercase tracking-widest pl-4">
-                                                                    <span>↳ Instructor Portfolio</span>
-                                                                    <span>₱{instructorRate.toLocaleString()}</span>
-                                                                </div>
-                                                                <div className="flex justify-between text-[10px] text-white/20 font-bold uppercase tracking-widest pl-4">
-                                                                    <span>↳ Studio Curation</span>
-                                                                    <span>₱{studioRate.toLocaleString()}</span>
-                                                                </div>
-                                                                <div className="flex justify-between text-xs font-medium pt-2">
-                                                                    <span className="text-white/60 font-bold uppercase tracking-widest text-[9px]">Platform Curation</span>
-                                                                    <span className="text-sage">₱{serviceFee.toLocaleString()}</span>
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="flex justify-between items-end pt-6 border-t border-white/10 mt-6">
-                                                                <div>
-                                                                    <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 mb-1">Grand Total</div>
-                                                                    <div className="text-4xl font-serif font-bold text-white tracking-tighter">₱{total.toLocaleString()}</div>
-                                                                </div>
-                                                                <button
-                                                                    onClick={handleBooking}
-                                                                    disabled={isBooking || !selectedEquipment}
-                                                                    className="bg-sage text-white px-10 py-5 rounded-[24px] text-[11px] font-bold uppercase tracking-widest hover:bg-white hover:text-charcoal transition-all shadow-cloud-lg active:scale-95 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-3"
-                                                                >
-                                                                    {isBooking ? (
-                                                                        <>
-                                                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                                                            Authenticating...
-                                                                        </>
-                                                                    ) : (
-                                                                        <>Confirm Request <ArrowRight className="w-4 h-4" /></>
-                                                                    )}
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })()}
-                                            </div>
-                                        );
-                                    })()}
+                                    ))}
                                 </div>
-                            ))}
+                            )}
                         </div>
                     )}
                 </div>

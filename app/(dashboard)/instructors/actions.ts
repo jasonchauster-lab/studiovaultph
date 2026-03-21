@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { normalizeTimeTo24h } from '@/lib/timezone'
 import { getPublicReviews } from '@/app/(dashboard)/reviews/actions'
+import { calculateDistance } from '@/lib/utils/location'
 
 export async function getInstructorProfile(instructorId: string) {
     const supabase = await createClient()
@@ -52,16 +53,24 @@ export async function getStudioProfile(studioId: string) {
 export async function findMatchingStudios(
     dateStr: string, // YYYY-MM-DD
     startTimeStr: string, // any time format
-    endTimeStr: string,   // any time format
-    locationArea: string
+    endTimeStr: string    // any time format
 ) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { studios: [] }
 
-    // Normalize to HH:mm:ss — handles 12h ("3:00 PM"), HH:mm ("15:00"), and HH:mm:ss
+    // 1. Get Instructor Profile for Radius Logic
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('home_base_lat, home_base_lng, max_travel_km')
+        .eq('id', user.id)
+        .single()
+
+    const hasRadiusInfo = profile?.home_base_lat && profile?.home_base_lng
+
+    // Normalize to HH:mm:ss
     const normalizedStart = normalizeTimeTo24h(startTimeStr)
     const normalizedEnd = normalizeTimeTo24h(endTimeStr)
-
-    const trimmedLocationArea = locationArea?.trim()
 
     // Query Slots in Location
     const { data: rawSlots, error } = await supabase
@@ -72,6 +81,9 @@ export async function findMatchingStudios(
                 id,
                 name,
                 location,
+                address,
+                lat,
+                lng,
                 hourly_rate,
                 pricing
             )
@@ -89,11 +101,21 @@ export async function findMatchingStudios(
 
     if (!rawSlots || rawSlots.length === 0) return { studios: [] }
 
-    // JS-level trim + case-insensitive comparison — handles DB values with stray whitespace or casing
+    // 3. Filter by Distance Radius (If instructor has it set)
     const slots = rawSlots?.filter((s: any) => {
-        const dbLoc = (s.studios?.location ?? '').trim().toLowerCase()
-        const searchLoc = trimmedLocationArea.toLowerCase()
-        return dbLoc === searchLoc || dbLoc.startsWith(searchLoc + ' - ') || searchLoc.startsWith(dbLoc + ' - ')
+        const studio = s.studios
+        if (!hasRadiusInfo) return true // Show all if instructor hasn't set home base yet (backward compatible)
+        
+        if (!studio.lat || !studio.lng) return false // Hide studios without coords if radius is active
+        
+        const dist = calculateDistance(
+            Number(profile.home_base_lat),
+            Number(profile.home_base_lng),
+            Number(studio.lat),
+            Number(studio.lng)
+        )
+        
+        return dist <= (profile.max_travel_km || 10)
     }) || []
 
     if (slots.length === 0) return { studios: [] }

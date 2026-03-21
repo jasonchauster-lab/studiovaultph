@@ -10,6 +10,8 @@ import Image from 'next/image'
 import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
 import { normalizeImageFile, uploadContentType } from '@/lib/utils/image-utils'
 import ImageCropper from '@/components/shared/ImageCropper'
+import { geocodeAddress } from '@/lib/utils/location'
+import { MapPin } from 'lucide-react'
 
 export default function StudioSettingsForm({ studio }: { studio: any }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -28,6 +30,11 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
 
     const [existingPhotos, setExistingPhotos] = useState<string[]>(studio.space_photos_urls || studio.space_photos || [])
     const [newSpacePhotos, setNewSpacePhotos] = useState<File[]>([])
+    
+    // Location State
+    const [lat, setLat] = useState(studio.lat || '')
+    const [lng, setLng] = useState(studio.lng || '')
+    const [isGeocoding, setIsGeocoding] = useState(false)
 
     // Cropper State
     const [cropperConfig, setCropperConfig] = useState<{
@@ -361,8 +368,32 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                             required
                             rows={2}
                             placeholder="e.g. Unit 204, 2nd Floor, The Podium, ADB Ave, Ortigas Center"
-                            className="w-full px-5 py-3.5 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all resize-none placeholder:text-charcoal-300"
+                            className="w-full px-5 py-3.5 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all resize-none placeholder:text-charcoal-300 pr-12"
                         />
+                        <button 
+                            type="button"
+                            onClick={async () => {
+                                const addr = (document.getElementsByName('address')[0] as HTMLTextAreaElement).value
+                                if (!addr) return;
+                                setIsGeocoding(true);
+                                const coords = await geocodeAddress(addr);
+                                if (coords) {
+                                    setLat(coords.lat.toString());
+                                    setLng(coords.lng.toString());
+                                    setSuccess(true);
+                                } else {
+                                    setError('Could not verify address. Please be more specific.');
+                                }
+                                setIsGeocoding(false);
+                            }}
+                            className="absolute right-3 bottom-3 p-2 bg-cream-100 hover:bg-forest/10 rounded-lg text-forest transition-colors flex items-center gap-2"
+                            title="Verify Location Coords"
+                        >
+                            {isGeocoding ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
+                            <span className="text-[9px] font-black uppercase tracking-widest hidden sm:block">Verify Coords</span>
+                        </button>
+                        <input type="hidden" name="lat" value={lat} />
+                        <input type="hidden" name="lng" value={lng} />
                     </div>
                     <div className="space-y-1.5">
                         <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Google Maps Link <span className="text-rose-gold">*</span></label>

@@ -238,25 +238,30 @@ export default function AdminAnalytics({ stats }: { stats: any }) {
                                     </linearGradient>
                                 </defs>
 
-                                {/* Data Points */}
-                                {stats.dailyData.map((d: any, i: number) => (
-                                    <g key={i} className="group cursor-pointer">
-                                        <circle
-                                            cx={i * pointPadding}
-                                            cy={chartHeight - (d.revenue / maxRevenue) * chartHeight}
-                                            r="3.5"
-                                            fill="#FFFFFF"
-                                            stroke="#1F2937"
-                                            strokeWidth="1.5"
-                                            className="transition-all duration-300 group-hover:r-[5] group-hover:fill-charcoal group-hover:stroke-white"
-                                        />
-                                        <title>{`${d.date}: ₱${d.revenue.toLocaleString()}`}</title>
-                                    </g>
-                                ))}
                             </svg>
                         ) : (
                             <div className="flex flex-col items-center justify-center h-full text-charcoal/50 text-[10px] font-black uppercase tracking-widest italic bg-alabaster/30 rounded-3xl border border-cream-100 border-dashed">
                                 Insufficient data for trend analysis
+                            </div>
+                        )}
+
+                        {/* Data Point Overlay - Prevents SVG stretching distortion */}
+                        {stats.dailyData.length > 1 && (
+                            <div className="absolute inset-0 pointer-events-none">
+                                {stats.dailyData.map((d: any, i: number) => (
+                                    <div 
+                                        key={i}
+                                        className="group absolute pointer-events-auto cursor-pointer"
+                                        style={{
+                                            left: `${(i / (stats.dailyData.length - 1)) * 100}%`,
+                                            top: `${(1 - (d.revenue / maxRevenue)) * 100}%`,
+                                            transform: 'translate(-50%, -50%)'
+                                        }}
+                                        title={`${d.date}: ₱${d.revenue.toLocaleString()}`}
+                                    >
+                                        <div className="w-[7px] h-[7px] rounded-full bg-white border-[1.5px] border-[#1F2937] transition-all duration-300 group-hover:scale-[1.6] group-hover:bg-[#1b1c19] group-hover:border-white shadow-sm" />
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>

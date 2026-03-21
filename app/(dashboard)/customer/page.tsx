@@ -21,6 +21,9 @@ interface SearchParams {
     time?: string;
     equipment?: string;
     amenity?: string;
+    lat?: string;
+    lng?: string;
+    radius?: string;
 }
 
 export default async function CustomerDashboard({
@@ -86,10 +89,24 @@ export default async function CustomerDashboard({
     ]
 
     // Filter out suspended or negative balance studios
-    const studios = rawStudios?.filter((s: any) => {
+    let studios = rawStudios?.filter((s: any) => {
         const owner = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles;
         return !owner?.is_suspended && (owner?.available_balance || 0) >= 0;
     }) || []
+
+    // 1.1 Distance Filter for Studios
+    if (params.lat && params.lng && params.radius && params.radius !== 'all') {
+        const { calculateDistance } = await import('@/lib/utils/location')
+        const userLat = parseFloat(params.lat)
+        const userLng = parseFloat(params.lng)
+        const radius = parseFloat(params.radius)
+
+        studios = studios.filter(s => {
+            if (!s.lat || !s.lng) return false;
+            const dist = calculateDistance(userLat, userLng, Number(s.lat), Number(s.lng))
+            return dist <= radius
+        })
+    }
 
     // 2. Fetch Instructors (with certifications)
     let instructorQuery = supabase
@@ -204,15 +221,39 @@ export default async function CustomerDashboard({
         }
     })
 
-    // Filter Instructors by certification
+    // Filter Instructors by certification and Distance
+    const { calculateDistance } = await import('@/lib/utils/location')
+    const userLat = params.lat ? parseFloat(params.lat) : null
+    const userLng = params.lng ? parseFloat(params.lng) : null
+    const radius = params.radius && params.radius !== 'all' ? parseFloat(params.radius) : null
+
     const instructors = instructorsRaw?.filter(inst => {
+        // 1. Certification Filter
         if (params.certification && params.certification !== 'all') {
             const filterTokens = params.certification.split(',').map(c => c.trim().toLowerCase())
-            return inst.certifications?.some((c: any) =>
+            const hasCert = inst.certifications?.some((c: any) =>
                 c.verified &&
                 filterTokens.some(token => c.certification_body?.trim().toLowerCase().startsWith(token))
             )
+            if (!hasCert) return false
         }
+
+        // 2. Distance Filter
+        if (userLat !== null && userLng !== null && radius !== null) {
+            // Check Home Base distance
+            let isWithinRange = false
+            if (inst.home_base_lat && inst.home_base_lng) {
+                const dist = calculateDistance(userLat, userLng, Number(inst.home_base_lat), Number(inst.home_base_lng))
+                if (dist <= radius) isWithinRange = true
+            }
+
+            // Also check distance to any studio they are available at (if we had that data easily)
+            // For now, if they don't have a home base in range, we might skip them or check studios.
+            // A more robust way would be to join with active availability locations.
+            
+            return isWithinRange
+        }
+
         return true
     }) || []
 

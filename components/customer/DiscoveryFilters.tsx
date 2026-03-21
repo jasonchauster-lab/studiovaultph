@@ -2,8 +2,10 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
-import { Filter, Calendar, Clock, ChevronDown } from 'lucide-react'
+import { Filter, Calendar, Clock, ChevronDown, MapPin, Navigation, Loader2 } from 'lucide-react'
+import { useState } from 'react'
 import { STUDIO_AMENITIES } from '@/types'
+import { clsx } from 'clsx'
 import LocationFilterDropdown from '@/components/shared/LocationFilterDropdown'
 import MultiSelectFilter from '@/components/shared/MultiSelectFilter'
 import { getManilaTodayStr } from '@/lib/timezone'
@@ -16,11 +18,15 @@ interface DiscoveryFiltersProps {
 export default function DiscoveryFilters({ availableLocations }: DiscoveryFiltersProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const [isDetecting, setIsDetecting] = useState(false)
+
+    const currentRadius = searchParams.get('radius') || 'all'
+    const hasLocation = searchParams.get('lat') && searchParams.get('lng')
 
     const createQueryString = useCallback(
         (name: string, value: string) => {
             const params = new URLSearchParams(searchParams.toString())
-            if (value === 'all' || value === '') {
+            if (value === 'all' || value === '' || value === 'null') {
                 params.delete(name)
             } else {
                 params.set(name, value)
@@ -29,6 +35,26 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
         },
         [searchParams]
     )
+
+    const handleLocationDetect = () => {
+        if (!navigator.geolocation) return alert('Geolocation not supported');
+        setIsDetecting(true);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const params = new URLSearchParams(searchParams.toString());
+                params.set('lat', pos.coords.latitude.toString());
+                params.set('lng', pos.coords.longitude.toString());
+                if (!params.has('radius')) params.set('radius', '10');
+                router.push(`/customer?${params.toString()}`);
+                setIsDetecting(false);
+            },
+            (err) => {
+                console.error(err);
+                alert('Could not detect location.');
+                setIsDetecting(false);
+            }
+        );
+    }
 
     const handleFilter = (name: string, value: string) => {
         router.push(`/customer?${createQueryString(name, value)}`)
@@ -164,6 +190,42 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                                 value={searchParams.get('time') || ''}
                                 className="w-full lg:w-36 pl-12 pr-4 py-2.5 bg-off-white/50 border border-burgundy/5 rounded-xl sm:rounded-2xl text-[12px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-4 focus:ring-forest/5 focus:border-forest/20 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20 h-[50px] sm:h-[54px]"
                             />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Distance and Location Group */}
+                <div className="flex flex-col sm:flex-row gap-6 pt-6 sm:pt-8 lg:pt-0 border-t lg:border-t-0 border-burgundy/5 lg:border-l lg:pl-8">
+                    <div className="flex flex-col gap-2.5 min-w-[140px]">
+                        <label className="text-[9px] font-black text-burgundy/30 uppercase tracking-[0.2em] ml-1.5 flex items-center justify-between">
+                            Distance
+                            {hasLocation && <span className="text-forest lowercase italic font-medium">Active</span>}
+                        </label>
+                        <div className="flex items-center gap-3">
+                            <div className="relative group/select flex-1">
+                                <select
+                                    onChange={(e) => handleFilter('radius', e.target.value)}
+                                    value={currentRadius}
+                                    className="w-full pl-5 pr-10 py-3 bg-off-white/50 border border-burgundy/5 rounded-xl sm:rounded-2xl text-[11px] font-black uppercase tracking-widest text-burgundy shadow-sm appearance-none cursor-pointer hover:bg-white hover:border-burgundy/20 h-[50px] sm:h-[54px]"
+                                >
+                                    <option value="all">Any Dist.</option>
+                                    <option value="5">Within 5km</option>
+                                    <option value="10">Within 10km</option>
+                                    <option value="20">Within 20km</option>
+                                    <option value="50">Within 50km</option>
+                                </select>
+                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-burgundy/30 pointer-events-none" />
+                            </div>
+                            <button
+                                onClick={handleLocationDetect}
+                                className={clsx(
+                                    "p-4 rounded-xl sm:rounded-2xl border transition-all shadow-sm active:scale-95 h-[50px] sm:h-[54px] flex items-center justify-center",
+                                    hasLocation ? "bg-forest text-white border-forest" : "bg-off-white/50 border-burgundy/5 text-burgundy/40 hover:bg-white hover:border-burgundy/20"
+                                )}
+                                title="Detect My Location"
+                            >
+                                {isDetecting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
+                            </button>
                         </div>
                     </div>
                 </div>
