@@ -321,6 +321,11 @@ export async function createStudio(formData: FormData) {
             return { error: 'Failed to initialize studio profile: ' + profileError.message }
         }
 
+        // Sync role to Auth metadata for middleware performance
+        await supabase.auth.updateUser({
+            data: { role: newRole }
+        })
+
         // Parse pricing
         const pricing: Record<string, number> = {}
         allKeys.forEach(key => {

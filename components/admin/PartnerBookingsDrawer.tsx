@@ -61,7 +61,7 @@ export default function PartnerBookingsDrawer({
         >
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-charcoal-900/60 backdrop-blur-md transition-opacity z-0"
+                className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity z-0"
                 onClick={onClose}
             />
 

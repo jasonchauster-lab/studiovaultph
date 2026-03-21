@@ -116,7 +116,21 @@ export async function GET(request: Request) {
 
                 // ── Returning OAuth user: route to their dashboard ────────────
                 if (existingProfile.role) {
-                    return buildRedirect(origin, request, getDashboard(existingProfile.role))
+                    const dashboard = getDashboard(existingProfile.role)
+                    const response = buildRedirect(origin, request, dashboard)
+
+                    // Mark device as verified since they used OAuth
+                    const cookieOptions: any = { 
+                        path: '/', 
+                        sameSite: 'lax', 
+                        secure: process.env.NODE_ENV === 'production', 
+                        httpOnly: false,
+                        maxAge: 14 * 24 * 60 * 60 // Remember for 14 days by default for OAuth
+                    }
+                    response.cookies.set(`otp_rem_${user.id.toLowerCase()}`, '1', cookieOptions)
+                    response.cookies.set(`rem_me_${user.id.toLowerCase()}`, '1', cookieOptions)
+
+                    return response
                 }
 
                 // Profile exists but role was never set (edge case) — pick a role

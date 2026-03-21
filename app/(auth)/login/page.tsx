@@ -55,7 +55,8 @@ function LoginContent() {
             const { data: { session } } = await supabase.auth.getSession()
             if (session?.user && !isRedirecting) {
                 // Check if they are an OAuth user (already verified)
-                const isOAuth = session.user.app_metadata?.provider && session.user.app_metadata.provider !== 'email'
+                const isOAuth = (session.user.app_metadata?.provider && session.user.app_metadata.provider !== 'email') ||
+                                (session.user.app_metadata?.providers?.some((p: string) => p !== 'email'))
                 
                 // Check if they were already remembered
                 if (isOAuth || isOtpRemembered(session.user.id)) {
@@ -96,7 +97,8 @@ function LoginContent() {
                     // We let handleAuth manage the transition to the OTP step.
                     if (!otpSent) {
                         // Check if they are an OAuth user (already verified)
-                        const isOAuth = session.user.app_metadata?.provider && session.user.app_metadata.provider !== 'email'
+                        const isOAuth = (session.user.app_metadata?.provider && session.user.app_metadata.provider !== 'email') ||
+                                        (session.user.app_metadata?.providers?.some((p: string) => p !== 'email'))
 
                         // However, if they are ALREADY remembered, we CAN redirect
                         if (isOAuth || isOtpRemembered(session.user.id)) {

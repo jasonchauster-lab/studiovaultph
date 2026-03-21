@@ -217,9 +217,9 @@ export default async function StudioDashboard(props: {
                     <div className="fixed inset-0 bg-white flex flex-col md:flex-row z-[60]">
                         <div className="hidden md:flex md:w-1/2 relative flex-col justify-end">
                             <Image src="/studio-application-bg.png" alt="Studio Application" fill className="object-cover" priority />
-                            <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent" />
-                            <div className="relative p-16 text-white z-10">
-                                <h2 className="text-4xl lg:text-5xl font-serif font-bold mb-6 leading-tight tracking-tight">Elevate Your Studio Management</h2>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                            <div className="relative p-16 text-white z-10 drop-shadow-md">
+                                <h2 className="text-4xl lg:text-5xl font-serif font-bold mb-6 leading-tight tracking-tight text-white">Elevate Your Studio Management</h2>
                                 <p className="text-lg text-white/90 font-medium max-w-sm leading-relaxed">
                                     Experience the art of seamless booking and client care with Studio Vault's premium platform.
                                 </p>

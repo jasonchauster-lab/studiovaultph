@@ -55,7 +55,10 @@ export async function updateSession(request: NextRequest) {
     // ── Diagnostic Logging (Server-side) ──────────────────────────────
     const path = request.nextUrl.pathname
     const otpCookie = userId ? request.cookies.get(`otp_rem_${userId.toLowerCase()}`)?.value : null
-    const isOAuth = user?.app_metadata?.provider && user.app_metadata.provider !== 'email'
+    
+    // Robust OAuth check: check singular provider OR plural providers list
+    const isOAuth = (user?.app_metadata?.provider && user.app_metadata.provider !== 'email') ||
+                    (user?.app_metadata?.providers?.some((p: string) => p !== 'email'))
     
     const isVerified = user && (isOAuth || otpCookie === '1' || otpCookie?.toLowerCase() === userId?.toLowerCase())
 

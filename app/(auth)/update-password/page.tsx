@@ -57,7 +57,7 @@ export default function UpdatePasswordPage() {
                         className="object-cover"
                         priority
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 </div>
 
                 {/* Right Side: Success Content */}
@@ -93,10 +93,10 @@ export default function UpdatePasswordPage() {
                     className="object-cover"
                     priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-                <div className="relative p-16 text-white z-10">
-                    <h2 className="text-4xl lg:text-5xl font-serif mb-6 leading-tight">Secure Your Session</h2>
+                <div className="relative p-16 text-white z-10 drop-shadow-md">
+                    <h2 className="text-4xl lg:text-5xl font-serif mb-6 leading-tight text-white">Secure Your Session</h2>
                     <p className="text-lg text-white/90 font-light max-w-sm leading-relaxed">
                         Setting a strong password is the first step towards protecting your personal practice data.
                     </p>

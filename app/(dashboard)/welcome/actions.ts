@@ -45,6 +45,13 @@ export async function selectRole(role: 'customer' | 'instructor' | 'studio') {
         error = insertError
     }
 
+    if (!error) {
+        // Sync role to Auth metadata for middleware performance
+        await supabase.auth.updateUser({
+            data: { role }
+        })
+    }
+
     if (error) {
         console.error('Role selection failed:', error)
         return { error: 'Failed to set role. Please try again.' }

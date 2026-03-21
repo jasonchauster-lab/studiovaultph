@@ -171,7 +171,7 @@ type ParqAnswers = Partial<Record<ParqKey, boolean>>
 function AgreementModal({ title, content, onClose }: { title: string; content: string; onClose: () => void }) {
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
         >
             <div
@@ -205,7 +205,7 @@ function AgreementModal({ title, content, onClose }: { title: string; content: s
 // ─── Medical Clearance Modal ──────────────────────────────────────────────────
 function MedicalClearanceModal({ onAcknowledge }: { onAcknowledge: () => void }) {
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-900/70 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
             <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
                 <div className="p-6 border-b border-rose-gold/10 flex items-center gap-3">
                     <div className="w-10 h-10 bg-rose-gold/10 rounded-full flex items-center justify-center shrink-0">

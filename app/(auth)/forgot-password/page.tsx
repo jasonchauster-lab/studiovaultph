@@ -35,10 +35,10 @@ export default function ForgotPasswordPage() {
                     className="object-cover"
                     priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-                <div className="relative p-16 text-white z-10">
-                    <h2 className="text-4xl lg:text-5xl font-serif mb-6 leading-tight">Reset Your Perspective</h2>
+                <div className="relative p-16 text-white z-10 drop-shadow-md">
+                    <h2 className="text-4xl lg:text-5xl font-serif mb-6 leading-tight text-white">Reset Your Perspective</h2>
                     <p className="text-lg text-white/90 font-light max-w-sm leading-relaxed">
                         Don't worry, even the best of us lose our focus sometimes. We'll help you get back to your practice.
                     </p>

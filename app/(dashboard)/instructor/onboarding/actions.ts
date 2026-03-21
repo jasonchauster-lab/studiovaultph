@@ -77,6 +77,11 @@ export async function submitInstructorOnboarding(formData: FormData) {
         return { error: 'Failed to update profile' }
     }
 
+    // Sync role to Auth metadata for middleware performance
+    await supabase.auth.updateUser({
+        data: { role: newRole }
+    })
+
     const certificatePath = `${user.id}/cert_${Date.now()}.${certificateFile.name.split('.').pop()}`
     const govIdPath = `${user.id}/govid_${Date.now()}.${govIdFile.name.split('.').pop()}`
     let birPath = null

@@ -37,7 +37,7 @@ export default function EarningsOverview({ studioId, summary, userEmail }: Earni
             {/* Info Modal */}
             {/* ... (same as before) */}
             {showInfoModal && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-sm" onClick={() => setShowInfoModal(false)}>
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowInfoModal(false)}>
                     <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
                         <div className="px-6 py-4 border-b border-cream-200 flex justify-between items-center bg-cream-50">
                             <h3 className="font-serif text-lg text-charcoal-900">Wallet & Recovery Rules</h3>

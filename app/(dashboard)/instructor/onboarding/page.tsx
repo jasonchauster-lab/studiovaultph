@@ -69,9 +69,9 @@ export default async function InstructorOnboardingPage() {
                     className="object-cover"
                     priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 via-transparent to-transparent" />
-                <div className="relative p-16 text-white z-10">
-                    <h2 className="text-4xl lg:text-5xl font-serif mb-6 leading-tight">Grow Your Practice</h2>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <div className="relative p-16 text-white z-10 drop-shadow-md">
+                    <h2 className="text-4xl lg:text-5xl font-serif mb-6 leading-tight text-white">Grow Your Practice</h2>
                     <p className="text-lg text-white/90 font-light max-w-sm leading-relaxed">
                         Access premium studio spaces and manage your freelance business with StudioVault's elite platform.
                     </p>
