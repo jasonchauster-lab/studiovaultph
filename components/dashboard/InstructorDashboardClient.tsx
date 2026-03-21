@@ -113,7 +113,8 @@ export default function InstructorDashboardClient({
         instructorProfile?.teaching_equipment &&
         instructorProfile.teaching_equipment.length > 0 &&
         instructorProfile.rates &&
-        Object.keys(instructorProfile.rates).length > 0
+        Object.keys(instructorProfile.rates).length > 0 &&
+        instructorProfile.home_base_address
     );
 
     const [expandedCities, setExpandedCities] = useState<string[]>([]);
@@ -277,8 +278,8 @@ export default function InstructorDashboardClient({
                 <div className="bg-forest/5 border border-forest/10 rounded-[32px] p-8 sm:p-12 mb-12 relative overflow-hidden group/service transition-all hover:bg-forest/10">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
                     <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                        <div className="w-20 h-20 bg-forest text-white rounded-[24px] flex items-center justify-center shadow-cloud shrink-0 group-hover/service:scale-110 transition-transform duration-700">
-                            <MapPin className="w-8 h-8" />
+                        <div className="w-20 h-20 bg-burgundy text-white rounded-[24px] flex items-center justify-center shadow-cloud shrink-0 group-hover/service:scale-110 transition-transform duration-700">
+                            <AlertTriangle className="w-8 h-8" />
                         </div>
                         <div className="flex-1 text-center md:text-left">
                             <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tight mb-2">Connect with Clients at Home</h2>
@@ -326,6 +327,11 @@ export default function InstructorDashboardClient({
                         <MobileScheduleCalendar
                             currentDate={new Date(currentDateStr || getManilaTodayStr())}
                             onAddSlot={(date) => {
+                                if (!isProfileComplete) {
+                                    alert('Please complete your profile and set your service area before adding sessions.');
+                                    router.push('/instructor/profile');
+                                    return;
+                                }
                                 setSingleDate(format(date, 'yyyy-MM-dd'));
                                 setAddMode('single');
                                 setIsAddModalOpen(true);
@@ -407,7 +413,14 @@ export default function InstructorDashboardClient({
                                                 <h3 className="text-[10px] sm:text-[11px] font-black text-burgundy uppercase tracking-[0.3em] sm:tracking-[0.4em] mb-2 sm:mb-3 relative z-10">Quiet Week</h3>
                                                 <p className="text-[9px] sm:text-[10px] text-charcoal/50 font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] max-w-[200px] sm:max-w-[220px] mx-auto mb-6 sm:mb-8 relative z-10 leading-relaxed">No bookings yet—your schedule is clear.</p>
                                                 <button 
-                                                    onClick={() => setIsAddModalOpen(true)}
+                                                    onClick={() => {
+                                                        if (!isProfileComplete) {
+                                                            alert('Please complete your profile and set your service area before adding sessions.');
+                                                            router.push('/instructor/profile');
+                                                            return;
+                                                        }
+                                                        setIsAddModalOpen(true);
+                                                    }}
                                                     className="px-6 sm:px-8 py-3 sm:py-3.5 bg-forest text-white text-[8px] sm:text-[9px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-tight flex items-center gap-2 relative z-10 active:scale-95"
                                                 >
                                                     <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Quick Add

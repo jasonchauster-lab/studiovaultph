@@ -35,6 +35,7 @@ interface InstructorScheduleCalendarProps {
         id: string;
         teaching_equipment?: string[];
         rates?: Record<string, number>;
+        home_base_address?: string | null;
     } | null;
 }
 
@@ -73,7 +74,8 @@ export default function InstructorScheduleCalendar({
         instructorProfile?.teaching_equipment && 
         instructorProfile.teaching_equipment.length > 0 && 
         instructorProfile.rates && 
-        Object.keys(instructorProfile.rates).length > 0
+        Object.keys(instructorProfile.rates).length > 0 &&
+        instructorProfile?.home_base_address
     );
 
     const toggleCityAccordion = (city: string) => {
@@ -354,7 +356,7 @@ export default function InstructorScheduleCalendar({
                         </div>
                         <div>
                             <p className="text-[11px] font-black text-burgundy uppercase tracking-[0.2em]">Profile Incomplete</p>
-                            <p className="text-[10px] text-burgundy/60 uppercase tracking-[0.1em] font-bold">Please set your teaching equipment and rates to start adding sessions.</p>
+                            <p className="text-[10px] text-burgundy/60 uppercase tracking-[0.1em] font-bold">Please set your teaching equipment, rates, and service area to start adding sessions.</p>
                         </div>
                     </div>
                     <Link 
@@ -661,6 +663,11 @@ export default function InstructorScheduleCalendar({
                                                                 )}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation()
+                                                                    if (!isProfileComplete) {
+                                                                        alert('Please complete your profile and set your service area before adding sessions.');
+                                                                        router.push('/instructor/profile');
+                                                                        return;
+                                                                    }
                                                                     setSingleDate(format(day, 'yyyy-MM-dd'))
                                                                     setSingleTime(`${hour.toString().padStart(2, '0')}:00`)
                                                                     setSingleEndTime(`${(hour + 1).toString().padStart(2, '0')}:00`)

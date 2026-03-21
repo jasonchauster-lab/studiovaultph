@@ -328,111 +328,116 @@ export default function ProfileForm({ profile }: { profile: any }) {
                 </div>
             )}
 
-            {/* Home Service Settings (Instructors Only) */}
+            {/* Service Area & Location (Instructors Only) */}
             {profile?.role === 'instructor' && (
                 <div className="atelier-card space-y-10">
                     <div className="flex items-center gap-3 border-b border-cream-100 pb-4">
                         <div className="flex flex-col gap-0.5">
-                            <h3 className="text-xl font-serif font-bold text-charcoal-900 tracking-tight">Home Service Settings</h3>
-                            <p className="text-[10px] font-black text-charcoal-500 uppercase tracking-widest">Configure your mobile teaching radius</p>
+                            <h3 className="text-xl font-serif font-bold text-charcoal-900 tracking-tight">Service Area & Location</h3>
+                            <p className="text-[10px] font-black text-charcoal-500 uppercase tracking-widest">Mandatory for studio-proximity searching</p>
                         </div>
                         <div className="h-px flex-1 bg-cream-50" />
                     </div>
 
                     <div className="space-y-8">
-                        {/* Toggle */}
-                        <label className="flex items-center gap-4 p-6 border border-cream-200 rounded-3xl bg-white cursor-pointer hover:border-forest/30 transition-all group">
-                            <div className="relative flex items-center">
+                        {/* Base Location - NOW MANDATORY */}
+                        <div className="space-y-3">
+                            <label className="block text-[10px] font-black text-charcoal-900 uppercase tracking-[0.3em] ml-1 flex items-center gap-2">
+                                Your Home Base Address
+                                <span className="text-red-500">*</span>
+                            </label>
+                            <div className="relative">
                                 <input 
-                                    type="checkbox" 
-                                    name="offersHomeSessions" 
-                                    checked={offersHomeSessions}
-                                    onChange={(e) => setOffersHomeSessions(e.target.checked)}
-                                    className="peer sr-only" 
+                                    type="text" 
+                                    name="homeBaseAddress"
+                                    value={homeBaseAddress}
+                                    onChange={(e) => setHomeBaseAddress(e.target.value)}
+                                    placeholder="e.g. Rockwell, Makati or specific street address"
+                                    required={profile?.role === 'instructor'}
+                                    className="w-full px-5 py-4 bg-off-white border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-forest/5 focus:ring-4 focus:border-forest transition-all pr-12"
                                 />
-                                <div className="w-14 h-7 bg-cream-100 rounded-full peer peer-checked:bg-forest transition-colors duration-300" />
-                                <div className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-7 shadow-sm" />
+                                <button 
+                                    type="button"
+                                    onClick={async () => {
+                                        if (!homeBaseAddress) return;
+                                        setGeocoding(true);
+                                        const res = await geocodeAddress(homeBaseAddress);
+                                        if (res) {
+                                            setHomeBaseLat(res.lat.toString());
+                                            setHomeBaseLng(res.lng.toString());
+                                            setHomeBaseAddress(res.full || homeBaseAddress);
+                                            setMessage('Location verified! Coordinates captured.');
+                                        } else {
+                                            setMessage('Could not verify address. Please be more specific.');
+                                        }
+                                        setGeocoding(false);
+                                    }}
+                                    disabled={geocoding || !homeBaseAddress}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-forest/10 rounded-lg text-forest transition-colors disabled:opacity-30"
+                                    title="Verify Address"
+                                >
+                                    {geocoding ? <Loader2 className="w-5 h-5 animate-spin" /> : <MapPin className="w-5 h-5" />}
+                                </button>
                             </div>
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold text-charcoal-900">Offer Home Sessions</span>
-                                <span className="text-[10px] text-charcoal-500 italic">Allow clients to book you at their home or private studio</span>
+                            <div className="flex items-start gap-2 ml-1">
+                                <Navigation className="w-3.5 h-3.5 text-forest mt-0.5 flex-none" />
+                                <p className="text-[10px] text-charcoal-400 italic leading-relaxed uppercase tracking-wider font-bold">
+                                    {homeBaseLat && homeBaseLng ? '✓ COORDINATES VERIFIED' : 'PENDING VERIFICATION — CLICK THE PIN ICON'}
+                                </p>
                             </div>
-                        </label>
+                            
+                            {/* Secret Coords (Hidden from view but in form) */}
+                            <input type="hidden" name="homeBaseLat" value={homeBaseLat} />
+                            <input type="hidden" name="homeBaseLng" value={homeBaseLng} />
+                        </div>
 
-                        {offersHomeSessions && (
-                            <div className="animate-in slide-in-from-top-4 duration-500 space-y-8 pl-4 border-l-2 border-forest/10">
-                                {/* Base Location */}
-                                <div className="space-y-3">
-                                    <label className="block text-[10px] font-black text-charcoal-900 uppercase tracking-[0.3em] ml-1">Your Base Address</label>
-                                    <div className="relative">
-                                        <input 
-                                            type="text" 
-                                            name="homeBaseAddress"
-                                            value={homeBaseAddress}
-                                            onChange={(e) => setHomeBaseAddress(e.target.value)}
-                                            placeholder="e.g. Rockwell, Makati or specific street address"
-                                            className="w-full px-5 py-4 bg-off-white border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-forest/5 focus:ring-4 focus:border-forest transition-all pr-12"
-                                        />
-                                        <button 
-                                            type="button"
-                                            onClick={async () => {
-                                                if (!homeBaseAddress) return;
-                                                setGeocoding(true);
-                                                const coords = await geocodeAddress(homeBaseAddress);
-                                                if (coords) {
-                                                    setHomeBaseLat(coords.lat.toString());
-                                                    setHomeBaseLng(coords.lng.toString());
-                                                    setMessage('Location verified! Coordinates captured.');
-                                                } else {
-                                                    setMessage('Could not verify address. Please be more specific.');
-                                                }
-                                                setGeocoding(false);
-                                            }}
-                                            disabled={geocoding || !homeBaseAddress}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-forest/10 rounded-lg text-forest transition-colors disabled:opacity-30"
-                                            title="Verify Address"
-                                        >
-                                            {geocoding ? <Loader2 className="w-5 h-5 animate-spin" /> : <MapPin className="w-5 h-5" />}
-                                        </button>
-                                    </div>
-                                    <p className="text-[10px] text-charcoal-400 italic leading-relaxed">This address is used only for distance calculation. It will never be shown to clients.</p>
-                                    
-                                    {/* Secret Coords (Hidden from view but in form) */}
-                                    <input type="hidden" name="homeBaseLat" value={homeBaseLat} />
-                                    <input type="hidden" name="homeBaseLng" value={homeBaseLng} />
-                                </div>
-
-                                {/* Travel Radius */}
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-end ml-1">
-                                        <label className="block text-[10px] font-black text-charcoal-900 uppercase tracking-[0.3em]">Maximum Travel Distance</label>
-                                        <span className="text-sm font-serif font-bold text-forest">{maxTravelKm} KM</span>
-                                    </div>
-                                    <div className="relative pt-1">
-                                        <input 
-                                            type="range" 
-                                            name="maxTravelKm" 
-                                            min="1" 
-                                            max="50" 
-                                            step="1"
-                                            value={maxTravelKm}
-                                            onChange={(e) => setMaxTravelKm(parseInt(e.target.value))}
-                                            className="w-full h-2 bg-cream-100 rounded-lg appearance-none cursor-pointer accent-forest transition-all"
-                                        />
-                                        <div className="flex justify-between mt-2 px-1">
-                                            <span className="text-[9px] font-bold text-charcoal-300 uppercase tracking-widest">1 KM</span>
-                                            <span className="text-[9px] font-bold text-charcoal-300 uppercase tracking-widest">50 KM</span>
-                                        </div>
-                                    </div>
-                                    <div className="p-4 bg-forest/5 rounded-2xl border border-forest/10 flex items-start gap-3">
-                                        <Navigation className="w-4 h-4 text-forest mt-0.5 flex-none" />
-                                        <p className="text-[11px] text-charcoal-600 leading-relaxed font-medium">
-                                            You will only be appear as available for home sessions or studios within a <strong className="text-forest">{maxTravelKm}km</strong> radius of your base address.
-                                        </p>
-                                    </div>
+                        {/* Travel Radius */}
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-end ml-1">
+                                <label className="block text-[10px] font-black text-charcoal-900 uppercase tracking-[0.3em]">Maximum Travel Distance</label>
+                                <span className="text-sm font-serif font-bold text-forest">{maxTravelKm} KM</span>
+                            </div>
+                            <div className="relative pt-1">
+                                <input 
+                                    type="range" 
+                                    name="maxTravelKm" 
+                                    min="1" 
+                                    max="50" 
+                                    step="1"
+                                    value={maxTravelKm}
+                                    onChange={(e) => setMaxTravelKm(parseInt(e.target.value))}
+                                    className="w-full h-2 bg-cream-100 rounded-lg appearance-none cursor-pointer accent-forest transition-all"
+                                />
+                                <div className="flex justify-between mt-2 px-1">
+                                    <span className="text-[9px] font-bold text-charcoal-300 uppercase tracking-widest">1 KM</span>
+                                    <span className="text-[9px] font-bold text-charcoal-300 uppercase tracking-widest">50 KM</span>
                                 </div>
                             </div>
-                        )}
+                            <p className="text-[11px] text-charcoal-500 leading-relaxed font-medium italic">
+                                This determines which studios and home-service clients you appear near.
+                            </p>
+                        </div>
+
+                        {/* Separate Toggle for Home Service Enablement */}
+                        <div className="pt-6 border-t border-cream-100">
+                            <label className="flex items-center gap-4 p-6 border border-cream-200 rounded-3xl bg-white cursor-pointer hover:border-forest/30 transition-all group shadow-sm hover:shadow-md">
+                                <div className="relative flex items-center">
+                                    <input 
+                                        type="checkbox" 
+                                        name="offersHomeSessions" 
+                                        checked={offersHomeSessions}
+                                        onChange={(e) => setOffersHomeSessions(e.target.checked)}
+                                        className="peer sr-only" 
+                                    />
+                                    <div className="w-14 h-7 bg-cream-100 rounded-full peer peer-checked:bg-forest transition-colors duration-300" />
+                                    <div className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-7 shadow-sm" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-charcoal-900 group-hover:text-forest transition-colors">I offer Home Sessions</span>
+                                    <span className="text-[10px] text-charcoal-500 italic">Allow clients to book you at their location within your radius.</span>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                 </div>
             )}

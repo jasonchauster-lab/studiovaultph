@@ -4,7 +4,6 @@ import { headers } from 'next/headers'
 import ProfileForm from '@/components/customer/ProfileForm'
 import InstructorGallerySection from '@/components/instructor/InstructorGallerySection'
 import InstructorCertificationsSection from '@/components/instructor/InstructorCertificationsSection'
-import InstructorServiceAreaSection from '@/components/instructor/InstructorServiceAreaSection'
 import Link from 'next/link'
 import { ArrowLeft, User } from 'lucide-react'
 
@@ -74,8 +73,6 @@ export default async function InstructorProfilePage() {
                 {/* Photo Gallery Section */}
                 <InstructorGallerySection images={profile?.gallery_images || []} />
 
-                {/* Service Area Section */}
-                <InstructorServiceAreaSection profile={profile} />
 
                 {/* Certifications Section */}
                 <InstructorCertificationsSection certifications={certifications || []} />

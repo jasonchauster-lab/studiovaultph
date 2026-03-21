@@ -17,6 +17,7 @@ export default function HeaderSearchPill() {
     const [addressSearch, setAddressSearch] = useState('')
     const [suggestions, setSuggestions] = useState<string[]>([])
     const [isGeocoding, setIsGeocoding] = useState(false)
+    const [loadingSuggestions, setLoadingSuggestions] = useState(false)
     const [showSuggestions, setShowSuggestions] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
 
@@ -34,12 +35,15 @@ export default function HeaderSearchPill() {
     useEffect(() => {
         const fetchSuggestions = async () => {
             if (addressSearch.length > 2) {
+                setLoadingSuggestions(true)
                 const results = await getAutocompleteSuggestions(addressSearch)
                 setSuggestions(results)
                 setShowSuggestions(true)
+                setLoadingSuggestions(false)
             } else {
                 setSuggestions([])
                 setShowSuggestions(false)
+                setLoadingSuggestions(false)
             }
         }
 
@@ -227,7 +231,7 @@ export default function HeaderSearchPill() {
                                         className="w-full px-6 py-4 flex items-center gap-3 hover:bg-forest/5 text-left border-b border-border-grey/50 group"
                                     >
                                         <div className="w-8 h-8 rounded-lg bg-forest/5 flex items-center justify-center group-hover:bg-forest group-hover:text-white transition-colors">
-                                            <Navigation className="w-4 h-4" />
+                                            {isDetecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation className="w-4 h-4" />}
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-[12px] font-black text-burgundy group-hover:text-forest">Use device location</span>
@@ -235,16 +239,28 @@ export default function HeaderSearchPill() {
                                         </div>
                                     </button>
                                     
-                                    {suggestions.map((suggestion, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => handleSuggestionSelect(suggestion)}
-                                            className="w-full px-6 py-4 flex items-center gap-4 hover:bg-off-white text-left transition-colors border-b border-border-grey/30 last:border-0"
-                                        >
-                                            <MapPin className="w-4 h-4 text-burgundy/20" />
-                                            <span className="text-[12px] font-bold text-burgundy truncate">{suggestion}</span>
-                                        </button>
-                                    ))}
+                                    {loadingSuggestions ? (
+                                        <div className="px-6 py-8 flex items-center justify-center gap-3 text-burgundy/40">
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            <span className="text-[11px] font-bold uppercase tracking-widest">Finding addresses...</span>
+                                        </div>
+                                    ) : suggestions.length > 0 ? (
+                                        suggestions.map((suggestion, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => handleSuggestionSelect(suggestion)}
+                                                className="w-full px-6 py-4 flex items-center gap-4 hover:bg-off-white text-left transition-colors border-b border-border-grey/30 last:border-0"
+                                            >
+                                                <MapPin className="w-4 h-4 text-burgundy/20" />
+                                                <span className="text-[12px] font-bold text-burgundy truncate">{suggestion}</span>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="px-6 py-8 flex flex-col items-center justify-center gap-2 text-burgundy/40 italic">
+                                            <p className="text-[11px] font-bold uppercase tracking-widest">No addresses found</p>
+                                            <p className="text-[9px] not-italic">Try a different city or area</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
