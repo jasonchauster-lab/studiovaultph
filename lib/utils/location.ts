@@ -1,3 +1,5 @@
+import { getGeocodeAction, getReverseGeocodeAction, getAutocompleteAction } from '../actions/location'
+
 /**
  * Calculates the Haversine distance between two points in kilometers.
  * @param lat1 Latitude of the first point
@@ -21,122 +23,77 @@ export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2
 }
 
 /**
- * Geocodes an address string to Latitude and Longitude using Google Maps Geocoding API.
+ * Geocodes an address string to Latitude and Longitude using Google Maps Geocoding API (via Server Action).
  * Fallback to a free service or dummy coordinates if API Key is missing.
  */
-export async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-  if (!apiKey) {
-    console.warn('Google Maps API Key missing. Using free OpenStreetMap (Nominatim) fallback.');
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
-        {
-          headers: {
-            'User-Agent': 'PilatesBridge/1.0 (contact@studiovaultph.com)'
-          }
-        }
-      );
-      const data = await response.json();
-      if (data && data.length > 0) {
-        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-      }
-    } catch (err) {
-      console.error('OSM Fallback error:', err);
-    }
-    // Final fallback to Manila if everything fails
-    return { lat: 14.5995, lng: 120.9842 };
+export async function geocodeAddress(address: string): Promise<{ lat: number; lng: number, full?: string, short?: string } | null> {
+  // Use Server Action to avoid CORS
+  const result = await getGeocodeAction(address);
+  if (result.data) {
+    const { location, full, short } = result.data;
+    return { lat: location.lat, lng: location.lng, full, short };
   }
 
+  // Fallback to OSM (Nominatim) directly if server action fails or key is missing
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-        address
-      )}&key=${apiKey}`
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
+      {
+        headers: {
+          'User-Agent': 'PilatesBridge/1.0 (contact@studiovaultph.com)'
+        }
+      }
     );
     const data = await response.json();
-
-    if (data.status === 'OK' && data.results.length > 0) {
-      const { lat, lng } = data.results[0].geometry.location;
-      return { lat, lng };
+    if (data && data.length > 0) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), full: data[0].display_name, short: data[0].name || data[0].display_name.split(',')[0] };
     }
-
-    console.error('Geocoding failed:', data.status, data.error_message);
-    return null;
-  } catch (error) {
-    console.error('Geocoding error:', error);
-    return null;
+  } catch (err) {
+    console.error('OSM Fallback error:', err);
   }
+
+  // Final fallback to Manila if everything fails
+  return { lat: 14.5995, lng: 120.9842, full: 'Manila, Philippines', short: 'Manila' };
 }
 
 /**
- * Reverse geocodes coordinates to a human-readable address using Google Maps Geocoding API.
+ * Reverse geocodes coordinates to a human-readable address using Google Maps Geocoding API (via Server Action).
  */
-export async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-  if (!apiKey) {
-    // OSM Fallback (Nominatim)
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
-        {
-          headers: {
-            'User-Agent': 'PilatesBridge/1.0 (contact@studiovaultph.com)'
-          }
-        }
-      );
-      const data = await response.json();
-      if (data && data.address) {
-        return data.address.city || data.address.town || data.address.suburb || data.display_name;
-      }
-    } catch (err) {
-      console.error('OSM Reverse Geocode error:', err);
-    }
-    return "Current Location";
+export async function reverseGeocode(lat: number, lng: number): Promise<{ full: string, short: string } | null> {
+  const result = await getReverseGeocodeAction(lat, lng);
+  if (result.data) {
+    return result.data;
   }
 
+  // OSM Fallback (Nominatim)
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+      {
+        headers: {
+          'User-Agent': 'PilatesBridge/1.0 (contact@studiovaultph.com)'
+        }
+      }
     );
     const data = await response.json();
-
-    if (data.status === 'OK' && data.results.length > 0) {
-      return data.results[0].formatted_address;
+    if (data && data.address) {
+      const full = data.display_name;
+      const short = data.address.neighborhood || data.address.suburb || data.address.city || data.address.town || "Nearby";
+      return { full, short };
     }
-    return null;
-  } catch (error) {
-    console.error('Reverse Geocoding error:', error);
-    return null;
+  } catch (err) {
+    console.error('OSM Reverse Geocode error:', err);
   }
+  return { full: "Current Location", short: "Nearby" };
 }
 
 /**
- * Fetches address suggestions from Google Places Autocomplete API.
+ * Fetches address suggestions from Google Places Autocomplete API (via Server Action).
  */
 export async function getAutocompleteSuggestions(input: string): Promise<string[]> {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-  if (!apiKey || !input.trim()) {
-    return [];
+  const result = await getAutocompleteAction(input);
+  if (result.data) {
+    return result.data;
   }
-
-  try {
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
-        input
-      )}&key=${apiKey}&components=country:ph` // Restrict to Philippines for better UX
-    );
-    const data = await response.json();
-
-    if (data.status === 'OK') {
-      return data.predictions.map((p: any) => p.description);
-    }
-    return [];
-  } catch (error) {
-    console.error('Autocomplete error:', error);
-    return [];
-  }
+  return [];
 }

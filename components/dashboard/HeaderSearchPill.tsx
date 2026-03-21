@@ -49,14 +49,16 @@ export default function HeaderSearchPill() {
 
     useEffect(() => {
         if (lat && lng) {
-            reverseGeocode(parseFloat(lat), parseFloat(lng)).then(name => {
-                if (name) {
-                    const shortName = name.split(',')[0].trim()
-                    setLocationName(shortName)
+            reverseGeocode(parseFloat(lat), parseFloat(lng)).then(res => {
+                if (res) {
+                    setLocationName(res.short)
+                    // Also populate the search input if it's empty
+                    if (!addressSearch) setAddressSearch(res.full)
                 }
             })
         } else {
             setLocationName(null)
+            setAddressSearch('')
         }
     }, [lat, lng])
 
@@ -71,11 +73,10 @@ export default function HeaderSearchPill() {
                 params.set('lng', longitude.toString())
                 if (!params.has('radius') || params.get('radius') === 'all') params.set('radius', '10')
                 
-                const address = await reverseGeocode(latitude, longitude)
-                if (address) {
-                    setAddressSearch(address)
-                    const shortName = address.split(',')[0].trim()
-                    setLocationName(shortName)
+                const res = await reverseGeocode(latitude, longitude)
+                if (res) {
+                    setAddressSearch(res.full)
+                    setLocationName(res.short)
                 }
 
                 router.push(`/customer?${params.toString()}`)
@@ -95,11 +96,11 @@ export default function HeaderSearchPill() {
         setShowSuggestions(false)
         
         setIsGeocoding(true)
-        const coords = await geocodeAddress(suggestion)
-        if (coords) {
+        const result = await geocodeAddress(suggestion)
+        if (result) {
             const params = new URLSearchParams(searchParams.toString())
-            params.set('lat', coords.lat.toString())
-            params.set('lng', coords.lng.toString())
+            params.set('lat', result.lat.toString())
+            params.set('lng', result.lng.toString())
             if (!params.has('radius') || params.get('radius') === 'all') params.set('radius', '10')
             router.push(`/customer?${params.toString()}`)
             setIsOpen(false)
@@ -113,11 +114,11 @@ export default function HeaderSearchPill() {
 
         setIsGeocoding(true)
         try {
-            const coords = await geocodeAddress(addressSearch)
-            if (coords) {
+            const result = await geocodeAddress(addressSearch)
+            if (result) {
                 const params = new URLSearchParams(searchParams.toString())
-                params.set('lat', coords.lat.toString())
-                params.set('lng', coords.lng.toString())
+                params.set('lat', result.lat.toString())
+                params.set('lng', result.lng.toString())
                 if (!params.has('radius') || params.get('radius') === 'all') params.set('radius', '10')
                 router.push(`/customer?${params.toString()}`)
                 setAddressSearch('')
