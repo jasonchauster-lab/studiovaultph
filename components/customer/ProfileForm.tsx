@@ -8,6 +8,8 @@ import Image from 'next/image'
 import WaiverUpload from '@/components/customer/WaiverUpload'
 import { normalizeImageFile } from '@/lib/utils/image-utils'
 import { clsx } from 'clsx'
+import { geocodeAddress, getAutocompleteSuggestions } from '@/lib/utils/location'
+import { MapPin, Search, Loader2 as LoaderIcon } from 'lucide-react'
 import Avatar from '@/components/shared/Avatar'
 import ImageCropper from '@/components/shared/ImageCropper'
 import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
@@ -26,6 +28,11 @@ export default function ProfileForm({ profile }: { profile: any }) {
     const [homeBaseLat, setHomeBaseLat] = useState(profile?.home_base_lat || '')
     const [homeBaseLng, setHomeBaseLng] = useState(profile?.home_base_lng || '')
     const [maxTravelKm, setMaxTravelKm] = useState(profile?.max_travel_km || 10)
+
+    // Autocomplete State
+    const [suggestions, setSuggestions] = useState<string[]>([])
+    const [showSuggestions, setShowSuggestions] = useState(false)
+    const [isSearching, setIsSearching] = useState(false)
     const [geocoding, setGeocoding] = useState(false)
 
     // State for avatar preview and file
@@ -141,6 +148,32 @@ export default function ProfileForm({ profile }: { profile: any }) {
         }
 
         setIsLoading(false)
+    }
+    const handleAddressSearch = async (val: string) => {
+        setHomeBaseAddress(val)
+        if (val.length >= 3) {
+            setIsSearching(true)
+            const results = await getAutocompleteSuggestions(val)
+            setSuggestions(results)
+            setShowSuggestions(true)
+            setIsSearching(false)
+        } else {
+            setSuggestions([])
+            setShowSuggestions(false)
+        }
+    }
+
+    const handleSuggestionSelect = async (suggestion: string) => {
+        setHomeBaseAddress(suggestion)
+        setShowSuggestions(false)
+        setGeocoding(true)
+        const res = await geocodeAddress(suggestion)
+        if (res) {
+            setHomeBaseLat(res.lat.toString())
+            setHomeBaseLng(res.lng.toString())
+            setHomeBaseAddress(res.full || suggestion)
+        }
+        setGeocoding(false)
     }
 
     return (
@@ -341,52 +374,46 @@ export default function ProfileForm({ profile }: { profile: any }) {
 
                     <div className="space-y-8">
                         {/* Base Location - NOW MANDATORY */}
-                        <div className="space-y-3">
-                            <label className="block text-[10px] font-black text-charcoal-900 uppercase tracking-[0.3em] ml-1 flex items-center gap-2">
-                                Your Home Base Address
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <div className="relative">
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-black text-charcoal-500 uppercase tracking-widest ml-1">Home Base Address</label>
+                            <div className="relative group/address">
+                                <div className="absolute left-5 top-5 text-charcoal-300 group-focus-within/address:text-forest transition-colors">
+                                    <MapPin className="w-5 h-5" />
+                                </div>
                                 <input 
                                     type="text" 
                                     name="homeBaseAddress"
                                     value={homeBaseAddress}
-                                    onChange={(e) => setHomeBaseAddress(e.target.value)}
-                                    placeholder="e.g. Rockwell, Makati or specific street address"
-                                    required={profile?.role === 'instructor'}
-                                    className="w-full px-5 py-4 bg-off-white border border-cream-200 rounded-xl text-charcoal-900 font-medium text-sm focus:outline-none focus:ring-forest/5 focus:ring-4 focus:border-forest transition-all pr-12"
+                                    onChange={(e) => handleAddressSearch(e.target.value)}
+                                    autoComplete="off"
+                                    placeholder="Enter your street/community address..."
+                                    className="w-full pl-14 pr-16 py-5 bg-off-white border border-cream-200 rounded-2xl text-charcoal-900 font-bold text-sm focus:outline-none focus:ring-forest/5 focus:ring-4 focus:border-forest transition-all placeholder:text-charcoal-300 placeholder:font-medium"
                                 />
-                                <button 
-                                    type="button"
-                                    onClick={async () => {
-                                        if (!homeBaseAddress) return;
-                                        setGeocoding(true);
-                                        const res = await geocodeAddress(homeBaseAddress);
-                                        if (res) {
-                                            setHomeBaseLat(res.lat.toString());
-                                            setHomeBaseLng(res.lng.toString());
-                                            setHomeBaseAddress(res.full || homeBaseAddress);
-                                            setMessage('Location verified! Coordinates captured.');
-                                        } else {
-                                            setMessage('Could not verify address. Please be more specific.');
-                                        }
-                                        setGeocoding(false);
-                                    }}
-                                    disabled={geocoding || !homeBaseAddress}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-forest/10 rounded-lg text-forest transition-colors disabled:opacity-30"
-                                    title="Verify Address"
-                                >
-                                    {geocoding ? <Loader2 className="w-5 h-5 animate-spin" /> : <MapPin className="w-5 h-5" />}
-                                </button>
-                            </div>
-                            <div className="flex items-start gap-2 ml-1">
-                                <Navigation className="w-3.5 h-3.5 text-forest mt-0.5 flex-none" />
-                                <p className="text-[10px] text-charcoal-400 italic leading-relaxed uppercase tracking-wider font-bold">
-                                    {homeBaseLat && homeBaseLng ? '✓ COORDINATES VERIFIED' : 'PENDING VERIFICATION — CLICK THE PIN ICON'}
-                                </p>
+                                
+                                {isSearching && (
+                                    <div className="absolute right-5 top-5">
+                                        <LoaderIcon className="w-5 h-5 animate-spin text-forest/40" />
+                                    </div>
+                                )}
+
+                                {/* Suggestions Dropdown */}
+                                {showSuggestions && suggestions.length > 0 && (
+                                    <div className="absolute z-[100] top-full left-0 right-0 mt-2 bg-white border border-cream-200 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                        {suggestions.map((s, idx) => (
+                                            <button
+                                                key={idx}
+                                                type="button"
+                                                onClick={() => handleSuggestionSelect(s)}
+                                                className="w-full text-left px-6 py-4 text-xs font-bold text-charcoal-700 hover:bg-forest/5 hover:text-forest transition-colors border-b border-cream-50 last:border-0 flex items-center gap-3"
+                                            >
+                                                <Search className="w-3.5 h-3.5 opacity-30" />
+                                                {s}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             
-                            {/* Secret Coords (Hidden from view but in form) */}
                             <input type="hidden" name="homeBaseLat" value={homeBaseLat} />
                             <input type="hidden" name="homeBaseLng" value={homeBaseLng} />
                         </div>

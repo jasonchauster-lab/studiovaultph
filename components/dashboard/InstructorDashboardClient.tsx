@@ -1,24 +1,5 @@
 'use client';
 
-// Hoisted outside the component — these are static data that never change,
-// so defining them inside the function body would recreate them on every render.
-const AREAS = [
-    'Alabang - Madrigal/Ayala Alabang', 'Alabang - Filinvest City', 'Alabang - Alabang Town Center Area', 'Alabang - Others',
-    'BGC - High Street', 'BGC - Central Square/Uptown', 'BGC - Forbes Town', 'BGC - Others',
-    'Ortigas - Ortigas Center', 'Ortigas - Greenhills', 'Ortigas - San Juan', 'Ortigas - Others',
-    'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others',
-    'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer',
-    'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village',
-    'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others'
-]
-
-const GROUPED_AREAS = AREAS.reduce((acc: Record<string, string[]>, loc: string) => {
-    const city = loc?.split(' - ')[0] || 'Studio';
-    if (!acc[city]) acc[city] = [];
-    acc[city].push(loc);
-    return acc;
-}, {})
-
 import { useEffect, useState } from 'react';
 import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2, Pencil, Copy, Trash2, AlertTriangle, CheckCircle, Plus, RefreshCcw, UserCheck } from 'lucide-react'
 import Avatar from '@/components/shared/Avatar';
@@ -104,7 +85,6 @@ export default function InstructorDashboardClient({
     const [singleDate, setSingleDate] = useState(currentDateStr || '');
     const [singleTime, setSingleTime] = useState('09:00');
     const [singleEndTime, setSingleEndTime] = useState('10:00');
-    const [locations, setLocations] = useState<string[]>([]);
     const [equipment, setEquipment] = useState<string[]>([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [addMode, setAddMode] = useState<'single' | 'bulk'>('single');
@@ -119,37 +99,12 @@ export default function InstructorDashboardClient({
 
     const [expandedCities, setExpandedCities] = useState<string[]>([]);
 
-    const toggleCityAccordion = (city: string) => {
-        setExpandedCities(prev =>
-            prev.includes(city) ? prev.filter(c => c !== city) : [...prev, city]
-        );
-    };
-    const toggleLocation = (loc: string) => {
-        setLocations(prev =>
-            prev.includes(loc)
-                ? prev.filter(l => l !== loc)
-                : [...prev, loc]
-        );
-    };
-
     const toggleEquipment = (eq: string) => {
         setEquipment(prev =>
             prev.includes(eq)
                 ? prev.filter(e => e !== eq)
                 : [...prev, eq]
         );
-    };
-
-    const toggleCityGroup = (cityLocations: string[]) => {
-        const allSelected = cityLocations.every(loc => locations.includes(loc));
-        if (allSelected) {
-            setLocations(prev => prev.filter(l => !cityLocations.includes(l)));
-        } else {
-            setLocations(prev => {
-                const newSelections = cityLocations.filter(loc => !prev.includes(loc));
-                return [...prev, ...newSelections];
-            });
-        }
     };
 
     const getSlotDateTime = (date: string | undefined, time: string | undefined) => {
@@ -213,8 +168,8 @@ export default function InstructorDashboardClient({
         if (e) e.preventDefault();
         if (isSubmitting) return;
 
-        if (locations.length === 0) {
-            alert('Please select at least one location');
+        if (!instructorProfile?.home_base_address) {
+            alert('Please set your Service Area in profile settings first.');
             return;
         }
 
@@ -227,7 +182,7 @@ export default function InstructorDashboardClient({
             days: [new Date(singleDate).getDay()],
             startTime: singleTime,
             endTime: singleEndTime,
-            locations: locations,
+            locations: [instructorProfile?.home_base_address || ''],
             equipment: instructorProfile?.teaching_equipment || []
         });
 
@@ -350,7 +305,6 @@ export default function InstructorDashboardClient({
                                         setSingleDate(slot.date || getManilaTodayStr());
                                         setSingleTime(slot.start_time);
                                         setSingleEndTime(slot.end_time);
-                                        setLocations([slot.location_area]);
                                         setEquipment(slot.equipment || instructorProfile?.teaching_equipment || []);
                                         setIsEditModalOpen(true);
                                     }
@@ -362,7 +316,7 @@ export default function InstructorDashboardClient({
                                     start_time: a.start_time,
                                     end_time: a.end_time,
                                     date: a.date || getManilaTodayStr(),
-                                    type: `Availability: ${a.location_area?.split(' - ').slice(-1)[0] || a.location_area || 'Standard'}`,
+                                    type: `Home Session: ${instructorProfile?.home_base_address?.split(',')[0] || 'My Area'}`,
                                     location: a.location_area || 'Studio',
                                     is_booked: false
                                 })),
@@ -873,18 +827,11 @@ export default function InstructorDashboardClient({
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-slate uppercase tracking-widest pl-1">Primary Location</label>
-                                    <select 
-                                        name="location_area" 
-                                        required 
-                                        defaultValue={editingSlot.location_area}
-                                        className="w-full px-5 py-4 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all uppercase tracking-widest shadow-inner cursor-pointer"
-                                    >
-                                        {AREAS.sort().map(loc => (
-                                            <option key={loc} value={loc}>{loc}</option>
-                                        ))}
-                                    </select>
+                                <div className="space-y-4">
+                                    <div className="p-4 bg-forest/5 rounded-2xl border border-forest/10">
+                                        <p className="text-[10px] font-bold text-forest uppercase tracking-widest mb-1">Service Area</p>
+                                        <p className="text-[11px] font-bold text-charcoal">{instructorProfile?.home_base_address || 'No service area set'}</p>
+                                    </div>
                                 </div>
 
                                 <div className="pt-6 flex flex-col gap-4">
@@ -970,58 +917,19 @@ export default function InstructorDashboardClient({
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <label className="text-[10px] font-bold text-slate uppercase tracking-widest pl-1">Target Areas</label>
-                                        <div className="space-y-4">
-                                            {Object.entries(GROUPED_AREAS).sort().map(([city, cityLocations]) => (
-                                                <div key={city} className="border border-border-grey rounded-[1.5rem] overflow-hidden bg-off-white/50 shadow-sm">
-                                                    <button 
-                                                        type="button"
-                                                        onClick={() => toggleCityAccordion(city)}
-                                                        className="w-full px-5 py-4 flex items-center justify-between hover:bg-white transition-all border-b border-border-grey/50"
-                                                    >
-                                                        <span className="text-[10px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
-                                                        <div className="flex items-center gap-4">
-                                                            <span className="text-[9px] text-slate font-black uppercase tracking-tighter">{cityLocations.filter(l => locations.includes(l)).length} SET</span>
-                                                            <ChevronRight className={clsx("w-4 h-4 text-slate/40 transition-transform", expandedCities.includes(city) && "rotate-90")} />
-                                                        </div>
-                                                    </button>
-                                                    {expandedCities.includes(city) && (
-                                                        <div className="p-4 grid grid-cols-1 gap-2 bg-white animate-in slide-in-from-top-2 duration-200">
-                                                            <button 
-                                                                type="button"
-                                                                onClick={() => toggleCityGroup(cityLocations)}
-                                                                className="text-left px-4 py-2.5 text-[9px] font-black text-forest hover:bg-forest/5 rounded-xl transition-all uppercase tracking-[0.2em] mb-1"
-                                                            >
-                                                                {cityLocations.every(l => locations.includes(l)) ? 'Deselect All' : 'Select Entire ' + city}
-                                                            </button>
-                                                            {cityLocations.map(loc => (
-                                                                <button 
-                                                                    key={loc}
-                                                                    type="button"
-                                                                    onClick={() => toggleLocation(loc)}
-                                                                    className={clsx(
-                                                                        "text-left px-4 py-4 rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest flex items-center justify-between border",
-                                                                        locations.includes(loc) 
-                                                                            ? "bg-buttermilk border-burgundy/10 text-burgundy shadow-tight scale-[1.02]" 
-                                                                            : "text-slate bg-off-white/50 border-transparent hover:border-border-grey"
-                                                                    )}
-                                                                >
-                                                                    {loc?.split(' - ')[1] || loc || 'Studio'}
-                                                                    {locations.includes(loc) && <CheckCircle className="w-4 h-4 text-burgundy" />}
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
 
-                                    <div className="pt-6">
+                                    <div className="pt-6 space-y-4">
+                                        {!instructorProfile?.home_base_address && (
+                                            <div className="p-4 bg-burgundy/5 border border-burgundy/10 rounded-2xl flex items-start gap-3">
+                                                <AlertCircle className="w-5 h-5 text-burgundy shrink-0 mt-0.5" />
+                                                <p className="text-[11px] font-bold text-burgundy/80 leading-relaxed uppercase tracking-wider">
+                                                    Service Area missing. Please set your home base in profile settings to activate sessions.
+                                                </p>
+                                            </div>
+                                        )}
                                         <button 
                                             type="submit"
-                                            disabled={isSubmitting || locations.length === 0}
+                                            disabled={isSubmitting || !instructorProfile?.home_base_address}
                                             className="w-full py-5 bg-forest text-white rounded-2xl text-[10px] font-bold hover:brightness-110 transition-all uppercase tracking-[0.3em] shadow-tight disabled:opacity-50 active:scale-95"
                                         >
                                             {isSubmitting ? 'Creating Session...' : 'Activate Session'}

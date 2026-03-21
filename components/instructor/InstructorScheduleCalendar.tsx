@@ -66,9 +66,7 @@ export default function InstructorScheduleCalendar({
     const [singleDate, setSingleDate] = useState(currentDate ? format(currentDate, 'yyyy-MM-dd') : '')
     const [singleTime, setSingleTime] = useState('09:00')
     const [singleEndTime, setSingleEndTime] = useState('10:00')
-    const [locations, setLocations] = useState<string[]>([])
     const [equipment, setEquipment] = useState<string[]>([])
-    const [expandedCities, setExpandedCities] = useState<string[]>([])
 
     const isProfileComplete = !!(
         instructorProfile?.teaching_equipment && 
@@ -78,38 +76,6 @@ export default function InstructorScheduleCalendar({
         instructorProfile?.home_base_address
     );
 
-    const toggleCityAccordion = (city: string) => {
-        setExpandedCities(prev =>
-            prev.includes(city) ? prev.filter(c => c !== city) : [...prev, city]
-        )
-    }
-    const toggleLocation = (loc: string) => {
-        setLocations(prev =>
-            prev.includes(loc)
-                ? prev.filter(l => l !== loc)
-                : [...prev, loc]
-        )
-    }
-
-    const toggleEquipment = (eq: string) => {
-        setEquipment(prev =>
-            prev.includes(eq)
-                ? prev.filter(e => e !== eq)
-                : [...prev, eq]
-        )
-    }
-
-    const toggleCityGroup = (cityLocations: string[]) => {
-        const allSelected = cityLocations.every(loc => locations.includes(loc));
-        if (allSelected) {
-            setLocations(prev => prev.filter(l => !cityLocations.includes(l)));
-        } else {
-            setLocations(prev => {
-                const newSelections = cityLocations.filter(loc => !prev.includes(loc));
-                return [...prev, ...newSelections];
-            });
-        }
-    }
 
     // Calendar Calculations
     const days = useMemo(() => {
@@ -271,11 +237,6 @@ export default function InstructorScheduleCalendar({
         if (isSubmitting) return;
         if (!isProfileComplete) return;
 
-        if (locations.length === 0) {
-            alert('Please select at least one location');
-            return;
-        }
-
         setIsSubmitting(true)
         const { generateRecurringAvailability } = await import('@/app/(dashboard)/instructor/schedule/actions');
 
@@ -285,7 +246,7 @@ export default function InstructorScheduleCalendar({
             days: [new Date(singleDate).getDay()],
             startTime: singleTime,
             endTime: singleEndTime,
-            locations: locations,
+            locations: [instructorProfile?.home_base_address || ''],
             equipment: instructorProfile?.teaching_equipment || []
         })
 
@@ -323,28 +284,11 @@ export default function InstructorScheduleCalendar({
         setSingleDate(slot.date || (currentDate ? format(currentDate, 'yyyy-MM-dd') : ''))
         setSingleTime(slot.start_time)
         setSingleEndTime(slot.end_time)
-        setLocations([slot.location_area])
         // Use slot's equipment if it has it, otherwise profile's
         setEquipment(slot.equipment || instructorProfile?.teaching_equipment || [])
         setIsEditModalOpen(true)
     }
 
-    const AREAS = [
-        'Alabang - Madrigal/Ayala Alabang', 'Alabang - Filinvest City', 'Alabang - Alabang Town Center Area', 'Alabang - Others',
-        'BGC - High Street', 'BGC - Central Square/Uptown', 'BGC - Forbes Town', 'BGC - Others',
-        'Ortigas - Ortigas Center', 'Ortigas - Greenhills', 'Ortigas - San Juan', 'Ortigas - Others',
-        'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others',
-        'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer',
-        'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village',
-        'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others'
-    ];
-
-    const GROUPED_AREAS = AREAS.reduce((acc, loc) => {
-        const city = loc?.split(' - ')[0] || loc || 'Studio';
-        if (!acc[city]) acc[city] = [];
-        acc[city].push(loc);
-        return acc;
-    }, {} as Record<string, string[]>);
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -725,7 +669,6 @@ export default function InstructorScheduleCalendar({
                                                                                 setSingleDate(slot.date || format(day, 'yyyy-MM-dd'));
                                                                                 setSingleTime(slot.start_time);
                                                                                 setSingleEndTime(slot.end_time);
-                                                                                setLocations(locations);
                                                                                 setEquipment(equipment.length > 0 ? equipment : ['Reformer']);
                                                                                 setCurrentSlotHistory(historyMap[`${dayStr}-${hour}`] || []);
                                                                                 setIsEditModalOpen(true);
@@ -1030,79 +973,17 @@ export default function InstructorScheduleCalendar({
                                 </div>
 
                                 <div className="space-y-6">
-                                    <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-2">Geographic Deployment</h4>
-                                    <div className="space-y-3">
-                                        {Object.entries(GROUPED_AREAS).map(([city, cityLocations]) => {
-                                            const selectedInCity = cityLocations.filter(loc => locations.includes(loc));
-                                            const allSelected = selectedInCity.length === cityLocations.length;
-                                            const isExpanded = expandedCities.includes(city);
-
-                                            return (
-                                                <div key={city} className="earth-card overflow-hidden bg-white border border-border-grey shadow-tight">
-                                                    {/* Accordion Header */}
-                                                    <div
-                                                        className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-off-white transition-all border-b border-border-grey/30"
-                                                        onClick={() => toggleCityAccordion(city)}
-                                                    >
-                                                        <div className="flex items-center gap-4">
-                                                            <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
-                                                            {selectedInCity.length > 0 && (
-                                                                <span className="text-[9px] font-bold text-[#4B5563] bg-[#F3F4F6] px-2.5 py-1 rounded-full uppercase tracking-widest border border-gray-200">
-                                                                    {selectedInCity.length}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex items-center gap-6 shrink-0">
-                                                            <button
-                                                                type="button"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    toggleCityGroup(cityLocations);
-                                                                }}
-                                                                className="text-[9px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-slate/20 underline-offset-8 whitespace-nowrap"
-                                                            >
-                                                                {allSelected ? 'DESELECT' : 'SELECT ALL'}
-                                                            </button>
-                                                            {isExpanded ? <ChevronUp className="w-4 h-4 text-slate flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate flex-shrink-0" />}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Accordion Content */}
-                                                    {isExpanded && (
-                                                        <div className="px-6 py-6 bg-off-white/40 animate-in slide-in-from-top-2 duration-300">
-                                                            <div className="grid grid-cols-1 gap-y-4">
-                                                                {cityLocations.map(area => {
-                                                                    const isSelected = locations.includes(area);
-                                                                    const displayName = area?.split(' - ')[1] || area || 'Studio';
-                                                                    return (
-                                                                        <div
-                                                                            key={area}
-                                                                            onClick={() => toggleLocation(area)}
-                                                                            className="flex items-center gap-4 cursor-pointer group/loc"
-                                                                        >
-                                                                            <div className={clsx(
-                                                                                "w-5 h-5 rounded border flex items-center justify-center transition-all duration-300",
-                                                                                isSelected
-                                                                                    ? "bg-forest border-forest text-white"
-                                                                                    : "bg-white border-border-grey group-hover/loc:border-forest/50"
-                                                                            )}>
-                                                                                {isSelected && <CheckCircle className="w-3.5 h-3.5" />}
-                                                                            </div>
-                                                                            <span className={clsx(
-                                                                                "text-[10px] font-bold uppercase tracking-[0.2em] transition-colors duration-300",
-                                                                                isSelected ? "text-charcoal" : "text-slate group-hover/loc:text-forest"
-                                                                            )}>
-                                                                                {displayName}
-                                                                            </span>
-                                                                        </div>
-                                                                    )
-                                                                })}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )
-                                        })}
+                                    <div className="earth-card p-6 bg-burgundy/5 border border-burgundy/10 rounded-2xl">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <MapPin className="w-4 h-4 text-burgundy" />
+                                            <span className="text-[10px] font-black text-burgundy uppercase tracking-widest">Service Area Address</span>
+                                        </div>
+                                        <p className="text-sm font-serif text-charcoal-700">
+                                            {instructorProfile?.home_base_address || 'Address not set'}
+                                        </p>
+                                        <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-2 italic">
+                                            Changing this requires updating your profile.
+                                        </p>
                                     </div>
                                 </div>
 
@@ -1149,6 +1030,7 @@ export default function InstructorScheduleCalendar({
                             <InstructorScheduleGenerator 
                                 initialAvailability={[]} 
                                 teachingEquipment={instructorProfile?.teaching_equipment || []}
+                                instructorProfile={instructorProfile}
                             />
                         </div>
                     </div>
@@ -1200,79 +1082,17 @@ export default function InstructorScheduleCalendar({
                                 </div>
 
                                 <div className="space-y-6">
-                                    <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] ml-2">Geographic Deployment</h4>
-                                    <div className="space-y-3">
-                                        {Object.entries(GROUPED_AREAS).map(([city, cityLocations]) => {
-                                            const selectedInCity = cityLocations.filter(loc => locations.includes(loc));
-                                            const allSelected = selectedInCity.length === cityLocations.length;
-                                            const isExpanded = expandedCities.includes(city);
-
-                                            return (
-                                                <div key={city} className="earth-card overflow-hidden bg-white border border-border-grey shadow-tight">
-                                                    {/* Accordion Header */}
-                                                    <div
-                                                        className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-off-white transition-all border-b border-border-grey/30"
-                                                        onClick={() => toggleCityAccordion(city)}
-                                                    >
-                                                        <div className="flex items-center gap-4">
-                                                            <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
-                                                            {selectedInCity.length > 0 && (
-                                                                <span className="text-[9px] font-bold text-[#4B5563] bg-[#F3F4F6] px-2.5 py-1 rounded-full uppercase tracking-widest border border-gray-200">
-                                                                    {selectedInCity.length}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex items-center gap-6 shrink-0">
-                                                            <button
-                                                                type="button"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    toggleCityGroup(cityLocations);
-                                                                }}
-                                                                className="text-[9px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-slate/20 underline-offset-8 whitespace-nowrap"
-                                                            >
-                                                                {allSelected ? 'DESELECT' : 'SELECT ALL'}
-                                                            </button>
-                                                            {isExpanded ? <ChevronUp className="w-4 h-4 text-slate flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate flex-shrink-0" />}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Accordion Content */}
-                                                    {isExpanded && (
-                                                        <div className="px-6 py-6 bg-off-white/40 animate-in slide-in-from-top-2 duration-300">
-                                                            <div className="grid grid-cols-1 gap-y-4">
-                                                                {cityLocations.map(area => {
-                                                                    const isSelected = locations.includes(area);
-                                                                    const displayName = area?.split(' - ')[1] || area || 'Studio';
-                                                                    return (
-                                                                        <div
-                                                                            key={area}
-                                                                            onClick={() => toggleLocation(area)}
-                                                                            className="flex items-center gap-4 cursor-pointer group/loc"
-                                                                        >
-                                                                            <div className={clsx(
-                                                                                "w-5 h-5 rounded border flex items-center justify-center transition-all duration-300",
-                                                                                isSelected
-                                                                                    ? "bg-forest border-forest text-white"
-                                                                                    : "bg-white border-border-grey group-hover/loc:border-forest/50"
-                                                                            )}>
-                                                                                {isSelected && <CheckCircle className="w-3.5 h-3.5" />}
-                                                                            </div>
-                                                                            <span className={clsx(
-                                                                                "text-[10px] font-bold uppercase tracking-[0.2em] transition-colors duration-300",
-                                                                                isSelected ? "text-charcoal" : "text-slate group-hover/loc:text-forest"
-                                                                            )}>
-                                                                                {displayName}
-                                                                            </span>
-                                                                        </div>
-                                                                    )
-                                                                })}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )
-                                        })}
+                                    <div className="earth-card p-6 bg-burgundy/5 border border-burgundy/10 rounded-2xl">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <MapPin className="w-4 h-4 text-burgundy" />
+                                            <span className="text-[10px] font-black text-burgundy uppercase tracking-widest">Service Area Address</span>
+                                        </div>
+                                        <p className="text-sm font-serif text-charcoal-700">
+                                            {instructorProfile?.home_base_address || 'Address not set'}
+                                        </p>
+                                        <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-2 italic">
+                                            Changing this requires updating your profile.
+                                        </p>
                                     </div>
                                 </div>
 

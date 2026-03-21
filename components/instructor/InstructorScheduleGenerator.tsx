@@ -7,29 +7,16 @@ import { Loader2, Plus, Trash2, Clock, MapPin, Repeat, CheckCircle, AlertCircle,
 import { clsx } from 'clsx'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-const LOCATIONS = [
-    'Alabang - Madrigal/Ayala Alabang', 'Alabang - Filinvest City', 'Alabang - Alabang Town Center Area', 'Alabang - Others',
-    'BGC - High Street', 'BGC - Central Square/Uptown', 'BGC - Forbes Town', 'BGC - Others',
-    'Ortigas - Ortigas Center', 'Ortigas - Greenhills', 'Ortigas - San Juan', 'Ortigas - Others',
-    'Makati - CBD/Ayala', 'Makati - Poblacion/Rockwell', 'Makati - San Antonio/Gil Puyat', 'Makati - Others',
-    'Mandaluyong - Ortigas South', 'Mandaluyong - Greenfield/Shaw', 'Mandaluyong - Boni/Pioneer',
-    'QC - Tomas Morato', 'QC - Katipunan', 'QC - Eastwood', 'QC - Cubao', 'QC - Fairview/Commonwealth', 'QC - Novaliches', 'QC - Diliman', 'QC - Maginhawa/UP Village',
-    'Paranaque - BF Homes', 'Paranaque - Moonwalk / Merville', 'Paranaque - Bicutan / Sucat', 'Paranaque - Others'
-]
-
-const GROUPED_LOCATIONS = LOCATIONS.reduce((acc, loc) => {
-    const city = loc.split(' - ')[0];
-    if (!acc[city]) acc[city] = [];
-    acc[city].push(loc);
-    return acc;
-}, {} as Record<string, string[]>);
 
 interface ScheduleManagerProps {
     initialAvailability: any[];
     teachingEquipment: string[];
+    instructorProfile: {
+        home_base_address?: string | null;
+    } | null;
 }
 
-export default function InstructorScheduleGenerator({ initialAvailability, teachingEquipment }: ScheduleManagerProps) {
+export default function InstructorScheduleGenerator({ initialAvailability, teachingEquipment, instructorProfile }: ScheduleManagerProps) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -40,37 +27,9 @@ export default function InstructorScheduleGenerator({ initialAvailability, teach
     const [selectedDays, setSelectedDays] = useState<number[]>([]);
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('17:00');
-    const [locations, setLocations] = useState<string[]>([]);
-    const [expandedCities, setExpandedCities] = useState<string[]>([]);
-
-    const toggleCityAccordion = (city: string) => {
-        setExpandedCities(prev =>
-            prev.includes(city) ? prev.filter(c => c !== city) : [...prev, city]
-        )
-    }
-
-    const toggleLocation = (loc: string) => {
-        setLocations(prev =>
-            prev.includes(loc)
-                ? prev.filter(l => l !== loc)
-                : [...prev, loc]
-        );
-    }
-
-    const toggleCityGroup = (cityLocations: string[]) => {
-        const allSelected = cityLocations.every(loc => locations.includes(loc));
-        if (allSelected) {
-            setLocations(prev => prev.filter(l => !cityLocations.includes(l)));
-        } else {
-            setLocations(prev => {
-                const newSelections = cityLocations.filter(loc => !prev.includes(loc));
-                return [...prev, ...newSelections];
-            });
-        }
-    }
 
     const handleGenerate = async () => {
-        if (!startDate || !endDate || selectedDays.length === 0 || locations.length === 0) {
+        if (!startDate || !endDate || selectedDays.length === 0) {
             setMessage({ type: 'error', text: 'Please fill in all fields before saving.' });
             return;
         }
@@ -85,7 +44,7 @@ export default function InstructorScheduleGenerator({ initialAvailability, teach
                 days: selectedDays,
                 startTime,
                 endTime,
-                locations: locations,
+                locations: [instructorProfile?.home_base_address || ''],
                 equipment: teachingEquipment
             });
 
@@ -101,7 +60,7 @@ export default function InstructorScheduleGenerator({ initialAvailability, teach
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }
 
     const toggleDay = (d: number) => {
         if (selectedDays.includes(d)) setSelectedDays(selectedDays.filter(x => x !== d));
@@ -246,81 +205,17 @@ export default function InstructorScheduleGenerator({ initialAvailability, teach
                                 {/* Equipment picker removed - automatically uses profile equipment */}
                             </div>
 
-                            <div className="earth-card p-6 flex flex-col bg-white border border-border-grey shadow-tight">
-                                <h3 className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] mb-4 px-2">Location</h3>
-                                <div className="space-y-4 flex-1">
-                                    {Object.entries(GROUPED_LOCATIONS).map(([city, cityLocations]) => {
-                                        const selectedInCity = cityLocations.filter(loc => locations.includes(loc));
-                                        const allSelected = selectedInCity.length === cityLocations.length;
-                                        const isExpanded = expandedCities.includes(city);
-
-                                        return (
-                                            <div key={city} className="bg-white rounded-xl border border-border-grey shadow-sm overflow-hidden transition-all duration-300">
-                                                {/* Accordion Header */}
-                                                <div
-                                                    className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-off-white transition-all border-b border-border-grey/30"
-                                                    onClick={() => toggleCityAccordion(city)}
-                                                >
-                                                    <div className="flex items-center gap-4">
-                                                        <span className="text-[11px] font-bold text-charcoal uppercase tracking-[0.2em]">{city}</span>
-                                                        {selectedInCity.length > 0 && (
-                                                            <span className="text-[9px] font-bold text-[#4B5563] bg-[#F3F4F6] px-2.5 py-1 rounded-full uppercase tracking-widest border border-gray-200">
-                                                                {selectedInCity.length}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex items-center gap-6 shrink-0">
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                toggleCityGroup(cityLocations);
-                                                            }}
-                                                            className="text-[9px] font-bold text-slate hover:text-charcoal transition-colors uppercase tracking-[0.2em] underline decoration-slate/20 underline-offset-8 whitespace-nowrap"
-                                                        >
-                                                            {allSelected ? 'DESELECT' : 'SELECT ALL'}
-                                                        </button>
-                                                        {isExpanded ? <ChevronUp className="w-4 h-4 text-slate flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate flex-shrink-0" />}
-                                                    </div>
-                                                </div>
-
-                                                {/* Accordion Content */}
-                                                {isExpanded && (
-                                                    <div className="px-6 py-6 bg-off-white/40 animate-in slide-in-from-top-2 duration-300">
-                                                        <div className="grid grid-cols-1 gap-y-4">
-                                                            {cityLocations.map(l => {
-                                                                const isSelected = locations.includes(l);
-                                                                const displayName = l.split(' - ')[1] || l;
-                                                                return (
-                                                                    <div
-                                                                        key={l}
-                                                                        onClick={() => toggleLocation(l)}
-                                                                        className="flex items-center gap-4 cursor-pointer group/loc"
-                                                                    >
-                                                                        <div className={clsx(
-                                                                            "w-5 h-5 rounded border flex items-center justify-center transition-all duration-300",
-                                                                            isSelected
-                                                                                ? "bg-forest border-forest text-white"
-                                                                                : "bg-white border-border-grey group-hover/loc:border-forest/50"
-                                                                        )}>
-                                                                            {isSelected && <CheckCircle className="w-3.5 h-3.5" />}
-                                                                        </div>
-                                                                        <span className={clsx(
-                                                                            "text-[10px] font-bold uppercase tracking-[0.2em] transition-colors duration-300",
-                                                                            isSelected ? "text-charcoal" : "text-slate group-hover/loc:text-forest"
-                                                                        )}>
-                                                                            {displayName}
-                                                                        </span>
-                                                                    </div>
-                                                                )
-                                                            })}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )
-                                    })}
+                            <div className="earth-card p-8 flex flex-col bg-burgundy/5 border border-burgundy/10 rounded-2xl">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <MapPin className="w-5 h-5 text-burgundy" />
+                                    <span className="text-[10px] font-black text-burgundy uppercase tracking-widest">Service Area Address</span>
                                 </div>
+                                <p className="text-sm font-serif text-charcoal-700 leading-relaxed">
+                                    {instructorProfile?.home_base_address || 'Address not set'}
+                                </p>
+                                <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-4 italic border-t border-burgundy/5 pt-3">
+                                    Recurring sessions will be generated for your verified service area.
+                                </p>
                             </div>
                         </div>
                     </div>
