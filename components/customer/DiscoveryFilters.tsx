@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
-import { Filter, Calendar, Clock, ChevronDown, MapPin, Navigation, Loader2 } from 'lucide-react'
+import { Filter, Calendar, Clock, ChevronDown, Navigation, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { STUDIO_AMENITIES } from '@/types'
 import { clsx } from 'clsx'
@@ -57,6 +57,10 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
     }
 
     const handleFilter = (name: string, value: string) => {
+        // PROACTIVE UX: If user selects a radius but hasn't set location, trigger detection
+        if (name === 'radius' && value !== 'all' && !hasLocation) {
+            handleLocationDetect();
+        }
         router.push(`/customer?${createQueryString(name, value)}`)
     }
 
@@ -196,13 +200,13 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
 
                 {/* Distance and Location Group */}
                 <div className="flex flex-col sm:flex-row gap-6 pt-6 sm:pt-8 lg:pt-0 border-t lg:border-t-0 border-burgundy/5 lg:border-l lg:pl-8">
-                    <div className="flex flex-col gap-2.5 min-w-[140px]">
+                    <div className="flex flex-col gap-2.5 min-w-[140px] flex-1 lg:flex-none">
                         <label className="text-[9px] font-black text-burgundy/30 uppercase tracking-[0.2em] ml-1.5 flex items-center justify-between">
                             Distance
                             {hasLocation && <span className="text-forest lowercase italic font-medium">Active</span>}
                         </label>
                         <div className="flex items-center gap-3">
-                            <div className="relative group/select flex-1">
+                            <div className="relative group/select flex-1 min-w-[130px]">
                                 <select
                                     onChange={(e) => handleFilter('radius', e.target.value)}
                                     value={currentRadius}
@@ -216,10 +220,12 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                                 </select>
                                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-burgundy/30 pointer-events-none" />
                             </div>
+
                             <button
                                 onClick={handleLocationDetect}
+                                type="button"
                                 className={clsx(
-                                    "p-4 rounded-xl sm:rounded-2xl border transition-all shadow-sm active:scale-95 h-[50px] sm:h-[54px] flex items-center justify-center",
+                                    "p-4 rounded-xl sm:rounded-2xl border transition-all shadow-sm active:scale-95 h-[50px] sm:h-[54px] flex items-center justify-center w-[54px]",
                                     hasLocation ? "bg-forest text-white border-forest" : "bg-off-white/50 border-burgundy/5 text-burgundy/40 hover:bg-white hover:border-burgundy/20"
                                 )}
                                 title="Detect My Location"

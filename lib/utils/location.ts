@@ -69,3 +69,46 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
     return null;
   }
 }
+
+/**
+ * Reverse geocodes coordinates to a human-readable address using Google Maps Geocoding API.
+ */
+export async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  if (!apiKey) {
+    // OSM Fallback (Nominatim)
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+        {
+          headers: {
+            'User-Agent': 'PilatesBridge/1.0 (contact@studiovaultph.com)'
+          }
+        }
+      );
+      const data = await response.json();
+      if (data && data.address) {
+        return data.address.city || data.address.town || data.address.suburb || data.display_name;
+      }
+    } catch (err) {
+      console.error('OSM Reverse Geocode error:', err);
+    }
+    return "Current Location";
+  }
+
+  try {
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`
+    );
+    const data = await response.json();
+
+    if (data.status === 'OK' && data.results.length > 0) {
+      return data.results[0].formatted_address;
+    }
+    return null;
+  } catch (error) {
+    console.error('Reverse Geocoding error:', error);
+    return null;
+  }
+}
