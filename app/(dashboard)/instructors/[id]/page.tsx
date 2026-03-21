@@ -128,6 +128,10 @@ export default async function InstructorProfilePage(props: {
                                 activeBookings={activeBookings || []}
                                 instructorRates={instructor?.rates || {}}
                                 pendingBookings={pendingBookings || []}
+                                offersHomeSessions={instructor.offers_home_sessions}
+                                maxTravelKm={instructor.max_travel_km}
+                                homeBaseLat={instructor.home_base_lat}
+                                homeBaseLng={instructor.home_base_lng}
                             />
                         </div>
 

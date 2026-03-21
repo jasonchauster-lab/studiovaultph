@@ -19,6 +19,9 @@ interface InstructorProfileCardProps {
         }>
         rates?: Record<string, number>
         teaching_equipment?: string[]
+        offers_home_sessions?: boolean
+        max_travel_km?: number
+        home_base_address?: string | null
     }
     averageRating?: number
     totalReviews?: number
@@ -93,6 +96,21 @@ export default function InstructorProfileCard({
                             {!c.verified && <span className="opacity-50">(Pending)</span>}
                         </span>
                     ))}
+                </div>
+            )}
+
+            {/* Home Sessions Badge */}
+            {instructor.offers_home_sessions && (
+                <div className="mb-8 p-4 bg-forest/5 border border-forest/10 rounded-2xl flex flex-col items-center gap-2">
+                    <div className="flex items-center gap-2 text-forest font-black text-[10px] uppercase tracking-widest">
+                        <CheckCircle className="w-4 h-4" />
+                        Home Sessions Available
+                    </div>
+                    {instructor.max_travel_km && (
+                        <span className="text-[9px] text-forest/40 font-bold uppercase tracking-widest">
+                            Within {instructor.max_travel_km}km of {instructor.home_base_address?.split(',')[0] || 'Base'}
+                        </span>
+                    )}
                 </div>
             )}
 

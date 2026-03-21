@@ -84,3 +84,35 @@ export async function deleteCertification(certId: string) {
     revalidatePath('/instructor/profile')
     return { success: true }
 }
+
+export async function updateServiceArea(data: {
+    offers_home_sessions: boolean;
+    home_base_address: string;
+    home_base_lat: number | null;
+    home_base_lng: number | null;
+    max_travel_km: number;
+}) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'Unauthorized' }
+
+    const { error } = await supabase
+        .from('profiles')
+        .update({
+            offers_home_sessions: data.offers_home_sessions,
+            home_base_address: data.home_base_address,
+            home_base_lat: data.home_base_lat,
+            home_base_lng: data.home_base_lng,
+            max_travel_km: data.max_travel_km
+        })
+        .eq('id', user.id)
+
+    if (error) {
+        console.error('Update service area error:', error)
+        return { error: 'Failed to update service area.' }
+    }
+
+    revalidatePath('/instructor/profile')
+    return { success: true }
+}

@@ -6,7 +6,7 @@ import { findMatchingStudios } from '@/app/(dashboard)/instructors/actions'
 import { requestBooking } from '@/app/(dashboard)/customer/actions'
 import { getManilaTodayStr, toManilaDate, formatTo12Hour, normalizeTimeTo24h } from '@/lib/timezone'
 import { calculateDistance, geocodeAddress } from '@/lib/utils/location'
-import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info, Calendar, ChevronDown } from 'lucide-react'
+import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info, Calendar, ChevronDown, AlertCircle } from 'lucide-react'
 import clsx from 'clsx'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays, isPast, eachDayOfInterval, addHours, parse, isAfter } from 'date-fns'
 
@@ -44,13 +44,21 @@ export default function InstructorBookingWizard({
     availability,
     activeBookings = [],
     instructorRates = {},
-    pendingBookings = []
+    pendingBookings = [],
+    offersHomeSessions,
+    maxTravelKm,
+    homeBaseLat,
+    homeBaseLng
 }: {
     instructorId: string
     availability: any[]
     activeBookings?: any[]
     instructorRates?: Record<string, number>
     pendingBookings?: any[]
+    offersHomeSessions?: boolean
+    maxTravelKm?: number
+    homeBaseLat?: number | null
+    homeBaseLng?: number | null
 }) {
     const [step, setStep] = useState<1 | 2 | 3>(1)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -722,15 +730,17 @@ export default function InstructorBookingWizard({
                             >
                                 Studio
                             </button>
-                            <button 
-                                onClick={() => setBookingType('home')}
-                                className={clsx(
-                                    "px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                                    bookingType === 'home' ? "bg-sage text-white shadow-md" : "text-charcoal/40 hover:text-charcoal"
-                                )}
-                            >
-                                Home
-                            </button>
+                            {offersHomeSessions && (
+                                <button 
+                                    onClick={() => setBookingType('home')}
+                                    className={clsx(
+                                        "px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                                        bookingType === 'home' ? "bg-sage text-white shadow-md" : "text-charcoal/40 hover:text-charcoal"
+                                    )}
+                                >
+                                    Home
+                                </button>
+                            )}
                         </div>
                         <button
                             onClick={() => setStep(1)}
@@ -805,11 +815,39 @@ export default function InstructorBookingWizard({
                                         </div>
                                     </div>
 
-                                    {clientLat && (
-                                        <div className="p-4 bg-green-50 border border-green-100 rounded-2xl flex items-center gap-3 animate-in fade-in">
-                                            <CheckCircle className="w-4 h-4 text-green-600" />
-                                            <span className="text-[10px] font-bold text-green-700 uppercase tracking-widest">Location Verified — Instructor can travel to you</span>
-                                        </div>
+                                    {/* Distance Check & Results */}
+                                    {clientLat && clientLng && homeBaseLat && homeBaseLng && (
+                                        (() => {
+                                            const dist = calculateDistance(clientLat, clientLng, Number(homeBaseLat), Number(homeBaseLng))
+                                            const isTooFar = dist > (maxTravelKm || 10)
+                                            
+                                            return (
+                                                <div className={clsx(
+                                                    "p-6 rounded-2xl flex flex-col gap-2 animate-in fade-in slide-in-from-top-2",
+                                                    isTooFar ? "bg-red-50 border border-red-100" : "bg-forest/5 border border-forest/10"
+                                                )}>
+                                                    <div className="flex items-center gap-3">
+                                                        {isTooFar ? (
+                                                            <AlertCircle className="w-5 h-5 text-red-500" />
+                                                        ) : (
+                                                            <CheckCircle className="w-5 h-5 text-forest" />
+                                                        )}
+                                                        <span className={clsx(
+                                                            "text-[11px] font-black uppercase tracking-widest",
+                                                            isTooFar ? "text-red-600" : "text-forest"
+                                                        )}>
+                                                            {isTooFar ? 'Location Too Far' : 'Within Travel Range'}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[10px] font-bold text-charcoal/40 uppercase tracking-widest">
+                                                        {isTooFar 
+                                                            ? `This instructor travels up to ${maxTravelKm}km. You are ${dist.toFixed(1)}km away.` 
+                                                            : `Estimated travel distance: ${dist.toFixed(1)}km`
+                                                        }
+                                                    </p>
+                                                </div>
+                                            )
+                                        })()
                                     )}
                                 </div>
                             </div>

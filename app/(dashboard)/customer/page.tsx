@@ -238,20 +238,22 @@ export default async function CustomerDashboard({
             if (!hasCert) return false
         }
 
-        // 2. Distance Filter
+        // 2. Distance Filter (Home Sessions)
         if (userLat !== null && userLng !== null && radius !== null) {
-            // Check Home Base distance
-            let isWithinRange = false
-            if (inst.home_base_lat && inst.home_base_lng) {
-                const dist = calculateDistance(userLat, userLng, Number(inst.home_base_lat), Number(inst.home_base_lng))
-                if (dist <= radius) isWithinRange = true
-            }
-
-            // Also check distance to any studio they are available at (if we had that data easily)
-            // For now, if they don't have a home base in range, we might skip them or check studios.
-            // A more robust way would be to join with active availability locations.
+            // An instructor matches IF:
+            // 1. They offer home sessions
+            // 2. They have a home base set
+            // 3. The distance is within THEIR max_travel_km
+            // 4. The distance is within the USER'S preferred radius
             
-            return isWithinRange
+            if (!inst.offers_home_sessions || !inst.home_base_lat || !inst.home_base_lng) return false
+
+            const dist = calculateDistance(userLat, userLng, Number(inst.home_base_lat), Number(inst.home_base_lng))
+            
+            const withinUserRadius = dist <= radius
+            const withinInstructorLimit = dist <= (inst.max_travel_km || 10)
+
+            return withinUserRadius && withinInstructorLimit
         }
 
         return true
