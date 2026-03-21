@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MapPin, Calendar, Clock, ChevronDown, Navigation, Loader2, Search, X } from 'lucide-react'
-import { reverseGeocode, geocodeAddress } from '@/lib/utils/location'
+import { reverseGeocode, geocodeAddress, getAutocompleteSuggestions } from '@/lib/utils/location'
 import { getManilaTodayStr } from '@/lib/timezone'
 import { clsx } from 'clsx'
 import { useClickAway } from 'react-use'
@@ -15,7 +15,9 @@ export default function HeaderSearchPill() {
     const [locationName, setLocationName] = useState<string | null>(null)
     const [isDetecting, setIsDetecting] = useState(false)
     const [addressSearch, setAddressSearch] = useState('')
+    const [suggestions, setSuggestions] = useState<string[]>([])
     const [isGeocoding, setIsGeocoding] = useState(false)
+    const [showSuggestions, setShowSuggestions] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
 
     const lat = searchParams.get('lat')
@@ -23,13 +25,32 @@ export default function HeaderSearchPill() {
     const date = searchParams.get('date')
     const radius = searchParams.get('radius') || '10'
 
-    useClickAway(containerRef, () => setIsOpen(false))
+    useClickAway(containerRef, () => {
+        setIsOpen(false)
+        setShowSuggestions(false)
+    })
+
+    // Handle autocomplete suggestions
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (addressSearch.length > 2) {
+                const results = await getAutocompleteSuggestions(addressSearch)
+                setSuggestions(results)
+                setShowSuggestions(true)
+            } else {
+                setSuggestions([])
+                setShowSuggestions(false)
+            }
+        }
+
+        const debounceTimer = setTimeout(fetchSuggestions, 300)
+        return () => clearTimeout(debounceTimer)
+    }, [addressSearch])
 
     useEffect(() => {
         if (lat && lng) {
             reverseGeocode(parseFloat(lat), parseFloat(lng)).then(name => {
                 if (name) {
-                    // Shorten the name for the pill (e.g., just the city)
                     const shortName = name.split(',')[0].trim()
                     setLocationName(shortName)
                 }
@@ -43,14 +64,23 @@ export default function HeaderSearchPill() {
         if (!navigator.geolocation) return alert('Geolocation not supported')
         setIsDetecting(true)
         navigator.geolocation.getCurrentPosition(
-            (pos) => {
+            async (pos) => {
                 const params = new URLSearchParams(searchParams.toString())
-                params.set('lat', pos.coords.latitude.toString())
-                params.set('lng', pos.coords.longitude.toString())
+                const { latitude, longitude } = pos.coords
+                params.set('lat', latitude.toString())
+                params.set('lng', longitude.toString())
                 if (!params.has('radius') || params.get('radius') === 'all') params.set('radius', '10')
+                
+                const address = await reverseGeocode(latitude, longitude)
+                if (address) {
+                    setAddressSearch(address)
+                    const shortName = address.split(',')[0].trim()
+                    setLocationName(shortName)
+                }
+
                 router.push(`/customer?${params.toString()}`)
                 setIsDetecting(false)
-                setIsOpen(false)
+                setTimeout(() => setIsOpen(false), 800)
             },
             (err) => {
                 console.error(err)
@@ -58,6 +88,23 @@ export default function HeaderSearchPill() {
                 setIsDetecting(false)
             }
         )
+    }
+
+    const handleSuggestionSelect = async (suggestion: string) => {
+        setAddressSearch(suggestion)
+        setShowSuggestions(false)
+        
+        setIsGeocoding(true)
+        const coords = await geocodeAddress(suggestion)
+        if (coords) {
+            const params = new URLSearchParams(searchParams.toString())
+            params.set('lat', coords.lat.toString())
+            params.set('lng', coords.lng.toString())
+            if (!params.has('radius') || params.get('radius') === 'all') params.set('radius', '10')
+            router.push(`/customer?${params.toString()}`)
+            setIsOpen(false)
+        }
+        setIsGeocoding(false)
     }
 
     const handleAddressSearch = async (e: React.FormEvent) => {
@@ -138,7 +185,7 @@ export default function HeaderSearchPill() {
                 <div className="absolute top-full left-0 right-0 mt-4 p-8 bg-white border border-border-grey rounded-[2rem] shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
                     <div className="flex flex-col gap-8">
                         {/* Location Search Row */}
-                        <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-3 relative">
                             <label className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em] ml-2">Where do you want to practice?</label>
                             <div className="flex items-center gap-3">
                                 <form onSubmit={handleAddressSearch} className="relative flex-1 group">
@@ -148,6 +195,7 @@ export default function HeaderSearchPill() {
                                         placeholder="City, Zip, or Area..."
                                         value={addressSearch}
                                         onChange={(e) => setAddressSearch(e.target.value)}
+                                        onFocus={() => addressSearch.length > 2 && setShowSuggestions(true)}
                                         className="w-full pl-12 pr-4 py-4 bg-off-white/50 border border-border-grey rounded-2xl text-[13px] font-bold text-burgundy placeholder:text-burgundy/20 focus:outline-none focus:ring-4 focus:ring-forest/5 focus:border-forest/20 transition-all"
                                         autoFocus
                                     />
@@ -159,12 +207,45 @@ export default function HeaderSearchPill() {
                                 </form>
                                 <button
                                     onClick={handleLocationDetect}
-                                    className="p-4 bg-forest text-white rounded-2xl shadow-lg hover:brightness-110 active:scale-95 transition-all"
+                                    className={clsx(
+                                        "p-4 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-3",
+                                        isDetecting ? "bg-forest/50 text-white" : "bg-forest text-white hover:brightness-110"
+                                    )}
                                     title="Search Near Me"
                                 >
                                     {isDetecting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
+                                    <span className="text-[10px] font-black uppercase tracking-wider hidden lg:block">Near Me</span>
                                 </button>
                             </div>
+
+                            {/* Autocomplete Suggestions */}
+                            {showSuggestions && (
+                                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border-grey rounded-2xl shadow-xl z-[60] overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                                    <button
+                                        onClick={handleLocationDetect}
+                                        className="w-full px-6 py-4 flex items-center gap-3 hover:bg-forest/5 text-left border-b border-border-grey/50 group"
+                                    >
+                                        <div className="w-8 h-8 rounded-lg bg-forest/5 flex items-center justify-center group-hover:bg-forest group-hover:text-white transition-colors">
+                                            <Navigation className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[12px] font-black text-burgundy group-hover:text-forest">Use device location</span>
+                                            <span className="text-[9px] font-bold text-burgundy/40 uppercase tracking-widest">Allow access to find studios near you</span>
+                                        </div>
+                                    </button>
+                                    
+                                    {suggestions.map((suggestion, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => handleSuggestionSelect(suggestion)}
+                                            className="w-full px-6 py-4 flex items-center gap-4 hover:bg-off-white text-left transition-colors border-b border-border-grey/30 last:border-0"
+                                        >
+                                            <MapPin className="w-4 h-4 text-burgundy/20" />
+                                            <span className="text-[12px] font-bold text-burgundy truncate">{suggestion}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Date and Radius Row */}

@@ -125,12 +125,6 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                         </div>
                     </div>
 
-                    <div className="min-w-[140px] flex-1 sm:flex-none">
-                        <LocationFilterDropdown
-                            value={searchParams.get('location') || 'all'}
-                            onChange={(val) => handleFilter('location', val)}
-                        />
-                    </div>
 
                     <div className="min-w-[140px] flex-1 sm:flex-none">
                         <MultiSelectFilter
@@ -160,41 +154,6 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
                             onChange={(vals) => handleMultiFilter('amenity', vals)}
                             className="w-full"
                         />
-                    </div>
-                </div>
-
-                {/* Date and Time Group */}
-                <div className="flex gap-6 sm:gap-6 pt-6 sm:pt-8 lg:pt-0 border-t lg:border-t-0 border-burgundy/5">
-                    <div className="flex flex-col gap-2.5 flex-1 lg:flex-none">
-                        <label className="text-[9px] font-black text-burgundy/30 uppercase tracking-[0.2em] ml-1.5">Date</label>
-                        <div className="relative group/input">
-                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-burgundy/30 group-focus-within/input:text-forest transition-colors pointer-events-none" />
-                            <input
-                                type="date"
-                                min={getManilaTodayStr()}
-                                onChange={(e) => handleFilter('date', e.target.value)}
-                                value={searchParams.get('date') || ''}
-                                className="w-full lg:w-44 pl-12 pr-4 py-2.5 bg-off-white/50 border border-burgundy/5 rounded-xl sm:rounded-2xl text-[12px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-4 focus:ring-forest/5 focus:border-forest/20 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20 h-[50px] sm:h-[54px]"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col gap-2.5 flex-1 lg:flex-none">
-                        <label className="text-[9px] font-black text-burgundy/30 uppercase tracking-[0.2em] ml-1.5">Time</label>
-                        <div className="relative group/input">
-                            <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-burgundy/30 group-focus-within/input:text-forest transition-colors pointer-events-none" />
-                            <input
-                                type="time"
-                                min={
-                                    searchParams.get('date') === getManilaTodayStr()
-                                        ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-                                        : undefined
-                                }
-                                onChange={(e) => handleFilter('time', e.target.value)}
-                                value={searchParams.get('time') || ''}
-                                className="w-full lg:w-36 pl-12 pr-4 py-2.5 bg-off-white/50 border border-burgundy/5 rounded-xl sm:rounded-2xl text-[12px] font-bold text-burgundy shadow-sm focus:outline-none focus:ring-4 focus:ring-forest/5 focus:border-forest/20 transition-all cursor-pointer hover:bg-white hover:border-burgundy/20 h-[50px] sm:h-[54px]"
-                            />
-                        </div>
                     </div>
                 </div>
 

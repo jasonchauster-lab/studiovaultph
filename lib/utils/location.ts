@@ -112,3 +112,31 @@ export async function reverseGeocode(lat: number, lng: number): Promise<string |
     return null;
   }
 }
+
+/**
+ * Fetches address suggestions from Google Places Autocomplete API.
+ */
+export async function getAutocompleteSuggestions(input: string): Promise<string[]> {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  if (!apiKey || !input.trim()) {
+    return [];
+  }
+
+  try {
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
+        input
+      )}&key=${apiKey}&components=country:ph` // Restrict to Philippines for better UX
+    );
+    const data = await response.json();
+
+    if (data.status === 'OK') {
+      return data.predictions.map((p: any) => p.description);
+    }
+    return [];
+  } catch (error) {
+    console.error('Autocomplete error:', error);
+    return [];
+  }
+}
