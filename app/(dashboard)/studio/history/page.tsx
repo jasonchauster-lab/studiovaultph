@@ -49,8 +49,8 @@ export default async function StudioHistoryPage(props: {
             endDate = format(endOfMonth(lastMonth), 'yyyy-MM-dd')
         }
     } else if (!range) {
-        // Default to last 3 months for performance
-        startDate = format(startOfMonth(subMonths(new Date(), 3)), 'yyyy-MM-dd')
+        // Show all by default (RPC handles null as unlimited)
+        startDate = undefined
     }
     // --- END DATE FILTER LOGIC ---
 

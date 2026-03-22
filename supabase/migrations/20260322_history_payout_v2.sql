@@ -467,7 +467,7 @@ BEGIN
     LEFT JOIN profiles ip ON b.instructor_id = ip.id
     JOIN profiles cp ON b.client_id = cp.id
     WHERE s.studio_id = p_studio_id
-    AND b.status IN ('approved', 'completed', 'cancelled_refunded', 'cancelled_charged')
+    AND b.status IN ('approved', 'completed', 'cancelled_refunded', 'cancelled_charged', 'pending', 'rejected')
     AND (p_start_date IS NULL OR s.date >= p_start_date)
     AND (p_end_date IS NULL OR s.date <= p_end_date)
     ORDER BY s.date DESC, s.start_time DESC;
