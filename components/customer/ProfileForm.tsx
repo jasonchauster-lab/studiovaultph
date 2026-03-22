@@ -497,11 +497,11 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                     step="1"
                                     value={maxTravelKm}
                                     onChange={(e) => setMaxTravelKm(parseInt(e.target.value))}
-                                    className="w-full h-2 bg-cream-100 rounded-lg appearance-none cursor-pointer accent-forest transition-all"
+                                    className="w-full h-2 bg-charcoal-200/20 rounded-lg appearance-none cursor-pointer accent-forest transition-all"
                                 />
                                 <div className="flex justify-between mt-2 px-1">
-                                    <span className="text-[9px] font-bold text-charcoal-300 uppercase tracking-widest">1 KM</span>
-                                    <span className="text-[9px] font-bold text-charcoal-300 uppercase tracking-widest">50 KM</span>
+                                    <span className="text-[9px] font-bold text-charcoal-500 uppercase tracking-widest">1 KM</span>
+                                    <span className="text-[9px] font-bold text-charcoal-500 uppercase tracking-widest">50 KM</span>
                                 </div>
                             </div>
                             <p className="text-[11px] text-charcoal-500 leading-relaxed font-medium italic">
@@ -511,7 +511,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
 
                         {/* Separate Toggle for Home Service Enablement */}
                         <div className="pt-6 border-t border-cream-100">
-                            <label className="flex items-center gap-4 p-6 border border-cream-200 rounded-3xl bg-white cursor-pointer hover:border-forest/30 transition-all group shadow-sm hover:shadow-md">
+                            <label className="flex items-center gap-4 p-6 border border-burgundy/10 rounded-3xl bg-white/80 backdrop-blur-sm cursor-pointer hover:border-forest/30 transition-all group shadow-sm hover:shadow-md">
                                 <div className="relative flex items-center">
                                     <input 
                                         type="checkbox" 
@@ -520,8 +520,8 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                         onChange={(e) => setOffersHomeSessions(e.target.checked)}
                                         className="peer sr-only" 
                                     />
-                                    <div className="w-14 h-7 bg-cream-100 rounded-full peer peer-checked:bg-forest transition-colors duration-300" />
-                                    <div className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-7 shadow-sm" />
+                                    <div className="w-14 h-7 bg-charcoal-200/40 rounded-full peer peer-checked:bg-forest transition-colors duration-300" />
+                                    <div className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-7 shadow-sm border border-burgundy/5" />
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="text-sm font-bold text-charcoal-900 group-hover:text-forest transition-colors">I offer Home Sessions</span>
