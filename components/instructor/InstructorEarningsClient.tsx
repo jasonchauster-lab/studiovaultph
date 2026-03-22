@@ -260,17 +260,16 @@ export default function InstructorEarningsClient({
                 </div>
 
                 {/* Net Balance / Current */}
-                <div className="atelier-card p-6 sm:p-8 group bg-charcoal text-white border-0 shadow-xl overflow-hidden relative">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
-                    <div className="flex items-center gap-3 mb-6 relative z-10">
-                        <div className="w-10 h-10 rounded-2xl bg-gold/20 flex items-center justify-center shrink-0 border border-gold/30">
-                            <DollarSign className="w-5 h-5 text-gold-400" />
+                <div className="atelier-card p-6 sm:p-8 group">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-2xl bg-forest/10 flex items-center justify-center shrink-0">
+                            <DollarSign className="w-5 h-5 text-forest" />
                         </div>
-                        <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">NET YIELD</span>
+                        <span className="text-[10px] font-black text-forest/40 uppercase tracking-[0.2em]">NET YIELD</span>
                     </div>
-                    <div className="space-y-2 relative z-10">
-                        <h3 className="text-3xl sm:text-5xl font-serif text-gold-400 tracking-tighter">₱{(netEarnings || 0).toLocaleString()}</h3>
-                        <p className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">CURRENT BALANCE</p>
+                    <div className="space-y-2">
+                        <h3 className="text-3xl sm:text-5xl font-serif text-charcoal tracking-tighter">₱{(netEarnings || 0).toLocaleString()}</h3>
+                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest px-1">CURRENT BALANCE</p>
                     </div>
                 </div>
 
