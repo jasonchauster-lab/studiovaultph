@@ -43,11 +43,11 @@ export default function EditStudioModal({ studio }: { studio: Studio }) {
             </button>
 
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-900/50 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/50 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-2xl animate-in fade-in zoom-in duration-200 overflow-y-auto max-h-[90vh]">
                         <div className="flex justify-between items-center mb-6 border-b border-cream-100 pb-4">
-                            <h3 className="text-2xl font-serif text-charcoal-900">Studio Settings</h3>
-                            <button onClick={() => setIsOpen(false)} className="text-charcoal-400 hover:text-charcoal-900 p-1 hover:bg-cream-50 rounded-full transition-colors">
+                            <h3 className="text-2xl font-serif text-charcoal">Studio Settings</h3>
+                            <button onClick={() => setIsOpen(false)} className="text-charcoal-400 hover:text-charcoal p-1 hover:bg-cream-50 rounded-full transition-colors">
                                 <X className="w-6 h-6" />
                             </button>
                         </div>
@@ -58,17 +58,17 @@ export default function EditStudioModal({ studio }: { studio: Studio }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-charcoal-700 mb-1">Studio Name</label>
-                                    <input name="name" required defaultValue={studio.name} className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-cream-50/30" />
+                                    <input name="name" required defaultValue={studio.name} className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal outline-none focus:ring-2 focus:ring-charcoal bg-cream-50/30" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-charcoal-700 mb-1">Contact Number</label>
-                                    <input name="contactNumber" required defaultValue={studio.contact_number} className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-cream-50/30" />
+                                    <input name="contactNumber" required defaultValue={studio.contact_number} className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal outline-none focus:ring-2 focus:ring-charcoal bg-cream-50/30" />
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-charcoal-700 mb-1">Location Area</label>
-                                <select name="location" required defaultValue={studio.location} className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white">
+                                <select name="location" required defaultValue={studio.location} className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal outline-none focus:ring-2 focus:ring-charcoal bg-white">
                                     <optgroup label="Alabang">
                                         <option value="Alabang - Madrigal/Ayala Alabang">Alabang - Madrigal / Ayala Alabang</option>
                                         <option value="Alabang - Filinvest City">Alabang - Filinvest City</option>
@@ -124,7 +124,7 @@ export default function EditStudioModal({ studio }: { studio: Studio }) {
                                     required
                                     defaultValue={studio.address}
                                     placeholder="e.g. Unit 302, One Building, Ayala Ave"
-                                    className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 h-20 bg-cream-50/30"
+                                    className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal outline-none focus:ring-2 focus:ring-charcoal h-20 bg-cream-50/30"
                                 />
                             </div>
 
@@ -137,10 +137,10 @@ export default function EditStudioModal({ studio }: { studio: Studio }) {
                                                 <input
                                                     type="checkbox"
                                                     name={`eq_${eq}`}
-                                                    className="w-5 h-5 shrink-0 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
+                                                    className="w-5 h-5 shrink-0 text-charcoal border-cream-300 rounded focus:ring-charcoal"
                                                     defaultChecked={studio.equipment?.includes(eq)}
                                                 />
-                                                <span className="text-charcoal-900 font-medium">{eq}</span>
+                                                <span className="text-charcoal font-medium">{eq}</span>
                                             </label>
 
                                             <div className="flex items-center justify-end gap-4 flex-wrap sm:flex-nowrap opacity-50 group-has-[:checked]:opacity-100 transition-opacity">
@@ -151,7 +151,7 @@ export default function EditStudioModal({ studio }: { studio: Studio }) {
                                                         name={`qty_${eq}`}
                                                         defaultValue={studio.inventory?.[eq] || (eq === 'Reformer' ? studio.reformers_count : 1)}
                                                         min="0"
-                                                        className="w-16 px-2 py-1 bg-white border border-cream-200 rounded text-charcoal-900 focus:outline-none focus:ring-1 focus:ring-charcoal-900 text-sm"
+                                                        className="w-16 px-2 py-1 bg-white border border-cream-200 rounded text-charcoal focus:outline-none focus:ring-1 focus:ring-charcoal text-sm"
                                                     />
                                                 </div>
                                                 <div className="flex items-center gap-2 shrink-0">
@@ -165,7 +165,7 @@ export default function EditStudioModal({ studio }: { studio: Studio }) {
                                                             placeholder="0"
                                                             min="0"
                                                             step="1"
-                                                            className="w-24 pl-5 pr-2 py-1 bg-white border border-cream-200 rounded text-charcoal-900 focus:outline-none focus:ring-1 focus:ring-charcoal-900 text-sm font-bold"
+                                                            className="w-24 pl-5 pr-2 py-1 bg-white border border-cream-200 rounded text-charcoal focus:outline-none focus:ring-1 focus:ring-charcoal text-sm font-bold"
                                                         />
                                                     </div>
                                                 </div>

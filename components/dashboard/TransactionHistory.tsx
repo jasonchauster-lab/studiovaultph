@@ -31,7 +31,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
     const currentData = activeTab === 'income' ? incomeTransactions : payoutTransactions;
 
     return (
-        <div className="atelier-card overflow-hidden">
+        <div className="earth-card overflow-hidden">
                 <div className="flex border-b border-cream-200/60 bg-cream-50/30">
                     <button
                         onClick={() => setActiveTab('income')}
@@ -110,7 +110,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                 <td className="px-6 py-6">
                                                     <div className="flex items-center gap-3">
                                                         <div className="relative">
-                                                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-cream-200 shadow-sm group-hover:border-forest/20 group-hover:scale-105 transition-all">
+                                                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-cream-200 shadow-sm transition-all">
                                                                 <User className="w-5 h-5 text-charcoal/30" />
                                                             </div>
                                                             {isPositive && (
@@ -167,7 +167,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                     )}
                                                 </td>
                                                 <td className={clsx(
-                                                    "px-6 py-6 text-right font-black text-lg transition-all whitespace-nowrap group-hover:scale-105",
+                                                    "px-6 py-6 text-right font-black text-lg transition-all whitespace-nowrap",
                                                     isRefunded ? "text-charcoal/30" :
                                                         isPenalty ? "text-rose-500" :
                                                             isPositive ? "text-emerald-600" :
@@ -206,7 +206,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                             {/* Date Header */}
                                             <div className="sticky top-0 z-10 bg-cream-50/90 backdrop-blur-md px-4 py-3 border-y border-cream-100/50">
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-[11px] font-black text-charcoal-900 uppercase tracking-[0.2em] whitespace-nowrap">
+                                                    <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] whitespace-nowrap">
                                                         {dayName}
                                                     </span>
                                                     <div className="h-px flex-1 bg-cream-200/40" />
@@ -329,7 +329,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                                     </span>
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-6 text-right font-black text-rose-500 text-lg group-hover:scale-105 transition-all">
+                                            <td className="px-6 py-6 text-right font-black text-rose-500 text-lg transition-all">
                                                 -₱{Math.abs(tx.total_amount).toLocaleString()}
                                             </td>
                                         </tr>
@@ -361,7 +361,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                             {/* Date Header */}
                                             <div className="sticky top-0 z-10 bg-cream-50/90 backdrop-blur-md px-4 py-3 border-y border-cream-100/50">
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-[11px] font-black text-charcoal-900 uppercase tracking-[0.2em] whitespace-nowrap">
+                                                    <span className="text-[11px] font-black text-charcoal uppercase tracking-[0.2em] whitespace-nowrap">
                                                         {dayName}
                                                     </span>
                                                     <div className="h-px flex-1 bg-cream-200/40" />

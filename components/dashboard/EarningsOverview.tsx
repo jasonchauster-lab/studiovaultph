@@ -40,8 +40,8 @@ export default function EarningsOverview({ studioId, summary, userEmail }: Earni
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowInfoModal(false)}>
                     <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
                         <div className="px-6 py-4 border-b border-cream-200 flex justify-between items-center bg-cream-50">
-                            <h3 className="font-serif text-lg text-charcoal-900">Wallet & Recovery Rules</h3>
-                            <button onClick={() => setShowInfoModal(false)} className="text-charcoal-400 hover:text-charcoal-900 transition-colors">
+                            <h3 className="font-serif text-lg text-charcoal">Wallet & Recovery Rules</h3>
+                            <button onClick={() => setShowInfoModal(false)} className="text-charcoal/40 hover:text-charcoal transition-colors">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -56,7 +56,7 @@ export default function EarningsOverview({ studioId, summary, userEmail }: Earni
                                 </p>
                             </div>
                             <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-charcoal-900 font-bold text-sm uppercase tracking-wider">
+                                <div className="flex items-center gap-2 text-charcoal font-bold text-sm uppercase tracking-wider">
                                     <ShieldCheck className="w-4 h-4" />
                                     Auto-Recovery
                                 </div>
@@ -80,7 +80,7 @@ export default function EarningsOverview({ studioId, summary, userEmail }: Earni
             {/* Consolidated Stats Grid (Responsive) */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {/* Available Balance - Hero Card */}
-                <div className="atelier-card p-6 sm:p-8 col-span-2 relative overflow-hidden group border-0 shadow-2xl bg-charcoal-900 text-white">
+                <div className="atelier-card p-6 sm:p-8 col-span-2 relative overflow-hidden group border-0 shadow-2xl bg-forest text-white">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
                     
                     <div className="flex justify-between items-start mb-8 relative z-10">
@@ -113,7 +113,7 @@ export default function EarningsOverview({ studioId, summary, userEmail }: Earni
                                 disabled={summary.availableBalance <= 0}
                                 className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
                                     summary.availableBalance > 0 
-                                    ? 'bg-gold hover:bg-gold-600 text-charcoal-900 shadow-lg shadow-gold/20 active:scale-95' 
+                                    ? 'bg-gold hover:bg-gold-600 text-charcoal shadow-lg shadow-gold/20 active:scale-95' 
                                     : 'bg-white/5 text-white/20 cursor-not-allowed border border-white/10'
                                 }`}
                             >
@@ -140,7 +140,7 @@ export default function EarningsOverview({ studioId, summary, userEmail }: Earni
                         <span className="text-[10px] font-black text-forest/40 uppercase tracking-[0.2em]">NET YIELD</span>
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-3xl font-serif text-charcoal-900 tracking-tighter">₱{summary.netEarnings.toLocaleString()}</h3>
+                        <h3 className="text-3xl font-serif text-charcoal tracking-tighter">₱{summary.netEarnings.toLocaleString()}</h3>
                         <p className="text-[10px] font-black text-charcoal-400 uppercase tracking-widest">REALIZED INCOME</p>
                     </div>
                 </div>
@@ -165,13 +165,13 @@ export default function EarningsOverview({ studioId, summary, userEmail }: Earni
                 {/* Gross Stats */}
                 <div className="atelier-card p-6 sm:p-8 group">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-2xl bg-charcoal-900/5 flex items-center justify-center shrink-0">
-                            <TrendingUp className="w-5 h-5 text-charcoal-900" />
+                        <div className="w-10 h-10 rounded-2xl bg-charcoal/5 flex items-center justify-center shrink-0">
+                            <TrendingUp className="w-5 h-5 text-charcoal" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal-900/40 uppercase tracking-[0.2em]">GROSS</span>
+                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">GROSS</span>
                     </div>
                     <div className="space-y-1">
-                        <h3 className="text-2xl font-serif text-charcoal-900">₱{summary.totalEarnings.toLocaleString()}</h3>
+                        <h3 className="text-2xl font-serif text-charcoal">₱{summary.totalEarnings.toLocaleString()}</h3>
                         <div className="flex items-center gap-4 pt-1">
                             <div className="flex flex-col">
                                 <span className="text-[11px] font-serif text-forest">+₱{summary.totalCompensation.toLocaleString()}</span>
@@ -189,13 +189,13 @@ export default function EarningsOverview({ studioId, summary, userEmail }: Earni
                 {/* Paid Out */}
                 <div className="atelier-card p-6 sm:p-8 group">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-2xl bg-charcoal-900/5 flex items-center justify-center shrink-0">
-                            <CreditCard className="w-5 h-5 text-charcoal-900" />
+                        <div className="w-10 h-10 rounded-2xl bg-charcoal/5 flex items-center justify-center shrink-0">
+                            <CreditCard className="w-5 h-5 text-charcoal" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal-900/40 uppercase tracking-[0.2em]">CASHOUTS</span>
+                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">CASHOUTS</span>
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-2xl font-serif text-charcoal-900">₱{summary.totalPaidOut.toLocaleString()}</h3>
+                        <h3 className="text-2xl font-serif text-charcoal">₱{summary.totalPaidOut.toLocaleString()}</h3>
                         {summary.pendingPayouts > 0 && (
                             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-gold/10 rounded-full border border-gold/20">
                                 <Clock className="w-2.5 h-2.5 text-gold-600" />

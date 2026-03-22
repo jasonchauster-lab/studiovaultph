@@ -240,27 +240,27 @@ export default function InstructorEarningsClient({
                         <span className="text-[10px] font-black text-gold/60 uppercase tracking-[0.2em]">LIFETIME</span>
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-3xl sm:text-5xl font-serif text-charcoal-900 tracking-tighter">₱{(totalEarned || 0).toLocaleString()}</h3>
-                        <p className="text-[10px] font-black text-charcoal-400 uppercase tracking-widest px-1">GROSS EARNINGS</p>
+                        <h3 className="text-3xl sm:text-5xl font-serif text-charcoal tracking-tighter">₱{(totalEarned || 0).toLocaleString()}</h3>
+                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest px-1">GROSS EARNINGS</p>
                     </div>
                 </div>
 
                 {/* Total Withdrawn */}
                 <div className="atelier-card p-6 sm:p-8 group">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-2xl bg-charcoal-900/5 flex items-center justify-center shrink-0">
-                            <ArrowUpRight className="w-5 h-5 text-charcoal-900" />
+                        <div className="w-10 h-10 rounded-2xl bg-charcoal/5 flex items-center justify-center shrink-0">
+                            <ArrowUpRight className="w-5 h-5 text-charcoal" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal-900/40 uppercase tracking-[0.2em]">CASHOUTS</span>
+                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">CASHOUTS</span>
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-3xl sm:text-5xl font-serif text-charcoal-900 tracking-tighter">₱{(totalWithdrawn || 0).toLocaleString()}</h3>
-                        <p className="text-[10px] font-black text-charcoal-400 uppercase tracking-widest px-1">TOTAL WITHDRAWN</p>
+                        <h3 className="text-3xl sm:text-5xl font-serif text-charcoal tracking-tighter">₱{(totalWithdrawn || 0).toLocaleString()}</h3>
+                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest px-1">TOTAL WITHDRAWN</p>
                     </div>
                 </div>
 
                 {/* Net Balance / Current */}
-                <div className="atelier-card p-6 sm:p-8 group bg-charcoal-900 text-white border-0 shadow-xl overflow-hidden relative">
+                <div className="atelier-card p-6 sm:p-8 group bg-charcoal text-white border-0 shadow-xl overflow-hidden relative">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
                     <div className="flex items-center gap-3 mb-6 relative z-10">
                         <div className="w-10 h-10 rounded-2xl bg-gold/20 flex items-center justify-center shrink-0 border border-gold/30">
@@ -280,7 +280,7 @@ export default function InstructorEarningsClient({
                         <div className="w-10 h-10 rounded-2xl bg-burgundy/5 flex items-center justify-center shrink-0">
                             <AlertCircle className="w-5 h-5 text-burgundy/40" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal-400 uppercase tracking-[0.2em]">ADJUSTMENTS</span>
+                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">ADJUSTMENTS</span>
                     </div>
                     <div className="space-y-4">
                         <div className="flex flex-row items-center gap-6">
