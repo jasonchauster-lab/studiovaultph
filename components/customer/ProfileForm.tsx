@@ -17,7 +17,7 @@ import Image from 'next/image'
 import WaiverUpload from '@/components/customer/WaiverUpload'
 import { normalizeImageFile } from '@/lib/utils/image-utils'
 import { clsx } from 'clsx'
-import { geocodeAddress, getAutocompleteSuggestions } from '@/lib/utils/location'
+import { geocodeAddress, getAutocompleteSuggestions, reverseGeocode } from '@/lib/utils/location'
 import Avatar from '@/components/shared/Avatar'
 import ImageCropper from '@/components/shared/ImageCropper'
 import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
@@ -40,6 +40,8 @@ export default function ProfileForm({ profile }: { profile: any }) {
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [isSearching, setIsSearching] = useState(false)
     const [geocoding, setGeocoding] = useState(false)
+    const [detectingLocation, setDetectingLocation] = useState(false)
+    const [noResults, setNoResults] = useState(false)
 
     // State for avatar preview and file
     const [previewUrl, setPreviewUrl] = useState<string | null>(profile?.avatar_url || '/default-avatar.svg')
@@ -159,19 +161,23 @@ export default function ProfileForm({ profile }: { profile: any }) {
         setHomeBaseAddress(val)
         if (val.length >= 3) {
             setIsSearching(true)
+            setNoResults(false)
             const results = await getAutocompleteSuggestions(val)
             setSuggestions(results)
             setShowSuggestions(true)
+            setNoResults(results.length === 0)
             setIsSearching(false)
         } else {
             setSuggestions([])
             setShowSuggestions(false)
+            setNoResults(false)
         }
     }
 
     const handleSuggestionSelect = async (suggestion: string) => {
         setHomeBaseAddress(suggestion)
         setShowSuggestions(false)
+        setNoResults(false)
         setGeocoding(true)
         const res = await geocodeAddress(suggestion)
         if (res) {
@@ -180,6 +186,32 @@ export default function ProfileForm({ profile }: { profile: any }) {
             setHomeBaseAddress(res.full || suggestion)
         }
         setGeocoding(false)
+    }
+
+    const handleDetectLocation = () => {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser")
+            return
+        }
+
+        setDetectingLocation(true)
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords
+                const res = await reverseGeocode(latitude, longitude)
+                if (res) {
+                    setHomeBaseAddress(res.full)
+                    setHomeBaseLat(latitude.toString())
+                    setHomeBaseLng(longitude.toString())
+                }
+                setDetectingLocation(false)
+            },
+            (error) => {
+                console.error("Geolocation error:", error)
+                alert("Failed to detect location. Please enter it manually.")
+                setDetectingLocation(false)
+            }
+        )
     }
 
     return (
@@ -391,31 +423,57 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                     name="homeBaseAddress"
                                     value={homeBaseAddress}
                                     onChange={(e) => handleAddressSearch(e.target.value)}
+                                    onFocus={() => {
+                                        if (suggestions.length > 0) setShowSuggestions(true)
+                                    }}
+                                    onBlur={() => {
+                                        // Delay to allow clicking on a suggestion
+                                        setTimeout(() => setShowSuggestions(false), 200)
+                                    }}
                                     autoComplete="off"
                                     placeholder="Enter your street/community address..."
-                                    className="w-full pl-14 pr-16 py-5 bg-off-white border border-cream-200 rounded-2xl text-charcoal-900 font-bold text-sm focus:outline-none focus:ring-forest/5 focus:ring-4 focus:border-forest transition-all placeholder:text-charcoal-300 placeholder:font-medium"
+                                    className="w-full pl-14 pr-28 py-5 bg-off-white border border-cream-200 rounded-2xl text-charcoal-900 font-bold text-sm focus:outline-none focus:ring-forest/5 focus:ring-4 focus:border-forest transition-all placeholder:text-charcoal-300 placeholder:font-medium"
                                 />
                                 
-                                {isSearching && (
-                                    <div className="absolute right-5 top-5">
+                                <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                    {isSearching && (
                                         <Loader2 className="w-5 h-5 animate-spin text-forest/40" />
-                                    </div>
-                                )}
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={handleDetectLocation}
+                                        disabled={detectingLocation}
+                                        className="p-2.5 rounded-xl bg-forest/5 text-forest hover:bg-forest hover:text-white transition-all active:scale-95 disabled:opacity-50"
+                                        title="Detect current location"
+                                    >
+                                        {detectingLocation ? (
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                        ) : (
+                                            <Navigation className="w-4 h-4" />
+                                        )}
+                                    </button>
+                                </div>
 
                                 {/* Suggestions Dropdown */}
-                                {showSuggestions && suggestions.length > 0 && (
+                                {showSuggestions && (suggestions.length > 0 || noResults) && (
                                     <div className="absolute z-[100] top-full left-0 right-0 mt-2 bg-white border border-cream-200 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                                        {suggestions.map((s, idx) => (
-                                            <button
-                                                key={idx}
-                                                type="button"
-                                                onClick={() => handleSuggestionSelect(s)}
-                                                className="w-full text-left px-6 py-4 text-xs font-bold text-charcoal-700 hover:bg-forest/5 hover:text-forest transition-colors border-b border-cream-50 last:border-0 flex items-center gap-3"
-                                            >
-                                                <Search className="w-3.5 h-3.5 opacity-30" />
-                                                {s}
-                                            </button>
-                                        ))}
+                                        {suggestions.length > 0 ? (
+                                            suggestions.map((s, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    type="button"
+                                                    onClick={() => handleSuggestionSelect(s)}
+                                                    className="w-full text-left px-6 py-4 text-xs font-bold text-charcoal-700 hover:bg-forest/5 hover:text-forest transition-colors border-b border-cream-50 last:border-0 flex items-center gap-3"
+                                                >
+                                                    <Search className="w-3.5 h-3.5 opacity-30" />
+                                                    {s}
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="px-6 py-4 text-xs font-bold text-charcoal-400 italic">
+                                                No suggestions found.
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>

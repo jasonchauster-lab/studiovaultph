@@ -10,8 +10,8 @@ import Image from 'next/image'
 import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
 import { normalizeImageFile, uploadContentType } from '@/lib/utils/image-utils'
 import ImageCropper from '@/components/shared/ImageCropper'
-import { geocodeAddress } from '@/lib/utils/location'
-import { MapPin } from 'lucide-react'
+import { geocodeAddress, getAutocompleteSuggestions, resolveGoogleMapsUrl } from '@/lib/utils/location'
+import { MapPin, Search } from 'lucide-react'
 
 export default function StudioSettingsForm({ studio }: { studio: any }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -35,6 +35,57 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
     const [lat, setLat] = useState(studio.lat || '')
     const [lng, setLng] = useState(studio.lng || '')
     const [isGeocoding, setIsGeocoding] = useState(false)
+    const [address, setAddress] = useState(studio.address || '')
+    const [googleMapsUrl, setGoogleMapsUrl] = useState(studio.google_maps_url || '')
+    const [isResolvingUrl, setIsResolvingUrl] = useState(false)
+
+    // Autocomplete State
+    const [suggestions, setSuggestions] = useState<string[]>([])
+    const [showSuggestions, setShowSuggestions] = useState(false)
+    const [isSearching, setIsSearching] = useState(false)
+
+    const handleAddressSearch = async (val: string) => {
+        setAddress(val)
+        if (val.length >= 3) {
+            setIsSearching(true)
+            const results = await getAutocompleteSuggestions(val)
+            setSuggestions(results)
+            setShowSuggestions(true)
+            setIsSearching(false)
+        } else {
+            setSuggestions([])
+            setShowSuggestions(false)
+        }
+    }
+
+    const handleSuggestionSelect = async (suggestion: string) => {
+        setAddress(suggestion)
+        setShowSuggestions(false)
+        setIsGeocoding(true)
+        const res = await geocodeAddress(suggestion)
+        if (res) {
+            setLat(res.lat.toString())
+            setLng(res.lng.toString())
+            setAddress(res.full || suggestion)
+        }
+        setIsGeocoding(false)
+    }
+
+    const handleGoogleMapsUrlBlur = async () => {
+        if (!googleMapsUrl?.trim()) return
+        // Only resolve if it looks like a URL
+        if (!googleMapsUrl.includes('google') && !googleMapsUrl.includes('goo.gl') && !googleMapsUrl.includes('maps.app')) return
+        setIsResolvingUrl(true)
+        const result = await resolveGoogleMapsUrl(googleMapsUrl)
+        if (result) {
+            setLat(result.lat.toString())
+            setLng(result.lng.toString())
+            if (result.address && !address.trim()) {
+                setAddress(result.address)
+            }
+        }
+        setIsResolvingUrl(false)
+    }
 
     // Cropper State
     const [cropperConfig, setCropperConfig] = useState<{
@@ -362,14 +413,47 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                 <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-1.5">
                         <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Display Address</label>
-                        <textarea
-                            name="address"
-                            defaultValue={studio.address || ''}
-                            required
-                            rows={2}
-                            placeholder="e.g. The Podium, ADB Ave, Ortigas Center"
-                            className="w-full px-5 py-3.5 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all resize-none placeholder:text-charcoal-300"
-                        />
+                        <div className="relative">
+                            <div className="absolute left-4 top-4 text-charcoal-300">
+                                <MapPin className="w-4 h-4" />
+                            </div>
+                            <input
+                                type="text"
+                                name="address"
+                                value={address}
+                                onChange={(e) => handleAddressSearch(e.target.value)}
+                                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                                autoComplete="off"
+                                required
+                                placeholder="e.g. The Podium, ADB Ave, Ortigas Center"
+                                className="w-full pl-12 pr-12 py-3.5 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all placeholder:text-charcoal-300"
+                            />
+                            {isSearching && (
+                                <div className="absolute right-4 top-4">
+                                    <Loader2 className="w-4 h-4 animate-spin text-charcoal-300" />
+                                </div>
+                            )}
+                            {showSuggestions && suggestions.length > 0 && (
+                                <div className="absolute z-[100] top-full left-0 right-0 mt-1 bg-white border border-cream-200 rounded-xl shadow-2xl overflow-hidden">
+                                    {suggestions.map((s, idx) => (
+                                        <button
+                                            key={idx}
+                                            type="button"
+                                            onMouseDown={() => handleSuggestionSelect(s)}
+                                            className="w-full text-left px-5 py-3 text-xs font-medium text-charcoal-700 hover:bg-cream-50 transition-colors border-b border-cream-50 last:border-0 flex items-center gap-3"
+                                        >
+                                            <Search className="w-3.5 h-3.5 opacity-30 flex-shrink-0" />
+                                            <span className="truncate">{s}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        {isGeocoding && (
+                            <p className="text-[10px] text-charcoal-400 flex items-center gap-1.5 ml-1">
+                                <Loader2 className="w-3 h-3 animate-spin" /> Locating address...
+                            </p>
+                        )}
                     </div>
                     <div className="space-y-1.5">
                         <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Floor or Unit (Optional)</label>
@@ -385,14 +469,28 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                     </div>
                     <div className="space-y-1.5">
                         <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Google Maps Link <span className="text-rose-gold">*</span></label>
-                        <input
-                            type="url"
-                            name="googleMapsUrl"
-                            defaultValue={studio.google_maps_url || ''}
-                            required
-                            placeholder="e.g. https://maps.app.goo.gl/..."
-                            className="w-full px-5 py-3.5 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all placeholder:text-charcoal-300"
-                        />
+                        <div className="relative">
+                            <input
+                                type="url"
+                                name="googleMapsUrl"
+                                value={googleMapsUrl}
+                                onChange={(e) => setGoogleMapsUrl(e.target.value)}
+                                onBlur={handleGoogleMapsUrlBlur}
+                                required
+                                placeholder="e.g. https://maps.app.goo.gl/..."
+                                className="w-full px-5 py-3.5 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all placeholder:text-charcoal-300"
+                            />
+                            {isResolvingUrl && (
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                    <Loader2 className="w-4 h-4 animate-spin text-charcoal-300" />
+                                </div>
+                            )}
+                        </div>
+                        {isResolvingUrl && (
+                            <p className="text-[10px] text-charcoal-400 flex items-center gap-1.5 ml-1">
+                                <Loader2 className="w-3 h-3 animate-spin" /> Resolving link to address...
+                            </p>
+                        )}
                     </div>
                     <div className="space-y-1.5">
                         <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Studio Bio / Description</label>

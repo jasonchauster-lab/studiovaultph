@@ -237,13 +237,27 @@ export async function createStudio(formData: FormData) {
         const floorOrUnit = formData.get('floorOrUnit') as string
         const googleMapsUrl = formData.get('googleMapsUrl') as string
 
-        // Auto-geocode if coordinates are missing (Studio Onboarding doesn't have lat/lng inputs yet)
-        let lat = null;
-        let lng = null;
-        const geoResult = await getGeocodeAction(`${address}, ${location}`);
-        if (geoResult?.data?.location) {
-            lat = geoResult.data.location.lat;
-            lng = geoResult.data.location.lng;
+        // Use client-side lat/lng if available, otherwise geocode
+        let lat = parseFloat(formData.get('lat') as string) || null;
+        let lng = parseFloat(formData.get('lng') as string) || null;
+
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+            // Auto-geocode from address + location
+            const geoResult = await getGeocodeAction(`${address}, ${location}`);
+            if (geoResult?.data?.location) {
+                lat = geoResult.data.location.lat;
+                lng = geoResult.data.location.lng;
+            }
+        }
+
+        // Final fallback: resolve from Google Maps URL
+        if ((!lat || !lng) && googleMapsUrl) {
+            const { resolveGoogleMapsUrlAction } = await import('@/lib/actions/location');
+            const urlResult = await resolveGoogleMapsUrlAction(googleMapsUrl);
+            if (urlResult?.data) {
+                lat = urlResult.data.lat;
+                lng = urlResult.data.lng;
+            }
         }
 
         const birPath = formData.get('birCertificateUrl') as string
@@ -530,6 +544,17 @@ export async function updateStudio(formData: FormData) {
         if (geoResult?.data?.location) {
             lat = geoResult.data.location.lat;
             lng = geoResult.data.location.lng;
+        }
+    }
+
+    // Fallback: resolve from Google Maps URL if coordinates are still missing
+    const googleMapsUrlRaw = formData.get('googleMapsUrl') as string
+    if ((isNaN(lat) || isNaN(lng)) && googleMapsUrlRaw) {
+        const { resolveGoogleMapsUrlAction } = await import('@/lib/actions/location');
+        const urlResult = await resolveGoogleMapsUrlAction(googleMapsUrlRaw);
+        if (urlResult?.data) {
+            lat = urlResult.data.lat;
+            lng = urlResult.data.lng;
         }
     }
 

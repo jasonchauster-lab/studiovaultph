@@ -1,4 +1,4 @@
-import { getGeocodeAction, getReverseGeocodeAction, getAutocompleteAction } from '../actions/location'
+import { getGeocodeAction, getReverseGeocodeAction, getAutocompleteAction, resolveGoogleMapsUrlAction } from '../actions/location'
 
 /**
  * Calculates the Haversine distance between two points in kilometers.
@@ -96,4 +96,15 @@ export async function getAutocompleteSuggestions(input: string): Promise<string[
     return result.data;
   }
   return [];
+}
+
+/**
+ * Resolves a Google Maps URL to extract its lat/lng and formatted address.
+ */
+export async function resolveGoogleMapsUrl(url: string): Promise<{ lat: number; lng: number; address: string; short: string } | null> {
+  const result = await resolveGoogleMapsUrlAction(url);
+  if (result.data) {
+    return result.data;
+  }
+  return null;
 }

@@ -85,3 +85,130 @@ export async function getAutocompleteAction(input: string) {
         return { error: 'Fetch failed' };
     }
 }
+
+/**
+ * Resolves a Google Maps URL (including short links like maps.app.goo.gl/...)
+ * to extract lat/lng coordinates and a formatted address.
+ */
+export async function resolveGoogleMapsUrlAction(url: string) {
+    if (!url?.trim()) return { error: 'No URL provided' };
+
+    try {
+        let finalUrl = url.trim();
+
+        // Follow redirects for short URLs (maps.app.goo.gl, goo.gl/maps)
+        if (finalUrl.includes('goo.gl') || finalUrl.includes('maps.app')) {
+            try {
+                const response = await fetch(finalUrl, {
+                    method: 'HEAD',
+                    redirect: 'follow',
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (compatible; StudioVault/1.0)'
+                    }
+                });
+                finalUrl = response.url || finalUrl;
+            } catch {
+                // If HEAD fails, try GET
+                try {
+                    const response = await fetch(finalUrl, {
+                        redirect: 'follow',
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0 (compatible; StudioVault/1.0)'
+                        }
+                    });
+                    finalUrl = response.url || finalUrl;
+                } catch {
+                    // Continue with original URL
+                }
+            }
+        }
+
+        // Extract coordinates from various Google Maps URL formats
+        let lat: number | null = null;
+        let lng: number | null = null;
+
+        // Pattern 1: @lat,lng in URL (most common in full URLs)
+        const atPattern = /@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+        const atMatch = finalUrl.match(atPattern);
+        if (atMatch) {
+            lat = parseFloat(atMatch[1]);
+            lng = parseFloat(atMatch[2]);
+        }
+
+        // Pattern 2: !3dLAT!4dLNG (in embed/data URLs)
+        if (!lat || !lng) {
+            const dataPattern = /!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/;
+            const dataMatch = finalUrl.match(dataPattern);
+            if (dataMatch) {
+                lat = parseFloat(dataMatch[1]);
+                lng = parseFloat(dataMatch[2]);
+            }
+        }
+
+        // Pattern 3: query=lat,lng or q=lat,lng
+        if (!lat || !lng) {
+            const queryPattern = /[?&](?:query|q)=(-?\d+\.?\d*)[,+](-?\d+\.?\d*)/;
+            const queryMatch = finalUrl.match(queryPattern);
+            if (queryMatch) {
+                lat = parseFloat(queryMatch[1]);
+                lng = parseFloat(queryMatch[2]);
+            }
+        }
+
+        // Pattern 4: /place/ URLs — extract the place name and geocode it
+        if (!lat || !lng) {
+            const placePattern = /\/place\/([^/@]+)/;
+            const placeMatch = finalUrl.match(placePattern);
+            if (placeMatch) {
+                const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
+                const geoResult = await getGeocodeAction(placeName);
+                if (geoResult?.data) {
+                    return {
+                        data: {
+                            lat: geoResult.data.location.lat,
+                            lng: geoResult.data.location.lng,
+                            address: geoResult.data.full,
+                            short: geoResult.data.short
+                        }
+                    };
+                }
+            }
+        }
+
+        // Pattern 5: /search/ URLs - extract the query and geocode it
+        if (!lat || !lng) {
+            const searchPattern = /\/search\/([^/?]+)/;
+            const searchMatch = finalUrl.match(searchPattern);
+            if (searchMatch) {
+                const searchQuery = decodeURIComponent(searchMatch[1].replace(/\+/g, ' '));
+                const geoResult = await getGeocodeAction(searchQuery);
+                if (geoResult?.data) {
+                    return {
+                        data: {
+                            lat: geoResult.data.location.lat,
+                            lng: geoResult.data.location.lng,
+                            address: geoResult.data.full,
+                            short: geoResult.data.short
+                        }
+                    };
+                }
+            }
+        }
+
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+            return { error: 'Could not extract coordinates from this URL' };
+        }
+
+        // Reverse geocode to get the formatted address
+        const reverseResult = await getReverseGeocodeAction(lat, lng);
+        const address = reverseResult?.data?.full || `${lat}, ${lng}`;
+        const short = reverseResult?.data?.short || '';
+
+        return {
+            data: { lat, lng, address, short }
+        };
+    } catch (error) {
+        console.error('Resolve Google Maps URL error:', error);
+        return { error: 'Failed to resolve Google Maps URL' };
+    }
+}
