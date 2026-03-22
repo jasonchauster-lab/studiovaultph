@@ -36,7 +36,17 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
         totalCompensation: Number(data.totalCompensation || 0),
         totalPenalty: Number(data.totalPenalty || 0),
         netEarnings: Number(data.netEarnings || 0),
-        recentTransactions: data.recentTransactions || [],
+        // Map RPC field names to what the InstructorEarningsClient expects
+        recentTransactions: (data.recentTransactions || []).map((tx: any) => ({
+            date: tx.tx_date || tx.date,
+            type: tx.type,
+            client: tx.client,
+            total_amount: Number(tx.amount ?? tx.total_amount ?? 0),
+            details: tx.details,
+            status: tx.status,
+            session_date: tx.session_date,
+            session_time: tx.session_time,
+        })),
         payouts: data.payouts || []
     };
 }

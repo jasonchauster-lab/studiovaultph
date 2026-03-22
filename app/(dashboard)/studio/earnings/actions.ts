@@ -32,10 +32,24 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             summary.pendingBalance = Number(summary.pendingBalance || 0)
         }
 
+        // Map RPC field names to what TransactionHistory component expects
+        const mappedTransactions = (data.transactions || []).map((tx: any) => ({
+            date: tx.tx_date || tx.date,
+            booking_date: tx.tx_date || tx.date,
+            type: tx.type,
+            client: tx.client,
+            instructor: tx.instructor,
+            total_amount: Number(tx.amount ?? 0),
+            details: tx.details,
+            status: tx.status,
+            session_date: tx.session_date,
+            session_time: tx.session_time,
+        }))
+
         return {
             bookings: data.bookings || [],
             payouts: data.payouts || [],
-            transactions: data.transactions || [],
+            transactions: mappedTransactions,
             summary: summary
         }
     } catch (err: any) {
