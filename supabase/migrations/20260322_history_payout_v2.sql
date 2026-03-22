@@ -95,147 +95,133 @@ BEGIN
     FROM payout_requests 
     WHERE user_id = p_instructor_id;
 
-    -- 3. Bookings and Earnings Calculations
-    -- We aggregate these from the bookings table directly
-    -- 3. Bookings and Earnings Calculations
-    -- Use a temporary table for multi-statement scoping
-    CREATE TEMP TABLE temp_instructor_bookings ON COMMIT DROP AS
-    SELECT 
-        b.*,
-        s.date as session_date,
-        s.start_time as session_time,
-        st.name as studio_name,
-        cp.full_name as client_name
-    FROM bookings b
-    JOIN slots s ON b.slot_id = s.id
-    JOIN studios st ON s.studio_id = st.id
-    JOIN profiles cp ON b.client_id = cp.id
-    WHERE b.instructor_id = p_instructor_id
-    AND (p_start_date IS NULL OR s.date >= p_start_date)
-    AND (p_end_date IS NULL OR s.date <= p_end_date)
-    AND (b.status IN ('approved', 'completed', 'cancelled_charged') OR b.payment_status = 'submitted');
+    -- 3. Unified Data Fetching
+    RETURN (
+        WITH instructor_bookings AS (
+            SELECT 
+                b.*,
+                s.date as session_date,
+                s.start_time as session_time,
+                st.name as studio_name,
+                cp.full_name as client_name
+            FROM bookings b
+            LEFT JOIN slots s ON b.slot_id = s.id
+            LEFT JOIN studios st ON b.studio_id = st.id
+            JOIN profiles cp ON b.client_id = cp.id
+            WHERE b.instructor_id = p_instructor_id
+            AND (p_start_date IS NULL OR s.date >= p_start_date)
+            AND (p_end_date IS NULL OR s.date <= p_end_date)
+            AND (b.status IN ('approved', 'completed', 'cancelled_charged') OR b.payment_status = 'submitted')
+        ),
+        stats AS (
+            SELECT
+                COALESCE(SUM(CASE WHEN (status IN ('approved', 'completed') OR (status = 'pending' AND payment_status = 'submitted')) THEN (price_breakdown->>'instructor_fee')::NUMERIC ELSE 0 END), 0) as gross,
+                COALESCE(SUM(CASE WHEN (price_breakdown->>'penalty_processed')::BOOLEAN = true AND price_breakdown->>'refund_initiator' = 'client' THEN (price_breakdown->>'instructor_fee')::NUMERIC 
+                                  WHEN (price_breakdown->>'penalty_processed')::BOOLEAN = true AND price_breakdown->>'refund_initiator' = 'studio' THEN (price_breakdown->>'penalty_amount')::NUMERIC 
+                                  ELSE 0 END), 0) as compensation,
+                COALESCE(SUM(CASE WHEN (price_breakdown->>'penalty_processed')::BOOLEAN = true AND price_breakdown->>'refund_initiator' = 'instructor' THEN (price_breakdown->>'penalty_amount')::NUMERIC ELSE 0 END), 0) as penalty
+            FROM instructor_bookings
+        ),
+        all_tx AS (
+            -- Booking Earnings
+            SELECT 
+                b.created_at as tx_date,
+                b.session_date,
+                b.session_time,
+                CASE 
+                    WHEN b.status = 'cancelled_charged' THEN 'Late Cancellation'
+                    WHEN b.status = 'pending' THEN 'Verification'
+                    ELSE 'Session'
+                END as type,
+                b.client_name as client,
+                (b.price_breakdown->>'instructor_fee')::NUMERIC as amount,
+                b.status::TEXT,
+                b.price_breakdown->>'equipment' as details
+            FROM instructor_bookings b
 
-    SELECT
-        COALESCE(SUM(CASE WHEN (status IN ('approved', 'completed') OR (status = 'pending' AND payment_status = 'submitted')) THEN (price_breakdown->>'instructor_fee')::NUMERIC ELSE 0 END), 0) as gross,
-        COALESCE(SUM(CASE WHEN (price_breakdown->>'penalty_processed')::BOOLEAN = true AND price_breakdown->>'refund_initiator' = 'client' THEN (price_breakdown->>'instructor_fee')::NUMERIC 
-                          WHEN (price_breakdown->>'penalty_processed')::BOOLEAN = true AND price_breakdown->>'refund_initiator' = 'studio' THEN (price_breakdown->>'penalty_amount')::NUMERIC 
-                          ELSE 0 END), 0) as compensation,
-        COALESCE(SUM(CASE WHEN (price_breakdown->>'penalty_processed')::BOOLEAN = true AND price_breakdown->>'refund_initiator' = 'instructor' THEN (price_breakdown->>'penalty_amount')::NUMERIC ELSE 0 END), 0) as penalty
-    INTO v_total_earned, v_total_compensation, v_total_penalty
-    FROM temp_instructor_bookings;
+            UNION ALL
 
-    v_net_earnings := v_total_earned + v_total_compensation - v_total_penalty;
+            -- Compensations (Instructor gets penalty from Client/Studio)
+            SELECT 
+                b.updated_at,
+                b.session_date,
+                b.session_time,
+                'Compensation',
+                b.client_name,
+                CASE 
+                    WHEN b.price_breakdown->>'refund_initiator' = 'client' THEN (b.price_breakdown->>'instructor_fee')::NUMERIC
+                    ELSE (b.price_breakdown->>'penalty_amount')::NUMERIC
+                END,
+                'processed'::TEXT,
+                'Late cancellation payout'
+            FROM instructor_bookings b
+            WHERE (b.price_breakdown->>'penalty_processed')::BOOLEAN = true
+            AND b.price_breakdown->>'refund_initiator' IN ('client', 'studio')
 
-    -- 4. Transactions List
-    WITH all_tx AS (
-        -- Booking Earnings
-        SELECT 
-            b.created_at as tx_date,
-            b.session_date,
-            b.session_time,
-            CASE 
-                WHEN b.status = 'cancelled_charged' THEN 'Late Cancellation'
-                WHEN b.status = 'pending' THEN 'Verification'
-                ELSE 'Session'
-            END as type,
-            b.client_name as client,
-            (b.price_breakdown->>'instructor_fee')::NUMERIC as amount,
-            b.status::TEXT,
-            b.price_breakdown->>'equipment' as details
-        FROM temp_instructor_bookings b
+            UNION ALL
 
-        UNION ALL
+            -- Penalties (Instructor pays penalty)
+            SELECT 
+                b.updated_at,
+                b.session_date,
+                b.session_time,
+                'Penalty',
+                b.client_name,
+                -(b.price_breakdown->>'penalty_amount')::NUMERIC,
+                'processed'::TEXT,
+                'Late cancellation deduction'
+            FROM instructor_bookings b
+            WHERE (b.price_breakdown->>'penalty_processed')::BOOLEAN = true
+            AND b.price_breakdown->>'refund_initiator' = 'instructor'
 
-        -- Compensations (Instructor gets penalty from Client/Studio)
-        SELECT 
-            b.updated_at,
-            b.session_date,
-            b.session_time,
-            'Compensation',
-            b.client_name,
-            CASE 
-                WHEN b.price_breakdown->>'refund_initiator' = 'client' THEN (b.price_breakdown->>'instructor_fee')::NUMERIC
-                ELSE (b.price_breakdown->>'penalty_amount')::NUMERIC
-            END,
-            'processed'::TEXT,
-            'Late cancellation payout'
-        FROM temp_instructor_bookings b
-        WHERE (b.price_breakdown->>'penalty_processed')::BOOLEAN = true
-        AND b.price_breakdown->>'refund_initiator' IN ('client', 'studio')
+            UNION ALL
 
-        UNION ALL
+            -- Payouts
+            SELECT 
+                created_at,
+                NULL,
+                NULL,
+                'Payout',
+                'System',
+                -amount,
+                status::TEXT,
+                'Withdrawal via ' || payment_method
+            FROM payout_requests
+            WHERE user_id = p_instructor_id
+            AND (p_start_date IS NULL OR created_at::DATE >= p_start_date)
+            AND (p_end_date IS NULL OR created_at::DATE <= p_end_date)
 
-        -- Penalties (Instructor pays penalty)
-        SELECT 
-            b.updated_at,
-            b.session_date,
-            b.session_time,
-            'Penalty',
-            b.client_name,
-            -(b.price_breakdown->>'penalty_amount')::NUMERIC,
-            'processed'::TEXT,
-            'Late cancellation deduction'
-        FROM temp_instructor_bookings b
-        WHERE (b.price_breakdown->>'penalty_processed')::BOOLEAN = true
-        AND b.price_breakdown->>'refund_initiator' = 'instructor'
+            UNION ALL
 
-        UNION ALL
-
-        -- Payouts
-        SELECT 
-            created_at,
-            NULL,
-            NULL,
-            'Payout',
-            'System',
-            -amount,
-            status::TEXT,
-            'Withdrawal via ' || payment_method
-        FROM payout_requests
-        WHERE user_id = p_instructor_id
-        AND (p_start_date IS NULL OR created_at::DATE >= p_start_date)
-        AND (p_end_date IS NULL OR created_at::DATE <= p_end_date)
-
-        UNION ALL
-
-        -- Wallet / Admin Adjustments
-        SELECT 
-            COALESCE(processed_at, updated_at, created_at),
-            NULL,
-            NULL,
-            CASE WHEN type = 'admin_adjustment' THEN 'Adjustment' ELSE 'Top-Up' END,
-            'Admin',
-            amount,
-            status::TEXT,
-            COALESCE(admin_notes, 'Manual balance adjustment')
-        FROM wallet_top_ups
-        WHERE user_id = p_instructor_id
-        AND status = 'approved'
-        AND (p_start_date IS NULL OR created_at::DATE >= p_start_date)
-        AND (p_end_date IS NULL OR created_at::DATE <= p_end_date)
-    )
-    SELECT jsonb_agg(tx ORDER BY tx_date DESC) INTO v_transactions
-    FROM (SELECT * FROM all_tx) tx;
-
-    -- 5. Payouts History
-    SELECT jsonb_agg(p ORDER BY created_at DESC) INTO v_payouts
-    FROM payout_requests p
-    WHERE user_id = p_instructor_id;
-
-    -- Drop temp table
-    DROP TABLE temp_instructor_bookings;
-
-    RETURN jsonb_build_object(
-        'totalEarned', v_total_earned,
-        'totalWithdrawn', v_total_withdrawn,
-        'pendingPayouts', v_pending_payouts,
-        'availableBalance', v_available_balance,
-        'pendingBalance', v_pending_balance,
-        'totalCompensation', v_total_compensation,
-        'totalPenalty', v_total_penalty,
-        'netEarnings', v_net_earnings,
-        'recentTransactions', COALESCE(v_transactions, '[]'::jsonb),
-        'payouts', COALESCE(v_payouts, '[]'::jsonb)
+            -- Wallet / Admin Adjustments
+            SELECT 
+                COALESCE(processed_at, updated_at, created_at),
+                NULL,
+                NULL,
+                CASE WHEN type = 'admin_adjustment' THEN 'Adjustment' ELSE 'Top-Up' END,
+                'Admin',
+                amount,
+                status::TEXT,
+                COALESCE(admin_notes, 'Manual balance adjustment')
+            FROM wallet_top_ups
+            WHERE user_id = p_instructor_id
+            AND status = 'approved'
+            AND (p_start_date IS NULL OR created_at::DATE >= p_start_date)
+            AND (p_end_date IS NULL OR created_at::DATE <= p_end_date)
+        )
+        SELECT jsonb_build_object(
+            'totalEarned', s.gross,
+            'totalWithdrawn', v_total_withdrawn,
+            'pendingPayouts', v_pending_payouts,
+            'availableBalance', v_available_balance,
+            'pendingBalance', v_pending_balance,
+            'totalCompensation', s.compensation,
+            'totalPenalty', s.penalty,
+            'netEarnings', (s.gross + s.compensation - s.penalty),
+            'recentTransactions', COALESCE((SELECT jsonb_agg(tx ORDER BY tx_date DESC) FROM all_tx tx), '[]'::jsonb),
+            'payouts', COALESCE((SELECT jsonb_agg(p ORDER BY created_at DESC) FROM payout_requests p WHERE user_id = p_instructor_id), '[]'::jsonb)
+        )
+        FROM stats s
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -273,136 +259,121 @@ BEGIN
     INTO v_available_balance, v_pending_balance
     FROM profiles WHERE id = v_owner_id;
 
-    -- 3. Aggregated Stats logic
-    CREATE TEMP TABLE temp_studio_bookings ON COMMIT DROP AS
-    SELECT 
-        b.*,
-        s.date as session_date,
-        s.start_time as session_time,
-        st.name as studio_name,
-        cp.full_name as client_name,
-        ip.full_name as instructor_name
-    FROM bookings b
-    JOIN slots s ON b.slot_id = s.id
-    JOIN studios st ON s.studio_id = st.id
-    JOIN profiles cp ON b.client_id = cp.id
-    LEFT JOIN profiles ip ON b.instructor_id = ip.id
-    WHERE b.studio_id = p_studio_id
-    AND (p_start_date IS NULL OR s.date >= p_start_date)
-    AND (p_end_date IS NULL OR s.date <= p_end_date)
-    AND (b.status IN ('approved', 'completed', 'cancelled_charged', 'cancelled_refunded') OR b.payment_status = 'submitted');
+    -- 3. Unified Data Fetching
+    RETURN (
+        WITH studio_bookings AS (
+            SELECT 
+                b.*,
+                s.date as session_date,
+                s.start_time as session_time,
+                st.name as studio_name,
+                cp.full_name as client_name,
+                ip.full_name as instructor_name
+            FROM bookings b
+            LEFT JOIN slots s ON b.slot_id = s.id
+            LEFT JOIN studios st ON b.studio_id = st.id
+            JOIN profiles cp ON b.client_id = cp.id
+            LEFT JOIN profiles ip ON b.instructor_id = ip.id
+            WHERE b.studio_id = p_studio_id
+            AND (p_start_date IS NULL OR s.date >= p_start_date OR (s.id IS NULL AND b.created_at::DATE >= p_start_date))
+            AND (p_end_date IS NULL OR s.date <= p_end_date OR (s.id IS NULL AND b.created_at::DATE <= p_end_date))
+            AND (b.status IN ('approved', 'completed', 'cancelled_charged', 'cancelled_refunded') OR b.payment_status = 'submitted')
+        ),
+        stats AS (
+            SELECT
+                COALESCE(SUM(CASE WHEN (status IN ('approved', 'completed') OR (status = 'pending' AND payment_status = 'submitted') OR (status = 'cancelled_charged' AND NOT (price_breakdown->>'refund_initiator' = 'client'))) THEN (price_breakdown->>'studio_fee')::NUMERIC ELSE 0 END), 0) as gross,
+                COALESCE(SUM(CASE WHEN (price_breakdown->>'penalty_processed')::BOOLEAN = true AND price_breakdown->>'refund_initiator' = 'instructor' THEN (price_breakdown->>'penalty_amount')::NUMERIC 
+                                  WHEN status = 'cancelled_charged' AND price_breakdown->>'refund_initiator' = 'client' THEN (price_breakdown->>'studio_fee')::NUMERIC
+                                  ELSE 0 END), 0) as compensation,
+                COALESCE(SUM(CASE WHEN (price_breakdown->>'penalty_processed')::BOOLEAN = true AND price_breakdown->>'refund_initiator' = 'studio' THEN (price_breakdown->>'penalty_amount')::NUMERIC ELSE 0 END), 0) as penalty
+            FROM studio_bookings
+        ),
+        all_transactions AS (
+            -- Bookings
+            SELECT 
+                b.created_at as tx_date,
+                'Booking' as type,
+                b.status::TEXT,
+                COALESCE(b.client_name, 'Client') as client,
+                COALESCE(b.instructor_name, 'Instructor') as instructor,
+                (b.price_breakdown->>'studio_fee')::NUMERIC as amount,
+                b.session_date,
+                b.session_time,
+                (b.price_breakdown->>'quantity') || ' x ' || (b.price_breakdown->>'equipment') as details
+            FROM studio_bookings b
+            WHERE b.status != 'cancelled_refunded'
 
-    SELECT
-        COALESCE(SUM(CASE WHEN (status IN ('approved', 'completed') OR (status = 'pending' AND payment_status = 'submitted') OR (status = 'cancelled_charged' AND NOT (price_breakdown->>'refund_initiator' = 'client'))) THEN (price_breakdown->>'studio_fee')::NUMERIC ELSE 0 END), 0) as gross,
-        COALESCE(SUM(CASE WHEN (price_breakdown->>'penalty_processed')::BOOLEAN = true AND price_breakdown->>'refund_initiator' = 'instructor' THEN (price_breakdown->>'penalty_amount')::NUMERIC 
-                          WHEN status = 'cancelled_charged' AND price_breakdown->>'refund_initiator' = 'client' THEN (price_breakdown->>'studio_fee')::NUMERIC
-                          ELSE 0 END), 0) as compensation,
-        COALESCE(SUM(CASE WHEN (price_breakdown->>'penalty_processed')::BOOLEAN = true AND price_breakdown->>'refund_initiator' = 'studio' THEN (price_breakdown->>'penalty_amount')::NUMERIC ELSE 0 END), 0) as penalty
-    INTO v_total_earned, v_total_compensation, v_total_penalty
-    FROM temp_studio_bookings;
+            UNION ALL
 
-    v_net_earnings := v_total_earned + v_total_compensation - v_total_penalty;
+            -- Refunds (Zero actual payout but record for audit)
+            SELECT 
+                b.created_at,
+                'Refund',
+                'cancelled_refunded'::TEXT,
+                b.client_name,
+                b.instructor_name,
+                0,
+                b.session_date,
+                b.session_time,
+                'Refunded session'
+            FROM studio_bookings b
+            WHERE b.status = 'cancelled_refunded'
 
-    -- 4. Transactions List (Unified)
-    WITH all_transactions AS (
-        -- Bookings
-        SELECT 
-            b.created_at as tx_date,
-            'Booking' as type,
-            b.status::TEXT,
-            COALESCE(b.client_name, 'Client') as client,
-            COALESCE(b.instructor_name, 'Instructor') as instructor,
-            (b.price_breakdown->>'studio_fee')::NUMERIC as amount,
-            b.session_date,
-            b.session_time,
-            (b.price_breakdown->>'quantity') || ' x ' || (b.price_breakdown->>'equipment') as details
-        FROM temp_studio_bookings b
-        WHERE b.status != 'cancelled_refunded'
+            UNION ALL
 
-        UNION ALL
+            -- Compensations
+            SELECT 
+                b.updated_at,
+                'Compensation',
+                'processed'::TEXT,
+                b.client_name,
+                b.instructor_name,
+                CASE 
+                    WHEN b.price_breakdown->>'refund_initiator' = 'instructor' THEN (b.price_breakdown->>'penalty_amount')::NUMERIC
+                    ELSE (b.price_breakdown->>'studio_fee')::NUMERIC
+                END,
+                b.session_date,
+                b.session_time,
+                'Cancellation compensation'
+            FROM studio_bookings b
+            WHERE (b.price_breakdown->>'penalty_processed')::BOOLEAN = true AND b.price_breakdown->>'refund_initiator' = 'instructor'
+            OR (b.status = 'cancelled_charged' AND b.price_breakdown->>'refund_initiator' = 'client')
 
-        -- Refunds (Zero actual payout but record for audit)
-        SELECT 
-            b.created_at,
-            'Refund',
-            'cancelled_refunded'::TEXT,
-            b.client_name,
-            b.instructor_name,
-            0,
-            b.session_date,
-            b.session_time,
-            'Refunded session'
-        FROM temp_studio_bookings b
-        WHERE b.status = 'cancelled_refunded'
+            UNION ALL
 
-        UNION ALL
-
-        -- Compensations
-        SELECT 
-            b.updated_at,
-            'Compensation',
-            'processed'::TEXT,
-            b.client_name,
-            b.instructor_name,
-            CASE 
-                WHEN b.price_breakdown->>'refund_initiator' = 'instructor' THEN (b.price_breakdown->>'penalty_amount')::NUMERIC
-                ELSE (b.price_breakdown->>'studio_fee')::NUMERIC
-            END,
-            b.session_date,
-            b.session_time,
-            'Cancellation compensation'
-        FROM temp_studio_bookings b
-        WHERE (b.price_breakdown->>'penalty_processed')::BOOLEAN = true AND b.price_breakdown->>'refund_initiator' = 'instructor'
-        OR (b.status = 'cancelled_charged' AND b.price_breakdown->>'refund_initiator' = 'client')
-
-        UNION ALL
-
-        -- Payouts
-        SELECT 
-            created_at,
-            'Payout',
-            status::TEXT,
-            'System',
-            'Staff',
-            -amount,
-            NULL,
-            NULL,
-            'Withdrawal via ' || payment_method
-        FROM payout_requests
-        WHERE studio_id = p_studio_id
-        AND (p_start_date IS NULL OR created_at::DATE >= p_start_date)
-        AND (p_end_date IS NULL OR created_at::DATE <= p_end_date)
-    )
-    SELECT jsonb_agg(tx ORDER BY tx_date DESC) INTO v_transactions
-    FROM (SELECT * FROM all_transactions) tx;
-
-    -- 5. Bookings List (Simple)
-    SELECT jsonb_agg(b ORDER BY created_at DESC) INTO v_bookings_data
-    FROM temp_studio_bookings b;
-
-    -- 6. Payouts List
-    SELECT jsonb_agg(p ORDER BY created_at DESC) INTO v_payout_data
-    FROM payout_requests p
-    WHERE studio_id = p_studio_id;
-
-    -- Drop temp table
-    DROP TABLE temp_studio_bookings;
-
-    RETURN jsonb_build_object(
-        'bookings', COALESCE(v_bookings_data, '[]'::jsonb),
-        'payouts', COALESCE(v_payout_data, '[]'::jsonb),
-        'transactions', COALESCE(v_transactions, '[]'::jsonb),
-        'summary', jsonb_build_object(
-            'totalEarnings', v_total_earned,
-            'totalCompensation', v_total_compensation,
-            'totalPenalty', v_total_penalty,
-            'netEarnings', v_net_earnings,
-            'totalPaidOut', COALESCE((SELECT SUM(amount) FROM payout_requests WHERE studio_id = p_studio_id AND status = 'paid'), 0),
-            'pendingPayouts', COALESCE((SELECT SUM(amount) FROM payout_requests WHERE studio_id = p_studio_id AND status IN ('pending', 'approved')), 0),
-            'availableBalance', v_available_balance,
-            'pendingBalance', v_pending_balance,
-            'payoutApprovalStatus', v_payout_approval_status
+            -- Payouts
+            SELECT 
+                created_at,
+                'Payout',
+                status::TEXT,
+                'System',
+                'Staff',
+                -amount,
+                NULL,
+                NULL,
+                'Withdrawal via ' || payment_method
+            FROM payout_requests
+            WHERE studio_id = p_studio_id
+            AND (p_start_date IS NULL OR created_at::DATE >= p_start_date)
+            AND (p_end_date IS NULL OR created_at::DATE <= p_end_date)
         )
+        SELECT jsonb_build_object(
+            'bookings', COALESCE((SELECT jsonb_agg(b ORDER BY created_at DESC) FROM studio_bookings b), '[]'::jsonb),
+            'payouts', COALESCE((SELECT jsonb_agg(p ORDER BY created_at DESC) FROM payout_requests p WHERE studio_id = p_studio_id), '[]'::jsonb),
+            'transactions', COALESCE((SELECT jsonb_agg(tx ORDER BY tx_date DESC) FROM all_transactions tx), '[]'::jsonb),
+            'summary', jsonb_build_object(
+                'totalEarnings', s.gross,
+                'totalCompensation', s.compensation,
+                'totalPenalty', s.penalty,
+                'netEarnings', (s.gross + s.compensation - s.penalty),
+                'totalPaidOut', COALESCE((SELECT SUM(amount) FROM payout_requests WHERE studio_id = p_studio_id AND status = 'paid'), 0),
+                'pendingPayouts', COALESCE((SELECT SUM(amount) FROM payout_requests WHERE studio_id = p_studio_id AND status IN ('pending', 'approved')), 0),
+                'availableBalance', v_available_balance,
+                'pendingBalance', v_pending_balance,
+                'payoutApprovalStatus', v_payout_approval_status
+            )
+        )
+        FROM stats s
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -442,13 +413,13 @@ BEGIN
     SELECT 
         b.id,
         b.created_at,
-        b.status,
+        b.status::TEXT,
         b.price_breakdown,
         b.instructor_checked_in_at,
         b.client_id,
         b.instructor_id,
         b.slot_id,
-        s.date as session_date,
+        COALESCE(s.date, b.created_at::DATE) as session_date,
         s.start_time,
         s.end_time,
         s.equipment,
@@ -462,14 +433,14 @@ BEGIN
         cp.other_medical_condition as client_other_medical,
         cp.bio as client_bio
     FROM bookings b
-    JOIN slots s ON b.slot_id = s.id
-    JOIN studios st ON s.studio_id = st.id
+    LEFT JOIN slots s ON b.slot_id = s.id
+    LEFT JOIN studios st ON b.studio_id = st.id
     LEFT JOIN profiles ip ON b.instructor_id = ip.id
     JOIN profiles cp ON b.client_id = cp.id
-    WHERE s.studio_id = p_studio_id
+    WHERE b.studio_id = p_studio_id
     AND b.status::TEXT IN ('approved', 'completed', 'cancelled_refunded', 'cancelled_charged', 'pending', 'rejected', 'cancelled')
-    AND (p_start_date IS NULL OR s.date >= p_start_date)
-    AND (p_end_date IS NULL OR s.date <= p_end_date)
-    ORDER BY s.date DESC, s.start_time DESC;
+    AND (p_start_date IS NULL OR s.date >= p_start_date OR (s.id IS NULL AND b.created_at::DATE >= p_start_date))
+    AND (p_end_date IS NULL OR s.date <= p_end_date OR (s.id IS NULL AND b.created_at::DATE <= p_end_date))
+    ORDER BY COALESCE(s.date, b.created_at::DATE) DESC, s.start_time DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
