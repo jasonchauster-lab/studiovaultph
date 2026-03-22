@@ -225,7 +225,7 @@ export default function HeaderSearchPill() {
 
                             {/* Autocomplete Suggestions */}
                             {showSuggestions && (
-                                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border-grey rounded-2xl shadow-xl z-[60] overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                                <div className="relative mt-2 bg-white border border-border-grey rounded-2xl shadow-xl z-10 overflow-hidden animate-in slide-in-from-top-2 duration-200">
                                     <button
                                         onClick={handleLocationDetect}
                                         className="w-full px-6 py-4 flex items-center gap-3 hover:bg-forest/5 text-left border-b border-border-grey/50 group"

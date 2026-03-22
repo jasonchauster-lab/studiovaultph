@@ -456,7 +456,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
 
                                 {/* Suggestions Dropdown */}
                                 {showSuggestions && (suggestions.length > 0 || noResults) && (
-                                    <div className="absolute z-[100] top-full left-0 right-0 mt-2 bg-white border border-cream-200 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div className="relative z-[100] mt-2 bg-white border border-cream-200 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                                         {suggestions.length > 0 ? (
                                             suggestions.map((s, idx) => (
                                                 <button

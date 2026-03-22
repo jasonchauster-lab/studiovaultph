@@ -11,7 +11,7 @@ export async function getGeocodeAction(address: string) {
 
     try {
         const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_API_KEY}`
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&region=ph&key=${GOOGLE_API_KEY}`
         );
         const data = await response.json();
         if (data.status === 'OK' && data.results.length > 0) {
@@ -41,7 +41,7 @@ export async function getReverseGeocodeAction(lat: number, lng: number) {
 
     try {
         const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&region=ph&key=${GOOGLE_API_KEY}`
         );
         const data = await response.json();
         if (data.status === 'OK' && data.results.length > 0) {
@@ -70,9 +70,9 @@ export async function getAutocompleteAction(input: string) {
     if (!input.trim()) return { data: [] };
 
     try {
-        // Try without country restriction first to see if it's too restrictive
+        // Restrict to Philippines (components=country:ph)
         const response = await fetch(
-            `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&key=${GOOGLE_API_KEY}`
+            `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&components=country:ph&key=${GOOGLE_API_KEY}`
         );
         const data = await response.json();
         if (data.status === 'OK') {
