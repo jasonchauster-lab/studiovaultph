@@ -222,32 +222,32 @@ export default function InstructorDashboardClient({
     return (
         <div className="space-y-8 sm:space-y-16 pb-20">
             {/* Sticky Header */}
-            <div className="sticky-header-antigravity -mx-4 sm:-mx-8 lg:-mx-12 mb-8 sm:mb-12 px-6 sm:px-8 lg:px-12 py-6 sm:py-8 lg:py-0">
+            <div className="sticky-header-antigravity -mx-4 sm:-mx-8 lg:-mx-12 mb-6 sm:mb-12 px-4 sm:px-8 lg:px-12 py-6 sm:py-8 lg:py-0">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-8">
                     <div>
-                        <h1 className="text-xl sm:text-4xl md:text-5xl font-serif text-burgundy tracking-tighter mb-2 sm:mb-4">Instructor Dashboard</h1>
-                        <p className="text-[9px] sm:text-[10px] font-bold text-burgundy/40 uppercase tracking-[0.3em] sm:tracking-[0.4em] max-w-[90%] sm:max-w-none leading-relaxed">Manage your professional schedule and earnings with grounded precision.</p>
+                        <h1 className="text-xl sm:text-3xl md:text-5xl font-serif text-burgundy tracking-tighter mb-2 sm:mb-4">Instructor Dashboard</h1>
+                        <p className="text-[8px] sm:text-[10px] font-bold text-burgundy/40 uppercase tracking-[0.2em] sm:tracking-[0.4em] max-w-[90%] sm:max-w-none leading-relaxed">Manage your professional schedule and earnings with grounded precision.</p>
                     </div>
                 </div>
             </div>
 
             {/* Service Area Setup Prompt */}
             {!instructorProfile?.home_base_address && (
-                <div className="atelier-card !bg-forest/5 !border-forest/10 p-10 sm:p-14 mb-12 relative overflow-hidden group/service">
+                <div className="atelier-card !bg-forest/5 !border-forest/10 p-6 sm:p-10 lg:p-14 mb-8 sm:mb-12 relative overflow-hidden group/service">
                     <div className="absolute top-0 right-0 w-80 h-80 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none group-hover:bg-forest/10 transition-colors" />
-                    <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
-                        <div className="w-20 h-20 bg-burgundy text-white rounded-[2rem] flex items-center justify-center shadow-ambient shrink-0 group-hover/service:scale-110 transition-transform duration-700">
-                            <AlertTriangle className="w-9 h-9" />
+                    <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-10 relative z-10">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-burgundy text-white rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center shadow-ambient shrink-0 group-hover/service:scale-110 transition-transform duration-700">
+                            <AlertTriangle className="w-7 h-7 sm:w-9 sm:h-9" />
                         </div>
                         <div className="flex-1 text-center md:text-left">
-                            <h2 className="text-3xl sm:text-4xl font-serif text-burgundy tracking-tight mb-3">Connect with Clients at Home</h2>
-                            <p className="text-[11px] font-bold text-slate uppercase tracking-[0.2em] leading-relaxed max-w-2xl">
+                            <h2 className="text-2xl sm:text-4xl font-serif text-burgundy tracking-tight mb-2 sm:mb-3">Connect with Clients at Home</h2>
+                            <p className="text-[10px] sm:text-[11px] font-bold text-slate uppercase tracking-[0.15em] sm:tracking-[0.2em] leading-relaxed max-w-2xl">
                                 You haven't set your service area yet. Pin your home base and define your travel radius to appear in "Home Session" searches and grow your reach.
                             </p>
                         </div>
                         <Link 
                             href="/instructor/profile"
-                            className="btn-primary-atelier !py-4 !px-10"
+                            className="btn-primary-atelier !py-3 sm:!py-4 !px-8 sm:!px-10 !text-[9px] sm:!text-[10px]"
                         >
                             Setup Area
                         </Link>
@@ -285,8 +285,8 @@ export default function InstructorDashboardClient({
             )}
 
             {/* Dashboard Grid Container */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10">
+                <div className="lg:col-span-8">
                     {/* Desktop Calendar */}
                     <div className="hidden lg:block border border-burgundy/5 rounded-xl overflow-hidden bg-white">
                         <InstructorScheduleCalendar
@@ -359,7 +359,7 @@ export default function InstructorDashboardClient({
                 </div>
 
                 {/* Upcoming Bookings Sidebar */}
-                <div className="space-y-10 lg:col-span-1">
+                <div className="space-y-10 lg:col-span-4">
                     <div className="atelier-card !p-0 overflow-hidden border-none shadow-ambient">
                         <div className="bg-forest p-6 sm:p-8 flex items-center justify-between">
                             <h2 className="text-[11px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">

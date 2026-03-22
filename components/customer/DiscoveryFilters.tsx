@@ -181,7 +181,6 @@ export default function DiscoveryFilters({ availableLocations, userRole }: Disco
                         </div>
                     </button>
                 </div>
-
                 <FilterDrawer 
                     isOpen={isDrawerOpen}
                     onClose={() => setIsDrawerOpen(false)}
@@ -190,18 +189,6 @@ export default function DiscoveryFilters({ availableLocations, userRole }: Disco
                     handleMultiFilter={handleMultiFilter}
                     getMultiValue={getMultiValue}
                 />
-
-                {/* Clear Filters (Desktop Only) */}
-                {hasFilters && (
-                    <div className="pt-6 sm:pt-8 lg:pt-0 lg:border-l lg:pl-8 hidden lg:block">
-                        <button
-                            onClick={clearAllFilters}
-                            className="text-[10px] font-black text-burgundy/60 hover:text-white hover:bg-burgundy transition-all duration-500 uppercase tracking-[0.2em] flex items-center gap-2 px-8 py-4.5 rounded-2xl bg-off-white border border-burgundy/10 hover:border-burgundy shadow-sm transform active:scale-95"
-                        >
-                            Clear All Filters
-                        </button>
-                    </div>
-                )}
             </div>
         </div>
     )

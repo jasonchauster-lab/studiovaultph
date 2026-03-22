@@ -396,6 +396,33 @@ export default function ProfileForm({ profile }: { profile: any }) {
                         </div>
                     </div>
 
+                    {/* Equipment Rates Section */}
+                    {selectedEquipment.length > 0 && (
+                        <div className="pt-8 border-t border-cream-100 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                            <div className="flex flex-col gap-1">
+                                <label className="block text-[10px] font-black text-charcoal-900 uppercase tracking-[0.3em]">Equipment Rates (PHP)</label>
+                                <p className="text-[10px] font-medium text-charcoal-500 italic">Set your hourly rate for each apparatus</p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {selectedEquipment.map((eq) => (
+                                    <div key={eq} className="relative group/rate">
+                                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-charcoal-400 group-focus-within/rate:text-forest transition-colors uppercase tracking-widest pointer-events-none">
+                                            {eq}
+                                        </div>
+                                        <input 
+                                            type="number" 
+                                            name={`rate_${eq}`}
+                                            defaultValue={profile?.rates?.[eq] || ''}
+                                            placeholder="0.00"
+                                            className="w-full pl-32 pr-5 py-4 bg-off-white border border-cream-200 rounded-xl text-charcoal-900 font-bold text-sm focus:outline-none focus:ring-forest/5 focus:ring-4 focus:border-forest transition-all text-right"
+                                        />
+                                        <div className="absolute left-[120px] top-1/2 -translate-y-1/2 w-px h-4 bg-cream-200" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             )}
 
