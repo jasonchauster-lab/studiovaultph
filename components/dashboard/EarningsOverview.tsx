@@ -80,7 +80,7 @@ export default function EarningsOverview({ studioId, summary, userEmail }: Earni
             {/* Consolidated Stats Grid (Responsive) */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {/* Available Balance - Hero Card */}
-                <div className="atelier-card p-6 sm:p-8 col-span-2 relative overflow-hidden group border-0 shadow-2xl bg-forest text-white">
+                <div className="atelier-card p-6 sm:p-8 col-span-2 relative overflow-hidden group border-0 shadow-2xl !bg-forest text-white">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
                     
                     <div className="flex justify-between items-start mb-8 relative z-10">

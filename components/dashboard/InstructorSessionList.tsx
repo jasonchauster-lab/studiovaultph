@@ -273,7 +273,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                             <div className="w-9 h-9 sm:w-12 sm:h-12 bg-charcoal/5 rounded-[1.25rem] flex items-center justify-center shrink-0 border border-charcoal/10">
                                 <Clock className="w-4 h-4 sm:w-6 h-6 text-charcoal/40" />
                             </div>
-                            <h2 className="text-xl sm:text-3xl font-serif text-charcoal/40 tracking-tight">Archive Registry</h2>
+                            <h2 className="text-xl sm:text-3xl font-serif text-charcoal/40 tracking-tight">Past Sessions</h2>
                         </div>
                     </div>
 
@@ -292,7 +292,7 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <span className="w-1 h-1 rounded-full bg-charcoal/10" />
-                                        <span className="text-[8px] font-black text-charcoal/20 uppercase tracking-[0.15em]">{group.bookings.length} {group.bookings.length === 1 ? 'Legacy' : 'Legacies'}</span>
+                                        <span className="text-[8px] font-black text-charcoal/20 uppercase tracking-[0.15em]">{group.bookings.length} {group.bookings.length === 1 ? 'Session' : 'Sessions'}</span>
                                     </div>
                                 </div>
 
@@ -605,7 +605,11 @@ const ArchiveSessionCard = memo(({ booking, onStudioClick, onClientClick, onRevi
                         <span className="text-[13px] sm:text-base font-serif text-charcoal/40 leading-none tracking-tight">
                             {isMounted && startDateTime.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
                         </span>
-                        <span className="text-[7px] font-black text-charcoal/20 uppercase tracking-[0.15em] mt-1.5">RECORDED</span>
+                        <span className="text-[7px] font-black text-charcoal/20 uppercase tracking-[0.15em] mt-1.5">
+                            {booking.status === 'completed' ? 'COMPLETED' : 
+                             booking.status?.includes('cancelled') ? 'CANCELLED' : 
+                             booking.status ? booking.status.replace('_', ' ').toUpperCase() : 'RECORDED'}
+                        </span>
                     </div>
                     {booking.price_breakdown?.instructor_fee && (
                         <div className="flex flex-col items-end sm:items-center sm:mt-3">
