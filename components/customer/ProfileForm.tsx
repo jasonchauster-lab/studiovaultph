@@ -497,7 +497,10 @@ export default function ProfileForm({ profile }: { profile: any }) {
                                     step="1"
                                     value={maxTravelKm}
                                     onChange={(e) => setMaxTravelKm(parseInt(e.target.value))}
-                                    className="w-full h-2 bg-charcoal-200/20 rounded-lg appearance-none cursor-pointer accent-forest transition-all"
+                                    className="w-full h-1.5 bg-charcoal-200/20 rounded-lg appearance-none cursor-pointer accent-forest transition-all"
+                                    style={{
+                                        background: `linear-gradient(to right, #2B3F33 0%, #2B3F33 ${((maxTravelKm - 1) / (50 - 1)) * 100}%, rgba(81, 50, 41, 0.1) ${((maxTravelKm - 1) / (50 - 1)) * 100}%, rgba(81, 50, 41, 0.1) 100%)`
+                                    }}
                                 />
                                 <div className="flex justify-between mt-2 px-1">
                                     <span className="text-[9px] font-bold text-charcoal-500 uppercase tracking-widest">1 KM</span>
