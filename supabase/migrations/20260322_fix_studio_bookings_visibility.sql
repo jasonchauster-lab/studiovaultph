@@ -16,6 +16,8 @@ WHERE b.slot_id = s.id
 -- Step 3: Update the history RPC to also match bookings through the slot join
 -- so that even if studio_id is NULL, the booking still appears in history.
 
+DROP FUNCTION IF EXISTS get_studio_rental_history_v2(UUID, DATE, DATE);
+
 -- Recreate get_studio_rental_history_v2 with fallback join
 CREATE OR REPLACE FUNCTION get_studio_rental_history_v2(
     p_studio_id UUID,
@@ -27,7 +29,6 @@ RETURNS TABLE (
     created_at TIMESTAMPTZ,
     status TEXT,
     price_breakdown JSONB,
-    instructor_checked_in_at TIMESTAMPTZ,
     client_id UUID,
     instructor_id UUID,
     slot_id UUID,
@@ -52,7 +53,6 @@ BEGIN
         b.created_at,
         b.status::TEXT,
         b.price_breakdown,
-        b.instructor_checked_in_at,
         b.client_id,
         b.instructor_id,
         b.slot_id,
@@ -82,6 +82,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+
+DROP FUNCTION IF EXISTS get_studio_earnings_v2(UUID, DATE, DATE);
 
 -- Also update get_studio_earnings_v2 with the same fallback
 CREATE OR REPLACE FUNCTION get_studio_earnings_v2(
@@ -224,6 +226,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+
+DROP FUNCTION IF EXISTS get_studio_dashboard_stats(UUID, UUID);
 
 -- Also update get_studio_dashboard_stats to use the same fallback
 CREATE OR REPLACE FUNCTION get_studio_dashboard_stats(

@@ -10,7 +10,7 @@ import StudioChatButton from '@/components/dashboard/StudioChatButton'
 import BookingFilter, { FilterState } from '@/components/dashboard/BookingFilter'
 import CancelBookingModal from './CancelBookingModal'
 import InstructorPreviewModal from './InstructorPreviewModal'
-import { cancelBookingByStudio, checkInInstructor } from '@/app/(dashboard)/studio/actions'
+import { cancelBookingByStudio } from '@/app/(dashboard)/studio/actions'
 import { getInstructorProfile } from '@/app/(dashboard)/instructors/actions'
 import Avatar from '@/components/shared/Avatar'
 
@@ -401,26 +401,6 @@ const SessionCard = memo(({ booking, currentUserId, onInstructorClick, onClientC
 
                 {/* Row 4: Actions */}
                 <div className="flex items-center gap-2">
-                    {booking.status === 'approved' && !booking.instructor_checked_in_at && (
-                        <button
-                            onClick={async () => {
-                                if (confirm('Check in this instructor?')) {
-                                    await checkInInstructor(booking.id)
-                                }
-                            }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-forest text-white hover:brightness-110 transition-all rounded-lg font-bold text-[9px] uppercase tracking-wider shadow-sm active:scale-95"
-                            title="Check In Instructor"
-                        >
-                            <UserCheck className="w-3.5 h-3.5" />
-                            Check In
-                        </button>
-                    )}
-                    {booking.instructor_checked_in_at && (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-forest/10 text-forest border border-forest/20 rounded-lg font-bold text-[9px] uppercase tracking-wider">
-                            <UserCheck className="w-3.5 h-3.5" />
-                            Checked In
-                        </div>
-                    )}
 
                     {instructor && instructor.id !== currentUserId && (
                         <StudioChatButton

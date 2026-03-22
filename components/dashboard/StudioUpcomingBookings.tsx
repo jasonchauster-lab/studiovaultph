@@ -5,7 +5,7 @@ import { Calendar, Clock, X, AlertCircle, Box, UserCheck } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import CancelBookingModal from './CancelBookingModal'
-import { cancelBookingByStudio, checkInInstructor } from '@/app/(dashboard)/studio/actions'
+import { cancelBookingByStudio } from '@/app/(dashboard)/studio/actions'
 import { formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
 import StudioChatButton from './StudioChatButton'
 import Avatar from '@/components/shared/Avatar'
@@ -154,27 +154,6 @@ export default function StudioUpcomingBookings({ bookings: initialBookings, curr
                                         {['approved', 'completed'].includes(booking.status?.toLowerCase()) ? 'Confirmed' : 'Pending'}
                                     </span>
                                     <div className="flex gap-1.5 items-center">
-                                        {['approved', 'completed'].includes(booking.status?.toLowerCase()) && !booking.instructor_checked_in_at && (
-                                            <button
-                                                onClick={async () => {
-                                                    if (confirm('Check in this instructor?')) {
-                                                        await checkInInstructor(booking.id)
-                                                    }
-                                                }}
-                                                className="w-8 h-8 bg-forest/5 text-forest border border-forest/20 rounded-full hover:bg-forest hover:text-white transition-all flex items-center justify-center shadow-tight group/check"
-                                                title="Check In Instructor"
-                                            >
-                                                <UserCheck className="w-3.5 h-3.5" />
-                                            </button>
-                                        )}
-                                        {booking.instructor_checked_in_at && (
-                                            <div 
-                                                className="w-8 h-8 bg-forest text-white rounded-full flex items-center justify-center shadow-tight"
-                                                title={isMounted ? `Instructor checked in at ${new Date(booking.instructor_checked_in_at).toLocaleTimeString()}` : "Checked in"}
-                                            >
-                                                <UserCheck className="w-3.5 h-3.5" />
-                                            </div>
-                                        )}
                                         <button
                                             onClick={() => setCancellingBooking(booking)}
                                             className="w-8 h-8 bg-white text-red-600 border border-border-grey/50 rounded-full hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-tight active:scale-90"
