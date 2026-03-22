@@ -33,7 +33,7 @@ export default function DashboardHeader({ profile, studioData, avatarUrl, onOpen
 
     return (
         <header className={clsx(
-            "fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border-b border-border-grey bg-white/95 backdrop-blur-md px-4 md:px-12",
+            "fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border-b border-burgundy/5 bg-white/95 backdrop-blur-md px-4 md:px-12",
             isScrolled ? "h-16 md:h-20 shadow-tight" : "h-[60px] md:h-28 lg:h-32"
         )}>
             <div className="max-w-7xl mx-auto h-full flex items-center justify-between gap-4">
@@ -41,7 +41,7 @@ export default function DashboardHeader({ profile, studioData, avatarUrl, onOpen
                 <div className="flex items-center gap-2 sm:gap-6">
                     <button 
                         onClick={onOpenSidebar}
-                        className="p-3 rounded-xl hover:bg-off-white text-burgundy/40 hover:text-burgundy transition-all active:scale-95"
+                        className="p-3 rounded-xl hover:bg-stone-50 text-burgundy/40 hover:text-burgundy transition-all active:scale-95"
                         aria-label="Open Menu"
                     >
                         <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -70,12 +70,12 @@ export default function DashboardHeader({ profile, studioData, avatarUrl, onOpen
 
                 {/* Right: Profile / Notifications */}
                 <div className="flex items-center gap-3 sm:gap-6">
-                    <div className="flex items-center gap-3 pl-4 border-l border-border-grey shrink-0">
+                    <div className="flex items-center gap-3 pl-4 border-l border-burgundy/5 shrink-0">
                         <div className="hidden sm:flex flex-col items-end text-right">
                             <p className="text-xs font-bold text-burgundy leading-tight mb-0.5 whitespace-nowrap">
                                 {profile?.role === 'studio' ? (studioData?.name || profile?.full_name || 'Studio') : (profile?.full_name || 'Partner')}
                             </p>
-                            <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest leading-none">
+                            <p className="text-[10px] text-burgundy/40 font-bold uppercase tracking-widest leading-none">
                                 {profile?.role === 'instructor' ? 'INSTRUCTOR' :
                                     profile?.role === 'studio' ? 'STUDIO' :
                                         profile?.role || 'USER'}

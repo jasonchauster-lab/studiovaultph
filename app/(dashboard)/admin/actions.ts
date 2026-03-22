@@ -86,46 +86,18 @@ export async function rejectPayout(payoutId: string) {
         return { error: 'Unauthorized: Admin access required.' }
     }
 
-    // 1. Update status to 'rejected' atomically
-    const { data, error } = await supabase.from('payout_requests')
-        .update({
-            status: 'rejected',
-            updated_at: new Date().toISOString()
-        })
-        .eq('id', payoutId)
-        .eq('status', 'pending')
-        .select('*')
+    // --- ATOMIC RPC ---
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: rpcResult, error: rpcError } = await supabase.rpc('reject_payout_atomic', {
+        p_payout_id: payoutId,
+        p_admin_id: user?.id,
+        p_rejection_notes: `Payout rejected by admin`
+    });
 
-    if (error) {
-        console.error('Error rejecting payout:', error)
-        return { error: `Failed to reject payout: ${error.message} (${error.code})` }
+    if (rpcError || !rpcResult?.success) {
+        console.error('Error rejecting payout (atomic):', rpcError);
+        return { error: rpcError?.message || 'Failed to reject payout securely.' };
     }
-
-    if (!data || data.length === 0) {
-        return { error: 'Payout request not found or not in pending state.' }
-    }
-
-    const payout = data[0];
-    const targetId = payout.user_id || payout.instructor_id
-    const amount = Number(payout.amount || 0)
-
-    // 2. Refund the wallet deduction since it was rejected
-    if (targetId && amount > 0) {
-        const { error: refundError } = await supabase.rpc('increment_available_balance', {
-            user_id: targetId,
-            amount: amount
-        })
-        if (refundError) {
-            console.error('Error refunding rejected payout:', refundError)
-            return { error: `Payout rejected, but failed to refund user's wallet: ${refundError.message}` }
-        }
-    }
-
-    // Fetch details for better logging
-    const { data: profile } = await supabase.from('profiles').select('full_name, email').eq('id', targetId).single()
-    const payeeName = profile?.full_name || 'Unknown'
-
-    await logAdminAction(supabase, 'REJECT_PAYOUT', 'payout_requests', payoutId, `Payout of ₱${amount} rejected for ${payeeName} (${profile?.email || 'no email'})`)
 
     revalidatePath('/admin')
     revalidatePath('/instructor/earnings')
@@ -636,127 +608,45 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
         return { error: `Failed to find booking details: ${fetchError?.message || 'Unknown'}` }
     }
 
-    // 2. Update booking status atomically to prevent double-refunds
-    const { data: updatedBooking, error: updateError } = await supabase.from('bookings')
-        .update({
-            status: 'rejected',
-            rejection_reason: reason
-        })
-        .eq('id', bookingId)
-        .in('status', ['pending', 'approved'])
-        .select('id')
+    // --- ATOMIC RPC ---
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: rpcResult, error: rpcError } = await supabase.rpc('reject_booking_atomic', {
+        p_booking_id: bookingId,
+        p_admin_id: user?.id,
+        p_reason: reason,
+        p_with_refund: withRefund
+    });
 
-    if (updateError) {
-        console.error('Error rejecting booking:', updateError)
-        return { error: 'Failed to reject booking' }
+    if (rpcError || !rpcResult?.success) {
+        console.error('Error rejecting booking (atomic):', rpcError);
+        return { error: rpcError?.message || 'Failed to reject booking securely.' };
     }
 
-    if (!updatedBooking || updatedBooking.length === 0) {
-        return { error: 'Booking already processed or not eligible for rejection.' }
-    }
-
-    // 3. Release Slots
-    const allSlotIds = [booking.slot_id, ...(booking.booked_slot_ids || [])].filter(Boolean)
-    if (allSlotIds.length > 0) {
-        await supabase.from('slots')
-            .update({ is_available: true })
-            .in('id', allSlotIds)
-    }
-
-    // 3.5 Process Refund if requested
-    let hasRefund = withRefund;
-
+    // --- NOTIFICATIONS ---
     const client = first(booking.client);
     const slots = first(booking.slots);
-    const instructor = first(booking.instructor);
     const studios = first(slots?.studios);
-    const studioOwner = first((studios as any)?.owner);
-    const sessionInfo = slots ? `on ${formatManilaDateStr(slots.date)} at ${formatTo12Hour(slots.start_time)}` : 'Unknown Time';
-
-    if (hasRefund && booking.client_id) {
-        const breakdown = booking.price_breakdown as any;
-        const walletDeduction = Number(breakdown?.wallet_deduction || 0);
-        const totalPrice = Number(booking.total_price || 0);
-        const refundAmount = totalPrice + walletDeduction;
-
-        if (refundAmount > 0) {
-            const { error: refundError } = await supabase.rpc('increment_available_balance', {
-                user_id: booking.client_id,
-                amount: refundAmount
-            })
-            if (refundError) {
-                console.error('Error processing refund during rejection:', refundError)
-                return { error: `Booking rejected, but refund failed: ${refundError.message}` }
-            }
-
-            // Log the refund transaction
-            await supabase.from('wallet_top_ups').insert({
-                user_id: booking.client_id,
-                amount: refundAmount,
-                status: 'approved', // instantly approved
-                type: 'refund',
-                admin_notes: `Refund for rejected studio booking`
-            })
-        } else {
-            hasRefund = false;
-        }
-    }
-
-    // 4. Send Rejection Email to Client
-
-    // --- AUTO-REMOVAL OF AVAILABILITY START ---
-    // If an instructor's studio rental is rejected, remove the auto-created availability
-    if (booking.client_id === booking.instructor_id) {
-        try {
-            const dateStr = slots?.date;
-            const timeStr = slots?.start_time;
-
-            await supabase
-                .from('instructor_availability')
-                .delete()
-                .eq('instructor_id', booking.instructor_id)
-                .eq('date', dateStr)
-                .eq('start_time', timeStr);
-
-            revalidatePath('/instructor/schedule');
-        } catch (availError) {
-            console.error('Failed to remove auto-availability on rejection:', availError);
-        }
-    }
-    // --- AUTO-REMOVAL OF AVAILABILITY END ---
-
-    if (!client?.email) {
-        console.error('Missing client email for rejection:', { client, booking });
-        return { error: `Booking rejected, but failed to send email: Client email not found. (ID: ${bookingId})` };
-    }
-
     const date = formatManilaDateStr(slots?.date);
     const time = formatTo12Hour(slots?.start_time);
     const studioName = studios?.name || 'Pilates Studio';
 
-    const emailResult = await sendEmail({
-        to: client.email,
-        subject: `Update on your booking at ${studioName}`,
-        react: BookingNotificationEmail({
-            recipientName: client.full_name || 'Valued Client',
-            bookingType: 'Booking Rejected',
-            studioName: studioName,
-            date,
-            time,
-            rejectionReason: reason,
-            hasRefund,
-            equipment: (booking.price_breakdown as any)?.equipment,
-            quantity: (booking.price_breakdown as any)?.quantity
-        })
-    });
-
-    if (!emailResult.success) {
-        console.error('Email send failed in rejectBooking:', emailResult.error);
-        // We'll still return success for the rejection itself, but maybe a warning?
-        // Actually, returning success: true but with a message is better.
+    if (client?.email) {
+        await sendEmail({
+            to: client.email,
+            subject: `Update on your booking at ${studioName}`,
+            react: BookingNotificationEmail({
+                recipientName: client.full_name || 'Valued Client',
+                bookingType: 'Booking Rejected',
+                studioName: studioName,
+                date,
+                time,
+                rejectionReason: reason,
+                hasRefund: withRefund,
+                equipment: (booking.price_breakdown as any)?.equipment,
+                quantity: (booking.price_breakdown as any)?.quantity
+            })
+        });
     }
-
-    await logAdminAction(supabase, 'REJECT_BOOKING', 'bookings', bookingId, `Booking rejected for client ${client?.full_name || 'Unknown'} (${client?.email || 'no email'}) — Instructor: ${instructor?.full_name || 'N/A'} (${instructor?.email || 'no email'}) at ${studios?.name || 'Unknown Studio'} (Owner: ${studioOwner?.full_name || 'N/A'}, ${studioOwner?.email || 'no email'}) ${sessionInfo} — Reason: ${reason || 'None'}, Refund: ${hasRefund ? 'Yes' : 'No'}`)
 
     revalidatePath('/admin')
     revalidatePath('/studio')
@@ -768,169 +658,84 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
 export async function getAdminAnalytics(startDate?: string, endDate?: string) {
     try {
         const supabase = createAdminClient()
-        // No verifyAdmin needed here as createAdminClient is already protected by the master key requirement
-        // and its usage is restricted to administrative dashboard context.
+        
+        // 1. Fetch aggregated stats from the new RPC
+        const { data: stats, error: rpcError } = await supabase.rpc('get_admin_dashboard_stats', {
+            p_start_date: startDate ? startDate.split('T')[0] : '1970-01-01',
+            p_end_date: endDate ? endDate.split('T')[0] : '9999-12-31'
+        })
 
-        // 1. Fetch all approved/completed bookings for the chart and stats
-        let bookingsQuery = supabase
-            .from('bookings')
-            .select(`
-                id,
-                total_price,
-                created_at,
-                price_breakdown,
-                status,
-                client:profiles!client_id(full_name, email),
-                slots!inner(
-                    date,
-                    start_time,
-                    studios(
-                        name,
-                        owner:profiles!owner_id(email)
-                    )
-                ),
-                instructor:profiles!instructor_id(full_name, email)
-            `)
-            .in('status', ['approved', 'completed', 'cancelled_charged'])
-
-        if (startDate) bookingsQuery = bookingsQuery.gte('slots.date', startDate.split('T')[0])
-        if (endDate) bookingsQuery = bookingsQuery.lte('slots.date', endDate.split('T')[0])
-
-        const { data: bookings, error: bookingsError } = await bookingsQuery
-        if (bookingsError) {
-            console.error('Analytics: Bookings fetch error details:', bookingsError)
-            return { error: `Database Error (Bookings): ${bookingsError.message} (${bookingsError.code || 'NO_CODE'})` }
-        }
-        console.log(`Analytics: Successfully fetched ${bookings?.length || 0} bookings.`)
-
-        // 2. Fetch all completed payouts
-        let payoutsQuery = supabase
-            .from('payout_requests')
-            .select(`
-                id,
-                amount, 
-                created_at, 
-                instructor_id, 
-                studio_id, 
-                user_id,
-                instructor:profiles!instructor_id(full_name, email),
-                user:profiles!user_id(full_name, email),
-                studios(name, profiles!owner_id(full_name, email))
-            `)
-            .eq('status', 'paid')
-
-        if (startDate) payoutsQuery = payoutsQuery.gte('created_at', startDate)
-        if (endDate) payoutsQuery = payoutsQuery.lte('created_at', endDate)
-
-        const { data: payouts, error: payoutsError } = await payoutsQuery
-        if (payoutsError) {
-            console.error('Analytics: Payouts fetch error:', payoutsError)
+        if (rpcError) {
+            console.error('Analytics: RPC error:', rpcError)
+            return { error: `Database Error (Aggregation): ${rpcError.message}` }
         }
 
-        const totalPayouts = (payouts || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
-        console.log(`Analytics: Successfully fetched ${payouts?.length || 0} payouts.`)
+        // 2. Fetch details for transactions list (Capped for performance)
+        const [bookingsRes, payoutsRes, topUpsRes] = await Promise.all([
+            supabase.from('bookings')
+                .select(`
+                    id, total_price, created_at, price_breakdown, status,
+                    client:profiles!client_id(full_name, email),
+                    slots!inner(date, start_time, studios(name, owner:profiles!owner_id(email))),
+                    instructor:profiles!instructor_id(full_name, email)
+                `)
+                .in('status', ['approved', 'completed', 'cancelled_charged'])
+                .gte('slots.date', startDate ? startDate.split('T')[0] : '1970-01-01')
+                .lte('slots.date', endDate ? endDate.split('T')[0] : '9999-12-31')
+                .order('created_at', { ascending: false })
+                .limit(100),
+            supabase.from('payout_requests')
+                .select('id, amount, created_at, instructor:profiles!instructor_id(full_name, email), user:profiles!user_id(full_name, email), studios(name, profiles!owner_id(full_name, email))')
+                .eq('status', 'paid')
+                .gte('created_at', startDate || '1970-01-01')
+                .lte('created_at', endDate || new Date().toISOString())
+                .limit(100),
+            supabase.from('wallet_top_ups')
+                .select('id, amount, created_at, profiles:profiles!user_id(full_name, email)')
+                .eq('status', 'completed')
+                .eq('type', 'top_up')
+                .gte('created_at', startDate || '1970-01-01')
+                .lte('created_at', endDate || new Date().toISOString())
+                .limit(100)
+        ])
 
-        // 2.5 Fetch successful wallet top-ups
-        const { data: topUps, error: topUpsError } = await supabase
-            .from('wallet_top_ups')
-            .select('amount, created_at, profiles:profiles!user_id(full_name, email)')
-            .eq('status', 'completed')
-            .eq('type', 'top_up')
-            .gte('created_at', startDate || '1970-01-01')
-            .lte('created_at', endDate || new Date().toISOString())
-
-        if (topUpsError) {
-            console.error('Analytics: Top-ups fetch error:', topUpsError)
-        }
-        console.log(`Analytics: Successfully fetched ${topUps?.length || 0} top-ups.`)
-
-        // Helper to extract first item if array (Supabase relationship safeguard)
         const getFirst = (val: any) => Array.isArray(val) ? val[0] : val;
 
-        // 3. Aggregate statistics and prepare transaction list
-        const stats = (bookings || []).reduce((acc: any, booking: any) => {
-            const slots = getFirst(booking.slots)
+        // 3. Transform data into a unified transaction list
+        const transactions: any[] = []
+
+        // Bookings
+        bookingsRes.data?.forEach((b: any) => {
+            const slots = getFirst(b.slots)
             const studio = getFirst(slots?.studios)
-            const client = getFirst(booking.client)
-            const instructor = getFirst(booking.instructor)
-
-            const sessionDate = slots?.date || (booking.created_at ? booking.created_at.split('T')[0] : new Date().toISOString().split('T')[0])
-
-            const breakdown = booking.price_breakdown || {}
-            const platformFee = Number(breakdown.service_fee || 0)
-            const instructorFee = Number(breakdown.instructor_fee || 0)
-            const studioFee = Number(breakdown.studio_fee || 0)
-            let total = platformFee + instructorFee + studioFee
-
-            if (total === 0) {
-                total = Number(booking.total_price || 0)
-                const fallbackPlatform = total * 0.2
-                const fallbackInstructor = total * 0.5
-                const fallbackStudio = total * 0.3
-                acc.totalRevenue += total
-                acc.totalPlatformFees += fallbackPlatform
-                acc.totalStudioFees += fallbackStudio
-                acc.totalInstructorFees += fallbackInstructor
-
-                if (!acc.daily[sessionDate]) {
-                    acc.daily[sessionDate] = { date: sessionDate, revenue: 0, platformFees: 0, bookings: 0 }
-                }
-                acc.daily[sessionDate].revenue += total
-                acc.daily[sessionDate].platformFees += fallbackPlatform
-                acc.daily[sessionDate].bookings += 1
-            } else {
-                acc.totalRevenue += total
-                acc.totalPlatformFees += platformFee
-                acc.totalStudioFees += studioFee
-                acc.totalInstructorFees += instructorFee
-
-                if (!acc.daily[sessionDate]) {
-                    acc.daily[sessionDate] = { date: sessionDate, revenue: 0, platformFees: 0, bookings: 0 }
-                }
-                acc.daily[sessionDate].revenue += total
-                acc.daily[sessionDate].platformFees += platformFee
-                acc.daily[sessionDate].bookings += 1
-            }
-
-            acc.bookingCount += 1
-
-            acc.transactions.push({
-                id: booking.id,
-                date: slots ? `${slots.date} ${slots.start_time}` : booking.created_at,
+            const client = getFirst(b.client)
+            const instructor = getFirst(b.instructor)
+            const breakdown = b.price_breakdown || {}
+            
+            transactions.push({
+                id: b.id,
+                date: slots ? `${slots.date} ${slots.start_time}` : b.created_at,
                 type: 'Booking',
-                status: booking.status,
+                status: b.status,
                 client: client?.full_name || '-',
                 client_email: client?.email || '-',
                 studio: studio?.name || '-',
-                studio_email: getFirst(studio?.owner)?.email || '-',
                 instructor: instructor?.full_name || '-',
-                instructor_email: instructor?.email || '-',
-                total_amount: total,
-                platform_fee: (total === 0 ? (Number(booking.total_price || 0) * 0.2) : platformFee),
-                studio_fee: (total === 0 ? (Number(booking.total_price || 0) * 0.3) : studioFee),
-                instructor_fee: (total === 0 ? (Number(booking.total_price || 0) * 0.5) : instructorFee)
+                total_amount: Number(breakdown.service_fee || 0) + Number(breakdown.instructor_fee || 0) + Number(breakdown.studio_fee || 0) || Number(b.total_price || 0),
+                platform_fee: Number(breakdown.service_fee || 0),
+                studio_fee: Number(breakdown.studio_fee || 0),
+                instructor_fee: Number(breakdown.instructor_fee || 0)
             })
-
-            return acc
-        }, {
-            totalRevenue: 0,
-            totalPlatformFees: 0,
-            totalStudioFees: 0,
-            totalInstructorFees: 0,
-            totalPayouts: totalPayouts,
-            bookingCount: 0,
-            daily: {},
-            transactions: []
         })
 
-        // 4. Add payouts to transactions
-        payouts?.forEach((p: any) => {
+        // Payouts
+        payoutsRes.data?.forEach((p: any) => {
             const instructor = getFirst(p.instructor)
             const user = getFirst(p.user)
             const studio = getFirst(p.studios)
             const studioOwner = getFirst(studio?.profiles)
 
-            stats.transactions.push({
+            transactions.push({
                 id: `payout-${p.id}`,
                 date: p.created_at,
                 type: 'Payout',
@@ -947,10 +752,10 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
             })
         })
 
-        // 4.5 Add top-ups to transactions
-        topUps?.forEach((t: any) => {
+        // Top-ups
+        topUpsRes.data?.forEach((t: any) => {
             const profile = getFirst(t.profiles)
-            stats.transactions.push({
+            transactions.push({
                 id: `topup-${t.id}`,
                 date: t.created_at,
                 type: 'Top-up',
@@ -965,20 +770,15 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
                 studio_fee: 0,
                 instructor_fee: 0
             })
-            // Optionally add top-ups to revenue if the user considers them revenue
-            // stats.totalRevenue += Number(t.amount) 
         })
 
-        // 5. Sort transactions by date descending
-        stats.transactions.sort((a: any, b: any) => {
-            const dateA = new Date(a.date).getTime()
-            const dateB = new Date(b.date).getTime()
-            return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA)
-        })
+        // Sort by date descending
+        transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
         return {
             ...stats,
-            dailyData: Object.values(stats.daily).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+            transactions,
+            dailyData: stats.daily || []
         }
     } catch (err: any) {
         console.error('UNHANDLED ANALYTICS ERROR:', err)

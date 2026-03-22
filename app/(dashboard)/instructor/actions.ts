@@ -11,202 +11,33 @@ import { formatManilaDate, formatManilaTime, toManilaDateStr, toManilaTimeString
 export async function getInstructorEarnings(startDate?: string, endDate?: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+
     if (!user) return { error: 'Unauthorized' }
 
+    const { data, error } = await supabase.rpc('get_instructor_earnings_v3', {
+        p_instructor_id: user.id,
+        p_start_date: startDate || null,
+        p_end_date: endDate || null
+    })
 
-
-    const { data: profile } = await supabase.from('profiles').select('available_balance, pending_balance').eq('id', user.id).single()
-
-    let bookingsQuery = supabase
-        .from('bookings')
-        .select(`
-            *, 
-            price_breakdown, 
-            status, 
-            created_at,
-            updated_at,
-            client:profiles!client_id(full_name),
-            slots!inner(date, start_time, studios(name))
-        `)
-        .eq('instructor_id', user.id)
-        .or('status.in.(approved,completed,cancelled_charged,cancelled_refunded),payment_status.eq.submitted')
-
-    if (startDate) bookingsQuery = bookingsQuery.gte('slots.date', startDate)
-    if (endDate) bookingsQuery = bookingsQuery.lte('slots.date', endDate)
-
-    const { data: bookings, error: bookingError } = await bookingsQuery
-
-    if (bookingError) {
-        console.error('Error fetching earnings (bookings):', bookingError)
-        return { error: `Bookings Fetch Error: ${bookingError.message || JSON.stringify(bookingError)}` }
+    if (error) {
+        console.error('Error fetching instructor earnings via RPC:', error)
+        return { error: `Earnings Fetch Error: ${error.message}` }
     }
-
-    const first = (val: any) => Array.isArray(val) ? val[0] : val
-
-    let grossEarned = 0;
-    let totalCompensation = 0; // Received from Studio Displacement Fees
-    let totalPenalty = 0; // Paid as late cancellation penalties
-    const recentTransactions: any[] = [];
-
-    bookings?.forEach(booking => {
-        const breakdown = booking.price_breakdown as any;
-        const instructorFee = Number(breakdown?.instructor_fee || 0);
-        const penaltyProcessed = breakdown?.penalty_processed === true;
-        const penaltyAmount = Number(breakdown?.penalty_amount || 0);
-        const initiator = breakdown?.refund_initiator;
-
-        const slot = first(booking.slots);
-        const isRefunded = booking.status === 'cancelled_refunded';
-        const isRealized = ['approved', 'completed', 'cancelled_charged'].includes(booking.status) || (booking.status === 'pending' && booking.payment_status === 'submitted');
-
-        if (isRealized || isRefunded) {
-            if (isRealized) grossEarned += instructorFee;
-
-            const studioName = slot?.studios?.name;
-            const txDate = slot?.date && slot?.start_time ? `${slot.date}T${slot.start_time}+08:00` : booking.created_at;
-            const isLateCancel = booking.status === 'cancelled_charged';
-
-            let txType = 'Booking';
-            if (isRefunded) txType = 'Booking (Refunded)';
-            else if (isLateCancel) txType = 'Booking (Late Cancel)';
-            else if (booking.payment_status === 'submitted' && booking.status === 'pending') txType = 'Booking (Verification)';
-
-            recentTransactions.push({
-                date: txDate,
-                type: txType,
-                status: booking.status,
-                client: (booking.client as any)?.full_name,
-                studio: studioName,
-                total_amount: isRefunded ? 0 : instructorFee,
-                session_date: slot?.date,
-                session_time: slot?.start_time,
-                details: isRefunded ? `REFUNDED: ${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}` :
-                    isLateCancel ? `CHARGED: ${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}` :
-                        `${breakdown?.quantity || 1} x ${breakdown?.equipment || 'Session'}`
-            });
-        }
-
-        // 2. Compensation (Studio cancelled late)
-        if (penaltyProcessed && initiator === 'studio') {
-            totalCompensation += penaltyAmount;
-            recentTransactions.push({
-                date: booking.updated_at || booking.created_at,
-                type: 'Cancellation Compensation',
-                status: 'processed',
-                details: 'Displacement fee from studio',
-                total_amount: penaltyAmount,
-                session_date: slot?.date,
-                session_time: slot?.start_time,
-            });
-        }
-
-        // 3. Penalty (Instructor cancelled late)
-        if (penaltyProcessed && initiator === 'instructor') {
-            totalPenalty += penaltyAmount;
-            recentTransactions.push({
-                date: booking.updated_at || booking.created_at,
-                type: 'Cancellation Penalty',
-                status: 'processed',
-                details: 'Late cancellation penalty',
-                total_amount: -penaltyAmount,
-                session_date: slot?.date,
-                session_time: slot?.start_time,
-            });
-        }
-    });
-
-    // 2. Calculate Total Withdrawn & Pending Payouts
-    let payoutsQuery = supabase
-        .from('payout_requests')
-        .select('amount, status, created_at, payment_method')
-        .eq('user_id', user.id)
-
-    if (startDate) payoutsQuery = payoutsQuery.gte('created_at', `${startDate}T00:00:00.000Z`)
-    if (endDate) payoutsQuery = payoutsQuery.lte('created_at', `${endDate}T23:59:59.999Z`)
-
-    const { data: payouts, error: payoutError } = await payoutsQuery
-
-    if (payoutError) {
-        console.error('Error fetching payouts:', payoutError)
-        return { error: `Payouts Fetch Error: ${payoutError.message || JSON.stringify(payoutError)}` }
-    }
-
-    let totalWithdrawn = 0;
-    let pendingPayouts = 0;
-
-    payouts?.forEach(payout => {
-        if (payout.status === 'paid' || payout.status === 'processed') {
-            totalWithdrawn += payout.amount;
-            recentTransactions.push({
-                date: payout.created_at,
-                type: 'Payout',
-                status: payout.status,
-                total_amount: -payout.amount,
-                details: `Withdrawal via ${payout.payment_method}`
-            });
-        } else if (payout.status === 'pending') {
-            pendingPayouts += payout.amount;
-            recentTransactions.push({
-                date: payout.created_at,
-                type: 'Payout Request',
-                status: 'pending',
-                total_amount: -payout.amount,
-                details: `Withdrawal via ${payout.payment_method}`
-            });
-        }
-    });
-
-    const netEarnings = grossEarned + totalCompensation - totalPenalty;
-
-    // 4. Get Wallet Top-ups & Admin Adjustments
-    let walletQuery = supabase
-        .from('wallet_top_ups')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false });
-
-    if (startDate) walletQuery = walletQuery.gte('created_at', `${startDate}T00:00:00.000Z`)
-    if (endDate) walletQuery = walletQuery.lte('created_at', `${endDate}T23:59:59.999Z`)
-
-    const { data: walletActions } = await walletQuery;
-
-    walletActions?.forEach(wa => {
-        const isAdjustment = wa.type === 'admin_adjustment';
-        recentTransactions.push({
-            date: wa.processed_at || wa.updated_at || wa.created_at,
-            type: isAdjustment ? 'Direct Adjustment' : 'Wallet Top-Up',
-            status: 'completed',
-            total_amount: wa.amount,
-            details: isAdjustment ? (wa.admin_notes || 'Manual balance adjustment') : 'Gcash/Bank Top-up'
-        });
-    });
-
-    recentTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    const availableBalance = Number(profile?.available_balance || 0);
-    const dbPendingBalance = Number(profile?.pending_balance || 0);
-
-    // Calculate "Virtual" Pending Balance: DB pending + any approved bookings that aren't completed yet
-    let virtualPending = dbPendingBalance;
-    bookings?.forEach(b => {
-        if (b.status === 'approved') {
-            const breakdown = b.price_breakdown as any;
-            virtualPending += Number(breakdown?.instructor_fee || 0);
-        }
-    });
 
     return {
-        totalEarned: grossEarned + totalCompensation,
-        totalCompensation,
-        totalPenalty,
-        netEarnings,
-        totalWithdrawn,
-        pendingPayouts,
-        availableBalance,
-        pendingBalance: virtualPending,
-        recentTransactions,
-        bookingsCount: bookings?.filter(b => ['approved', 'completed', 'cancelled_charged'].includes(b.status) || b.payment_status === 'submitted')?.length || 0
+        ...data,
+        // Ensure numbers are numbers and handle potentially missing fields
+        totalEarned: Number(data.totalEarned || 0),
+        totalWithdrawn: Number(data.totalWithdrawn || 0),
+        pendingPayouts: Number(data.pendingPayouts || 0),
+        availableBalance: Number(data.availableBalance || 0),
+        pendingBalance: Number(data.pendingBalance || 0),
+        totalCompensation: Number(data.totalCompensation || 0),
+        totalPenalty: Number(data.totalPenalty || 0),
+        netEarnings: Number(data.netEarnings || 0),
+        recentTransactions: data.recentTransactions || [],
+        payouts: data.payouts || []
     };
 }
 
@@ -235,32 +66,20 @@ export async function requestPayout(amount: number, method: string, details: any
         return { error: `Insufficient funds. Available: ₱${availableBalance}` }
     }
 
-    // 1b. Deduct from profile right away
-    const { error: deductError } = await supabase.rpc('deduct_available_balance', {
-        user_id: user.id,
-        amount
-    })
+    // 1b. Process Atomic Payout Request
+    const { data: result, error: rpcError } = await supabase.rpc('request_payout_atomic_v2', {
+        p_user_id: user.id,
+        p_amount: amount,
+        p_method: method,
+        p_account_name: details.accountName,
+        p_account_number: details.accountNumber,
+        p_bank_name: method === 'bank' ? details.bankName : undefined,
+        p_studio_id: null
+    });
 
-    if (deductError) {
-        return { error: 'Failed to process balance deduction.' };
-    }
-
-    // 2. Create Payout Request
-    const { error } = await supabase
-        .from('payout_requests')
-        .insert({
-            user_id: user.id,
-            amount,
-            payment_method: method,
-            account_name: details.accountName,
-            account_number: details.accountNumber,
-            bank_name: method === 'bank' ? details.bankName : undefined,
-            status: 'pending'
-        })
-
-    if (error) {
-        console.error('Payout request error:', error)
-        return { error: `Failed to submit payout request: ${error.message} (code: ${error.code})` }
+    if (rpcError || !result?.success) {
+        console.error('Payout RPC error:', rpcError || result?.error);
+        return { error: rpcError?.message || result?.error || 'Failed to process payout request.' };
     }
 
     revalidatePath('/instructor/earnings')
@@ -657,104 +476,22 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
         return { error: 'Booking is already cancelled or rejected.' }
     }
 
-    const slotData = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots
-    const startTimeStr = slotData?.start_time
-    const dateStr = slotData?.date
-    const approvedAtStr = booking.approved_at
-    const sessionStart = new Date(`${dateStr}T${startTimeStr}+08:00`)
-    const now = new Date()
-
-    const diffInHours = (sessionStart.getTime() - now.getTime()) / (1000 * 60 * 60)
-    const isLateCancellation = diffInHours < 24
-
-    // Phase 7: 15-minute grace period check (Strictly from approved_at)
-    // If approvedAt is null, the grace period is inherently active (unlocked booking)
-    const approvedAt = approvedAtStr ? new Date(approvedAtStr) : null
-    const isWithinGracePeriod = !approvedAt || (now.getTime() - approvedAt.getTime() <= 15 * 60 * 1000)
-
+    const slotData = Array.isArray(booking.slots) ? (booking.slots as any)[0] : booking.slots;
     const isStudioRental = booking.client_id === booking.instructor_id
     const studio = (slotData as any)?.studios
 
-    // 2. Mark as cancelled atomically to prevent double refunds
-    const breakdown = booking.price_breakdown as any;
-    const walletDeduction = Number(breakdown?.wallet_deduction || 0);
-    const totalPrice = Number(booking.total_price || 0);
-    const refundAmount = totalPrice + walletDeduction;
+    // 2. Mark as cancelled atomically using RPC
+    const { data: result, error: rpcError } = await supabase.rpc('cancel_booking_atomic', {
+        p_booking_id: bookingId,
+        p_reason: reason,
+        p_cancelled_by: user.id
+    });
 
-    let penaltyAmount = 0;
-    let penaltyProcessed = false;
-
-    if (isLateCancellation && !isWithinGracePeriod) {
-        penaltyAmount = Number(breakdown?.studio_fee || 0)
+    if (rpcError || !result?.success) {
+        console.error('Instructor cancel RPC error:', rpcError || result?.error);
+        return { error: rpcError?.message || result?.error || 'Failed to cancel booking.' };
     }
 
-    const { data: updatedBooking, error: updateError } = await supabase.from('bookings').update({
-        status: 'cancelled_refunded',
-        cancel_reason: reason,
-        cancelled_by: user.id,
-        price_breakdown: {
-            ...breakdown,
-            refunded_amount: refundAmount,
-            penalty_amount: penaltyAmount,
-            refund_initiator: 'instructor'
-        }
-    })
-        .eq('id', bookingId)
-        .in('status', ['approved', 'pending'])
-        .select('id')
-
-    if (updateError) {
-        console.error('Instructor cancel update error:', updateError)
-        return { error: 'Failed to update booking status.' }
-    }
-
-    if (!updatedBooking || updatedBooking.length === 0) {
-        return { error: 'Booking already cancelled or not eligible for cancellation.' }
-    }
-
-    // 3. Process 100% Refund to Client (in Studio Rental case, client IS the instructor)
-    if (refundAmount > 0) {
-        const { error: refundError } = await supabase.rpc('increment_available_balance', {
-            user_id: booking.client_id,
-            amount: refundAmount
-        })
-        if (refundError) {
-            console.error('Instructor cancel refund error:', refundError)
-            return { error: `Cancellation processed, but refund failed: ${refundError.message}` }
-        }
-    }
-
-    // 4. Penalty Logic (Apply to ALL cancellations < 24h, EXCEPT during grace period)
-    if (isLateCancellation && !isWithinGracePeriod) {
-        if (penaltyAmount > 0 && studio?.owner_id) {
-            const { error: penaltyError } = await supabase.rpc('transfer_balance', {
-                p_from_id: user.id,
-                p_to_id: studio.owner_id,
-                p_amount: penaltyAmount
-            })
-            if (penaltyError) {
-                console.error('Penalty transfer error:', penaltyError)
-                return { error: `Refund processed, but penalty transfer failed: ${penaltyError.message}` }
-            }
-            penaltyProcessed = true
-        }
-    }
-
-    // Finalize breakdown fields that might have changed
-    await supabase.from('bookings').update({
-        price_breakdown: {
-            ...breakdown,
-            refunded_amount: refundAmount,
-            penalty_amount: penaltyAmount,
-            penalty_processed: penaltyProcessed,
-            refund_initiator: 'instructor'
-        }
-    }).eq('id', bookingId)
-
-    const allSlotIds = [booking.slot_id, ...(booking.booked_slot_ids || [])].filter(Boolean)
-    if (allSlotIds.length > 0) {
-        await supabase.from('slots').update({ is_available: true }).in('id', allSlotIds)
-    }
 
     // 5. Send Emails
     const client = Array.isArray(booking.client) ? booking.client[0] : booking.client

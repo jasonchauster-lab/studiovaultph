@@ -71,13 +71,13 @@ const ACTION_CATEGORIES: Record<string, string> = {
 }
 
 const CATEGORY_BADGE: Record<string, string> = {
-    Approvals: 'bg-green-100 text-green-700',
-    Bookings: 'bg-blue-100 text-blue-700',
-    Payouts: 'bg-amber-100 text-amber-700',
-    Wallet: 'bg-purple-100 text-purple-700',
-    Partners: 'bg-orange-100 text-orange-700',
-    Finance: 'bg-rose-100 text-rose-700',
-    Other: 'bg-gray-100 text-gray-600',
+    Approvals: 'bg-green-50 text-green-700 border-green-100',
+    Bookings: 'bg-blue-50 text-blue-700 border-blue-100',
+    Payouts: 'bg-amber-50 text-amber-700 border-amber-100',
+    Wallet: 'bg-purple-50 text-purple-700 border-purple-100',
+    Partners: 'bg-orange-50 text-orange-700 border-orange-100',
+    Finance: 'bg-rose-50 text-rose-700 border-rose-100',
+    Other: 'bg-stone-100 text-stone-600 border-stone-200',
 }
 
 function getAdmin(log: Log): { name: string; email: string } {
@@ -256,46 +256,46 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
                 <div className="glass-card p-8 group hover:scale-[1.02] transition-all duration-500">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2.5 bg-sage/10 rounded-xl group-hover:bg-sage/20 transition-colors">
-                            <Activity className="w-5 h-5 text-sage" />
+                        <div className="p-2.5 bg-forest/10 rounded-xl group-hover:bg-forest transition-colors">
+                            <Activity className="w-5 h-5 text-forest group-hover:text-white transition-colors" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Velocity</span>
+                        <span className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em]">Velocity</span>
                     </div>
-                    <p className="font-serif text-4xl text-charcoal">{thisWeek.length}</p>
-                    <p className="text-[10px] text-charcoal/50 font-bold uppercase tracking-widest mt-2">ACTIONS THIS WEEK</p>
+                    <p className="font-serif text-4xl text-burgundy">{thisWeek.length}</p>
+                    <p className="text-[10px] text-burgundy/50 font-black uppercase tracking-widest mt-2">{thisWeek.length === 1 ? 'ACTION' : 'ACTIONS'} THIS WEEK</p>
                 </div>
 
                 <div className="glass-card p-8 group hover:scale-[1.02] transition-all duration-500">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2.5 bg-green-50 rounded-xl group-hover:bg-green-100 transition-colors">
-                            <CheckCircle className="w-5 h-5 text-green-600" />
+                        <div className="p-2.5 bg-green-50 rounded-xl group-hover:bg-green-600 transition-colors">
+                            <CheckCircle className="w-5 h-5 text-green-600 group-hover:text-white transition-colors" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Success Rate</span>
+                        <span className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em]">Success Rate</span>
                     </div>
                     <p className="font-serif text-4xl text-green-600">{totalApprovals}</p>
-                    <p className="text-[10px] text-charcoal/50 font-bold uppercase tracking-widest mt-2">TOTAL APPROVALS</p>
+                    <p className="text-[10px] text-burgundy/50 font-black uppercase tracking-widest mt-2">TOTAL APPROVALS</p>
                 </div>
 
                 <div className="glass-card p-8 group hover:scale-[1.02] transition-all duration-500">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2.5 bg-red-50 rounded-xl group-hover:bg-red-100 transition-colors">
-                            <XCircle className="w-5 h-5 text-red-600" />
+                        <div className="p-2.5 bg-burgundy/10 rounded-xl group-hover:bg-burgundy transition-colors">
+                            <XCircle className="w-5 h-5 text-burgundy group-hover:text-white transition-colors" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Intercepts</span>
+                        <span className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em]">Intercepts</span>
                     </div>
-                    <p className="font-serif text-4xl text-red-600">{totalRejections}</p>
-                    <p className="text-[10px] text-charcoal/50 font-bold uppercase tracking-widest mt-2">TOTAL REJECTIONS</p>
+                    <p className="font-serif text-4xl text-burgundy">{totalRejections}</p>
+                    <p className="text-[10px] text-burgundy/50 font-black uppercase tracking-widest mt-2">TOTAL REJECTIONS</p>
                 </div>
 
                 <div className="glass-card p-8 group hover:scale-[1.02] transition-all duration-500">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2.5 bg-gold/10 rounded-xl group-hover:bg-gold/20 transition-colors">
-                            <TrendingUp className="w-5 h-5 text-gold" />
+                        <div className="p-2.5 bg-amber-400/10 rounded-xl group-hover:bg-amber-400 transition-colors">
+                            <TrendingUp className="w-5 h-5 text-amber-600 group-hover:text-white transition-colors" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">Lead Admin</span>
+                        <span className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em]">Lead Admin</span>
                     </div>
-                    <p className="text-xl font-serif text-charcoal truncate">{topAdmin?.[0] ?? '—'}</p>
-                    <p className="text-[10px] text-charcoal/50 font-bold uppercase tracking-widest mt-2">{topAdmin?.[1] ?? 0} OPERATIONS COMPLETED</p>
+                    <p className="text-xl font-serif text-burgundy truncate">{topAdmin?.[0] ?? '—'}</p>
+                    <p className="text-[10px] text-burgundy/50 font-black uppercase tracking-widest mt-2">{topAdmin?.[1] ?? 0} OPERATIONS COMPLETED</p>
                 </div>
             </div>
 
@@ -303,13 +303,13 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
             <div className="flex gap-4 bg-white/40 backdrop-blur-md p-1.5 rounded-2xl border border-white/50 w-fit">
                 <button
                     onClick={() => { setActiveSubtab('activity'); resetPage() }}
-                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all duration-500 uppercase ${activeSubtab === 'activity' ? 'bg-forest text-white shadow-lg' : 'text-charcoal/40 hover:text-charcoal hover:bg-white/50'}`}
+                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all duration-500 uppercase ${activeSubtab === 'activity' ? 'bg-forest text-white shadow-lg' : 'text-burgundy/40 hover:text-burgundy hover:bg-white/50'}`}
                 >
                     Administrative Logs
                 </button>
                 <button
                     onClick={() => { setActiveSubtab('transactions'); resetPage() }}
-                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all duration-500 uppercase ${activeSubtab === 'transactions' ? 'bg-forest text-white shadow-lg' : 'text-charcoal/40 hover:text-charcoal hover:bg-white/50'}`}
+                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all duration-500 uppercase ${activeSubtab === 'transactions' ? 'bg-forest text-white shadow-lg' : 'text-burgundy/40 hover:text-burgundy hover:bg-white/50'}`}
                 >
                     Financial Archives
                 </button>
@@ -319,34 +319,34 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
             <div className="glass-card overflow-hidden">
 
                 {/* Header */}
-                <div className="flex flex-wrap items-center justify-between gap-6 p-8 border-b border-cream-100">
+                <div className="flex flex-wrap items-center justify-between gap-6 p-8 border-b border-stone-100 bg-stone-50/30">
                     <div>
-                        <h2 className="text-sm font-black tracking-[0.2em] text-charcoal uppercase flex items-center gap-3">
-                            {activeSubtab === 'activity' ? <Clock className="w-4 h-4 text-sage" /> : <TrendingUp className="w-4 h-4 text-sage" />}
+                        <h2 className="text-[11px] font-black tracking-[0.3em] text-burgundy uppercase flex items-center gap-3">
+                            {activeSubtab === 'activity' ? <Clock className="w-4 h-4 text-forest" /> : <TrendingUp className="w-4 h-4 text-forest" />}
                             {activeSubtab === 'activity' ? 'SYSTEM ACTIVITY LOG' : 'FINANCIAL TRANSACTION LEDGER'}
                         </h2>
-                        <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-1">{currentDisplayData.length} CRYPTOGRAPHICALLY LOGGED ENTRIES</p>
+                        <p className="text-[9px] text-burgundy/40 font-black uppercase tracking-[0.2em] mt-1.5">{currentDisplayData.length} CRYPTOGRAPHICALLY LOGGED ENTRIES</p>
                     </div>
                     <button
                         onClick={activeSubtab === 'activity' ? exportActivityCSV : exportFinancialCSV}
-                        className="flex items-center gap-2.5 px-6 py-3 bg-forest text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-widest shadow-md"
+                        className="flex items-center gap-3 px-6 py-3.5 bg-forest text-white text-[10px] font-black rounded-xl hover:brightness-110 transition-all tracking-[0.2em] shadow-md active:scale-95"
                     >
-                        <Download className="w-3.5 h-3.5" />
+                        <Download className="w-4 h-4" />
                         EXPORT DATASET
                     </button>
                 </div>
 
                 {/* Filters row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-8 bg-alabaster/30 border-b border-cream-100">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-8 bg-stone-50/10 border-b border-stone-100">
                     {/* Search */}
                     <div className="relative group lg:col-span-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/50 group-focus-within:text-sage transition-colors" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-burgundy/40 group-focus-within:text-forest transition-colors" />
                         <input
                             type="text"
                             placeholder="Universal search…"
                             value={search}
                             onChange={e => { setSearch(e.target.value); resetPage() }}
-                            className="w-full pl-11 pr-4 py-3 text-[10px] font-bold border border-cream-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sage/20 transition-all tracking-widest uppercase"
+                            className="w-full pl-11 pr-4 py-3.5 text-[10px] font-black border border-stone-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-forest/20 transition-all tracking-widest uppercase placeholder:text-burgundy/20"
                         />
                     </div>
 
@@ -392,16 +392,16 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                 type="date"
                                 value={dateFrom}
                                 onChange={e => { setDateFrom(e.target.value); resetPage() }}
-                                className="w-full px-4 py-3 text-[10px] font-black border border-cream-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer pr-12"
+                                className="w-full px-4 py-3.5 text-[10px] font-black border border-stone-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-forest/20 transition-all tracking-widest uppercase cursor-pointer pr-12 placeholder:text-burgundy/20"
                             />
                         </div>
-                        <span className="text-charcoal/50 font-black">/</span>
+                        <span className="text-burgundy/20 font-black">/</span>
                         <div className="flex-1 relative group">
                             <input
                                 type="date"
                                 value={dateTo}
                                 onChange={e => { setDateTo(e.target.value); resetPage() }}
-                                className="w-full px-4 py-3 text-[10px] font-black border border-cream-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer pr-12"
+                                className="w-full px-4 py-3.5 text-[10px] font-black border border-stone-100 rounded-xl bg-white/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-forest/20 transition-all tracking-widest uppercase cursor-pointer pr-12 placeholder:text-burgundy/20"
                             />
                         </div>
                     </div>
@@ -430,22 +430,22 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 {activeSubtab === 'activity' ? (
-                                    <tr className="bg-alabaster/50 border-b border-cream-100">
-                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">TIMESTAMP</th>
-                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">OPERATOR</th>
-                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">CLASSIFICATION</th>
-                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">AMOUNT</th>
-                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">OPERATIONAL DETAILS</th>
+                                    <tr className="bg-stone-50/50 border-b border-stone-100 italic">
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">TIMESTAMP</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">OPERATOR</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">CLASSIFICATION</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">AMOUNT</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">OPERATIONAL DETAILS</th>
                                     </tr>
                                 ) : (
-                                    <tr className="bg-alabaster/50 border-b border-cream-100">
-                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">TIMESTAMP</th>
-                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">TYPE</th>
-                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">PARTICIPANTS</th>
-                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">TOTAL</th>
-                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">REVENUE FEE</th>
-                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">STUDIO</th>
-                                        <th className="px-8 py-5 text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">INSTRUCTOR</th>
+                                    <tr className="bg-stone-50/50 border-b border-stone-100 italic">
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">TIMESTAMP</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">TYPE</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">PARTICIPANTS</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">TOTAL</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">REVENUE FEE</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">STUDIO</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">INSTRUCTOR</th>
                                     </tr>
                                 )}
                             </thead>
@@ -562,24 +562,24 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-8 py-6 bg-alabaster/30 border-t border-cream-100">
-                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest">
+                    <div className="flex items-center justify-between px-8 py-6 bg-stone-50/30 border-t border-stone-100">
+                        <p className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em]">
                             INDEX {page} OF {totalPages} &nbsp;•&nbsp; {currentDisplayData.length} GLOBAL RECORDS
                         </p>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
                                 disabled={page === 1}
-                                className="p-2 rounded-xl border border-cream-100 bg-white/60 disabled:opacity-30 hover:bg-white hover:shadow-cloud transition-all"
+                                className="p-3.5 rounded-xl border border-stone-200 bg-white/60 disabled:opacity-30 hover:bg-white hover:shadow-cloud transition-all active:scale-95"
                             >
-                                <ChevronLeft className="w-4 h-4 text-charcoal" />
+                                <ChevronLeft className="w-4 h-4 text-burgundy" />
                             </button>
                             <button
                                 onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
                                 disabled={page === totalPages}
-                                className="p-2 rounded-xl border border-cream-100 bg-white/60 disabled:opacity-30 hover:bg-white hover:shadow-cloud transition-all"
+                                className="p-3.5 rounded-xl border border-stone-200 bg-white/60 disabled:opacity-30 hover:bg-white hover:shadow-cloud transition-all active:scale-95"
                             >
-                                <ChevronRight className="w-4 h-4 text-charcoal" />
+                                <ChevronRight className="w-4 h-4 text-burgundy" />
                             </button>
                         </div>
                     </div>

@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import { submitInstructorOnboarding } from '@/app/(dashboard)/instructor/onboarding/actions'
 import Link from 'next/link'
-import { Upload, CheckCircle, AlertCircle, Loader2, ShieldCheck, ArrowRight } from 'lucide-react'
+import { Upload, CheckCircle, AlertCircle, Loader2, ShieldCheck, ArrowRight, X } from 'lucide-react'
 import { normalizeImageFile } from '@/lib/utils/image-utils'
 import ImageCropper from '@/components/shared/ImageCropper'
 import clsx from 'clsx'
 import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
+import Image from 'next/image'
 
 export default function InstructorOnboardingForm() {
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -82,411 +83,324 @@ export default function InstructorOnboardingForm() {
     }
 
     return (
-        <div className="w-full max-w-lg mx-auto bg-card border border-cream-300 rounded-xl shadow-sm overflow-hidden mb-8">
-            <div className="p-5 sm:p-8 bg-cream-50 border-b border-cream-200">
-                <h2 className="text-2xl font-serif text-charcoal-900 mb-2">Instructor Application</h2>
-                <p className="text-charcoal-600">Join the StudioVaultPH network. Please provide your details and certification.</p>
+        <div className="atelier-card w-full bg-white shadow-tight overflow-hidden mb-12 border border-border-grey">
+            <div className="p-10 border-b border-border-grey bg-off-white/30">
+                <h2 className="text-2xl font-serif text-burgundy mb-2 tracking-tight">Technical details</h2>
+                <p className="text-[11px] font-bold text-charcoal/40 uppercase tracking-[0.2em]">Partner Registration & Credentials</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-5 sm:p-8 space-y-6 bg-white/50 backdrop-blur-sm">
-
-                {/* Full Name */}
-                <div className="space-y-2">
-                    <label htmlFor="fullName" className="block text-sm font-medium text-charcoal-800">
-                        Full Name <span className="text-rose-gold font-bold">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        id="fullName"
-                        name="fullName"
-                        required
-                        className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400"
-                        placeholder="e.g. Jane Doe"
-                    />
-                </div>
-
-                {/* Date of Birth */}
-                <div className="space-y-2">
-                    <label htmlFor="dateOfBirth" className="block text-sm font-medium text-charcoal-800">
-                        Date of Birth <span className="text-rose-gold font-bold">*</span>
-                    </label>
-                    <input
-                        type="date"
-                        id="dateOfBirth"
-                        name="dateOfBirth"
-                        required
-                        className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all"
-                    />
-                </div>
-
-                {/* Instagram Handle */}
-                <div className="space-y-2">
-                    <label htmlFor="instagramHandle" className="block text-sm font-medium text-charcoal-800">
-                        Instagram Handle <span className="text-rose-gold font-bold">*</span>
-                    </label>
-                    <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-500">@</span>
-                        <input
-                            type="text"
-                            id="instagramHandle"
-                            name="instagramHandle"
-                            required
-                            className="w-full pl-8 pr-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400"
-                            placeholder="pilatesjane"
-                        />
-                    </div>
-                </div>
-
-                {/* Contact Number */}
-                <div className="space-y-2">
-                    <label htmlFor="contactNumber" className="block text-sm font-medium text-charcoal-800">
-                        Contact Number <span className="text-rose-gold font-bold">*</span>
-                    </label>
-                    <input
-                        type="tel"
-                        id="contactNumber"
-                        name="contactNumber"
-                        required
-                        maxLength={13}
-                        className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400"
-                        placeholder="e.g. 09171234567"
-                    />
-                    <p className="text-[11px] text-charcoal-400 mt-1">Format: 09XXXXXXXXX or +639XXXXXXXXX (11 digits)</p>
-                </div>
-
-                {/* Certification Body */}
-                <div className="space-y-2">
-                    <label htmlFor="certificationBody" className="block text-sm font-medium text-charcoal-800">
-                        Certification Body <span className="text-rose-gold font-bold">*</span>
-                    </label>
-                    <div className="relative">
-                        <select
-                            id="certificationBody"
-                            name="certificationBody"
-                            required
-                            value={certificationBody}
-                            onChange={(e) => setCertificationBody(e.target.value)}
-                            className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all appearance-none cursor-pointer text-charcoal-800"
-                        >
-                            <option value="" disabled>Select your certification...</option>
-                            <option value="STOTT">STOTT Pilates</option>
-                            <option value="BASI">BASI</option>
-                            <option value="Balanced Body">Balanced Body</option>
-                            <option value="Polestar">Polestar</option>
-                            <option value="Classical">Classical</option>
-                            <option value="Other">Other (Type below)</option>
-                        </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-charcoal-500">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Other Certification Field (Conditional) */}
-                {certificationBody === 'Other' && (
-                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <label htmlFor="otherCertification" className="block text-sm font-medium text-charcoal-800">
-                            Certification Name
+            <form onSubmit={handleSubmit} className="p-10 space-y-8">
+                {/* Personal Info Group */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Full Name */}
+                    <div className="space-y-3">
+                        <label htmlFor="fullName" className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/50 px-1">
+                            Full Legal Name <span className="text-burgundy">*</span>
                         </label>
                         <input
                             type="text"
-                            id="otherCertification"
-                            name="otherCertification"
+                            id="fullName"
+                            name="fullName"
                             required
-                            className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400"
-                            placeholder="e.g. Classic Pilates UK"
+                            className="w-full px-6 py-4 bg-off-white border border-border-grey rounded-2xl text-charcoal font-bold focus:ring-2 focus:ring-forest/20 focus:border-forest outline-none transition-all placeholder:text-charcoal/20 text-sm"
+                            placeholder="e.g. Maria Clara"
                         />
                     </div>
-                )}
 
-                {/* Certificate Upload */}
-                <div className="space-y-2">
-                    <label htmlFor="certificateFile" className="block text-sm font-medium text-charcoal-800">
-                        Upload Certificate <span className="text-rose-gold font-bold">*</span>
-                    </label>
-                    <div className="border-2 border-dashed border-cream-300 rounded-lg p-6 flex flex-col items-center justify-center bg-cream-50/50 hover:bg-cream-100/50 transition-colors relative cursor-pointer group">
-                        <input
-                            type="file"
-                            id="certificateFile"
-                            name="certificateFile"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            required
-                            onChange={async (e) => {
-                                const file = e.target.files?.[0]
-                                if (!file) return
-                                
-                                setSelectedFileName(file.name)
-                                if (file.type.startsWith('image/')) {
-                                    const processed = await normalizeImageFile(file)
-                                    setCropperConfig({
-                                        isOpen: true,
-                                        image: URL.createObjectURL(processed),
-                                        aspectRatio: 3 / 4,
-                                        title: 'Crop Certificate',
-                                        onCrop: (cropped) => {
-                                            setCertFile(cropped)
-                                            setPreviewUrl(URL.createObjectURL(cropped))
-                                        }
-                                    })
-                                } else {
-                                    setCertFile(file)
-                                    setPreviewUrl(null)
-                                }
-                            }}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        />
-                        {previewUrl ? (
-                            <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-3 z-20 group">
-                                <img
-                                    src={previewUrl}
-                                    alt="Certificate Preview"
-                                    className="w-full h-full object-contain bg-cream-100 cursor-pointer"
-                                    onClick={(e) => { e.preventDefault(); window.open(previewUrl, '_blank'); }}
-                                />
-                                <div className="absolute top-2 right-2 bg-charcoal-900/70 p-1 rounded-full text-white cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={(e) => { e.preventDefault(); setPreviewUrl(null); setSelectedFileName(null); }}>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className={clsx(
-                                "w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-colors",
-                                selectedFileName ? "bg-green-100" : "bg-cream-200 group-hover:bg-cream-300"
-                            )}>
-                                {selectedFileName ? (
-                                    <CheckCircle className="w-5 h-5 text-green-600" />
-                                ) : (
-                                    <Upload className="w-5 h-5 text-rose-gold" />
-                                )}
-                            </div>
-                        )}
-                        <p className="text-sm font-medium text-charcoal-700">
-                            {selectedFileName || 'Click to upload or drag and drop'}
-                        </p>
-                    <p className="text-xs text-charcoal-500 mt-1">PDF, JPG, or PNG (max 5MB)</p>
-                    </div>
-                    <div className="space-y-2 mt-4">
-                        <label htmlFor="certExpiry" className="block text-sm font-medium text-charcoal-800">
-                            Certification Expiration Date <span className="text-charcoal-400 font-normal">(Optional)</span>
+                    {/* Date of Birth */}
+                    <div className="space-y-3">
+                        <label htmlFor="dateOfBirth" className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/50 px-1">
+                            Date of Birth <span className="text-burgundy">*</span>
                         </label>
                         <input
                             type="date"
-                            id="certExpiry"
-                            name="certExpiry"
-                            className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400"
+                            id="dateOfBirth"
+                            name="dateOfBirth"
+                            required
+                            className="w-full px-6 py-4 bg-off-white border border-border-grey rounded-2xl text-charcoal font-bold focus:ring-2 focus:ring-forest/20 focus:border-forest outline-none transition-all text-sm"
                         />
-                        <p className="text-[10px] text-charcoal-500 italic">Leave blank if your certification does not expire.</p>
                     </div>
                 </div>
 
-                <div className="pt-4 border-t border-cream-200">
-                    <h3 className="text-sm font-semibold text-charcoal-900 uppercase tracking-wider mb-4">Legal Documents</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Instagram Handle */}
+                    <div className="space-y-3">
+                        <label htmlFor="instagramHandle" className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/50 px-1">
+                            Instagram Profile <span className="text-burgundy">*</span>
+                        </label>
+                        <div className="relative">
+                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-charcoal/30 font-bold">@</span>
+                            <input
+                                type="text"
+                                id="instagramHandle"
+                                name="instagramHandle"
+                                required
+                                className="w-full pl-12 pr-6 py-4 bg-off-white border border-border-grey rounded-2xl text-charcoal font-bold focus:ring-2 focus:ring-forest/20 focus:border-forest outline-none transition-all placeholder:text-charcoal/20 text-sm"
+                                placeholder="handle"
+                            />
+                        </div>
+                    </div>
 
-                    {/* TIN */}
-                    <div className="space-y-2 mb-6">
-                        <label htmlFor="tin" className="block text-sm font-medium text-charcoal-800">
-                            Tax Identification Number (TIN) <span className="text-rose-gold font-bold">*</span>
+                    {/* Contact Number */}
+                    <div className="space-y-3">
+                        <label htmlFor="contactNumber" className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/50 px-1">
+                            Mobile Number <span className="text-burgundy">*</span>
                         </label>
                         <input
-                            type="text"
-                            id="tin"
-                            name="tin"
+                            type="tel"
+                            id="contactNumber"
+                            name="contactNumber"
                             required
-                            className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400 font-mono"
-                            placeholder="000-000-000-000"
+                            maxLength={13}
+                            className="w-full px-6 py-4 bg-off-white border border-border-grey rounded-2xl text-charcoal font-bold focus:ring-2 focus:ring-forest/20 focus:border-forest outline-none transition-all placeholder:text-charcoal/20 text-sm"
+                            placeholder="0917XXXXXXX"
                         />
-                        <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
-                            <ShieldCheck className="w-3 h-3 text-rose-gold" />
-                            Used only for secure identity verification and automated payouts.
-                        </p>
                     </div>
+                </div>
 
-                    {/* Gov ID */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-charcoal-800">
-                                Valid Government ID <span className="text-rose-gold font-bold">*</span>
+                {/* Certification Group */}
+                <div className="pt-8 border-t border-border-grey">
+                    <h3 className="text-sm font-black uppercase tracking-[0.3em] text-burgundy/40 mb-8">Professional Credentials</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Certification Body */}
+                        <div className="space-y-3">
+                            <label htmlFor="certificationBody" className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/50 px-1">
+                                Certification Body <span className="text-burgundy">*</span>
                             </label>
-                            <div className="border-2 border-dashed border-cream-300 rounded-lg p-4 flex flex-col items-center justify-center bg-cream-50/50 hover:bg-cream-100/50 transition-colors relative cursor-pointer group h-[120px]">
-                                <input
-                                    type="file"
-                                    name="govIdFile"
-                                    accept=".jpg,.jpeg,.png,.pdf"
+                            <div className="relative">
+                                <select
+                                    id="certificationBody"
+                                    name="certificationBody"
                                     required
-                                    onChange={async (e) => {
-                                        const file = e.target.files?.[0]
-                                        if (!file) return
-
-                                        setGovIdFileName(file.name)
-                                        if (file.type.startsWith('image/')) {
-                                            const processed = await normalizeImageFile(file)
-                                            setCropperConfig({
-                                                isOpen: true,
-                                                image: URL.createObjectURL(processed),
-                                                aspectRatio: 4 / 3,
-                                                title: 'Crop Government ID',
-                                                onCrop: (cropped) => {
-                                                    setGovIdFile(cropped)
-                                                    setGovIdPreviewUrl(URL.createObjectURL(cropped))
-                                                }
-                                            })
-                                        } else {
-                                            setGovIdFile(file)
-                                            setGovIdPreviewUrl(null)
-                                        }
-                                    }}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                />
-                                {govIdPreviewUrl ? (
-                                    <div className="relative w-full h-full z-20 group">
-                                        <img
-                                            src={govIdPreviewUrl}
-                                            alt="ID Preview"
-                                            className="h-full w-full object-contain cursor-pointer"
-                                            onClick={(e) => { e.preventDefault(); window.open(govIdPreviewUrl, '_blank'); }}
-                                        />
-                                        <div className="absolute top-1 right-1 bg-charcoal-900/70 p-1 rounded-full text-white cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-                                            onClick={(e) => { e.preventDefault(); setGovIdPreviewUrl(null); setGovIdFileName(null); }}>
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <Upload className="w-5 h-5 text-rose-gold mb-1" />
-                                        <p className="text-[10px] text-center font-medium text-charcoal-700">
-                                            {govIdFileName || 'Upload ID'}
-                                        </p>
-                                    </>
-                                )}
+                                    value={certificationBody}
+                                    onChange={(e) => setCertificationBody(e.target.value)}
+                                    className="w-full px-6 py-4 bg-off-white border border-border-grey rounded-2xl text-charcoal font-bold focus:ring-2 focus:ring-forest/20 focus:border-forest outline-none transition-all appearance-none cursor-pointer text-sm"
+                                >
+                                    <option value="" disabled>Select Body...</option>
+                                    <option value="STOTT">STOTT Pilates</option>
+                                    <option value="BASI">BASI</option>
+                                    <option value="Balanced Body">Balanced Body</option>
+                                    <option value="Polestar">Polestar</option>
+                                    <option value="Classical">Classical</option>
+                                    <option value="Other">Other (Specify)</option>
+                                </select>
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-charcoal/30">
+                                    <ArrowRight className="w-4 h-4 rotate-90" />
+                                </div>
                             </div>
-                            <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
-                                <ShieldCheck className="w-3 h-3 text-rose-gold" />
-                                Used only for secure identity verification and automated payouts.
-                            </p>
                         </div>
-                        <div className="space-y-2">
-                            <label htmlFor="govIdExpiry" className="block text-sm font-medium text-charcoal-800">
-                                ID Expiration Date <span className="text-rose-gold font-bold">*</span>
-                            </label>
-                            <input
-                                type="date"
-                                id="govIdExpiry"
-                                name="govIdExpiry"
-                                required
-                                className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all"
-                            />
-                            <p className="text-[10px] text-charcoal-500 italic">As listed on your ID.</p>
-                        </div>
+
+                        {/* Other Certification Field (Conditional) */}
+                        {certificationBody === 'Other' && (
+                            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <label htmlFor="otherCertification" className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/50 px-1">
+                                    Certification Name
+                                </label>
+                                <input
+                                    type="text"
+                                    id="otherCertification"
+                                    name="otherCertification"
+                                    required
+                                    className="w-full px-6 py-4 bg-off-white border border-border-grey rounded-2xl text-charcoal font-bold focus:ring-2 focus:ring-forest/20 focus:border-forest outline-none transition-all text-sm"
+                                    placeholder="e.g. Classic Pilates UK"
+                                />
+                            </div>
+                        )}
                     </div>
 
-                    {/* BIR Form 2303 */}
-                    <div className="space-y-2 mb-6">
-                        <label className="block text-sm font-medium text-charcoal-800">
-                            BIR Form 2303 (COR) <span className="text-charcoal-400 font-normal">(Optional)</span>
+                    {/* Certificate Upload */}
+                    <div className="mt-8 space-y-3">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/50 px-1">
+                            Certificate of Qualification <span className="text-burgundy">*</span>
                         </label>
-                        <div className="border-2 border-dashed border-cream-300 rounded-lg p-4 flex flex-col items-center justify-center bg-cream-50/50 hover:bg-cream-100/50 transition-colors relative cursor-pointer group h-[100px]">
+                        <div className="border-2 border-dashed border-forest/20 rounded-2xl p-8 flex flex-col items-center justify-center bg-forest/5 hover:bg-forest/10 transition-colors relative cursor-pointer group">
                             <input
                                 type="file"
-                                name="birFile"
-                                accept=".jpg,.jpeg,.png,.pdf"
+                                id="certificateFile"
+                                name="certificateFile"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                required
                                 onChange={async (e) => {
                                     const file = e.target.files?.[0]
                                     if (!file) return
-
-                                    setBirFileName(file.name)
+                                    setSelectedFileName(file.name)
                                     if (file.type.startsWith('image/')) {
                                         const processed = await normalizeImageFile(file)
                                         setCropperConfig({
                                             isOpen: true,
                                             image: URL.createObjectURL(processed),
                                             aspectRatio: 3 / 4,
-                                            title: 'Crop BIR Form',
+                                            title: 'Crop Certificate',
                                             onCrop: (cropped) => {
-                                                setBirFile(cropped)
-                                                setBirPreviewUrl(URL.createObjectURL(cropped))
+                                                setCertFile(cropped)
+                                                setPreviewUrl(URL.createObjectURL(cropped))
                                             }
                                         })
                                     } else {
-                                        setBirFile(file)
-                                        setBirPreviewUrl(null)
+                                        setCertFile(file)
+                                        setPreviewUrl(null)
                                     }
                                 }}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
-                            {birPreviewUrl ? (
-                                <div className="relative w-full h-full z-20 group">
-                                    <img
-                                        src={birPreviewUrl}
-                                        alt="BIR Preview"
-                                        className="h-full w-full object-contain cursor-pointer"
-                                        onClick={(e) => { e.preventDefault(); window.open(birPreviewUrl, '_blank'); }}
+                            {previewUrl ? (
+                                <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-4 z-20 group">
+                                    <Image
+                                        src={previewUrl}
+                                        alt="Certificate Preview"
+                                        fill
+                                        className="object-contain bg-white"
                                     />
-                                    <div className="absolute top-1 right-1 bg-charcoal-900/70 p-1 rounded-full text-white cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-                                        onClick={(e) => { e.preventDefault(); setBirPreviewUrl(null); setBirFileName(null); }}>
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    <div className="absolute top-4 right-4 bg-burgundy/80 p-2 rounded-full text-white cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={(e) => { e.preventDefault(); setPreviewUrl(null); setSelectedFileName(null); }}>
+                                        <X className="w-4 h-4" />
                                     </div>
                                 </div>
                             ) : (
-                                <>
-                                    <Upload className="w-4 h-4 text-rose-gold mb-1" />
-                                    <p className="text-[10px] text-center font-medium text-charcoal-700">
-                                        {birFileName || 'Click to upload'}
-                                    </p>
-                                </>
+                                <div className={clsx(
+                                    "w-14 h-14 rounded-full flex items-center justify-center mb-4 transition-all",
+                                    selectedFileName ? "bg-forest text-white" : "bg-white text-forest shadow-tight group-hover:scale-110"
+                                )}>
+                                    {selectedFileName ? (
+                                        <CheckCircle className="w-6 h-6" />
+                                    ) : (
+                                        <Upload className="w-6 h-6" />
+                                    )}
+                                </div>
                             )}
+                            <p className="text-xs font-bold text-charcoal uppercase tracking-widest">
+                                {selectedFileName || 'Add Certificate'}
+                            </p>
+                            <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-[0.2em] mt-2">PDF, JPG, or PNG (max 5MB)</p>
                         </div>
-                        <div className="space-y-2 mt-4">
-                            <label htmlFor="birExpiry" className="block text-sm font-medium text-charcoal-800">
-                                BIR Expiration Date <span className="text-charcoal-400 font-normal">(Optional)</span>
-                            </label>
-                            <input
-                                type="date"
-                                id="birExpiry"
-                                name="birExpiry"
-                                className="w-full px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:ring-2 focus:ring-charcoal-900 focus:border-transparent outline-none transition-all placeholder:text-charcoal-400"
-                            />
-                        </div>
-                        <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
-                            <ShieldCheck className="w-3 h-3 text-rose-gold" />
-                            Used only for secure identity verification and automated payouts.
-                        </p>
-                        <p className="text-[10px] text-charcoal-500 italic">
-                            If provided, tax withholding is 5%. If not, 10% will be withheld.
-                        </p>
                     </div>
                 </div>
 
-                {/* Cancellation & Wallet Policy */}
-                <div className="pt-6 border-t border-cream-200">
-                    <h3 className="text-sm font-semibold text-charcoal-900 uppercase tracking-wider mb-4">Cancellation & Wallet Policy</h3>
-                    <div className="bg-cream-50 rounded-xl border border-cream-200 p-4 mb-4">
-                        <div className="h-48 overflow-y-auto pr-2 text-xs text-charcoal-600 space-y-4 scrollbar-thin scrollbar-thumb-cream-300">
-                            <p className="font-bold text-charcoal-900">1. The 24-Hour Strict Cancellation Rule</p>
-                            <p>Studio Vault PH enforces a strict 24-hour cancellation policy. Any session cancelled less than 24 hours before the scheduled start time is considered a "Late Cancellation" and is subject to automated penalties.</p>
+                {/* Legal Group */}
+                <div className="pt-8 border-t border-border-grey space-y-8">
+                    <h3 className="text-sm font-black uppercase tracking-[0.3em] text-burgundy/40 mb-8">Verification & Payouts</h3>
 
-                            <p className="font-bold text-charcoal-900">2. Instructor-Initiated Late Cancellations</p>
-                            <p>If an Instructor cancels within the 24-hour window: The Client receives a 100% refund. The Instructor’s Wallet will be immediately deducted the cost of the Studio Rental Fee, which is credited to the Studio.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* TIN */}
+                        <div className="space-y-3">
+                            <label htmlFor="tin" className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/50 px-1">
+                                Tax ID (TIN) <span className="text-burgundy">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="tin"
+                                name="tin"
+                                required
+                                className="w-full px-6 py-4 bg-off-white border border-border-grey rounded-2xl text-charcoal font-mono font-bold focus:ring-2 focus:ring-forest/20 focus:border-forest outline-none transition-all placeholder:text-charcoal/20 text-sm"
+                                placeholder="000-000-000-000"
+                            />
+                        </div>
 
-                            <p className="font-bold text-charcoal-900">3. Studio-Initiated Late Cancellations</p>
-                            <p>If a Studio cancels within the 24-hour window: The Client receives a 100% refund. The Studio’s Wallet is deducted a Displacement Fee (equal to the Studio Rental Rate), which is credited to the Instructor’s Wallet.</p>
-
-                            <p className="font-bold text-charcoal-900">4. Negative Wallet Balances</p>
-                            <p>If penalties cause a balance to drop below ₱0.00, the account carries a negative balance. Future earnings are automatically applied to the debt. "Request Payout" and new bookings are disabled until settled.</p>
+                        {/* ID Expiry */}
+                        <div className="space-y-3">
+                            <label htmlFor="govIdExpiry" className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/50 px-1">
+                                ID Expiration <span className="text-burgundy">*</span>
+                            </label>
+                            <input
+                                type="date"
+                                id="govIdExpiry"
+                                name="govIdExpiry"
+                                required
+                                className="w-full px-6 py-4 bg-off-white border border-border-grey rounded-2xl text-charcoal font-bold focus:ring-2 focus:ring-forest/20 focus:border-forest outline-none transition-all text-sm"
+                            />
                         </div>
                     </div>
 
-                    <div className="flex items-start gap-3">
-                        <div className="flex items-center h-5">
+                    {/* ID Upload */}
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/50 px-1">
+                            Valid Government ID <span className="text-burgundy">*</span>
+                        </label>
+                        <div className="border-2 border-dashed border-forest/20 rounded-2xl p-8 flex flex-col items-center justify-center bg-forest/5 hover:bg-forest/10 transition-colors relative cursor-pointer group">
                             <input
-                                id="policyAgree"
-                                name="policyAgree"
-                                type="checkbox"
+                                type="file"
+                                name="govIdFile"
+                                accept=".jpg,.jpeg,.png,.pdf"
                                 required
-                                className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900 cursor-pointer"
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0]
+                                    if (!file) return
+                                    setGovIdFileName(file.name)
+                                    if (file.type.startsWith('image/')) {
+                                        const processed = await normalizeImageFile(file)
+                                        setCropperConfig({
+                                            isOpen: true,
+                                            image: URL.createObjectURL(processed),
+                                            aspectRatio: 4 / 3,
+                                            title: 'Crop Government ID',
+                                            onCrop: (cropped) => {
+                                                setGovIdFile(cropped)
+                                                setGovIdPreviewUrl(URL.createObjectURL(cropped))
+                                            }
+                                        })
+                                    } else {
+                                        setGovIdFile(file)
+                                        setGovIdPreviewUrl(null)
+                                    }
+                                }}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
+                            {govIdPreviewUrl ? (
+                                <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-4 z-20 group">
+                                    <Image
+                                        src={govIdPreviewUrl}
+                                        alt="ID Preview"
+                                        fill
+                                        className="object-contain bg-white"
+                                    />
+                                    <div className="absolute top-4 right-4 bg-burgundy/80 p-2 rounded-full text-white cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={(e) => { e.preventDefault(); setGovIdPreviewUrl(null); setGovIdFileName(null); }}>
+                                        <X className="w-4 h-4" />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center">
+                                    <ShieldCheck className="w-10 h-10 text-forest mb-4" />
+                                    <p className="text-xs font-bold text-charcoal uppercase tracking-widest">
+                                        {govIdFileName || 'Add ID Image'}
+                                    </p>
+                                </div>
+                            )}
                         </div>
-                        <label htmlFor="policyAgree" className="text-sm text-charcoal-700 cursor-pointer">
-                            I have read and agree to the <Link href="/terms-of-service" target="_blank" className="text-rose-gold font-bold hover:underline">Studio Vault Cancellation & Wallet Policy</Link>. <span className="text-rose-gold font-bold">*</span>
+                    </div>
+                </div>
+
+                {/* Policy Group */}
+                <div className="pt-8 border-t border-border-grey space-y-6">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/50 px-1">Platform Policies</label>
+                    <div className="earth-card bg-off-white border border-border-grey p-8 space-y-4">
+                        <div className="h-40 overflow-y-auto pr-4 text-[11px] text-charcoal/60 space-y-6 scrollbar-thin scrollbar-thumb-forest/20 leading-relaxed font-medium">
+                            <div>
+                                <p className="font-black text-burgundy uppercase tracking-widest mb-2">1. The 24-Hour Strict Cancellation Rule</p>
+                                <p>Studio Vault PH enforces a strict 24-hour cancellation policy. Any session cancelled less than 24 hours before the scheduled start time is considered a "Late Cancellation" and is subject to automated penalties.</p>
+                            </div>
+                            <div>
+                                <p className="font-black text-burgundy uppercase tracking-widest mb-2">2. Instructor-Initiated Late Cancellations</p>
+                                <p>If an Instructor cancels within the 24-hour window: The Client receives a 100% refund. The Instructor’s Wallet will be immediately deducted the cost of the Studio Rental Fee, which is credited to the Studio.</p>
+                            </div>
+                            <div>
+                                <p className="font-black text-burgundy uppercase tracking-widest mb-2">3. Studio-Initiated Late Cancellations</p>
+                                <p>If a Studio cancels within the 24-hour window: The Client receives a 100% refund. The Studio’s Wallet is deducted a Displacement Fee (equal to the Studio Rental Rate), which is credited to the Instructor’s Wallet.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-4 px-2">
+                        <input
+                            id="policyAgree"
+                            name="policyAgree"
+                            type="checkbox"
+                            required
+                            className="w-5 h-5 mt-0.5 text-forest border-border-grey rounded-lg focus:ring- forest/20 cursor-pointer"
+                        />
+                        <label htmlFor="policyAgree" className="text-xs text-charcoal font-medium leading-relaxed cursor-pointer">
+                            I verify that all information provided is accurate and I agree to the <Link href="/terms-of-service" target="_blank" className="text-forest font-bold hover:underline underline-offset-4">Studio Vault Professional Terms</Link>.
                         </label>
                     </div>
                 </div>
@@ -494,10 +408,10 @@ export default function InstructorOnboardingForm() {
                 {/* Notifications */}
                 {message && (
                     <div className={clsx(
-                        "p-3 rounded-lg flex items-center gap-3 text-sm",
-                        message.type === 'success' ? "bg-green-50 text-green-800 border border-green-200" : "bg-red-50 text-red-800 border border-red-200"
+                        "p-6 rounded-2xl flex items-center gap-4 text-xs font-bold uppercase tracking-widest border animate-in fade-in slide-in-from-top-4 duration-500",
+                        message.type === 'success' ? "bg-forest/5 text-forest border-forest/20" : "bg-burgundy/5 text-burgundy border-burgundy/20"
                     )}>
-                        {message.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                        {message.type === 'success' ? <CheckCircle className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
                         {message.text}
                     </div>
                 )}
@@ -506,12 +420,12 @@ export default function InstructorOnboardingForm() {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-4 px-6 bg-forest text-white rounded-xl font-bold text-lg hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:opacity-70 group"
+                    className="w-full py-6 px-8 bg-forest text-white rounded-2xl text-[12px] font-black uppercase tracking-[0.4em] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-4 shadow-xl shadow-forest/10 disabled:opacity-50 group mt-12"
                 >
                     {isSubmitting ? (
                         <>
-                            <Loader2 className="w-6 h-6 animate-spin" />
-                            <span className="text-white/80 font-medium tracking-wide">Processing application...</span>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span>Processing...</span>
                         </>
                     ) : (
                         <>

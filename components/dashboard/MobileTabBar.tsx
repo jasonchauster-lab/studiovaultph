@@ -20,7 +20,7 @@ export default function MobileTabBar({ onOpenMenu }: MobileTabBarProps) {
     ]
 
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-md border-t border-border-grey px-2 pb-safe">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-md border-t border-burgundy/10 px-2 pb-safe">
             <div className="flex items-center justify-around h-20">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href

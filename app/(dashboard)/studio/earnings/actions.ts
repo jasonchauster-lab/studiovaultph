@@ -8,294 +8,35 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
     const supabase = await createClient()
 
     try {
-
-
-        // 1. Get Studio & Owner details
-        const { data: studio, error: studioErr } = await supabase
-            .from('studios')
-            .select('owner_id, payout_approval_status')
-            .eq('id', studioId)
-            .maybeSingle()
-
-        if (studioErr) {
-            console.error('[getEarningsData] Studio fetch error:', studioErr)
-            return { error: `Studio access error: ${studioErr.message}` }
-        }
-
-        const ownerId = studio?.owner_id
-
-        const { data: profile, error: profileErr } = ownerId
-            ? await supabase.from('profiles').select('available_balance, pending_balance').eq('id', ownerId).maybeSingle()
-            : { data: null, error: null }
-
-        if (profileErr) {
-            console.error('[getEarningsData] Profile fetch error:', profileErr)
-        }
-
-        // 2. Fetch slot IDs
-        const { data: studioSlots, error: slotsError } = await supabase
-            .from('slots')
-            .select('id')
-            .eq('studio_id', studioId)
-
-        if (slotsError) {
-            console.error('[getEarningsData] Slots fetch error:', slotsError)
-            return { error: `Failed to fetch slot data: ${slotsError.message}` }
-        }
-
-        const slotIds = studioSlots?.map((s: any) => s.id) ?? []
-        if (slotIds.length === 0) {
-            return {
-                bookings: [],
-                payouts: [],
-                transactions: [],
-                summary: {
-                    totalEarnings: 0,
-                    totalCompensation: 0,
-                    totalPenalty: 0,
-                    netEarnings: 0,
-                    totalPaidOut: 0,
-                    pendingPayouts: 0,
-                    availableBalance: Number(profile?.available_balance || 0),
-                    pendingBalance: Number(profile?.pending_balance || 0),
-                    payoutApprovalStatus: studio?.payout_approval_status || 'none'
-                }
-            }
-        }
-
-        // 3. Get all relevant bookings (active + late cancelled with potential charges)
-        let bookingsQuery = supabase
-            .from('bookings')
-            .select(`
-                *,
-                client:profiles!client_id(full_name),
-                instructor:profiles!instructor_id(full_name),
-                slots(date, start_time, end_time, studios(name))
-            `)
-            .eq('studio_id', studioId)
-            .or('status.in.(approved,completed,cancelled_charged,cancelled_refunded),payment_status.eq.submitted')
-            .order('created_at', { ascending: false })
-
-        if (startDate) bookingsQuery = bookingsQuery.gte('slots.date', startDate)
-        if (endDate) bookingsQuery = bookingsQuery.lte('slots.date', endDate)
-
-        const { data: bookings, error: bookingsError } = await bookingsQuery
-
-        if (bookingsError) {
-            console.error('[getEarningsData] Bookings fetch error:', bookingsError)
-            return { error: `Failed to fetch earnings data: ${bookingsError.message}` }
-        }
-
-        // 4. Get all payout requests
-        let payoutsQuery = supabase
-            .from('payout_requests')
-            .select('*')
-            .eq('studio_id', studioId)
-            .order('created_at', { ascending: false })
-
-        if (startDate) payoutsQuery = payoutsQuery.gte('created_at', `${startDate}T00:00:00.000Z`)
-        if (endDate) payoutsQuery = payoutsQuery.lte('created_at', `${endDate}T23:59:59.999Z`)
-
-        const { data: payouts, error: payoutsError } = await payoutsQuery
-
-        if (payoutsError) {
-            console.error('[getEarningsData] Payouts fetch error:', payoutsError)
-            return { error: `Failed to fetch payout history: ${payoutsError.message}` }
-        }
-
-        let grossEarnings = 0
-        let totalCompensation = 0 // Received from Instructor Penalties
-        let totalPenalty = 0 // Paid as Displacement Fees
-        let upcomingEarnings = 0 // Approved/Submitted but not yet completed
-
-        bookings?.forEach(b => {
-            const breakdown = b.price_breakdown as any
-            const studioFee = Number(breakdown?.studio_fee || 0)
-            const penaltyProcessed = breakdown?.penalty_processed === true
-            const penaltyAmount = Number(breakdown?.penalty_amount || 0)
-            const initiator = breakdown?.refund_initiator
-
-            // Client cancelled late → studio keeps studio_fee as compensation, not a regular booking earn
-            const isClientLateCancel = b.status === 'cancelled_charged' && initiator === 'client'
-
-            // Scenario A: Successful or Pending Booking (awaiting approval)
-            const isRealized = (['approved', 'completed'].includes(b.status) || (b.status === 'pending' && b.payment_status === 'submitted') || (b.status === 'cancelled_charged' && !isClientLateCancel))
-
-            if (isRealized) {
-                grossEarnings += studioFee
-
-                // BUSINESS LOGIC: If it's not yet completed and funds aren't unlocked,
-                // it's "Upcoming" (not yet in profile.pending_balance)
-                if (b.status !== 'completed' && !b.funds_unlocked) {
-                    upcomingEarnings += studioFee
-                }
-            }
-
-            // Scenario B: Compensation — client cancelled late (studio keeps studio_fee)
-            if (isClientLateCancel) {
-                totalCompensation += studioFee
-            }
-
-            // Scenario B2: Compensation — instructor cancelled late (studio gets penalty)
-            if (penaltyProcessed && initiator === 'instructor') {
-                totalCompensation += penaltyAmount
-            }
-
-            // Scenario C: Penalty (Studio cancelled late)
-            if (penaltyProcessed && initiator === 'studio') {
-                totalPenalty += penaltyAmount
-            }
+        const { data, error } = await supabase.rpc('get_studio_earnings_v2', {
+            p_studio_id: studioId,
+            p_start_date: startDate || null,
+            p_end_date: endDate || null
         })
 
-        const totalPaidOut = payouts
-            ?.filter(p => p.status === 'paid')
-            .reduce((sum, p) => sum + Number(p.amount), 0) || 0
+        if (error) {
+            console.error('[getEarningsData] RPC error:', error)
+            return { error: `Earnings data error: ${error.message}` }
+        }
 
-        const totalPending = payouts
-            ?.filter(p => p.status === 'pending' || p.status === 'approved')
-            .reduce((sum, p) => sum + Number(p.amount), 0) || 0
-
-        // Net Earnings logic
-        const netEarnings = grossEarnings + totalCompensation - totalPenalty
-
-        // 6. Unified Transactions for CSV
-        const transactions: any[] = []
-        const wrap = (val: any) => Array.isArray(val) ? val[0] : val
-
-        bookings?.forEach(b => {
-            const breakdown = b.price_breakdown as any
-            const studioFee = Number(breakdown?.studio_fee || 0)
-            const slot = wrap(b.slots)
-            const studioName = slot?.studios?.name
-            const clientName = wrap(b.client)?.full_name
-            const instructorName = wrap(b.instructor)?.full_name
-
-            const penaltyProcessed = breakdown?.penalty_processed === true
-            const penaltyAmount = Number(breakdown?.penalty_amount || 0)
-            const initiator = breakdown?.refund_initiator
-
-            // Add the booking transaction itself if valid, pending verification, or refunded
-            const isRefunded = b.status === 'cancelled_refunded'
-            const isLateCancel = b.status === 'cancelled_charged'
-            const isRealizedTx = ['approved', 'completed', 'cancelled_charged'].includes(b.status) || (b.status === 'pending' && b.payment_status === 'submitted')
-
-            if (isRealizedTx || isRefunded) {
-                let txType = 'Booking'
-                if (isRefunded) txType = 'Booking (Refunded)'
-                else if (isLateCancel) txType = 'Booking (Late Cancel)'
-                else if (b.payment_status === 'submitted' && b.status === 'pending') txType = 'Booking (Verification)'
-
-                transactions.push({
-                    date: b.created_at,
-                    booking_date: slot?.date && slot?.start_time ? `${slot.date}T${slot.start_time}+08:00` : undefined,
-                    session_date: slot?.date,
-                    session_time: slot?.start_time,
-                    type: txType,
-                    client: clientName,
-                    instructor: instructorName,
-                    studio: studioName,
-                    total_amount: isRefunded ? 0 : studioFee,
-                    details: isRefunded ? `REFUNDED: ${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}` :
-                        isLateCancel ? `CHARGED: ${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}` :
-                            `${b.price_breakdown?.quantity || 1} x ${b.price_breakdown?.equipment || 'Session'}`
-                })
-            }
-
-            // Add Compensation entry
-            if (penaltyProcessed && initiator === 'instructor') {
-                transactions.push({
-                    date: b.updated_at || b.created_at,
-                    type: 'Cancellation Compensation',
-                    client: clientName,
-                    instructor: instructorName,
-                    studio: studioName,
-                    total_amount: penaltyAmount,
-                    session_date: slot?.date,
-                    session_time: slot?.start_time,
-                    details: 'Late cancellation by instructor'
-                })
-            }
-
-            // Add Penalty entry
-            if (penaltyProcessed && initiator === 'studio') {
-                transactions.push({
-                    date: b.updated_at || b.created_at,
-                    type: 'Cancellation Penalty',
-                    client: clientName,
-                    instructor: instructorName,
-                    studio: studioName,
-                    total_amount: -penaltyAmount,
-                    session_date: slot?.date,
-                    session_time: slot?.start_time,
-                    details: 'Late cancellation displacement fee'
-                })
-            }
-        })
-
-        payouts?.forEach(p => {
-            transactions.push({
-                date: p.created_at,
-                type: 'Payout',
-                status: p.status,
-                total_amount: -Number(p.amount),
-                details: `Withdrawal via ${p.payment_method}`
-            })
-        })
-
-        // 4.5. Get Wallet Top-ups & Admin Adjustments
-        let walletQuery = ownerId ? supabase
-            .from('wallet_top_ups')
-            .select('*')
-            .eq('user_id', ownerId)
-            .eq('status', 'approved')
-            .order('created_at', { ascending: false })
-            : null;
-
-        if (walletQuery && startDate) walletQuery = walletQuery.gte('created_at', `${startDate}T00:00:00.000Z`)
-        if (walletQuery && endDate) walletQuery = walletQuery.lte('created_at', `${endDate}T23:59:59.999Z`)
-
-        const { data: walletActions } = walletQuery ? await walletQuery : { data: null };
-
-        walletActions?.forEach(wa => {
-            const isAdjustment = wa.type === 'admin_adjustment';
-            transactions.push({
-                date: wa.processed_at || wa.updated_at || wa.created_at,
-                type: isAdjustment ? 'Direct Adjustment' : 'Wallet Top-Up',
-                total_amount: wa.amount, // Signed amount
-                details: wa.admin_notes || (isAdjustment ? 'Manual balance adjustment' : 'Gcash/Bank Top-up')
-            });
-        });
-
-        // Map wallet actions to "booking-like" objects for the UI
-        const mappedWalletActions = walletActions?.map(wa => ({
-            id: wa.id,
-            created_at: wa.processed_at || wa.updated_at || wa.created_at,
-            type: wa.type, // 'top_up' or 'admin_adjustment'
-            admin_notes: wa.admin_notes,
-            amount: wa.amount,
-            // Mock empty fields for UI compatibility
-            client: null,
-            slots: null,
-            price_breakdown: { studio_fee: wa.amount }
-        })) || [];
-
-        transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        // Parse numeric strings back to numbers if needed (though jsonb should handle it)
+        const summary = data.summary
+        if (summary) {
+            summary.totalEarnings = Number(summary.totalEarnings || 0)
+            summary.totalCompensation = Number(summary.totalCompensation || 0)
+            summary.totalPenalty = Number(summary.totalPenalty || 0)
+            summary.netEarnings = Number(summary.netEarnings || 0)
+            summary.totalPaidOut = Number(summary.totalPaidOut || 0)
+            summary.pendingPayouts = Number(summary.pendingPayouts || 0)
+            summary.availableBalance = Number(summary.availableBalance || 0)
+            summary.pendingBalance = Number(summary.pendingBalance || 0)
+        }
 
         return {
-            bookings: [...(bookings || []), ...mappedWalletActions].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
-            payouts,
-            transactions,
-            summary: {
-                totalEarnings: grossEarnings,
-                totalCompensation,
-                totalPenalty,
-                netEarnings,
-                totalPaidOut,
-                pendingPayouts: totalPending,
-                availableBalance: Number(profile?.available_balance || 0),
-                pendingBalance: Number(profile?.pending_balance || 0) + upcomingEarnings,
-                payoutApprovalStatus: studio?.payout_approval_status || 'none'
-            }
+            bookings: data.bookings || [],
+            payouts: data.payouts || [],
+            transactions: data.transactions || [],
+            summary: summary
         }
     } catch (err: any) {
         console.error('[getEarningsData] Global Crash:', err)
@@ -324,63 +65,39 @@ export async function requestPayout(prevState: any, formData: FormData) {
     // Check approval status and document expiry
     const { data: studio } = await supabase
         .from('studios')
-        .select('payout_approval_status, bir_certificate_expiry, mayors_permit_expiry, payout_lock')
+        .select('payout_approval_status, bir_certificate_expiry, mayors_permit_expiry, payout_lock, owner_id')
         .eq('id', studioId).single()
 
     if (studio?.payout_approval_status !== 'approved') {
-        return { error: 'Your payout application is pending or has not been approved yet. Please submit the required documents first.' }
+        return { error: 'Your payout application is pending or has not been approved yet.' }
     }
 
     if (studio?.payout_lock) {
-        return { error: 'Withdrawals are currently locked for your studio. Please contact support.' }
+        return { error: 'Withdrawals are currently locked for your studio.' }
     }
 
     const today = getManilaTodayStr()
     if ((studio?.bir_certificate_expiry && studio.bir_certificate_expiry < today)
         || (studio?.mayors_permit_expiry && studio.mayors_permit_expiry < today)) {
-        return { error: 'One or more of your mandatory documents (BIR 2303 or Mayor\'s Permit) have expired. Please update them before requesting a payout.' }
-    }
-
-
-    // Re-verify balance server-side to prevent overdrawing
-    const { summary, error: dataError } = await getEarningsData(studioId)
-    if (dataError || !summary) {
-        return { error: 'Could not verify balance. Please try again.' }
-    }
-
-    if (amount > summary.availableBalance) {
-        return { error: `Insufficient balance. Available: ₱${summary.availableBalance.toLocaleString()}` }
+        return { error: 'One or more of your mandatory documents have expired.' }
     }
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Not authenticated' }
 
-    // 2. Perform atomic deduction
-    const { error: deductError } = await supabase.rpc('deduct_available_balance', {
-        user_id: user.id,
-        amount
+    // PERFORM ATOMIC DEDUCTION AND RECORD CREATION
+    const { data: result, error: rpcError } = await supabase.rpc('request_payout_atomic_v2', {
+        p_user_id: user.id,
+        p_amount: amount,
+        p_method: paymentMethod,
+        p_account_name: accountName,
+        p_account_number: accountNumber,
+        p_bank_name: paymentMethod === 'bank_transfer' ? bankName : undefined,
+        p_studio_id: studioId
     })
 
-    if (deductError) {
-        return { error: 'Failed to process balance deduction.' };
-    }
-
-    const { error } = await supabase
-        .from('payout_requests')
-        .insert({
-            studio_id: studioId,
-            user_id: user.id,
-            amount,
-            payment_method: paymentMethod,
-            account_name: accountName,
-            account_number: accountNumber,
-            bank_name: paymentMethod === 'bank_transfer' ? bankName : undefined,
-            status: 'pending'
-        })
-
-    if (error) {
-        console.error('Payout Request Error:', error)
-        return { error: `Failed to submit payout request: ${error.message} (${error.code})` }
+    if (rpcError || !result?.success) {
+        return { error: rpcError?.message || result?.error || 'Failed to process payout request.' }
     }
 
     revalidatePath('/studio/earnings')

@@ -81,8 +81,11 @@ export default async function InstructorProfilePage(props: {
     const { reviews, averageRating, totalCount } = await getPublicReviews(id, user?.id)
 
     return (
-        <div className="min-h-screen bg-alabaster relative selection:bg-sage/20">
-            <div className="fixed inset-0 bg-white/50 -z-10 pointer-events-none" />
+        <div className="min-h-screen bg-[#faf9f6] relative selection:bg-sage/20 pb-20">
+            {/* Subtle Texture Overlay */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-multiply" 
+                style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/felt.png")` }} 
+            />
 
             {/* Banner Section */}
             {instructor.banner_url && (
@@ -98,11 +101,11 @@ export default async function InstructorProfilePage(props: {
                 </div>
             )}
 
-            <div className={clsx("p-4 sm:p-8 md:p-12", instructor.banner_url && "-mt-16 sm:-mt-24 relative z-10")}>
-                <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <div className={clsx("max-w-7xl mx-auto p-4 sm:p-8 md:p-12", instructor.banner_url && "-mt-16 sm:-mt-24 relative z-10")}>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
                     {/* Sidebar: Profile Info */}
-                    <div className="lg:col-span-1 space-y-6">
+                    <div className="lg:col-span-4 space-y-6">
                         <InstructorProfileCard 
                             instructor={instructor as any} 
                             averageRating={averageRating ?? undefined} 
@@ -112,14 +115,14 @@ export default async function InstructorProfilePage(props: {
                     </div>
 
                     {/* Main Content Area */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <div className="lg:col-span-8 space-y-12">
                         {/* Booking Wizard Section */}
-                        <div className="glass-card p-8 rounded-[32px]">
-                            <h2 className="text-2xl font-serif font-bold text-burgundy mb-8 flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-2xl bg-sage/10 flex items-center justify-center">
-                                    <Calendar className="w-5 h-5 text-sage" />
+                        <div className="atelier-card p-10">
+                            <h2 className="text-3xl font-serif font-bold text-burgundy mb-10 flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-forest text-white flex items-center justify-center shadow-lg shadow-forest/20">
+                                    <Calendar className="w-6 h-6" />
                                 </div>
-                                Schedule a Session
+                                Session Schedule
                             </h2>
 
                             <InstructorBookingWizard
@@ -137,12 +140,12 @@ export default async function InstructorProfilePage(props: {
 
                         {/* Photo Gallery Section */}
                         {instructor.gallery_images && instructor.gallery_images.length > 0 && (
-                            <div className="glass-card p-8 rounded-[32px]">
-                                <h2 className="text-2xl font-serif font-bold text-burgundy mb-8 flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
-                                        <ImageIcon className="w-5 h-5 text-gold" />
+                            <div className="atelier-card p-10">
+                                <h2 className="text-3xl font-serif font-bold text-burgundy mb-10 flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-burgundy text-white flex items-center justify-center shadow-lg shadow-burgundy/20">
+                                        <ImageIcon className="w-6 h-6" />
                                     </div>
-                                    From my Classes
+                                    In Practice
                                 </h2>
                                 <PublicInstructorGallery images={instructor.gallery_images} />
                             </div>
@@ -150,16 +153,15 @@ export default async function InstructorProfilePage(props: {
 
 
                         {/* Reviews Section */}
-
-                        <div id="reviews" className="glass-card p-8 rounded-[32px] scroll-mt-24">
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-2xl font-serif font-bold text-burgundy flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
-                                        <Star className="w-5 h-5 text-gold" />
+                        <div id="reviews" className="atelier-card p-10 scroll-mt-32">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
+                                <h2 className="text-3xl font-serif font-bold text-burgundy flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-amber-400 text-white flex items-center justify-center shadow-lg shadow-amber-200">
+                                        <Star className="w-6 h-6" />
                                     </div>
-                                    Client Reviews
+                                    Student Stories
                                 </h2>
-                                <div className="bg-white/40 px-4 py-2 rounded-2xl border border-white/60">
+                                <div className="bg-white px-6 py-3 rounded-2xl border border-burgundy/5 shadow-sm">
                                     <StarRating rating={averageRating} count={totalCount} size="sm" />
                                 </div>
                             </div>

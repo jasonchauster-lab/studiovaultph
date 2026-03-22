@@ -161,11 +161,11 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                                 {/* Sticky Date Header */}
                                 <div className="sticky top-0 z-20 py-3 bg-cream-50/95 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex flex-col items-center justify-center bg-forest text-white rounded-xl w-10 h-10 shrink-0 shadow-md ring-1 ring-white/20">
-                                            <span className="text-[7px] font-black uppercase tracking-widest leading-none opacity-80">
+                                        <div className="flex flex-col items-center justify-center bg-forest text-white rounded-2xl w-12 h-12 shrink-0 shadow-lg shadow-forest/20 group-hover:scale-105 transition-transform">
+                                            <span className="text-[8px] font-black uppercase tracking-[0.2em] leading-none opacity-70">
                                                 {dateObj.toLocaleDateString('en-PH', { month: 'short' })}
                                             </span>
-                                            <span className="text-sm font-serif font-bold leading-none mt-0.5">
+                                            <span className="text-lg font-serif font-bold leading-none mt-1">
                                                 {dateObj.toLocaleDateString('en-PH', { day: 'numeric' })}
                                             </span>
                                         </div>
@@ -315,8 +315,8 @@ const SessionCard = memo(({ booking, currentUserId, onInstructorClick, onClientC
     return (
         <div
             className={clsx(
-                "earth-card overflow-hidden border border-border-grey bg-white hover:bg-off-white/60 transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0",
-                isCancelled && "opacity-55 grayscale-[0.4]"
+                "atelier-card overflow-hidden group relative mx-4 sm:mx-0",
+                isCancelled && "opacity-60 grayscale-[0.3]"
             )}
         >
             {/* Top accent for status */}

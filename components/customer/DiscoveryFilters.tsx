@@ -1,14 +1,14 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { Filter, Calendar, Clock, ChevronDown, Navigation, Loader2 } from 'lucide-react'
-import { useState } from 'react'
 import { STUDIO_AMENITIES } from '@/types'
 import { clsx } from 'clsx'
 import LocationFilterDropdown from '@/components/shared/LocationFilterDropdown'
 import MultiSelectFilter from '@/components/shared/MultiSelectFilter'
 import { getManilaTodayStr } from '@/lib/timezone'
+import FilterDrawer from './FilterDrawer'
 
 interface DiscoveryFiltersProps {
     /** Sub-location strings of verified studios that currently exist in the DB */
@@ -20,6 +20,7 @@ export default function DiscoveryFilters({ availableLocations, userRole }: Disco
     const router = useRouter()
     const searchParams = useSearchParams()
     const [isDetecting, setIsDetecting] = useState(false)
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
     const currentRadius = searchParams.get('radius') || 'all'
     const hasLocation = searchParams.get('lat') && searchParams.get('lng')
@@ -106,11 +107,10 @@ export default function DiscoveryFilters({ availableLocations, userRole }: Disco
             </div>
 
             <div className="flex flex-col lg:flex-row lg:items-end gap-6 sm:gap-8">
-                {/* Main Categories: Grid/Wrap on Mobile to prevent cutoff */}
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 flex-1">
+                {/* Desktop View: Main Categories */}
+                <div className="hidden lg:flex flex-wrap items-center gap-4 flex-1">
                     {userRole !== 'instructor' && (
                         <div className="min-w-[140px] flex-1 sm:flex-none">
-                            {/* Type Filter */}
                             <div className="relative group w-full">
                                 <select
                                     onChange={(e) => handleFilter('type', e.target.value)}
@@ -127,7 +127,6 @@ export default function DiscoveryFilters({ availableLocations, userRole }: Disco
                             </div>
                         </div>
                     )}
-
 
                     <div className="min-w-[140px] flex-1 sm:flex-none">
                         <MultiSelectFilter
@@ -159,6 +158,38 @@ export default function DiscoveryFilters({ availableLocations, userRole }: Disco
                         />
                     </div>
                 </div>
+
+                {/* Mobile View: Single Filter Button */}
+                <div className="flex lg:hidden flex-col gap-4">
+                    <button
+                        onClick={() => setIsDrawerOpen(true)}
+                        className="flex items-center justify-between w-full px-6 py-4 bg-off-white/50 border border-burgundy/10 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] text-burgundy shadow-sm group hover:border-burgundy/30 transition-all h-[60px]"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-burgundy/5 flex items-center justify-center border border-burgundy/5 group-hover:bg-burgundy group-hover:text-white transition-all">
+                                <Filter className="w-4 h-4" />
+                            </div>
+                            <span className="font-black">Filter Discovery</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                             {hasFilters && (
+                                <span className="px-2.5 py-1 rounded-lg bg-burgundy text-white text-[8px] font-black uppercase tracking-widest animate-pulse">
+                                    Active
+                                </span>
+                             )}
+                             <ChevronDown className="w-4 h-4 text-burgundy/20 group-hover:text-burgundy/40" />
+                        </div>
+                    </button>
+                </div>
+
+                <FilterDrawer 
+                    isOpen={isDrawerOpen}
+                    onClose={() => setIsDrawerOpen(false)}
+                    userRole={userRole}
+                    handleFilter={handleFilter}
+                    handleMultiFilter={handleMultiFilter}
+                    getMultiValue={getMultiValue}
+                />
 
                 {/* Clear Filters (Desktop Only) */}
                 {hasFilters && (

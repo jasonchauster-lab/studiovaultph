@@ -44,90 +44,113 @@ export default async function CustomerDashboard({
         expireAbandonedBookings().catch(() => {})
     )
 
-    // 1. Fetch Studios + all distinct verified locations (for smart filter)
-    let studioQuery = supabase
-        .from('studios')
-        .select('*, profiles!owner_id(available_balance, is_suspended)')
-        .eq('verified', true)
+    // 1. Fetch main datasets in parallel
+    const [{ data: profile }, { data: allLocationsRaw }] = await Promise.all([
+        supabase.from('profiles').select('role, date_of_birth, contact_number').eq('id', user.id).maybeSingle(),
+        supabase.from('studios').select('location').eq('verified', true)
+    ])
 
-    if (params.location && params.location !== 'all') {
-        if (params.location.includes(' - ')) {
-            studioQuery = studioQuery.eq('location', params.location)
-        } else {
-            studioQuery = studioQuery.like('location', params.location + ' - %')
+    if (!profile?.date_of_birth || !profile?.contact_number) {
+        redirect('/customer/onboarding')
+    }
+
+    const availableLocations: string[] = [...new Set((allLocationsRaw || []).map((s: any) => s.location).filter(Boolean))]
+
+    // 1.1 Define Distance Parameters
+    const userLat = params.lat ? parseFloat(params.lat) : null
+    const userLng = params.lng ? parseFloat(params.lng) : null
+    const radiusKm = params.radius && params.radius !== 'all' ? parseFloat(params.radius) : null
+    const radiusMeters = radiusKm ? radiusKm * 1000 : null
+
+    // 1.2 Fetch Studios (PostGIS optimization)
+    let rawStudiosData: any[];
+    if (userLat !== null && userLng !== null && radiusMeters !== null) {
+        const { data } = await supabase.rpc('get_studios_nearby_v2', {
+            user_lat: userLat,
+            user_lng: userLng,
+            radius_meters: radiusMeters
+        })
+        rawStudiosData = data || []
+    } else {
+        const { data } = await supabase
+            .from('studios')
+            .select('*, profiles!owner_id!inner(available_balance, is_suspended)')
+            .eq('verified', true)
+            .eq('profiles.is_suspended', false)
+            .gte('profiles.available_balance', 0)
+        rawStudiosData = data || []
+    }
+
+    let studios = rawStudiosData.filter(s => {
+        // A. Location Tags (Fallback)
+        if (params.location && params.location !== 'all') {
+            const matchesTag = params.location.includes(' - ') 
+                ? s.location === params.location 
+                : s.location?.startsWith(params.location + ' - ')
+            if (!matchesTag) return false
+        }
+
+        // B. Equipment/Amenities
+        if (params.equipment && params.equipment !== 'all') {
+             const equipmentList = params.equipment.split(',')
+             if (!s.equipment?.some((e: string) => equipmentList.includes(e))) return false
+        }
+        if (params.amenity && params.amenity !== 'all') {
+             const amenityList = params.amenity.split(',')
+             if (!s.amenities?.some((a: string) => amenityList.includes(a))) return false
+        }
+        return true
+    })
+
+    // 2. Fetch Instructors (PostGIS optimization)
+    let fetchedInstructors: any[];
+    if (userLat !== null && userLng !== null && radiusMeters !== null) {
+        const { data } = await supabase.rpc('get_instructors_nearby_v1', {
+            user_lat: userLat,
+            user_lng: userLng,
+            radius_meters: radiusMeters
+        })
+        fetchedInstructors = data || []
+    } else {
+        const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', 'instructor')
+            .is('is_suspended', false)
+        
+        fetchedInstructors = data || []
+    }
+
+    // 2.1 Process instructor filters (Availability & Certs)
+    let filteredInstructors = fetchedInstructors;
+
+    if (params.certification && params.certification !== 'all') {
+        // Fetch certs for these instructors since the RPC might not include them joined
+        const instructorIds = filteredInstructors.map(i => i.id)
+        if (instructorIds.length > 0) {
+            const { data: certs } = await supabase
+                .from('certifications')
+                .select('*')
+                .in('instructor_id', instructorIds)
+                .eq('verified', true)
+            
+            const filterTokens = params.certification.split(',').map(c => c.trim().toLowerCase())
+            filteredInstructors = filteredInstructors.filter(inst => {
+                const instCerts = certs?.filter(c => c.instructor_id === inst.id) || []
+                return instCerts.some(c => 
+                    filterTokens.some(token => c.certification_body?.trim().toLowerCase().startsWith(token))
+                )
+            })
         }
     }
 
     if (params.equipment && params.equipment !== 'all') {
         const equipmentList = params.equipment.split(',')
-        studioQuery = studioQuery.overlaps('equipment', equipmentList)
+        filteredInstructors = filteredInstructors.filter(inst => 
+            inst.teaching_equipment?.some((e: string) => equipmentList.includes(e))
+        )
     }
 
-    if (params.amenity && params.amenity !== 'all') {
-        const amenityList = params.amenity.split(',')
-        studioQuery = studioQuery.overlaps('amenities', amenityList)
-    }
-
-    // Fetch profile + studios + locations in parallel
-    const [{ data: profile, error: profileError }, { data: allStudiosForLocations }, { data: rawStudios }] = await Promise.all([
-        supabase.from('profiles').select('role, date_of_birth, contact_number').eq('id', user.id).maybeSingle(),
-        supabase.from('studios').select('location').eq('verified', true),
-        studioQuery
-    ])
-
-    if (profileError) {
-        console.error('[CustomerDashboard] Profile fetch error:', profileError)
-    }
-
-    if (!profile?.date_of_birth || !profile?.contact_number) {
-        console.log(`[CustomerDashboard] Incomplete profile for ${user.email}. Redirecting to onboarding.`)
-        redirect('/customer/onboarding')
-    }
-
-    const availableLocations: string[] = [
-        ...new Set((allStudiosForLocations || []).map((s: any) => s.location).filter(Boolean))
-    ]
-
-    // Filter out suspended or negative balance studios
-    let studios = rawStudios?.filter((s: any) => {
-        const owner = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles;
-        return !owner?.is_suspended && (owner?.available_balance || 0) >= 0;
-    }) || []
-
-    // 1.1 Distance Filter for Studios
-    if (params.lat && params.lng && params.radius && params.radius !== 'all') {
-        const { calculateDistance } = await import('@/lib/utils/location')
-        const userLat = parseFloat(params.lat)
-        const userLng = parseFloat(params.lng)
-        const radius = parseFloat(params.radius)
-
-        studios = studios.filter(s => {
-            if (!s.lat || !s.lng) return false;
-            const dist = calculateDistance(userLat, userLng, Number(s.lat), Number(s.lng))
-            return dist <= radius
-        })
-    }
-
-    // 2. Fetch Instructors (with certifications)
-    let instructorQuery = supabase
-        .from('profiles')
-        .select(`
-            *,
-            certifications (
-                id,
-                certification_body,
-                verified
-            )
-        `)
-        .eq('role', 'instructor')
-        .eq('is_suspended', false)
-
-    if (params.equipment && params.equipment !== 'all') {
-        const equipmentList = params.equipment.split(',')
-        instructorQuery = instructorQuery.overlaps('teaching_equipment', equipmentList)
-    }
-
-    // 3. Availability & Location Filter (Instructors)
     if (params.date || params.time || (params.location && params.location !== 'all')) {
         let availQuery = supabase.from('instructor_availability').select('instructor_id')
 
@@ -146,17 +169,12 @@ export default async function CustomerDashboard({
             availQuery = availQuery.lte('start_time', timeStr).gt('end_time', timeStr)
         }
 
-        const { data: availableIds, error: availError } = await availQuery
-
-        if (availError) {
-            console.error('Availability Query Error:', availError)
-        }
-
-        if (availableIds && availableIds.length > 0) {
+        const { data: availableIds } = await availQuery
+        if (availableIds) {
             const ids = availableIds.map((a: any) => a.instructor_id)
-            instructorQuery = instructorQuery.in('id', ids)
+            filteredInstructors = filteredInstructors.filter(inst => ids.includes(inst.id))
         } else {
-            instructorQuery = instructorQuery.eq('id', '00000000-0000-0000-0000-000000000000')
+            filteredInstructors = []
         }
     }
 
@@ -205,11 +223,9 @@ export default async function CustomerDashboard({
         if (data) slots = data as unknown as Slot[]
     }
 
-    // Fetch aggregated ratings + instructors in parallel
-    // reviewer_ratings is a DB view (GROUP BY reviewee_id) — no more loading 2000 raw rows
-    const [{ data: ratingsRows }, { data: instructorsRaw }] = await Promise.all([
+    // 3. Fetch aggregated ratings + ratings rows in parallel
+    const [{ data: ratingsRows }] = await Promise.all([
         supabase.from('reviewer_ratings').select('reviewee_id, average, count'),
-        instructorQuery,
     ])
 
     const ratingsMap: Record<string, { total: number, count: number, average: number }> = {}
@@ -221,43 +237,18 @@ export default async function CustomerDashboard({
         }
     })
 
-    // Filter Instructors by certification and Distance
-    const { calculateDistance } = await import('@/lib/utils/location')
-    const userLat = params.lat ? parseFloat(params.lat) : null
-    const userLng = params.lng ? parseFloat(params.lng) : null
-    const radius = params.radius && params.radius !== 'all' ? parseFloat(params.radius) : null
+    // To ensure the UI has certifications, join them back if they aren't there
+    const instructorsWithCerts = await Promise.all(filteredInstructors.map(async (inst) => {
+        if (inst.certifications) return inst;
+        const { data: certs } = await supabase
+            .from('certifications')
+            .select('*')
+            .eq('instructor_id', inst.id)
+            .eq('verified', true);
+        return { ...inst, certifications: certs || [] };
+    }));
 
-    const instructors = instructorsRaw?.filter(inst => {
-        // 1. Certification Filter
-        if (params.certification && params.certification !== 'all') {
-            const filterTokens = params.certification.split(',').map(c => c.trim().toLowerCase())
-            const hasCert = inst.certifications?.some((c: any) =>
-                c.verified &&
-                filterTokens.some(token => c.certification_body?.trim().toLowerCase().startsWith(token))
-            )
-            if (!hasCert) return false
-        }
-
-        // 2. Distance Filter (Home Sessions)
-        if (userLat !== null && userLng !== null && radius !== null) {
-            // An instructor matches IF:
-            // 1. They offer home sessions
-            // 2. They have a home base set
-            // 3. The distance is within THEIR max_travel_km
-            // 4. The distance is within the USER'S preferred radius
-            
-            if (!inst.offers_home_sessions || !inst.home_base_lat || !inst.home_base_lng) return false
-
-            const dist = calculateDistance(userLat, userLng, Number(inst.home_base_lat), Number(inst.home_base_lng))
-            
-            const withinUserRadius = dist <= radius
-            const withinInstructorLimit = dist <= (inst.max_travel_km || 10)
-
-            return withinUserRadius && withinInstructorLimit
-        }
-
-        return true
-    }) || []
+    const instructors = instructorsWithCerts;
 
     return (
         <div className="relative min-h-screen pb-20 sm:pb-32 space-y-12 sm:space-y-20 overflow-hidden bg-[#faf9f6]">
@@ -297,7 +288,7 @@ export default async function CustomerDashboard({
                             </div>
 
                             {instructors.length === 0 ? (
-                                <div className="earth-card py-24 text-center flex flex-col items-center justify-center gap-y-6 border-dashed border-2 border-burgundy/10 bg-off-white/30">
+                                <div className="atelier-card py-24 text-center flex flex-col items-center justify-center gap-y-6 border-dashed border-2 border-burgundy/10 bg-off-white/30">
                                     <div className="relative">
                                         <div className="w-24 h-24 bg-walking-vinnie/20 rounded-full flex items-center justify-center shadow-inner ring-1 ring-walking-vinnie/30">
                                             <User className="w-10 h-10 text-burgundy/20" />
@@ -316,7 +307,7 @@ export default async function CustomerDashboard({
                                     {instructors.map(inst => {
                                         const hasVerifiedCert = inst.certifications?.some((c: any) => c.verified)
                                         return (
-                                            <div key={inst.id} className="marketplace-card earth-card group bg-white rounded-[2.5rem] border border-burgundy/5 overflow-hidden transition-all duration-700 hover:shadow-[0_40px_100px_rgba(81,50,41,0.12)] hover:-translate-y-2 flex flex-col h-full relative">
+                                            <div key={inst.id} className="atelier-card group flex flex-col h-full relative overflow-hidden">
                                                 {/* ── Banner: gradient lifestyle area ── */}
                                                 <div className="relative h-32 sm:h-44 bg-[#F5F2EB] overflow-hidden">
                                                     {(inst.banner_url || inst.avatar_url) ? (
@@ -449,7 +440,7 @@ export default async function CustomerDashboard({
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
                                 {studios?.map(studio => (
-                                    <div key={studio.id} className="marketplace-card earth-card group bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-burgundy/5 overflow-hidden transition-all duration-700 hover:shadow-[0_40px_100px_rgba(81,50,41,0.12)] hover:-translate-y-2 flex flex-col h-full ring-1 ring-burgundy/[0.02]">
+                                    <div key={studio.id} className="atelier-card group flex flex-col h-full ring-1 ring-burgundy/[0.02] overflow-hidden">
                                         {/* ── Banner Image ── */}
                                         <div className="relative aspect-[16/10] overflow-hidden bg-[#F5F2EB]">
                                             {(studio.banner_url || studio.logo_url) ? (
@@ -461,7 +452,7 @@ export default async function CustomerDashboard({
                                                     className="object-cover group-hover:scale-110 transition-transform duration-[3000ms] ease-out will-change-transform"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-off-white to-walking-vinnie/20">
+                                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-stone-50 to-walking-vinnie/20">
                                                     <span className="text-burgundy/10 font-serif italic text-7xl sm:text-8xl select-none group-hover:scale-110 transition-transform duration-1000">
                                                         {studio.name.slice(0, 1)}
                                                     </span>
@@ -562,7 +553,7 @@ export default async function CustomerDashboard({
                             </div>
 
                             {slots.length === 0 ? (
-                                <div className="earth-card py-24 text-center flex flex-col items-center justify-center gap-y-6 border-dashed border-2 border-burgundy/10 bg-off-white/30">
+                                <div className="atelier-card py-24 text-center flex flex-col items-center justify-center gap-y-6 border-dashed border-2 border-burgundy/10 bg-off-white/30">
                                     <div className="relative">
                                         <div className="w-24 h-24 bg-buttermilk/20 rounded-full flex items-center justify-center shadow-inner ring-1 ring-buttermilk/40">
                                             <Clock className="w-10 h-10 text-burgundy/20" />

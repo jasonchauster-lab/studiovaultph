@@ -37,9 +37,9 @@ export default function InstructorProfileCard({
     const initial = instructor.full_name ? instructor.full_name.charAt(0).toUpperCase() : 'I'
 
     return (
-        <div className={`glass-card p-8 rounded-[32px] text-center border-border-grey shadow-cloud bg-white ${isSticky ? 'sticky top-24' : ''}`}>
+        <div className={`atelier-card p-10 text-center ${isSticky ? 'sm:sticky sm:top-24' : ''}`}>
             {/* Avatar Section */}
-            <div className="relative w-32 h-32 bg-white/40 rounded-full flex items-center justify-center mx-auto mb-6 overflow-hidden border-2 border-white/80 shadow-cloud ring-1 ring-border-grey/10">
+            <div className="relative w-40 h-40 bg-white rounded-full flex items-center justify-center mx-auto mb-8 overflow-hidden border-4 border-white shadow-2xl ring-1 ring-burgundy/5 group hover:scale-105 transition-transform duration-700">
                 <Image
                     src={getSupabaseAssetUrl(instructor.avatar_url, 'avatars') || '/default-avatar.svg'}
                     alt={instructor.full_name}
@@ -60,9 +60,9 @@ export default function InstructorProfileCard({
                     href={`https://instagram.com/${instructor.instagram_handle}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 text-[10px] font-bold text-sage uppercase tracking-widest hover:text-burgundy transition-colors group mb-4"
+                    className="inline-flex items-center justify-center gap-3 text-[11px] font-black text-forest uppercase tracking-[0.2em] hover:text-burgundy transition-all duration-300 group mb-6 px-6 py-2 rounded-full bg-forest/5 hover:bg-burgundy/5 border border-forest/10 hover:border-burgundy/10"
                 >
-                    <Instagram className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    <Instagram className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
                     @{instructor.instagram_handle}
                 </a>
             )}
@@ -81,19 +81,18 @@ export default function InstructorProfileCard({
 
             {/* Certifications */}
             {instructor.certifications && instructor.certifications.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-2 mb-8">
-                    {instructor.certifications.map((c, i) => (
+                <div className="flex flex-wrap justify-center gap-2.5 mb-8">
+                    {instructor.certifications.map((c: any, i: number) => (
                         <span
                             key={i}
-                            className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-1.5 border ${c.verified
-                                ? "bg-sage/10 text-sage border-sage/20"
-                                : "bg-white/40 text-burgundy/60 border-white/60"
+                            className={`text-[9px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-xl flex items-center gap-2 border transition-all duration-300 ${c.verified
+                                ? "bg-forest text-white border-forest shadow-lg shadow-forest/10"
+                                : "bg-white text-burgundy/40 border-burgundy/5"
                                 }`}
-                            title={c.verified ? 'Verified Certification' : 'Pending Verification'}
+                            title={c.verified ? 'Verified Master' : 'Pending Verification'}
                         >
-                            <Award className="w-3 h-3" />
+                            <Award className="w-3.5 h-3.5" />
                             {c.certification_body}
-                            {!c.verified && <span className="opacity-50">(Pending)</span>}
                         </span>
                     ))}
                 </div>
@@ -101,30 +100,32 @@ export default function InstructorProfileCard({
 
             {/* Home Sessions Badge */}
             {instructor.offers_home_sessions && (
-                <div className="mb-8 p-4 bg-forest/5 border border-forest/10 rounded-2xl flex flex-col items-center gap-2">
-                    <div className="flex items-center gap-2 text-forest font-black text-[10px] uppercase tracking-widest">
-                        <CheckCircle className="w-4 h-4" />
-                        Home Sessions Available
+                <div className="mb-10 p-6 bg-forest/5 border border-forest/10 rounded-[2rem] flex flex-col items-center gap-3 shadow-inner">
+                    <div className="flex items-center gap-3 text-forest font-black text-[11px] uppercase tracking-[0.2em]">
+                        <div className="w-8 h-8 rounded-full bg-forest text-white flex items-center justify-center shadow-lg shadow-forest/20">
+                            <CheckCircle className="w-4 h-4" />
+                        </div>
+                        Home Sessions
                     </div>
                     {instructor.max_travel_km && (
-                        <span className="text-[9px] text-forest/40 font-bold uppercase tracking-widest">
-                            Within {instructor.max_travel_km}km of {instructor.home_base_address?.split(',')[0] || 'Base'}
+                        <span className="text-[10px] text-forest/50 font-black uppercase tracking-[0.15em]">
+                            Within {instructor.max_travel_km}km Range
                         </span>
                     )}
                 </div>
             )}
 
             {/* Teaching Equipment */}
-            {(instructor.teaching_equipment || (instructor.rates && Object.keys(instructor.rates).length > 0)) && (
-                <div className="pt-8 border-t border-burgundy/5">
-                    <h3 className="text-[10px] font-bold text-burgundy/60 uppercase tracking-[0.2em] mb-4">
-                        Certified Equipment
+            {(instructor.teaching_equipment?.length || (instructor.rates && Object.keys(instructor.rates).length > 0)) && (
+                <div className="pt-10 border-t border-burgundy/5">
+                    <h3 className="text-[10px] font-black text-burgundy/20 uppercase tracking-[0.3em] mb-6">
+                        Expertise & Specializations
                     </h3>
-                    <div className="flex flex-wrap justify-center gap-2">
+                    <div className="flex flex-wrap justify-center gap-2.5">
                         {(instructor.teaching_equipment || Object.keys(instructor.rates || {})).map((eq) => (
                             <span 
                                 key={eq} 
-                                className="bg-white/60 text-burgundy text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-[12px] border border-border-grey shadow-tight"
+                                className="bg-white text-burgundy/60 text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-xl border border-burgundy/5 shadow-sm hover:border-burgundy/10 transition-colors"
                             >
                                 {eq}
                             </span>

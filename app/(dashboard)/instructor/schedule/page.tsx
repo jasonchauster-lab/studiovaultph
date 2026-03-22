@@ -19,17 +19,24 @@ export default async function InstructorSchedulePage(props: {
     const dateParam = typeof searchParams.date === 'string' ? searchParams.date : getManilaTodayStr()
     const currentDate = new Date(dateParam)
 
-    // Fetch existing availability, profile, and bookings
+    const { addWeeks, format } = await import('date-fns')
+    const windowStart = addWeeks(currentDate, -4)
+    const windowEnd = addWeeks(currentDate, 12) // Fetch 3 months of data for smooth scrolling
+    const windowStartStr = format(windowStart, 'yyyy-MM-dd')
+    const windowEndStr = format(windowEnd, 'yyyy-MM-dd')
+
+    // Fetch existing availability, profile, and bookings with windowed filtering
     const [availabilityRes, profileRes, bookingsRes] = await Promise.all([
         supabase
             .from('instructor_availability')
             .select('*')
             .eq('instructor_id', user.id)
+            .or(`date.is.null,and(date.gte.${windowStartStr},date.lte.${windowEndStr})`)
             .order('day_of_week', { ascending: true })
             .order('start_time', { ascending: true }),
         supabase
             .from('profiles')
-            .select('id, teaching_equipment, rates')
+            .select('id, teaching_equipment, rates, home_base_address')
             .eq('id', user.id)
             .single(),
         supabase
@@ -40,6 +47,8 @@ export default async function InstructorSchedulePage(props: {
                 client:profiles!client_id (id, full_name, avatar_url, email, date_of_birth, medical_conditions, other_medical_condition, bio)
             `)
             .eq('instructor_id', user.id)
+            .gte('slots.date', windowStartStr)
+            .lte('slots.date', windowEndStr)
             .in('status', ['approved', 'completed', 'pending', 'cancelled_refunded', 'cancelled_charged', 'rejected'])
             .order('created_at', { ascending: false })
     ])

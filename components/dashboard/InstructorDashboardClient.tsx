@@ -222,31 +222,31 @@ export default function InstructorDashboardClient({
             <div className="sticky-header-antigravity -mx-4 sm:-mx-8 lg:-mx-12 mb-8 sm:mb-12 px-6 sm:px-8 lg:px-12 py-6 sm:py-8 lg:py-0">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-8">
                     <div>
-                        <h1 className="text-xl sm:text-4xl md:text-5xl font-serif text-charcoal tracking-tighter mb-2 sm:mb-4">Instructor Dashboard</h1>
-                        <p className="text-[9px] sm:text-[10px] font-bold text-charcoal/40 uppercase tracking-[0.3em] sm:tracking-[0.4em] max-w-[90%] sm:max-w-none leading-relaxed">Manage your professional schedule and earnings with grounded precision.</p>
+                        <h1 className="text-xl sm:text-4xl md:text-5xl font-serif text-burgundy tracking-tighter mb-2 sm:mb-4">Instructor Dashboard</h1>
+                        <p className="text-[9px] sm:text-[10px] font-bold text-burgundy/40 uppercase tracking-[0.3em] sm:tracking-[0.4em] max-w-[90%] sm:max-w-none leading-relaxed">Manage your professional schedule and earnings with grounded precision.</p>
                     </div>
                 </div>
             </div>
 
             {/* Service Area Setup Prompt */}
             {!instructorProfile?.home_base_address && (
-                <div className="bg-forest/5 border border-forest/10 rounded-[32px] p-8 sm:p-12 mb-12 relative overflow-hidden group/service transition-all hover:bg-forest/10">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
-                    <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                        <div className="w-20 h-20 bg-burgundy text-white rounded-[24px] flex items-center justify-center shadow-cloud shrink-0 group-hover/service:scale-110 transition-transform duration-700">
-                            <AlertTriangle className="w-8 h-8" />
+                <div className="atelier-card !bg-forest/5 !border-forest/10 p-10 sm:p-14 mb-12 relative overflow-hidden group/service">
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none group-hover:bg-forest/10 transition-colors" />
+                    <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
+                        <div className="w-20 h-20 bg-burgundy text-white rounded-[2rem] flex items-center justify-center shadow-ambient shrink-0 group-hover/service:scale-110 transition-transform duration-700">
+                            <AlertTriangle className="w-9 h-9" />
                         </div>
                         <div className="flex-1 text-center md:text-left">
-                            <h2 className="text-2xl sm:text-3xl font-serif text-charcoal tracking-tight mb-2">Connect with Clients at Home</h2>
-                            <p className="text-[11px] font-bold text-charcoal/40 uppercase tracking-widest leading-relaxed max-w-2xl">
+                            <h2 className="text-3xl sm:text-4xl font-serif text-burgundy tracking-tight mb-3">Connect with Clients at Home</h2>
+                            <p className="text-[11px] font-bold text-slate uppercase tracking-[0.2em] leading-relaxed max-w-2xl">
                                 You haven't set your service area yet. Pin your home base and define your travel radius to appear in "Home Session" searches and grow your reach.
                             </p>
                         </div>
                         <Link 
                             href="/instructor/profile"
-                            className="px-10 py-5 bg-forest text-white text-[11px] font-black uppercase tracking-widest rounded-2xl hover:brightness-110 transition-all shadow-cloud active:scale-95 whitespace-nowrap"
+                            className="btn-primary-atelier !py-4 !px-10"
                         >
-                            Setup Service Area
+                            Setup Area
                         </Link>
                     </div>
                 </div>
@@ -267,7 +267,7 @@ export default function InstructorDashboardClient({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                 <div className="lg:col-span-2">
                     {/* Desktop Calendar */}
-                    <div className="hidden lg:block border border-border-grey rounded-xl overflow-hidden bg-white">
+                    <div className="hidden lg:block border border-burgundy/5 rounded-xl overflow-hidden bg-white">
                         <InstructorScheduleCalendar
                             availability={availability}
                             bookings={calendarBookings}
@@ -339,190 +339,119 @@ export default function InstructorDashboardClient({
 
                 {/* Upcoming Bookings Sidebar */}
                 <div className="space-y-10 lg:col-span-1">
-                    <div className="earth-card overflow-hidden">
-                        <div className="bg-buttermilk p-5 flex items-center justify-between border-b border-burgundy/10">
-                            <h2 className="text-[11px] font-bold !text-burgundy uppercase tracking-[0.2em] flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-burgundy" />
-                                Upcoming Bookings
+                    <div className="atelier-card !p-0 overflow-hidden border-none shadow-ambient">
+                        <div className="bg-forest p-6 sm:p-8 flex items-center justify-between">
+                            <h2 className="text-[11px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                                <Calendar className="w-4 h-4 text-white/60" />
+                                Upcoming
                             </h2>
-                            <span className="text-[9px] font-bold text-burgundy/50 border border-burgundy/20 px-3 py-1 rounded-full uppercase tracking-tighter">Next 5 Sessions</span>
+                            <span className="text-[9px] font-black text-white/40 border border-white/20 px-3 py-1 rounded-full uppercase tracking-widest">Next 5</span>
                         </div>
-                        <div className="p-4 sm:p-6">
+                        <div className="p-6 sm:p-8 space-y-6">
                             {(() => {
                                 if (isLoading) {
                                     return (
-                                        <div className="py-12 flex justify-center">
-                                            <Loader2 className="w-6 h-6 text-forest animate-spin" />
+                                        <div className="py-20 flex justify-center">
+                                            <Loader2 className="w-8 h-8 text-forest animate-spin" />
                                         </div>
                                     );
                                 }
-
+ 
                                 if (upcomingBookings.length === 0) {
                                     return (
-                                            <div className="py-12 sm:py-16 text-center bg-off-white shadow-inner rounded-2xl border border-border-grey/50 flex flex-col items-center justify-center relative overflow-hidden group/empty mx-1">
-                                                <div className="absolute inset-0 bg-gradient-to-b from-buttermilk/10 to-transparent pointer-events-none" />
-                                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center shadow-tight border border-border-grey/50 mb-6 sm:mb-8 relative z-10 group-hover/empty:scale-110 transition-transform duration-700">
-                                                    <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-burgundy/40" />
-                                                </div>
-                                                <h3 className="text-[10px] sm:text-[11px] font-black text-burgundy uppercase tracking-[0.3em] sm:tracking-[0.4em] mb-2 sm:mb-3 relative z-10">Quiet Week</h3>
-                                                <p className="text-[9px] sm:text-[10px] text-charcoal/50 font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] max-w-[200px] sm:max-w-[220px] mx-auto mb-6 sm:mb-8 relative z-10 leading-relaxed">No bookings yet—your schedule is clear.</p>
-                                                <button 
-                                                    onClick={() => {
-                                                        if (!isProfileComplete) {
-                                                            alert('Please complete your profile and set your service area before adding sessions.');
-                                                            router.push('/instructor/profile');
-                                                            return;
-                                                        }
-                                                        setIsAddModalOpen(true);
-                                                    }}
-                                                    className="px-6 sm:px-8 py-3 sm:py-3.5 bg-forest text-white text-[8px] sm:text-[9px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-tight flex items-center gap-2 relative z-10 active:scale-95"
-                                                >
-                                                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Quick Add
-                                                </button>
+                                        <div className="py-20 text-center bg-surface-container-low rounded-[2rem] border border-outline-variant/10 flex flex-col items-center justify-center relative overflow-hidden group/empty">
+                                            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-tight mb-8 group-hover/empty:scale-110 transition-transform duration-700">
+                                                <Calendar className="w-8 h-8 text-forest/20" />
                                             </div>
+                                            <h3 className="text-[11px] font-black text-forest uppercase tracking-[0.4em] mb-3">Quiet Week</h3>
+                                            <p className="text-[10px] text-slate font-bold uppercase tracking-widest max-w-[200px] mx-auto mb-8 leading-relaxed">No bookings yet—your schedule is clear.</p>
+                                            <button 
+                                                onClick={() => {
+                                                    if (!isProfileComplete) {
+                                                        alert('Please complete your profile and set your service area before adding sessions.');
+                                                        router.push('/instructor/profile');
+                                                        return;
+                                                    }
+                                                    setIsAddModalOpen(true);
+                                                }}
+                                                className="btn-primary-atelier !py-3.5 !px-8 !text-[9px]"
+                                            >
+                                                <Plus className="w-4 h-4" /> Quick Add
+                                            </button>
+                                        </div>
                                     );
                                 }
-
+ 
                                 return (
-                                        <div className="space-y-4 sm:space-y-5">
-                                            {upcomingBookings.map(session => (
-                                                <div key={session.id} className="p-4 sm:p-5 border border-border-grey/50 bg-white rounded-2xl hover:bg-off-white transition-all duration-500 shadow-tight group relative ring-1 ring-border-grey/10">
-                                                    <div className="flex justify-between items-start mb-4 sm:mb-5">
-                                                        <div className="flex flex-col gap-1 w-full">
-                                                            <div className="flex items-center gap-3 sm:gap-4">
-                                                                 <button
-                                                                    onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
-                                                                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-[12px] sm:rounded-[14px] overflow-hidden border border-white bg-white shadow-tight shrink-0 hover:scale-110 transition-transform duration-700"
-                                                                >
-                                                                    <Avatar 
-                                                                        src={session.slots?.studios?.logo_url} 
-                                                                        fallbackName={session.slots?.studios?.name} 
-                                                                        size={56} 
-                                                                    />
-                                                                </button>
-
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className="flex items-start justify-between gap-2">
-                                                                        <button
-                                                                            onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
-                                                                            className="text-xs sm:text-sm font-black text-charcoal uppercase tracking-tight hover:text-forest transition-colors text-left leading-tight"
-                                                                        >
-                                                                            {session.slots?.studios?.name || 'Unknown Studio'}
-                                                                        </button>
-                                                                        <div className="flex items-center gap-1 bg-[#FFF1B5]/40 px-1.5 py-0.5 rounded border border-charcoal/5 whitespace-nowrap">
-                                                                            <span className="text-[9px] sm:text-[10px] font-black text-charcoal">1/1</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="flex items-start gap-1.5 text-xs text-charcoal/50 font-black uppercase tracking-[0.1em] mt-1 sm:mt-1.5">
-                                                                        <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-forest/50 shrink-0" />
-                                                                        <span className="">{session.slots?.date ? formatManilaDateStr(session.slots.date) : 'No Date'} • {session.slots?.start_time ? formatTo12Hour(session.slots.start_time) : 'No Time'}</span>
-                                                                    </div>
-                                                                </div>
+                                    <div className="space-y-6">
+                                        {upcomingBookings.map(session => (
+                                            <div key={session.id} className="p-6 bg-white rounded-[1.5rem] border border-outline-variant/20 hover:border-forest/30 transition-all duration-500 shadow-tight group">
+                                                <div className="flex items-start gap-4 mb-6">
+                                                    <button
+                                                        onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
+                                                        className="w-14 h-14 rounded-2xl overflow-hidden border border-surface-container-highest bg-white shadow-tight shrink-0 hover:scale-110 transition-transform duration-700"
+                                                    >
+                                                        <Avatar 
+                                                            src={session.slots?.studios?.logo_url} 
+                                                            fallbackName={session.slots?.studios?.name} 
+                                                            size={56} 
+                                                        />
+                                                    </button>
+ 
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <button
+                                                                onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
+                                                                className="text-sm font-black text-burgundy uppercase tracking-tight hover:text-forest transition-colors text-left leading-tight"
+                                                            >
+                                                                {session.slots?.studios?.name || 'Studio Session'}
+                                                            </button>
+                                                            <div className="bg-forest/5 px-2 py-1 rounded border border-forest/10">
+                                                                <span className="text-[10px] font-black text-forest uppercase tracking-widest">1/1</span>
                                                             </div>
                                                         </div>
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            <Clock className="w-3.5 h-3.5 text-forest/40" />
+                                                            <span className="text-[10px] font-bold text-slate uppercase tracking-widest">
+                                                                {session.slots?.date ? formatManilaDateStr(session.slots.date) : 'TBD'} • {session.slots?.start_time ? formatTo12Hour(session.slots.start_time) : 'TBD'}
+                                                            </span>
+                                                        </div>
                                                     </div>
-
-                                                    <div className="pt-5 sm:pt-7 border-t border-border-grey/30 space-y-4 sm:space-y-5">
+                                                </div>
+ 
+                                                <div className="pt-6 border-t border-outline-variant/10 flex items-center justify-between">
+                                                    <button
+                                                        className="flex items-center gap-3 group/client hover:bg-forest/5 p-2 -m-2 rounded-xl transition-all"
+                                                        onClick={() => setSelectedProfile(session.client)}
+                                                    >
+                                                        <div className="w-10 h-10 rounded-full border border-outline-variant/20 shadow-tight group-hover/client:scale-105 transition-transform overflow-hidden">
+                                                            <Avatar src={session.client?.avatar_url} fallbackName={session.client?.full_name} size={40} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[9px] font-black text-slate uppercase tracking-widest">Client</p>
+                                                            <p className="text-[11px] font-black text-burgundy uppercase tracking-tight group-hover:text-forest transition-colors">{session.client?.full_name}</p>
+                                                        </div>
+                                                    </button>
+ 
+                                                    <div className="flex gap-2">
                                                         <button
-                                                            className="flex items-center gap-3 sm:gap-4 cursor-pointer group/client w-full text-left focus:outline-none focus:ring-2 focus:ring-forest/20 rounded-xl p-1.5 -m-1.5 hover:bg-white transition-all"
-                                                            onClick={() => setSelectedProfile(session.client)}
-                                                            aria-label={`View record for ${session.client?.full_name}`}
+                                                            onClick={() => setActiveChat({
+                                                                id: session.id,
+                                                                recipientId: session.client_id,
+                                                                name: session.client?.full_name || 'Client',
+                                                                isExpired: isChatExpired(session)
+                                                            })}
+                                                            className="w-10 h-10 bg-white border border-outline-variant/30 text-forest rounded-full hover:bg-forest hover:text-white transition-all shadow-tight flex items-center justify-center relative"
                                                         >
-                                                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden bg-white shrink-0 border border-border-grey/50 shadow-tight group-hover/client:scale-110 transition-transform duration-500">
-                                                                <Avatar 
-                                                                    src={session.client?.avatar_url} 
-                                                                    fallbackName={session.client?.full_name} 
-                                                                    size={40} 
-                                                                />
-                                                            </div>
-
-                                                            <div className="text-[10px] sm:text-[11px] text-charcoal/40 uppercase tracking-[0.2em] flex-1 group-hover/client:text-forest transition-colors font-bold break-words">
-                                                                CLIENT: <span className="font-black text-charcoal">{session.client?.full_name}</span>
-                                                            </div>
+                                                            <MessageSquare className="w-4 h-4" />
+                                                            <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.client_id} isOpen={false} />
                                                         </button>
-
-                                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
-                                                            <div className="flex items-center gap-3">
-                                                                <Box className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-forest/40" />
-                                                                <span className="font-black text-slate uppercase tracking-[0.2em] text-[10px] sm:text-xs">
-                                                                    {Array.isArray(session.slots?.equipment) && session.slots.equipment.length > 0
-                                                                        ? `${session.slots.equipment[0]}`
-                                                                        : (`${session.price_breakdown?.equipment || 'Standard'}`)
-                                                                    } ({session.quantity || 1})
-                                                                </span>
-                                                            </div>
-
-                                                            <div className="flex gap-2 sm:gap-2.5 items-center self-end sm:self-auto">
-                                                                {session.status === 'approved' && !session.client_checked_in_at && (
-                                                                    <button
-                                                                        onClick={async (e) => {
-                                                                            e.preventDefault();
-                                                                            if (confirm('Check in this client?')) {
-                                                                                await checkInClient(session.id);
-                                                                            }
-                                                                        }}
-                                                                        className="w-8 h-8 sm:w-10 sm:h-10 bg-forest/5 text-forest border border-forest/20 rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight group/check"
-                                                                        title="Check In Client"
-                                                                    >
-                                                                        <UserCheck className="w-4 h-4" />
-                                                                    </button>
-                                                                )}
-                                                                {session.client_checked_in_at && (
-                                                                    <div 
-                                                                        className="w-8 h-8 sm:w-10 sm:h-10 bg-forest text-white rounded-full flex items-center justify-center shadow-tight"
-                                                                        title={isMounted ? `Checked in at ${formatTo12Hour(toManilaTimeString(session.client_checked_in_at))}` : "Checked in"}
-                                                                    >
-                                                                        <UserCheck className="w-4 h-4" />
-                                                                    </div>
-                                                                )}
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.preventDefault();
-                                                                        setActiveChat({
-                                                                            id: session.id,
-                                                                            recipientId: session.client_id,
-                                                                            name: session.client?.full_name || 'Client',
-                                                                            isExpired: isChatExpired(session)
-                                                                        })
-                                                                    }}
-                                                                    className="w-8 h-8 sm:w-10 sm:h-10 bg-white text-forest border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn"
-                                                                    title="Message Client"
-                                                                    aria-label={`Message client ${session.client?.full_name || 'Client'}`}
-                                                                >
-                                                                    <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                                                    <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.client_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.client_id} />
-                                                                </button>
-    
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.preventDefault();
-                                                                        setActiveChat({
-                                                                            id: session.id,
-                                                                            recipientId: session.slots?.studios?.owner_id,
-                                                                            name: session.slots?.studios?.name || 'Studio',
-                                                                            isExpired: isChatExpired(session)
-                                                                        })
-                                                                    }}
-                                                                    className="w-8 h-8 sm:w-10 sm:h-10 bg-white text-charcoal border border-border-grey rounded-full hover:bg-forest hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight relative group/btn2"
-                                                                    title="Message Studio"
-                                                                    aria-label={`Message studio ${session.slots?.studios?.name || 'Studio'}`}
-                                                                >
-                                                                    <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                                                    <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.slots?.studios?.owner_id} isOpen={activeChat?.id === session.id && activeChat?.recipientId === session.slots?.studios?.owner_id} />
-                                                                </button>
-    
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.preventDefault();
-                                                                        setCancellingBooking(session);
-                                                                    }}
-                                                                    className="w-8 h-8 sm:w-10 sm:h-10 bg-white text-red-600 border border-border-grey rounded-full hover:bg-red-600 hover:text-white transition-all duration-300 flex items-center justify-center shadow-tight"
-                                                                    title="Cancel Session"
-                                                                    aria-label="Cancel session"
-                                                                >
-                                                                    <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                                                </button>
-                                                            </div>
+                                                        <button
+                                                             onClick={() => setCancellingBooking(session)}
+                                                             className="w-10 h-10 bg-white border border-outline-variant/30 text-burgundy rounded-full hover:bg-burgundy hover:text-white transition-all shadow-tight flex items-center justify-center"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -560,9 +489,9 @@ export default function InstructorDashboardClient({
 
             {/* Profile Detail Modal */}
             {selectedProfile && (
-                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedProfile(null)}>
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-burgundy/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedProfile(null)}>
                     <div className="bg-white/90 backdrop-blur-md rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative border border-white/40" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setSelectedProfile(null)} className="absolute top-8 right-8 p-3 hover:bg-charcoal/5 rounded-2xl transition-all text-charcoal/30 hover:text-charcoal border border-transparent hover:border-border-grey"><X className="w-5 h-5" /></button>
+                        <button onClick={() => setSelectedProfile(null)} className="absolute top-8 right-8 p-3 hover:bg-burgundy/5 rounded-2xl transition-all text-burgundy/30 hover:text-burgundy border border-transparent hover:border-burgundy/5"><X className="w-5 h-5" /></button>
                         <div className="absolute top-0 right-0 w-64 h-64 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
                         <div className="flex flex-col items-center text-center mb-10">
                              <div className="w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10">
@@ -573,9 +502,9 @@ export default function InstructorDashboardClient({
                                 />
                             </div>
 
-                            <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedProfile.full_name}</h3>
+                            <h3 className="text-3xl font-serif text-burgundy tracking-tighter mb-2">{selectedProfile.full_name}</h3>
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.35em]">{selectedProfile.email}</p>
+                                <p className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.35em]">{selectedProfile.email}</p>
                                 {selectedProfile.date_of_birth && (
                                     <div className="inline-block px-3 py-1 bg-forest/5 rounded-full border border-forest/10 mt-2">
                                         <p className="text-[9px] font-black text-forest uppercase tracking-[0.2em]">{calculateAge(selectedProfile.date_of_birth)} YEARS OLD</p>
@@ -586,8 +515,8 @@ export default function InstructorDashboardClient({
 
                         {selectedProfile.bio && (
                             <div className="bg-white/40 p-6 rounded-[2rem] border border-white/60 mb-6 relative z-10">
-                                <h4 className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.4em] mb-3">BIO</h4>
-                                <p className="text-[11px] text-charcoal/60 leading-relaxed italic uppercase tracking-wider">"{selectedProfile.bio}"</p>
+                                <h4 className="text-[9px] font-black text-burgundy/40 uppercase tracking-[0.4em] mb-3">BIO</h4>
+                                <p className="text-[11px] text-burgundy/60 leading-relaxed italic uppercase tracking-wider">"{selectedProfile.bio}"</p>
                             </div>
                         )}
 
@@ -609,8 +538,8 @@ export default function InstructorDashboardClient({
                                      .join(', ');
 
                                 return displayConditions ? (
-                                    <div className="bg-red-50/60 backdrop-blur-sm p-8 rounded-3xl border border-red-100 relative z-10">
-                                        <h4 className="text-[10px] font-black text-red-900/60 uppercase tracking-[0.4em] mb-4 flex items-center gap-3"><AlertCircle className="w-4 h-4" /> PHYSICAL CONDITIONS</h4>
+                                    <div className="bg-red-50/60 backdrop-blur-sm p-8 rounded-[2rem] border border-red-100 relative z-10 mt-6">
+                                        <h4 className="text-[10px] font-black text-red-900/60 uppercase tracking-[0.4em] mb-4 flex items-center gap-3"><AlertCircle className="w-4 h-4" /> Conditions</h4>
                                         <p className="text-[11px] text-red-900 font-black uppercase tracking-[0.2em] leading-relaxed">{displayConditions}</p>
                                     </div>
                                 ) : (
@@ -628,15 +557,15 @@ export default function InstructorDashboardClient({
 
             {/* Booking Detail Modal (Mobile) */}
             {selectedBooking && (
-                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 md:p-6 bg-charcoal/40 backdrop-blur-sm" onClick={() => setSelectedBooking(null)}>
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 md:p-6 bg-burgundy/40 backdrop-blur-sm" onClick={() => setSelectedBooking(null)}>
                     <div className="bg-white/90 backdrop-blur-md rounded-[2.5rem] w-full max-w-2xl shadow-2xl border border-white/40 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
                         <div className="p-8 md:p-10 border-b border-border-grey/50 flex justify-between items-center bg-white/30">
                             <div>
-                                <h3 className="text-2xl font-serif text-charcoal tracking-tighter">Booking Details</h3>
-                                <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.4em] mt-2">SESSION OVERVIEW</p>
+                                <h3 className="text-2xl font-serif text-burgundy tracking-tighter">Booking Details</h3>
+                                <p className="text-[9px] font-black text-burgundy/40 uppercase tracking-[0.4em] mt-2">SESSION OVERVIEW</p>
                             </div>
                             <button onClick={() => setSelectedBooking(null)} className="p-4 hover:bg-white/60 rounded-2xl transition-all border border-transparent hover:border-border-grey">
-                                <X className="w-5 h-5 text-charcoal/40" />
+                                <X className="w-5 h-5 text-burgundy/40" />
                             </button>
                         </div>
 
@@ -651,12 +580,12 @@ export default function InstructorDashboardClient({
                                     />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <h4 className="text-2xl font-serif text-charcoal truncate tracking-tight">{selectedBooking.client?.full_name}</h4>
+                                    <h4 className="text-2xl font-serif text-burgundy truncate tracking-tight">{selectedBooking.client?.full_name}</h4>
 
                                     <div className="mt-5 flex flex-wrap gap-3">
                                         <button 
                                             onClick={() => setSelectedProfile(selectedBooking.client)}
-                                            className="px-5 py-2.5 bg-white/60 border border-border-grey/60 rounded-xl text-[10px] font-black text-charcoal/60 hover:text-charcoal transition-all uppercase tracking-[0.2em] active:scale-95"
+                                            className="px-5 py-2.5 bg-white/60 border border-burgundy/10 rounded-xl text-[10px] font-black text-burgundy/60 hover:text-burgundy transition-all uppercase tracking-[0.2em] active:scale-95"
                                         >
                                             View Profile
                                         </button>
@@ -680,12 +609,12 @@ export default function InstructorDashboardClient({
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="earth-card p-6 bg-white border border-border-grey shadow-tight">
+                                <div className="atelier-card p-6 bg-white border border-burgundy/5 shadow-tight">
                                     <p className="text-[10px] font-bold text-slate uppercase tracking-widest mb-4 flex items-center gap-2">
                                         <Clock className="w-4 h-4 text-forest" /> Session Info
                                     </p>
                                     <div className="space-y-4">
-                                        <div className="text-charcoal">
+                                        <div className="text-burgundy">
                                             <p className="text-[9px] font-black text-slate/40 uppercase tracking-widest mb-1">DATE & TIME</p>
                                             <p className="text-sm font-bold uppercase tracking-tight">
                                                 {(() => {
@@ -701,7 +630,7 @@ export default function InstructorDashboardClient({
                                                 })()}
                                             </p>
                                         </div>
-                                        <div className="text-charcoal">
+                                        <div className="text-burgundy">
                                             <p className="text-[9px] font-black text-slate/40 uppercase tracking-widest mb-1">EQUIPMENT</p>
                                             <p className="text-sm font-bold uppercase tracking-wider">{selectedBooking.price_breakdown?.equipment || 'Standard'}</p>
                                             <p className="text-[10px] font-bold text-slate mt-0.5 capitalize">UNITS: {selectedBooking.price_breakdown?.units || 1}</p>
@@ -709,19 +638,19 @@ export default function InstructorDashboardClient({
                                     </div>
                                 </div>
 
-                                <div className="earth-card p-6 bg-white border border-border-grey shadow-tight">
+                                <div className="atelier-card p-6 bg-white border border-burgundy/5 shadow-tight">
                                     <p className="text-[10px] font-bold text-slate uppercase tracking-widest mb-4 flex items-center gap-2">
                                         <MapPin className="w-4 h-4 text-forest" /> Studio Location
                                     </p>
                                     <div className="space-y-4">
                                         <div>
                                             <p className="text-[9px] font-black text-slate/40 uppercase tracking-widest mb-1">STUDIO</p>
-                                            <p className="text-sm font-bold text-charcoal uppercase tracking-tight">{selectedBooking.studio?.name}</p>
+                                            <p className="text-sm font-bold text-burgundy uppercase tracking-tight">{selectedBooking.studio?.name}</p>
                                             <p className="text-xs text-slate mt-1 leading-relaxed capitalize">{selectedBooking.studio?.location}</p>
                                         </div>
                                         <button 
                                             onClick={() => setSelectedStudio(selectedBooking.studio)}
-                                            className="text-[10px] font-bold text-forest hover:text-charcoal transition-colors uppercase tracking-[0.2em] flex items-center gap-2"
+                                            className="text-[10px] font-bold text-forest hover:text-burgundy transition-colors uppercase tracking-[0.2em] flex items-center gap-2"
                                         >
                                             View Details <ArrowUpRight className="w-3.5 h-3.5" />
                                         </button>
@@ -731,7 +660,7 @@ export default function InstructorDashboardClient({
 
                             {/* Booking History */}
                             {selectedBooking.booking_history && selectedBooking.booking_history.length > 0 && (
-                                <div className="space-y-6 bg-off-white/50 p-6 rounded-2xl border border-border-grey/50 shadow-inner">
+                                <div className="space-y-6 bg-stone-50 p-6 rounded-2xl border border-burgundy/5 shadow-inner">
                                     <h4 className="text-[10px] font-bold text-slate uppercase tracking-[0.3em] flex items-center gap-2">
                                         <Clock className="w-4 h-4" /> Activity History
                                     </h4>
@@ -740,7 +669,7 @@ export default function InstructorDashboardClient({
                                             <div key={idx} className="flex gap-4 items-start pb-4 mb-4 border-b border-border-grey/30 last:border-0 last:pb-0 last:mb-0">
                                                 <div className="w-2 h-2 rounded-full bg-forest mt-1.5 shrink-0 shadow-sm" />
                                                 <div className="min-w-0 flex-1">
-                                                    <p className="text-xs text-charcoal font-bold uppercase tracking-tight leading-snug">{entry.action_description || entry.status}</p>
+                                                    <p className="text-xs text-burgundy font-bold uppercase tracking-tight leading-snug">{entry.action_description || entry.status}</p>
                                                     <p className="text-[10px] text-slate mt-1 font-medium">{format(new Date(entry.timestamp), 'MMM d, h:mm a')}</p>
                                                 </div>
                                             </div>
@@ -750,7 +679,7 @@ export default function InstructorDashboardClient({
                             )}
                         </div>
 
-                        <div className="p-6 md:p-8 border-t border-border-grey bg-alabaster/50 flex flex-col md:flex-row gap-4">
+                        <div className="p-6 md:p-8 border-t border-burgundy/5 bg-stone-50/50 flex flex-col md:flex-row gap-4">
                             {selectedBooking.status === 'approved' && (
                                 <button 
                                     onClick={() => {
@@ -775,14 +704,14 @@ export default function InstructorDashboardClient({
 
             {/* Edit Availability Modal (Mobile) */}
             {isEditModalOpen && editingSlot && (
-                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-charcoal/40 backdrop-blur-sm" onClick={() => setIsEditModalOpen(false)}>
-                    <div className="bg-white rounded-[2rem] w-full max-w-lg shadow-card border border-border-grey overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
-                        <div className="p-6 border-b border-border-grey flex justify-between items-center bg-alabaster/50">
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-burgundy/40 backdrop-blur-sm" onClick={() => setIsEditModalOpen(false)}>
+                    <div className="bg-white rounded-[2rem] w-full max-w-lg shadow-card border border-burgundy/5 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b border-burgundy/5 flex justify-between items-center bg-stone-50/50">
                             <div>
-                                <h3 className="text-xl font-serif text-charcoal tracking-tight">Edit Availability</h3>
+                                <h3 className="text-xl font-serif text-burgundy tracking-tight">Edit Availability</h3>
                                 <p className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] mt-1">UPDATE PARAMETERS</p>
                             </div>
-                            <button onClick={() => setIsEditModalOpen(false)} className="p-3 hover:bg-white rounded-xl transition-colors border border-border-grey shadow-tight">
+                            <button onClick={() => setIsEditModalOpen(false)} className="p-3 hover:bg-stone-50 rounded-xl transition-colors border border-burgundy/5 shadow-tight">
                                 <X className="w-5 h-5 text-slate" />
                             </button>
                         </div>
@@ -798,7 +727,7 @@ export default function InstructorDashboardClient({
                                             required 
                                             value={singleDate} 
                                             onChange={(e) => setSingleDate(e.target.value)}
-                                            className="w-full px-5 py-4 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all uppercase tracking-widest shadow-inner cursor-pointer"
+                                            className="w-full px-5 py-4 bg-stone-50 border border-burgundy/10 rounded-2xl text-xs font-bold text-burgundy focus:ring-1 focus:ring-forest outline-none transition-all uppercase tracking-widest shadow-inner cursor-pointer"
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
@@ -810,7 +739,7 @@ export default function InstructorDashboardClient({
                                                 required 
                                                 value={singleTime} 
                                                 onChange={(e) => setSingleTime(e.target.value)}
-                                                className="w-full px-5 py-4 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all shadow-inner cursor-pointer"
+                                                className="w-full px-5 py-4 bg-stone-50 border border-burgundy/10 rounded-2xl text-xs font-bold text-burgundy focus:ring-1 focus:ring-forest outline-none transition-all shadow-inner cursor-pointer"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -821,7 +750,7 @@ export default function InstructorDashboardClient({
                                                 required 
                                                 value={singleEndTime} 
                                                 onChange={(e) => setSingleEndTime(e.target.value)}
-                                                className="w-full px-5 py-4 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all shadow-inner cursor-pointer"
+                                                className="w-full px-5 py-4 bg-stone-50 border border-burgundy/10 rounded-2xl text-xs font-bold text-burgundy focus:ring-1 focus:ring-forest outline-none transition-all shadow-inner cursor-pointer"
                                             />
                                         </div>
                                     </div>
@@ -830,7 +759,7 @@ export default function InstructorDashboardClient({
                                 <div className="space-y-4">
                                     <div className="p-4 bg-forest/5 rounded-2xl border border-forest/10">
                                         <p className="text-[10px] font-bold text-forest uppercase tracking-widest mb-1">Service Area</p>
-                                        <p className="text-[11px] font-bold text-charcoal">{instructorProfile?.home_base_address || 'No service area set'}</p>
+                                        <p className="text-[11px] font-bold text-burgundy">{instructorProfile?.home_base_address || 'No service area set'}</p>
                                     </div>
                                 </div>
 
@@ -858,14 +787,14 @@ export default function InstructorDashboardClient({
 
             {/* Add Slot Modal (Mobile) */}
             {isAddModalOpen && (
-                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-charcoal/40 backdrop-blur-sm" onClick={() => setIsAddModalOpen(false)}>
-                    <div className="bg-white rounded-[2rem] w-full max-w-lg shadow-card border border-border-grey overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
-                        <div className="p-6 border-b border-border-grey flex justify-between items-center bg-alabaster/50">
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-burgundy/40 backdrop-blur-sm" onClick={() => setIsAddModalOpen(false)}>
+                    <div className="bg-white rounded-[2rem] w-full max-w-lg shadow-card border border-burgundy/5 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b border-burgundy/5 flex justify-between items-center bg-stone-50/50">
                             <div>
-                                <h3 className="text-xl font-serif text-charcoal tracking-tight">Add Single Slot</h3>
+                                <h3 className="text-xl font-serif text-burgundy tracking-tight">Add Single Slot</h3>
                                 <p className="text-[10px] font-bold text-slate uppercase tracking-[0.2em] mt-1">NEW AVAILABILITY</p>
                             </div>
-                            <button onClick={() => setIsAddModalOpen(false)} className="p-3 hover:bg-white rounded-xl transition-colors border border-border-grey shadow-tight">
+                            <button onClick={() => setIsAddModalOpen(false)} className="p-3 hover:bg-stone-50 rounded-xl transition-colors border border-burgundy/5 shadow-tight">
                                 <X className="w-5 h-5 text-slate" />
                             </button>
                         </div>
@@ -876,7 +805,7 @@ export default function InstructorDashboardClient({
                                     <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-tight border border-burgundy/10">
                                         <AlertTriangle className="w-8 h-8 text-burgundy" />
                                     </div>
-                                    <h4 className="text-xl font-serif text-charcoal tracking-tight">Setup Required</h4>
+                                    <h4 className="text-xl font-serif text-burgundy tracking-tight">Setup Required</h4>
                                     <p className="text-xs text-slate leading-relaxed uppercase tracking-widest font-medium">Please define your teaching equipment and rates in settings first.</p>
                                     <Link href="/instructor/profile" className="block w-full py-4 bg-forest text-white rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-tight active:scale-95">Go to Settings</Link>
                                 </div>
@@ -890,7 +819,7 @@ export default function InstructorDashboardClient({
                                                 required 
                                                 value={singleDate} 
                                                 onChange={(e) => setSingleDate(e.target.value)}
-                                                className="w-full px-5 py-5 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all uppercase tracking-widest shadow-inner cursor-pointer"
+                                                className="w-full px-5 py-5 bg-stone-50 border border-burgundy/10 rounded-2xl text-xs font-bold text-burgundy focus:ring-1 focus:ring-forest outline-none transition-all uppercase tracking-widest shadow-inner cursor-pointer"
                                             />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
@@ -901,7 +830,7 @@ export default function InstructorDashboardClient({
                                                     required 
                                                     value={singleTime} 
                                                     onChange={(e) => setSingleTime(e.target.value)}
-                                                    className="w-full px-5 py-5 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all shadow-inner cursor-pointer"
+                                                    className="w-full px-5 py-5 bg-stone-50 border border-burgundy/10 rounded-2xl text-xs font-bold text-burgundy focus:ring-1 focus:ring-forest outline-none transition-all shadow-inner cursor-pointer"
                                                 />
                                             </div>
                                             <div className="space-y-2">
@@ -911,7 +840,7 @@ export default function InstructorDashboardClient({
                                                     required 
                                                     value={singleEndTime} 
                                                     onChange={(e) => setSingleEndTime(e.target.value)}
-                                                    className="w-full px-5 py-5 bg-off-white border border-border-grey rounded-2xl text-xs font-bold text-charcoal focus:ring-1 focus:ring-forest outline-none transition-all shadow-inner cursor-pointer"
+                                                    className="w-full px-5 py-5 bg-stone-50 border border-burgundy/10 rounded-2xl text-xs font-bold text-burgundy focus:ring-1 focus:ring-forest outline-none transition-all shadow-inner cursor-pointer"
                                                 />
                                             </div>
                                         </div>
@@ -944,9 +873,9 @@ export default function InstructorDashboardClient({
 
             {/* Studio Detail Modal */}
             {selectedStudio && (
-                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedStudio(null)}>
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-burgundy/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedStudio(null)}>
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-8 md:p-12 relative" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setSelectedStudio(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/50 hover:text-charcoal"><X className="w-5 h-5" /></button>
+                        <button onClick={() => setSelectedStudio(null)} className="absolute top-6 right-6 p-2 hover:bg-stone-50 rounded-full transition-colors text-burgundy/30 hover:text-burgundy"><X className="w-5 h-5" /></button>
                         <div className="flex flex-col items-center text-center mb-10">
                             <div className="w-24 h-24 rounded-2xl overflow-hidden mb-6 border-4 border-white shadow-tight relative z-10 bg-white">
                                 <Avatar 
@@ -956,24 +885,24 @@ export default function InstructorDashboardClient({
                                 />
                             </div>
 
-                            <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedStudio.name}</h3>
+                            <h3 className="text-3xl font-serif text-burgundy tracking-tighter mb-2">{selectedStudio.name}</h3>
                             <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedStudio.location}</p>
                         </div>
 
                         <div className="space-y-6 mb-10">
                             {selectedStudio.description && (
-                                <div className="bg-off-white/50 p-6 rounded-2xl border border-border-grey/50">
-                                    <h4 className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.4em] mb-3">ABOUT THE STUDIO</h4>
-                                    <p className="text-[11px] text-charcoal/70 leading-relaxed">{selectedStudio.description}</p>
+                                <div className="bg-stone-50 p-6 rounded-2xl border border-burgundy/5">
+                                    <h4 className="text-[9px] font-black text-burgundy/40 uppercase tracking-[0.4em] mb-3">ABOUT THE STUDIO</h4>
+                                    <p className="text-[11px] text-burgundy/70 leading-relaxed">{selectedStudio.description}</p>
                                 </div>
                             )}
 
                             <div className="grid grid-cols-1 gap-3">
-                                <div className="flex items-center gap-4 p-4 bg-white border border-border-grey rounded-xl shadow-tight">
+                                <div className="flex items-center gap-4 p-4 bg-white border border-burgundy/5 rounded-xl shadow-tight">
                                     <div className="w-10 h-10 rounded-lg bg-forest/5 flex items-center justify-center"><Box className="w-5 h-5 text-forest/40" /></div>
                                     <div>
-                                        <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">CONTACT INFO</p>
-                                        <p className="text-[11px] font-bold text-charcoal">{selectedStudio.email || 'No email provided'}</p>
+                                        <p className="text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">CONTACT INFO</p>
+                                        <p className="text-[11px] font-bold text-burgundy">{selectedStudio.email || 'No email provided'}</p>
                                         <p className="text-[11px] font-bold text-slate">{selectedStudio.phone || 'No phone provided'}</p>
                                     </div>
                                 </div>
@@ -982,13 +911,13 @@ export default function InstructorDashboardClient({
                                         href={selectedStudio.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selectedStudio.name} ${selectedStudio.location}`)}`}
                                         target="_blank" 
                                         rel="noopener noreferrer" 
-                                        className="flex items-center justify-between p-4 bg-white border border-border-grey rounded-xl shadow-tight hover:border-forest/40 hover:bg-forest/5 transition-all group"
+                                        className="flex items-center justify-between p-4 bg-white border border-burgundy/5 rounded-xl shadow-tight hover:border-forest/40 hover:bg-forest/5 transition-all group"
                                     >
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-lg bg-forest/5 flex items-center justify-center"><MapPin className="w-5 h-5 text-forest/40" /></div>
                                             <div>
-                                                <p className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em]">LOCATION</p>
-                                                <p className="text-[11px] font-bold text-charcoal group-hover:text-forest transition-colors">Open in Google Maps</p>
+                                                <p className="text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">LOCATION</p>
+                                                <p className="text-[11px] font-bold text-burgundy group-hover:text-forest transition-colors">Open in Google Maps</p>
                                             </div>
                                         </div>
                                         <ArrowUpRight className="w-4 h-4 text-charcoal/50 group-hover:text-forest transition-all" />

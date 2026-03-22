@@ -55,97 +55,56 @@ export async function submitInstructorOnboarding(formData: FormData) {
         ? existingRole
         : 'instructor'
 
-    // 2. Update Profile
-    const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-            id: user.id, // Ensure id is set for upsert
-            full_name: fullName,
-            instagram_handle: instagramHandle,
-            contact_number: contactNumber,
-            date_of_birth: dateOfBirth,
-            tin: tin,
-            gov_id_expiry: govIdExpiry,
-            bir_expiry: birExpiry || null,
-            role: newRole,
-            updated_at: new Date().toISOString()
-        })
-        .select() // Returning to help debugging if needed
-
-    if (profileError) {
-        console.error('Profile update error:', profileError)
-        return { error: 'Failed to update profile' }
-    }
-
-    // Sync role to Auth metadata for middleware performance
-    await supabase.auth.updateUser({
-        data: { role: newRole }
-    })
-
+    // 1. Upload Files
     const certificatePath = `${user.id}/cert_${Date.now()}.${certificateFile.name.split('.').pop()}`
     const govIdPath = `${user.id}/govid_${Date.now()}.${govIdFile.name.split('.').pop()}`
     let birPath = null
 
-    // Upload Cert
-    const { error: certUploadError } = await supabase.storage
-        .from('certifications')
-        .upload(certificatePath, certificateFile)
+    const uploadPromises = [
+        supabase.storage.from('certifications').upload(certificatePath, certificateFile),
+        supabase.storage.from('certifications').upload(govIdPath, govIdFile)
+    ]
 
-    if (certUploadError) {
-        console.error('Cert upload error:', certUploadError)
-        return { error: `Failed to upload certificate: ${certUploadError.message}` }
-    }
-
-    // Upload Gov ID
-    const { error: govIdUploadError } = await supabase.storage
-        .from('certifications')
-        .upload(govIdPath, govIdFile)
-
-    if (govIdUploadError) {
-        console.error('Gov ID upload error:', govIdUploadError)
-        return { error: `Failed to upload Government ID: ${govIdUploadError.message}` }
-    }
-
-    // Upload BIR (Optional)
     if (birFile && birFile.size > 0) {
         birPath = `${user.id}/bir_${Date.now()}.${birFile.name.split('.').pop()}`
-        const { error: birUploadError } = await supabase.storage
-            .from('certifications')
-            .upload(birPath, birFile)
-
-        if (birUploadError) {
-            console.error('BIR upload error:', birUploadError)
-            return { error: `Failed to upload BIR document: ${birUploadError.message}` }
-        }
+        uploadPromises.push(supabase.storage.from('certifications').upload(birPath, birFile))
     }
 
-    // Update Profile with URLs
-    await supabase.from('profiles').update({
-        gov_id_url: govIdPath,
-        bir_url: birPath
-    }).eq('id', user.id)
-
-    // Get public URL (or signed URL depending on bucket privacy)
-    // Assuming private bucket for certs, we typically store the path.
-    // For simplicity in this demo, let's assume we store the path or a signed URL generator is used later.
-    // Let's store the path for now.
-
-    // 3. Insert into Certifications table
-    const { error: certError } = await supabase
-        .from('certifications')
-        .insert({
-            instructor_id: user.id,
-            certification_body: certificationBody,
-            certification_name: 'Instructor Certification', // Generic name or derived
-            proof_url: certificatePath,
-            expiry_date: certExpiry,
-            verified: false // Defaults to false in DB, but being explicit
-        })
-
-    if (certError) {
-        console.error('Certification insert error:', certError)
-        return { error: 'Failed to submit certification' }
+    const uploadResults = await Promise.all(uploadPromises)
+    const uploadErrorResult = uploadResults.find(r => r.error)
+    if (uploadErrorResult && uploadErrorResult.error) {
+        console.error('Upload error:', uploadErrorResult.error)
+        return { error: `Failed to upload documents: ${uploadErrorResult.error.message}` }
     }
+
+    // 2. Atomic DB Submission
+    const { data: result, error: rpcError } = await supabase.rpc('submit_onboarding_atomic', {
+        target_user_id: user.id,
+        new_full_name: fullName,
+        new_instagram_handle: instagramHandle,
+        new_contact_number: contactNumber,
+        new_date_of_birth: dateOfBirth,
+        new_tin: tin,
+        new_gov_id_expiry: govIdExpiry,
+        new_bir_expiry: birExpiry || null,
+        new_role: newRole,
+        cert_body: certificationBody,
+        cert_name: 'Instructor Certification',
+        cert_proof_url: certificatePath,
+        cert_expiry_date: certExpiry,
+        id_url: govIdPath,
+        tax_url: birPath
+    })
+
+    if (rpcError || (result as any)?.success === false) {
+        console.error('Atomic Onboarding Error:', rpcError || (result as any)?.error)
+        return { error: rpcError?.message || (result as any)?.error || 'Failed to submit application' }
+    }
+
+    // 3. Sync Auth Metadata
+    await supabase.auth.updateUser({
+        data: { role: newRole }
+    })
 
     // Revalidate pages to ensure cache is updated
     revalidatePath('/instructor')

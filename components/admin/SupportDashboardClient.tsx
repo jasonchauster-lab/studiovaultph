@@ -220,14 +220,14 @@ export default function SupportDashboardClient() {
     }
 
     return (
-        <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-200px)] bg-white border border-cream-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-200px)] bg-white border border-stone-100 rounded-[32px] overflow-hidden shadow-cloud">
             {/* Sidebar: Ticket List */}
             <div className={clsx(
-                "w-full lg:w-1/3 border-r border-cream-200 flex flex-col bg-cream-50",
+                "w-full lg:w-1/3 border-r border-stone-100 flex flex-col bg-stone-50",
                 selectedTicket ? "hidden lg:flex" : "flex"
             )}>
-                <div className="p-4 border-b border-cream-200 bg-white">
-                    <h2 className="font-serif text-charcoal-900 font-medium">Open Tickets ({tickets.length})</h2>
+                <div className="p-6 border-b border-stone-100 bg-white">
+                    <h2 className="font-serif text-burgundy text-lg">Active Inquiries ({tickets.length})</h2>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                     {tickets.length === 0 ? (
@@ -240,24 +240,27 @@ export default function SupportDashboardClient() {
                                 key={ticket.id}
                                 onClick={() => setSelectedTicket(ticket)}
                                 className={clsx(
-                                    "w-full text-left p-4 border-b border-cream-100 transition-colors hover:bg-white",
-                                    selectedTicket?.id === ticket.id ? "bg-white border-l-4 border-l-charcoal-900" : "bg-transparent border-l-4 border-l-transparent"
+                                    "w-full text-left p-6 border-b border-stone-100 transition-all duration-300 hover:bg-white group relative",
+                                    selectedTicket?.id === ticket.id ? "bg-white" : "bg-transparent"
                                 )}
                             >
-                                <div className="flex justify-between items-start mb-1">
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-medium text-charcoal-900 text-sm">
+                                {selectedTicket?.id === ticket.id && (
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-burgundy" />
+                                )}
+                                <div className="flex justify-between items-start mb-2">
+                                    <div className="flex items-center gap-3">
+                                        <span className="font-black text-burgundy text-[11px] uppercase tracking-widest">
                                             {ticket.profiles?.studios?.[0]?.name || ticket.profiles?.full_name || 'Unknown User'}
                                         </span>
                                         {unreadTickets.has(ticket.id) && (
-                                            <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse" title="New Message" />
+                                            <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-sm shadow-red-500/50" title="New Message" />
                                         )}
                                     </div>
-                                    <span className="text-[10px] text-charcoal-400">
-                                        {new Date(ticket.updated_at).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' })}
+                                    <span className="text-[9px] font-black text-burgundy/30 uppercase tracking-tighter">
+                                        {new Date(ticket.updated_at).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' })}
                                     </span>
                                 </div>
-                                <div className="text-xs text-charcoal-500 uppercase tracking-wider">
+                                <div className="text-[9px] font-black text-forest uppercase tracking-[0.2em] opacity-60">
                                     {ticket.profiles?.role}
                                 </div>
                             </button>
@@ -274,49 +277,44 @@ export default function SupportDashboardClient() {
                 {selectedTicket ? (
                     <>
                         {/* Chat Header */}
-                        <div className="p-4 border-b border-cream-200 flex justify-between items-center bg-cream-50/50">
-                            <div className="flex items-center gap-3">
+                        <div className="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50/30">
+                            <div className="flex items-center gap-4">
                                 <button
                                     onClick={() => setSelectedTicket(null)}
-                                    className="lg:hidden p-2 -ml-2 text-charcoal-400 hover:text-charcoal-900"
+                                    className="lg:hidden p-2 -ml-2 text-burgundy/40 hover:text-burgundy transition-colors"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
-                                <div className="w-10 h-10 bg-cream-200 rounded-full flex items-center justify-center shrink-0">
-                                    <User className="w-5 h-5 text-charcoal-600" />
+                                <div className="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center shrink-0 shadow-tight">
+                                    <User className="w-6 h-6 text-burgundy/60" />
                                 </div>
                                 <div className="min-w-0">
-                                    <h3 className="font-medium text-charcoal-900 truncate">
+                                    <h3 className="font-serif text-lg text-burgundy truncate">
                                         {selectedTicket.profiles?.studios?.[0]?.name
                                             ? `${selectedTicket.profiles.studios[0].name} (${selectedTicket.profiles.full_name})`
                                             : selectedTicket.profiles?.full_name}
                                     </h3>
-                                    <p className="text-xs text-charcoal-500">Ticket ID: {selectedTicket.id.slice(0, 8)}</p>
+                                    <p className="text-[10px] font-black text-burgundy/40 uppercase tracking-widest mt-0.5">TICKET ID: {selectedTicket.id.slice(0, 8).toUpperCase()}</p>
                                 </div>
                             </div>
                             <button
                                 onClick={handleResolve}
-                                className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors flex items-center gap-2"
+                                className="px-5 py-2.5 bg-green-50 text-green-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-100 transition-all flex items-center gap-2.5 shadow-sm active:scale-95"
                             >
                                 <CheckCircle className="w-4 h-4" />
-                                Mark Resolved
+                                Intercept & Resolve
                             </button>
                         </div>
 
                         {/* Messages */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-cream-50/30">
+                        <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-stone-50/10">
                             {messages.map(msg => {
-                                // Admin is the sender if sender_id matches current user... 
-                                // Actually we need to know who "I" am. 
-                                // Ideally we compare with auth.user.id but for Admin dashboard, 
-                                // we can assume messages from the Ticket User are "Left" and others (Admins) are "Right".
-                                // Or better, check if sender_id === selectedTicket.user_id.
                                 const isUser = msg.sender_id === selectedTicket.user_id
                                 return (
                                     <div key={msg.id} className={clsx("flex", isUser ? "justify-start" : "justify-end")}>
                                         <div className={clsx(
-                                            "max-w-[70%] p-3 rounded-2xl text-sm shadow-sm",
-                                            isUser ? "bg-white border border-cream-200 text-charcoal-800 rounded-bl-none" : "bg-forest text-white rounded-br-none"
+                                            "max-w-[75%] p-5 rounded-[24px] text-xs shadow-tight leading-relaxed transition-all animate-in fade-in slide-in-from-bottom-2 duration-500",
+                                            isUser ? "bg-white border border-stone-100 text-burgundy/80 rounded-bl-none" : "bg-forest text-white rounded-br-none shadow-forest/10"
                                         )}>
                                             {msg.message}
                                         </div>
@@ -327,27 +325,27 @@ export default function SupportDashboardClient() {
                         </div>
 
                         {/* Input */}
-                        <div className="p-4 border-t border-cream-200 bg-white">
+                        <div className="p-6 border-t border-stone-100 bg-white">
                             <form
                                 onSubmit={(e) => {
                                     e.preventDefault()
                                     handleSend()
                                 }}
-                                className="flex gap-2"
+                                className="flex gap-4"
                             >
                                 <input
                                     type="text"
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
-                                    placeholder="Reply to user..."
-                                    className="flex-1 px-4 py-2 bg-cream-50 border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900"
+                                    placeholder="Dispatch response to operative..."
+                                    className="flex-1 px-6 py-3.5 bg-stone-50 border border-stone-200 rounded-xl text-burgundy text-[11px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all placeholder:text-burgundy/20"
                                 />
                                 <button
                                     type="submit"
                                     disabled={!inputValue.trim() || isSending}
-                                    className="w-10 h-10 bg-forest text-white rounded-lg flex items-center justify-center hover:brightness-110 disabled:opacity-50 transition-colors"
+                                    className="w-12 h-12 bg-forest text-white rounded-xl flex items-center justify-center hover:brightness-110 disabled:opacity-50 transition-all shadow-md active:scale-95"
                                 >
-                                    {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                    {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                                 </button>
                             </form>
                         </div>

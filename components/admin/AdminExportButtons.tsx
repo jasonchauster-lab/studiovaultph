@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, Loader2 } from 'lucide-react'
+import { Download, Loader2, FileSpreadsheet, CreditCard, Wallet } from 'lucide-react'
 import { getPayoutsExport, getRevenueExport, getWalletBalancesExport } from '@/app/(dashboard)/admin/actions'
+import clsx from 'clsx'
 
 function toCSV(rows: Record<string, any>[]): string {
     if (!rows || rows.length === 0) return ''
@@ -37,10 +38,14 @@ function ExportButton({
     label,
     filename,
     fetchFn,
+    icon: Icon,
+    variant = 'secondary'
 }: {
     label: string
     filename: string
     fetchFn: () => Promise<{ rows?: Record<string, any>[]; error?: string }>
+    icon: any
+    variant?: 'primary' | 'secondary'
 }) {
     const [loading, setLoading] = useState(false)
 
@@ -68,10 +73,34 @@ function ExportButton({
         <button
             onClick={handleClick}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-cream-200 text-charcoal-700 text-sm font-medium rounded-lg hover:bg-cream-50 hover:border-charcoal-300 transition-colors shadow-sm disabled:opacity-60"
+            className={clsx(
+                "group relative overflow-hidden px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 disabled:opacity-50 flex items-center gap-3 shadow-xl",
+                variant === 'primary' 
+                    ? "bg-forest text-white shadow-forest/20 hover:shadow-forest/40 hover:-translate-y-0.5" 
+                    : "bg-white text-burgundy border border-stone-100 shadow-stone-200/50 hover:border-forest/30 hover:shadow-forest/10 hover:-translate-y-0.5"
+            )}
         >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {label}
+            <div className="absolute inset-x-0 bottom-0 h-0.5 bg-amber-400 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+            
+            {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
+            ) : (
+                <Icon className={clsx(
+                    "w-4 h-4 transition-transform duration-500 group-hover:scale-110",
+                    variant === 'primary' ? "text-amber-400" : "text-forest"
+                )} />
+            )}
+            
+            <span className="relative z-10">
+                {loading ? "Extracting..." : label}
+            </span>
+            
+            {!loading && (
+                <Download className={clsx(
+                    "w-3 h-3 transition-all duration-500 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0",
+                    variant === 'primary' ? "text-white/60" : "text-forest/60"
+                )} />
+            )}
         </button>
     )
 }
@@ -83,23 +112,40 @@ interface AdminExportButtonsProps {
 
 export default function AdminExportButtons({ startDate, endDate }: AdminExportButtonsProps) {
     return (
-        <div className="flex flex-wrap gap-3 items-center">
-            <span className="text-xs text-charcoal-400 font-medium uppercase tracking-wider">Export:</span>
-            <ExportButton
-                label="Payouts"
-                filename="payouts_export"
-                fetchFn={getPayoutsExport}
-            />
-            <ExportButton
-                label="Revenue"
-                filename="revenue_export"
-                fetchFn={() => getRevenueExport(startDate, endDate)}
-            />
-            <ExportButton
-                label="Wallet Balances"
-                filename="wallet_balances"
-                fetchFn={getWalletBalancesExport}
-            />
+        <div className="bg-white border border-stone-100 p-8 rounded-[32px] shadow-sm relative overflow-hidden group">
+            {/* Background texture/glow */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none group-hover:bg-forest/10 transition-colors duration-700" />
+            
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                <div className="text-center md:text-left">
+                    <h3 className="text-xl font-serif text-burgundy tracking-tight">Financial Intelligence</h3>
+                    <p className="text-[10px] font-black text-burgundy/30 uppercase tracking-[0.3em] mt-1">
+                        Consolidated ledger analytics & reports
+                    </p>
+                </div>
+                
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                    <ExportButton
+                        label="Payouts"
+                        filename="payouts_export"
+                        fetchFn={getPayoutsExport}
+                        icon={CreditCard}
+                    />
+                    <ExportButton
+                        label="Revenue"
+                        filename="revenue_export"
+                        fetchFn={() => getRevenueExport(startDate, endDate)}
+                        icon={FileSpreadsheet}
+                    />
+                    <ExportButton
+                        label="Wallets"
+                        filename="wallet_balances"
+                        fetchFn={getWalletBalancesExport}
+                        icon={Wallet}
+                        variant="primary"
+                    />
+                </div>
+            </div>
         </div>
     )
 }

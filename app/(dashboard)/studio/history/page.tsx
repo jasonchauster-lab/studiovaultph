@@ -4,7 +4,14 @@ import { PlusCircle } from 'lucide-react'
 import Link from 'next/link'
 import StudioRentalList from '@/components/dashboard/StudioRentalList'
 
-export default async function StudioHistoryPage() {
+import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns'
+import DateRangeFilters from '@/components/dashboard/DateRangeFilters'
+
+export default async function StudioHistoryPage(props: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+    const searchParams = await props.searchParams
+    const range = searchParams.range as string | undefined
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -21,53 +28,72 @@ export default async function StudioHistoryPage() {
         return <div className="p-8">Studio not found.</div>
     }
 
-    // 2. Get all slot IDs for this studio
-    const { data: studioSlots } = await supabase
-        .from('slots')
-        .select('id')
-        .eq('studio_id', studio.id)
+    // --- DATE FILTER LOGIC ---
+    let startDate: string | undefined
+    let endDate: string | undefined
 
-    const slotIds = studioSlots?.map(s => s.id) ?? []
+    if (range && range !== 'all') {
+        const now = new Date()
+        if (range === '7d') {
+            startDate = format(new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
+            endDate = format(now, 'yyyy-MM-dd')
+        } else if (range === '30d') {
+            startDate = format(new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
+            endDate = format(now, 'yyyy-MM-dd')
+        } else if (range === 'this-month') {
+            startDate = format(startOfMonth(now), 'yyyy-MM-dd')
+            endDate = format(endOfMonth(now), 'yyyy-MM-dd')
+        } else if (range === 'last-month') {
+            const lastMonth = subMonths(now, 1)
+            startDate = format(startOfMonth(lastMonth), 'yyyy-MM-dd')
+            endDate = format(endOfMonth(lastMonth), 'yyyy-MM-dd')
+        }
+    } else if (!range) {
+        // Default to last 3 months for performance
+        startDate = format(startOfMonth(subMonths(new Date(), 3)), 'yyyy-MM-dd')
+    }
+    // --- END DATE FILTER LOGIC ---
 
-    // 3. Fetch bookings with instructor details (including avatar)
-    const { data: bookings } = slotIds.length === 0
-        ? { data: [] }
-        : await supabase
-            .from('bookings')
-            .select(`
-                *,
-                slots (
-                    date,
-                    start_time,
-                    end_time,
-                    equipment,
-                    studios (
-                        id,
-                        name,
-                        location,
-                        address,
-                        owner_id,
-                        logo_url
-                    )
-                ),
-                instructor:profiles!instructor_id (
-                    id,
-                    full_name,
-                    avatar_url
-                ),
-                client:profiles!client_id (
-                    id,
-                    full_name,
-                    avatar_url,
-                    email,
-                    medical_conditions,
-                    other_medical_condition,
-                    bio
-                )
-            `)
-            .in('slot_id', slotIds)
-            .in('status', ['approved', 'completed', 'cancelled_refunded', 'cancelled_charged'])
-            .order('created_at', { ascending: false })
+    // 2. Fetch bookings via RPC
+    const { data: bookings, error } = await supabase.rpc('get_studio_rental_history_v2', {
+        p_studio_id: studio.id,
+        p_start_date: startDate || null,
+        p_end_date: endDate || null
+    })
+
+    if (error) {
+        console.error('Error fetching studio history via RPC:', error)
+    }
+
+    // Map RPC table result to the format expected by StudioRentalList
+    // (StudioRentalList expects bookings.slots to be an object/array)
+    const formattedBookings = (bookings || []).map((b: any) => ({
+        ...b,
+        slots: {
+            date: b.session_date,
+            start_time: b.start_time,
+            end_time: b.end_time,
+            equipment: b.equipment,
+            studios: {
+                id: studio.id,
+                name: b.studio_name
+            }
+        },
+        instructor: b.instructor_id ? {
+            id: b.instructor_id,
+            full_name: b.instructor_name,
+            avatar_url: b.instructor_avatar
+        } : null,
+        client: {
+            id: b.client_id,
+            full_name: b.client_name,
+            avatar_url: b.client_avatar,
+            email: b.client_email,
+            medical_conditions: b.client_medical,
+            other_medical_condition: b.client_other_medical,
+            bio: b.client_bio
+        }
+    }))
 
     return (
         <div className="min-h-screen bg-cream-50 px-4 py-6 sm:p-10">
@@ -89,8 +115,13 @@ export default async function StudioHistoryPage() {
                     </Link>
                 </div>
 
+                {/* Date Filter */}
+                <div className="flex justify-end">
+                    <DateRangeFilters />
+                </div>
+
                 {/* Card List */}
-                <StudioRentalList bookings={bookings || []} currentUserId={user.id} />
+                <StudioRentalList bookings={formattedBookings || []} currentUserId={user.id} />
             </div >
         </div >
     )

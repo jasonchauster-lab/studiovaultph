@@ -175,7 +175,7 @@ function AgreementModal({ title, content, onClose }: { title: string; content: s
             onClick={onClose}
         >
             <div
-                className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl flex flex-col max-h-[85vh]"
+                className="atelier-card max-w-2xl w-full flex flex-col max-h-[85vh] overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center px-6 py-4 border-b border-cream-200">
@@ -189,12 +189,12 @@ function AgreementModal({ title, content, onClose }: { title: string; content: s
                         {content}
                     </pre>
                 </div>
-                <div className="px-6 py-4 border-t border-cream-200">
+                <div className="px-6 py-4 border-t border-cream-100 bg-cream-50/50">
                     <button
                         onClick={onClose}
-                        className="w-full bg-forest text-white py-2.5 rounded-lg font-medium hover:brightness-110 transition-all"
+                        className="w-full bg-forest text-white py-3 rounded-xl font-bold uppercase tracking-widest text-xs hover:brightness-110 transition-all shadow-lg shadow-forest/10"
                     >
-                        Close
+                        I Understand
                     </button>
                 </div>
             </div>
@@ -206,12 +206,15 @@ function AgreementModal({ title, content, onClose }: { title: string; content: s
 function MedicalClearanceModal({ onAcknowledge }: { onAcknowledge: () => void }) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
-                <div className="p-6 border-b border-rose-gold/10 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-rose-gold/10 rounded-full flex items-center justify-center shrink-0">
-                        <HeartPulse className="w-5 h-5 text-rose-gold" />
+            <div className="atelier-card max-w-lg w-full overflow-hidden shadow-2xl border-burgundy/20">
+                <div className="p-6 border-b border-burgundy/10 flex items-center gap-4 bg-burgundy/5">
+                    <div className="w-12 h-12 bg-burgundy text-white rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-burgundy/20">
+                        <HeartPulse className="w-6 h-6" />
                     </div>
-                    <h3 className="font-serif text-lg text-charcoal-900">Medical Clearance Required</h3>
+                    <div>
+                        <h3 className="font-serif text-xl text-charcoal-900">Medical Clearance</h3>
+                        <p className="text-[10px] uppercase tracking-widest text-burgundy font-bold mt-0.5">Required Action</p>
+                    </div>
                 </div>
                 <div className="p-6 space-y-4">
                     <p className="text-charcoal-700 text-sm leading-relaxed">
@@ -231,16 +234,16 @@ function MedicalClearanceModal({ onAcknowledge }: { onAcknowledge: () => void })
                             <span>The assigned instructor bears responsibility for safe exercise selection and ongoing supervision during your session.</span>
                         </li>
                     </ul>
-                    <div className="bg-rose-gold/5 border border-rose-gold/20 rounded-lg p-3 text-xs text-rose-gold-700">
+                    <div className="bg-burgundy/5 border border-burgundy/10 rounded-xl p-4 text-xs text-burgundy-900 leading-relaxed italic">
                         By clicking "I Acknowledge", you confirm that you have read this notice and will obtain appropriate medical clearance before your session.
                     </div>
                 </div>
                 <div className="px-6 pb-6">
                     <button
                         onClick={onAcknowledge}
-                        className="w-full bg-rose-gold text-white py-3 rounded-lg font-medium hover:bg-rose-gold/90 transition-colors"
+                        className="w-full bg-burgundy text-white py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-xs hover:brightness-110 transition-all shadow-lg shadow-burgundy/20 mt-2"
                     >
-                        I Acknowledge — Continue to Booking
+                        I Acknowledge — Continue
                     </button>
                 </div>
             </div>
@@ -519,21 +522,26 @@ export default function PaymentForm({
             <form onSubmit={handleSubmit} className="border-t border-cream-200 pt-8 space-y-6">
                 {/* Countdown Timer Banner */}
                 {timeLeft !== null && timeLeft > 0 && (
-                    <div className={`flex items-center justify-between p-4 rounded-xl border ${timeLeft <= 120
-                        ? 'bg-rose-gold/10 border-rose-gold/30'
+                    <div className={`flex items-center justify-between p-4 rounded-2xl border-2 ${timeLeft <= 120
+                        ? 'bg-burgundy/5 border-burgundy/20'
                         : timeLeft <= 300
                             ? 'bg-amber-50 border-amber-200'
-                            : 'bg-charcoal-50 border-charcoal-200'
+                            : 'bg-forest/5 border-forest/10'
                         }`}>
-                        <div className="flex items-center gap-2">
-                            <Clock className={`w-5 h-5 ${timeLeft <= 120 ? 'text-rose-gold animate-pulse' : timeLeft <= 300 ? 'text-amber-600' : 'text-charcoal-600'
-                                }`} />
-                            <span className={`text-sm font-medium ${timeLeft <= 120 ? 'text-rose-gold' : timeLeft <= 300 ? 'text-amber-800' : 'text-charcoal-800'
+                        <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${timeLeft <= 120 ? 'bg-burgundy text-white animate-pulse' : timeLeft <= 300 ? 'bg-amber-500 text-white' : 'bg-forest text-white'
                                 }`}>
-                                Complete payment before your hold expires
-                            </span>
+                                <Clock className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <span className={`text-xs font-bold uppercase tracking-widest block ${timeLeft <= 120 ? 'text-burgundy' : timeLeft <= 300 ? 'text-amber-700' : 'text-forest'
+                                    }`}>
+                                    Time Remaining
+                                </span>
+                                <span className="text-[10px] text-charcoal-500">Pay now to secure your slot</span>
+                            </div>
                         </div>
-                        <span className={`font-mono text-lg font-bold ${timeLeft <= 120 ? 'text-rose-gold' : timeLeft <= 300 ? 'text-amber-700' : 'text-charcoal-700'
+                        <span className={`font-mono text-2xl font-black ${timeLeft <= 120 ? 'text-burgundy' : timeLeft <= 300 ? 'text-amber-700' : 'text-charcoal-900'
                             }`}>
                             {formatTime(timeLeft)}
                         </span>

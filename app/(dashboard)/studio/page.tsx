@@ -71,110 +71,57 @@ export default async function StudioDashboard(props: {
         const monthGridEnd = format(endOfWeek(endOfMonth(currentDate), { weekStartsOn: 1 }), 'yyyy-MM-dd')
 
         // Fetch bookings + calendar slots in one parallel round (eliminates 2 sequential round trips)
-        const [{ data: studioBookings }, { data: statsBookings }, { data: slots }] = await Promise.all([
+        const [
+            { data: studioBookings },
+            { data: slots },
+            { data: dashboardStats }
+        ] = await Promise.all([
             // Upcoming Bookings
             supabase
                 .from('bookings')
                 .select(`
-                    *,
-                    client:profiles!client_id(full_name, avatar_url),
+                    id, 
+                    status, 
+                    price_breakdown, 
+                    total_price,
+                    created_at,
+                    client:profiles!client_id(full_name, avatar_url, email, phone, medical_conditions, date_of_birth),
                     instructor:profiles!instructor_id(full_name, avatar_url),
-                    slots!inner(*)
+                    slots!inner(date, start_time, end_time, quantity, session_type)
                 `)
                 .eq('studio_id', myStudio.id)
-                .in('status', ['approved'])
-                .or(`date.gt.${todayStr},and(date.eq.${todayStr},start_time.gte.${nowTimeStr})`, { foreignTable: 'slots' })
-                .order('date', { foreignTable: 'slots', ascending: true })
-                .order('start_time', { foreignTable: 'slots', ascending: true })
-                .limit(10),
-            // Stats Bookings (Last 30 Days)
-            supabase
-                .from('bookings')
-                .select(`
-                    *,
-                    instructor:profiles!instructor_id(full_name, avatar_url),
-                    slots(*)
-                `)
-                .eq('studio_id', myStudio.id)
-                .in('status', ['approved', 'completed', 'cancelled_charged'])
-                .gte('slots.date', thirtyDaysAgoStr),
-            // Calendar Slots (full month grid)
+                .in('status', ['pending', 'approved'])
+                .gte('slots.date', todayStr)
+                .order('slots(date)', { ascending: true }),
+
+            // Weekly Slots
             supabase
                 .from('slots')
-                .select(`
-                    *,
-                    bookings (
-                        id,
-                        status,
-                        created_at,
-                        updated_at,
-                        equipment,
-                        quantity,
-                        price_breakdown,
-                        client:profiles!client_id(
-                            full_name,
-                            avatar_url,
-                            bio,
-                            email,
-                            medical_conditions,
-                            other_medical_condition,
-                            date_of_birth
-                        ),
-                        instructor:profiles!instructor_id(
-                            full_name,
-                            avatar_url,
-                            bio,
-                            email,
-                            medical_conditions,
-                            other_medical_condition,
-                            date_of_birth
-                        )
-                    )
-                `)
+                .select('*, bookings(id, status)')
                 .eq('studio_id', myStudio.id)
-                .gte('date', monthGridStart)
-                .lte('date', monthGridEnd),
+                .gte('date', dayStrings[0])
+                .lte('date', dayStrings[6]),
+
+            // Dashboard Stats RPC
+            supabase.rpc('get_studio_dashboard_stats', {
+                p_studio_id: myStudio.id,
+                p_last_30_days_date: thirtyDaysAgoStr,
+                p_week_start: dayStrings[0],
+                p_week_end: dayStrings[6]
+            })
         ]);
 
         if (studioBookings) upcomingBookings = studioBookings
         if (slots) weeklySlots = slots
 
-        if (statsBookings && statsBookings.length > 0) {
-            // Calc Revenue
-            monthlyRevenue = statsBookings.reduce((sum, b) => {
-                const breakdown = b.price_breakdown as any;
-                const studioFee = Number(breakdown?.studio_fee || 0);
-
-                if (studioFee > 0) return sum + studioFee;
-
-                // Fallback for legacy bookings without breakdown
-                const fallbackFee = b.total_price ? Math.max(0, b.total_price - 100) : 0;
-                return sum + fallbackFee;
-            }, 0)
-
-            // Calc Top Instructor
-            const instructorCounts: Record<string, number> = {}
-            statsBookings.forEach(b => {
-                const name = b.instructor?.full_name || 'Unknown'
-                instructorCounts[name] = (instructorCounts[name] || 0) + 1
-            })
-            topInstructorName = Object.entries(instructorCounts).sort((a, b) => b[1] - a[1])[0][0]
-        }
-
-        // Calc Occupancy and Total Spots for the current week only (stat card shows weekly numbers)
-        const thisWeekSlots = weeklySlots.filter((s: any) => s.date >= dayStrings[0] && s.date <= dayStrings[6])
-        if (thisWeekSlots.length > 0) {
-            const totalSpots = thisWeekSlots.reduce((sum: number, s: any) => sum + (s.quantity || 1), 0)
-            const bookedSpotsCount = thisWeekSlots.reduce((sum: number, s: any) => {
-                const activeBookings = s.bookings?.filter((b: any) =>
-                    ['approved', 'pending', 'completed'].includes(b.status?.toLowerCase())
-                ).length || 0
-                return sum + activeBookings
-            }, 0)
-
-            occupancyRate = Math.round((bookedSpotsCount / totalSpots) * 100)
-            // Use total spots for "Active Listings"
-            ;(weeklySlots as any).totalSpots = totalSpots
+        // Apply Stats from RPC
+        if (dashboardStats) {
+            monthlyRevenue = (dashboardStats as any).revenue || 0;
+            topInstructorName = (dashboardStats as any).top_instructor || 'N/A';
+            occupancyRate = (dashboardStats as any).occupancy_rate || 0;
+            
+            // Still set totalSpots for the UI if needed
+            ;(weeklySlots as any).totalSpots = (dashboardStats as any).total_spots || 0;
         }
     }
 

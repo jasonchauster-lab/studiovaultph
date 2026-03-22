@@ -71,7 +71,7 @@ export default function InstructorEarningsClient({
             {/* Info Modal */}
             {showInfoModal && (
                 <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/20 backdrop-blur-md animate-in fade-in duration-700" onClick={() => setShowInfoModal(false)}>
-                    <div className="glass-card w-full max-w-lg overflow-hidden p-10 relative animate-in zoom-in-95 duration-700 rounded-[12px]" onClick={e => e.stopPropagation()}>
+                    <div className="glass-card w-full max-w-lg overflow-hidden p-10 relative animate-in zoom-in-95 duration-700" onClick={e => e.stopPropagation()}>
                         <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
                         <div className="flex justify-between items-start mb-10 border-b border-white/60 pb-8">
@@ -184,34 +184,32 @@ export default function InstructorEarningsClient({
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 px-4 sm:px-0">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-0">
                 {/* Available Balance */}
-                <div className="earth-card p-4 sm:p-6 relative overflow-hidden bg-white/60 backdrop-blur-sm hover:-translate-y-1 transition-all duration-500 shadow-tight border border-border-grey group">
+                <div className="atelier-card p-6 sm:p-8 relative overflow-hidden group">
                     <button
                         onClick={() => setShowInfoModal(true)}
-                        className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 text-charcoal/30 hover:text-charcoal transition-colors p-1.5 bg-off-white rounded-lg border border-border-grey"
+                        className="absolute top-4 right-4 z-10 text-forest/20 hover:text-forest transition-colors p-2 bg-sage/5 rounded-xl border border-forest/10"
                     >
-                        <Info className="w-3.5 h-3.5" />
+                        <Info className="w-4 h-4" />
                     </button>
  
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none group-hover:bg-forest/10 transition-colors" />
-                        
-                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <div className="p-1 sm:p-1.5 bg-sage/5 rounded-lg border border-border-grey shadow-sm shrink-0">
-                            <Wallet className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-forest" />
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-2xl bg-sage/10 flex items-center justify-center shrink-0">
+                            <Wallet className="w-5 h-5 text-forest" />
                         </div>
-                        <span className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] leading-tight">AVAILABLE</span>
+                        <span className="text-[10px] font-black text-forest/40 uppercase tracking-[0.2em]">AVAILABLE</span>
                     </div>
-                    <div className="space-y-1">
-                        <h2 className="text-xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate">₱{(availableBalance || 0).toLocaleString()}</h2>
-                        <div className="flex items-center justify-between gap-2 mt-2">
-                            <div className="text-[7px] sm:text-[8px] font-black text-forest uppercase tracking-widest bg-sage/10 w-fit px-2 py-0.5 rounded border border-forest/10">LIQUID</div>
+                    
+                    <div className="space-y-4">
+                        <h2 className="text-3xl sm:text-5xl font-serif text-forest tracking-tighter">₱{(availableBalance || 0).toLocaleString()}</h2>
+                        <div className="flex items-center justify-between gap-4 pt-2">
+                            <span className="text-[10px] font-black text-forest uppercase tracking-widest bg-sage/10 px-3 py-1 rounded-full border border-forest/10">LIQUID</span>
                             {availableBalance > 0 && (
                                 <Link
                                     href="/instructor/payout"
-                                    className="text-[7px] sm:text-[8px] font-black text-white uppercase tracking-widest bg-forest px-3 py-1 rounded-lg border border-forest shadow-sm hover:brightness-110 transition-all active:scale-95 flex items-center gap-1"
+                                    className="btn-forest px-6 py-2.5 text-[10px]"
                                 >
-                                    <ArrowUpRight className="w-2.5 h-2.5" />
                                     WITHDRAW
                                 </Link>
                             )}
@@ -220,75 +218,82 @@ export default function InstructorEarningsClient({
                 </div>
 
                 {/* Pending Balance */}
-                <div className="earth-card p-4 sm:p-6 hover:-translate-y-1 transition-all duration-500 bg-white/60 backdrop-blur-sm shadow-tight border border-border-grey group">
-                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <div className="p-1 sm:p-1.5 bg-buttermilk/10 rounded-lg border border-border-grey shadow-sm shrink-0">
-                            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-burgundy/40" />
+                <div className="atelier-card p-6 sm:p-8 group">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-2xl bg-burgundy/10 flex items-center justify-center shrink-0">
+                            <Clock className="w-5 h-5 text-burgundy/60" />
                         </div>
-                        <span className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] leading-tight truncate">PENDING</span>
+                        <span className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em]">PENDING</span>
                     </div>
-                    <div className="space-y-1">
-                        <h3 className="text-xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate text-burgundy/80">₱{(pendingBalance || 0).toLocaleString()}</h3>
-                        <p className="text-[7px] sm:text-[8px] font-black text-charcoal/40 uppercase tracking-widest truncate">FUTURE INCOME</p>
+                    <div className="space-y-2">
+                        <h3 className="text-3xl sm:text-5xl font-serif text-burgundy/80 tracking-tighter">₱{(pendingBalance || 0).toLocaleString()}</h3>
+                        <p className="text-[10px] font-black text-burgundy/30 uppercase tracking-widest px-1">FUTURE INCOME</p>
                     </div>
                 </div>
 
                 {/* Gross Earnings */}
-                <div className="earth-card p-4 sm:p-6 hover:-translate-y-1 transition-all duration-500 bg-white/60 backdrop-blur-sm shadow-tight border border-border-grey group">
-                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <div className="p-1 sm:p-1.5 bg-sage/5 rounded-lg border border-border-grey shadow-sm shrink-0">
-                            <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-forest/40 group-hover:text-forest transition-colors" />
+                <div className="atelier-card p-6 sm:p-8 group">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center shrink-0">
+                            <TrendingUp className="w-5 h-5 text-gold" />
                         </div>
-                        <span className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] leading-tight">LIFETIME</span>
+                        <span className="text-[10px] font-black text-gold/60 uppercase tracking-[0.2em]">LIFETIME</span>
                     </div>
-                    <div className="space-y-1">
-                        <h3 className="text-xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate">₱{(totalEarned || 0).toLocaleString()}</h3>
-                        <p className="text-[7px] sm:text-[8px] font-black text-charcoal/40 uppercase tracking-widest truncate">GROSS EARNINGS</p>
+                    <div className="space-y-2">
+                        <h3 className="text-3xl sm:text-5xl font-serif text-charcoal-900 tracking-tighter">₱{(totalEarned || 0).toLocaleString()}</h3>
+                        <p className="text-[10px] font-black text-charcoal-400 uppercase tracking-widest px-1">GROSS EARNINGS</p>
                     </div>
                 </div>
 
                 {/* Total Withdrawn */}
-                <div className="earth-card p-4 sm:p-6 hover:-translate-y-1 transition-all duration-500 bg-white/60 backdrop-blur-sm shadow-tight border border-border-grey group relative overflow-hidden">
-                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <div className="p-1 sm:p-1.5 bg-charcoal/5 rounded-lg border border-border-grey shadow-sm shrink-0">
-                            <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-charcoal/30 group-hover:text-charcoal/50 transition-colors" />
+                <div className="atelier-card p-6 sm:p-8 group">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-2xl bg-charcoal-900/5 flex items-center justify-center shrink-0">
+                            <ArrowUpRight className="w-5 h-5 text-charcoal-900" />
                         </div>
-                        <span className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] leading-tight">CASHOUTS</span>
+                        <span className="text-[10px] font-black text-charcoal-900/40 uppercase tracking-[0.2em]">CASHOUTS</span>
                     </div>
-                    <div className="space-y-1">
-                        <h3 className="text-xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate">₱{(totalWithdrawn || 0).toLocaleString()}</h3>
-                        <p className="text-[7px] sm:text-[8px] font-black text-charcoal/40 uppercase tracking-widest truncate">TOTAL WITHDRAWN</p>
+                    <div className="space-y-2">
+                        <h3 className="text-3xl sm:text-5xl font-serif text-charcoal-900 tracking-tighter">₱{(totalWithdrawn || 0).toLocaleString()}</h3>
+                        <p className="text-[10px] font-black text-charcoal-400 uppercase tracking-widest px-1">TOTAL WITHDRAWN</p>
                     </div>
                 </div>
 
                 {/* Net Balance / Current */}
-                <div className="earth-card p-4 sm:p-6 hover:-translate-y-1 transition-all duration-500 bg-white/60 backdrop-blur-sm shadow-tight border border-border-grey group">
-                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                        <div className="p-1 sm:p-1.5 bg-gold/5 rounded-lg border border-border-grey shadow-sm shrink-0">
-                            <DollarSign className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gold/40 group-hover:text-gold transition-colors" />
+                <div className="atelier-card p-6 sm:p-8 group bg-charcoal-900 text-white border-0 shadow-xl overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
+                    <div className="flex items-center gap-3 mb-6 relative z-10">
+                        <div className="w-10 h-10 rounded-2xl bg-gold/20 flex items-center justify-center shrink-0 border border-gold/30">
+                            <DollarSign className="w-5 h-5 text-gold-400" />
                         </div>
-                        <span className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] leading-tight">NET YIELD</span>
+                        <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">NET YIELD</span>
                     </div>
-                    <div className="space-y-1">
-                        <h3 className="text-xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate text-gold-700">₱{(netEarnings || 0).toLocaleString()}</h3>
-                        <p className="text-[7px] sm:text-[8px] font-black text-charcoal/40 uppercase tracking-widest truncate">CURRENT BALANCE</p>
+                    <div className="space-y-2 relative z-10">
+                        <h3 className="text-3xl sm:text-5xl font-serif text-gold-400 tracking-tighter">₱{(netEarnings || 0).toLocaleString()}</h3>
+                        <p className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">CURRENT BALANCE</p>
                     </div>
                 </div>
 
-                {/* Adjustments (Compensation & penalties) */}
-                <div className="earth-card p-4 sm:p-6 hover:-translate-y-1 transition-all duration-500 bg-white/60 backdrop-blur-sm shadow-tight border border-border-grey group">
-                    <div className="flex items-center gap-2 mb-2 sm:mb-2">
-                        <div className="p-1 sm:p-1.5 bg-red-400/5 rounded-lg border border-border-grey shadow-sm shrink-0">
-                            <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-400/30 group-hover:text-red-400/60 transition-colors" />
+                {/* Adjustments */}
+                <div className="atelier-card p-6 sm:p-8 group">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-2xl bg-burgundy/5 flex items-center justify-center shrink-0">
+                            <AlertCircle className="w-5 h-5 text-burgundy/40" />
                         </div>
-                        <span className="text-[8px] sm:text-[9px] font-black text-charcoal/40 uppercase tracking-[0.2em] leading-tight">VAULT ADJ.</span>
+                        <span className="text-[10px] font-black text-charcoal-400 uppercase tracking-[0.2em]">ADJUSTMENTS</span>
                     </div>
-                    <div className="space-y-1">
-                        <div className="flex flex-row items-center gap-3">
-                            <span className="text-[10px] sm:text-[11px] font-black text-forest tracking-tighter">+₱{(totalCompensation || 0).toLocaleString()}</span>
-                            <span className="text-[10px] sm:text-[11px] font-black text-red-500 tracking-tighter">-₱{(totalPenalty || 0).toLocaleString()}</span>
+                    <div className="space-y-4">
+                        <div className="flex flex-row items-center gap-6">
+                            <div className="flex flex-col">
+                                <span className="text-2xl font-serif text-forest">+₱{(totalCompensation || 0).toLocaleString()}</span>
+                                <span className="text-[8px] font-black text-forest/40 uppercase tracking-widest">COMPS</span>
+                            </div>
+                            <div className="w-px h-8 bg-border-grey" />
+                            <div className="flex flex-col">
+                                <span className="text-2xl font-serif text-burgundy">-₱{(totalPenalty || 0).toLocaleString()}</span>
+                                <span className="text-[8px] font-black text-burgundy/40 uppercase tracking-widest">PENALTIES</span>
+                            </div>
                         </div>
-                        <p className="text-[7px] sm:text-[8px] font-black text-charcoal/40 uppercase tracking-widest truncate">PENALTIES & COMPS</p>
                     </div>
                 </div>
             </div>

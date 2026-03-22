@@ -8,8 +8,14 @@ import { createClient } from '@/lib/supabase/server'
 export default async function PayoutPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    const { availableBalance, error: balanceError } = await getInstructorEarnings()
-    const { payouts, error: historyError } = await getPayoutHistory()
+    // Parallelize data fetching for performance
+    const [earningsRes, historyRes] = await Promise.all([
+        getInstructorEarnings(),
+        getPayoutHistory()
+    ]);
+
+    const { availableBalance, error: balanceError } = earningsRes;
+    const { payouts, error: historyError } = historyRes;
 
     if (balanceError) {
         return <div className="p-8">Error loading wallet information.</div>
@@ -35,46 +41,46 @@ export default async function PayoutPage() {
                 <div className="space-y-3">
                     {payouts && payouts.length > 0 ? (
                         payouts.map((payout: any) => (
-                            <div key={payout.id} className="earth-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-off-white border border-border-grey flex flex-col items-center justify-center shrink-0">
-                                        <span className="text-[10px] font-black text-burgundy uppercase">
+                            <div key={payout.id} className="atelier-card !p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 group transition-all duration-500 hover:border-forest/30">
+                                <div className="flex items-center gap-5">
+                                    <div className="w-14 h-14 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex flex-col items-center justify-center shrink-0 group-hover:bg-forest/5 transition-colors">
+                                        <span className="text-[10px] font-black text-burgundy uppercase tracking-widest leading-none mb-1">
                                             {new Date(payout.created_at).toLocaleDateString('en-US', { month: 'short' })}
                                         </span>
-                                        <span className="text-lg font-serif text-charcoal leading-none">
+                                        <span className="text-2xl font-serif text-charcoal leading-none">
                                             {new Date(payout.created_at).getDate()}
                                         </span>
                                     </div>
                                     <div>
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-xs font-bold text-charcoal-900 capitalize">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <span className="text-sm font-black text-charcoal uppercase tracking-tight">
                                                 {payout.payment_method} Transfer
                                             </span>
                                             <span className={clsx(
-                                                "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border border-border-grey shadow-tight",
-                                                payout.status === 'processed' ? "bg-green-50 text-green-700" : 
-                                                payout.status === 'pending' ? "bg-yellow-50 text-yellow-700" : "bg-red-50 text-red-700"
+                                                "text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-lg border shadow-tight transition-all",
+                                                payout.status === 'processed' ? "bg-forest/5 text-forest border-forest/20" : 
+                                                payout.status === 'pending' ? "bg-amber-50 text-amber-900 border-amber-200" : "bg-burgundy/5 text-burgundy border-burgundy/20"
                                             )}>
                                                 {payout.status}
                                             </span>
                                         </div>
-                                        <p className="text-xs text-charcoal-400 uppercase tracking-widest whitespace-normal break-words leading-tight mt-1">
+                                        <p className="text-[10px] text-slate font-bold uppercase tracking-[0.2em] leading-relaxed max-w-[200px] sm:max-w-md">
                                             {payout.payment_method === 'bank'
                                                 ? payout.payment_details?.bankName
                                                 : payout.payment_details?.accountNumber}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex justify-between items-center sm:block sm:text-right">
-                                    <span className="sm:hidden text-[10px] font-black text-slate uppercase tracking-widest">Amount</span>
-                                    <span className="text-lg font-serif text-burgundy font-bold">
+                                <div className="flex justify-between items-center sm:block sm:text-right border-t sm:border-t-0 pt-4 sm:pt-0 border-outline-variant/10">
+                                    <span className="sm:hidden text-[9px] font-black text-slate uppercase tracking-[0.3em]">Amount</span>
+                                    <span className="text-2xl font-serif text-charcoal tracking-tighter group-hover:text-forest transition-colors">
                                         ₱{payout.amount.toLocaleString()}
                                     </span>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div className="earth-card p-8 text-center text-charcoal-400 text-sm">
+                        <div className="atelier-card !p-12 text-center text-slate font-bold uppercase tracking-[0.3em] bg-surface-container-low border-dashed">
                             No payout requests found.
                         </div>
                     )}

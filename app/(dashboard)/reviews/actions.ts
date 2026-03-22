@@ -61,39 +61,22 @@ export async function submitReview({
     const isInstructor = booking.instructor_id === user.id
     if (!isCustomer && !isInstructor) return { error: 'You are not a participant of this booking.' }
 
-    // 3. Insert the review - DB unique constraint (booking_id, reviewer_id, reviewee_id)
-    //    will reject duplicates automatically.
-    const { error: reviewError } = await supabase
-        .from('reviews')
-        .insert({
-            booking_id: bookingId,
-            reviewer_id: user.id,
-            reviewee_id: revieweeId,
-            rating,
-            comment,
-            tags,
-        })
+    // 3. Process Atomic Review Submission
+    const { data: result, error: rpcError } = await supabase.rpc('submit_review_atomic', {
+        p_booking_id: bookingId,
+        p_reviewer_id: user.id,
+        p_reviewee_id: revieweeId,
+        p_rating: rating,
+        p_comment: comment,
+        p_tags: tags
+    });
 
-    if (reviewError) {
-        if (reviewError.code === '23505') return { error: 'You have already reviewed this person for this session.' }
-        console.error('Review insert error:', reviewError)
-        return { error: `Failed to submit review: ${reviewError.message}` }
-    }
-
-    // 4. Update the correct tracking flag on the booking
-    if (isCustomer) {
-        const isInstructorReview = revieweeId === booking.instructor_id
-        const flagUpdate = isInstructorReview
-            ? { customer_reviewed_instructor: true, customer_reviewed: true }
-            : { customer_reviewed_studio: true }
-        await supabase.from('bookings').update(flagUpdate).eq('id', bookingId)
-    } else if (isInstructor) {
-        // Instructor reviewing the client vs reviewing the studio
-        const isClientReview = revieweeId === booking.client_id
-        const flagUpdate = isClientReview
-            ? { instructor_reviewed: true }
-            : { instructor_reviewed_studio: true }
-        await supabase.from('bookings').update(flagUpdate).eq('id', bookingId)
+    if (rpcError || !result?.success) {
+        if (rpcError?.code === '23505' || result?.error === 'Already reviewed') {
+            return { error: 'You have already reviewed this person for this session.' };
+        }
+        console.error('Review RPC error:', rpcError || result?.error);
+        return { error: rpcError?.message || result?.error || 'Failed to submit review.' };
     }
 
     revalidatePath('/customer')

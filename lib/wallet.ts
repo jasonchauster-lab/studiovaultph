@@ -120,21 +120,15 @@ export async function autoCompleteBookings() {
         return { count: 0 }
     }
 
-    let completedCount = 0
-    for (const b of toComplete) {
+    const results = await Promise.all(toComplete.map(async b => {
         if (b.status === 'cancelled_charged') {
-            const result = await processInstantPayout(b.id)
-            if (result.success) {
-                completedCount++
-            }
+            return processInstantPayout(b.id)
         } else {
-            const result = await processBookingCompletion(b.id)
-            if (result.success) {
-                completedCount++
-            }
+            return processBookingCompletion(b.id)
         }
-    }
+    }))
 
+    const completedCount = results.filter(r => r.success).length
     return { count: completedCount }
 }
 
@@ -145,73 +139,12 @@ export async function autoCompleteBookings() {
  */
 export async function expireAbandonedBookings() {
     const supabase = await createClient()
-    const now = new Date().toISOString()
-    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString()
+    const { data: result, error: rpcError } = await supabase.rpc('expire_all_abandoned_bookings_atomic');
 
-    // Query A: bookings with explicit expires_at set and past due
-    const { data: expiredByTimer } = await supabase
-        .from('bookings')
-        .select('id, slot_id, client_id, booked_slot_ids, price_breakdown')
-        .eq('status', 'pending')
-        .not('expires_at', 'is', null)
-        .lte('expires_at', now)
-        .is('payment_proof_url', null)
-
-    // Query B: legacy bookings with NULL expires_at that are older than 15 minutes
-    const { data: expiredLegacy } = await supabase
-        .from('bookings')
-        .select('id, slot_id, client_id, booked_slot_ids, price_breakdown')
-        .eq('status', 'pending')
-        .is('expires_at', null)
-        .lte('created_at', fifteenMinutesAgo)
-        .is('payment_proof_url', null)
-
-    const expiredBookings = [...(expiredByTimer || []), ...(expiredLegacy || [])]
-
-    if (expiredBookings.length === 0) {
-        return { count: 0 }
+    if (rpcError) {
+        console.error('Bulk Expiration Error:', rpcError);
+        return { count: 0, error: rpcError.message };
     }
 
-    let expiredCount = 0
-    for (const booking of expiredBookings) {
-        try {
-            // 1. Mark booking as expired
-            await supabase.from('bookings')
-                .update({ status: 'expired' })
-                .eq('id', booking.id)
-
-            // 2. Release all associated slots
-            const allSlotIds = [booking.slot_id, ...(booking.booked_slot_ids || [])].filter(Boolean)
-            if (allSlotIds.length > 0) {
-                await supabase.from('slots')
-                    .update({ is_available: true })
-                    .in('id', allSlotIds)
-            }
-
-            // 3. Refund wallet deduction if any
-            const breakdown = booking.price_breakdown as any
-            const walletDeduction = Number(breakdown?.wallet_deduction || 0)
-            if (walletDeduction > 0 && booking.client_id) {
-                await supabase.rpc('increment_available_balance', {
-                    user_id: booking.client_id,
-                    amount: walletDeduction
-                })
-
-                // Log the refund transaction
-                await supabase.from('wallet_top_ups').insert({
-                    user_id: booking.client_id,
-                    amount: walletDeduction,
-                    status: 'approved',
-                    type: 'refund',
-                    admin_notes: `Refund for expired booking (id: ${booking.id.slice(0, 8)})`
-                })
-            }
-
-            expiredCount++
-        } catch (err) {
-            console.error(`Failed to expire booking ${booking.id}:`, err)
-        }
-    }
-
-    return { count: expiredCount }
+    return { count: result?.expired_count || 0 };
 }

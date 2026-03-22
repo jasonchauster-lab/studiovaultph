@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes, isPast, addDays, subDays, startOfMonth, endOfMonth, startOfDay } from 'date-fns'
+import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes, isPast, addDays, subDays, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle, ChevronDown, ChevronUp, CheckCircle, Check, Pencil, Copy } from 'lucide-react'
 import clsx from 'clsx'
 import { toManilaDateStr, getManilaTodayStr, toManilaDate, getSlotDateTime, formatTo12Hour } from '@/lib/timezone'
@@ -293,7 +293,7 @@ export default function InstructorScheduleCalendar({
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {!isProfileComplete && (
-                <div className="earth-card p-6 bg-burgundy/5 border border-burgundy/10 flex items-center justify-between gap-6">
+                <div className="atelier-card p-6 bg-burgundy/5 border border-burgundy/10 flex items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-full bg-burgundy/10 flex items-center justify-center shrink-0">
                             <AlertTriangle className="w-5 h-5 text-burgundy" />
@@ -376,40 +376,40 @@ export default function InstructorScheduleCalendar({
             {/* Desktop View */}
             <div className="hidden lg:block space-y-10">
                 {/* Header */}
-                <div className="earth-card p-10 bg-white shadow-tight relative overflow-hidden">
+                <div className="atelier-card p-10 bg-white shadow-tight relative overflow-hidden">
                 {/* Background Tint */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-buttermilk/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-50/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
                 {/* Row 1: Title + Date Navigation */}
                 <div className="flex flex-wrap items-center gap-4 relative z-10">
-                    <h2 className="text-4xl font-serif text-charcoal hidden md:block min-w-[240px] tracking-tighter">
+                    <h2 className="text-4xl font-serif text-burgundy hidden md:block min-w-[240px] tracking-tighter">
                         {isMounted && format(safeDate, 'MMMM yyyy')}
                     </h2>
                     <div className="flex items-center gap-4">
                         <div className="relative group">
-                            <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate group-focus-within:text-forest transition-colors" />
+                            <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-burgundy/40 group-focus-within:text-forest transition-colors" />
                             <input
                                 type="date"
                                 value={isMounted ? format(safeDate, 'yyyy-MM-dd') : ''}
                                 onChange={(e) => { if (e.target.value) router.push(`?date=${e.target.value}`) }}
-                                className="pl-12 pr-6 py-4 border border-border-grey rounded-lg text-[10px] font-bold bg-white text-charcoal outline-none focus:ring-1 focus:ring-forest transition-all cursor-pointer uppercase tracking-[0.2em]"
+                                className="pl-12 pr-6 py-4 border border-burgundy/5 rounded-lg text-[10px] font-bold bg-white text-burgundy outline-none focus:ring-1 focus:ring-forest transition-all cursor-pointer uppercase tracking-[0.2em]"
                                 title="Select any specific date"
                             />
                         </div>
-                        <div className="flex items-center bg-off-white rounded-lg p-1 border border-border-grey shadow-tight">
-                            <button onClick={handlePrev} className="flex items-center gap-1.5 px-4 py-2 hover:bg-white rounded-md transition-all text-slate hover:text-charcoal text-[10px] font-bold uppercase tracking-widest" title="Previous">
+                        <div className="flex items-center bg-[#faf9f6]/50 rounded-lg p-1 border border-burgundy/5 shadow-tight">
+                            <button onClick={handlePrev} className="flex items-center gap-1.5 px-4 py-2 hover:bg-white rounded-md transition-all text-burgundy/40 hover:text-burgundy text-[10px] font-bold uppercase tracking-widest" title="Previous">
                                 <ChevronLeft className="w-3.5 h-3.5" /> PREV
                             </button>
-                            <button onClick={handleToday} className="px-6 py-2 text-[10px] font-bold text-charcoal uppercase tracking-widest hover:bg-white rounded-md transition-all border-x border-border-grey mx-1" title="Go to Today">
+                            <button onClick={handleToday} className="px-6 py-2 text-[10px] font-bold text-burgundy uppercase tracking-widest hover:bg-white rounded-md transition-all border-x border-burgundy/5 mx-1" title="Go to Today">
                                 TODAY
                             </button>
-                            <button onClick={handleNext} className="flex items-center gap-1.5 px-4 py-2 hover:bg-white rounded-md transition-all text-slate hover:text-charcoal text-[10px] font-bold uppercase tracking-widest" title="Next">
+                            <button onClick={handleNext} className="flex items-center gap-1.5 px-4 py-2 hover:bg-white rounded-md transition-all text-burgundy/40 hover:text-burgundy text-[10px] font-bold uppercase tracking-widest" title="Next">
                                 NEXT <ChevronRight className="w-3.5 h-3.5" />
                             </button>
                         </div>
 
                         {/* View Switcher */}
-                        <div className="flex items-center bg-white rounded-lg p-1 border border-border-grey shadow-tight ml-4">
+                        <div className="flex items-center bg-white rounded-lg p-1 border border-burgundy/5 shadow-tight ml-4">
                             {(['day', 'week', 'month'] as const).map((v) => (
                                 <button
                                     key={v}
@@ -417,8 +417,8 @@ export default function InstructorScheduleCalendar({
                                     className={clsx(
                                         "px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all",
                                         view === v
-                                            ? "bg-buttermilk text-burgundy shadow-tight"
-                                            : "text-slate hover:text-burgundy hover:bg-off-white"
+                                            ? "bg-amber-50 text-burgundy shadow-tight"
+                                            : "text-burgundy/40 hover:text-burgundy hover:bg-[#faf9f6]"
                                     )}
                                 >
                                     {v}
@@ -464,16 +464,16 @@ export default function InstructorScheduleCalendar({
 
 
             {/* Calendar Grid */}
-            <div className="bg-white border border-border-grey shadow-tight overflow-hidden rounded-[8px]">
+            <div className="bg-white border border-burgundy/5 shadow-tight overflow-hidden rounded-[8px]">
                 <div className="overflow-x-auto no-scrollbar">
                     <div className={clsx("min-w-[800px] xl:min-w-full", view === 'month' && "min-w-0")}>
                         {view !== 'month' ? (
-                            <div className={clsx("grid border-b border-border-grey bg-off-white", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>
-                                <div className="p-6 text-[10px] font-black text-charcoal border-r border-border-grey sticky left-0 bg-white z-20 w-[100px] text-center uppercase tracking-[0.3em] flex items-center justify-center"></div>
+                            <div className={clsx("grid border-b border-burgundy/5 bg-[#faf9f6]", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>
+                                <div className="p-6 text-[10px] font-black text-burgundy border-r border-burgundy/5 sticky left-0 bg-white z-20 w-[100px] text-center uppercase tracking-[0.3em] flex items-center justify-center"></div>
                                 {days.map(day => (
-                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 transition-all relative", isMounted && isSameDay(day, new Date()) ? "bg-buttermilk/20" : "")}>
-                                        <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
-                                        <div className={clsx("text-3xl font-serif font-black tracking-tighter", isMounted && isSameDay(day, new Date()) ? "text-burgundy" : "text-charcoal")}>{format(day, 'd')}</div>
+                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-burgundy/5 last:border-r-0 transition-all relative", isMounted && isSameDay(day, new Date()) ? "bg-amber-50/20" : "")}>
+                                        <div className="text-[10px] text-burgundy/40 font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
+                                        <div className={clsx("text-3xl font-serif font-black tracking-tighter", isMounted && isSameDay(day, new Date()) ? "text-burgundy" : "text-burgundy")}>{format(day, 'd')}</div>
                                         {isMounted && isSameDay(day, new Date()) && (
                                             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-1 bg-forest rounded-t-full" />
                                         )}
@@ -481,16 +481,16 @@ export default function InstructorScheduleCalendar({
                                 ))}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-7 border-b border-border-grey bg-off-white">
+                            <div className="grid grid-cols-7 border-b border-burgundy/5 bg-[#faf9f6]">
                                 {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
-                                    <div key={d} className="p-4 text-center text-[10px] font-black text-slate uppercase tracking-[0.3em] border-r border-border-grey last:border-r-0">
+                                    <div key={d} className="p-4 text-center text-[10px] font-black text-burgundy/40 uppercase tracking-[0.3em] border-r border-burgundy/5 last:border-r-0">
                                         {d}
                                     </div>
                                 ))}
                             </div>
                         )}
 
-                        <div className="divide-y divide-border-grey relative overflow-hidden">
+                        <div className="divide-y divide-burgundy/5 relative overflow-hidden">
                             {view !== 'month' && (
                                 <>
                                     {/* Current Time Indicator */}
@@ -519,7 +519,7 @@ export default function InstructorScheduleCalendar({
 
                                     {hours.map(hour => (
                                         <div key={hour} className={clsx("grid", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
-                                            <div className="p-4 text-[10px] text-slate font-black border-r border-border-grey text-center sticky left-0 bg-white z-20 w-[100px] flex items-center justify-center tracking-[0.2em]">
+                                            <div className="p-4 text-[10px] text-burgundy/40 font-black border-r border-burgundy/5 text-center sticky left-0 bg-white z-20 w-[100px] flex items-center justify-center tracking-[0.2em]">
                                                 {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                             </div>
 
@@ -595,10 +595,11 @@ export default function InstructorScheduleCalendar({
                                                     })
                                                 ];
 
-                                                const isToday = isMounted && isSameDay(day, new Date())
+                                                    const isToday = isMounted && isSameDay(day, new Date())
+                                                    const isPastDay = isPast(endOfDay(day))
 
                                                     return (
-                                                        <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-1 overflow-hidden", isPastCell ? "bg-gray-50" : isToday ? "bg-buttermilk/10" : "")} style={{ height: `${ROW_HEIGHT}px` }}>
+                                                        <div key={day.toString() + hour} className={clsx("border-r border-burgundy/5 last:border-r-0 relative group p-1 overflow-hidden", isPastCell ? "bg-stone-50" : isToday ? "bg-amber-50/10" : "")} style={{ height: `${ROW_HEIGHT}px` }}>
                                                             <div
                                                                 className={clsx(
                                                                     "absolute inset-0 transition-all duration-700 bg-forest/5 cursor-pointer z-0 flex items-center justify-center",
@@ -653,8 +654,8 @@ export default function InstructorScheduleCalendar({
                                                                             className={clsx(
                                                                                 "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-1.5 py-1 group/slot flex flex-col justify-start shadow-tight",
                                                                                 isPastCell
-                                                                                     ? "bg-white/50 border-border-grey/50 text-charcoal/40"
-                                                                                     : "bg-buttermilk border-border-grey text-charcoal",
+                                                                                     ? "bg-white/50 border-burgundy/5 text-burgundy/40"
+                                                                                     : "bg-amber-50 border-burgundy/10 text-burgundy",
                                                                                 duration < 30 && "py-0.5 px-1 justify-center"
                                                                             )}
                                                                             style={{
@@ -760,7 +761,7 @@ export default function InstructorScheduleCalendar({
                                                                                     )}
                                                                                 </div>
                                                                             </div>
-                                                                            <div className="absolute top-1 right-1 text-[8px] font-black text-burgundy bg-buttermilk/60 px-1 py-0.5 rounded border border-burgundy/10 whitespace-nowrap z-20 shadow-sm scale-90 origin-right">
+                                                                            <div className="absolute top-1 right-1 text-[8px] font-black text-burgundy bg-amber-50/60 px-1 py-0.5 rounded border border-burgundy/10 whitespace-nowrap z-20 shadow-sm scale-90 origin-right">
                                                                                 {Math.min(booking.quantity || 1, 1)}/1
                                                                             </div>
                                                                         </div>
@@ -777,7 +778,7 @@ export default function InstructorScheduleCalendar({
                             )}
 
                             {view === 'month' && (
-                                <div className="grid grid-cols-7 divide-x divide-y divide-border-grey">
+                                <div className="grid grid-cols-7 divide-x divide-y divide-burgundy/5">
                                     {days.map((day) => {
                                         const dayStr = toManilaDateStr(day);
                                         const isCurrentMonth = day.getMonth() === safeDate.getMonth();
@@ -921,19 +922,19 @@ export default function InstructorScheduleCalendar({
             {
                 isAddModalOpen && addMode === 'single' && (
                     <div
-                        className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
+                        className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-burgundy/20 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setIsAddModalOpen(false)}
                     >
                         <div
-                            className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh] will-change-transform"
+                            className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-burgundy/5 animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh] will-change-transform"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="flex justify-between items-center mb-12">
                                 <div>
-                                    <h3 className="text-3xl font-serif text-charcoal tracking-tighter">
+                                    <h3 className="text-3xl font-serif text-burgundy tracking-tighter">
                                         Add Time Slot
                                     </h3>
-                                <p className="text-[10px] text-slate font-bold uppercase tracking-[0.4em] mt-2">
+                                <p className="text-[10px] text-burgundy/40 font-bold uppercase tracking-[0.4em] mt-2">
                                     DEFINE A SINGLE SESSION TIME AND LOCATION
                                 </p>
                             </div>
@@ -955,19 +956,19 @@ export default function InstructorScheduleCalendar({
                         )}
 
                         <form onSubmit={handleCreateSingle} className="space-y-6">
-                                <div className="earth-card p-6 space-y-6 bg-off-white border border-border-grey shadow-tight">
+                                <div className="atelier-card p-6 space-y-6 bg-[#faf9f6]/50 border border-burgundy/5 shadow-tight">
                                     <div>
-                                        <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Calendar Date</label>
-                                        <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-5 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
+                                        <label className="block text-[10px] font-bold text-burgundy/40 uppercase tracking-[0.2em] mb-3 ml-2">Calendar Date</label>
+                                        <input name="date" type="date" required value={singleDate} onChange={(e) => setSingleDate(e.target.value)} className="w-full px-5 py-4 border border-burgundy/5 rounded-lg bg-white text-burgundy font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Start Time</label>
-                                            <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-5 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
+                                            <label className="block text-[10px] font-bold text-burgundy/40 uppercase tracking-[0.2em] mb-3 ml-2">Start Time</label>
+                                            <input name="startTime" type="time" required value={singleTime} onChange={(e) => setSingleTime(e.target.value)} className="w-full px-5 py-4 border border-burgundy/5 rounded-lg bg-white text-burgundy font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">End Time</label>
-                                            <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-5 py-4 border border-border-grey rounded-lg bg-white text-charcoal font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
+                                            <label className="block text-[10px] font-bold text-burgundy/40 uppercase tracking-[0.2em] mb-3 ml-2">End Time</label>
+                                            <input name="endTime" type="time" required value={singleEndTime} onChange={(e) => setSingleEndTime(e.target.value)} className="w-full px-5 py-4 border border-burgundy/5 rounded-lg bg-white text-burgundy font-bold text-[10px] outline-none focus:ring-1 focus:ring-forest transition-all uppercase tracking-widest cursor-pointer" />
                                         </div>
                                     </div>
                                 </div>
@@ -1041,19 +1042,19 @@ export default function InstructorScheduleCalendar({
             {
                 isEditModalOpen && editingSlot && (
                     <div
-                        className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 animate-in fade-in duration-300"
+                        className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-burgundy/20 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setIsEditModalOpen(false)}
                     >
                         <div
-                            className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-border-grey animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh] will-change-transform"
+                            className="bg-white rounded-xl p-12 max-w-2xl w-full shadow-card border border-burgundy/5 animate-in zoom-in-95 duration-500 overflow-y-auto max-h-[90vh] will-change-transform"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="flex justify-between items-center mb-12">
                                 <div>
-                                    <h3 className="text-3xl font-serif text-charcoal tracking-tighter">Edit Slot</h3>
-                                    <p className="text-[10px] text-slate font-bold uppercase tracking-[0.4em] mt-2">UPDATE SESSION TIME OR LOCATION</p>
+                                    <h3 className="text-3xl font-serif text-burgundy tracking-tighter">Edit Slot</h3>
+                                    <p className="text-[10px] text-burgundy/40 font-bold uppercase tracking-[0.4em] mt-2">UPDATE SESSION TIME OR LOCATION</p>
                                 </div>
-                                <button onClick={() => setIsEditModalOpen(false)} className="p-4 bg-off-white hover:bg-white rounded-lg text-slate hover:text-charcoal transition-all border border-border-grey shadow-tight">
+                                <button onClick={() => setIsEditModalOpen(false)} className="p-4 bg-[#faf9f6] hover:bg-white rounded-lg text-burgundy/40 hover:text-burgundy transition-all border border-burgundy/5 shadow-tight">
                                     <X className="w-6 h-6" />
                                 </button>
                             </div>
@@ -1108,7 +1109,7 @@ export default function InstructorScheduleCalendar({
                                             {currentSlotHistory.map((h, i) => (
                                                 <div key={h.id + i} className="p-5 bg-orange-50/50 border border-orange-100 rounded-xl flex flex-col gap-2 shadow-sm">
                                                     <div className="flex justify-between items-start">
-                                                        <span className="text-[10px] font-bold text-charcoal uppercase tracking-widest">{h.client?.full_name || 'Client'}</span>
+                                                        <span className="text-[10px] font-bold text-burgundy uppercase tracking-widest">{h.client?.full_name || 'Client'}</span>
                                                         <span className="text-[8px] font-black bg-orange-100 text-orange-700 px-2 py-0.5 rounded uppercase tracking-tighter">
                                                             {h.status === 'rejected' ? 'REJECTED' : 'CANCELLED'}
                                                         </span>
@@ -1151,7 +1152,7 @@ export default function InstructorScheduleCalendar({
             {
                 selectedBooking && (
                     <div
-                        className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-charcoal/40 backdrop-blur-sm animate-in fade-in duration-300"
+                        className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-burgundy/20 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setSelectedBooking(null)}
                     >
                         <div
@@ -1253,7 +1254,7 @@ export default function InstructorScheduleCalendar({
                                             })()}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-3 text-charcoal">
+                                    <div className="flex items-center gap-3 text-burgundy">
                                         <MapPin className="w-4 h-4 opacity-40 shrink-0" />
                                         <div className="flex items-baseline gap-2 flex-1 min-w-0">
                                             <span className="text-[11px] font-bold uppercase tracking-widest text-left truncate">
@@ -1264,7 +1265,7 @@ export default function InstructorScheduleCalendar({
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="text-[10px] font-bold text-charcoal underline decoration-charcoal/20 hover:text-forest hover:decoration-forest transition-all shrink-0 whitespace-nowrap"
+                                                className="text-[10px] font-bold text-burgundy underline decoration-burgundy/20 hover:text-forest hover:decoration-forest transition-all shrink-0 whitespace-nowrap"
                                             >
                                                 View on Maps
                                             </a>
@@ -1279,11 +1280,11 @@ export default function InstructorScheduleCalendar({
                                         : (selectedBooking.price_breakdown?.equipment || 'SESSION');
                                     
                                     return (
-                                        <div className="pt-6 border-t border-[#E5E7EB] flex items-center justify-between">
-                                            <span className="text-[10px] font-black text-charcoal uppercase tracking-[0.3em]">
+                                        <div className="pt-6 border-t border-burgundy/10 flex items-center justify-between">
+                                            <span className="text-[10px] font-black text-burgundy uppercase tracking-[0.3em]">
                                                 {qty} {equipment} BOOKED
                                             </span>
-                                            <span className="text-[10px] font-black text-[#6B5A58] uppercase tracking-widest">
+                                            <span className="text-[10px] font-black text-burgundy/40 uppercase tracking-widest">
                                                 {currentSlotHistory.length} CANCELLED
                                             </span>
                                         </div>
@@ -1293,8 +1294,8 @@ export default function InstructorScheduleCalendar({
 
                             {/* Booked Section */}
                             <div className="space-y-6 px-8">
-                                <div className="flex items-center justify-between border-b border-charcoal/10 pb-4">
-                                    <h4 className="text-[10px] font-black text-charcoal uppercase tracking-[0.3em]">
+                                <div className="flex items-center justify-between border-b border-burgundy/10 pb-4">
+                                    <h4 className="text-[10px] font-black text-burgundy uppercase tracking-[0.3em]">
                                         {(() => {
                                             const qty = selectedBooking.quantity || 1;
                                             const equipment = Array.isArray(selectedBooking.slots?.equipment) && selectedBooking.slots.equipment.length > 0
@@ -1303,15 +1304,14 @@ export default function InstructorScheduleCalendar({
                                             return `${qty} ${equipment} Booked`;
                                         })()}
                                     </h4>
-                                    <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest">
+                                    <span className="text-[10px] font-black text-burgundy/40 uppercase tracking-widest">
                                         {currentSlotHistory.length} Cancelled
                                     </span>
                                 </div>
-
                                 <div className="space-y-4">
                                     <div
                                         onClick={() => selectedBooking.client && setSelectedProfile(selectedBooking.client)}
-                                        className="flex items-center justify-between bg-[#FFF1B5]/20 p-4 rounded-xl border border-[#FFF1B5]/40 cursor-pointer hover:bg-[#FFF1B5]/30 transition-all group"
+                                        className="flex items-center justify-between bg-amber-50/20 p-4 rounded-xl border border-amber-50/40 cursor-pointer hover:bg-amber-50/30 transition-all group"
                                     >
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm group-hover:scale-105 transition-transform">
@@ -1321,28 +1321,28 @@ export default function InstructorScheduleCalendar({
                                                     size={40} 
                                                 />
                                             </div>
-
+ 
                                             <div>
-                                                <p className="text-[11px] font-black text-charcoal uppercase tracking-wider group-hover:text-forest transition-colors">{selectedBooking.client?.full_name}</p>
-                                                <p className="text-[9px] font-medium text-charcoal/50 uppercase tracking-tighter">Verified Client</p>
+                                                <p className="text-[11px] font-black text-burgundy uppercase tracking-wider group-hover:text-forest transition-colors">{selectedBooking.client?.full_name}</p>
+                                                <p className="text-[9px] font-medium text-burgundy/40 uppercase tracking-tighter">Verified Client</p>
                                             </div>
                                         </div>
                                         {(() => {
                                             const isPastStart = getSlotDateTime(selectedBooking.slots?.date, selectedBooking.slots?.start_time) < now
                                             const isPastEnd = getSlotDateTime(selectedBooking.slots?.date, selectedBooking.slots?.end_time) < now
-
+ 
                                             let statusLabel = selectedBooking.status === 'approved' ? 'Confirmed' :
                                                 selectedBooking.status === 'completed' ? 'Completed' : 'Pending'
-
+ 
                                             if (selectedBooking.status === 'approved' && isPastEnd) statusLabel = 'Completed'
                                             if (selectedBooking.status === 'pending' && isPastStart) statusLabel = 'Expired'
-
+ 
                                             return (
                                                 <span className={clsx(
                                                     "text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest border",
                                                     statusLabel === 'Completed' ? "bg-forest/5 text-forest border-forest/10" :
                                                         statusLabel === 'Expired' ? "bg-red-50 text-red-600 border-red-100" :
-                                                            "bg-white text-charcoal border-charcoal/5"
+                                                            "bg-white text-burgundy border-burgundy/5"
                                                 )}>
                                                     {statusLabel}
                                                 </span>
@@ -1351,22 +1351,22 @@ export default function InstructorScheduleCalendar({
                                     </div>
                                 </div>
                             </div>
-
+ 
                             {/* Event History Section */}
-                            <div className="pt-6 border-t border-charcoal/10 mt-10 px-8">
-                                <h4 className="text-[10px] font-black text-charcoal uppercase tracking-[0.3em] mb-4 flex items-center gap-3 text-left">
+                            <div className="pt-6 border-t border-burgundy/10 mt-10 px-8">
+                                <h4 className="text-[10px] font-black text-burgundy uppercase tracking-[0.3em] mb-4 flex items-center gap-3 text-left">
                                     <Clock className="w-4 h-4 opacity-40" />
                                     Event History
                                 </h4>
                                 <div className="space-y-3">
                                     <div className="text-[10px] space-y-1 text-left">
-                                        <div className="flex items-center justify-between font-bold text-charcoal/60">
+                                        <div className="flex items-center justify-between font-bold text-burgundy/60">
                                             <span>Current Session</span>
-                                            <span className="uppercase tracking-tighter text-[8px] bg-[#F5F2EB] px-2 py-0.5 rounded border border-charcoal/10">
+                                            <span className="uppercase tracking-tighter text-[8px] bg-[#faf9f6] px-2 py-0.5 rounded border border-burgundy/5">
                                                 {selectedBooking.status}
                                             </span>
                                         </div>
-                                        <div className="flex flex-col gap-0.5 text-charcoal/40 font-medium">
+                                        <div className="flex flex-col gap-0.5 text-burgundy/40 font-medium">
                                             <p>Booked on {format(new Date(selectedBooking.created_at), 'MMM d, h:mm a')}</p>
                                             {['cancelled_refunded', 'cancelled_charged', 'rejected'].includes(selectedBooking.status?.toLowerCase()) && (
                                                 <p className="text-red-900/40 italic">
@@ -1377,13 +1377,13 @@ export default function InstructorScheduleCalendar({
                                     </div>
                                     {currentSlotHistory.map(h => (
                                         <div key={h.id} className="text-[10px] space-y-1 opacity-60 text-left">
-                                            <div className="flex items-center justify-between font-bold text-charcoal/60">
+                                            <div className="flex items-center justify-between font-bold text-burgundy/40">
                                                 <span>{h.client?.full_name || 'Previous Client'}</span>
                                                 <span className="uppercase tracking-tighter text-[8px] bg-red-50 text-red-600 px-2 py-0.5 rounded border border-red-100">
                                                     {h.status}
                                                 </span>
                                             </div>
-                                            <div className="flex flex-col gap-0.5 text-charcoal/40 font-medium">
+                                            <div className="flex flex-col gap-0.5 text-burgundy/20 font-medium">
                                                 <p>Booked on {format(new Date(h.created_at || h.updated_at), 'MMM d, h:mm a')}</p>
                                                 <p className="text-red-900/40 italic">
                                                     Cancelled on {format(new Date(h.updated_at), 'MMM d, h:mm a')}
@@ -1404,7 +1404,7 @@ export default function InstructorScheduleCalendar({
                                         });
                                         setSelectedBooking(null);
                                     }}
-                                    className="flex-1 bg-charcoal text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-125 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3"
+                                    className="flex-1 bg-burgundy text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] hover:brightness-125 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3"
                                 >
                                     <MessageSquare className="w-4 h-4" /> Message Client
                                 </button>
@@ -1487,7 +1487,7 @@ export default function InstructorScheduleCalendar({
 
             {/* Studio Detail Modal */}
             {selectedStudio && (
-                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedStudio(null)}>
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-burgundy/20 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedStudio(null)}>
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 p-10 md:p-14 relative" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setSelectedStudio(null)} className="absolute top-6 right-6 p-2 hover:bg-charcoal/5 rounded-full transition-colors text-charcoal/50 hover:text-charcoal"><X className="w-5 h-5" /></button>
                         <div className="flex flex-col items-center text-center mb-10">

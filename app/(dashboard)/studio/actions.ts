@@ -790,141 +790,28 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
         return { error: 'Booking is already cancelled or rejected.' }
     }
 
-    // 2. Mark as cancelled atomically to prevent double refunds
-    const breakdown = booking.price_breakdown as any;
-    const walletDeduction = Number(breakdown?.wallet_deduction || 0);
-    const totalPrice = Number(booking.total_price || 0);
-    const refundAmount = totalPrice + walletDeduction;
+    // 2. Mark as cancelled atomically using RPC
+    // This handles: status update, refund, penalty, strikes, and slot release
+    const { data: result, error: rpcError } = await supabase.rpc('cancel_booking_atomic', {
+        p_booking_id: bookingId,
+        p_reason: reason,
+        p_cancelled_by: user.id
+    });
 
-    const startTimeStr = slotData?.start_time
-    const dateStr = slotData?.date
-    const approvedAtStr = booking.approved_at
-    const sessionStart = new Date(`${dateStr}T${startTimeStr}+08:00`)
-    const now = new Date()
-
-    const diffInHours = (sessionStart.getTime() - now.getTime()) / (1000 * 60 * 60)
-    const isLateCancellation = diffInHours < 24
-
-    // Phase 7: 15-minute grace period check (Strictly from approved_at)
-    // If approvedAt is null, the grace period is inherently active (unlocked booking)
-    const approvedAt = approvedAtStr ? new Date(approvedAtStr) : null
-    const isWithinGracePeriod = !approvedAt || (now.getTime() - approvedAt.getTime() <= 15 * 60 * 1000)
-
-    let penaltyAmount = 0
-    let strikeLogged = false
-    let penaltyProcessed = false
-
-    if (isLateCancellation && !isWithinGracePeriod) {
-        penaltyAmount = Number(breakdown?.studio_fee || 0)
+    if (rpcError || !result?.success) {
+        console.error('Studio cancel RPC error:', rpcError || result?.error);
+        return { error: rpcError?.message || result?.error || 'Failed to cancel booking.' };
     }
 
-    const { data: updatedBooking, error: updateError } = await supabase.from('bookings').update({
-        status: 'cancelled_refunded',
-        cancel_reason: reason,
-        cancelled_by: user.id,
-        price_breakdown: {
-            ...breakdown,
-            refunded_amount: refundAmount,
-            penalty_amount: penaltyAmount,
-            refund_initiator: 'studio'
-        }
-    })
-        .eq('id', bookingId)
-        .in('status', ['approved', 'pending'])
-        .select('id')
-
-    if (updateError) {
-        console.error('Studio cancel update error:', updateError)
-        return { error: 'Failed to update booking status.' }
-    }
-
-    if (!updatedBooking || updatedBooking.length === 0) {
-        return { error: 'Booking already cancelled or not eligible for cancellation.' }
-    }
-
-    // 3. Process 100% Refund to Client
-    if (refundAmount > 0) {
-        const { error: refundError } = await supabase.rpc('increment_available_balance', {
-            user_id: booking.client_id,
-            amount: refundAmount
-        })
-        if (refundError) {
-            console.error('Studio cancel refund error:', refundError)
-            return { error: `Cancellation processed, but refund failed: ${refundError.message}` }
-        }
-    }
-
-    // 4. Displacement Fee & Strike logic (Studio Owner -> Instructor)
-    if (isLateCancellation && !isWithinGracePeriod) {
-        if (penaltyAmount > 0 && booking.instructor_id) {
-            const { error: penaltyError } = await supabase.rpc('transfer_balance', {
-                p_from_id: user.id, // Studio Owner
-                p_to_id: booking.instructor_id,
-                p_amount: penaltyAmount
+    // 3. Handle Auto-Suspension Email
+    if (result.is_suspended && user.email) {
+        await sendEmail({
+            to: user.email,
+            subject: 'Action Required: Your Studio Vault PH Listing has been Suspended',
+            react: AccountFrozenEmail({
+                studioName: result.studio_name,
             })
-            if (penaltyError) {
-                console.error('Displacement fee transfer error:', penaltyError)
-                return { error: `Refund processed, but displacement fee transfer failed: ${penaltyError.message}` }
-            }
-            penaltyProcessed = true
-        }
-
-        // --- STRIKE SYSTEM START ---
-        // 1. Log the strike
-        const { error: strikeError } = await supabase.from('studio_strikes').insert({
-            studio_id: studio.id,
-            booking_id: bookingId
-        })
-
-        if (strikeError) {
-            console.error('Error logging studio strike:', strikeError)
-        } else {
-            strikeLogged = true
-
-            // 2. Check for cumulative strikes (last 30 days)
-            const thirtyDaysAgo = new Date()
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
-            const { count: strikeCount } = await supabase
-                .from('studio_strikes')
-                .select('*', { count: 'exact', head: true })
-                .eq('studio_id', studio.id)
-                .gte('created_at', thirtyDaysAgo.toISOString())
-
-            if (strikeCount && strikeCount >= 3) {
-                // 3. Auto-suspend
-                await supabase.from('profiles').update({ is_suspended: true }).eq('id', user.id)
-
-                // 4. Send "Account Frozen" email
-                if (user.email) {
-                    await sendEmail({
-                        to: user.email,
-                        subject: 'Action Required: Your Studio Vault PH Listing has been Suspended',
-                        react: AccountFrozenEmail({
-                            studioName: studio.name,
-                        })
-                    })
-                }
-            }
-        }
-        // --- STRIKE SYSTEM END ---
-    }
-
-    // 5. Finalize breakdown fields that might have changed
-    await supabase.from('bookings').update({
-        price_breakdown: {
-            ...breakdown,
-            refunded_amount: refundAmount,
-            penalty_amount: penaltyAmount,
-            penalty_processed: penaltyProcessed,
-            strike_logged: strikeLogged,
-            refund_initiator: 'studio'
-        }
-    }).eq('id', bookingId)
-
-    const allSlotIds = [booking.slot_id, ...(booking.booked_slot_ids || [])].filter(Boolean)
-    if (allSlotIds.length > 0) {
-        await supabase.from('slots').update({ is_available: true }).in('id', allSlotIds)
+        });
     }
 
     // 4. Send Emails

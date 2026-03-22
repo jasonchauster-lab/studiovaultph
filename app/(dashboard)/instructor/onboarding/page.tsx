@@ -32,24 +32,25 @@ export default async function InstructorOnboardingPage() {
             redirect('/instructor')
         } else {
             return (
-                <div className="min-h-screen bg-cream-50 flex flex-col items-center justify-center p-4 transition-all animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="max-w-md w-full bg-white p-10 rounded-2xl border border-cream-200 shadow-sm text-center">
-                        <div className="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Clock className="w-8 h-8 text-yellow-600" />
+                <div className="min-h-screen bg-off-white flex flex-col items-center justify-center p-4 transition-all animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="atelier-card max-w-md w-full bg-white p-12 text-center shadow-tight">
+                        <div className="w-20 h-20 bg-forest/5 rounded-full flex items-center justify-center mx-auto mb-8">
+                            <Clock className="w-10 h-10 text-forest" />
                         </div>
 
-                        <h1 className="text-3xl font-serif text-charcoal-900 mb-4">Application Under Review</h1>
-                        <p className="text-charcoal-600 mb-8 leading-relaxed">
-                            Thanks for applying to StudioVaultPH! Our team is currently reviewing your certifications to ensure the highest quality for our studios.
+                        <h1 className="text-3xl font-serif text-burgundy mb-4 tracking-tight">Application Under Review</h1>
+                        <p className="text-charcoal/60 mb-8 leading-relaxed">
+                            Thanks for applying to StudioVault! Our team is currently reviewing your certifications to ensure the highest quality for our partner studios.
                         </p>
 
-                        <div className="bg-cream-50 rounded-xl p-4 border border-cream-100 mb-8">
-                            <div className="flex items-center justify-center gap-2 text-sm text-charcoal-500">
-                                Status: <span className="text-yellow-700 font-semibold flex items-center gap-1"><span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span> Pending Verification</span>
+                        <div className="bg-forest/5 rounded-2xl p-6 border border-forest/10 mb-8">
+                            <div className="flex items-center justify-center gap-3 text-xs font-bold uppercase tracking-widest text-forest">
+                                <span className="w-2 h-2 bg-forest rounded-full animate-pulse"></span>
+                                Status: Pending Verification
                             </div>
                         </div>
 
-                        <p className="text-xs text-charcoal-400">
+                        <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-[0.2em]">
                             This usually takes 24-48 hours. check back soon!
                         </p>
                     </div>
@@ -59,9 +60,9 @@ export default async function InstructorOnboardingPage() {
     }
 
     return (
-        <div className="fixed inset-0 bg-white flex flex-col md:flex-row z-[60]">
-            {/* Left Side: Image */}
-            <div className="hidden md:flex md:w-1/2 relative flex-col justify-end">
+        <div className="fixed inset-0 bg-off-white flex flex-col md:flex-row z-[60]">
+            {/* Left Side: Brand Narrative */}
+            <div className="hidden md:flex md:w-[45%] relative flex-col justify-end p-20">
                 <Image
                     src="/instructor-application-bg.png"
                     alt="Instructor Application"
@@ -69,32 +70,30 @@ export default async function InstructorOnboardingPage() {
                     className="object-cover"
                     priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                <div className="relative p-16 text-white z-10 drop-shadow-md">
-                    <h2 className="text-4xl lg:text-5xl font-serif mb-6 leading-tight text-white">Grow Your Practice</h2>
-                    <p className="text-lg text-white/90 font-light max-w-sm leading-relaxed">
+                <div className="absolute inset-0 bg-gradient-to-t from-burgundy/90 via-burgundy/20 to-transparent" />
+                
+                <div className="relative z-10">
+                    <Image src="/logo4.png" alt="StudioVault" width={160} height={48} className="h-12 w-auto object-contain brightness-0 invert mb-12" />
+                    <h2 className="text-5xl lg:text-6xl font-serif text-white mb-6 leading-tight max-w-md">Grow Your Practice.</h2>
+                    <p className="text-xl text-white/80 font-light max-w-sm leading-relaxed">
                         Access premium studio spaces and manage your freelance business with StudioVault's elite platform.
                     </p>
                 </div>
             </div>
 
-            {/* Right Side: Form */}
-            <div className="flex-1 overflow-y-auto bg-white p-8 md:p-12 lg:p-20">
-                <div className="max-w-xl mx-auto">
-                    <div className="mb-12">
-                        <Link href="/" className="flex items-center justify-center gap-0 group mb-8">
-                            <Image src="/logo2.jpg" alt="StudioVault Logo" width={80} height={80} className="w-20 h-20 object-contain mix-blend-multiply" />
-                            <span className="text-3xl font-serif font-bold text-charcoal-900 tracking-tight -ml-5 whitespace-nowrap">StudioVaultPH</span>
-                        </Link>
-                        <h2 className="text-charcoal-800 text-sm font-bold uppercase tracking-[0.2em] mb-3">Join the Vault</h2>
-                        <h1 className="text-2xl sm:text-4xl font-serif text-charcoal-900 mb-4 tracking-tight">Instructor Application</h1>
-                        <p className="text-charcoal-600">The premium marketplace for Pilates professionals.</p>
+            {/* Right Side: Onboarding Content */}
+            <div className="flex-1 overflow-y-auto p-6 md:p-12 lg:p-24 flex flex-col items-center">
+                <div className="max-w-xl w-full">
+                    <div className="mb-16">
+                        <h2 className="text-charcoal/40 text-xs font-bold uppercase tracking-[0.3em] mb-4">Partner Onboarding</h2>
+                        <h1 className="text-4xl sm:text-5xl font-serif text-burgundy mb-6 tracking-tight">Instructor Registration</h1>
+                        <p className="text-charcoal/60 text-lg leading-relaxed">Join the curated marketplace for elite Pilates professionals.</p>
                     </div>
 
                     <InstructorOnboardingForm />
 
-                    <div className="mt-12 pt-8 border-t border-cream-100 text-center text-xs text-charcoal-400">
-                        &copy; 2026 StudioVaultPH. All rights reserved.
+                    <div className="mt-20 pt-10 border-t border-border-grey text-center text-[10px] font-bold text-charcoal/30 uppercase tracking-[0.2em]">
+                        &copy; 2026 STUDIO VAULT. ALL RIGHTS RESERVED.
                     </div>
                 </div>
             </div>

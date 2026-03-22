@@ -124,34 +124,28 @@ export async function requestBooking(
         const serviceFee = Math.max(100, instructorFee * 0.2);
         const totalPrice = (instructorFee + serviceFee) * quantity;
 
-        // Wallet Deduction
+        // Wallet Deduction logic (client-side calculation before atomic commit)
         const { data: profile } = await supabase.from('profiles').select('available_balance').eq('id', user.id).single();
         const deduction = Math.min(profile?.available_balance ?? 0, totalPrice);
         const finalPrice = totalPrice - deduction;
 
-        if (deduction > 0) {
-            await supabase.rpc('deduct_available_balance', { p_user_id: user.id, p_amount: deduction });
-        }
+        // --- ATOMIC RPC ---
+        const { data: rpcResult, error: rpcError } = await supabase.rpc('book_home_session_atomic', {
+            p_instructor_id: instructorId,
+            p_client_id: user.id,
+            p_date: dateStr,
+            p_start_time: timeStr,
+            p_end_time: bookingEnd?.split('T')[1]?.split('.')[0],
+            p_total_price: finalPrice,
+            p_price_breakdown: { instructor_fee: instructorFee, service_fee: serviceFee, wallet_deduction: deduction },
+            p_wallet_deduction: deduction,
+            p_home_address: clientAddress,
+            p_home_lat: clientLat,
+            p_home_lng: clientLng
+        });
 
-        // Insert Booking
-        const { data: newBooking, error: insertError } = await supabase.from('bookings').insert({
-            instructor_id: instructorId,
-            client_id: user.id,
-            status: 'pending',
-            total_price: finalPrice,
-            location_type: 'home',
-            home_address: clientAddress,
-            home_lat: clientLat,
-            home_lng: clientLng,
-            booking_date: dateStr,
-            booking_start_time: timeStr,
-            booking_end_time: bookingEnd?.split('T')[1]?.split('.')[0],
-            price_breakdown: { instructor_fee: instructorFee, service_fee: serviceFee, wallet_deduction: deduction },
-            expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString()
-        }).select().single();
-
-        if (insertError) return { error: insertError.message };
-        actualBookingId = newBooking.id;
+        if (rpcError || !rpcResult?.success) return { error: rpcError?.message || 'Booking failed.' };
+        actualBookingId = rpcResult.booking_id;
     }
 
     if (!actualBookingId) return { error: 'Booking failed.' };
@@ -262,57 +256,23 @@ export async function submitPaymentProof(
 
     const hasRiskFlags = Object.values(parqAnswers).some(v => v === true)
 
-    // 1. Update booking with payment proof and agreement flags
-    const { error } = await supabase
-        .from('bookings')
-        .update({
-            payment_proof_url: proofUrl,
-            payment_status: 'submitted',
-            payment_submitted_at: new Date().toISOString(),
-            waiver_agreed: waiverAgreed,
-            terms_agreed: termsAgreed,
-            expires_at: null // Clear expiry — payment submitted, slot is now permanently held
-        })
-        .eq('id', bookingId)
-        .eq('client_id', user.id) // Ensure ownership
-        .eq('status', 'pending')  // Security Fix: Only pending bookings can be paid
+    // --- ATOMIC RPC ---
+    // Handles: Booking status update, Consent insertion, and Profile waiver_signed_at sync in 1 transaction
+    const { data: rpcResult, error: rpcError } = await supabase.rpc('submit_payment_atomic', {
+        p_booking_id: bookingId,
+        p_client_id: user.id,
+        p_proof_url: proofUrl,
+        p_waiver_agreed: waiverAgreed,
+        p_terms_agreed: termsAgreed,
+        p_parq_answers: parqAnswers,
+        p_has_risk_flags: hasRiskFlags,
+        p_medical_clearance_acknowledged: medicalClearanceAcknowledged,
+        p_waiver_version: '2026-03-22' // Updated version for the new atomic flow
+    });
 
-    if (error) {
-        console.error('Payment proof submission error:', error)
-        return { error: `DB Error: ${error.message} (Code: ${error.code})` }
-    }
-
-    // 2. Insert timestamped consent audit record
-    const { error: consentError } = await supabase
-        .from('waiver_consents')
-        .insert({
-            booking_id: bookingId,
-            user_id: user.id,
-            waiver_agreed: waiverAgreed,
-            terms_agreed: termsAgreed,
-            parq_answers: parqAnswers,
-            has_risk_flags: hasRiskFlags,
-            medical_clearance_acknowledged: medicalClearanceAcknowledged,
-            waiver_version: '2026-02-19',
-            agreed_at: new Date().toISOString()
-        })
-
-    if (consentError) {
-        // Fatal - we must record consent for legal reasons
-        console.error('Consent audit log error:', consentError)
-        return { error: `Failed to save waiver consent. Please try again. (${consentError.message})` }
-    }
-
-    // 3. Sync waiver_signed_at to profile for quick access
-    if (waiverAgreed) {
-        const { error: profileError } = await supabase
-            .from('profiles')
-            .update({ waiver_signed_at: new Date().toISOString() })
-            .eq('id', user.id);
-
-        if (profileError) {
-            console.warn('Failed to sync waiver_signed_at to profile:', profileError);
-        }
+    if (rpcError || !rpcResult?.success) {
+        console.error('Payment atomic submission error:', rpcError);
+        return { error: rpcError?.message || 'Failed to submit payment securely.' };
     }
 
     revalidatePath(`/customer/payment/${bookingId}`)

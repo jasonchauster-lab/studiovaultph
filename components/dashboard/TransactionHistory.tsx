@@ -31,32 +31,32 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
     const currentData = activeTab === 'income' ? incomeTransactions : payoutTransactions;
 
     return (
-        <div className="bg-white border border-cream-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex overflow-x-auto hide-scrollbar">
+        <div className="atelier-card overflow-hidden">
+                <div className="flex border-b border-cream-200/60 bg-cream-50/30">
                     <button
                         onClick={() => setActiveTab('income')}
-                        className={`px-4 sm:px-6 py-4 text-xs sm:text-sm font-bold uppercase tracking-widest transition-all border-b-2 whitespace-nowrap ${activeTab === 'income'
-                            ? 'border-charcoal text-charcoal bg-off-white/30'
-                            : 'border-transparent text-charcoal/40 hover:text-charcoal active:scale-95'
+                        className={`flex-1 px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 whitespace-nowrap ${activeTab === 'income'
+                            ? 'border-forest text-forest bg-sage/5'
+                            : 'border-transparent text-charcoal/40 hover:text-forest/60'
                             }`}
                     >
-                        Income & Adjustments
+                        INCOME & ADJUSTMENTS
                     </button>
                     <button
                         onClick={() => setActiveTab('payouts')}
-                        className={`px-4 sm:px-6 py-4 text-xs sm:text-sm font-bold uppercase tracking-widest transition-all border-b-2 whitespace-nowrap ${activeTab === 'payouts'
-                            ? 'border-charcoal text-charcoal bg-off-white/30'
-                            : 'border-transparent text-charcoal/40 hover:text-charcoal active:scale-95'
+                        className={`flex-1 px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 whitespace-nowrap ${activeTab === 'payouts'
+                            ? 'border-burgundy text-burgundy bg-burgundy/5'
+                            : 'border-transparent text-charcoal/40 hover:text-burgundy/60'
                             }`}
                     >
-                        Withdrawals
+                        WITHDRAWALS
                     </button>
                 </div>
 
             <div className="overflow-x-auto">
                 {activeTab === 'income' ? (
                     <div className="w-full">
-                        {/* Desktop Table */}
+                        {/* Desktop Table View */}
                         <table className="hidden sm:table w-full text-left text-sm text-charcoal-600">
                             <thead className="bg-cream-50/50 text-charcoal/60 font-black uppercase tracking-[0.1em] text-[10px] border-b border-cream-200">
                                 <tr>

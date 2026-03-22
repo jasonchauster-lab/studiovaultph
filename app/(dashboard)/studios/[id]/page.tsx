@@ -28,13 +28,32 @@ const getStudioStaticData = unstable_cache(
 
         if (!studio) return null
 
-        const { data: profiles } = await admin
+        // Use a bounding box to prune the instructor list (roughly 50km radius)
+        // 0.5 degrees lat/lng is ~55km in the Philippines.
+        let instructorQuery = admin
             .from('profiles')
-            .select('id, full_name, rates, avatar_url, bio, instagram_handle, teaching_equipment')
+            .select('id, full_name, rates, avatar_url, bio, instagram_handle, teaching_equipment, home_base_lat, home_base_lng, max_travel_km, offers_home_sessions')
             .eq('role', 'instructor')
             .not('rates', 'is', null)
+            .is('is_suspended', false)
+
+        if (studio.lat && studio.lng) {
+            const lat = Number(studio.lat)
+            const lng = Number(studio.lng)
+            instructorQuery = instructorQuery
+                .gte('home_base_lat', lat - 0.5)
+                .lte('home_base_lat', lat + 0.5)
+                .gte('home_base_lng', lng - 0.5)
+                .lte('home_base_lng', lng + 0.5)
+        }
+
+        const { data: profiles } = await instructorQuery
 
         const allInstructorIds = (profiles || []).map((p: any) => p.id)
+
+        if (allInstructorIds.length === 0) {
+            return { studio, profiles: [], certsRaw: [], availabilityRaw: [] }
+        }
 
         const [{ data: certsRaw }, { data: availabilityRaw }] = await Promise.all([
             admin
@@ -136,12 +155,24 @@ export default async function StudioDetailsPage(props: {
             return a.start_time.localeCompare(b.start_time)
         })
 
+    const { calculateDistance } = await import('@/lib/utils/location')
+    const studioLat = Number(studio.lat)
+    const studioLng = Number(studio.lng)
+
     const instructors = (profiles || []).map(p => ({
         ...p,
         certifications: (certsRaw || []).filter(c => c.instructor_id === p.id),
         instructor_availability: (availabilityRaw || []).filter(a => a.instructor_id === p.id)
     })).filter(i => {
         if (i.certifications.length === 0) return false
+        
+        // 1. Distance-based matching (New Primary System)
+        if (studioLat && studioLng && i.home_base_lat && i.home_base_lng) {
+            const dist = calculateDistance(studioLat, studioLng, Number(i.home_base_lat), Number(i.home_base_lng))
+            return dist <= (i.max_travel_km || 10)
+        }
+
+        // 2. Fallback to location-area tags
         const instrLocations = i.instructor_availability.map((a: any) => (a.location_area ?? '').trim().toLowerCase())
         return instrLocations.some(loc =>
             loc === trimmedStudioLocation.toLowerCase() ||
@@ -158,7 +189,11 @@ export default async function StudioDetailsPage(props: {
     })
 
     return (
-        <div className="min-h-screen bg-cream-50">
+        <div className="min-h-screen bg-[#faf9f6] pb-20">
+            {/* Subtle Texture Overlay */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-multiply" 
+                style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/felt.png")` }} 
+            />
             {/* Banner Section */}
             {studio.banner_url && (
                 <div className="relative w-full h-[200px] sm:h-[400px] bg-cream-100 overflow-hidden">
@@ -173,10 +208,10 @@ export default async function StudioDetailsPage(props: {
                 </div>
             )}
 
-            <div className={clsx("max-w-5xl mx-auto space-y-8 p-4 sm:p-8", studio.banner_url && "-mt-12 sm:-mt-20 relative z-10")}>
+            <div className={clsx("max-w-5xl mx-auto space-y-12 p-4 sm:p-8", studio.banner_url && "-mt-16 sm:-mt-24 relative z-10")}>
                 {/* Studio Header */}
-                <div className="glass-card p-8 rounded-[32px] bg-white flex flex-col md:flex-row items-center gap-8 mb-8 border-border-grey shadow-cloud">
-                    <div className="w-32 h-32 bg-off-white rounded-[24px] flex items-center justify-center overflow-hidden border-2 border-white shadow-tight shrink-0">
+                <div className="atelier-card p-10 flex flex-col md:flex-row items-center gap-10">
+                    <div className="w-40 h-40 bg-white rounded-[32px] flex items-center justify-center overflow-hidden border-4 border-white shadow-2xl shrink-0 group hover:scale-105 transition-transform duration-700">
                         {studio.logo_url ? (
                             <div className="relative w-full h-full">
                                 <NextImage
@@ -207,18 +242,18 @@ export default async function StudioDetailsPage(props: {
                     </div>
                     <div className="flex-1 text-center md:text-left">
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2">
-                            <h1 className="text-4xl font-serif font-bold text-burgundy tracking-tight">{studio.name}</h1>
+                            <h1 className="text-3xl sm:text-5xl font-serif font-bold text-burgundy tracking-tight">{studio.name}</h1>
                             {studio.verified && (
-                                <div className="badge-verified flex items-center gap-1.5">
-                                    <CheckCircle2 className="w-3 h-3" />
-                                    Verified Studio
+                                <div className="px-4 py-1.5 rounded-full bg-forest text-[10px] font-black text-white uppercase tracking-[0.2em] shadow-lg shadow-forest/20 flex items-center gap-2">
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    Verified
                                 </div>
                             )}
                         </div>
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-burgundy/60 font-medium whitespace-nowrap">
-                            <div className="flex items-center gap-1.5 flex-wrap justify-center md:justify-start">
-                                <MapPin className="w-4 h-4 text-sage shrink-0" />
-                                <span className="font-bold text-burgundy/80">
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-5 text-sm font-medium">
+                            <div className="flex items-center gap-2 bg-burgundy/5 px-4 py-1.5 rounded-full border border-burgundy/5">
+                                <MapPin className="w-4 h-4 text-forest shrink-0" />
+                                <span className="font-bold text-burgundy-900 tracking-tight">
                                     {studio.floor_or_unit ? `${studio.floor_or_unit}, ` : ''}
                                     {studio.address || studio.location}
                                 </span>
@@ -245,12 +280,12 @@ export default async function StudioDetailsPage(props: {
                 </div>
 
                 {/* Booking Section */}
-                <div className="glass-card p-8 rounded-[32px] bg-white border-border-grey shadow-cloud">
-                    <h2 className="text-2xl font-serif font-bold text-burgundy mb-8 flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-sage/10 flex items-center justify-center">
-                            <Clock className="w-5 h-5 text-sage" />
+                <div className="atelier-card p-10">
+                    <h2 className="text-3xl font-serif font-bold text-burgundy mb-10 flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-forest text-white flex items-center justify-center shadow-lg shadow-forest/20">
+                            <Clock className="w-6 h-6" />
                         </div>
-                        Available Slots
+                        Available Sessions
                     </h2>
                     {(() => {
                         const now = new Date().toISOString().split('T')[0];
@@ -284,27 +319,27 @@ export default async function StudioDetailsPage(props: {
 
                 {/* Studio Gallery Section */}
                 {studio.space_photos_urls && studio.space_photos_urls.length > 0 && (
-                    <div className="glass-card p-8 rounded-[32px] bg-white border-border-grey shadow-cloud">
-                        <h2 className="text-2xl font-serif font-bold text-burgundy mb-8 flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
-                                <ImageIcon className="w-5 h-5 text-gold" />
+                    <div className="atelier-card p-10">
+                        <h2 className="text-3xl font-serif font-bold text-burgundy mb-10 flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-burgundy text-white flex items-center justify-center shadow-lg shadow-burgundy/20">
+                                <ImageIcon className="w-6 h-6" />
                             </div>
-                            The Space
+                            The Studio Space
                         </h2>
                         <PublicInstructorGallery images={studio.space_photos_urls} />
                     </div>
                 )}
 
                 {/* Reviews Section */}
-                <div id="reviews" className="glass-card p-8 rounded-[32px] bg-white border-border-grey shadow-cloud scroll-mt-24">
-                    <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-2xl font-serif font-bold text-burgundy flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
-                                <Star className="w-5 h-5 text-gold" />
+                <div id="reviews" className="atelier-card p-10 scroll-mt-32">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
+                        <h2 className="text-3xl font-serif font-bold text-burgundy flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-amber-400 text-white flex items-center justify-center shadow-lg shadow-amber-200">
+                                <Star className="w-6 h-6" />
                             </div>
-                            Member Reviews
+                            Member Experience
                         </h2>
-                        <div className="bg-white/40 px-4 py-2 rounded-2xl border border-white/60">
+                        <div className="bg-white px-6 py-3 rounded-2xl border border-burgundy/5 shadow-sm">
                             <StarRating rating={averageRating} count={totalCount} size="sm" />
                         </div>
                     </div>

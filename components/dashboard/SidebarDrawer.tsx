@@ -32,7 +32,7 @@ export default function SidebarDrawer({ isOpen, onClose, role, profile, studioDa
             "flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-300 group",
             isActive 
                 ? "bg-forest/10 text-forest shadow-tight" 
-                : "text-burgundy/60 hover:bg-off-white hover:text-burgundy"
+                : "text-burgundy/60 hover:bg-stone-50 hover:text-burgundy"
         )
 
     return (
@@ -46,7 +46,7 @@ export default function SidebarDrawer({ isOpen, onClose, role, profile, studioDa
             {/* Drawer */}
             <div className="fixed top-0 left-0 bottom-0 w-[320px] bg-white shadow-2xl z-[201] animate-in slide-in-from-left duration-500 ease-out flex flex-col">
                 {/* Header */}
-                <div className="p-8 border-b border-border-grey flex items-center justify-between">
+                <div className="p-8 border-b border-burgundy/5 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Avatar
                             src={avatarUrl}
@@ -65,7 +65,7 @@ export default function SidebarDrawer({ isOpen, onClose, role, profile, studioDa
                     </div>
                     <button 
                         onClick={onClose}
-                        className="p-3 rounded-full hover:bg-off-white text-burgundy/20 hover:text-burgundy transition-all"
+                        className="p-3 rounded-full hover:bg-stone-50 text-burgundy/20 hover:text-burgundy transition-all"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -172,7 +172,7 @@ export default function SidebarDrawer({ isOpen, onClose, role, profile, studioDa
 
                     {role === 'admin' && (
                         <>
-                            <div className="h-px bg-border-grey my-4 mx-6" />
+                            <div className="h-px bg-burgundy/5 my-4 mx-6" />
                             <Link href="/admin" onClick={onClose} className={linkClass(pathname === '/admin')}>
                                 <ShieldCheck className="w-5 h-5" />
                                 <span className="text-[11px] font-black uppercase tracking-widest">Admin Panel</span>
@@ -186,7 +186,7 @@ export default function SidebarDrawer({ isOpen, onClose, role, profile, studioDa
                 </div>
 
                 {/* Footer */}
-                <div className="p-8 border-t border-border-grey">
+                <div className="p-8 border-t border-burgundy/5">
                     <form action={signOut}>
                         <button className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-red-50 text-red-600 hover:bg-red-100 transition-all font-black text-[11px] uppercase tracking-[0.2em]">
                             <LogOut className="w-4 h-4" />
