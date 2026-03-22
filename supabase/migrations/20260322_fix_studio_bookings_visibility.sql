@@ -42,7 +42,7 @@ RETURNS TABLE (
     client_name TEXT,
     client_avatar TEXT,
     client_email TEXT,
-    client_medical TEXT,
+    client_medical TEXT[],
     client_other_medical TEXT,
     client_bio TEXT
 ) AS $$
