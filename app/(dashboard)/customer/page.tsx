@@ -318,11 +318,21 @@ export default async function CustomerDashboard({
                                         return (
                                             <div key={inst.id} className="marketplace-card earth-card group bg-white rounded-[2.5rem] border border-burgundy/5 overflow-hidden transition-all duration-700 hover:shadow-[0_40px_100px_rgba(81,50,41,0.12)] hover:-translate-y-2 flex flex-col h-full relative">
                                                 {/* ── Banner: gradient lifestyle area ── */}
-                                                <div className="relative h-32 sm:h-44 bg-[#F5F2EB]">
-                                                    {/* Premium mesh gradient background */}
-                                                    <div className="absolute inset-0 bg-gradient-to-br from-walking-vinnie/20 via-buttermilk/10 to-transparent opacity-60" />
-                                                    <div className="absolute -top-10 sm:-top-20 -right-10 sm:-right-20 w-48 sm:w-64 h-48 sm:h-64 bg-forest/5 rounded-full blur-[60px] sm:blur-[80px]" />
-                                                    <div className="absolute -bottom-10 sm:-bottom-20 -left-10 sm:-left-20 w-48 sm:w-64 h-48 sm:h-64 bg-burgundy/5 rounded-full blur-[60px] sm:blur-[80px]" />
+                                                <div className="relative h-32 sm:h-44 bg-[#F5F2EB] overflow-hidden">
+                                                    {(inst.banner_url || inst.avatar_url) ? (
+                                                        <Image
+                                                            src={inst.banner_url || inst.avatar_url}
+                                                            alt={inst.full_name}
+                                                            fill
+                                                            className="object-cover group-hover:scale-110 transition-transform duration-[3000ms] ease-out will-change-transform opacity-40"
+                                                        />
+                                                    ) : (
+                                                        <>
+                                                            <div className="absolute inset-0 bg-gradient-to-br from-walking-vinnie/20 via-buttermilk/10 to-transparent opacity-60" />
+                                                            <div className="absolute -top-10 sm:-top-20 -right-10 sm:-right-20 w-48 sm:w-64 h-48 sm:h-64 bg-forest/5 rounded-full blur-[60px] sm:blur-[80px]" />
+                                                            <div className="absolute -bottom-10 sm:-bottom-20 -left-10 sm:-left-20 w-48 sm:w-64 h-48 sm:h-64 bg-burgundy/5 rounded-full blur-[60px] sm:blur-[80px]" />
+                                                        </>
+                                                    )}
                                                     
                                                     <div className="absolute inset-x-0 bottom-0 h-16 sm:h-20 bg-gradient-to-t from-white to-transparent" />
                                                     
@@ -442,9 +452,9 @@ export default async function CustomerDashboard({
                                     <div key={studio.id} className="marketplace-card earth-card group bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-burgundy/5 overflow-hidden transition-all duration-700 hover:shadow-[0_40px_100px_rgba(81,50,41,0.12)] hover:-translate-y-2 flex flex-col h-full ring-1 ring-burgundy/[0.02]">
                                         {/* ── Banner Image ── */}
                                         <div className="relative aspect-[16/10] overflow-hidden bg-[#F5F2EB]">
-                                            {studio.logo_url ? (
+                                            {(studio.banner_url || studio.logo_url) ? (
                                                 <Image
-                                                    src={studio.logo_url}
+                                                    src={studio.banner_url || studio.logo_url}
                                                     alt={studio.name}
                                                     fill
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

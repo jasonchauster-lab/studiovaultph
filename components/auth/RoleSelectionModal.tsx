@@ -55,12 +55,12 @@ export default function RoleSelectionModal({ isOpen, onClose }: RoleSelectionMod
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 overflow-hidden">
             {/* Backdrop — High-End Glass */}
             <div
-                className="absolute inset-0 bg-primary/20 backdrop-blur-xl animate-in fade-in duration-500 cursor-pointer"
+                className="absolute inset-0 bg-primary/20 backdrop-blur-md animate-in fade-in duration-300 cursor-pointer"
                 onClick={onClose}
             />
 
             {/* Modal — Ambient Tonal Layering */}
-            <div className="relative w-full max-w-2xl h-auto max-h-[90vh] overflow-y-auto bg-surface rounded-3xl shadow-ambient animate-in zoom-in-95 slide-in-from-bottom-8 duration-500 will-change-transform">
+            <div className="relative w-full max-w-2xl h-auto max-h-[90vh] overflow-y-auto bg-surface rounded-3xl shadow-ambient animate-in zoom-in-95 slide-in-from-bottom-8 duration-300 will-change-transform">
 
                 {/* Header — Editorial Breathing Room */}
                 <div className="px-8 pt-10 pb-8 flex justify-between items-start">
