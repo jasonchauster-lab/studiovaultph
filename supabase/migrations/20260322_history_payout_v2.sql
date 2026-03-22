@@ -140,7 +140,7 @@ BEGIN
             END as type,
             b.client_name as client,
             (b.price_breakdown->>'instructor_fee')::NUMERIC as amount,
-            b.status,
+            b.status::TEXT,
             b.price_breakdown->>'equipment' as details
         FROM temp_instructor_bookings b
 
@@ -157,7 +157,7 @@ BEGIN
                 WHEN b.price_breakdown->>'refund_initiator' = 'client' THEN (b.price_breakdown->>'instructor_fee')::NUMERIC
                 ELSE (b.price_breakdown->>'penalty_amount')::NUMERIC
             END,
-            'processed',
+            'processed'::TEXT,
             'Late cancellation payout'
         FROM temp_instructor_bookings b
         WHERE (b.price_breakdown->>'penalty_processed')::BOOLEAN = true
@@ -173,7 +173,7 @@ BEGIN
             'Penalty',
             b.client_name,
             -(b.price_breakdown->>'penalty_amount')::NUMERIC,
-            'processed',
+            'processed'::TEXT,
             'Late cancellation deduction'
         FROM temp_instructor_bookings b
         WHERE (b.price_breakdown->>'penalty_processed')::BOOLEAN = true
@@ -189,7 +189,7 @@ BEGIN
             'Payout',
             'System',
             -amount,
-            status,
+            status::TEXT,
             'Withdrawal via ' || payment_method
         FROM payout_requests
         WHERE user_id = p_instructor_id
@@ -206,7 +206,7 @@ BEGIN
             CASE WHEN type = 'admin_adjustment' THEN 'Adjustment' ELSE 'Top-Up' END,
             'Admin',
             amount,
-            status,
+            status::TEXT,
             COALESCE(admin_notes, 'Manual balance adjustment')
         FROM wallet_top_ups
         WHERE user_id = p_instructor_id
@@ -309,7 +309,7 @@ BEGIN
         SELECT 
             b.created_at as tx_date,
             'Booking' as type,
-            b.status,
+            b.status::TEXT,
             COALESCE(b.client_name, 'Client') as client,
             COALESCE(b.instructor_name, 'Instructor') as instructor,
             (b.price_breakdown->>'studio_fee')::NUMERIC as amount,
@@ -325,7 +325,7 @@ BEGIN
         SELECT 
             b.created_at,
             'Refund',
-            'cancelled_refunded',
+            'cancelled_refunded'::TEXT,
             b.client_name,
             b.instructor_name,
             0,
@@ -341,7 +341,7 @@ BEGIN
         SELECT 
             b.updated_at,
             'Compensation',
-            'processed',
+            'processed'::TEXT,
             b.client_name,
             b.instructor_name,
             CASE 
@@ -361,7 +361,7 @@ BEGIN
         SELECT 
             created_at,
             'Payout',
-            status,
+            status::TEXT,
             'System',
             'Staff',
             -amount,
@@ -467,7 +467,7 @@ BEGIN
     LEFT JOIN profiles ip ON b.instructor_id = ip.id
     JOIN profiles cp ON b.client_id = cp.id
     WHERE s.studio_id = p_studio_id
-    AND b.status IN ('approved', 'completed', 'cancelled_refunded', 'cancelled_charged', 'pending', 'rejected')
+    AND b.status::TEXT IN ('approved', 'completed', 'cancelled_refunded', 'cancelled_charged', 'pending', 'rejected', 'cancelled')
     AND (p_start_date IS NULL OR s.date >= p_start_date)
     AND (p_end_date IS NULL OR s.date <= p_end_date)
     ORDER BY s.date DESC, s.start_time DESC;
