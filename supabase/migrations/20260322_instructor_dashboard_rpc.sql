@@ -18,6 +18,7 @@ DECLARE
     v_calendar_bookings JSONB;
     v_availability JSONB;
     v_profile JSONB;
+    v_revenue_trends JSONB;
 BEGIN
     -- 1. Profile & Balance
     SELECT 
@@ -51,7 +52,22 @@ BEGIN
     FROM bookings
     WHERE instructor_id = p_instructor_id AND status IN ('approved', 'completed');
 
-    -- 5. Upcoming Bookings (Top 5)
+    -- 5. Revenue Trends (Last 14 Days)
+    SELECT jsonb_agg(sub) INTO v_revenue_trends
+    FROM (
+        SELECT 
+            d.date::DATE as date,
+            COALESCE(SUM((b.price_breakdown->>'instructor_fee')::NUMERIC), 0) as amount,
+            COUNT(b.id) as count
+        FROM generate_series(p_today - INTERVAL '13 days', p_today, INTERVAL '1 day') d(date)
+        LEFT JOIN bookings b ON b.instructor_id = p_instructor_id 
+            AND b.status IN ('approved', 'completed')
+            AND (b.booking_date = d.date::DATE OR EXISTS(SELECT 1 FROM slots s WHERE s.id = b.slot_id AND s.date = d.date::DATE))
+        GROUP BY d.date
+        ORDER BY d.date ASC
+    ) sub;
+
+    -- 6. Upcoming Bookings (Top 5)
     SELECT jsonb_agg(sub) INTO v_upcoming_bookings
     FROM (
         SELECT 
@@ -109,7 +125,7 @@ BEGIN
         LIMIT 5
     ) sub;
 
-    -- 6. Calendar Bookings (Week)
+    -- 7. Calendar Bookings (Week)
     SELECT jsonb_agg(sub) INTO v_calendar_bookings
     FROM (
         SELECT 
@@ -161,7 +177,7 @@ BEGIN
           AND COALESCE(s.date, b.booking_date) <= p_week_end
     ) sub;
 
-    -- 7. Availability (Week)
+    -- 8. Availability (Week)
     SELECT jsonb_agg(sub) INTO v_availability
     FROM (
         SELECT * FROM instructor_availability
@@ -170,7 +186,7 @@ BEGIN
         ORDER BY day_of_week ASC, start_time ASC
     ) sub;
 
-    -- 8. Pending Earnings (Approved + Future)
+    -- 9. Pending Earnings (Approved + Future)
     SELECT COALESCE(SUM((price_breakdown->>'instructor_fee')::NUMERIC), 0)
     INTO v_pending_earnings
     FROM bookings b
@@ -192,7 +208,8 @@ BEGIN
         'upcoming_bookings', COALESCE(v_upcoming_bookings, '[]'::jsonb),
         'calendar_bookings', COALESCE(v_calendar_bookings, '[]'::jsonb),
         'availability', COALESCE(v_availability, '[]'::jsonb),
-        'profile', v_profile
+        'profile', v_profile,
+        'revenue_trends', COALESCE(v_revenue_trends, '[]'::jsonb)
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

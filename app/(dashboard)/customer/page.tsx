@@ -343,6 +343,7 @@ export default async function CustomerDashboard({
                                                         <AvatarWithFallback
                                                             src={inst.avatar_url}
                                                             alt={inst.full_name}
+                                                            isOnline={inst.is_online}
                                                         />
                                                     </div>
                                                 </div>

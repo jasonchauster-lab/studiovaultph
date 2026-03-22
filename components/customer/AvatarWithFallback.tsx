@@ -9,9 +9,10 @@ interface AvatarWithFallbackProps {
   src: string | null | undefined
   alt: string
   initials?: string
+  isOnline?: boolean
 }
 
-export default function AvatarWithFallback({ src, alt }: AvatarWithFallbackProps) {
+export default function AvatarWithFallback({ src, alt, isOnline = false }: AvatarWithFallbackProps) {
   const [errored, setErrored] = useState(false)
   
   // Try to resolve Supabase paths to full URLs if they aren't already
@@ -27,14 +28,23 @@ export default function AvatarWithFallback({ src, alt }: AvatarWithFallbackProps
   const displaySrc = (finalSrc && !errored) ? finalSrc : '/default-avatar.svg'
 
   return (
-    <Image
-      src={displaySrc}
-      alt={alt}
-      width={48}
-      height={48}
-      className="w-full h-full object-cover"
-      onError={() => setErrored(true)}
-      unoptimized={isHeic && !src?.includes('supabase.co')}
-    />
+    <div className="relative w-full h-full">
+      <Image
+        src={displaySrc}
+        alt={alt}
+        width={48}
+        height={48}
+        className="w-full h-full object-cover"
+        onError={() => setErrored(true)}
+        unoptimized={(isHeic && !src?.includes('supabase.co')) || src?.startsWith('blob:')}
+      />
+      {/* Live Presence Dot */}
+      {isOnline && (
+        <span className="absolute bottom-0 right-0 flex h-3 w-3 translate-x-1/4 translate-y-1/4">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-forest opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-forest border-2 border-white"></span>
+        </span>
+      )}
+    </div>
   )
 }

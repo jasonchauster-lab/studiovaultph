@@ -13,6 +13,7 @@ import CancelBookingModal from './CancelBookingModal';
 import { cancelBookingByInstructor, checkInClient } from '@/app/(dashboard)/instructor/actions';
 import InstructorScheduleCalendar from '@/components/instructor/InstructorScheduleCalendar';
 import InstructorStatCards from './InstructorStatCards';
+import RevenueTrendChart from './RevenueTrendChart';
 import MobileScheduleCalendar from '@/components/dashboard/MobileScheduleCalendar';
 import { deleteAvailability } from '@/app/(dashboard)/instructor/schedule/actions';
 import clsx from 'clsx';
@@ -27,6 +28,7 @@ interface InstructorDashboardClientProps {
     availability: any[];
     totalSessionsTaught: number;
     pendingEarnings: number;
+    revenueTrends?: any[];
     currentDateStr: string;
     instructorProfile: {
         id: string;
@@ -47,6 +49,7 @@ export default function InstructorDashboardClient({
     availability,
     totalSessionsTaught,
     pendingEarnings,
+    revenueTrends,
     currentDateStr,
     instructorProfile
 }: InstructorDashboardClientProps) {
@@ -262,6 +265,24 @@ export default function InstructorDashboardClient({
                 }}
                 hasPendingPayout={hasPendingPayout}
             />
+
+            {/* Revenue Trends Visualization */}
+            {revenueTrends && revenueTrends.length > 0 && (
+                <div className="max-w-5xl mx-auto px-4 sm:px-0">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <RevenueTrendChart 
+                            data={revenueTrends} 
+                            title="Revenue Growth" 
+                            type="revenue"
+                        />
+                        <RevenueTrendChart 
+                            data={revenueTrends} 
+                            title="Booking Volume" 
+                            type="bookings"
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Dashboard Grid Container */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">

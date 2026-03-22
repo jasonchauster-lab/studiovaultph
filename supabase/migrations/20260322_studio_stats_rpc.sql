@@ -12,6 +12,7 @@ DECLARE
     v_top_instructor_name TEXT;
     v_total_spots INT;
     v_booked_spots INT;
+    v_revenue_trends JSONB;
 BEGIN
     -- 1. Monthly Revenue (Last 30 Days)
     SELECT COALESCE(SUM((price_breakdown->>'studio_fee')::NUMERIC), 0)
@@ -54,12 +55,28 @@ BEGIN
       AND s.date >= p_week_start
       AND s.date <= p_week_end;
 
+    -- 4. Revenue Trends (Last 14 Days)
+    SELECT jsonb_agg(sub) INTO v_revenue_trends
+    FROM (
+        SELECT 
+            d.date::DATE as date,
+            COALESCE(SUM((b.price_breakdown->>'studio_fee')::NUMERIC), 0) as amount,
+            COUNT(b.id) as count
+        FROM generate_series(CURRENT_DATE - INTERVAL '13 days', CURRENT_DATE, INTERVAL '1 day') d(date)
+        LEFT JOIN bookings b ON b.studio_id = p_studio_id 
+            AND b.status IN ('approved', 'completed', 'cancelled_charged')
+            AND EXISTS(SELECT 1 FROM slots s WHERE s.id = b.slot_id AND s.date = d.date::DATE)
+        GROUP BY d.date
+        ORDER BY d.date ASC
+    ) sub;
+
     RETURN jsonb_build_object(
         'revenue', v_revenue,
         'top_instructor', COALESCE(v_top_instructor_name, 'N/A'),
         'total_spots', v_total_spots,
         'booked_spots', v_booked_spots,
-        'occupancy_rate', CASE WHEN v_total_spots > 0 THEN ROUND((v_booked_spots::NUMERIC / v_total_spots::NUMERIC) * 100) ELSE 0 END
+        'occupancy_rate', CASE WHEN v_total_spots > 0 THEN ROUND((v_booked_spots::NUMERIC / v_total_spots::NUMERIC) * 100) ELSE 0 END,
+        'revenue_trends', COALESCE(v_revenue_trends, '[]'::jsonb)
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

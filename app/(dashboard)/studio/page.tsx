@@ -12,6 +12,7 @@ import Image from 'next/image'
 import StudioStatCards from '@/components/dashboard/StudioStatCards'
 
 import StudioUpcomingBookings from '@/components/dashboard/StudioUpcomingBookings'
+import RevenueTrendChart from '@/components/dashboard/RevenueTrendChart'
 import { toManilaTimeString, toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
 import { format } from 'date-fns'
 
@@ -44,6 +45,7 @@ export default async function StudioDashboard(props: {
     let occupancyRate = 0
     let topInstructorName = 'N/A'
     let dayStrings: string[] = []
+    let dashboardStats: any = null
 
     // Use getManilaTodayStr() — toLocaleDateString with a timeZone option is unreliable
     // on Vercel/Docker runtimes that lack full ICU data (see lib/timezone.ts note).
@@ -74,7 +76,7 @@ export default async function StudioDashboard(props: {
         const [
             { data: studioBookings },
             { data: slots },
-            { data: dashboardStats }
+            { data: fetchedStats }
         ] = await Promise.all([
             // Upcoming Bookings
             supabase
@@ -113,6 +115,7 @@ export default async function StudioDashboard(props: {
 
         if (studioBookings) upcomingBookings = studioBookings
         if (slots) weeklySlots = slots
+        if (fetchedStats) dashboardStats = fetchedStats
 
         // Apply Stats from RPC
         if (dashboardStats) {
@@ -214,6 +217,24 @@ export default async function StudioDashboard(props: {
                                 topInstructor: topInstructorName
                             }}
                         />
+
+                        {/* Revenue Trends Visualization */}
+                        {dashboardStats && (dashboardStats as any).revenue_trends && (dashboardStats as any).revenue_trends.length > 0 && (
+                            <div className="max-w-7xl mx-auto mb-12">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <RevenueTrendChart 
+                                        data={(dashboardStats as any).revenue_trends} 
+                                        title="Revenue Growth" 
+                                        type="revenue"
+                                    />
+                                    <RevenueTrendChart 
+                                        data={(dashboardStats as any).revenue_trends} 
+                                        title="Booking Volume" 
+                                        type="bookings"
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         <div className="grid grid-cols-1 xl:grid-cols-4 gap-10">
                             <div className="xl:col-span-3">

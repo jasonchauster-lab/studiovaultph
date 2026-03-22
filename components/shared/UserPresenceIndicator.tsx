@@ -105,14 +105,14 @@ export default function UserPresenceIndicator({
         <div className={`flex items-center gap-1.5 ${className}`}>
             <span className="relative flex h-2.5 w-2.5">
                 {isOnline && (
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-forest opacity-75"></span>
                 )}
-                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isOnline ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isOnline ? 'bg-forest' : 'bg-burgundy/20'}`}></span>
             </span>
             {showText && (
-                <span className={`text-xs ${isOnline 
-                    ? (textColor || 'text-green-600 font-medium') 
-                    : `${textColor || 'text-gray-400'} flex items-center gap-1`}`}>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${isOnline 
+                    ? (textColor || 'text-forest') 
+                    : `${textColor || 'text-burgundy/40'} flex items-center gap-1`}`}>
                     {isOnline ? (
                         'Online'
                     ) : (

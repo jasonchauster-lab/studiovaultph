@@ -12,6 +12,7 @@ import ChatWindow from '@/components/dashboard/ChatWindow'
 import Avatar from '@/components/shared/Avatar'
 import Link from 'next/link'
 
+import { createClient } from '@/lib/supabase/client'
 import MobileScheduleCalendar from '@/components/dashboard/MobileScheduleCalendar'
 
 interface Availability {
@@ -40,14 +41,29 @@ interface InstructorScheduleCalendarProps {
 }
 
 export default function InstructorScheduleCalendar({ 
-    availability, 
-    bookings = [], 
+    availability: initialAvailability, 
+    bookings: initialBookings = [], 
     currentUserId, 
     currentDate,
     instructorProfile
 }: InstructorScheduleCalendarProps) {
     const safeDate = currentDate || new Date();
     const router = useRouter()
+    const supabase = createClient()
+    
+    // Local state for real-time updates
+    const [localAvailability, setLocalAvailability] = useState<Availability[]>(initialAvailability)
+    const [localBookings, setLocalBookings] = useState<any[]>(initialBookings)
+
+    // Sync local state with props when they change (e.g., from server-side revalidation)
+    useEffect(() => {
+        setLocalAvailability(initialAvailability)
+    }, [initialAvailability])
+
+    useEffect(() => {
+        setLocalBookings(initialBookings)
+    }, [initialBookings])
+
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [addMode, setAddMode] = useState<'single' | 'bulk'>('single')
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -61,6 +77,68 @@ export default function InstructorScheduleCalendar({
     useEffect(() => {
         setIsMounted(true)
     }, [])
+
+    // Supabase Realtime Subscription
+    useEffect(() => {
+        const channel = supabase
+            .channel(`instructor-schedule-${currentUserId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'instructor_availability',
+                    filter: `instructor_id=eq.${currentUserId}`
+                },
+                (payload: any) => {
+                    if (payload.eventType === 'INSERT') {
+                        setLocalAvailability(prev => [...prev, payload.new as Availability])
+                    } else if (payload.eventType === 'UPDATE') {
+                        setLocalAvailability(prev => prev.map(a => a.id === payload.new.id ? payload.new as Availability : a))
+                    } else if (payload.eventType === 'DELETE') {
+                        setLocalAvailability(prev => prev.filter(a => a.id === payload.old.id))
+                    }
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'bookings',
+                    filter: `instructor_id=eq.${currentUserId}`
+                },
+                async (payload: any) => {
+                    if (payload.eventType === 'DELETE') {
+                        setLocalBookings(prev => prev.filter(b => b.id === payload.old.id))
+                    } else {
+                        // For INSERT and UPDATE, we need to fetch the joined data
+                        const { data } = await supabase
+                            .from('bookings')
+                            .select(`
+                                *,
+                                slots!inner (date, start_time, end_time, studios (id, name, location, address, logo_url, google_maps_url)),
+                                client:profiles!client_id (id, full_name, avatar_url, email, date_of_birth, medical_conditions, other_medical_condition, bio)
+                            `)
+                            .eq('id', payload.new.id)
+                            .single()
+                        
+                        if (data) {
+                            if (payload.eventType === 'INSERT') {
+                                setLocalBookings(prev => [data, ...prev])
+                            } else {
+                                setLocalBookings(prev => prev.map(b => b.id === data.id ? data : b))
+                            }
+                        }
+                    }
+                }
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [currentUserId, supabase])
 
     // Single Add Form State
     const [singleDate, setSingleDate] = useState(currentDate ? format(currentDate, 'yyyy-MM-dd') : '')
@@ -103,7 +181,7 @@ export default function InstructorScheduleCalendar({
         const rMap: Record<string, Availability[]> = {}
         const bMap: Record<string, any[]> = {}
 
-        availability.forEach(a => {
+        localAvailability.forEach(a => {
             if (!a.start_time) return;
             const startH = parseInt(a.start_time.split(':')[0])
             if (isNaN(startH)) return;
@@ -118,12 +196,12 @@ export default function InstructorScheduleCalendar({
             }
         })
 
-        const calendarBookings = bookings.filter(b => {
+        const calendarBookings = localBookings.filter(b => {
             const slot = b.slots
             return slot?.date && ['approved', 'completed', 'pending'].includes(b.status)
         })
 
-        const historicalBookings = bookings.filter(b => {
+        const historicalBookings = localBookings.filter(b => {
             const slot = b.slots
             return slot?.date && ['cancelled_refunded', 'cancelled_charged', 'rejected'].includes(b.status)
         })
@@ -150,7 +228,7 @@ export default function InstructorScheduleCalendar({
         })
 
         return { availabilityMap: aMap, recurringMap: rMap, bookingMap: bMap, historyMap: hMap }
-    }, [availability, bookings])
+    }, [localAvailability, localBookings])
 
     // Helper functions
     const calculateAge = (dob: string) => {
@@ -318,11 +396,11 @@ export default function InstructorScheduleCalendar({
                     onRecurringSchedule={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
                     onSlotClick={(session) => {
                         // For instructor, session.id is either a booking ID or a slot ID
-                        const booking = bookings.find(b => b.id === session.id);
+                        const booking = localBookings.find(b => b.id === session.id);
                         if (booking) {
                             setSelectedBooking(booking);
                         } else {
-                            const slot = availability.find(s => s.id === session.id);
+                            const slot = localAvailability.find(s => s.id === session.id);
                             if (slot) {
                                 setEditingSlot(slot);
                                 setSingleDate(slot.date || (currentDate ? format(currentDate, 'yyyy-MM-dd') : ''));
@@ -336,7 +414,7 @@ export default function InstructorScheduleCalendar({
                         const items: any[] = [];
                         
                         // Add bookings
-                        bookings.forEach(b => {
+                        localBookings.forEach(b => {
                             if (['pending', 'approved', 'completed'].includes(b.status)) {
                                 items.push({
                                     id: b.id,
@@ -355,7 +433,7 @@ export default function InstructorScheduleCalendar({
                         });
 
                         // Add availability slots
-                        availability.forEach(s => {
+                        localAvailability.forEach(s => {
                             if (s.date) {
                                 items.push({
                                     id: s.id,
@@ -570,7 +648,7 @@ export default function InstructorScheduleCalendar({
                                                     const sStart = sh * 60 + sm;
                                                     const sEnd = eh * 60 + em;
 
-                                                    return !bookings.some(b => {
+                                                    return !localBookings.some(b => {
                                                         const bSlot = b.slots;
                                                         if (!bSlot?.date || !bSlot?.start_time || !bSlot?.end_time || bSlot.date !== dayStr) return false;
                                                         if (!['pending', 'approved', 'completed'].includes(b.status)) return false;
@@ -784,12 +862,12 @@ export default function InstructorScheduleCalendar({
                                         const isCurrentMonth = day.getMonth() === safeDate.getMonth();
 
                                         // 1. Get all availability entries ("The Plan")
-                                        const dayAvailability = availability.filter(a => a.date === dayStr);
-                                        const dayRecurring = availability.filter(a => !a.date && a.day_of_week === getDay(day));
+                                        const dayAvailability = localAvailability.filter(a => a.date === dayStr);
+                                        const dayRecurring = localAvailability.filter(a => !a.date && a.day_of_week === getDay(day));
                                         const allDayAvailability = [...dayAvailability, ...dayRecurring];
 
                                         // 2. Get all active bookings ("The Reality")
-                                        const dayBookings = bookings.filter(b => {
+                                        const dayBookings = localBookings.filter(b => {
                                             const s = b.slots;
                                             return s?.date === dayStr && ['approved', 'completed', 'pending'].includes(b.status);
                                         });
