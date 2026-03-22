@@ -13,9 +13,10 @@ import { getManilaTodayStr } from '@/lib/timezone'
 interface DiscoveryFiltersProps {
     /** Sub-location strings of verified studios that currently exist in the DB */
     availableLocations?: string[]
+    userRole?: string
 }
 
-export default function DiscoveryFilters({ availableLocations }: DiscoveryFiltersProps) {
+export default function DiscoveryFilters({ availableLocations, userRole }: DiscoveryFiltersProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [isDetecting, setIsDetecting] = useState(false)
@@ -107,23 +108,25 @@ export default function DiscoveryFilters({ availableLocations }: DiscoveryFilter
             <div className="flex flex-col lg:flex-row lg:items-end gap-6 sm:gap-8">
                 {/* Main Categories: Grid/Wrap on Mobile to prevent cutoff */}
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4 flex-1">
-                    <div className="min-w-[140px] flex-1 sm:flex-none">
-                        {/* Type Filter */}
-                        <div className="relative group w-full">
-                            <select
-                                onChange={(e) => handleFilter('type', e.target.value)}
-                                value={searchParams.get('type') || 'all'}
-                                className="w-full sm:w-auto pl-5 pr-12 py-3 bg-off-white/50 border border-burgundy/5 rounded-xl sm:rounded-2xl text-[11px] font-black uppercase tracking-widest text-burgundy shadow-sm focus:outline-none focus:ring-4 focus:ring-forest/5 focus:border-forest/20 transition-all appearance-none cursor-pointer hover:bg-white hover:border-burgundy/20 whitespace-nowrap h-[50px] sm:h-[54px]"
-                            >
-                                <option value="all">All Modes</option>
-                                <option value="instructor">Instructors</option>
-                                <option value="studio">Studios</option>
-                            </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-burgundy/30 group-hover:text-forest transition-colors">
-                                <ChevronDown className="w-4 h-4" />
+                    {userRole !== 'instructor' && (
+                        <div className="min-w-[140px] flex-1 sm:flex-none">
+                            {/* Type Filter */}
+                            <div className="relative group w-full">
+                                <select
+                                    onChange={(e) => handleFilter('type', e.target.value)}
+                                    value={searchParams.get('type') || 'all'}
+                                    className="w-full sm:w-auto pl-5 pr-12 py-3 bg-off-white/50 border border-burgundy/5 rounded-xl sm:rounded-2xl text-[11px] font-black uppercase tracking-widest text-burgundy shadow-sm focus:outline-none focus:ring-4 focus:ring-forest/5 focus:border-forest/20 transition-all appearance-none cursor-pointer hover:bg-white hover:border-burgundy/20 whitespace-nowrap h-[50px] sm:h-[54px]"
+                                >
+                                    <option value="all">All Modes</option>
+                                    <option value="instructor">Instructors</option>
+                                    <option value="studio">Studios</option>
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-burgundy/30 group-hover:text-forest transition-colors">
+                                    <ChevronDown className="w-4 h-4" />
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
 
                     <div className="min-w-[140px] flex-1 sm:flex-none">

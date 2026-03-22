@@ -19,13 +19,14 @@ export async function getGeocodeAction(address: string) {
             const components = result.address_components;
             
             // Try to find the most specific political/geographic area
+            const premise = components.find((c: any) => c.types.includes('premise'))?.long_name;
             const neighborhood = components.find((c: any) => c.types.includes('neighborhood'))?.long_name;
             const sublocality2 = components.find((c: any) => c.types.includes('sublocality_level_2'))?.long_name;
             const sublocality1 = components.find((c: any) => c.types.includes('sublocality_level_1'))?.long_name;
             const sublocality = components.find((c: any) => c.types.includes('sublocality'))?.long_name;
             const city = components.find((c: any) => c.types.includes('locality'))?.long_name;
             
-            const short = neighborhood || sublocality2 || sublocality1 || sublocality || city || result.formatted_address.split(',')[0];
+            const short = premise || neighborhood || sublocality2 || sublocality1 || sublocality || city || result.formatted_address.split(',')[0];
             return { data: { location: result.geometry.location, full: result.formatted_address, short } };
         }
         console.error('Geocode Action Google Error:', data.status, data.error_message);
@@ -48,13 +49,14 @@ export async function getReverseGeocodeAction(lat: number, lng: number) {
             const result = data.results[0];
             const components = result.address_components;
             
+            const premise = components.find((c: any) => c.types.includes('premise'))?.long_name;
             const neighborhood = components.find((c: any) => c.types.includes('neighborhood'))?.long_name;
             const sublocality2 = components.find((c: any) => c.types.includes('sublocality_level_2'))?.long_name;
             const sublocality1 = components.find((c: any) => c.types.includes('sublocality_level_1'))?.long_name;
             const sublocality = components.find((c: any) => c.types.includes('sublocality'))?.long_name;
             const city = components.find((c: any) => c.types.includes('locality'))?.long_name;
             
-            const short = neighborhood || sublocality2 || sublocality1 || sublocality || city || result.formatted_address.split(',')[0];
+            const short = premise || neighborhood || sublocality2 || sublocality1 || sublocality || city || result.formatted_address.split(',')[0];
             return { data: { full: result.formatted_address, short } };
         }
         console.error('Reverse Geocode Action Google Error:', data.status, data.error_message);

@@ -85,7 +85,8 @@ export default function HeaderSearchPill() {
 
                 router.push(`/customer?${params.toString()}`)
                 setIsDetecting(false)
-                setTimeout(() => setIsOpen(false), 800)
+                // Remove automatic closure to allow date/radius selection
+                // setTimeout(() => setIsOpen(false), 800)
             },
             (err) => {
                 console.error(err)
@@ -106,8 +107,9 @@ export default function HeaderSearchPill() {
             params.set('lat', result.lat.toString())
             params.set('lng', result.lng.toString())
             if (!params.has('radius') || params.get('radius') === 'all') params.set('radius', '10')
+            setLocationName(result.short || null)
             router.push(`/customer?${params.toString()}`)
-            setIsOpen(false)
+            // setIsOpen(false)
         }
         setIsGeocoding(false)
     }
@@ -124,9 +126,10 @@ export default function HeaderSearchPill() {
                 params.set('lat', result.lat.toString())
                 params.set('lng', result.lng.toString())
                 if (!params.has('radius') || params.get('radius') === 'all') params.set('radius', '10')
+                setLocationName(result.short || null)
                 router.push(`/customer?${params.toString()}`)
                 setAddressSearch('')
-                setIsOpen(false)
+                // setIsOpen(false)
             } else {
                 alert('Could not find that address.')
             }

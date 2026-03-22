@@ -70,7 +70,7 @@ export default async function CustomerDashboard({
 
     // Fetch profile + studios + locations in parallel
     const [{ data: profile, error: profileError }, { data: allStudiosForLocations }, { data: rawStudios }] = await Promise.all([
-        supabase.from('profiles').select('date_of_birth, contact_number').eq('id', user.id).maybeSingle(),
+        supabase.from('profiles').select('role, date_of_birth, contact_number').eq('id', user.id).maybeSingle(),
         supabase.from('studios').select('location').eq('verified', true),
         studioQuery
     ])
@@ -270,7 +270,10 @@ export default async function CustomerDashboard({
 
                 {/* ─── Filters Row ─── */}
                 <div className="relative z-20">
-                    <DiscoveryFilters availableLocations={availableLocations} />
+                    <DiscoveryFilters 
+                        availableLocations={availableLocations} 
+                        userRole={profile?.role} 
+                    />
                 </div>
 
                 {/* ─── Sections ─── */}
@@ -279,7 +282,7 @@ export default async function CustomerDashboard({
                     {/* ══════════════════════════════════════
                         INSTRUCTORS SECTION
                     ══════════════════════════════════════ */}
-                    {(!params.type || params.type === 'instructor') && (
+                    {(profile?.role !== 'instructor') && (!params.type || params.type === 'instructor') && (
                         <section className="animate-in fade-in slide-in-from-bottom-6 duration-1000">
                             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-8 mb-8 sm:mb-16 border-b border-burgundy/5 pb-6 sm:pb-10">
                                 <div className="space-y-2 sm:space-y-3">
