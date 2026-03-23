@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useOptimistic, useTransition } from 'react';
 import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2, Pencil, Copy, Trash2, AlertTriangle, CheckCircle, Plus, RefreshCcw, UserCheck, Wallet } from 'lucide-react'
 import Avatar from '@/components/shared/Avatar';
 
@@ -10,7 +10,7 @@ import ChatWindow from '@/components/dashboard/ChatWindow';
 import MessageCountBadge from '@/components/dashboard/MessageCountBadge';
 import { formatManilaDateStr, formatTo12Hour, getManilaTodayStr, toManilaTimeString } from '@/lib/timezone';
 import CancelBookingModal from './CancelBookingModal';
-import { cancelBookingByInstructor, checkInClient } from '@/app/(dashboard)/instructor/actions';
+import { cancelBookingByInstructor, checkInClient } from '@/app/(dashboard)/instructor/booking-actions';
 import InstructorScheduleCalendar from '@/components/instructor/InstructorScheduleCalendar';
 import InstructorStatCards from './InstructorStatCards';
 import RevenueTrendChart from './RevenueTrendChart';
@@ -22,6 +22,7 @@ import { useToast } from '@/components/ui/Toast';
 import { DashboardHero } from './DashboardHero';
 import { PWAInstallPrompt } from './PWAInstallPrompt';
 import { Button } from '@/components/ui/Button';
+import DashboardErrorBoundary from '@/components/shared/DashboardErrorBoundary';
 
 interface InstructorDashboardClientProps {
     userId: string;
@@ -63,6 +64,9 @@ export default function InstructorDashboardClient({
 }: InstructorDashboardClientProps) {
     const router = useRouter();
     const { toast } = useToast();
+    const [isMounted, setIsMounted] = useState(false);
+    const [isPending, startTransition] = useTransition();
+
     const normalizeBookings = (bookings: any[]) => bookings.map(b => ({
         ...b,
         slots: Array.isArray(b.slots) ? b.slots[0] : b.slots
@@ -70,8 +74,16 @@ export default function InstructorDashboardClient({
 
     const [calendarBookings, setCalendarBookings] = useState<any[]>(() => normalizeBookings(initialCalendarBookings));
     const [upcomingBookings, setUpcomingBookings] = useState<any[]>(() => normalizeBookings(initialUpcomingBookings));
-    const [isLoading, setIsLoading] = useState(false); // No longer loading initially
-    const [isMounted, setIsMounted] = useState(false);
+
+    // Optimistic UI for bookings status
+    const [optimisticBookings, addOptimisticBooking] = useOptimistic(
+        upcomingBookings,
+        (state, { id, status, client_checked_in_at }: { id: string, status?: string, client_checked_in_at?: string | null }) => 
+            state.map(b => b.id === id 
+                ? { ...b, ...(status && { status }), ...(client_checked_in_at !== undefined && { client_checked_in_at }) }
+                : b
+            ).filter(b => b.status !== 'cancelled_refunded' && b.status !== 'cancelled_charged')
+    );
 
     useEffect(() => {
         setIsMounted(true);
@@ -136,15 +148,39 @@ export default function InstructorDashboardClient({
 
     const handleCancelConfirm = async (reason: string) => {
         if (!cancellingBooking) return { error: 'No booking selected' };
-        const result = await cancelBookingByInstructor(cancellingBooking.id, reason);
-        if (result.success) {
-            setCalendarBookings(prev => prev.filter(b => b.id !== cancellingBooking.id));
-            setUpcomingBookings(prev => prev.filter(b => b.id !== cancellingBooking.id));
-            toast('Session cancelled successfully', 'success');
-        } else {
-            toast(result.error || 'Failed to cancel session', 'error');
-        }
-        return result;
+        
+        startTransition(async () => {
+            // Optimistic update: mark as cancelled (which filters it out in our reducer)
+            addOptimisticBooking({ id: cancellingBooking.id, status: 'cancelled_refunded' });
+            
+            const result = await cancelBookingByInstructor(cancellingBooking.id, reason);
+            if (result.success) {
+                setCalendarBookings(prev => prev.filter(b => b.id !== cancellingBooking.id));
+                setUpcomingBookings(prev => prev.filter(b => b.id !== cancellingBooking.id));
+                toast('Session cancelled successfully', 'success');
+            } else {
+                toast(result.error || 'Failed to cancel session', 'error');
+            }
+        });
+        return { success: true }; // Close modal immediately
+    };
+
+    // Optimistic check-in handler
+    const handleCheckIn = async (bookingId: string) => {
+        if (!confirm('Check in this client?')) return;
+        
+        startTransition(async () => {
+            addOptimisticBooking({ id: bookingId, client_checked_in_at: new Date().toISOString() });
+            
+            const result = await checkInClient(bookingId);
+            if (result.success) {
+                toast('Check-in recorded', 'success');
+                // Permanent state update
+                setUpcomingBookings(prev => prev.map(b => b.id === bookingId ? { ...b, client_checked_in_at: new Date().toISOString() } : b));
+            } else {
+                toast(result.error || 'Failed to check in', 'error');
+            }
+        });
     };
 
     const handleDelete = async (id: string, groupId?: string) => {
@@ -230,7 +266,6 @@ export default function InstructorDashboardClient({
             document.body.style.overflow = 'unset';
         };
     }, [cancellingBooking, selectedProfile, selectedStudio, activeChat, selectedBooking, isEditModalOpen, isAddModalOpen]);
-
     return (
         <div className="space-y-8 sm:space-y-16 pb-20">
             {/* Unified Dashboard Hero */}
@@ -271,15 +306,17 @@ export default function InstructorDashboardClient({
             )}
 
             {/* Analytics Cards */}
-            <InstructorStatCards
-                stats={{
-                    balance: availableBalance || 0,
-                    upcomingSessions: calendarBookings.filter(b => b.status === 'approved').length,
-                    totalHours: totalSessionsTaught,
-                    pendingEarnings: pendingEarnings
-                }}
-                hasPendingPayout={hasPendingPayout}
-            />
+            <DashboardErrorBoundary fallbackTitle="Statistics Failure">
+                <InstructorStatCards
+                    stats={{
+                        balance: availableBalance || 0,
+                        upcomingSessions: calendarBookings.filter(b => b.status === 'approved').length,
+                        totalHours: totalSessionsTaught,
+                        pendingEarnings: pendingEarnings
+                    }}
+                    hasPendingPayout={hasPendingPayout}
+                />
+            </DashboardErrorBoundary>
 
             {/* Revenue Trends Visualization */}
             {revenueTrends && revenueTrends.length > 0 && (
@@ -323,95 +360,97 @@ export default function InstructorDashboardClient({
                                 </Link>
                             </div>
 
-                            <div className="space-y-6 relative z-10">
-                                {calendarBookings.filter(b => {
-                                    const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
-                                    return slot?.date === getManilaTodayStr();
-                                }).length > 0 ? (
-                                    calendarBookings
-                                        .filter(b => {
-                                            const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
-                                            return slot?.date === getManilaTodayStr();
-                                        })
-                                        .sort((a, b) => {
-                                            const slotA = Array.isArray(a.slots) ? a.slots[0] : a.slots;
-                                            const slotB = Array.isArray(b.slots) ? b.slots[0] : b.slots;
-                                            return (slotA?.start_time || '').localeCompare(slotB?.start_time || '');
-                                        })
-                                        .map((booking) => {
-                                            const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
-                                            
-                                            // Live indicator logic
-                                            const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false, timeZone: 'Asia/Manila' });
-                                            const isLive = nowTime >= (slot?.start_time || '99:99') && nowTime <= (slot?.end_time || '00:00');
-                                            
-                                            return (
-                                                <div key={booking.id} className={clsx(
-                                                    "flex items-center gap-8 p-8 border rounded-3xl transition-all duration-500 group/item relative overflow-hidden",
-                                                    isLive 
-                                                        ? "bg-white border-forest shadow-ambient ring-2 ring-forest/10" 
-                                                        : "bg-surface-container-low/40 border-burgundy/5 hover:bg-white hover:shadow-ambient"
-                                                )}>
-                                                    {isLive && (
-                                                        <div className="absolute top-0 right-0 px-4 py-1.5 bg-forest text-white text-[9px] font-black uppercase tracking-widest rounded-bl-xl animate-pulse">
-                                                            Live Now
-                                                        </div>
-                                                    )}
-                                                    <div className={clsx(
-                                                        "w-24 flex flex-col items-center justify-center py-4 rounded-2xl border transition-colors duration-500",
+                            <DashboardErrorBoundary fallbackTitle="Agenda Failure">
+                                <div className="space-y-6 relative z-10">
+                                    {optimisticBookings.filter(b => {
+                                        const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+                                        return slot?.date === getManilaTodayStr();
+                                    }).length > 0 ? (
+                                        optimisticBookings
+                                            .filter(b => {
+                                                const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+                                                return slot?.date === getManilaTodayStr();
+                                            })
+                                            .sort((a, b) => {
+                                                const slotA = Array.isArray(a.slots) ? a.slots[0] : a.slots;
+                                                const slotB = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+                                                return (slotA?.start_time || '').localeCompare(slotB?.start_time || '');
+                                            })
+                                            .map((booking) => {
+                                                const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
+                                                
+                                                // Live indicator logic
+                                                const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false, timeZone: 'Asia/Manila' });
+                                                const isLive = nowTime >= (slot?.start_time || '99:99') && nowTime <= (slot?.end_time || '00:00');
+                                                
+                                                return (
+                                                    <div key={booking.id} className={clsx(
+                                                        "flex items-center gap-8 p-8 border rounded-3xl transition-all duration-500 group/item relative overflow-hidden",
                                                         isLive 
-                                                            ? "bg-forest text-white border-forest" 
-                                                            : "bg-burgundy/5 text-burgundy border-burgundy/10 group-hover/item:bg-burgundy group-hover/item:text-white"
+                                                            ? "bg-white border-forest shadow-ambient ring-2 ring-forest/10" 
+                                                            : "bg-surface-container-low/40 border-burgundy/5 hover:bg-white hover:shadow-ambient"
                                                     )}>
-                                                        <span className="text-sm font-black uppercase tracking-tighter leading-none">{formatTo12Hour(slot?.start_time || '00:00:00').split(' ')[0]}</span>
-                                                        <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{formatTo12Hour(slot?.start_time || '00:00:00').split(' ')[1]}</span>
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-4 mb-2">
-                                                            <span className={clsx(
-                                                                "text-[11px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg",
-                                                                isLive ? "bg-forest/10 text-forest" : "bg-forest/5 text-forest"
-                                                            )}>{slot?.session_type || 'Private Session'}</span>
-                                                            <span className="w-1 h-1 bg-border-grey rounded-full" />
-                                                            <span className="text-[11px] font-bold text-slate uppercase tracking-widest flex items-center gap-1.5">
-                                                                <MapPin className="w-3.5 h-3.5 opacity-40" />
-                                                                {slot?.studios?.name || 'Home Base'}
-                                                            </span>
+                                                        {isLive && (
+                                                            <div className="absolute top-0 right-0 px-4 py-1.5 bg-forest text-white text-[9px] font-black uppercase tracking-widest rounded-bl-xl animate-pulse">
+                                                                Live Now
+                                                            </div>
+                                                        )}
+                                                        <div className={clsx(
+                                                            "w-24 flex flex-col items-center justify-center py-4 rounded-2xl border transition-colors duration-500",
+                                                            isLive 
+                                                                ? "bg-forest text-white border-forest" 
+                                                                : "bg-burgundy/5 text-burgundy border-burgundy/10 group-hover/item:bg-burgundy group-hover/item:text-white"
+                                                        )}>
+                                                            <span className="text-sm font-black uppercase tracking-tighter leading-none">{formatTo12Hour(slot?.start_time || '00:00:00').split(' ')[0]}</span>
+                                                            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{formatTo12Hour(slot?.start_time || '00:00:00').split(' ')[1]}</span>
                                                         </div>
-                                                        <h3 className="text-xl sm:text-2xl font-serif text-charcoal truncate tracking-tight">{booking.client?.full_name}</h3>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-4 mb-2">
+                                                                <span className={clsx(
+                                                                    "text-[11px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg",
+                                                                    isLive ? "bg-forest/10 text-forest" : "bg-forest/5 text-forest"
+                                                                )}>{slot?.session_type || 'Private Session'}</span>
+                                                                <span className="w-1 h-1 bg-border-grey rounded-full" />
+                                                                <span className="text-[11px] font-bold text-slate uppercase tracking-widest flex items-center gap-1.5">
+                                                                    <MapPin className="w-3.5 h-3.5 opacity-40" />
+                                                                    {slot?.studios?.name || 'Home Base'}
+                                                                </span>
+                                                            </div>
+                                                            <h3 className="text-xl sm:text-2xl font-serif text-charcoal truncate tracking-tight">{booking.client?.full_name}</h3>
+                                                        </div>
+                                                        <div className="flex items-center gap-4">
+                                                            <button 
+                                                                onClick={() => setSelectedBooking(booking)}
+                                                                className={clsx(
+                                                                    "w-12 h-12 flex items-center justify-center rounded-full transition-all shadow-tight hover:shadow-card border",
+                                                                    isLive 
+                                                                        ? "bg-white border-forest/20 text-forest" 
+                                                                        : "bg-white border-border-grey/40 text-charcoal/40 hover:text-forest hover:border-forest/20"
+                                                                )}
+                                                            >
+                                                                <ChevronRight className="w-6 h-6" />
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex items-center gap-4">
-                                                        <button 
-                                                            onClick={() => setSelectedBooking(booking)}
-                                                            className={clsx(
-                                                                "w-12 h-12 flex items-center justify-center rounded-full transition-all shadow-tight hover:shadow-card border",
-                                                                isLive 
-                                                                    ? "bg-white border-forest/20 text-forest" 
-                                                                    : "bg-white border-border-grey/40 text-charcoal/40 hover:text-forest hover:border-forest/20"
-                                                            )}
-                                                        >
-                                                            <ChevronRight className="w-6 h-6" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })
-                                ) : (
-                                    <div className="py-24 flex flex-col items-center justify-center bg-off-white/20 rounded-[3rem] border border-dashed border-border-grey/60">
-                                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-tight mb-8">
-                                            <Calendar className="w-8 h-8 text-charcoal/20" />
+                                                );
+                                            })
+                                    ) : (
+                                        <div className="py-24 flex flex-col items-center justify-center bg-off-white/20 rounded-[3rem] border border-dashed border-border-grey/60">
+                                            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-tight mb-8">
+                                                <Calendar className="w-8 h-8 text-charcoal/20" />
+                                            </div>
+                                            <h3 className="text-xl font-serif text-charcoal/40 tracking-tight mb-2">Clear Afternoon</h3>
+                                            <p className="text-[11px] font-black text-charcoal/30 uppercase tracking-[0.4em] italic mb-8">No sessions scheduled for today</p>
+                                            <button 
+                                                onClick={() => setIsAddModalOpen(true)}
+                                                className="px-8 py-3.5 border-2 border-forest/20 text-forest rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-forest hover:text-white hover:border-forest transition-all shadow-tight"
+                                            >
+                                                Add Availability
+                                            </button>
                                         </div>
-                                        <h3 className="text-xl font-serif text-charcoal/40 tracking-tight mb-2">Clear Afternoon</h3>
-                                        <p className="text-[11px] font-black text-charcoal/30 uppercase tracking-[0.4em] italic mb-8">No sessions scheduled for today</p>
-                                        <button 
-                                            onClick={() => setIsAddModalOpen(true)}
-                                            className="px-8 py-3.5 border-2 border-forest/20 text-forest rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-forest hover:text-white hover:border-forest transition-all shadow-tight"
-                                        >
-                                            Add Availability
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                                    )}
+                                </div>
+                            </DashboardErrorBoundary>
                         </div>
 
                         {/* Quick Access Grid */}

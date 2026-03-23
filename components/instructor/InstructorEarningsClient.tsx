@@ -8,6 +8,7 @@ import ExportCsvButton from '@/components/dashboard/ExportCsvButton'
 import DateRangeFilters from '@/components/dashboard/DateRangeFilters'
 import TopUpModal from '@/components/dashboard/TopUpModal'
 import { clsx } from 'clsx'
+import Sparkline from '../dashboard/Sparkline'
 
 export default function InstructorEarningsClient({
     data
@@ -63,6 +64,28 @@ export default function InstructorEarningsClient({
     const incomeTransactions = recentTransactions?.filter((t: any) => t.type !== 'Payout') || []
     const withdrawalTransactions = recentTransactions?.filter((t: any) => t.type === 'Payout') || []
     const [activeTab, setActiveTab] = useState<'income' | 'withdrawals'>('income')
+
+    // Process transactions for sparkline
+    const getTrendData = () => {
+        if (!incomeTransactions || incomeTransactions.length === 0) return [0, 0, 0, 0, 0, 0, 0]
+        
+        const dailyTotals: { [key: string]: number } = {}
+        incomeTransactions.forEach((tx: any) => {
+            const date = new Date(tx.date).toISOString().split('T')[0]
+            if (tx.total_amount > 0) {
+                dailyTotals[date] = (dailyTotals[date] || 0) + tx.total_amount
+            }
+        })
+
+        const sortedDates = Object.keys(dailyTotals).sort()
+        const trend = sortedDates.slice(-7).map(date => dailyTotals[date])
+        
+        while (trend.length < 7) trend.unshift(0)
+        return trend
+    }
+
+    const trendData = getTrendData()
+
 
     return (
         <div className="min-h-screen bg-cream-50/30 px-4 py-6 sm:p-8 selection:bg-forest/10 selection:text-forest">
@@ -209,17 +232,24 @@ export default function InstructorEarningsClient({
                     </div>
                 </div>
 
-                {/* Net Earnings */}
-                <div className="atelier-card p-6 sm:p-8 group">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-2xl bg-forest/10 flex items-center justify-center shrink-0">
-                            <TrendingUp className="w-5 h-5 text-forest" />
+                <div className="atelier-card p-6 sm:p-8 group overflow-hidden relative">
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-forest/10 flex items-center justify-center shrink-0">
+                                <TrendingUp className="w-5 h-5 text-forest" />
+                            </div>
+                            <span className="text-[10px] font-black text-forest/40 uppercase tracking-[0.2em]">NET YIELD</span>
                         </div>
-                        <span className="text-[10px] font-black text-forest/40 uppercase tracking-[0.2em]">NET YIELD</span>
+                        <div className="opacity-40 group-hover:opacity-100 transition-opacity">
+                            <Sparkline data={trendData} color="#5C8A42" width={80} height={30} />
+                        </div>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 relative z-10">
                         <h3 className="text-3xl font-serif text-charcoal tracking-tighter">₱{(netEarnings || 0).toLocaleString()}</h3>
-                        <p className="text-[10px] font-black text-charcoal-400 uppercase tracking-widest">REALIZED INCOME</p>
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-forest animate-pulse" />
+                            <p className="text-[10px] font-black text-charcoal-400 uppercase tracking-widest">REALIZED INCOME</p>
+                        </div>
                     </div>
                 </div>
 

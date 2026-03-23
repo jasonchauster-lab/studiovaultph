@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, startOfDay, isPast, startOfMonth, endOfMonth, addDays, subDays, addMonths, subMonths, getDay, setHours, setMinutes } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Users, User, Calendar as CalendarIcon, Clock, Trash2, Edit2, X, Sparkles, MapPin, Box, ArrowUpRight, Pencil, Copy, AlertCircle } from 'lucide-react'
 import clsx from 'clsx'
-import { createSlot, deleteSlot, updateSlot } from '@/app/(dashboard)/studio/actions' // For single slot
+import { createSlot, deleteSlot, updateSlot } from '@/app/(dashboard)/studio/slot-actions' // For single slot
 import ScheduleManager from './ScheduleManager' // Bulk generator
 import Image from 'next/image'
 import Avatar from '@/components/shared/Avatar'

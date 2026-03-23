@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Slot, Studio } from '@/types';
 import { ChevronDown, ChevronUp, MapPin, Clock, CreditCard, ShieldCheck } from 'lucide-react';
-import { bookSlot } from '@/app/(dashboard)/instructor/actions'; // Type only import if needed, actual usage in subcomponent
+import { bookSlot } from '@/app/(dashboard)/instructor/booking-actions'; // Type only import if needed, actual usage in subcomponent
 import BookSlotGroup from './BookSlotGroup';
 import clsx from 'clsx';
 

@@ -1,4 +1,4 @@
-import { getInstructorEarnings } from '../actions'
+import { getInstructorEarnings } from '../earnings-actions'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getManilaTodayStr } from '@/lib/timezone'

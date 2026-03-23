@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updateStudio } from '@/app/(dashboard)/studio/actions'
+import { updateStudio } from '@/app/(dashboard)/studio/studio-actions'
 import { Settings, X } from 'lucide-react'
 
 interface Studio {

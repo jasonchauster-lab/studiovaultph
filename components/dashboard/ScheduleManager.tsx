@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Loader2, Calendar, Clock, Repeat, CheckCircle, AlertCircle } from 'lucide-react';
-import { generateRecurringSlots } from '@/app/(dashboard)/studio/actions';
+import { generateRecurringSlots } from '@/app/(dashboard)/studio/slot-actions';
 
 interface ScheduleManagerProps {
     studioId: string;

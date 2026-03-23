@@ -1,4 +1,4 @@
-import { getInstructorEarnings, getPayoutHistory } from '../actions'
+import { getInstructorEarnings, getPayoutHistory } from '../earnings-actions'
 import PayoutForm from './PayoutForm'
 import Link from 'next/link'
 import { ArrowLeft, Clock } from 'lucide-react'

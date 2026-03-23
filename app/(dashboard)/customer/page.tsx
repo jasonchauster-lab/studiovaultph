@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import DiscoveryFilters from '@/components/customer/DiscoveryFilters'
-import { MapPin, Award, User, Clock, Filter, Calendar } from 'lucide-react'
+import { MapPin, Award, User, Clock, Filter, Calendar, Home } from 'lucide-react'
 import Image from 'next/image'
 import SlotCard from '@/components/dashboard/SlotCard'
 import { Slot } from '@/types'
@@ -11,6 +11,9 @@ import AvatarWithFallback from '@/components/customer/AvatarWithFallback'
 import StarRating from '@/components/reviews/StarRating'
 import { getManilaTodayStr, toManilaTimeString } from '@/lib/timezone'
 import { headers } from 'next/headers'
+import SaveButton from '@/components/shared/SaveButton'
+import SavedDiscovery from '@/components/customer/SavedDiscovery'
+import DiscoveryEmptyState from '@/components/customer/DiscoveryEmptyState'
 
 interface SearchParams {
     q?: string;
@@ -270,6 +273,10 @@ export default async function CustomerDashboard({
                 {/* ─── Sections ─── */}
                 <div className="flex flex-col gap-y-32">
 
+                    {/* Saved for You (Customer Retention) */}
+                    <SavedDiscovery allInstructors={instructors} allStudios={studios} />
+
+
                     {/* ══════════════════════════════════════
                         INSTRUCTORS SECTION
                     ══════════════════════════════════════ */}
@@ -288,20 +295,11 @@ export default async function CustomerDashboard({
                             </div>
 
                             {instructors.length === 0 ? (
-                                <div className="atelier-card py-24 text-center flex flex-col items-center justify-center gap-y-6 border-dashed border-2 border-burgundy/10 bg-off-white/30">
-                                    <div className="relative">
-                                        <div className="w-24 h-24 bg-walking-vinnie/20 rounded-full flex items-center justify-center shadow-inner ring-1 ring-walking-vinnie/30">
-                                            <User className="w-10 h-10 text-burgundy/20" />
-                                        </div>
-                                        <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md border border-burgundy/5">
-                                            <Filter className="w-3.5 h-3.5 text-burgundy/40" />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <h3 className="text-2xl font-serif font-bold text-burgundy tracking-tight">No instructors found</h3>
-                                        <p className="text-muted-burgundy/70 max-w-sm mx-auto text-sm font-medium leading-relaxed">We couldn't find any instructors matching your current filters. Try broadening your search or clearing all filters.</p>
-                                    </div>
-                                </div>
+                                <DiscoveryEmptyState 
+                                    title="No instructors found"
+                                    description="We couldn't find any instructors matching your current filters. Try broadening your search or clearing all filters."
+                                    icon={User}
+                                />
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {instructors.map(inst => {
@@ -327,7 +325,13 @@ export default async function CustomerDashboard({
                                                     
                                                     <div className="absolute inset-x-0 bottom-0 h-16 sm:h-20 bg-gradient-to-t from-white to-transparent" />
                                                     
+                                                    {/* Save Button */}
+                                                    <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-20">
+                                                        <SaveButton id={inst.id} type="instructor" className="w-10 h-10 sm:w-12 sm:h-12 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-white/50" />
+                                                    </div>
+
                                                     {/* Verified badge — top right */}
+
                                                     {hasVerifiedCert && (
                                                         <div className="absolute top-4 sm:top-6 right-4 sm:right-6 bg-white/90 backdrop-blur-md text-burgundy px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl flex items-center gap-2 z-10 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em] border border-burgundy/5 shadow-xl transition-all duration-500 group-hover:bg-forest group-hover:text-white group-hover:border-forest/20">
                                                             <Award className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
@@ -440,98 +444,110 @@ export default async function CustomerDashboard({
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
-                                {studios?.map(studio => (
-                                    <div key={studio.id} className="atelier-card group flex flex-col h-full ring-1 ring-burgundy/[0.02] overflow-hidden">
-                                        {/* ── Banner Image ── */}
-                                        <div className="relative aspect-[16/10] overflow-hidden bg-[#F5F2EB]">
-                                            {(studio.banner_url || studio.logo_url) ? (
-                                                <Image
-                                                    src={studio.banner_url || studio.logo_url}
-                                                    alt={studio.name}
-                                                    fill
-                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                                    className="object-cover group-hover:scale-110 transition-transform duration-[3000ms] ease-out will-change-transform"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-stone-50 to-walking-vinnie/20">
-                                                    <span className="text-burgundy/10 font-serif italic text-7xl sm:text-8xl select-none group-hover:scale-110 transition-transform duration-1000">
-                                                        {studio.name.slice(0, 1)}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            
-                                            <div className="absolute inset-0 bg-burgundy/5 group-hover:bg-transparent transition-colors duration-1000" />
-
-                                            {/* Location overlay — top left */}
-                                            <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-10">
-                                                <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-xl border border-white/50 transition-all duration-500 group-hover:bg-forest group-hover:text-white group-hover:border-forest/20">
-                                                    <MapPin className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-forest shrink-0 group-hover:text-white" />
-                                                    <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] sm:tracking-[0.15em]">{studio.location}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Studio small logo overlay — bottom left circular */}
-                                            <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 z-10 hidden sm:block transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
-                                                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[4px] sm:border-[6px] border-white shadow-2xl overflow-hidden bg-white ring-1 ring-burgundy/5">
-                                                    <AvatarWithFallback
-                                                        src={studio.logo_url}
+                                {studios?.length === 0 ? (
+                                    <div className="col-span-full">
+                                        <DiscoveryEmptyState 
+                                            title="No partner studios found"
+                                            description="No studios match your criteria. Try adjusting your equipment filters or increasing the search radius."
+                                            icon={Home}
+                                        />
+                                    </div>
+                                ) : (
+                                    studios?.map(studio => (
+                                        <div key={studio.id} className="atelier-card group flex flex-col h-full ring-1 ring-burgundy/[0.02] overflow-hidden">
+                                            {/* ── Banner Image ── */}
+                                            <div className="relative aspect-[16/10] overflow-hidden bg-[#F5F2EB]">
+                                                {(studio.banner_url || studio.logo_url) ? (
+                                                    <Image
+                                                        src={studio.banner_url || studio.logo_url}
                                                         alt={studio.name}
-                                                        initials={studio.name.slice(0, 1)}
+                                                        fill
+                                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                        className="object-cover group-hover:scale-110 transition-transform duration-[3000ms] ease-out will-change-transform"
                                                     />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* ── Card Body ── */}
-                                        <div className="p-6 sm:p-10 flex flex-col flex-1 gap-y-6 sm:gap-y-8">
-
-                                            {/* Studio name + rating */}
-                                            <div className="flex items-start justify-between gap-4 sm:gap-6">
-                                                <div className="space-y-1 sm:space-y-2">
-                                                    <h3 className="text-2xl sm:text-3xl font-serif font-bold text-burgundy tracking-tight leading-tight group-hover:text-forest transition-colors duration-500">{studio.name}</h3>
-                                                    <p className="text-[9px] sm:text-[10px] font-black text-burgundy/20 uppercase tracking-[0.2em] sm:tracking-[0.3em]">Partner Studio</p>
-                                                </div>
-                                                <div className="shrink-0 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-[#F5F2EB] border border-burgundy/5 flex flex-col items-center gap-0.5 sm:gap-1 shadow-sm transition-all duration-500 group-hover:bg-white group-hover:border-burgundy/10">
-                                                    <StarRating
-                                                        rating={ratingsMap[studio.owner_id]?.average || null}
-                                                        count={ratingsMap[studio.owner_id]?.count}
-                                                        size="xs"
-                                                    />
-                                                    {(!ratingsMap[studio.owner_id]?.count || ratingsMap[studio.owner_id].count === 0) && (
-                                                        <span className="text-[8px] font-black text-burgundy/25 uppercase tracking-[0.1em]">Vault Choice</span>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Description */}
-                                            <p className="text-[13px] sm:text-[14px] text-burgundy/40 leading-relaxed line-clamp-2 italic font-medium transition-colors duration-500 group-hover:text-burgundy/60">
-                                                {studio.description || 'A premiere pilates studio dedicated to your well-being and excellence.'}
-                                            </p>
-
-                                            {/* Features/Equipment */}
-                                            {(studio.reformers_count || 0) > 0 && (
-                                                <div className="flex flex-wrap gap-2">
-                                                    <div className="flex items-center gap-2.5 sm:gap-3 bg-walking-vinnie/5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-walking-vinnie/10 group-hover:border-forest/20 group-hover:bg-forest/5 transition-all duration-500">
-                                                        <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-forest animate-pulse" />
-                                                        <span className="text-[9px] sm:text-[10px] font-black text-burgundy/40 uppercase tracking-[0.15em] sm:tracking-[0.2em] group-hover:text-forest/70">
-                                                            {studio.reformers_count} Reformers
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-stone-50 to-walking-vinnie/20">
+                                                        <span className="text-burgundy/10 font-serif italic text-7xl sm:text-8xl select-none group-hover:scale-110 transition-transform duration-1000">
+                                                            {studio.name.slice(0, 1)}
                                                         </span>
                                                     </div>
-                                                </div>
-                                            )}
+                                                )}
+                                                
+                                                <div className="absolute inset-0 bg-burgundy/5 group-hover:bg-transparent transition-colors duration-1000" />
 
-                                            {/* Book Now Button — Full width at bottom */}
-                                            <div className="pt-6 sm:pt-8 mt-auto border-t border-burgundy/5">
-                                                <Link
-                                                    href={`/studios/${studio.id}`}
-                                                    className="flex items-center justify-center w-full py-4 sm:py-5 rounded-[1.25rem] sm:rounded-[1.5rem] bg-[#F5F2EB]/50 text-burgundy text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] border border-burgundy/5 hover:bg-forest hover:text-white hover:border-forest/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-500"
-                                                >
-                                                    Book Studio
-                                                </Link>
+                                                        {/* Location overlay — top left */}
+                                                        <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-10 flex items-center gap-3">
+                                                            <SaveButton id={studio.id} type="studio" className="w-10 h-10 sm:w-12 sm:h-12 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-white/50" />
+                                                            <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-xl border border-white/50 transition-all duration-500 group-hover:bg-forest group-hover:text-white group-hover:border-forest/20">
+                                                                <MapPin className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-forest shrink-0 group-hover:text-white" />
+                                                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] sm:tracking-[0.15em]">{studio.location}</span>
+                                                            </div>
+                                                        </div>
+
+
+                                                {/* Studio small logo overlay — bottom left circular */}
+                                                <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 z-10 hidden sm:block transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
+                                                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[4px] sm:border-[6px] border-white shadow-2xl overflow-hidden bg-white ring-1 ring-burgundy/5">
+                                                        <AvatarWithFallback
+                                                            src={studio.logo_url}
+                                                            alt={studio.name}
+                                                            initials={studio.name.slice(0, 1)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* ── Card Body ── */}
+                                            <div className="p-6 sm:p-10 flex flex-col flex-1 gap-y-6 sm:gap-y-8">
+
+                                                {/* Studio name + rating */}
+                                                <div className="flex items-start justify-between gap-4 sm:gap-6">
+                                                    <div className="space-y-1 sm:space-y-2">
+                                                        <h3 className="text-2xl sm:text-3xl font-serif font-bold text-burgundy tracking-tight leading-tight group-hover:text-forest transition-colors duration-500">{studio.name}</h3>
+                                                        <p className="text-[9px] sm:text-[10px] font-black text-burgundy/20 uppercase tracking-[0.2em] sm:tracking-[0.3em]">Partner Studio</p>
+                                                    </div>
+                                                    <div className="shrink-0 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-[#F5F2EB] border border-burgundy/5 flex flex-col items-center gap-0.5 sm:gap-1 shadow-sm transition-all duration-500 group-hover:bg-white group-hover:border-burgundy/10">
+                                                        <StarRating
+                                                            rating={ratingsMap[studio.owner_id]?.average || null}
+                                                            count={ratingsMap[studio.owner_id]?.count}
+                                                            size="xs"
+                                                        />
+                                                        {(!ratingsMap[studio.owner_id]?.count || ratingsMap[studio.owner_id].count === 0) && (
+                                                            <span className="text-[8px] font-black text-burgundy/25 uppercase tracking-[0.1em]">Vault Choice</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Description */}
+                                                <p className="text-[13px] sm:text-[14px] text-burgundy/40 leading-relaxed line-clamp-2 italic font-medium transition-colors duration-500 group-hover:text-burgundy/60">
+                                                    {studio.description || 'A premiere pilates studio dedicated to your well-being and excellence.'}
+                                                </p>
+
+                                                {/* Features/Equipment */}
+                                                {(studio.reformers_count || 0) > 0 && (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        <div className="flex items-center gap-2.5 sm:gap-3 bg-walking-vinnie/5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-walking-vinnie/10 group-hover:border-forest/20 group-hover:bg-forest/5 transition-all duration-500">
+                                                            <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-forest animate-pulse" />
+                                                            <span className="text-[9px] sm:text-[10px] font-black text-burgundy/40 uppercase tracking-[0.15em] sm:tracking-[0.2em] group-hover:text-forest/70">
+                                                                {studio.reformers_count} Reformers
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Book Now Button — Full width at bottom */}
+                                                <div className="pt-6 sm:pt-8 mt-auto border-t border-burgundy/5">
+                                                    <Link
+                                                        href={`/studios/${studio.id}`}
+                                                        className="flex items-center justify-center w-full py-4 sm:py-5 rounded-[1.25rem] sm:rounded-[1.5rem] bg-[#F5F2EB]/50 text-burgundy text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] border border-burgundy/5 hover:bg-forest hover:text-white hover:border-forest/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-500"
+                                                    >
+                                                        Book Studio
+                                                    </Link>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
                         </section>
                     )}
@@ -554,20 +570,11 @@ export default async function CustomerDashboard({
                             </div>
 
                             {slots.length === 0 ? (
-                                <div className="atelier-card py-24 text-center flex flex-col items-center justify-center gap-y-6 border-dashed border-2 border-burgundy/10 bg-off-white/30">
-                                    <div className="relative">
-                                        <div className="w-24 h-24 bg-buttermilk/20 rounded-full flex items-center justify-center shadow-inner ring-1 ring-buttermilk/40">
-                                            <Clock className="w-10 h-10 text-burgundy/20" />
-                                        </div>
-                                        <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md border border-burgundy/5">
-                                            <Calendar className="w-3.5 h-3.5 text-burgundy/40" />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <h3 className="text-2xl font-serif font-bold text-burgundy tracking-tight">No sessions available</h3>
-                                        <p className="text-muted-burgundy/70 max-w-sm mx-auto text-sm font-medium leading-relaxed">There are no sessions available for the selected period. Please try a different date or time range.</p>
-                                    </div>
-                                </div>
+                                <DiscoveryEmptyState 
+                                    title="No sessions available"
+                                    description="There are no sessions available for the selected period. Please try a different date or time range."
+                                    icon={Clock}
+                                />
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                     {slots.map(slot => (

@@ -10,7 +10,7 @@ import StudioChatButton from '@/components/dashboard/StudioChatButton'
 import BookingFilter, { FilterState } from '@/components/dashboard/BookingFilter'
 import CancelBookingModal from './CancelBookingModal'
 import InstructorPreviewModal from './InstructorPreviewModal'
-import { cancelBookingByStudio } from '@/app/(dashboard)/studio/actions'
+import { cancelBookingByStudio } from '@/app/(dashboard)/studio/booking-actions'
 import { getInstructorProfile } from '@/app/(dashboard)/instructors/actions'
 import Avatar from '@/components/shared/Avatar'
 

@@ -11,7 +11,7 @@ import ReviewModal from '@/components/reviews/ReviewModal'
 import BookingFilter, { FilterState } from '@/components/dashboard/BookingFilter'
 import CancelBookingModal from './CancelBookingModal'
 import StudioPreviewModal from './StudioPreviewModal'
-import { cancelBookingByInstructor, checkInClient } from '@/app/(dashboard)/instructor/actions'
+import { cancelBookingByInstructor, checkInClient } from '@/app/(dashboard)/instructor/booking-actions'
 import { getStudioProfile } from '@/app/(dashboard)/instructors/actions'
 
 interface InstructorSessionListProps {

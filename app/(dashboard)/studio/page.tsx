@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { createStudio } from './actions'
+import { createStudio } from './studio-actions'
 import { Calendar, DollarSign, Clock, User, Users, MapPin, TrendingUp, Sparkles, Plus, ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'

@@ -8,6 +8,7 @@ import SupportChatWrapper from '@/components/support/SupportChatWrapper'
 import UserPresenceTracker from '@/components/shared/UserPresenceTracker'
 import Image from 'next/image'
 import Link from 'next/link'
+import CommandPalette from '@/components/shared/CommandPalette'
 
 interface DashboardLayoutClientProps {
     children: React.ReactNode
@@ -74,6 +75,7 @@ export default function DashboardLayoutClient({
 
             {user && profile?.role !== 'admin' && <SupportChatWrapper userId={user.id} />}
             {user && <UserPresenceTracker />}
+            <CommandPalette userRole={profile?.role} />
         </div>
     )
 }

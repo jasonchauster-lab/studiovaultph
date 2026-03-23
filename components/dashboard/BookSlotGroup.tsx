@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { bookSlot } from '@/app/(dashboard)/instructor/actions'
+import { bookSlot } from '@/app/(dashboard)/instructor/booking-actions'
 import { Loader2, Check, ShoppingBag } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 

@@ -10,6 +10,7 @@ import clsx from 'clsx'
 import Avatar from '@/components/shared/Avatar'
 import { Menu, Search } from 'lucide-react'
 import HeaderSearchPill from './HeaderSearchPill'
+import NotificationCenter from '@/components/shared/NotificationCenter'
 
 interface DashboardHeaderProps {
     profile: any
@@ -81,6 +82,11 @@ export default function DashboardHeader({ profile, studioData, avatarUrl, onOpen
                                         profile?.role || 'USER'}
                             </p>
                         </div>
+                        {profile?.id && (
+                            <div className="hidden xs:block">
+                                <NotificationCenter userId={profile.id} />
+                            </div>
+                        )}
                         <Link
                             href={
                                 profile?.role === 'customer' ? '/customer/profile' :
