@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { 
     APIProvider, 
-    Map, 
+    Map as GoogleMap, 
     AdvancedMarker, 
     Pin, 
     InfoWindow,
-    useAdvancedMarkerRef
+    useAdvancedMarkerRef,
+    useMap
 } from '@vis.gl/react-google-maps'
 import { MapPin, Navigation, Star, Award, Home, User } from 'lucide-react'
 import Image from 'next/image'
@@ -45,8 +46,11 @@ interface DiscoveryMapProps {
 const MANILA_CENTER = { lat: 14.5995, lng: 120.9842 }
 
 export default function DiscoveryMap({ studios, instructors = [], apiKey, isRentMode = false }: DiscoveryMapProps) {
+    const map = useMap()
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [selectedType, setSelectedType] = useState<'studio' | 'instructor' | null>(null)
+    const carouselRef = useRef<HTMLDivElement>(null)
+    const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
     // Filter out studios/instructors with missing coordinates to prevent map crashes
     const validStudios = useMemo(() => studios.filter(s => typeof s.lat === 'number' && typeof s.lng === 'number'), [studios])
@@ -62,10 +66,65 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
         return { lat, lng }
     }, [validStudios])
 
+    // Sync map when selected item changes
+    useEffect(() => {
+        if (!map || !selectedId) return
+
+        const item = selectedType === 'studio' 
+            ? validStudios.find(s => s.id === selectedId)
+            : validInstructors.find(i => i.id === selectedId)
+
+        if (item) {
+            const lat = 'lat' in item ? item.lat : item.home_base_lat
+            const lng = 'lng' in item ? item.lng : item.home_base_lng
+            
+            if (lat && lng) {
+                map.panTo({ lat, lng })
+                map.setZoom(15)
+            }
+        }
+    }, [selectedId, selectedType, map, validStudios, validInstructors])
+
+    // Scroll carousel when selected item changes
+    useEffect(() => {
+        if (!selectedId) return
+        const card = cardRefs.current.get(selectedId)
+        if (card && carouselRef.current) {
+            // Only scroll if not already in view to avoid bounce
+            const rect = card.getBoundingClientRect()
+            const containerRect = carouselRef.current.getBoundingClientRect()
+            const isVisible = rect.left >= containerRect.left && rect.right <= containerRect.right
+            
+            if (!isVisible) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+            }
+        }
+    }, [selectedId])
+
+    const handleScroll = useCallback(() => {
+        if (!carouselRef.current) return
+        
+        const container = carouselRef.current
+        const scrollLeft = container.scrollLeft
+        const itemWidth = 280 + 16 // card width + gap
+        const index = Math.round(scrollLeft / itemWidth)
+        
+        const items = [
+            ...validStudios.map(s => ({ id: s.id, type: 'studio' as const })), 
+            ...(!isRentMode ? validInstructors.map(i => ({ id: i.id, type: 'instructor' as const })) : [])
+        ]
+        
+        const activeItem = items[index]
+        if (activeItem && activeItem.id !== selectedId) {
+            setSelectedId(activeItem.id)
+            setSelectedType(activeItem.type)
+        }
+    }, [selectedId, validStudios, validInstructors, isRentMode])
+
     return (
         <div className="w-full h-[calc(100vh-200px)] min-h-[500px] rounded-[2.5rem] overflow-hidden border border-burgundy/5 shadow-2xl relative animate-in fade-in zoom-in-95 duration-700">
             <APIProvider apiKey={apiKey}>
-                <Map
+                <GoogleMap
                     defaultCenter={mapCenter}
                     defaultZoom={13}
                     mapId="7cfbdb934b719a4f6fb584f0" // Atelier Discovery Map ID
@@ -181,13 +240,100 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
                             </div>
                         </InfoWindow>
                     )}
-                </Map>
+                </GoogleMap>
             </APIProvider>
 
             {/* Map Interaction Legend */}
             <div className="absolute top-6 left-6 z-10 hidden sm:flex items-center gap-3 bg-white/80 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-burgundy/5 shadow-2xl animate-in slide-in-from-left-4 duration-1000">
                 <div className="w-2 h-2 rounded-full bg-forest animate-pulse" />
                 <span className="text-[9px] font-black text-burgundy uppercase tracking-[0.2em]">Live Discovery Mode</span>
+            </div>
+
+            <div 
+                ref={carouselRef}
+                onScroll={handleScroll}
+                className="absolute bottom-10 left-0 right-0 z-10 flex gap-4 px-6 overflow-x-auto pb-6 cursor-grab active:cursor-grabbing snap-x snap-mandatory scrollbar-hide no-scrollbar"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+                {/* Combined Studios and Instructors for Carousel */}
+                {[...validStudios.map(s => ({ ...s, carouselType: 'studio' as const })), 
+                  ...(!isRentMode ? validInstructors.map(i => ({ ...i, carouselType: 'instructor' as const })) : [])]
+                  .map((item) => (
+                    <div 
+                        key={item.id}
+                        ref={el => { if (el) cardRefs.current.set(item.id, el) }}
+                        onClick={() => {
+                            setSelectedId(item.id)
+                            setSelectedType(item.carouselType)
+                        }}
+                        className={clsx(
+                            "flex-shrink-0 w-[280px] snap-center transition-all duration-500",
+                            selectedId === item.id ? "scale-105" : "scale-95 opacity-90"
+                        )}
+                    >
+                        <div className="atelier-card bg-white/95 backdrop-blur-xl overflow-hidden shadow-2xl border border-burgundy/5 group cursor-pointer hover:border-forest/30 transition-all duration-500">
+                            {item.carouselType === 'studio' ? (
+                                <>
+                                    <div className="relative h-32 bg-walking-vinnie/10">
+                                        {((item as Studio).banner_url || (item as Studio).logo_url) && (
+                                            <Image 
+                                                src={(item as Studio).banner_url || (item as Studio).logo_url || ''} 
+                                                alt={item.name as string}
+                                                fill
+                                                className="object-cover group-hover:scale-110 transition-transform duration-1000"
+                                            />
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg border border-burgundy/5 flex items-center gap-1">
+                                            <Star className="w-2.5 h-2.5 text-forest fill-forest" />
+                                            <span className="text-[8px] font-black text-burgundy">4.9</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-4">
+                                        <h4 className="text-[10px] font-black text-burgundy uppercase tracking-widest mb-1 truncate">{item.name as string}</h4>
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <MapPin className="w-2.5 h-2.5 text-burgundy/20" />
+                                            <p className="text-[8px] font-bold text-burgundy/40 uppercase tracking-tight truncate">{(item as Studio).location}</p>
+                                        </div>
+                                        <Link 
+                                            href={`/studios/${item.id}`}
+                                            className="flex items-center justify-center w-full py-2.5 bg-charcoal text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-xl group-hover:bg-forest transition-all duration-500 shadow-xl"
+                                        >
+                                            Book Studio
+                                        </Link>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="relative h-32 bg-forest/5">
+                                        {(item as Instructor).avatar_url && (
+                                            <Image 
+                                                src={(item as Instructor).avatar_url!} 
+                                                alt={(item as Instructor).full_name}
+                                                fill
+                                                className="object-cover opacity-80 group-hover:scale-110 transition-transform duration-1000"
+                                            />
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg border border-burgundy/5 flex items-center gap-1">
+                                            <Award className="w-2.5 h-2.5 text-forest" />
+                                            <span className="text-[8px] font-black text-burgundy uppercase tracking-widest">Certified</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 text-center">
+                                        <h4 className="text-[10px] font-black text-burgundy uppercase tracking-widest mb-4 truncate">{(item as Instructor).full_name}</h4>
+                                        <Link 
+                                            href={`/instructors/${item.id}`}
+                                            className="flex items-center justify-center w-full py-2.5 bg-forest text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-xl group-hover:bg-burgundy transition-all duration-500 shadow-xl"
+                                        >
+                                            View Instructor
+                                        </Link>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     )
