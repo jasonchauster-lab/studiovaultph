@@ -22,7 +22,7 @@ export default function DiscoveryViewManager({
     listView,
     isRentMode = false
 }: DiscoveryViewManagerProps) {
-    const [view, setView] = useState<'list' | 'map'>(isRentMode ? 'map' : 'list')
+    const [view, setView] = useState<'list' | 'map'>('list')
 
     return (
         <div className="relative">

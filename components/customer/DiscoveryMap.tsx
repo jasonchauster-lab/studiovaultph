@@ -13,6 +13,7 @@ import { MapPin, Navigation, Star, Award, Home, User } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import clsx from 'clsx'
+import { cleanMapStyle } from '@/constants/mapStyles'
 
 interface Studio {
     id: string
@@ -72,6 +73,7 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
                     zoomControl={true}
                     gestureHandling={'greedy'}
                     className="w-full h-full"
+                    styles={cleanMapStyle}
                 >
                     {validStudios.map((studio) => (
                         <StudioMarker 
@@ -202,32 +204,42 @@ function StudioMarker({ studio, onClick, isActive }: { studio: Studio, onClick: 
             zIndex={isActive ? 100 : 1}
         >
             <div className={clsx(
-                "group relative cursor-pointer transition-all duration-500",
-                isActive ? "scale-125 -translate-y-2" : "hover:scale-110"
+                "group relative flex flex-col items-center cursor-pointer transition-all duration-500",
+                isActive ? "scale-140 -translate-y-4" : "hover:scale-125 -translate-y-2"
             )}>
-                {/* Custom Marker Pin */}
+                {/* Custom Marker Pin Label */}
                 <div className={clsx(
-                    "w-10 h-10 rounded-full flex items-center justify-center border-2 shadow-2xl transform transition-all duration-500",
-                    isActive ? "bg-forest border-white rotate-[15deg]" : "bg-white border-burgundy/10 group-hover:border-forest/40"
+                    "flex flex-col items-center",
+                    isActive ? "opacity-100" : "opacity-90 group-hover:opacity-100"
                 )}>
-                    <Home className={clsx(
-                        "w-4 h-4 transition-colors",
-                        isActive ? "text-white" : "text-burgundy group-hover:text-forest"
+                    {/* Circle Main Body */}
+                    <div className={clsx(
+                        "w-12 h-12 rounded-full flex items-center justify-center border-2 shadow-[0_0_25px_rgba(0,0,0,0.3)] transition-all duration-500 transform",
+                        isActive 
+                            ? "bg-forest border-white rotate-[12deg] scale-110" 
+                            : "bg-burgundy border-white/40 group-hover:bg-forest"
+                    )}>
+                        <Home className="w-5 h-5 text-white" />
+                    </div>
+                    {/* Tip/Triangular point */}
+                    <div className={clsx(
+                        "w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] -mt-1 transition-all duration-500",
+                        isActive ? "border-t-forest" : "border-t-burgundy group-hover:border-t-forest"
                     )} />
                 </div>
                 
                 {/* Pulse Effect */}
                 {isActive && (
-                    <div className="absolute inset-0 rounded-full bg-forest/20 animate-ping -z-10" />
+                    <div className="absolute top-0 left-0 w-12 h-12 rounded-full bg-forest/30 animate-ping -z-10" />
                 )}
 
-                {/* Name Label (Desktop only) */}
+                {/* Name Label (Better visibility) */}
                 <div className={clsx(
-                    "absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md px-2 py-1 rounded-md border border-burgundy/5 shadow-tight whitespace-nowrap opacity-0 transition-opacity pointer-events-none group-hover:opacity-100 hidden sm:block",
-                    isActive && "opacity-100 bg-burgundy border-burgundy"
+                    "absolute top-full mt-3 left-1/2 -translate-x-1/2 bg-white px-3 py-1.5 rounded-full shadow-2xl border border-burgundy/5 whitespace-nowrap opacity-0 transition-all duration-500 pointer-events-none group-hover:opacity-100 group-hover:translate-y-1 block",
+                    isActive && "opacity-100 bg-burgundy border-burgundy translate-y-1"
                 )}>
                     <span className={clsx(
-                        "text-[7px] font-black uppercase tracking-widest",
+                        "text-[9px] font-black uppercase tracking-[0.2em]",
                         isActive ? "text-white" : "text-burgundy"
                     )}>{studio.name}</span>
                 </div>
@@ -247,42 +259,55 @@ function InstructorMarker({ instructor, onClick, isActive }: { instructor: Instr
             zIndex={isActive ? 100 : 1}
         >
             <div className={clsx(
-                "group relative cursor-pointer transition-all duration-500",
-                isActive ? "scale-125 -translate-y-2" : "hover:scale-110"
+                "group relative flex flex-col items-center cursor-pointer transition-all duration-500",
+                isActive ? "scale-140 -translate-y-4" : "hover:scale-125 -translate-y-2"
             )}>
-                {/* Custom Marker Pin */}
+                {/* Custom Marker Pin Label */}
                 <div className={clsx(
-                    "w-10 h-10 rounded-full flex items-center justify-center border-2 shadow-2xl transform transition-all duration-500 overflow-hidden",
-                    isActive ? "bg-burgundy border-white rotate-[-15deg]" : "bg-white border-burgundy/10 group-hover:border-burgundy/40"
+                    "flex flex-col items-center",
+                    isActive ? "opacity-100" : "opacity-90 group-hover:opacity-100"
                 )}>
-                    {instructor.avatar_url ? (
-                        <Image 
-                            src={instructor.avatar_url} 
-                            alt={instructor.full_name} 
-                            width={40} 
-                            height={40} 
-                            className="object-cover w-full h-full"
-                        />
-                    ) : (
-                        <User className={clsx(
-                            "w-4 h-4 transition-colors",
-                            isActive ? "text-white" : "text-burgundy group-hover:text-forest"
-                        )} />
-                    )}
+                    {/* Circle Main Body with Avatar */}
+                    <div className={clsx(
+                        "w-12 h-12 rounded-full flex items-center justify-center border-2 shadow-[0_0_25px_rgba(0,0,0,0.3)] transition-all duration-500 transform overflow-hidden bg-white",
+                        isActive 
+                            ? "border-forest rotate-[-12deg] scale-110" 
+                            : "border-burgundy/40 group-hover:border-forest"
+                    )}>
+                        {instructor.avatar_url ? (
+                            <Image 
+                                src={instructor.avatar_url} 
+                                alt={instructor.full_name} 
+                                width={48} 
+                                height={48} 
+                                className="object-cover w-full h-full"
+                            />
+                        ) : (
+                            <User className={clsx(
+                                "w-6 h-6 transition-colors",
+                                isActive ? "text-forest" : "text-burgundy"
+                            )} />
+                        )}
+                    </div>
+                    {/* Tip/Triangular point */}
+                    <div className={clsx(
+                        "w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] -mt-1 transition-all duration-500",
+                        isActive ? "border-t-forest" : "border-t-burgundy group-hover:border-t-forest"
+                    )} />
                 </div>
                 
                 {/* Pulse Effect */}
                 {isActive && (
-                    <div className="absolute inset-0 rounded-full bg-burgundy/20 animate-ping -z-10" />
+                    <div className="absolute top-0 left-0 w-12 h-12 rounded-full bg-burgundy/20 animate-ping -z-10" />
                 )}
 
-                {/* Name Label (Desktop only) */}
+                {/* Name Label */}
                 <div className={clsx(
-                    "absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md px-2 py-1 rounded-md border border-burgundy/5 shadow-tight whitespace-nowrap opacity-0 transition-opacity pointer-events-none group-hover:opacity-100 hidden sm:block",
-                    isActive && "opacity-100 bg-burgundy border-burgundy"
+                    "absolute top-full mt-3 left-1/2 -translate-x-1/2 bg-white px-3 py-1.5 rounded-full shadow-2xl border border-burgundy/5 whitespace-nowrap opacity-0 transition-all duration-500 pointer-events-none group-hover:opacity-100 group-hover:translate-y-1 block",
+                    isActive && "opacity-100 bg-forest border-forest translate-y-1"
                 )}>
                     <span className={clsx(
-                        "text-[7px] font-black uppercase tracking-widest",
+                        "text-[9px] font-black uppercase tracking-[0.2em]",
                         isActive ? "text-white" : "text-burgundy"
                     )}>{instructor.full_name}</span>
                 </div>

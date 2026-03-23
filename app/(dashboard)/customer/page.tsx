@@ -470,11 +470,11 @@ export default async function CustomerDashboard({
                                                             </div>
                                                         )}
                                                         <div className="absolute inset-0 bg-burgundy/5 group-hover:bg-transparent transition-colors duration-1000" />
-                                                        <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-10 flex items-center gap-3">
-                                                            <SaveButton id={studio.id} type="studio" className="w-10 h-10 sm:w-12 sm:h-12 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-white/50" />
-                                                            <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-xl border border-white/50 transition-all duration-500 group-hover:bg-forest group-hover:text-white group-hover:border-forest/20">
+                                                        <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-10 flex items-center gap-3 max-w-[calc(100%-2rem)]">
+                                                            <SaveButton id={studio.id} type="studio" className="w-10 h-10 sm:w-12 sm:h-12 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-white/50 shrink-0" />
+                                                            <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-xl border border-white/50 transition-all duration-500 group-hover:bg-forest group-hover:text-white group-hover:border-forest/20 overflow-hidden">
                                                                 <MapPin className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-forest shrink-0 group-hover:text-white" />
-                                                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] sm:tracking-[0.15em]">{studio.location}</span>
+                                                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] sm:tracking-[0.15em] truncate">{studio.location}</span>
                                                             </div>
                                                         </div>
                                                         <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 z-10 hidden sm:block transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
@@ -505,7 +505,7 @@ export default async function CustomerDashboard({
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        <p className="text-[13px] sm:text-[14px] text-burgundy/40 leading-relaxed line-clamp-2 italic font-medium transition-colors duration-500 group-hover:text-burgundy/60">
+                                                        <p className="text-[13px] sm:text-[14px] text-burgundy/40 leading-relaxed line-clamp-3 italic font-medium transition-colors duration-500 group-hover:text-burgundy/60">
                                                             {studio.description || 'A premiere pilates studio dedicated to your well-being and excellence.'}
                                                         </p>
                                                         {(studio.reformers_count || 0) > 0 && (

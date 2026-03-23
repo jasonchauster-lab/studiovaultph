@@ -10,6 +10,7 @@ import {
 } from '@vis.gl/react-google-maps'
 import { MapPin, Home, Star, Check } from 'lucide-react'
 import Image from 'next/image'
+import { cleanMapStyle } from '@/constants/mapStyles'
 import clsx from 'clsx'
 
 interface Studio {
@@ -55,6 +56,7 @@ export default function StudioSelectionMap({ studios, onSelect, apiKey }: Studio
                     zoomControl={true}
                     gestureHandling={'greedy'}
                     className="w-full h-full"
+                    styles={cleanMapStyle}
                 >
                     {validStudios.map((studio) => (
                         <StudioMarker 
@@ -110,17 +112,44 @@ function StudioMarker({ studio, onClick, isActive }: { studio: Studio, onClick: 
             zIndex={isActive ? 100 : 1}
         >
             <div className={clsx(
-                "group relative cursor-pointer transition-all duration-500",
-                isActive ? "scale-125 -translate-y-2" : "hover:scale-110"
+                "group relative flex flex-col items-center cursor-pointer transition-all duration-500",
+                isActive ? "scale-140 -translate-y-4" : "hover:scale-125 -translate-y-2"
             )}>
+                {/* Custom Marker Pin Label */}
                 <div className={clsx(
-                    "w-8 h-8 rounded-full flex items-center justify-center border-2 shadow-2xl transform transition-all duration-500",
-                    isActive ? "bg-forest border-white rotate-[15deg]" : "bg-white border-burgundy/10 group-hover:border-forest/40"
+                    "flex flex-col items-center",
+                    isActive ? "opacity-100" : "opacity-90 group-hover:opacity-100"
                 )}>
-                    <Home className={clsx(
-                        "w-3 h-3 transition-colors",
-                        isActive ? "text-white" : "text-burgundy group-hover:text-forest"
+                    {/* Circle Main Body */}
+                    <div className={clsx(
+                        "w-12 h-12 rounded-full flex items-center justify-center border-2 shadow-[0_0_25px_rgba(0,0,0,0.3)] transition-all duration-500 transform",
+                        isActive 
+                            ? "bg-forest border-white rotate-[12deg] scale-110" 
+                            : "bg-burgundy border-white/40 group-hover:bg-forest"
+                    )}>
+                        <Home className="w-5 h-5 text-white" />
+                    </div>
+                    {/* Tip/Triangular point */}
+                    <div className={clsx(
+                        "w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] -mt-1 transition-all duration-500",
+                        isActive ? "border-t-forest" : "border-t-burgundy group-hover:border-t-forest"
                     )} />
+                </div>
+                
+                {/* Pulse Effect */}
+                {isActive && (
+                    <div className="absolute top-0 left-0 w-12 h-12 rounded-full bg-forest/30 animate-ping -z-10" />
+                )}
+
+                {/* Name Label (Visible on hover/active) */}
+                <div className={clsx(
+                    "absolute top-full mt-3 left-1/2 -translate-x-1/2 bg-white px-3 py-1.5 rounded-full shadow-2xl border border-burgundy/5 whitespace-nowrap opacity-0 transition-all duration-500 pointer-events-none group-hover:opacity-100 group-hover:translate-y-1 block",
+                    isActive && "opacity-100 bg-burgundy border-burgundy translate-y-1"
+                )}>
+                    <span className={clsx(
+                        "text-[9px] font-black uppercase tracking-[0.2em]",
+                        isActive ? "text-white" : "text-burgundy"
+                    )}>{studio.name}</span>
                 </div>
             </div>
         </AdvancedMarker>

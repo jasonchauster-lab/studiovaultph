@@ -40,7 +40,7 @@ export default function SlotCard({ slot }: SlotCardProps) {
                 <div className="absolute top-3 left-3 z-10">
                     <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full shadow-tight border border-white/60">
                         <MapPin className="w-2.5 h-2.5 text-burgundy shrink-0" />
-                        <span className="text-[9px] font-bold text-burgundy truncate max-w-[120px]">
+                        <span className="text-[9px] font-bold text-burgundy truncate max-w-[150px]">
                             {studio?.location || 'Unknown Location'}
                         </span>
                     </div>
