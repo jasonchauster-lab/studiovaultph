@@ -532,15 +532,15 @@ export default function InstructorScheduleCalendar({
 
 
             {/* Calendar Grid */}
-            <div className="bg-white border border-burgundy/5 shadow-tight overflow-hidden rounded-[8px]">
+            <div className="bg-white border border-border-grey shadow-tight overflow-hidden rounded-[8px]">
                 <div className="overflow-x-auto no-scrollbar">
                     <div className={clsx("min-w-[800px] xl:min-w-full", view === 'month' && "min-w-0")}>
                         {view !== 'month' ? (
-                            <div className={clsx("grid border-b border-border-grey/50 bg-off-white/50 backdrop-blur-sm", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>
+                            <div className={clsx("grid border-b border-border-grey bg-off-white/50 backdrop-blur-sm", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>
                                 <div className="p-6 border-r border-border-grey/50 sticky left-0 bg-white z-20 w-[100px]" />
                                 {days.map(day => (
-                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey/50 last:border-r-0 transition-all relative", isMounted && isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
-                                        <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2 opacity-60">{format(day, 'EEE')}</div>
+                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 transition-all relative", isMounted && isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
+                                        <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2 opacity-80">{format(day, 'EEE')}</div>
                                         <div className={clsx("text-4xl font-serif font-black tracking-tighter leading-none", isMounted && isSameDay(day, new Date()) ? "text-forest" : "text-charcoal")}>{format(day, 'd')}</div>
                                         {isMounted && isSameDay(day, new Date()) && (
                                             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-forest rounded-t-full" />
@@ -558,7 +558,7 @@ export default function InstructorScheduleCalendar({
                             </div>
                         )}
 
-                        <div className="divide-y divide-burgundy/5 relative overflow-hidden">
+                        <div className="divide-y divide-border-grey relative overflow-hidden">
                             {view !== 'month' && (
                                 <>
                                     {/* Current Time Indicator */}
@@ -587,7 +587,7 @@ export default function InstructorScheduleCalendar({
 
                                     {hours.map(hour => (
                                         <div key={hour} className={clsx("grid", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
-                                            <div className="p-4 text-[10px] text-charcoal font-black border-r border-border-grey sticky left-0 bg-[#F5F2EB] z-20 w-[100px] flex items-center justify-center tracking-[0.2em]">
+                                            <div className="p-4 text-[10px] text-charcoal font-black border-r border-border-grey sticky left-0 bg-off-white z-20 w-[100px] flex items-center justify-center tracking-[0.2em] shadow-[2px_0_4px_rgba(0,0,0,0.02)]">
                                                 {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                             </div>
 
@@ -667,7 +667,7 @@ export default function InstructorScheduleCalendar({
                                                     const isPastDay = isPast(endOfDay(day))
 
                                                     return (
-                                                        <div key={day.toString() + hour} className={clsx("border-r border-burgundy/5 last:border-r-0 relative group p-1 overflow-hidden", isPastCell ? "bg-stone-50" : isToday ? "bg-amber-50/10" : "")} style={{ height: `${ROW_HEIGHT}px` }}>
+                                                        <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-1 overflow-hidden", isPastCell ? "bg-stone-50/50" : isToday ? "bg-forest/5" : "")} style={{ height: `${ROW_HEIGHT}px` }}>
                                                             <div
                                                                 className={clsx(
                                                                     "absolute inset-1.5 rounded-xl transition-all duration-500 bg-forest/10 cursor-pointer z-0 flex items-center justify-center opacity-0 group-hover:opacity-100 border-2 border-dashed border-forest/20 shadow-tight"
@@ -723,8 +723,8 @@ export default function InstructorScheduleCalendar({
                                                                             className={clsx(
                                                                                 "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-2 z-10 px-1.5 py-1 group/slot flex flex-col justify-between shadow-tight",
                                                                                 isPastCell
-                                                                                    ? "bg-stone-100 border-slate/10 text-slate/50"
-                                                                                    : "bg-white border-slate/10 ring-1 ring-slate/5 text-charcoal shadow-tight",
+                                                                                    ? "bg-stone-100 border-slate/20 text-slate/50"
+                                                                                    : "bg-[#FDF6E3]/40 border-slate/20 ring-1 ring-slate/10 text-charcoal shadow-tight hover:border-forest/30 hover:bg-[#FDF6E3]/60",
                                                                                 duration < 30 && "py-0.5 px-1 justify-center"
                                                                             )}
                                                                             style={{
@@ -756,8 +756,8 @@ export default function InstructorScheduleCalendar({
 
                                                                                     <div className="flex flex-wrap items-center gap-1 overflow-hidden">
                                                                                         {locations.map((loc, idx) => (
-                                                                                            <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border truncate", isPastCell ? "text-charcoal border-border-grey bg-off-white" : "text-charcoal border-charcoal/20 bg-buttermilk/10")}>
-                                                                                              <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-charcoal/60" : "text-charcoal/60")} />
+                                                                                                <div key={(loc || 'loc') + idx} className={clsx("text-[9px] font-bold uppercase tracking-tight flex items-center gap-1 px-1.5 py-0.5 rounded border-b border-charcoal/5 truncate", isPastCell ? "text-charcoal border-border-grey bg-off-white" : "text-charcoal border-charcoal/10 bg-white shadow-tight")}>
+                                                                                              <MapPin className={clsx("w-2.5 h-2.5 shrink-0", isPastCell ? "text-charcoal/40" : "text-charcoal/40")} />
                                                                   <span className="truncate max-w-[65px]">{loc?.split(' - ')[0] || 'Studio'}</span>
 
                                                                                             </div>

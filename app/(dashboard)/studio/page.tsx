@@ -11,7 +11,6 @@ import clsx from 'clsx'
 import Image from 'next/image'
 import StudioStatCards from '@/components/dashboard/StudioStatCards'
 
-import StudioUpcomingBookings from '@/components/dashboard/StudioUpcomingBookings'
 import RevenueTrendChart from '@/components/dashboard/RevenueTrendChart'
 import { toManilaTimeString, toManilaDateStr, getManilaTodayStr } from '@/lib/timezone'
 import { format } from 'date-fns'
@@ -234,115 +233,104 @@ export default async function StudioDashboard(props: {
                                     />
                                 </div>
                             </div>
-                        )}
-                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
-                            <div className="xl:col-span-8 space-y-8">
+                        )}                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+                            <div className="xl:col-span-12 space-y-12">
                                 {/* Today's Agenda */}
-                                <div className="atelier-card p-8 sm:p-10 bg-white border border-burgundy/5 shadow-ambient relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 w-64 h-64 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
-                                    
-                                    <div className="flex items-center justify-between mb-10 relative z-10">
-                                        <div>
-                                            <h2 className="text-2xl sm:text-3xl font-serif text-burgundy tracking-tight">Today's Agenda</h2>
-                                            <p className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.3em] mt-1">{format(new Date(), 'EEEE, MMMM do')}</p>
+                                <div className="mx-auto max-w-5xl w-full">
+                                    <div className="atelier-card p-8 sm:p-12 bg-white border border-burgundy/5 shadow-ambient relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-80 h-80 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                                        
+                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 relative z-10 gap-6">
+                                            <div>
+                                                <h2 className="text-3xl sm:text-4xl font-serif text-burgundy tracking-tight">Today's Agenda</h2>
+                                                <p className="text-[10px] sm:text-xs font-black text-burgundy/40 uppercase tracking-[0.3em] mt-1.5">{format(new Date(), 'EEEE, MMMM do')}</p>
+                                            </div>
+                                            <Link 
+                                                href="/studio/schedule"
+                                                className="px-6 py-3 bg-forest text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-card flex items-center gap-2"
+                                            >
+                                                <Calendar className="w-4 h-4" />
+                                                Open Full Calendar
+                                            </Link>
                                         </div>
+
+                                        <div className="space-y-6 relative z-10">
+                                            {upcomingBookings.filter(b => b.slots?.date === todayStr).length > 0 ? (
+                                                upcomingBookings
+                                                    .filter(b => b.slots?.date === todayStr)
+                                                    .sort((a, b) => (a.slots?.start_time || '').localeCompare(b.slots?.start_time || ''))
+                                                    .map((booking) => (
+                                                        <div key={booking.id} className="flex items-center gap-8 p-8 bg-off-white/40 border border-border-grey/30 rounded-3xl hover:bg-white hover:shadow-ambient transition-all duration-500 group/item">
+                                                            <div className="w-24 flex flex-col items-center justify-center py-4 bg-burgundy/5 rounded-2xl border border-burgundy/10 group-hover/item:bg-burgundy group-hover/item:text-white transition-colors duration-500">
+                                                                <span className="text-sm font-black uppercase tracking-tighter leading-none">{booking.slots?.start_time.slice(0, 5)}</span>
+                                                                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{parseInt(booking.slots?.start_time.split(':')[0]) >= 12 ? 'PM' : 'AM'}</span>
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center gap-4 mb-2">
+                                                                    <span className="text-[11px] font-black text-forest uppercase tracking-widest bg-forest/5 px-2.5 py-1 rounded-lg">{booking.slots?.session_type || 'Private Session'}</span>
+                                                                    <span className="w-1 h-1 bg-border-grey rounded-full" />
+                                                                    <span className="text-[11px] font-bold text-slate uppercase tracking-widest flex items-center gap-1.5">
+                                                                        <MapPin className="w-3.5 h-3.5 opacity-40" />
+                                                                        {booking.instructor?.full_name || 'Unassigned'}
+                                                                    </span>
+                                                                </div>
+                                                                <h3 className="text-xl sm:text-2xl font-serif text-charcoal truncate tracking-tight">{booking.client?.full_name}</h3>
+                                                            </div>
+                                                            <div className="flex items-center gap-4">
+                                                                <Link 
+                                                                    href="/studio/history"
+                                                                    className="w-12 h-12 flex items-center justify-center bg-white border border-border-grey/40 text-charcoal/40 hover:text-forest hover:border-forest/20 rounded-full transition-all shadow-tight hover:shadow-card"
+                                                                >
+                                                                    <ArrowUpRight className="w-6 h-6" />
+                                                                </Link>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                            ) : (
+                                                <div className="py-24 flex flex-col items-center justify-center bg-off-white/20 rounded-[3rem] border border-dashed border-border-grey/60">
+                                                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-tight mb-8">
+                                                        <Calendar className="w-8 h-8 text-charcoal/20" />
+                                                    </div>
+                                                    <h3 className="text-xl font-serif text-charcoal/40 tracking-tight mb-2">Clear Afternoon</h3>
+                                                    <p className="text-[11px] font-black text-charcoal/30 uppercase tracking-[0.4em] italic mb-8">No sessions scheduled for today</p>
+                                                    <Link 
+                                                        href="/studio/schedule"
+                                                        className="px-8 py-3.5 border-2 border-forest/20 text-forest rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-forest hover:text-white hover:border-forest transition-all shadow-tight"
+                                                    >
+                                                        Manage Slots
+                                                    </Link>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Quick Access */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-12">
                                         <Link 
                                             href="/studio/schedule"
-                                            className="px-5 py-2.5 bg-forest/5 text-forest border border-forest/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-forest hover:text-white transition-all shadow-tight"
+                                            className="atelier-card p-10 bg-white border border-burgundy/5 shadow-tight hover:shadow-ambient hover:-translate-y-1 transition-all duration-500 group/card"
                                         >
-                                            Open Full Calendar
-                                        </Link>
-                                    </div>
-
-                                    <div className="space-y-4 relative z-10">
-                                        {upcomingBookings.filter(b => b.slots?.date === todayStr).length > 0 ? (
-                                            upcomingBookings
-                                                .filter(b => b.slots?.date === todayStr)
-                                                .sort((a, b) => (a.slots?.start_time || '').localeCompare(b.slots?.start_time || ''))
-                                                .map((booking) => (
-                                                    <div key={booking.id} className="flex items-center gap-6 p-6 bg-off-white/40 border border-border-grey/30 rounded-2xl hover:bg-white hover:shadow-tight transition-all duration-500 group/item">
-                                                        <div className="w-20 flex flex-col items-center justify-center py-3 bg-burgundy/5 rounded-xl border border-burgundy/10 group-hover/item:bg-burgundy group-hover/item:text-white transition-colors duration-500">
-                                                            <span className="text-xs font-black uppercase tracking-tighter leading-none">{booking.slots?.start_time.slice(0, 5)}</span>
-                                                            <span className="text-[8px] font-black uppercase tracking-widest opacity-60">{parseInt(booking.slots?.start_time.split(':')[0]) >= 12 ? 'PM' : 'AM'}</span>
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center gap-3 mb-1">
-                                                                <span className="text-[10px] font-black text-forest uppercase tracking-widest">{booking.slots?.session_type || 'Private Session'}</span>
-                                                                <span className="w-1 h-1 bg-border-grey rounded-full" />
-                                                                <span className="text-[10px] font-bold text-slate uppercase tracking-widest">{booking.instructor?.full_name || 'Unassigned'}</span>
-                                                            </div>
-                                                            <h3 className="text-lg font-serif text-charcoal truncate tracking-tight">{booking.client?.full_name}</h3>
-                                                        </div>
-                                                        <div className="flex items-center gap-3">
-                                                            <Link 
-                                                                href="/studio/history"
-                                                                className="w-10 h-10 flex items-center justify-center bg-white border border-border-grey/40 text-charcoal/40 hover:text-forest hover:border-forest/20 rounded-full transition-all shadow-tight"
-                                                            >
-                                                                <ArrowUpRight className="w-5 h-5" />
-                                                            </Link>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                        ) : (
-                                            <div className="py-20 flex flex-col items-center justify-center bg-off-white/20 rounded-[2.5rem] border border-dashed border-border-grey/60">
-                                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-tight mb-6">
-                                                    <Calendar className="w-6 h-6 text-charcoal/20" />
-                                                </div>
-                                                <p className="text-[10px] font-black text-charcoal/30 uppercase tracking-[0.4em] italic leading-relaxed">No sessions scheduled for today</p>
-                                                <Link 
-                                                    href="/studio/schedule"
-                                                    className="mt-6 text-[9px] font-black text-forest hover:text-burgundy transition-colors uppercase tracking-[0.2em] underline underline-offset-4"
-                                                >
-                                                    Manage Slots
-                                                </Link>
+                                            <div className="w-14 h-14 bg-forest/5 rounded-2xl flex items-center justify-center mb-8 group-hover/card:bg-forest group-hover/card:text-white transition-colors">
+                                                <Plus className="w-7 h-7 text-forest group-hover/card:text-white" />
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Quick Access */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <Link 
-                                        href="/studio/schedule"
-                                        className="atelier-card p-8 bg-white border border-burgundy/5 shadow-tight hover:shadow-ambient hover:-translate-y-1 transition-all duration-500 group/card"
-                                    >
-                                        <div className="w-12 h-12 bg-forest/5 rounded-2xl flex items-center justify-center mb-6 group-hover/card:bg-forest group-hover/card:text-white transition-colors">
-                                            <Plus className="w-6 h-6 text-forest group-hover/card:text-white" />
-                                        </div>
-                                        <h3 className="text-xl font-serif text-burgundy tracking-tight mb-2">Generate Slots</h3>
-                                        <p className="text-[10px] font-bold text-slate uppercase tracking-widest leading-relaxed">Add new recurring or single slots to your calendar.</p>
-                                    </Link>
-                                    <Link 
-                                        href="/studio/earnings"
-                                        className="atelier-card p-8 bg-white border border-burgundy/5 shadow-tight hover:shadow-ambient hover:-translate-y-1 transition-all duration-500 group/card"
-                                    >
-                                        <div className="w-12 h-12 bg-burgundy/5 rounded-2xl flex items-center justify-center mb-6 group-hover/card:bg-burgundy group-hover/card:text-white transition-colors">
-                                            <DollarSign className="w-6 h-6 text-burgundy group-hover/card:text-white" />
-                                        </div>
-                                        <h3 className="text-xl font-serif text-burgundy tracking-tight mb-2">Studio Payouts</h3>
-                                        <p className="text-[10px] font-bold text-slate uppercase tracking-widest leading-relaxed">Manage your revenue, request payouts, and view statements.</p>
-                                    </Link>
-                                </div>
-                            </div>
-
-                            <div className="xl:col-span-4 space-y-8">
-                                <div className="earth-card overflow-hidden">
-                                    <div className="bg-buttermilk p-5 flex items-center justify-between border-b border-burgundy/10">
-                                        <h2 className="text-[11px] font-bold !text-burgundy uppercase tracking-[0.2em] flex items-center gap-2">
-                                            <Calendar className="w-4 h-4 text-burgundy" />
-                                            Upcoming
-                                        </h2>
-                                        <span className="text-[9px] font-bold text-burgundy/50 border border-burgundy/20 px-3 py-1 rounded-full uppercase tracking-tighter">7 Days</span>
-                                    </div>
-                                    <div className="p-6">
-                                        <StudioUpcomingBookings
-                                            bookings={upcomingBookings}
-                                            currentUserId={user.id}
-                                        />
+                                            <h3 className="text-2xl font-serif text-burgundy tracking-tight mb-3">Generate Slots</h3>
+                                            <p className="text-[11px] font-bold text-slate/60 uppercase tracking-widest leading-relaxed">Add new recurring or single slots to your calendar.</p>
+                                        </Link>
+                                        <Link 
+                                            href="/studio/earnings"
+                                            className="atelier-card p-10 bg-white border border-burgundy/5 shadow-tight hover:shadow-ambient hover:-translate-y-1 transition-all duration-500 group/card"
+                                        >
+                                            <div className="w-14 h-14 bg-burgundy/5 rounded-2xl flex items-center justify-center mb-8 group-hover/card:bg-burgundy group-hover/card:text-white transition-colors">
+                                                <DollarSign className="w-7 h-7 text-burgundy group-hover/card:text-white" />
+                                            </div>
+                                            <h3 className="text-2xl font-serif text-burgundy tracking-tight mb-3">Studio Payouts</h3>
+                                            <p className="text-[11px] font-bold text-slate/60 uppercase tracking-widest leading-relaxed">Manage your revenue, request payouts, and view statements.</p>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
 
                     </>
                 )}

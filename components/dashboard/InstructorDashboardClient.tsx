@@ -286,230 +286,113 @@ export default function InstructorDashboardClient({
 
             {/* Dashboard Grid Container */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10">
-                <div className="lg:col-span-8 space-y-8">
+                {/* Main Content Area */}
+                {/* Main Content Area */}
+                <div className="lg:col-span-12 space-y-12">
                     {/* Today's Agenda / Quick Overview */}
-                    <div className="atelier-card p-8 sm:p-10 bg-white border border-burgundy/5 shadow-ambient relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
-                        
-                        <div className="flex items-center justify-between mb-10 relative z-10">
-                            <div>
-                                <h2 className="text-2xl sm:text-3xl font-serif text-burgundy tracking-tight">Today's Agenda</h2>
-                                <p className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.3em] mt-1">{format(new Date(), 'EEEE, MMMM do')}</p>
-                            </div>
-                            <Link 
-                                href="/instructor/schedule"
-                                className="px-5 py-2.5 bg-forest/5 text-forest border border-forest/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-forest hover:text-white transition-all shadow-tight"
-                            >
-                                Open Full Calendar
-                            </Link>
-                        </div>
-
-                        <div className="space-y-4 relative z-10">
-                            {calendarBookings.filter(b => {
-                                const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
-                                return slot?.date === getManilaTodayStr();
-                            }).length > 0 ? (
-                                calendarBookings
-                                    .filter(b => {
-                                        const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
-                                        return slot?.date === getManilaTodayStr();
-                                    })
-                                    .sort((a, b) => {
-                                        const slotA = Array.isArray(a.slots) ? a.slots[0] : a.slots;
-                                        const slotB = Array.isArray(b.slots) ? b.slots[0] : b.slots;
-                                        return (slotA?.start_time || '').localeCompare(slotB?.start_time || '');
-                                    })
-                                    .map((booking) => {
-                                        const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
-                                        return (
-                                            <div key={booking.id} className="flex items-center gap-6 p-6 bg-off-white/40 border border-border-grey/30 rounded-2xl hover:bg-white hover:shadow-tight transition-all duration-500 group/item">
-                                                <div className="w-20 flex flex-col items-center justify-center py-3 bg-burgundy/5 rounded-xl border border-burgundy/10 group-hover/item:bg-burgundy group-hover/item:text-white transition-colors duration-500">
-                                                    <span className="text-xs font-black uppercase tracking-tighter leading-none">{formatTo12Hour(slot?.start_time || '00:00:00').split(' ')[0]}</span>
-                                                    <span className="text-[8px] font-black uppercase tracking-widest opacity-60">{formatTo12Hour(slot?.start_time || '00:00:00').split(' ')[1]}</span>
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-3 mb-1">
-                                                        <span className="text-[10px] font-black text-forest uppercase tracking-widest">{slot?.session_type || 'Private Session'}</span>
-                                                        <span className="w-1 h-1 bg-border-grey rounded-full" />
-                                                        <span className="text-[10px] font-bold text-slate uppercase tracking-widest">{slot?.studios?.name || 'Home Base'}</span>
-                                                    </div>
-                                                    <h3 className="text-lg font-serif text-charcoal truncate tracking-tight">{booking.client?.full_name}</h3>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <button 
-                                                        onClick={() => setSelectedBooking(booking)}
-                                                        className="w-10 h-10 flex items-center justify-center bg-white border border-border-grey/40 text-charcoal/40 hover:text-forest hover:border-forest/20 rounded-full transition-all shadow-tight"
-                                                    >
-                                                        <ChevronRight className="w-5 h-5" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                            ) : (
-                                <div className="py-20 flex flex-col items-center justify-center bg-off-white/20 rounded-[2.5rem] border border-dashed border-border-grey/60">
-                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-tight mb-6">
-                                        <Calendar className="w-6 h-6 text-charcoal/20" />
-                                    </div>
-                                    <p className="text-[10px] font-black text-charcoal/30 uppercase tracking-[0.4em] italic leading-relaxed">No sessions scheduled for today</p>
-                                    <button 
-                                        onClick={() => setIsAddModalOpen(true)}
-                                        className="mt-6 text-[9px] font-black text-forest hover:text-burgundy transition-colors uppercase tracking-[0.2em] underline underline-offset-4"
-                                    >
-                                        Add Availability
-                                    </button>
+                    <div className="mx-auto max-w-5xl w-full">
+                        <div className="atelier-card p-8 sm:p-12 bg-white border border-burgundy/5 shadow-ambient relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-80 h-80 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                            
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 relative z-10 gap-6">
+                                <div>
+                                    <h2 className="text-3xl sm:text-4xl font-serif text-burgundy tracking-tight">Today's Agenda</h2>
+                                    <p className="text-[10px] sm:text-xs font-black text-burgundy/40 uppercase tracking-[0.3em] mt-1.5">{format(new Date(), 'EEEE, MMMM do')}</p>
                                 </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Quick Access Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <Link 
-                            href="/instructor/schedule"
-                            className="atelier-card p-8 bg-white border border-burgundy/5 shadow-tight hover:shadow-ambient hover:-translate-y-1 transition-all duration-500 group/card"
-                        >
-                            <div className="w-12 h-12 bg-forest/5 rounded-2xl flex items-center justify-center mb-6 group-hover/card:bg-forest group-hover/card:text-white transition-colors">
-                                <Plus className="w-6 h-6 text-forest group-hover/card:text-white" />
+                                <Link 
+                                    href="/instructor/schedule"
+                                    className="px-6 py-3 bg-forest text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-card flex items-center gap-2"
+                                >
+                                    <Calendar className="w-4 h-4" />
+                                    Open Full Calendar
+                                </Link>
                             </div>
-                            <h3 className="text-xl font-serif text-burgundy tracking-tight mb-2">Manage Schedule</h3>
-                            <p className="text-[10px] font-bold text-slate uppercase tracking-widest leading-relaxed">Update your weekly slots and availability windows.</p>
-                        </Link>
-                        <Link 
-                            href="/instructor/earnings"
-                            className="atelier-card p-8 bg-white border border-burgundy/5 shadow-tight hover:shadow-ambient hover:-translate-y-1 transition-all duration-500 group/card"
-                        >
-                            <div className="w-12 h-12 bg-burgundy/5 rounded-2xl flex items-center justify-center mb-6 group-hover/card:bg-burgundy group-hover/card:text-white transition-colors">
-                                <Wallet className="w-6 h-6 text-burgundy group-hover/card:text-white" />
-                            </div>
-                            <h3 className="text-xl font-serif text-burgundy tracking-tight mb-2">Review Earnings</h3>
-                            <p className="text-[10px] font-bold text-slate uppercase tracking-widest leading-relaxed">Monitor your yield, payouts, and financial performance.</p>
-                        </Link>
-                    </div>
-                </div>
 
-                {/* Upcoming Bookings Sidebar */}
-                <div className="space-y-10 lg:col-span-4">
-                    <div className="atelier-card !p-0 overflow-hidden border-none shadow-ambient">
-                        <div className="bg-forest p-6 sm:p-8 flex items-center justify-between">
-                            <h2 className="text-[11px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
-                                <Calendar className="w-4 h-4 text-white/60" />
-                                Upcoming
-                            </h2>
-                            <span className="text-[9px] font-black text-white/40 border border-white/20 px-3 py-1 rounded-full uppercase tracking-widest">Next 5</span>
-                        </div>
-                        <div className="p-6 sm:p-8 space-y-6">
-                            {(() => {
-                                if (isLoading) {
-                                    return (
-                                        <div className="py-20 flex justify-center">
-                                            <Loader2 className="w-8 h-8 text-forest animate-spin" />
-                                        </div>
-                                    );
-                                }
- 
-                                if (upcomingBookings.length === 0) {
-                                    return (
-                                        <div className="py-20 text-center bg-surface-container-low rounded-[2rem] border border-outline-variant/10 flex flex-col items-center justify-center relative overflow-hidden group/empty">
-                                            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-tight mb-8 group-hover/empty:scale-110 transition-transform duration-700">
-                                                <Calendar className="w-8 h-8 text-forest/20" />
-                                            </div>
-                                            <h3 className="text-[11px] font-black text-forest uppercase tracking-[0.4em] mb-3">Quiet Week</h3>
-                                            <p className="text-[10px] text-slate font-bold uppercase tracking-widest max-w-[200px] mx-auto mb-8 leading-relaxed">No bookings yet—your schedule is clear.</p>
-                                            <button 
-                                                onClick={() => {
-                                                    if (!isProfileComplete) {
-                                                        alert('Please complete your profile and set your service area before adding sessions.');
-                                                        router.push('/instructor/profile');
-                                                        return;
-                                                    }
-                                                    setIsAddModalOpen(true);
-                                                }}
-                                                className="btn-primary-atelier !py-3.5 !px-8 !text-[9px]"
-                                            >
-                                                <Plus className="w-4 h-4" /> Quick Add
-                                            </button>
-                                        </div>
-                                    );
-                                }
- 
-                                return (
-                                    <div className="space-y-6">
-                                        {upcomingBookings.map(session => (
-                                            <div key={session.id} className="p-6 bg-white rounded-[1.5rem] border border-outline-variant/20 hover:border-forest/30 transition-all duration-500 shadow-tight group">
-                                                <div className="flex items-start gap-4 mb-6">
-                                                    <button
-                                                        onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
-                                                        className="w-14 h-14 rounded-2xl overflow-hidden border border-surface-container-highest bg-white shadow-tight shrink-0 hover:scale-110 transition-transform duration-700"
-                                                    >
-                                                        <Avatar 
-                                                            src={session.slots?.studios?.logo_url} 
-                                                            fallbackName={session.slots?.studios?.name} 
-                                                            size={56} 
-                                                        />
-                                                    </button>
- 
+                            <div className="space-y-6 relative z-10">
+                                {calendarBookings.filter(b => {
+                                    const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+                                    return slot?.date === getManilaTodayStr();
+                                }).length > 0 ? (
+                                    calendarBookings
+                                        .filter(b => {
+                                            const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+                                            return slot?.date === getManilaTodayStr();
+                                        })
+                                        .sort((a, b) => {
+                                            const slotA = Array.isArray(a.slots) ? a.slots[0] : a.slots;
+                                            const slotB = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+                                            return (slotA?.start_time || '').localeCompare(slotB?.start_time || '');
+                                        })
+                                        .map((booking) => {
+                                            const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
+                                            return (
+                                                <div key={booking.id} className="flex items-center gap-8 p-8 bg-off-white/40 border border-border-grey/30 rounded-3xl hover:bg-white hover:shadow-ambient transition-all duration-500 group/item">
+                                                    <div className="w-24 flex flex-col items-center justify-center py-4 bg-burgundy/5 rounded-2xl border border-burgundy/10 group-hover/item:bg-burgundy group-hover/item:text-white transition-colors duration-500">
+                                                        <span className="text-sm font-black uppercase tracking-tighter leading-none">{formatTo12Hour(slot?.start_time || '00:00:00').split(' ')[0]}</span>
+                                                        <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{formatTo12Hour(slot?.start_time || '00:00:00').split(' ')[1]}</span>
+                                                    </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="flex items-start justify-between gap-2">
-                                                            <button
-                                                                onClick={() => session.slots?.studios && setSelectedStudio(session.slots.studios)}
-                                                                className="text-sm font-black text-burgundy uppercase tracking-tight hover:text-forest transition-colors text-left leading-tight"
-                                                            >
-                                                                {session.slots?.studios?.name || 'Studio Session'}
-                                                            </button>
-                                                            <div className="bg-forest/5 px-2 py-1 rounded border border-forest/10">
-                                                                <span className="text-[10px] font-black text-forest uppercase tracking-widest">1/1</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center gap-2 mt-2">
-                                                            <Clock className="w-3.5 h-3.5 text-forest/40" />
-                                                            <span className="text-[10px] font-bold text-slate uppercase tracking-widest">
-                                                                {session.slots?.date ? formatManilaDateStr(session.slots.date) : 'TBD'} • {session.slots?.start_time ? formatTo12Hour(session.slots.start_time) : 'TBD'}
+                                                        <div className="flex items-center gap-4 mb-2">
+                                                            <span className="text-[11px] font-black text-forest uppercase tracking-widest bg-forest/5 px-2.5 py-1 rounded-lg">{slot?.session_type || 'Private Session'}</span>
+                                                            <span className="w-1 h-1 bg-border-grey rounded-full" />
+                                                            <span className="text-[11px] font-bold text-slate uppercase tracking-widest flex items-center gap-1.5">
+                                                                <MapPin className="w-3.5 h-3.5 opacity-40" />
+                                                                {slot?.studios?.name || 'Home Base'}
                                                             </span>
                                                         </div>
+                                                        <h3 className="text-xl sm:text-2xl font-serif text-charcoal truncate tracking-tight">{booking.client?.full_name}</h3>
                                                     </div>
-                                                </div>
- 
-                                                <div className="pt-6 border-t border-outline-variant/10 flex items-center justify-between">
-                                                    <button
-                                                        className="flex items-center gap-3 group/client hover:bg-forest/5 p-2 -m-2 rounded-xl transition-all"
-                                                        onClick={() => setSelectedProfile(session.client)}
-                                                    >
-                                                        <div className="w-10 h-10 rounded-full border border-outline-variant/20 shadow-tight group-hover/client:scale-105 transition-transform overflow-hidden">
-                                                            <Avatar src={session.client?.avatar_url} fallbackName={session.client?.full_name} size={40} />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-[9px] font-black text-slate uppercase tracking-widest">Client</p>
-                                                            <p className="text-[11px] font-black text-burgundy uppercase tracking-tight group-hover:text-forest transition-colors">{session.client?.full_name}</p>
-                                                        </div>
-                                                    </button>
- 
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => setActiveChat({
-                                                                id: session.id,
-                                                                recipientId: session.client_id,
-                                                                name: session.client?.full_name || 'Client',
-                                                                isExpired: isChatExpired(session)
-                                                            })}
-                                                            className="w-10 h-10 bg-white border border-outline-variant/30 text-forest rounded-full hover:bg-forest hover:text-white transition-all shadow-tight flex items-center justify-center relative"
+                                                    <div className="flex items-center gap-4">
+                                                        <button 
+                                                            onClick={() => setSelectedBooking(booking)}
+                                                            className="w-12 h-12 flex items-center justify-center bg-white border border-border-grey/40 text-charcoal/40 hover:text-forest hover:border-forest/20 rounded-full transition-all shadow-tight hover:shadow-card"
                                                         >
-                                                            <MessageSquare className="w-4 h-4" />
-                                                            <MessageCountBadge bookingId={session.id} currentUserId={userId || ''} partnerId={session.client_id} isOpen={false} />
-                                                        </button>
-                                                        <button
-                                                             onClick={() => setCancellingBooking(session)}
-                                                             className="w-10 h-10 bg-white border border-outline-variant/30 text-burgundy rounded-full hover:bg-burgundy hover:text-white transition-all shadow-tight flex items-center justify-center"
-                                                        >
-                                                            <X className="w-4 h-4" />
+                                                            <ChevronRight className="w-6 h-6" />
                                                         </button>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })
+                                ) : (
+                                    <div className="py-24 flex flex-col items-center justify-center bg-off-white/20 rounded-[3rem] border border-dashed border-border-grey/60">
+                                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-tight mb-8">
+                                            <Calendar className="w-8 h-8 text-charcoal/20" />
+                                        </div>
+                                        <h3 className="text-xl font-serif text-charcoal/40 tracking-tight mb-2">Clear Afternoon</h3>
+                                        <p className="text-[11px] font-black text-charcoal/30 uppercase tracking-[0.4em] italic mb-8">No sessions scheduled for today</p>
+                                        <button 
+                                            onClick={() => setIsAddModalOpen(true)}
+                                            className="px-8 py-3.5 border-2 border-forest/20 text-forest rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-forest hover:text-white hover:border-forest transition-all shadow-tight"
+                                        >
+                                            Add Availability
+                                        </button>
                                     </div>
-                                );
-                            })()}
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Quick Access Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-12">
+                            <Link 
+                                href="/instructor/schedule"
+                                className="atelier-card p-10 bg-white border border-burgundy/5 shadow-tight hover:shadow-ambient hover:-translate-y-1 transition-all duration-500 group/card"
+                            >
+                                <div className="w-14 h-14 bg-forest/5 rounded-2xl flex items-center justify-center mb-8 group-hover/card:bg-forest group-hover/card:text-white transition-colors">
+                                    <Plus className="w-7 h-7 text-forest group-hover/card:text-white" />
+                                </div>
+                                <h3 className="text-2xl font-serif text-burgundy tracking-tight mb-3">Manage Schedule</h3>
+                                <p className="text-[11px] font-bold text-slate/60 uppercase tracking-widest leading-relaxed">Update your weekly slots and availability windows.</p>
+                            </Link>
+                            <Link 
+                                href="/instructor/earnings"
+                                className="atelier-card p-10 bg-white border border-burgundy/5 shadow-tight hover:shadow-ambient hover:-translate-y-1 transition-all duration-500 group/card"
+                            >
+                                <div className="w-14 h-14 bg-burgundy/5 rounded-2xl flex items-center justify-center mb-8 group-hover/card:bg-burgundy group-hover/card:text-white transition-colors">
+                                    <Wallet className="w-7 h-7 text-burgundy group-hover/card:text-white" />
+                                </div>
+                                <h3 className="text-2xl font-serif text-burgundy tracking-tight mb-3">Review Earnings</h3>
+                                <p className="text-[11px] font-bold text-slate/60 uppercase tracking-widest leading-relaxed">Monitor your yield, payouts, and financial performance.</p>
+                            </Link>
                         </div>
                     </div>
                 </div>

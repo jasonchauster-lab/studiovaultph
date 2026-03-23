@@ -400,11 +400,11 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                     <div className="overflow-x-auto">
                         <div className={clsx("min-w-[1000px] xl:min-w-full", view === 'month' && "min-w-0")}>
                             {view !== 'month' && (
-                                <div className={clsx("grid border-b border-border-grey/50 bg-off-white/50 backdrop-blur-sm", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>
+                                <div className={clsx("grid border-b border-border-grey bg-off-white/50 backdrop-blur-sm", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>
                                     <div className="p-6 border-r border-border-grey/50 sticky left-0 bg-white z-20 w-[100px]" />
                                     {days.map((day: Date) => (
-                                        <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey/50 last:border-r-0 transition-all relative", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
-                                            <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2 opacity-60">{format(day, 'EEE')}</div>
+                                        <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey last:border-r-0 transition-all relative", isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
+                                            <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2 opacity-80">{format(day, 'EEE')}</div>
                                             <div className={clsx("text-4xl font-serif font-black tracking-tighter leading-none", isSameDay(day, new Date()) ? "text-forest" : "text-charcoal")}>{format(day, 'd')}</div>
                                             {isSameDay(day, new Date()) && (
                                                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-forest rounded-t-full" />
@@ -414,7 +414,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                 </div>
                             )}
 
-                            <div className="divide-y divide-border-grey/50 relative overflow-hidden">
+                            <div className="divide-y divide-border-grey relative overflow-hidden">
                                 {view !== 'month' && (
                                     <>
                                         {/* Current Time Indicator */}
@@ -438,7 +438,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
 
                                         {hours.map(hour => (
                                             <div key={hour} className={clsx("grid", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")} style={{ minHeight: "140px" }}>
-                                                <div className="p-4 text-[10px] text-charcoal font-black border-r border-border-grey sticky left-0 bg-[#F5F2EB] z-20 w-[100px] flex items-center justify-center tracking-[0.2em]">
+                                                <div className="p-4 text-[10px] text-charcoal font-black border-r border-border-grey sticky left-0 bg-off-white z-20 w-[100px] flex items-center justify-center tracking-[0.2em] shadow-[2px_0_4px_rgba(0,0,0,0.02)]">
                                                     {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                                 </div>
 
@@ -451,7 +451,7 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                     const ROW_HEIGHT = 140
 
                                                     return (
-                                                        <div key={day.toString() + hour} className={clsx("border-r border-border-grey/50 last:border-r-0 relative group p-1.5 transition-colors duration-300", isPastCell ? "bg-off-white/30" : isToday ? "bg-forest/5" : "hover:bg-off-white/50")} style={{ height: `${ROW_HEIGHT}px` }}>
+                                                        <div key={day.toString() + hour} className={clsx("border-r border-border-grey last:border-r-0 relative group p-1.5 transition-colors duration-300", isPastCell ? "bg-stone-50/50" : isToday ? "bg-forest/5" : "hover:bg-off-white/50")} style={{ height: `${ROW_HEIGHT}px` }}>
                                                             {cellSlots.length === 0 && (
                                                                 <div
                                                                     className={clsx(
@@ -515,10 +515,10 @@ export default function StudioScheduleCalendar({ studioId, slots, currentDate, d
                                                                     <div
                                                                          className={clsx(
                                                                             "absolute top-1 left-1 right-1 bottom-1 p-2 border-l-2 border-solid transition-all duration-500 hover:shadow-card hover:-translate-y-0.5 group/slot z-10 overflow-hidden cursor-pointer rounded-lg flex flex-col justify-between",
-                                                                                 isPastCell ? (isBooked ? "bg-[#1e4438] border-white/20 shadow-none" : "bg-off-white border-slate/20 opacity-90") :
+                                                                                 isPastCell ? (isBooked ? "bg-[#1e4438] border-white/20 shadow-none" : "bg-stone-100 border-slate/20 opacity-90") :
                                                                                      hasPending ? "bg-amber-100 border-amber-400 shadow-tight" :
-                                                                                         isBooked ? "bg-[#1e4438] border-white/20 shadow-card ring-1 ring-white/10" : "bg-white border-slate/10 ring-1 ring-slate/5 shadow-tight"
-                                                                        )}
+                                                                                         isBooked ? "bg-[#1e4438] border-white/20 shadow-card ring-1 ring-white/10 text-white" : "bg-[#FDF6E3]/40 border-slate/20 ring-1 ring-slate/10 shadow-tight hover:border-forest/30 hover:bg-[#FDF6E3]/60"
+                                                                         )}
                                                                         onClick={() => {
                                                                             setBucketSlots(cellSlots);
                                                                             setBucketTime({ date: day, hour });
