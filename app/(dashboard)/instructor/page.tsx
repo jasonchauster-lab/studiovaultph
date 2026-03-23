@@ -45,7 +45,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
     const { data: studios } = await supabase
         .from('studios')
         .select('*')
-        .eq('is_verified', true);
+        .eq('verified', true);
 
     // Check verification status
     if (!dashboardData?.is_verified) {

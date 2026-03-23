@@ -15,8 +15,8 @@ import clsx from 'clsx'
 interface Studio {
     id: string
     name: string
-    latitude: number
-    longitude: number
+    lat: number
+    lng: number
     location: string
     logo_url?: string
     banner_url?: string
@@ -36,8 +36,8 @@ export default function StudioSelectionMap({ studios, onSelect, apiKey }: Studio
 
     const mapCenter = useMemo(() => {
         if (studios.length === 0) return MANILA_CENTER
-        const lat = studios.reduce((acc, s) => acc + (s.latitude || 0), 0) / studios.length
-        const lng = studios.reduce((acc, s) => acc + (s.longitude || 0), 0) / studios.length
+        const lat = studios.reduce((acc, s) => acc + (s.lat || 0), 0) / studios.length
+        const lng = studios.reduce((acc, s) => acc + (s.lng || 0), 0) / studios.length
         return { lat, lng }
     }, [studios])
 
@@ -64,7 +64,7 @@ export default function StudioSelectionMap({ studios, onSelect, apiKey }: Studio
 
                     {selectedStudio && (
                         <InfoWindow
-                            position={{ lat: selectedStudio.latitude, lng: selectedStudio.longitude }}
+                            position={{ lat: selectedStudio.lat, lng: selectedStudio.lng }}
                             onCloseClick={() => setSelectedId(null)}
                             headerDisabled
                             className="p-0 border-none bg-transparent"
@@ -102,7 +102,7 @@ function StudioMarker({ studio, onClick, isActive }: { studio: Studio, onClick: 
     return (
         <AdvancedMarker
             ref={markerRef}
-            position={{ lat: studio.latitude, lng: studio.longitude }}
+            position={{ lat: studio.lat, lng: studio.lng }}
             onClick={onClick}
             zIndex={isActive ? 100 : 1}
         >

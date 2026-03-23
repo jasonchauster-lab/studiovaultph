@@ -53,7 +53,7 @@ export default async function InstructorSchedulePage(props: {
             .order('created_at', { ascending: false }),
         supabase
             .from('studios')
-            .select('id, name, location, latitude, longitude, logo_url, banner_url, description')
+            .select('id, name, location, lat, lng, logo_url, banner_url, description')
             .eq('verified', true)
     ])
 
