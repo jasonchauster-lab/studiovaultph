@@ -59,6 +59,8 @@ export default async function InstructorDashboardPage({ searchParams }: { search
             revenueTrends={dashboardData?.revenue_trends || []}
             currentDateStr={dateParam}
             instructorProfile={dashboardData?.profile || { id: user.id, teaching_equipment: [], rates: {} }}
+            fullName={user.user_metadata?.full_name}
+            avatarUrl={user.user_metadata?.avatar_url}
         />
     )
 }

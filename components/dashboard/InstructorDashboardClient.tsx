@@ -18,6 +18,10 @@ import MobileScheduleCalendar from '@/components/dashboard/MobileScheduleCalenda
 import { deleteAvailability } from '@/app/(dashboard)/instructor/schedule/actions';
 import clsx from 'clsx';
 import { format } from 'date-fns';
+import { useToast } from '@/components/ui/Toast';
+import { DashboardHero } from './DashboardHero';
+import { PWAInstallPrompt } from './PWAInstallPrompt';
+import { Button } from '@/components/ui/Button';
 
 interface InstructorDashboardClientProps {
     userId: string;
@@ -38,6 +42,8 @@ interface InstructorDashboardClientProps {
         offers_home_sessions?: boolean;
         max_travel_km?: number;
     } | null;
+    fullName?: string;
+    avatarUrl?: string;
 }
 
 export default function InstructorDashboardClient({
@@ -51,9 +57,12 @@ export default function InstructorDashboardClient({
     pendingEarnings,
     revenueTrends,
     currentDateStr,
-    instructorProfile
+    instructorProfile,
+    fullName,
+    avatarUrl
 }: InstructorDashboardClientProps) {
     const router = useRouter();
+    const { toast } = useToast();
     const normalizeBookings = (bookings: any[]) => bookings.map(b => ({
         ...b,
         slots: Array.isArray(b.slots) ? b.slots[0] : b.slots
@@ -131,6 +140,9 @@ export default function InstructorDashboardClient({
         if (result.success) {
             setCalendarBookings(prev => prev.filter(b => b.id !== cancellingBooking.id));
             setUpcomingBookings(prev => prev.filter(b => b.id !== cancellingBooking.id));
+            toast('Session cancelled successfully', 'success');
+        } else {
+            toast(result.error || 'Failed to cancel session', 'error');
         }
         return result;
     };
@@ -221,15 +233,18 @@ export default function InstructorDashboardClient({
 
     return (
         <div className="space-y-8 sm:space-y-16 pb-20">
-            {/* Sticky Header */}
-            <div className="sticky-header-antigravity -mx-4 sm:-mx-8 lg:-mx-12 mb-6 sm:mb-12 px-4 sm:px-8 lg:px-12 py-6 sm:py-8 lg:py-0">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-8">
-                    <div>
-                        <h1 className="text-xl sm:text-3xl md:text-5xl font-serif text-burgundy tracking-tighter mb-2 sm:mb-4">Instructor Dashboard</h1>
-                        <p className="text-[8px] sm:text-[10px] font-bold text-burgundy/40 uppercase tracking-[0.2em] sm:tracking-[0.4em] max-w-[90%] sm:max-w-none leading-relaxed">Manage your professional schedule and earnings with grounded precision.</p>
-                    </div>
-                </div>
-            </div>
+            {/* Unified Dashboard Hero */}
+            <DashboardHero 
+                title="Instructor Dashboard"
+                subtitle="Manage your professional schedule and earnings with grounded precision."
+                profile={instructorProfile ? {
+                    name: fullName || 'Instructor',
+                    location: instructorProfile.home_base_address || 'Home Base',
+                    image: avatarUrl
+                } : undefined}
+            />
+
+            <PWAInstallPrompt />
 
             {/* Service Area Setup Prompt */}
             {!instructorProfile?.home_base_address && (
@@ -325,15 +340,38 @@ export default function InstructorDashboardClient({
                                         })
                                         .map((booking) => {
                                             const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
+                                            
+                                            // Live indicator logic
+                                            const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false, timeZone: 'Asia/Manila' });
+                                            const isLive = nowTime >= (slot?.start_time || '99:99') && nowTime <= (slot?.end_time || '00:00');
+                                            
                                             return (
-                                                <div key={booking.id} className="flex items-center gap-8 p-8 bg-off-white/40 border border-border-grey/30 rounded-3xl hover:bg-white hover:shadow-ambient transition-all duration-500 group/item">
-                                                    <div className="w-24 flex flex-col items-center justify-center py-4 bg-burgundy/5 rounded-2xl border border-burgundy/10 group-hover/item:bg-burgundy group-hover/item:text-white transition-colors duration-500">
+                                                <div key={booking.id} className={clsx(
+                                                    "flex items-center gap-8 p-8 border rounded-3xl transition-all duration-500 group/item relative overflow-hidden",
+                                                    isLive 
+                                                        ? "bg-white border-forest shadow-ambient ring-2 ring-forest/10" 
+                                                        : "bg-surface-container-low/40 border-burgundy/5 hover:bg-white hover:shadow-ambient"
+                                                )}>
+                                                    {isLive && (
+                                                        <div className="absolute top-0 right-0 px-4 py-1.5 bg-forest text-white text-[9px] font-black uppercase tracking-widest rounded-bl-xl animate-pulse">
+                                                            Live Now
+                                                        </div>
+                                                    )}
+                                                    <div className={clsx(
+                                                        "w-24 flex flex-col items-center justify-center py-4 rounded-2xl border transition-colors duration-500",
+                                                        isLive 
+                                                            ? "bg-forest text-white border-forest" 
+                                                            : "bg-burgundy/5 text-burgundy border-burgundy/10 group-hover/item:bg-burgundy group-hover/item:text-white"
+                                                    )}>
                                                         <span className="text-sm font-black uppercase tracking-tighter leading-none">{formatTo12Hour(slot?.start_time || '00:00:00').split(' ')[0]}</span>
                                                         <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{formatTo12Hour(slot?.start_time || '00:00:00').split(' ')[1]}</span>
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-4 mb-2">
-                                                            <span className="text-[11px] font-black text-forest uppercase tracking-widest bg-forest/5 px-2.5 py-1 rounded-lg">{slot?.session_type || 'Private Session'}</span>
+                                                            <span className={clsx(
+                                                                "text-[11px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg",
+                                                                isLive ? "bg-forest/10 text-forest" : "bg-forest/5 text-forest"
+                                                            )}>{slot?.session_type || 'Private Session'}</span>
                                                             <span className="w-1 h-1 bg-border-grey rounded-full" />
                                                             <span className="text-[11px] font-bold text-slate uppercase tracking-widest flex items-center gap-1.5">
                                                                 <MapPin className="w-3.5 h-3.5 opacity-40" />
@@ -345,7 +383,12 @@ export default function InstructorDashboardClient({
                                                     <div className="flex items-center gap-4">
                                                         <button 
                                                             onClick={() => setSelectedBooking(booking)}
-                                                            className="w-12 h-12 flex items-center justify-center bg-white border border-border-grey/40 text-charcoal/40 hover:text-forest hover:border-forest/20 rounded-full transition-all shadow-tight hover:shadow-card"
+                                                            className={clsx(
+                                                                "w-12 h-12 flex items-center justify-center rounded-full transition-all shadow-tight hover:shadow-card border",
+                                                                isLive 
+                                                                    ? "bg-white border-forest/20 text-forest" 
+                                                                    : "bg-white border-border-grey/40 text-charcoal/40 hover:text-forest hover:border-forest/20"
+                                                            )}
                                                         >
                                                             <ChevronRight className="w-6 h-6" />
                                                         </button>

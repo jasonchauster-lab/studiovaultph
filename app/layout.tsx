@@ -70,6 +70,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { ToastProvider } from "@/components/ui/Toast";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -87,7 +89,9 @@ export default function RootLayout({
         className={`${playfairDisplay.variable} ${inter.variable} ${lexend.variable} antialiased`}
         suppressHydrationWarning
       >
-        {children}
+        <ToastProvider>
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );
