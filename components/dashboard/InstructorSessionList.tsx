@@ -100,44 +100,35 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
 
     const now = useMemo(() => isMounted ? new Date() : new Date(0), [isMounted])
 
-    // 1. Filter ALL bookings based on local state
-    const filteredBookings = useMemo(() => bookings.filter((b: any) => {
-        const slot = getFirst(b.slots)
-        if (!slot) return false
-
-        // Status Filter
-        if (filters.status !== 'all') {
-            if (filters.status === 'cancelled') {
-                if (!['cancelled_refunded', 'cancelled_charged'].includes(b.status)) return false
-            } else if (b.status !== filters.status) return false
-        }
-
-        // Date Filter
-        if (filters.dateRange.from || filters.dateRange.to) {
-            const slotDateTime = getSlotDateTime(slot.date, slot.start_time)
-            if (filters.dateRange.from && slotDateTime < filters.dateRange.from) return false
-            if (filters.dateRange.to && slotDateTime > filters.dateRange.to) return false
-        }
-
-        return true
-    }), [bookings, filters]);
-
-    // 2. Split filtered bookings into active/past
-    const activeBookings = useMemo(() => filteredBookings.filter((b: any) => {
-        const slot = getFirst(b.slots)
-        if (!slot) return false
-        const endDateTime = getSlotEndDateTime(slot.date, slot.end_time || slot.start_time)
-        return b.status === 'approved' && endDateTime > now
-    }), [filteredBookings, now]);
-
-    const historicalBookings = useMemo(() => {
-        const historic = filteredBookings.filter((b: any) => {
+    // 1. Memoized base filtering
+    const baseFilteredBookings = useMemo(() => {
+        return bookings.filter((b: any) => {
             const slot = getFirst(b.slots)
             if (!slot) return false
-            const endDateTime = getSlotEndDateTime(slot.date, slot.end_time || slot.start_time)
-            return (b.status !== 'approved' || endDateTime <= now)
+
+            // Status Filter
+            if (filters.status !== 'all') {
+                if (filters.status === 'cancelled') {
+                    if (!['cancelled_refunded', 'cancelled_charged'].includes(b.status)) return false
+                } else if (b.status !== filters.status) return false
+            }
+
+            // Date Filter
+            if (filters.dateRange.from || filters.dateRange.to) {
+                const slotDateTime = getSlotDateTime(slot.date, slot.start_time)
+                if (filters.dateRange.from && slotDateTime < filters.dateRange.from) return false
+                if (filters.dateRange.to && slotDateTime > filters.dateRange.to) return false
+            }
+
+            return true
         })
-        return [...historic].sort((a: any, b: any) => {
+    }, [bookings, filters]);
+
+    // 2. Memoized grouping and sorting (Unified list like Studio)
+    const { sortedDates, groupedBookings } = useMemo(() => {
+        const grouped: Record<string, any[]> = {}
+        
+        const sorted = [...baseFilteredBookings].sort((a, b) => {
             const slotA = getFirst(a.slots)
             const slotB = getFirst(b.slots)
             if (!slotA || !slotB) return 0
@@ -145,174 +136,106 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
             const dateB = getSlotDateTime(slotB.date, slotB.start_time).getTime()
             return dateB - dateA
         })
-    }, [filteredBookings, now]);
 
-    // Grouping helper
-    const groupBookingsByDate = (bookingsList: any[]) => {
-        const groups: { [key: string]: any[] } = {}
-        bookingsList.forEach(b => {
-            const slot = getFirst(b.slots)
-            if (!slot?.date) return
-            if (!groups[slot.date]) groups[slot.date] = []
-            groups[slot.date].push(b)
+        sorted.forEach(booking => {
+            const slot = getFirst(booking.slots)
+            if (!slot) return
+            const dateKey = slot.date
+            if (!grouped[dateKey]) {
+                grouped[dateKey] = []
+            }
+            grouped[dateKey].push(booking)
         })
-        return Object.keys(groups).sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
-            .map(date => ({ date, bookings: groups[date] }))
-    }
 
-    const activeGroups = useMemo(() => groupBookingsByDate(activeBookings), [activeBookings])
-    const historicalGroups = useMemo(() => {
-        const groups = groupBookingsByDate(historicalBookings)
-        return groups.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    }, [historicalBookings])
+        const dates = Object.keys(grouped).sort((a, b) => b.localeCompare(a))
+        return { sortedDates: dates, groupedBookings: grouped }
+    }, [baseFilteredBookings]);
 
     return (
-        <div className="space-y-10 pb-48">
+        <div className="space-y-8 pb-48">
             <div className="px-4 sm:px-0">
-                <div className="sm:earth-card sm:p-4 w-full sm:w-auto sm:inline-block bg-transparent sm:bg-white overflow-visible mb-6 sm:mb-8">
-                    <BookingFilter key={resetKey} onFilterChange={setFilters} />
-                </div>
+                <BookingFilter key={resetKey} onFilterChange={setFilters} />
             </div>
 
-            {/* Active Sessions List */}
-            <section>
-                <div className="px-6 sm:px-0 flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-12 gap-2">
-                    <div className="flex items-start gap-3 sm:gap-4 h-full">
-                        <div className="w-9 h-9 sm:w-12 sm:h-12 bg-forest/5 rounded-[1.25rem] flex items-center justify-center shrink-0 border border-forest/10">
-                            <Calendar className="w-4 h-4 sm:w-6 h-6 text-forest" />
-                        </div>
-                        <div className="flex flex-col justify-center">
-                            <h2 className="text-xl sm:text-4xl font-serif text-charcoal tracking-tight leading-none">Upcoming Sessions</h2>
-                            <div className="text-[7.5px] sm:text-[9px] font-black text-forest/60 uppercase tracking-[0.2em] mt-1.5 flex items-center gap-2">
-                                <span className="w-1 h-1 bg-forest rounded-full animate-pulse" />
-                                {activeBookings.length} {activeBookings.length === 1 ? 'Engagement' : 'Engagements'} Found
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {activeBookings.length === 0 ? (
-                    <div className="py-12 sm:py-20 flex flex-col items-center justify-center text-center bg-white/50 backdrop-blur-sm rounded-[2.5rem] border border-border-grey/30 mx-4 sm:mx-0 px-6 sm:px-8 shadow-tight relative overflow-hidden">
+            <div className="space-y-10">
+                {sortedDates.length === 0 ? (
+                    <div className="min-h-[220px] py-12 flex flex-col items-center justify-center text-center bg-white/40 backdrop-blur-sm rounded-[2rem] border-2 border-dashed border-charcoal/10 mx-4 sm:mx-0 px-6 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-64 h-64 bg-forest/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-[100px] pointer-events-none" />
-                        <div className="absolute bottom-0 right-0 w-64 h-64 bg-gold/5 rounded-full translate-x-1/2 translate-y-1/2 blur-[100px] pointer-events-none" />
-                        
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-charcoal/5 rounded-[1.75rem] sm:rounded-[2rem] flex items-center justify-center mb-6 sm:mb-8 relative border border-charcoal/5">
-                            <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-charcoal/20" />
-                            <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-forest/10 rounded-full flex items-center justify-center animate-bounce">
-                                <div className="w-1.5 h-1.5 sm:w-2 h-2 bg-forest rounded-full" />
-                            </div>
+                        <div className="w-14 h-14 bg-forest/5 rounded-full flex items-center justify-center mb-5 ring-1 ring-forest/10">
+                            <Calendar className="w-7 h-7 text-forest/40" />
                         </div>
-                        <h3 className="text-xl sm:text-4xl font-serif text-charcoal mb-3 sm:mb-4 tracking-tight">No active schedule yet.</h3>
-                        <p className="text-[10px] sm:text-sm text-charcoal/40 max-w-[280px] sm:max-w-[320px] mb-8 sm:mb-10 leading-relaxed font-black uppercase tracking-widest">
-                            Sync your availability or find a studio node to begin your session registry.
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10 w-full sm:w-auto">
+                        <h3 className="text-base font-serif font-bold text-charcoal-900 mb-2">No sessions found</h3>
+                        <p className="text-[11px] text-charcoal/50 max-w-[240px] mb-8 leading-relaxed">Try adjusting your filters or adding a new availability slot.</p>
+                        
+                        <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10">
                             {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
                                 <button 
                                     onClick={() => setResetKey(prev => prev + 1)}
-                                    className="w-full sm:w-auto px-10 py-4 bg-white text-forest border border-forest/20 text-[10px] font-black uppercase tracking-[0.25em] rounded-2xl hover:bg-forest/5 transition-all active:scale-95 shadow-tight"
+                                    className="px-5 py-2.5 bg-off-white text-charcoal/60 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-forest/5 transition-all border border-border-grey shadow-sm"
                                 >
                                     Clear Filters
                                 </button>
                             )}
                             <Link
                                 href="/instructor/schedule"
-                                className="w-full sm:w-auto px-12 py-5 bg-forest text-white text-[10px] font-black uppercase tracking-[0.25em] rounded-2xl hover:brightness-110 transition-all shadow-tight active:scale-95 text-center flex items-center justify-center gap-3"
+                                className="px-5 py-2.5 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-tight"
                             >
-                                <Navigation className="w-3.5 h-3.5" />
-                                FIND STUDIO / ADD SLOT
+                                Add Slot
                             </Link>
                         </div>
                     </div>
                 ) : (
-                    <div className="space-y-10">
-                        {activeGroups.map((group) => (
-                            <div key={group.date} className="relative">
-                                {/* Date Header */}
-                                <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md px-4 py-3 mb-4 rounded-[1.25rem] border border-charcoal/5 flex items-center justify-between mx-4 sm:mx-0 shadow-sm ring-1 ring-charcoal/[0.02]">
-                                    <div className="flex items-center gap-2.5">
-                                        <div className="w-7 h-7 rounded-lg bg-forest/5 flex items-center justify-center">
-                                            <Calendar className="w-3 h-3 text-forest/60" />
+                    sortedDates.map((dateKey) => {
+                        const dayBookings = groupedBookings[dateKey]
+                        const dateObj = new Date(`${dateKey}T00:00:00+08:00`)
+                        
+                        return (
+                            <div key={dateKey} className="space-y-4">
+                                {/* Sticky Date Header (Studio Style) */}
+                                <div className="sticky top-0 z-20 py-3 bg-cream-50/95 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex flex-col items-center justify-center bg-forest text-white rounded-2xl w-12 h-12 shrink-0 shadow-lg shadow-forest/20 transition-transform">
+                                            <span className="text-[8px] font-black uppercase tracking-[0.2em] leading-none opacity-70">
+                                                {isMounted && dateObj.toLocaleDateString('en-PH', { month: 'short' })}
+                                            </span>
+                                            <span className="text-lg font-serif font-bold leading-none mt-1">
+                                                {isMounted && dateObj.toLocaleDateString('en-PH', { day: 'numeric' })}
+                                            </span>
                                         </div>
-                                        <span className="text-[9px] font-black text-charcoal uppercase tracking-[0.25em]">
-                                            {isMounted && new Date(group.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="w-1 h-1 rounded-full bg-forest/20" />
-                                        <span className="text-[8px] font-black text-charcoal/30 uppercase tracking-[0.15em]">{group.bookings.length} {group.bookings.length === 1 ? 'Session' : 'Sessions'}</span>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2">
+                                                <h2 className="text-[10px] font-black text-charcoal uppercase tracking-[0.2em]">
+                                                    {isMounted && dateObj.toLocaleDateString('en-PH', { weekday: 'long' })}
+                                                </h2>
+                                                <div className="h-px flex-1 bg-gradient-to-r from-charcoal/10 via-charcoal/5 to-transparent" />
+                                                <span className="text-[8px] text-charcoal/30 font-bold uppercase tracking-widest bg-charcoal/5 px-2 py-0.5 rounded-full shrink-0">
+                                                    {dayBookings.length} {dayBookings.length === 1 ? 'SESSION' : 'SESSIONS'}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-4">
-                                    {group.bookings.map((booking: any) => (
-                                        <ActiveSessionCard
+                                <div className="space-y-3">
+                                    {dayBookings.map((booking: any) => (
+                                        <SessionCard
                                             key={booking.id}
                                             booking={booking}
                                             currentUserId={currentUserId}
                                             onStudioClick={handleStudioClick}
                                             onClientClick={setSelectedClient}
                                             onCancelClick={setCancellingBooking}
+                                            onReviewClick={setReviewTarget}
                                             now={now}
                                             isMounted={isMounted}
                                         />
                                     ))}
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        )
+                    })
                 )}
-            </section>
-
-            {/* Past Sessions List */}
-            {historicalBookings.length > 0 && (
-                <section>
-                    <div className="px-6 sm:px-0 flex items-center justify-between mb-6 sm:mb-12">
-                        <div className="flex items-center gap-3 sm:gap-4">
-                            <div className="w-9 h-9 sm:w-12 sm:h-12 bg-charcoal/5 rounded-[1.25rem] flex items-center justify-center shrink-0 border border-charcoal/10">
-                                <Clock className="w-4 h-4 sm:w-6 h-6 text-charcoal/40" />
-                            </div>
-                            <h2 className="text-xl sm:text-3xl font-serif text-charcoal/40 tracking-tight">Past Sessions</h2>
-                        </div>
-                    </div>
-
-                    <div className="space-y-10">
-                        {historicalGroups.map((group) => (
-                            <div key={group.date} className="relative">
-                                {/* Date Header */}
-                                <div className="sticky top-0 z-20 bg-charcoal/[0.03] backdrop-blur-md px-4 py-3 mb-4 rounded-[1.25rem] border border-charcoal/5 flex items-center justify-between mx-4 sm:mx-0 ring-1 ring-charcoal/[0.02]">
-                                    <div className="flex items-center gap-2.5">
-                                        <div className="w-7 h-7 rounded-lg bg-charcoal/5 flex items-center justify-center">
-                                            <Clock className="w-3 h-3 text-charcoal/30" />
-                                        </div>
-                                        <span className="text-[9px] font-black text-charcoal/40 uppercase tracking-[0.25em]">
-                                            {isMounted && new Date(group.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="w-1 h-1 rounded-full bg-charcoal/10" />
-                                        <span className="text-[8px] font-black text-charcoal/20 uppercase tracking-[0.15em]">{group.bookings.length} {group.bookings.length === 1 ? 'Session' : 'Sessions'}</span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    {group.bookings.map((booking: any) => (
-                                        <ArchiveSessionCard
-                                            key={booking.id}
-                                            booking={booking}
-                                            onStudioClick={handleStudioClick}
-                                            onClientClick={setSelectedClient}
-                                            onReviewClick={setReviewTarget}
-                                            isMounted={isMounted}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            )}
+            </div>
 
             <CancelBookingModal
                 isOpen={!!cancellingBooking}
@@ -346,74 +269,67 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
                 onClose={() => { setSelectedStudio(null); setStudioDetails(null) }}
             />
 
-            {/* Client Detail Modal overhaul */}
+            {/* Client Medical Modal (Studio Style) */}
             {selectedClient && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 will-change-transform" onClick={e => e.stopPropagation()}>
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
-
-                        <div className="flex flex-col items-center text-center mb-10 pt-10">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-charcoal/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
+                    <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden p-6 relative animate-in zoom-in-95 duration-500" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedClient(null)} className="absolute top-4 right-4 text-charcoal/20 hover:text-charcoal transition-colors"><X className="w-5 h-5" /></button>
+                        <div className="flex flex-col items-center mt-2 mb-6 text-center">
+                            <div className="relative w-20 h-20 rounded-full overflow-hidden mb-3 border border-cream-200 bg-cream-50">
                                 <Avatar 
                                     src={selectedClient.avatar_url} 
                                     fallbackName={selectedClient.full_name} 
-                                    size={96} 
+                                    size={80} 
                                 />
-
-                            <h3 className="text-3xl font-serif text-charcoal tracking-tighter mb-2">{selectedClient.full_name}</h3>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate uppercase tracking-[0.3em]">{selectedClient.email}</p>
+                            </div>
+                            <h3 className="text-xl font-serif text-charcoal">{selectedClient.full_name}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                                <p className="text-sm text-slate">{selectedClient.email}</p>
                                 {selectedClient.date_of_birth && (
-                                    <div className="inline-block px-3 py-1 bg-forest/5 rounded-full border border-forest/10 mt-2">
-                                        <p className="text-[9px] font-black text-forest uppercase tracking-[0.2em]">{calculateAge(selectedClient.date_of_birth)} YEARS OLD</p>
-                                    </div>
+                                    <>
+                                        <span className="text-border-grey">•</span>
+                                        <p className="text-sm font-bold text-forest">{calculateAge(selectedClient.date_of_birth)} years old</p>
+                                    </>
                                 )}
                             </div>
                         </div>
-
-                        <div className="px-10 pb-10">
-                            {selectedClient.bio && (
-                                <div className="bg-white/40 p-6 rounded-[2rem] border border-white/60 mb-6 relative z-10">
-                                    <h4 className="text-[9px] font-black text-charcoal/50 uppercase tracking-[0.4em] mb-3">BIO</h4>
-                                    <p className="text-[11px] text-charcoal/60 leading-relaxed italic uppercase tracking-wider">"{selectedClient.bio}"</p>
-                                </div>
-                            )}
-
-                            <div className="mb-8">
-                                {(() => {
-                                    const conditions = typeof selectedClient.medical_conditions === 'string'
-                                        ? selectedClient.medical_conditions.split(',').map((c: string) => c.trim())
-                                        : Array.isArray(selectedClient.medical_conditions)
-                                            ? selectedClient.medical_conditions
-                                            : [];
-
-                                    const displayConditions = conditions
-                                        .map((c: string) => c === 'Others' ? selectedClient.other_medical_condition : c)
-                                        .filter(Boolean)
-                                        .join(', ');
-
-                                    return displayConditions ? (
-                                        <div className="bg-red-50 p-6 rounded-2xl border border-red-200 relative z-10">
-                                            <h4 className="text-[10px] font-black text-red-800 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
-                                                <AlertCircle className="w-4 h-4" /> PHYSICAL CONDITIONS
-                                            </h4>
-                                            <p className="text-[11px] text-red-900 font-black uppercase tracking-[0.2em] leading-relaxed">{displayConditions}</p>
-                                        </div>
-                                    ) : (
-                                        <div className="bg-green-50 p-6 rounded-2xl border border-green-200 relative z-10">
-                                            <h4 className="text-[10px] font-black text-forest uppercase tracking-[0.4em] mb-2">HEALTH STATUS</h4>
-                                            <p className="text-[10px] text-forest/40 uppercase tracking-[0.2em] italic">No reported conditions.</p>
-                                        </div>
-                                    );
-                                })()}
-                            </div>
-
-                            <button
-                                onClick={() => setSelectedClient(null)}
-                                className="w-full py-5 bg-forest text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95"
-                            >
-                                CLOSE
-                            </button>
+                        <div className="bg-pastel-blue p-4 rounded-xl border border-border-grey mb-3">
+                            <h4 className="text-sm font-bold text-charcoal/40 mb-1 uppercase tracking-widest text-[10px]">About</h4>
+                            {selectedClient.bio
+                                ? <p className="text-sm text-slate leading-relaxed italic">"{selectedClient.bio}"</p>
+                                : <p className="text-sm text-slate italic">No bio provided.</p>
+                            }
                         </div>
+                        {(() => {
+                            const conditions = typeof selectedClient.medical_conditions === 'string'
+                                ? selectedClient.medical_conditions.split(',').map((c: string) => c.trim())
+                                : Array.isArray(selectedClient.medical_conditions)
+                                    ? selectedClient.medical_conditions
+                                    : [];
+
+                            const displayConditions = conditions
+                                .map((c: string) => c === 'Others' ? selectedClient.other_medical_condition : c)
+                                .filter(Boolean)
+                                .join(', ');
+
+                            return displayConditions ? (
+                                <div className="bg-red-50 p-4 rounded-xl border border-red-100 mb-2">
+                                    <h4 className="text-sm font-bold text-red-800 mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-widest"><AlertCircle className="w-3 h-3" /> Medical Conditions</h4>
+                                    <p className="text-sm text-red-700 whitespace-pre-wrap leading-relaxed">{displayConditions}</p>
+                                </div>
+                            ) : (
+                                <div className="bg-pastel-blue p-4 rounded-xl border border-border-grey mb-2">
+                                    <h4 className="text-sm font-bold text-charcoal/40 mb-1 uppercase tracking-widest text-[10px]">Medical Conditions</h4>
+                                    <p className="text-sm text-slate italic">None reported.</p>
+                                </div>
+                            );
+                        })()}
+                        <button
+                            onClick={() => setSelectedClient(null)}
+                            className="w-full mt-4 py-3 bg-forest text-white rounded-xl font-bold hover:brightness-110 transition-colors uppercase tracking-widest text-[10px]"
+                        >
+                            Close
+                        </button>
                     </div>
                 </div>
             )}
@@ -438,122 +354,97 @@ export default function InstructorSessionList({ bookings, currentUserId }: Instr
     )
 }
 
-const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClientClick, onCancelClick, now, isMounted }: any) => {
+const SessionCard = memo(({ booking, currentUserId, onStudioClick, onClientClick, onCancelClick, onReviewClick, now, isMounted }: any) => {
     const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
+    
     const slot = getFirst(booking.slots)
     const studio = getFirst(slot?.studios)
     const client = getFirst(booking.client)
-    const startDateTime = new Date(`${slot?.date}T${slot?.start_time}+08:00`)
+    const start = new Date(`${slot?.date}T${slot?.start_time}+08:00`)
+    const instructorFee = booking.price_breakdown?.instructor_fee ?? 0
+    const isCancelled = !['completed', 'approved'].includes(booking.status)
 
     return (
-        <div className="earth-card p-3.5 sm:p-5 bg-white hover:bg-off-white transition-all duration-300 shadow-tight group relative mx-4 sm:mx-0 rounded-[1.75rem] border-l-[3px] border-l-forest overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-forest/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl pointer-events-none group-hover:bg-forest/10 transition-colors" />
-            
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 relative z-10">
-                {/* Time Indicator */}
-                <div className="flex items-center justify-between sm:justify-center sm:bg-forest/5 sm:rounded-[1.5rem] sm:w-20 sm:h-20 sm:shrink-0 sm:border sm:border-forest/10">
-                    <div className="flex items-center gap-2.5 sm:flex-col sm:items-center sm:gap-1">
-                        <div className="flex sm:hidden items-center justify-center w-7 h-7 rounded-lg bg-forest/10">
-                            <Clock className="w-3 h-3 text-forest" />
+        <div
+            className={clsx(
+                "atelier-card overflow-hidden group relative mx-4 sm:mx-0 bg-white",
+                isCancelled && "opacity-60 grayscale-[0.3]"
+            )}
+        >
+            {/* Top accent for status */}
+            <div className={clsx(
+                'h-0.5 w-full',
+                booking.status === 'completed' ? 'bg-[#5C8A42]' :
+                booking.status === 'approved' ? 'bg-blue-400' :
+                'bg-red-300'
+            )} />
+
+            <div className="p-3.5">
+                {/* Row 1: Time + Status Badge */}
+                <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-1.5">
+                        <div className="w-1 h-1 rounded-full bg-forest/40" />
+                        <span className="text-[10px] font-black text-charcoal/60 uppercase tracking-widest">
+                            {isMounted && start.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        {['completed', 'approved'].includes(booking.status) && (
+                            <div className="flex items-baseline gap-1 bg-forest/5 px-2 py-0.5 rounded-full border border-forest/10">
+                                <span className="text-[6px] font-black text-forest/40 uppercase tracking-widest">EARNED</span>
+                                <span className="text-[10px] font-black text-forest">₱{Number(instructorFee).toLocaleString()}</span>
+                            </div>
+                        )}
+                        <span className={clsx(
+                            'px-2 py-0.5 text-[7px] font-bold uppercase rounded-full tracking-widest border inline-flex items-center gap-1 shrink-0',
+                            booking.status === 'completed' ? 'border-[#b8d49a] text-forest bg-sage/20' :
+                            booking.status === 'approved' ? 'bg-blue-100/70 text-blue-700 border-blue-200' :
+                            'bg-red-100/70 text-red-600 border-red-200'
+                        )}>
+                            {booking.status === 'completed' && <Award className="w-2 h-2" />}
+                            {booking.status === 'approved' ? (start > now ? 'Upcoming' : 'Ongoing') : 
+                             booking.status === 'completed' ? 'Completed' : 'Cancelled'}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Row 2: Client Name (Prominent) */}
+                {client && (
+                    <button onClick={() => onClientClick(client)} className="flex items-center gap-2 hover:opacity-75 transition-opacity mb-2.5 min-w-0 group/client">
+                        <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0 ring-1 ring-charcoal/5">
+                            <Avatar 
+                                src={client.avatar_url} 
+                                fallbackName={client.full_name} 
+                                size={24} 
+                            />
                         </div>
-                        <div className="flex flex-col sm:items-center">
-                            <span className="text-[15px] sm:text-lg font-serif text-charcoal leading-none tracking-tighter">
-                                {isMounted && startDateTime.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                        <span className="text-sm font-bold text-charcoal-900 truncate group-hover/client:text-forest transition-colors">{client.full_name}</span>
+                        {client?.medical_conditions && (
+                            <span className="ml-1 px-1.5 py-0.5 bg-red-50 text-red-500 text-[6px] font-black uppercase rounded border border-red-100 flex items-center gap-0.5 tracking-widest shrink-0">
+                                <AlertCircle className="w-2 h-2" /> MEDICAL
                             </span>
-                            <span className="text-[7px] sm:text-[8px] font-black text-forest/60 uppercase tracking-[0.2em] mt-1 sm:mt-1">START</span>
-                        </div>
-                    </div>
+                        )}
+                    </button>
+                )}
 
-                    {/* Mobile Actions */}
-                    <div className="flex sm:hidden items-center gap-2 shrink-0">
-                        {booking.status === 'approved' && !booking.client_checked_in_at && (
-                            <button
-                                onClick={async () => {
-                                    if (confirm('Check in this client?')) {
-                                        await checkInClient(booking.id)
-                                    }
-                                }}
-                                className="w-8 h-8 flex items-center justify-center rounded-xl bg-forest/10 text-forest border border-forest/20 active:scale-95 transition-transform"
-                                title="Check In Client"
-                            >
-                                <UserCheck className="w-3.5 h-3.5" />
-                            </button>
-                        )}
-                        {booking.client_checked_in_at && (
-                            <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-forest text-white" title="Checked In">
-                                <UserCheck className="w-3.5 h-3.5" />
-                            </div>
-                        )}
-                        {booking.status === 'approved' && startDateTime > now && (
-
-                            <button
-                                onClick={() => onCancelClick(booking)}
-                                className="w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-100/50 active:scale-95 transition-transform"
-                            >
-                                <X className="w-3.5 h-3.5" />
-                            </button>
-                        )}
-                        {client && client.id !== currentUserId && (
-                            <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="" variant="antigravity" iconType="client" />
-                        )}
-                    </div>
+                {/* Row 3: Studio + Equipment */}
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-4">
+                    <button onClick={() => onStudioClick(studio)} className="text-[10px] font-semibold text-charcoal/50 hover:text-forest transition-colors flex items-center gap-1 group/studio">
+                        <span className="opacity-60">studio:</span>
+                        <span className="font-bold text-charcoal/70 group-hover/studio:text-forest">{studio?.name || "Studio Node"}</span>
+                    </button>
+                    <span className="text-charcoal/20 text-[10px]">·</span>
+                    <span className="text-[9px] font-bold text-charcoal/50 uppercase tracking-wider bg-off-white px-1.5 py-0.5 rounded border border-border-grey/30">
+                        {Array.isArray(slot?.equipment) && slot.equipment.length > 0
+                            ? slot.equipment[0]
+                            : (booking.price_breakdown?.equipment || booking.equipment || 'Session')}
+                        <span className="font-medium opacity-50 ml-0.5">({booking.quantity || 1}x)</span>
+                    </span>
                 </div>
 
-                {/* Session Details */}
-                <div className="flex-1 min-w-0">
-                    <div className="flex flex-col gap-0.5">
-                        <div className="flex items-center gap-3">
-                            <button onClick={() => onStudioClick(studio)} className="text-[17px] sm:text-xl font-serif text-charcoal hover:text-forest transition-colors text-left tracking-tight">
-                                {studio?.name || "Studio Node"}
-                            </button>
-                            {studio?.owner_id && (
-                                <StudioChatButton
-                                    bookingId={booking.id}
-                                    currentUserId={currentUserId}
-                                    partnerId={studio.owner_id}
-                                    partnerName={studio.name || 'Studio'}
-                                    label="CHAT WITH STUDIO"
-                                    variant="antigravity"
-                                    iconType="studio"
-                                    className="!h-7 !px-2.5 opacity-60 hover:opacity-100"
-                                />
-                            )}
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-charcoal/30">
-                            <MapPin className="w-2.5 h-2.5 shrink-0" />
-                            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] truncate">{studio?.location || "REGISTRY N/A"}</span>
-                        </div>
-
-                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border-grey/30">
-                            {client && (
-                                <button onClick={() => onClientClick(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
-                                    <div className="w-6 h-6 rounded-lg border border-forest/10 p-0.5 shrink-0 overflow-hidden">
-                                        <Avatar 
-                                            src={client.avatar_url} 
-                                            fallbackName={client.full_name} 
-                                            size={24} 
-                                        />
-                                    </div>
-
-                                    <span className="text-[9px] font-black text-charcoal/60 uppercase tracking-[0.15em] truncate">{client.full_name}</span>
-                                </button>
-                            )}
-                            <div className="flex items-center gap-2 shrink-0">
-                                <span className="px-2 py-0.5 bg-forest/5 text-forest/50 text-[7px] font-black uppercase tracking-[0.15em] rounded-lg border border-forest/5 flex items-center gap-1">
-                                    <Box className="w-2 h-2" />
-                                    {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                                        ? `${slot.equipment[0]}`
-                                        : (`${booking.price_breakdown?.equipment || booking.equipment || 'Session'}`)}
-                                    <span className="opacity-40">({booking.quantity || 1})</span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Desktop Actions */}
-                <div className="hidden sm:flex items-center gap-2 ml-auto">
+                {/* Row 4: Actions */}
+                <div className="flex items-center gap-2">
+                    {/* Check In Action (Instructor Specific) */}
                     {booking.status === 'approved' && !booking.client_checked_in_at && (
                         <button
                             onClick={async () => {
@@ -561,111 +452,56 @@ const ActiveSessionCard = memo(({ booking, currentUserId, onStudioClick, onClien
                                     await checkInClient(booking.id)
                                 }
                             }}
-                            className="h-10 px-4 bg-forest text-white border border-forest rounded-xl hover:brightness-110 transition-all text-[9px] font-black uppercase tracking-[0.2em] shadow-tight"
+                            className="h-8 px-3 bg-forest text-white border border-forest rounded-lg hover:brightness-110 transition-all text-[9px] font-black uppercase tracking-widest shadow-sm active:scale-95"
                         >
                             CHECK IN
                         </button>
                     )}
                     {booking.client_checked_in_at && (
-                        <div className="h-10 px-4 flex items-center bg-forest/10 text-forest border border-forest/20 rounded-xl text-[9px] font-black uppercase tracking-[0.2em]">
+                        <div className="h-8 px-3 flex items-center bg-forest/10 text-forest border border-forest/20 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                            <UserCheck className="w-3 h-3 mr-1.5" />
                             CHECKED IN
                         </div>
                     )}
-                    {booking.status === 'approved' && startDateTime > now && (
+
+                    {/* Chat with Client */}
+                    {client && client.id !== currentUserId && (
+                        <StudioChatButton 
+                            bookingId={booking.id} 
+                            currentUserId={currentUserId} 
+                            partnerId={client.id} 
+                            partnerName={client.full_name || 'Client'} 
+                            label="CHAT" 
+                            variant="antigravity" 
+                            iconType="client"
+                            className="!h-8 !px-3 !bg-white !border-border-grey !text-[9px] !font-bold"
+                        />
+                    )}
+
+                    {/* Feedback (Review Studio) */}
+                    {booking.status === 'completed' && !booking.instructor_reviewed_studio && (
+                        <button
+                            onClick={() => onReviewClick({
+                                booking,
+                                revieweeId: studio?.owner_id || '',
+                                revieweeName: studio?.name || 'Studio'
+                            })}
+                            className="h-8 px-3 bg-white text-forest border border-forest/20 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-forest/5 transition-all shadow-sm active:scale-95"
+                        >
+                            FEEDBACK
+                        </button>
+                    )}
+
+                    {/* Cancel Action */}
+                    {booking.status === 'approved' && start > now && (
                         <button
                             onClick={() => onCancelClick(booking)}
-                            className="h-10 px-4 bg-off-white text-red-600 border border-border-grey rounded-xl hover:bg-red-600 hover:text-white transition-all text-[9px] font-black uppercase tracking-[0.2em] shadow-tight"
+                            className="h-8 px-3 bg-off-white text-red-500 border border-red-100 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-red-50 transition-all"
+                            title="Cancel Session"
                         >
-                            CANCEL
+                            Cancel
                         </button>
                     )}
-                    {client && client.id !== currentUserId && (
-                        <StudioChatButton bookingId={booking.id} currentUserId={currentUserId} partnerId={client.id} partnerName={client.full_name || 'Client'} label="CHAT" variant="antigravity" iconType="client" />
-                    )}
-                </div>
-
-            </div>
-        </div>
-    )
-})
-
-const ArchiveSessionCard = memo(({ booking, onStudioClick, onClientClick, onReviewClick, isMounted }: any) => {
-    const getFirst = (v: any) => Array.isArray(v) ? v[0] : v
-    const slot = getFirst(booking.slots)
-    const studio = getFirst(slot?.studios)
-    const client = getFirst(booking.client)
-    const startDateTime = new Date(`${slot?.date}T${slot?.start_time}+08:00`)
-
-    return (
-        <div className="glass-card p-3.5 sm:p-5 border border-white/40 bg-white/5 hover:bg-white/10 transition-all duration-700 shadow-sm group relative mx-4 sm:mx-0 rounded-[1.75rem] overflow-hidden grayscale-[0.5] hover:grayscale-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 relative z-10">
-                {/* Time & Earnings */}
-                <div className="flex items-center justify-between sm:flex-col sm:justify-center sm:bg-charcoal/[0.03] sm:rounded-[1.5rem] sm:w-24 sm:h-24 sm:shrink-0 sm:border sm:border-charcoal/5">
-                    <div className="flex flex-col sm:items-center">
-                        <span className="text-[13px] sm:text-base font-serif text-charcoal/40 leading-none tracking-tight">
-                            {isMounted && startDateTime.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                        </span>
-                        <span className="text-[7px] font-black text-charcoal/20 uppercase tracking-[0.15em] mt-1.5">
-                            {booking.status === 'completed' ? 'COMPLETED' : 
-                             booking.status?.includes('cancelled') ? 'CANCELLED' : 
-                             booking.status ? booking.status.replace('_', ' ').toUpperCase() : 'RECORDED'}
-                        </span>
-                    </div>
-                    {booking.price_breakdown?.instructor_fee && (
-                        <div className="flex flex-col items-end sm:items-center sm:mt-3">
-                            <span className="text-[13px] sm:text-base font-black text-sage/60 tracking-tighter">₱{booking.price_breakdown.instructor_fee.toLocaleString()}</span>
-                            <span className="text-[7px] font-black text-sage/30 uppercase tracking-[0.2em]">VALUED</span>
-                        </div>
-                    )}
-                </div>
-
-                {/* Session Info */}
-                <div className="flex-1 min-w-0">
-                    <div className="flex flex-col gap-0.5">
-                        <button onClick={() => onStudioClick(studio)} className="text-[15px] sm:text-lg font-serif text-charcoal/40 hover:text-charcoal transition-colors text-left tracking-tight">
-                            {studio?.name || "Historical Node"}
-                        </button>
-                        
-                        <div className="flex items-center gap-2 text-charcoal/20">
-                            <MapPin className="w-2.5 h-2.5 shrink-0" />
-                            <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] truncate">{studio?.location || "ARCHIVE N/A"}</span>
-                        </div>
-
-                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-charcoal/5">
-                            {client && (
-                                <button onClick={() => onClientClick(client)} className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1">
-                                    <div className="w-6 h-6 rounded-lg border border-charcoal/5 p-0.5 shrink-0 opacity-40 overflow-hidden">
-                                        <Avatar 
-                                            src={client.avatar_url} 
-                                            fallbackName={client.full_name} 
-                                            size={24} 
-                                        />
-                                    </div>
-
-                                    <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-[0.15em] truncate">{client.full_name}</span>
-                                </button>
-                            )}
-                            {booking.client_checked_in_at && (
-                                <span className="text-[8px] text-forest font-black uppercase tracking-[0.25em] bg-forest/5 px-3 py-1.5 rounded-xl border border-forest/10">CHECKED IN</span>
-                            )}
-                            {booking.status === 'completed' && !booking.instructor_reviewed_studio && (
-
-                                <button
-                                    onClick={() => onReviewClick({
-                                        booking,
-                                        revieweeId: studio?.owner_id || '',
-                                        revieweeName: studio?.name || 'Studio'
-                                    })}
-                                    className="h-8 px-5 bg-sage/[0.08] text-sage border border-sage/20 rounded-xl text-[9px] font-black uppercase tracking-[0.25em] hover:bg-sage hover:text-white transition-all shadow-sm active:scale-95"
-                                >
-                                    FEEDBACK
-                                </button>
-                            )}
-                            {booking.instructor_reviewed_studio && (
-                                <span className="text-[8px] text-charcoal/30 font-black uppercase tracking-[0.25em] bg-charcoal/[0.03] px-3 py-1.5 rounded-xl border border-charcoal/5">SUBMITTED</span>
-                            )}
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

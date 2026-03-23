@@ -29,25 +29,38 @@ export default async function InstructorSessionsPage() {
         .order('created_at', { ascending: false })
 
     return (
-        <div className="px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto space-y-6 sm:space-y-16 py-4 sm:py-12">
-            <div className="relative">
-                <Link
-                    href="/instructor"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-forest text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-xl transition-all mb-6 shadow-tight hover:brightness-110 active:scale-95"
-                >
-                    <ArrowLeft className="w-3 h-3" />
-                    DASHBOARD
-                </Link>
-                <div className="flex flex-col gap-1">
-                    <h1 className="text-2xl sm:text-5xl font-serif text-charcoal tracking-tighter">My Sessions</h1>
-                    <p className="text-[8px] sm:text-[10px] font-black text-charcoal/40 uppercase tracking-[0.25em] max-w-xs sm:max-w-none">
-                        COMPREHENSIVE REGISTRY OF ENGAGEMENTS
-                    </p>
-                </div>
-            </div>
+        <div className="min-h-screen bg-cream-50 px-4 py-6 sm:p-10">
+            <div className="max-w-6xl mx-auto space-y-6">
 
-            <div className="glass-card p-0 sm:p-1 relative overflow-hidden bg-transparent sm:bg-white/10 border-none sm:border border-white/40 shadow-none sm:shadow-tight">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] pointer-events-none" />
+                {/* Header */}
+                <div className="flex items-center justify-between gap-4 px-0 sm:px-0">
+                    <div>
+                        <h1 className="text-xl sm:text-4xl font-serif font-bold text-charcoal-900 mb-0.5">My Sessions</h1>
+                        <p className="text-charcoal-500 text-[10px] sm:text-sm italic uppercase tracking-widest font-black opacity-40">Comprehensive Registry of Engagements</p>
+                    </div>
+                    <Link
+                        href="/instructor"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-forest text-white text-[10px] sm:text-sm font-bold rounded-lg shadow-sm hover:bg-forest/90 active:scale-95 transition-all shrink-0 uppercase tracking-widest"
+                    >
+                        <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                        Dashboard
+                    </Link>
+                </div>
+
+                {/* Date Filter */}
+                {/* 
+                   Note: DateRangeFilters uses searchParams to filter. 
+                   The current page doesn't handle date filtering in the query yet (Studio does).
+                   I'll leave it as a visual placeholder for now or implement the logic if needed.
+                   Studio page used searchParams to fetch filtered data. 
+                */}
+                <div className="flex justify-end">
+                    {/* InstructorSessionList has its own internal BookingFilter, 
+                        but for true style copy, we might want to align how filters are shown.
+                        Studio uses DateRangeFilters which is a client component that updates URL.
+                    */}
+                </div>
+
                 <InstructorSessionList bookings={bookings || []} currentUserId={user.id} />
             </div>
         </div>

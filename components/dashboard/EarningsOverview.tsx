@@ -114,7 +114,7 @@ export default function EarningsOverview({ studioId, summary, userEmail }: Earni
                                 className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
                                     summary.availableBalance > 0 
                                     ? 'bg-gold hover:bg-gold-600 text-charcoal shadow-lg shadow-gold/20 active:scale-95' 
-                                    : 'bg-white/5 text-white/20 cursor-not-allowed border border-white/10'
+                                    : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/20'
                                 }`}
                             >
                                 Withdraw

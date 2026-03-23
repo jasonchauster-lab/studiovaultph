@@ -90,10 +90,9 @@ export default function PayoutRequestModal({
                 <button
                     onClick={() => setIsOpen(true)}
                     disabled={availableBalance <= 0}
-                    style={availableBalance > 0 ? { background: '#BC926E' } : {}}
-                    className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-all text-sm ${availableBalance > 0
-                        ? 'text-white hover:brightness-110'
-                        : 'bg-white/20 text-white/50 cursor-not-allowed'
+                    className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${availableBalance > 0
+                        ? 'bg-gold text-charcoal hover:bg-gold-600 shadow-lg shadow-gold/20'
+                        : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/20'
                         }`}
                 >
                     Request Payout
@@ -255,8 +254,7 @@ export default function PayoutRequestModal({
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    style={{ background: '#BC926E' }}
-                                    className="w-full py-2.5 text-white rounded-lg font-medium hover:brightness-110 transition-all flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="w-full py-3 bg-gold text-charcoal rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-600 transition-all flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-gold/20"
                                 >
                                     {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                                     {isLoading ? 'Processing Request...' : 'Submit Request'}

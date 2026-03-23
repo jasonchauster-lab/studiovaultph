@@ -60,6 +60,8 @@
   --color-off-white: var(--surface-container-low);
   --color-burgundy: #4a1d1d;
   --color-buttermilk: #fdf6e3;
+  --color-gold: #E6B325;
+  --color-gold-600: #C1921B;
 
   /* Shadow & Blur */
   --shadow-ambient: var(--shadow-ambient);

@@ -453,91 +453,79 @@ export default function InstructorScheduleCalendar({
 
             {/* Desktop View */}
             <div className="hidden lg:block space-y-10">
-                {/* Header */}
-                <div className="atelier-card p-4 sm:p-6 lg:p-10 bg-white shadow-tight relative overflow-hidden">
-                    {/* Background Tint */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-amber-50/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                {/* Header — Aligned with Studio Digital Atelier Style */}
+                <div className="earth-card p-10 bg-white shadow-tight relative overflow-hidden ring-1 ring-border-grey/50">
+                    {/* Background Tints */}
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-burgundy/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
 
-                    {/* Row 1: Title + Date Navigation */}
-                    <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 relative z-10">
-                        <h2 className="text-2xl sm:text-3xl xl:text-4xl font-serif text-burgundy tracking-tighter">
-                            {isMounted && format(safeDate, 'MMMM yyyy')}
-                        </h2>
-                        
-                        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                            <div className="relative group flex-1 sm:flex-none">
-                                <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-burgundy/40 group-focus-within:text-forest transition-colors" />
-                                <input
-                                    type="date"
-                                    value={isMounted ? format(safeDate, 'yyyy-MM-dd') : ''}
-                                    onChange={(e) => { if (e.target.value) router.push(`?date=${e.target.value}`) }}
-                                    className="w-full sm:w-auto pl-10 pr-4 py-3 sm:py-4 border border-burgundy/5 rounded-lg text-[9px] sm:text-[10px] font-bold bg-white text-burgundy outline-none focus:ring-1 focus:ring-forest transition-all cursor-pointer uppercase tracking-[0.15em] sm:tracking-[0.2em]"
-                                    title="Select any specific date"
-                                />
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+                        {/* Title + Date Navigation */}
+                        <div className="space-y-6 flex-1">
+                            <h2 className="text-5xl font-serif text-charcoal tracking-tighter font-black">
+                                {isMounted && format(safeDate, 'MMMM yyyy')}
+                            </h2>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center bg-off-white rounded-xl p-1.5 border border-border-grey shadow-tight">
+                                    <button onClick={handlePrev} className="flex items-center gap-2 px-4 py-2.5 hover:bg-white rounded-lg transition-all text-slate hover:text-charcoal text-[11px] font-black uppercase tracking-widest group" title="Previous">
+                                        <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" /> PREV
+                                    </button>
+                                    <button onClick={handleToday} className="px-6 py-2.5 text-[11px] font-black text-charcoal uppercase tracking-widest hover:bg-white rounded-lg transition-all border-x border-border-grey/50 mx-1" title="Go to Today">
+                                        TODAY
+                                    </button>
+                                    <button onClick={handleNext} className="flex items-center gap-2 px-4 py-2.5 hover:bg-white rounded-lg transition-all text-slate hover:text-charcoal text-[11px] font-black uppercase tracking-widest group" title="Next">
+                                        NEXT <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                                    </button>
+                                </div>
+                                <div className="relative group">
+                                    <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate transition-colors group-focus-within:text-forest" />
+                                    <input
+                                        type="date"
+                                        value={isMounted ? format(safeDate, 'yyyy-MM-dd') : ''}
+                                        onChange={(e) => { if (e.target.value) router.push(`?date=${e.target.value}`) }}
+                                        className="pl-12 pr-6 py-3.5 border border-border-grey rounded-xl text-[11px] font-black bg-white text-charcoal outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest transition-all cursor-pointer uppercase tracking-widest shadow-tight w-48"
+                                        title="Jump to date"
+                                    />
+                                </div>
                             </div>
-                            
-                            <div className="flex items-center bg-[#faf9f6]/50 rounded-lg p-0.5 sm:p-1 border border-burgundy/5 shadow-tight">
-                                <button onClick={handlePrev} className="flex items-center gap-1 px-2 sm:px-4 py-2 hover:bg-white rounded-md transition-all text-burgundy/40 hover:text-burgundy text-[9px] sm:text-[10px] font-bold uppercase tracking-widest" title="Previous">
-                                    <ChevronLeft className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> PREV
-                                </button>
-                                <button onClick={handleToday} className="px-3 sm:px-6 py-2 text-[9px] sm:text-[10px] font-bold text-burgundy uppercase tracking-widest hover:bg-white rounded-md transition-all border-x border-burgundy/5" title="Go to Today">
-                                    TODAY
-                                </button>
-                                <button onClick={handleNext} className="flex items-center gap-1 px-2 sm:px-4 py-2 hover:bg-white rounded-md transition-all text-burgundy/40 hover:text-burgundy text-[9px] sm:text-[10px] font-bold uppercase tracking-widest" title="Next">
-                                    NEXT <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                </button>
-                            </div>
+                        </div>
 
-                            {/* View Switcher */}
-                            <div className="flex items-center bg-white rounded-lg p-1 border border-burgundy/5 shadow-tight">
+                        {/* Actions & View Switcher */}
+                        <div className="flex flex-col items-end gap-6">
+                            <div className="flex items-center bg-white rounded-xl p-1.5 border border-border-grey shadow-tight">
                                 {(['day', 'week', 'month'] as const).map((v) => (
                                     <button
                                         key={v}
                                         onClick={() => setView(v)}
                                         className={clsx(
-                                            "px-3 sm:px-5 py-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest rounded-md transition-all",
+                                            "px-4 py-2.5 text-[11px] font-black uppercase tracking-tight rounded-lg transition-all duration-300",
                                             view === v
-                                                ? "bg-amber-50 text-burgundy shadow-tight"
-                                                : "text-burgundy/40 hover:text-burgundy hover:bg-[#faf9f6]"
+                                                ? "bg-charcoal text-white shadow-card translate-y-[-1px]"
+                                                : "text-slate hover:text-charcoal hover:bg-off-white"
                                         )}
                                     >
                                         {v}
                                     </button>
                                 ))}
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Row 2: Action Buttons */}
-                    <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4 mt-8 relative z-10">
-                        <button
-                            onClick={() => { 
-                                setAddMode('single'); 
-                                setIsAddModalOpen(true); 
-                            }}
-                            className={clsx(
-                                "flex-1 sm:flex-none h-10 sm:h-12 border-2 px-6 sm:px-8 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] transition-all flex items-center justify-center gap-2 sm:gap-3 shadow-tight active:scale-95",
-                                isProfileComplete 
-                                    ? "border-burgundy text-burgundy bg-white hover:bg-burgundy/5" 
-                                    : "border-burgundy/30 text-burgundy/60 bg-white hover:bg-burgundy/[0.02]"
-                            )}
-                        >
-                            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> ADD SLOT
-                        </button>
-                        <button
-                            onClick={() => { 
-                                setAddMode('bulk'); 
-                                setIsAddModalOpen(true); 
-                            }}
-                            className={clsx(
-                                "flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-3 text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] rounded-lg font-bold flex items-center justify-center gap-2 sm:gap-3 transition-all",
-                                isProfileComplete
-                                    ? "bg-forest text-white hover:brightness-110 shadow-tight active:scale-95"
-                                    : "bg-forest/70 text-white/70 hover:brightness-110 shadow-tight active:scale-95"
-                            )}
-                        >
-                            <CalendarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> RECURRING SCHEDULE
-                        </button>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => { setAddMode('single'); setIsAddModalOpen(true); }}
+                                    className="h-12 border-2 border-forest/20 px-6 rounded-xl text-[11px] font-black uppercase tracking-tight transition-all flex items-center gap-3 shadow-tight active:scale-95 text-forest bg-white hover:bg-forest hover:text-white hover:border-forest disabled:opacity-50"
+                                    disabled={!isProfileComplete}
+                                >
+                                    <Plus className="w-4 h-4" /> ADD SLOT
+                                </button>
+                                <button
+                                    onClick={() => { setAddMode('bulk'); setIsAddModalOpen(true); }}
+                                    className="h-12 px-6 rounded-xl text-[11px] font-black uppercase tracking-tight transition-all flex items-center gap-3 bg-forest text-white hover:brightness-110 shadow-card active:scale-95 disabled:opacity-50"
+                                    disabled={!isProfileComplete}
+                                >
+                                    <CalendarIcon className="w-4 h-4" /> RECURRING SCHEDULE
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -548,22 +536,22 @@ export default function InstructorScheduleCalendar({
                 <div className="overflow-x-auto no-scrollbar">
                     <div className={clsx("min-w-[800px] xl:min-w-full", view === 'month' && "min-w-0")}>
                         {view !== 'month' ? (
-                            <div className={clsx("grid border-b border-burgundy/5 bg-[#faf9f6]", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>
-                                <div className="p-6 text-[10px] font-black text-burgundy border-r border-burgundy/5 sticky left-0 bg-white z-20 w-[100px] text-center uppercase tracking-[0.3em] flex items-center justify-center"></div>
+                            <div className={clsx("grid border-b border-border-grey/50 bg-off-white/50 backdrop-blur-sm", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")}>
+                                <div className="p-6 border-r border-border-grey/50 sticky left-0 bg-white z-20 w-[100px]" />
                                 {days.map(day => (
-                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-burgundy/5 last:border-r-0 transition-all relative", isMounted && isSameDay(day, new Date()) ? "bg-amber-50/20" : "")}>
-                                        <div className="text-[10px] text-burgundy/40 font-black uppercase tracking-[0.3em] mb-2">{format(day, 'EEE')}</div>
-                                        <div className={clsx("text-3xl font-serif font-black tracking-tighter", isMounted && isSameDay(day, new Date()) ? "text-burgundy" : "text-burgundy")}>{format(day, 'd')}</div>
+                                    <div key={day.toString()} className={clsx("p-6 text-center border-r border-border-grey/50 last:border-r-0 transition-all relative", isMounted && isSameDay(day, new Date()) ? "bg-forest/5" : "")}>
+                                        <div className="text-[10px] text-slate font-black uppercase tracking-[0.3em] mb-2 opacity-60">{format(day, 'EEE')}</div>
+                                        <div className={clsx("text-4xl font-serif font-black tracking-tighter leading-none", isMounted && isSameDay(day, new Date()) ? "text-forest" : "text-charcoal")}>{format(day, 'd')}</div>
                                         {isMounted && isSameDay(day, new Date()) && (
-                                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-1 bg-forest rounded-t-full" />
+                                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-forest rounded-t-full" />
                                         )}
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-7 border-b border-burgundy/5 bg-[#faf9f6]">
+                            <div className="grid grid-cols-7 border-b border-border-grey bg-off-white">
                                 {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
-                                    <div key={d} className="p-4 text-center text-[10px] font-black text-burgundy/40 uppercase tracking-[0.3em] border-r border-burgundy/5 last:border-r-0">
+                                    <div key={d} className="p-4 text-center text-[10px] font-black text-slate uppercase tracking-[0.3em] border-r border-border-grey last:border-r-0">
                                         {d}
                                     </div>
                                 ))}
@@ -599,7 +587,7 @@ export default function InstructorScheduleCalendar({
 
                                     {hours.map(hour => (
                                         <div key={hour} className={clsx("grid", view === 'day' ? "grid-cols-[100px_1fr]" : "grid-cols-[100px_repeat(7,1fr)]")} style={{ minHeight: `${ROW_HEIGHT}px` }}>
-                                            <div className="p-4 text-[10px] text-burgundy/40 font-black border-r border-burgundy/5 text-center sticky left-0 bg-white z-20 w-[100px] flex items-center justify-center tracking-[0.2em]">
+                                            <div className="p-4 text-[10px] text-charcoal font-black border-r border-border-grey sticky left-0 bg-[#F5F2EB] z-20 w-[100px] flex items-center justify-center tracking-[0.2em]">
                                                 {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                                             </div>
 
@@ -682,9 +670,7 @@ export default function InstructorScheduleCalendar({
                                                         <div key={day.toString() + hour} className={clsx("border-r border-burgundy/5 last:border-r-0 relative group p-1 overflow-hidden", isPastCell ? "bg-stone-50" : isToday ? "bg-amber-50/10" : "")} style={{ height: `${ROW_HEIGHT}px` }}>
                                                             <div
                                                                 className={clsx(
-                                                                    "absolute inset-0 transition-all duration-700 bg-forest/5 cursor-pointer z-0 flex items-center justify-center",
-                                                                    "opacity-0 lg:group-hover:opacity-100", // Hidden on large, shown on hover
-                                                                    "md:opacity-10 md:hover:opacity-100" // Always slightly visible on small/tablet
+                                                                    "absolute inset-1.5 rounded-xl transition-all duration-500 bg-forest/10 cursor-pointer z-0 flex items-center justify-center opacity-0 group-hover:opacity-100 border-2 border-dashed border-forest/20 shadow-tight"
                                                                 )}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation()
@@ -700,7 +686,10 @@ export default function InstructorScheduleCalendar({
                                                                     setIsAddModalOpen(true)
                                                                 }}
                                                             >
-                                                                <Plus className="w-5 h-5 text-forest/20 lg:hidden" />
+                                                                <div className="flex flex-col items-center gap-2">
+                                                                    <Plus className="w-6 h-6 text-forest animate-pulse" />
+                                                                    <span className="text-[10px] font-black text-forest uppercase tracking-widest">Add Slot</span>
+                                                                </div>
                                                             </div>
 
                                                             {allVisibleItems.map((item) => {
@@ -732,10 +721,10 @@ export default function InstructorScheduleCalendar({
                                                                         <div
                                                                             key={slot.id}
                                                                             className={clsx(
-                                                                                "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-4 z-10 px-1.5 py-1 group/slot flex flex-col justify-start shadow-tight",
+                                                                                "absolute rounded-lg text-sm font-semibold hover:shadow-card hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden border-l-2 z-10 px-1.5 py-1 group/slot flex flex-col justify-between shadow-tight",
                                                                                 isPastCell
-                                                                                     ? "bg-white/50 border-burgundy/5 text-burgundy/40"
-                                                                                     : "bg-amber-50 border-burgundy/10 text-burgundy",
+                                                                                    ? "bg-stone-100 border-slate/10 text-slate/50"
+                                                                                    : "bg-white border-slate/10 ring-1 ring-slate/5 text-charcoal shadow-tight",
                                                                                 duration < 30 && "py-0.5 px-1 justify-center"
                                                                             )}
                                                                             style={{
@@ -785,13 +774,17 @@ export default function InstructorScheduleCalendar({
                                                                     const studioName = slotData.studios?.name || 'Partner Studio';
 
                                                                     return (
-                                                                        <div
-                                                                            key={booking.id}
-                                                                            className={clsx(
-                                                                                 "absolute rounded-lg text-[10px] z-20 p-2 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-tight border-l-4",
-                                                                                 isPastCell ? "bg-forest/40 border-forest/20 opacity-80" : "bg-forest border-forest/20",
-                                                                                duration < 45 && "flex-row items-center justify-between py-2 px-3"
-                                                                            )}
+                                                                         <div
+                                                                             key={booking.id}
+                                                                             className={clsx(
+                                                                                  "absolute rounded-lg text-[10px] z-20 p-2 overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer group/booking flex flex-col justify-between shadow-card border-l-2",
+                                                                                  isPastCell 
+                                                                                      ? "bg-[#1e4438]/60 border-white/10 opacity-80" 
+                                                                                      : booking.status === 'pending'
+                                                                                          ? "bg-amber-100 border-amber-400 shadow-tight text-amber-900"
+                                                                                          : "bg-[#1e4438] border-white/20 shadow-card ring-1 ring-white/10 text-white",
+                                                                                 duration < 45 && "flex-row items-center justify-between py-2 px-3"
+                                                                             )}
                                                                             style={{
                                                                                 top: `${topOffset}px`,
                                                                                 height: `${heightPx}px`,

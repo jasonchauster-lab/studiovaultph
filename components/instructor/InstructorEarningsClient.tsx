@@ -60,9 +60,13 @@ export default function InstructorEarningsClient({
     }
 
     const groupedTransactions = groupTransactionsByDate(recentTransactions)
+    const incomeTransactions = recentTransactions?.filter((t: any) => t.type !== 'Payout') || []
+    const withdrawalTransactions = recentTransactions?.filter((t: any) => t.type === 'Payout') || []
+    const [activeTab, setActiveTab] = useState<'income' | 'withdrawals'>('income')
 
     return (
-        <div className="max-w-7xl mx-auto space-y-12 pb-20">
+        <div className="min-h-screen bg-cream-50/30 px-4 py-6 sm:p-8 selection:bg-forest/10 selection:text-forest">
+            <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12 pb-20">
             <TopUpModal
                 isOpen={showTopUpModal}
                 onClose={() => setShowTopUpModal(false)}
@@ -70,182 +74,197 @@ export default function InstructorEarningsClient({
 
             {/* Info Modal */}
             {showInfoModal && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-charcoal/20 backdrop-blur-md animate-in fade-in duration-700" onClick={() => setShowInfoModal(false)}>
-                    <div className="glass-card w-full max-w-lg overflow-hidden p-10 relative animate-in zoom-in-95 duration-700" onClick={e => e.stopPropagation()}>
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
-
-                        <div className="flex justify-between items-start mb-10 border-b border-white/60 pb-8">
-                            <h3 className="text-3xl font-serif text-charcoal tracking-tighter">Vault Protocol</h3>
-                            <button onClick={() => setShowInfoModal(false)} className="text-charcoal/10 hover:text-charcoal transition-colors p-2 bg-white/40 rounded-xl border border-white/60">
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowInfoModal(false)}>
+                    <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
+                        <div className="px-6 py-4 border-b border-cream-200 flex justify-between items-center bg-cream-50">
+                            <h3 className="font-serif text-lg text-charcoal">Wallet & Recovery Rules</h3>
+                            <button onClick={() => setShowInfoModal(false)} className="text-charcoal/40 hover:text-charcoal transition-colors">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-
-                        <div className="space-y-10 mb-10">
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3 text-red-400 font-black text-[10px] uppercase tracking-[0.3em]">
-                                    <AlertCircle className="w-5 h-5" />
-                                    NEGATIVE BALANCE
+                        <div className="p-6 space-y-6">
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-rose-gold font-bold text-sm uppercase tracking-wider">
+                                    <AlertCircle className="w-4 h-4" />
+                                    Negative Balances
                                 </div>
-                                <p className="text-[11px] text-charcoal/60 font-black uppercase tracking-[0.2em] leading-relaxed">
-                                    Should penalty deductions cause your balance to drop below zero, payouts will be temporarily suspended until the balance is restored.
+                                <p className="text-sm text-charcoal-600 leading-relaxed uppercase tracking-tight font-medium">
+                                    If penalty deductions cause your wallet to drop below ₱0.00, your account will carry a negative balance. While negative, payouts are suspended.
                                 </p>
                             </div>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3 text-gold font-black text-[10px] uppercase tracking-[0.3em]">
-                                    <ShieldCheck className="w-5 h-5" />
-                                    AUTO-RECOVERY SYSTEM
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-charcoal font-bold text-sm uppercase tracking-wider">
+                                    <ShieldCheck className="w-4 h-4" />
+                                    Auto-Recovery
                                 </div>
-                                <p className="text-[11px] text-charcoal/60 font-black uppercase tracking-[0.2em] leading-relaxed">
-                                    Future earnings will be automatically allocated to settle outstanding obligations. Manual reconciliation via Administrative channels remains available.
+                                <p className="text-sm text-charcoal-600 leading-relaxed uppercase tracking-tight font-medium">
+                                    Any future earnings will be automatically applied to the negative balance until the debt is cleared. Admin settlement is also available.
                                 </p>
                             </div>
                         </div>
-
-                        <button
-                            onClick={() => setShowInfoModal(false)}
-                            className="btn-forest w-full py-4 text-[10px] font-bold uppercase tracking-[0.4em]"
-                        >
-                            ACKNOWLEDGE PROTOCOL
-                        </button>
+                        <div className="px-6 py-4 bg-cream-50 border-t border-cream-200">
+                            <button
+                                onClick={() => setShowInfoModal(false)}
+                                className="w-full py-3 bg-forest text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:brightness-110 transition-colors shadow-lg shadow-forest/20"
+                            >
+                                Acknowledge Protocol
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
 
-            <div className="sticky top-0 z-50 bg-off-white/95 backdrop-blur-md -mx-4 px-4 py-4 sm:static sm:bg-transparent sm:backdrop-blur-none sm:mx-0 sm:px-0 sm:py-0 border-b border-border-grey/10 sm:border-0">
-                <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                        <div className="relative">
-                            <Link
-                                href="/instructor"
-                                className="hidden sm:inline-flex items-center gap-3 text-[10px] font-black text-charcoal/50 hover:text-gold uppercase tracking-[0.3em] transition-all mb-4 group"
-                            >
-                                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                                BACK TO DASHBOARD
-                            </Link>
-                            <h1 className="text-2xl sm:text-5xl font-serif text-charcoal tracking-tighter mb-0.5 sm:mb-4">Earnings & Payouts</h1>
-                            <p className="text-[9px] sm:text-[10px] font-bold text-charcoal/40 uppercase tracking-[0.3em] leading-relaxed">Financial Overview & History</p>
-                        </div>
-                        <div className="flex sm:hidden items-center gap-2">
-                             <button
-                                onClick={() => setShowTopUpModal(true)}
-                                className="h-10 px-4 bg-white text-charcoal rounded-xl flex items-center justify-center gap-2 border border-border-grey shadow-tight active:scale-95 transition-all text-[9px] font-black uppercase tracking-[0.1em]"
-                                title="TOP UP"
-                            >
-                                <Plus className="w-3.5 h-3.5 text-forest" />
-                                TOP UP
-                            </button>
-                            {recentTransactions && (
-                                <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />
-                            )}
-                        </div>
+            <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-top-4 duration-700 ease-out">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+                    <div>
+                        <Link
+                            href="/instructor"
+                            className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/40 hover:text-charcoal uppercase tracking-[0.3em] transition-all mb-4 group"
+                        >
+                            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                            Return to Dashboard
+                        </Link>
+                        <h1 className="text-[2.25rem] sm:text-4xl font-serif text-charcoal-900 mb-2 tracking-tight leading-tight">Earnings &amp; Payouts</h1>
+                        <p className="text-charcoal-600/80 font-medium text-sm sm:text-base max-w-2xl leading-relaxed">
+                            Overview of your professional yield, settlements, and withdrawal history.
+                        </p>
                     </div>
-
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <div className="hidden sm:flex gap-2 w-full">
-                                <div className="flex-1">
-                                    {recentTransactions && <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />}
-                                </div>
-                                <button
-                                    onClick={() => setShowTopUpModal(true)}
-                                    className="flex-1 h-11 sm:h-12 bg-white text-charcoal px-4 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 border border-border-grey hover:bg-off-white transition-all shadow-tight active:scale-95"
-                                >
-                                    <Plus className="w-3.5 h-3.5 text-forest" />
-                                    TOP UP
-                                </button>
-                            </div>
-                            <div className="w-full sm:w-auto">
-                                {availableBalance < 0 ? (
-                                    <button
-                                        disabled
-                                        className="h-11 sm:h-12 w-full px-8 bg-charcoal text-white/40 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2 cursor-not-allowed opacity-50"
-                                    >
-                                        <ShieldCheck className="w-3.5 h-3.5" />
-                                        RESTRICTED
-                                    </button>
-                                ) : (
-                                        <Link
-                                            href="/instructor/payout"
-                                            className="h-11 sm:h-12 w-full px-8 bg-forest text-white rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-tight active:scale-95 text-center"
-                                        >
-                                            <Wallet className="w-3.5 h-3.5" />
-                                            WITHDRAW
-                                        </Link>
-                                )}
-                            </div>
-                        </div>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setShowTopUpModal(true)}
+                            className="h-11 px-6 bg-white text-charcoal rounded-xl flex items-center justify-center gap-2 border border-border-grey shadow-tight hover:bg-off-white active:scale-95 transition-all text-[10px] font-black uppercase tracking-widest"
+                        >
+                            <Plus className="w-3.5 h-3.5 text-forest" />
+                            TOP UP
+                        </button>
+                        {recentTransactions && (
+                            <ExportCsvButton data={recentTransactions} filename="instructor-earnings" />
+                        )}
                     </div>
                 </div>
             </div>
 
-            <div className="py-2 inline-block w-full sm:w-auto">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 fill-mode-both py-2">
                 <DateRangeFilters />
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-0">
-                {/* Available Balance */}
-                <div className="atelier-card p-6 sm:p-8 relative overflow-hidden group">
-                    <button
-                        onClick={() => setShowInfoModal(true)}
-                        className="absolute top-4 right-4 z-10 text-forest/20 hover:text-forest transition-colors p-2 bg-sage/5 rounded-xl border border-forest/10"
-                    >
-                        <Info className="w-4 h-4" />
-                    </button>
- 
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-2xl bg-sage/10 flex items-center justify-center shrink-0">
-                            <Wallet className="w-5 h-5 text-forest" />
-                        </div>
-                        <span className="text-[10px] font-black text-forest/40 uppercase tracking-[0.2em]">AVAILABLE</span>
-                    </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 fill-mode-both">
+                {/* Available Balance - Hero Card */}
+                <div className="atelier-card p-6 sm:p-8 col-span-2 relative overflow-hidden group border-0 shadow-2xl !bg-forest text-white">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
                     
-                    <div className="space-y-4">
-                        <h2 className="text-3xl sm:text-5xl font-serif text-forest tracking-tighter">₱{(availableBalance || 0).toLocaleString()}</h2>
-                        <div className="flex items-center justify-between gap-4 pt-2">
-                            <span className="text-[10px] font-black text-forest uppercase tracking-widest bg-sage/10 px-3 py-1 rounded-full border border-forest/10">LIQUID</span>
-                            {availableBalance > 0 && (
+                    <div className="flex justify-between items-start mb-8 relative z-10">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-gold/20 flex items-center justify-center border border-gold/30">
+                                <Wallet className="w-6 h-6 text-gold" />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">AVAILABLE FUNDS</span>
+                                    <button
+                                        onClick={() => setShowInfoModal(true)}
+                                        className="text-white/20 hover:text-white transition-colors"
+                                    >
+                                        <Info className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                                <div className="h-px w-full bg-gold/20 mt-1" />
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => setShowTopUpModal(true)}
+                                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all"
+                            >
+                                <Plus className="w-3.5 h-3.5 text-gold" />
+                                TOP UP
+                            </button>
+                            {availableBalance < 0 ? (
+                                <div className="px-6 py-2.5 bg-white/5 text-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/10 flex items-center gap-2">
+                                    <ShieldCheck className="w-3 h-3" />
+                                    RESTRICTED
+                                </div>
+                            ) : (
                                 <Link
                                     href="/instructor/payout"
-                                    className="btn-forest px-6 py-2.5 text-[10px]"
+                                    className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                                        availableBalance > 0 
+                                        ? 'bg-gold hover:bg-gold-600 text-charcoal shadow-lg shadow-gold/20 active:scale-95' 
+                                        : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/20'
+                                    }`}
                                 >
-                                    WITHDRAW
+                                    Withdraw
                                 </Link>
                             )}
                         </div>
                     </div>
+
+                    <div className="relative z-10 space-y-2">
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl sm:text-6xl font-serif text-gold tracking-tighter">₱{(availableBalance || 0).toLocaleString()}</span>
+                            <span className="text-xs font-black text-gold/40 tracking-widest uppercase mb-2">PHP</span>
+                        </div>
+                        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">LIQUID BALANCE READY FOR PAYOUT</p>
+                    </div>
                 </div>
 
-                {/* Pending Balance */}
+                {/* Net Earnings */}
+                <div className="atelier-card p-6 sm:p-8 group">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-2xl bg-forest/10 flex items-center justify-center shrink-0">
+                            <TrendingUp className="w-5 h-5 text-forest" />
+                        </div>
+                        <span className="text-[10px] font-black text-forest/40 uppercase tracking-[0.2em]">NET YIELD</span>
+                    </div>
+                    <div className="space-y-2">
+                        <h3 className="text-3xl font-serif text-charcoal tracking-tighter">₱{(netEarnings || 0).toLocaleString()}</h3>
+                        <p className="text-[10px] font-black text-charcoal-400 uppercase tracking-widest">REALIZED INCOME</p>
+                    </div>
+                </div>
+
+                {/* Security Hold */}
                 <div className="atelier-card p-6 sm:p-8 group">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 rounded-2xl bg-burgundy/10 flex items-center justify-center shrink-0">
                             <Clock className="w-5 h-5 text-burgundy/60" />
                         </div>
-                        <span className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em]">PENDING</span>
+                        <span className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em]">VAULT HOLD</span>
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-3xl sm:text-5xl font-serif text-burgundy/80 tracking-tighter">₱{(pendingBalance || 0).toLocaleString()}</h3>
-                        <p className="text-[10px] font-black text-burgundy/30 uppercase tracking-widest px-1">FUTURE INCOME</p>
+                        <h3 className="text-3xl font-serif text-burgundy/80 tracking-tighter">₱{(pendingBalance || 0).toLocaleString()}</h3>
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-3 h-3 text-burgundy/30" />
+                            <p className="text-[10px] font-black text-burgundy/30 uppercase tracking-widest leading-tight">24H SAFETY PERIOD</p>
+                        </div>
                     </div>
                 </div>
 
-                {/* Gross Earnings */}
+                {/* Gross Stats */}
                 <div className="atelier-card p-6 sm:p-8 group">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center shrink-0">
-                            <TrendingUp className="w-5 h-5 text-gold" />
+                        <div className="w-10 h-10 rounded-2xl bg-charcoal/5 flex items-center justify-center shrink-0">
+                            <TrendingUp className="w-5 h-5 text-charcoal" />
                         </div>
-                        <span className="text-[10px] font-black text-gold/60 uppercase tracking-[0.2em]">LIFETIME</span>
+                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">GROSS</span>
                     </div>
-                    <div className="space-y-2">
-                        <h3 className="text-3xl sm:text-5xl font-serif text-charcoal tracking-tighter">₱{(totalEarned || 0).toLocaleString()}</h3>
-                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest px-1">GROSS EARNINGS</p>
+                    <div className="space-y-1">
+                        <h3 className="text-2xl font-serif text-charcoal">₱{(totalEarned || 0).toLocaleString()}</h3>
+                        <div className="flex items-center gap-4 pt-1">
+                            <div className="flex flex-col">
+                                <span className="text-[11px] font-serif text-forest">+₱{(totalCompensation || 0).toLocaleString()}</span>
+                                <span className="text-[7px] font-black text-forest/40 uppercase tracking-widest">COMPS</span>
+                            </div>
+                            <div className="w-px h-6 bg-border-grey" />
+                            <div className="flex flex-col">
+                                <span className="text-[11px] font-serif text-burgundy">-₱{(totalPenalty || 0).toLocaleString()}</span>
+                                <span className="text-[7px] font-black text-burgundy/40 uppercase tracking-widest">FEES</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Total Withdrawn */}
+                {/* Paid Out */}
                 <div className="atelier-card p-6 sm:p-8 group">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 rounded-2xl bg-charcoal/5 flex items-center justify-center shrink-0">
@@ -254,214 +273,185 @@ export default function InstructorEarningsClient({
                         <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">CASHOUTS</span>
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-3xl sm:text-5xl font-serif text-charcoal tracking-tighter">₱{(totalWithdrawn || 0).toLocaleString()}</h3>
-                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest px-1">TOTAL WITHDRAWN</p>
-                    </div>
-                </div>
-
-                {/* Net Balance / Current */}
-                <div className="atelier-card p-6 sm:p-8 group">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-2xl bg-forest/10 flex items-center justify-center shrink-0">
-                            <DollarSign className="w-5 h-5 text-forest" />
-                        </div>
-                        <span className="text-[10px] font-black text-forest/40 uppercase tracking-[0.2em]">NET YIELD</span>
-                    </div>
-                    <div className="space-y-2">
-                        <h3 className="text-3xl sm:text-5xl font-serif text-charcoal tracking-tighter">₱{(netEarnings || 0).toLocaleString()}</h3>
-                        <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-widest px-1">CURRENT BALANCE</p>
-                    </div>
-                </div>
-
-                {/* Adjustments */}
-                <div className="atelier-card p-6 sm:p-8 group">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-2xl bg-burgundy/5 flex items-center justify-center shrink-0">
-                            <AlertCircle className="w-5 h-5 text-burgundy/40" />
-                        </div>
-                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">ADJUSTMENTS</span>
-                    </div>
-                    <div className="space-y-4">
-                        <div className="flex flex-row items-center gap-6">
-                            <div className="flex flex-col">
-                                <span className="text-2xl font-serif text-forest">+₱{(totalCompensation || 0).toLocaleString()}</span>
-                                <span className="text-[8px] font-black text-forest/40 uppercase tracking-widest">COMPS</span>
-                            </div>
-                            <div className="w-px h-8 bg-border-grey" />
-                            <div className="flex flex-col">
-                                <span className="text-2xl font-serif text-burgundy">-₱{(totalPenalty || 0).toLocaleString()}</span>
-                                <span className="text-[8px] font-black text-burgundy/40 uppercase tracking-widest">PENALTIES</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="earth-card overflow-hidden shadow-tight mb-20">
-                <div className="p-6 sm:p-10 border-b border-border-grey/60 flex items-center justify-between bg-white">
-                    <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
-                        <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-forest shrink-0" />
-                        <h3 className="text-xl sm:text-3xl font-serif text-charcoal tracking-tighter truncate">Transaction History</h3>
-                    </div>
-                    <div className="hidden sm:block text-[9px] font-bold text-charcoal/50 uppercase tracking-[0.4em]">Recent Activity</div>
-                </div>
-
-                <div className="w-full">
-                    <table className="hidden sm:table w-full text-left">
-                        <thead>
-                            <tr className="bg-white/40 text-charcoal/50 text-[10px] font-black uppercase tracking-[0.4em] border-b border-border-grey/40">
-                                <th className="px-6 py-4 font-black min-w-[140px]">Date / Time</th>
-                                <th className="px-6 py-4 font-black">STUDENT</th>
-                                <th className="px-6 py-4 font-black">Type</th>
-                                <th className="px-6 py-4 font-black">SCHEDULE</th>
-                                <th className="px-6 py-4 font-black">Status</th>
-                                <th className="px-6 py-4 font-black text-right">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/60 bg-white/20">
-                            {recentTransactions && recentTransactions.length > 0 ? (
-                                recentTransactions.map((tx: any, i: number) => (
-                                    <tr key={i} className="hover:bg-off-white/50 transition-all duration-500 group border-b border-border-grey/20">
-                                        <td className="px-6 py-4">
-                                            <div className="text-[10px] font-black text-charcoal uppercase tracking-[0.1em]">
-                                                {new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                            </div>
-                                            <span className="block text-[8px] text-charcoal/50 font-bold uppercase tracking-[0.2em] mt-1">
-                                                {new Date(tx.date).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-[10px] font-black text-charcoal uppercase tracking-[0.2em]">
-                                                {tx.client || 'System'}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-[10px] font-bold text-charcoal uppercase tracking-tighter flex items-center gap-2">
-                                                <span className="px-2.5 py-1 bg-charcoal/5 rounded-lg font-black tracking-widest text-[8px] border border-charcoal/10">{tx.type}</span>
-                                                {tx.details && (
-                                                    <span className="text-[8px] text-charcoal/50 font-bold px-2.5 py-1 bg-off-white rounded-lg tracking-tighter uppercase border border-border-grey/40">
-                                                        {tx.details}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {tx.session_date ? (
-                                                <div className="flex flex-col">
-                                                    <span className="font-black text-charcoal/60 text-[9px] uppercase whitespace-nowrap px-2.5 py-1 bg-buttermilk/10 rounded-lg border border-charcoal/5 w-fit">
-                                                        {new Date(tx.session_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} / {tx.session_time?.slice(0, 5)}
-                                                    </span>
-                                                </div>
-                                            ) : (
-                                                <span className="text-[9px] text-charcoal/40 uppercase font-black italic tracking-widest">System</span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={clsx(
-                                                "text-[8px] font-black uppercase tracking-[0.25em] px-3 py-1.5 rounded-lg border shadow-sm",
-                                                (tx.status === 'approved' || tx.status === 'processed' || tx.status === 'completed')
-                                                    ? "bg-sage/10 text-forest border-forest/20"
-                                                    : tx.status === 'pending'
-                                                        ? "bg-amber-50 text-amber-700 border-amber-200"
-                                                        : "bg-off-white text-charcoal/50 border-border-grey/60"
-                                            )}>
-                                                {tx.status}
-                                            </span>
-                                        </td>
-                                        <td className={`px-6 py-4 text-[11px] font-bold uppercase tracking-[0.1em] text-right ${tx.total_amount > 0 ? 'text-emerald-600' : tx.total_amount < 0 ? 'text-rose-500' : 'text-charcoal'}`}>
-                                            <div className="flex items-center justify-end gap-1.5">
-                                                {tx.total_amount > 0 ? <Plus className="w-3 h-3 stroke-[3px]" /> : tx.total_amount < 0 ? <Minus className="w-3 h-3 stroke-[3px]" /> : null}
-                                                ₱{Math.abs(tx.total_amount).toLocaleString()}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={6} className="px-10 py-32 text-center">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <div className="p-10 bg-off-white rounded-full border border-border-grey/60 mb-8 shadow-tight group-hover:scale-110 transition-transform duration-700">
-                                                <Wallet className="w-12 h-12 text-charcoal/10" />
-                                            </div>
-                                            <p className="text-charcoal/40 font-black uppercase tracking-[0.4em] italic text-[10px]">No transaction records detected in the vault</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-
-                    {/* Mobile List Layout */}
-                    <div className="sm:hidden">
-                        {groupedTransactions && Object.keys(groupedTransactions).length > 0 ? (
-                            Object.entries(groupedTransactions).map(([date, transactions]) => (
-                                <div key={date}>
-                                    <div className="bg-off-white/80 backdrop-blur-sm px-4 py-2 border-y border-border-grey/10">
-                                        <span className="text-[8px] font-black text-charcoal/30 uppercase tracking-[0.3em]">{date}</span>
-                                    </div>
-                                    <div className="divide-y divide-border-grey/5">
-                                        {(transactions as any[]).map((tx: any, i: number) => (
-                                            <div key={i} className="px-4 py-5 flex items-start justify-between gap-3 bg-white hover:bg-off-white/30 active:scale-[0.99] transition-all duration-300">
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className={clsx(
-                                                            "text-[7px] font-black uppercase tracking-[0.2em] px-1.5 py-0.5 rounded border shadow-sm",
-                                                            (tx.status === 'approved' || tx.status === 'processed' || tx.status === 'completed')
-                                                                ? "bg-sage/10 text-forest border-forest/10"
-                                                                : tx.status === 'pending'
-                                                                    ? "bg-amber-50 text-amber-700 border-amber-100"
-                                                                    : "bg-off-white text-charcoal/40 border-border-grey/20"
-                                                        )}>
-                                                            {tx.status?.replace('_', ' ')}
-                                                        </span>
-                                                        <span className="text-[8px] text-charcoal/20 font-bold uppercase tracking-[0.1em]">
-                                                            {new Date(tx.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                                                        </span>
-                                                    </div>
-                                                    <p className="text-[15px] font-serif text-charcoal tracking-tight truncate leading-tight mb-1.5">
-                                                        {tx.client || 'System Settlement'}
-                                                    </p>
-                                                    <div className="flex flex-wrap gap-1.5 items-center">
-                                                        <span className="text-[8px] font-bold text-charcoal/40 uppercase tracking-widest px-1.5 py-0.5 bg-off-white/50 rounded border border-border-grey/30">
-                                                            {tx.type}
-                                                        </span>
-                                                        {tx.session_date && (
-                                                            <span className="text-[8px] text-charcoal/60 font-black uppercase tracking-tighter bg-buttermilk/5 px-1.5 py-0.5 rounded border border-charcoal/5">
-                                                                {new Date(tx.session_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="shrink-0 text-right flex flex-col items-end gap-0.5">
-                                                    <span className={`text-base font-serif tracking-tight ${tx.total_amount > 0 ? 'text-emerald-600' : tx.total_amount < 0 ? 'text-rose-500' : 'text-charcoal'}`}>
-                                                        {tx.total_amount > 0 ? '+' : tx.total_amount < 0 ? '-' : ''}
-                                                        ₱{Math.abs(tx.total_amount).toLocaleString()}
-                                                    </span>
-                                                    {tx.details && (
-                                                        <span className="text-[7px] text-charcoal/30 font-bold uppercase tracking-widest max-w-[70px] leading-tight truncate">
-                                                            {tx.details}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="px-10 py-32 text-center bg-white">
-                                <p className="text-charcoal/40 font-black uppercase tracking-[0.4em] italic text-[10px]">No transaction records found</p>
+                        <h3 className="text-2xl font-serif text-charcoal">₱{(totalWithdrawn || 0).toLocaleString()}</h3>
+                        {pendingPayouts > 0 && (
+                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-gold/10 rounded-full border border-gold/20">
+                                <Clock className="w-2.5 h-2.5 text-gold-600" />
+                                <span className="text-[8px] font-black uppercase text-gold-600 tracking-wider">
+                                    ₱{pendingPayouts.toLocaleString()} PENDING
+                                </span>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Top-Up Modal */}
-            <TopUpModal
-                isOpen={showTopUpModal}
-                onClose={() => setShowTopUpModal(false)}
-            />
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
+                <div className="flex items-center gap-3 mb-6">
+                    <h2 className="text-2xl font-serif text-charcoal-900 tracking-tight">Transaction History</h2>
+                    <div className="h-px flex-1 bg-cream-200/60" />
+                </div>
+
+                <div className="earth-card overflow-hidden shadow-tight">
+                    <div className="flex border-b border-cream-200/60 bg-cream-50/30">
+                        <button
+                            onClick={() => setActiveTab('income')}
+                            className={`flex-1 px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 whitespace-nowrap ${activeTab === 'income'
+                                ? 'border-forest text-forest bg-sage/5'
+                                : 'border-transparent text-charcoal/40 hover:text-forest/60'
+                                }`}
+                        >
+                            INCOME & ADJUSTMENTS
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('withdrawals')}
+                            className={`flex-1 px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 whitespace-nowrap ${activeTab === 'withdrawals'
+                                ? 'border-burgundy text-burgundy bg-burgundy/5'
+                                : 'border-transparent text-charcoal/40 hover:text-burgundy/60'
+                                }`}
+                        >
+                            WITHDRAWALS
+                        </button>
+                    </div>
+
+                    <div className="w-full overflow-x-auto">
+                        <table className="hidden sm:table w-full text-left">
+                            <thead className="bg-cream-50/50 text-charcoal/60 font-black uppercase tracking-[0.1em] text-[10px] border-b border-cream-200">
+                                <tr>
+                                    <th className="px-6 py-5">Date / Time</th>
+                                    <th className="px-6 py-5">Student</th>
+                                    <th className="px-6 py-5">Type</th>
+                                    <th className="px-6 py-5">Schedule</th>
+                                    <th className="px-6 py-5">Status</th>
+                                    <th className="px-6 py-5 text-right font-black">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-cream-100/50 bg-white/20">
+                                {(activeTab === 'income' ? incomeTransactions : withdrawalTransactions).length > 0 ? (
+                                    (activeTab === 'income' ? incomeTransactions : withdrawalTransactions).map((tx: any, i: number) => (
+                                        <tr key={i} className="hover:bg-off-white/50 transition-all duration-500 group border-b border-border-grey/20">
+                                            <td className="px-6 py-6 whitespace-nowrap">
+                                                <div className="text-[10px] font-black text-charcoal uppercase tracking-[0.1em]">
+                                                    {new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                </div>
+                                                <span className="block text-[8px] text-charcoal/40 font-bold uppercase tracking-[0.2em] mt-1">
+                                                    {new Date(tx.date).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-6">
+                                                <div className="text-[10px] font-black text-charcoal uppercase tracking-[0.2em]">
+                                                    {tx.client || 'System'}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-6">
+                                                <div className="flex flex-col gap-1.5">
+                                                    <span className="inline-block px-2.5 py-1 bg-charcoal/5 rounded-lg font-black tracking-widest text-[8px] border border-charcoal/10 uppercase w-fit">
+                                                        {tx.type}
+                                                    </span>
+                                                    {tx.details && (
+                                                        <span className="text-[8px] text-charcoal/50 font-bold px-2.5 py-1 bg-off-white rounded-lg tracking-tighter uppercase border border-border-grey/40 truncate max-w-[150px]">
+                                                            {tx.details}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-6">
+                                                {tx.session_date ? (
+                                                    <div className="flex flex-col">
+                                                        <span className="font-black text-charcoal/60 text-[9px] uppercase whitespace-nowrap px-2.5 py-1 bg-buttermilk/10 rounded-lg border border-charcoal/5 w-fit">
+                                                            {new Date(tx.session_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} / {tx.session_time?.slice(0, 5)}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-[9px] text-charcoal/20 uppercase font-black italic tracking-widest">--</span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-6">
+                                                <span className={clsx(
+                                                    "text-[8px] font-black uppercase tracking-[0.25em] px-3 py-1.5 rounded-lg border shadow-sm",
+                                                    (tx.status === 'approved' || tx.status === 'processed' || tx.status === 'completed' || tx.status === 'paid')
+                                                        ? "bg-sage/10 text-forest border-forest/20"
+                                                        : tx.status === 'pending'
+                                                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                                                            : "bg-off-white text-charcoal/40 border-border-grey/60"
+                                                )}>
+                                                    {tx.status}
+                                                </span>
+                                            </td>
+                                            <td className={clsx(
+                                                "px-6 py-6 text-[13px] font-bold uppercase tracking-[0.1em] text-right",
+                                                tx.total_amount > 0 ? "text-emerald-600" : tx.total_amount < 0 ? "text-rose-500" : "text-charcoal"
+                                            )}>
+                                                <div className="flex items-center justify-end gap-1.5 font-serif text-base">
+                                                    {tx.total_amount > 0 ? '+' : tx.total_amount < 0 ? '-' : ''}
+                                                    ₱{Math.abs(tx.total_amount).toLocaleString()}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={6} className="px-10 py-32 text-center">
+                                            <div className="flex flex-col items-center justify-center">
+                                                <div className="p-10 bg-off-white rounded-full border border-border-grey/60 mb-8 shadow-tight">
+                                                    <Clock className="w-12 h-12 text-charcoal/10" />
+                                                </div>
+                                                <p className="text-charcoal/40 font-black uppercase tracking-[0.4em] italic text-[10px]">No records detected in the vault</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+
+                        {/* Mobile List Layout (Simplified for brevity but standardized) */}
+                        <div className="sm:hidden divide-y divide-border-grey/10">
+                            {(activeTab === 'income' ? incomeTransactions : withdrawalTransactions).length > 0 ? (
+                                (activeTab === 'income' ? incomeTransactions : withdrawalTransactions).map((tx: any, i: number) => (
+                                    <div key={i} className="px-4 py-5 flex items-start justify-between gap-3 bg-white active:bg-off-white/30 transition-all duration-300">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className={clsx(
+                                                    "text-[7px] font-black uppercase tracking-[0.2em] px-1.5 py-0.5 rounded border shadow-sm",
+                                                    (tx.status === 'approved' || tx.status === 'processed' || tx.status === 'completed' || tx.status === 'paid')
+                                                        ? "bg-sage/10 text-forest border-forest/10"
+                                                        : tx.status === 'pending'
+                                                            ? "bg-amber-50 text-amber-700 border-amber-100"
+                                                            : "bg-off-white text-charcoal/40 border-border-grey/20"
+                                                )}>
+                                                    {tx.status}
+                                                </span>
+                                                <span className="text-[8px] text-charcoal/20 font-bold uppercase tracking-[0.1em]">
+                                                    {new Date(tx.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </div>
+                                            <p className="text-[15px] font-serif text-charcoal tracking-tight truncate leading-tight mb-1.5">
+                                                {tx.client || 'System Settlement'}
+                                            </p>
+                                            <div className="flex flex-wrap gap-1.5 items-center">
+                                                <span className="text-[8px] font-bold text-charcoal/40 uppercase tracking-widest px-1.5 py-0.5 bg-off-white/50 rounded border border-border-grey/30">
+                                                    {tx.type}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="shrink-0 text-right pt-0.5">
+                                            <span className={clsx('text-base font-serif tracking-tight', tx.total_amount > 0 ? 'text-emerald-600' : tx.total_amount < 0 ? 'text-rose-500' : 'text-charcoal')}>
+                                                {tx.total_amount > 0 ? '+' : tx.total_amount < 0 ? '-' : ''}
+                                                ₱{Math.abs(tx.total_amount).toLocaleString()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="px-10 py-32 text-center bg-white">
+                                    <p className="text-charcoal/40 font-black uppercase tracking-[0.4em] italic text-[10px]">No records found</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    )
+    </div>
+)
 }
