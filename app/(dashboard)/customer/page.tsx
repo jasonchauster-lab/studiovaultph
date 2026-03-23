@@ -489,19 +489,25 @@ export default async function CustomerDashboard({
                                                     </div>
 
                                                     <div className="p-6 sm:p-10 flex flex-col flex-1 gap-y-6 sm:gap-y-8">
-                                                        <div className="flex items-start justify-between gap-4 sm:gap-6">
-                                                            <div className="space-y-1 sm:space-y-2">
-                                                                <h3 className="text-2xl sm:text-3xl font-serif font-bold text-burgundy tracking-tight leading-tight group-hover:text-forest transition-colors duration-500">{studio.name}</h3>
-                                                                <p className="text-[9px] sm:text-[10px] font-black text-burgundy/20 uppercase tracking-[0.2em] sm:tracking-[0.3em]">Partner Studio</p>
-                                                            </div>
-                                                            <div className="shrink-0 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-[#F5F2EB] border border-burgundy/5 flex flex-col items-center gap-0.5 sm:gap-1 shadow-sm transition-all duration-500 group-hover:bg-white group-hover:border-burgundy/10">
+                                                        <div className="space-y-1 sm:space-y-2">
+                                                            <h3 className="text-2xl sm:text-3xl font-serif font-bold text-burgundy tracking-tight leading-tight group-hover:text-forest transition-colors duration-500">{studio.name}</h3>
+                                                            <p className="text-[9px] sm:text-[10px] font-black text-burgundy/20 uppercase tracking-[0.2em] sm:tracking-[0.3em]">Partner Studio</p>
+                                                        </div>
+
+                                                        {/* Streamlined Rating Row (Below Name to prevent cut-off) */}
+                                                        <div className="flex items-center">
+                                                            <div className="shrink-0 px-3 py-1.5 rounded-xl bg-[#F5F2EB] border border-burgundy/5 flex items-center gap-2.5 shadow-sm transition-all duration-500 group-hover:bg-white group-hover:border-burgundy/10">
                                                                 <StarRating
                                                                     rating={ratingsMap[studio.owner_id]?.average || null}
                                                                     count={ratingsMap[studio.owner_id]?.count}
                                                                     size="xs"
                                                                 />
-                                                                {(!ratingsMap[studio.owner_id]?.count || ratingsMap[studio.owner_id].count === 0) && (
-                                                                    <span className="text-[8px] font-black text-burgundy/25 uppercase tracking-[0.1em]">Vault Choice</span>
+                                                                {(!ratingsMap[studio.owner_id]?.count || ratingsMap[studio.owner_id].count === 0) ? (
+                                                                    <span className="text-[8px] font-black text-burgundy/25 uppercase tracking-[0.1em] border-l border-burgundy/10 pl-2">Vault Choice</span>
+                                                                ) : (
+                                                                    <span className="text-[9px] text-burgundy/30 font-black uppercase tracking-widest border-l border-burgundy/10 pl-2">
+                                                                        {ratingsMap[studio.owner_id].count} Reviews
+                                                                    </span>
                                                                 )}
                                                             </div>
                                                         </div>

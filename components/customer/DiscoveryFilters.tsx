@@ -9,6 +9,7 @@ import LocationFilterDropdown from '@/components/shared/LocationFilterDropdown'
 import MultiSelectFilter from '@/components/shared/MultiSelectFilter'
 import { getManilaTodayStr } from '@/lib/timezone'
 import FilterDrawer from './FilterDrawer'
+import { useGeolocation } from '@/lib/hooks/useGeolocation'
 
 interface DiscoveryFiltersProps {
     /** Sub-location strings of verified studios that currently exist in the DB */
@@ -19,7 +20,7 @@ interface DiscoveryFiltersProps {
 export default function DiscoveryFilters({ availableLocations, userRole }: DiscoveryFiltersProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
-    const [isDetecting, setIsDetecting] = useState(false)
+    const { isDetecting, detectLocation } = useGeolocation()
     const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
     const currentRadius = searchParams.get('radius') || 'all'
@@ -39,23 +40,7 @@ export default function DiscoveryFilters({ availableLocations, userRole }: Disco
     )
 
     const handleLocationDetect = () => {
-        if (!navigator.geolocation) return alert('Geolocation not supported');
-        setIsDetecting(true);
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                const params = new URLSearchParams(searchParams.toString());
-                params.set('lat', pos.coords.latitude.toString());
-                params.set('lng', pos.coords.longitude.toString());
-                if (!params.has('radius')) params.set('radius', '10');
-                router.push(`/customer?${params.toString()}`);
-                setIsDetecting(false);
-            },
-            (err) => {
-                console.error(err);
-                alert('Could not detect location.');
-                setIsDetecting(false);
-            }
-        );
+        detectLocation()
     }
 
     const handleFilter = (name: string, value: string) => {

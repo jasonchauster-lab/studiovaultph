@@ -7,13 +7,14 @@ import { reverseGeocode, geocodeAddress, getAutocompleteSuggestions } from '@/li
 import { getManilaTodayStr } from '@/lib/timezone'
 import { clsx } from 'clsx'
 import { useClickAway } from 'react-use'
+import { useGeolocation } from '@/lib/hooks/useGeolocation'
 
 export default function HeaderSearchPill() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [isOpen, setIsOpen] = useState(false)
     const [locationName, setLocationName] = useState<string | null>(null)
-    const [isDetecting, setIsDetecting] = useState(false)
+    const { isDetecting, detectLocation } = useGeolocation()
     const [addressSearch, setAddressSearch] = useState('')
     const [suggestions, setSuggestions] = useState<string[]>([])
     const [isGeocoding, setIsGeocoding] = useState(false)
@@ -66,34 +67,12 @@ export default function HeaderSearchPill() {
         }
     }, [lat, lng])
 
-    const handleLocationDetect = () => {
-        if (!navigator.geolocation) return alert('Geolocation not supported')
-        setIsDetecting(true)
-        navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-                const params = new URLSearchParams(searchParams.toString())
-                const { latitude, longitude } = pos.coords
-                params.set('lat', latitude.toString())
-                params.set('lng', longitude.toString())
-                if (!params.has('radius') || params.get('radius') === 'all') params.set('radius', '10')
-                
-                const res = await reverseGeocode(latitude, longitude)
-                if (res) {
-                    setAddressSearch(res.full)
-                    setLocationName(res.short)
-                }
-
-                router.push(`/customer?${params.toString()}`)
-                setIsDetecting(false)
-                // Remove automatic closure to allow date/radius selection
-                // setTimeout(() => setIsOpen(false), 800)
-            },
-            (err) => {
-                console.error(err)
-                alert('Could not detect location.')
-                setIsDetecting(false)
-            }
-        )
+    const handleLocationDetect = async () => {
+        const res = await detectLocation()
+        if (res) {
+            setAddressSearch(res.full)
+            setLocationName(res.short)
+        }
     }
 
     const handleSuggestionSelect = async (suggestion: string) => {

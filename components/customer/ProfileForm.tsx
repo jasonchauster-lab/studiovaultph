@@ -21,6 +21,8 @@ import { geocodeAddress, getAutocompleteSuggestions, reverseGeocode } from '@/li
 import Avatar from '@/components/shared/Avatar'
 import ImageCropper from '@/components/shared/ImageCropper'
 import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
+import { useGeolocation } from '@/lib/hooks/useGeolocation'
+import { useDebounce } from 'react-use'
 
 export default function ProfileForm({ profile }: { profile: any }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -42,6 +44,8 @@ export default function ProfileForm({ profile }: { profile: any }) {
     const [geocoding, setGeocoding] = useState(false)
     const [detectingLocation, setDetectingLocation] = useState(false)
     const [noResults, setNoResults] = useState(false)
+    const [debouncedSearch, setDebouncedSearch] = useState('')
+    const { detectLocation } = useGeolocation()
 
     // State for avatar preview and file
     const [previewUrl, setPreviewUrl] = useState<string | null>(profile?.avatar_url || '/default-avatar.svg')
@@ -157,22 +161,31 @@ export default function ProfileForm({ profile }: { profile: any }) {
 
         setIsLoading(false)
     }
-    const handleAddressSearch = async (val: string) => {
+    const handleAddressSearch = (val: string) => {
         setHomeBaseAddress(val)
-        if (val.length >= 3) {
-            setIsSearching(true)
-            setNoResults(false)
-            const results = await getAutocompleteSuggestions(val)
-            setSuggestions(results)
-            setShowSuggestions(true)
-            setNoResults(results.length === 0)
-            setIsSearching(false)
-        } else {
-            setSuggestions([])
-            setShowSuggestions(false)
-            setNoResults(false)
-        }
+        // Update debounced search term
+        setDebouncedSearch(val)
     }
+
+    useDebounce(
+        async () => {
+            if (debouncedSearch.length >= 3) {
+                setIsSearching(true)
+                setNoResults(false)
+                const results = await getAutocompleteSuggestions(debouncedSearch)
+                setSuggestions(results)
+                setShowSuggestions(true)
+                setNoResults(results.length === 0)
+                setIsSearching(false)
+            } else {
+                setSuggestions([])
+                setShowSuggestions(false)
+                setNoResults(false)
+            }
+        },
+        300,
+        [debouncedSearch]
+    )
 
     const handleSuggestionSelect = async (suggestion: string) => {
         setHomeBaseAddress(suggestion)
@@ -188,30 +201,21 @@ export default function ProfileForm({ profile }: { profile: any }) {
         setGeocoding(false)
     }
 
-    const handleDetectLocation = () => {
-        if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser")
-            return
-        }
-
+    const handleDetectLocation = async () => {
         setDetectingLocation(true)
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const { latitude, longitude } = position.coords
-                const res = await reverseGeocode(latitude, longitude)
-                if (res) {
-                    setHomeBaseAddress(res.full)
-                    setHomeBaseLat(latitude.toString())
-                    setHomeBaseLng(longitude.toString())
-                }
-                setDetectingLocation(false)
-            },
-            (error) => {
-                console.error("Geolocation error:", error)
-                alert("Failed to detect location. Please enter it manually.")
-                setDetectingLocation(false)
+        try {
+            const res = await detectLocation()
+            if (res) {
+                setHomeBaseAddress(res.full)
+                setHomeBaseLat(res.lat.toString())
+                setHomeBaseLng(res.lng.toString())
             }
-        )
+        } catch (error) {
+            console.error("Geolocation error:", error)
+            alert("Failed to detect location. Please enter it manually.")
+        } finally {
+            setDetectingLocation(false)
+        }
     }
 
     return (

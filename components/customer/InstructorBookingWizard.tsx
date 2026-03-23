@@ -9,6 +9,7 @@ import { calculateDistance, geocodeAddress } from '@/lib/utils/location'
 import { Loader2, MapPin, CheckCircle, ArrowRight, Minus, Plus, ChevronLeft, ChevronRight, Info, Calendar, ChevronDown, AlertCircle } from 'lucide-react'
 import clsx from 'clsx'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays, isPast, eachDayOfInterval, addHours, parse, isAfter } from 'date-fns'
+import { useGeolocation } from '@/lib/hooks/useGeolocation'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -83,6 +84,7 @@ export default function InstructorBookingWizard({
     const [clientLng, setClientLng] = useState<number | null>(null)
     const [isDetectingLocation, setIsDetectingLocation] = useState(false)
     const [homeBookingPrice, setHomeBookingPrice] = useState(0)
+    const { detectLocation } = useGeolocation()
     const router = useRouter()
     const searchParams = useSearchParams()
     const filterLocation = searchParams.get('location')
@@ -761,24 +763,21 @@ export default function InstructorBookingWizard({
                                 <div className="space-y-6">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <button 
-                                            onClick={() => {
-                                                if (!navigator.geolocation) return alert('Geolocation not supported');
+                                            onClick={async () => {
                                                 setIsDetectingLocation(true);
-                                                navigator.geolocation.getCurrentPosition(
-                                                    async (pos) => {
-                                                        const lat = pos.coords.latitude;
-                                                        const lng = pos.coords.longitude;
-                                                        setClientLat(lat);
-                                                        setClientLng(lng);
-                                                        setClientAddress(`Current Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
-                                                        setIsDetectingLocation(false);
-                                                    },
-                                                    (err) => {
-                                                        console.error(err);
-                                                        alert('Could not detect location. Please enter address manually.');
-                                                        setIsDetectingLocation(false);
+                                                try {
+                                                    const res = await detectLocation();
+                                                    if (res) {
+                                                        setClientLat(res.lat);
+                                                        setClientLng(res.lng);
+                                                        setClientAddress(res.full);
                                                     }
-                                                );
+                                                } catch (err) {
+                                                    console.error(err);
+                                                    alert('Could not detect location. Please enter address manually.');
+                                                } finally {
+                                                    setIsDetectingLocation(false);
+                                                }
                                             }}
                                             className="flex items-center justify-center gap-3 bg-white p-5 rounded-2xl border-2 border-border-grey hover:border-forest/30 transition-all group"
                                         >

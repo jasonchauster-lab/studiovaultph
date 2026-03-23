@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
+import { useState, useCallback, useMemo, useRef, useEffect, memo } from 'react'
 import { 
     APIProvider, 
     Map as GoogleMap, 
@@ -15,6 +15,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import clsx from 'clsx'
 import { cleanMapStyle } from '@/constants/mapStyles'
+import { MarkerClusterer } from '@googlemaps/markerclusterer'
 
 interface Studio {
     id: string
@@ -49,12 +50,46 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
     const map = useMap()
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [selectedType, setSelectedType] = useState<'studio' | 'instructor' | null>(null)
+    const [isScrolling, setIsScrolling] = useState(false)
+    const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const isManualSelection = useRef(false)
     const carouselRef = useRef<HTMLDivElement>(null)
     const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+    const [markers, setMarkers] = useState<{[key: string]: google.maps.marker.AdvancedMarkerElement}>({})
+    const clusterer = useRef<MarkerClusterer | null>(null)
+
+    const setMarkerRef = useCallback((marker: google.maps.marker.AdvancedMarkerElement | null, key: string) => {
+        setMarkers((prev) => {
+            if (marker) {
+                if (prev[key] === marker) return prev
+                return { ...prev, [key]: marker }
+            } else {
+                if (!prev[key]) return prev
+                const newMarkers = { ...prev }
+                delete newMarkers[key]
+                return newMarkers
+            }
+        })
+    }, [])
 
     // Filter out studios/instructors with missing coordinates to prevent map crashes
     const validStudios = useMemo(() => studios.filter(s => typeof s.lat === 'number' && typeof s.lng === 'number'), [studios])
     const validInstructors = useMemo(() => instructors.filter(i => typeof i.home_base_lat === 'number' && typeof i.home_base_lng === 'number'), [instructors])
+    
+    // Initialize clusterer
+    useEffect(() => {
+        if (!map) return
+        if (!clusterer.current) {
+            clusterer.current = new MarkerClusterer({ map })
+        }
+    }, [map])
+
+    // Update clusterer when markers change
+    useEffect(() => {
+        if (!clusterer.current) return
+        clusterer.current.clearMarkers()
+        clusterer.current.addMarkers(Object.values(markers))
+    }, [markers])
     
     const selectedStudio = useMemo(() => validStudios.find(s => s.id === selectedId), [validStudios, selectedId])
     const selectedInstructor = useMemo(() => validInstructors.find(i => i.id === selectedId), [validInstructors, selectedId])
@@ -66,9 +101,20 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
         return { lat, lng }
     }, [validStudios])
 
+    // Memoize combined items for carousel to avoid expensive spreading on every render
+    const carouselItems = useMemo(() => [
+        ...validStudios.map(s => ({ ...s, carouselType: 'studio' as const })), 
+        ...(!isRentMode ? validInstructors.map(i => ({ ...i, carouselType: 'instructor' as const })) : [])
+    ], [validStudios, validInstructors, isRentMode])
+
     // Sync map when selected item changes
     useEffect(() => {
         if (!map || !selectedId) return
+
+        // OPTIMIZATION: If selection came from scroll, don't pan immediately to avoid jitter
+        // or pan with lower zoom if it's already in view
+        if (!isManualSelection.current) return
+        isManualSelection.current = false
 
         const item = selectedType === 'studio' 
             ? validStudios.find(s => s.id === selectedId)
@@ -109,17 +155,16 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
         const itemWidth = 280 + 16 // card width + gap
         const index = Math.round(scrollLeft / itemWidth)
         
-        const items = [
-            ...validStudios.map(s => ({ id: s.id, type: 'studio' as const })), 
-            ...(!isRentMode ? validInstructors.map(i => ({ id: i.id, type: 'instructor' as const })) : [])
-        ]
-        
-        const activeItem = items[index]
+        const activeItem = carouselItems[index]
         if (activeItem && activeItem.id !== selectedId) {
-            setSelectedId(activeItem.id)
-            setSelectedType(activeItem.type)
+            // DEBOUNCE: Don't update state on every pixel of scroll
+            if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current)
+            scrollTimeoutRef.current = setTimeout(() => {
+                setSelectedId(activeItem.id)
+                setSelectedType(activeItem.carouselType)
+            }, 100)
         }
-    }, [selectedId, validStudios, validInstructors, isRentMode])
+    }, [selectedId, carouselItems])
 
     return (
         <div className="w-full h-[calc(100vh-200px)] min-h-[500px] rounded-[2.5rem] overflow-hidden border border-burgundy/5 shadow-2xl relative animate-in fade-in zoom-in-95 duration-700">
@@ -139,10 +184,12 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
                             key={studio.id} 
                             studio={studio} 
                             onClick={() => {
+                                isManualSelection.current = true
                                 setSelectedId(studio.id)
                                 setSelectedType('studio')
                             }}
                             isActive={selectedId === studio.id && selectedType === 'studio'}
+                            setMarkerRef={(marker) => setMarkerRef(marker, studio.id)}
                         />
                     ))}
 
@@ -151,10 +198,12 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
                             key={instructor.id} 
                             instructor={instructor} 
                             onClick={() => {
+                                isManualSelection.current = true
                                 setSelectedId(instructor.id)
                                 setSelectedType('instructor')
                             }}
                             isActive={selectedId === instructor.id && selectedType === 'instructor'}
+                            setMarkerRef={(marker) => setMarkerRef(marker, instructor.id)}
                         />
                     ))}
 
@@ -174,13 +223,13 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
                 {/* Combined Studios and Instructors for Carousel */}
-                {[...validStudios.map(s => ({ ...s, carouselType: 'studio' as const })), 
-                  ...(!isRentMode ? validInstructors.map(i => ({ ...i, carouselType: 'instructor' as const })) : [])]
+                {carouselItems
                   .map((item) => (
                     <div 
                         key={item.id}
                         ref={el => { if (el) cardRefs.current.set(item.id, el) }}
                         onClick={() => {
+                            isManualSelection.current = true
                             setSelectedId(item.id)
                             setSelectedType(item.carouselType)
                         }}
@@ -257,8 +306,13 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
     )
 }
 
-function StudioMarker({ studio, onClick, isActive }: { studio: Studio, onClick: () => void, isActive: boolean }) {
+// Memoized markers to prevent unnecessary re-renders
+const StudioMarker = memo(function StudioMarker({ studio, onClick, isActive, setMarkerRef }: { studio: Studio, onClick: () => void, isActive: boolean, setMarkerRef: (marker: google.maps.marker.AdvancedMarkerElement | null) => void }) {
     const [markerRef, marker] = useAdvancedMarkerRef();
+
+    useEffect(() => {
+        setMarkerRef(marker);
+    }, [marker, setMarkerRef]);
 
     return (
         <AdvancedMarker
@@ -299,10 +353,14 @@ function StudioMarker({ studio, onClick, isActive }: { studio: Studio, onClick: 
             </div>
         </AdvancedMarker>
     )
-}
+})
 
-function InstructorMarker({ instructor, onClick, isActive }: { instructor: Instructor, onClick: () => void, isActive: boolean }) {
+const InstructorMarker = memo(function InstructorMarker({ instructor, onClick, isActive, setMarkerRef }: { instructor: Instructor, onClick: () => void, isActive: boolean, setMarkerRef: (marker: google.maps.marker.AdvancedMarkerElement | null) => void }) {
     const [markerRef, marker] = useAdvancedMarkerRef();
+
+    useEffect(() => {
+        setMarkerRef(marker);
+    }, [marker, setMarkerRef]);
 
     return (
         <AdvancedMarker
@@ -354,4 +412,4 @@ function InstructorMarker({ instructor, onClick, isActive }: { instructor: Instr
             </div>
         </AdvancedMarker>
     )
-}
+})
