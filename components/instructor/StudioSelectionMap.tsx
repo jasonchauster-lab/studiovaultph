@@ -15,8 +15,8 @@ import clsx from 'clsx'
 interface Studio {
     id: string
     name: string
-    lat: number
-    lng: number
+    lat: number | null
+    lng: number | null
     location: string
     logo_url?: string
     banner_url?: string
@@ -32,14 +32,17 @@ const MANILA_CENTER = { lat: 14.5995, lng: 120.9842 }
 
 export default function StudioSelectionMap({ studios, onSelect, apiKey }: StudioSelectionMapProps) {
     const [selectedId, setSelectedId] = useState<string | null>(null)
-    const selectedStudio = useMemo(() => studios.find(s => s.id === selectedId), [studios, selectedId])
+
+    // Filter out studios with missing coordinates to prevent map crashes
+    const validStudios = useMemo(() => studios.filter(s => typeof s.lat === 'number' && typeof s.lng === 'number'), [studios])
+    const selectedStudio = useMemo(() => validStudios.find(s => s.id === selectedId), [validStudios, selectedId])
 
     const mapCenter = useMemo(() => {
-        if (studios.length === 0) return MANILA_CENTER
-        const lat = studios.reduce((acc, s) => acc + (s.lat || 0), 0) / studios.length
-        const lng = studios.reduce((acc, s) => acc + (s.lng || 0), 0) / studios.length
+        if (validStudios.length === 0) return MANILA_CENTER
+        const lat = validStudios.reduce((acc, s) => acc + (s.lat || 0), 0) / validStudios.length
+        const lng = validStudios.reduce((acc, s) => acc + (s.lng || 0), 0) / validStudios.length
         return { lat, lng }
-    }, [studios])
+    }, [validStudios])
 
     return (
         <div className="w-full h-[500px] rounded-3xl overflow-hidden border border-burgundy/5 shadow-inner relative">
@@ -53,7 +56,7 @@ export default function StudioSelectionMap({ studios, onSelect, apiKey }: Studio
                     gestureHandling={'greedy'}
                     className="w-full h-full"
                 >
-                    {studios.map((studio) => (
+                    {validStudios.map((studio) => (
                         <StudioMarker 
                             key={studio.id} 
                             studio={studio} 
@@ -64,7 +67,7 @@ export default function StudioSelectionMap({ studios, onSelect, apiKey }: Studio
 
                     {selectedStudio && (
                         <InfoWindow
-                            position={{ lat: selectedStudio.lat, lng: selectedStudio.lng }}
+                            position={{ lat: selectedStudio.lat!, lng: selectedStudio.lng! }}
                             onCloseClick={() => setSelectedId(null)}
                             headerDisabled
                             className="p-0 border-none bg-transparent"
@@ -102,7 +105,7 @@ function StudioMarker({ studio, onClick, isActive }: { studio: Studio, onClick: 
     return (
         <AdvancedMarker
             ref={markerRef}
-            position={{ lat: studio.lat, lng: studio.lng }}
+            position={{ lat: studio.lat!, lng: studio.lng! }}
             onClick={onClick}
             zIndex={isActive ? 100 : 1}
         >

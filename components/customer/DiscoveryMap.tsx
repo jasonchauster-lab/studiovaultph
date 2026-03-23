@@ -17,8 +17,8 @@ import clsx from 'clsx'
 interface Studio {
     id: string
     name: string
-    latitude: number
-    longitude: number
+    lat: number | null
+    lng: number | null
     location: string
     logo_url?: string
     banner_url?: string
@@ -28,8 +28,8 @@ interface Studio {
 interface Instructor {
     id: string
     full_name: string
-    latitude: number
-    longitude: number
+    home_base_lat: number | null
+    home_base_lng: number | null
     avatar_url?: string
     is_online?: boolean
 }
@@ -46,16 +46,20 @@ const MANILA_CENTER = { lat: 14.5995, lng: 120.9842 }
 export default function DiscoveryMap({ studios, instructors = [], apiKey, isRentMode = false }: DiscoveryMapProps) {
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [selectedType, setSelectedType] = useState<'studio' | 'instructor' | null>(null)
+
+    // Filter out studios/instructors with missing coordinates to prevent map crashes
+    const validStudios = useMemo(() => studios.filter(s => typeof s.lat === 'number' && typeof s.lng === 'number'), [studios])
+    const validInstructors = useMemo(() => instructors.filter(i => typeof i.home_base_lat === 'number' && typeof i.home_base_lng === 'number'), [instructors])
     
-    const selectedStudio = useMemo(() => studios.find(s => s.id === selectedId), [studios, selectedId])
-    const selectedInstructor = useMemo(() => instructors.find(i => i.id === selectedId), [instructors, selectedId])
+    const selectedStudio = useMemo(() => validStudios.find(s => s.id === selectedId), [validStudios, selectedId])
+    const selectedInstructor = useMemo(() => validInstructors.find(i => i.id === selectedId), [validInstructors, selectedId])
 
     const mapCenter = useMemo(() => {
-        if (studios.length === 0) return MANILA_CENTER
-        const lat = studios.reduce((acc, s) => acc + (s.latitude || 0), 0) / studios.length
-        const lng = studios.reduce((acc, s) => acc + (s.longitude || 0), 0) / studios.length
+        if (validStudios.length === 0) return MANILA_CENTER
+        const lat = validStudios.reduce((acc, s) => acc + (s.lat || 0), 0) / validStudios.length
+        const lng = validStudios.reduce((acc, s) => acc + (s.lng || 0), 0) / validStudios.length
         return { lat, lng }
-    }, [studios])
+    }, [validStudios])
 
     return (
         <div className="w-full h-[calc(100vh-200px)] min-h-[500px] rounded-[2.5rem] overflow-hidden border border-burgundy/5 shadow-2xl relative animate-in fade-in zoom-in-95 duration-700">
@@ -69,7 +73,7 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
                     gestureHandling={'greedy'}
                     className="w-full h-full"
                 >
-                    {studios.map((studio) => (
+                    {validStudios.map((studio) => (
                         <StudioMarker 
                             key={studio.id} 
                             studio={studio} 
@@ -81,7 +85,7 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
                         />
                     ))}
 
-                    {!isRentMode && instructors.map((instructor) => (
+                    {!isRentMode && validInstructors.map((instructor) => (
                         <InstructorMarker 
                             key={instructor.id} 
                             instructor={instructor} 
@@ -95,7 +99,7 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
 
                     {selectedStudio && selectedType === 'studio' && (
                         <InfoWindow
-                            position={{ lat: selectedStudio.latitude, lng: selectedStudio.longitude }}
+                            position={{ lat: selectedStudio.lat!, lng: selectedStudio.lng! }}
                             onCloseClick={() => {
                                 setSelectedId(null)
                                 setSelectedType(null)
@@ -142,7 +146,7 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
 
                     {selectedInstructor && selectedType === 'instructor' && (
                         <InfoWindow
-                            position={{ lat: selectedInstructor.latitude, lng: selectedInstructor.longitude }}
+                            position={{ lat: selectedInstructor.home_base_lat!, lng: selectedInstructor.home_base_lng! }}
                             onCloseClick={() => {
                                 setSelectedId(null)
                                 setSelectedType(null)
@@ -193,7 +197,7 @@ function StudioMarker({ studio, onClick, isActive }: { studio: Studio, onClick: 
     return (
         <AdvancedMarker
             ref={markerRef}
-            position={{ lat: studio.latitude, lng: studio.longitude }}
+            position={{ lat: studio.lat!, lng: studio.lng! }}
             onClick={onClick}
             zIndex={isActive ? 100 : 1}
         >
@@ -238,7 +242,7 @@ function InstructorMarker({ instructor, onClick, isActive }: { instructor: Instr
     return (
         <AdvancedMarker
             ref={markerRef}
-            position={{ lat: instructor.latitude, lng: instructor.longitude }}
+            position={{ lat: instructor.home_base_lat!, lng: instructor.home_base_lng! }}
             onClick={onClick}
             zIndex={isActive ? 100 : 1}
         >
