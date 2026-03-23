@@ -84,6 +84,9 @@ export default async function AdminDashboard({
             })(),
         ])
 
+        if (queuesRes.error) {
+            console.error('[AdminDashboard] Queue RPC failed:', queuesRes.error.message, queuesRes.error)
+        }
         const queues = queuesRes.data || {}
         const pendingCerts = queues.certifications || []
         const pendingStudios = queues.studios_verify || []

@@ -70,12 +70,12 @@ BEGIN
         ORDER BY b.created_at DESC
     ) j;
 
-    -- 5. Instructor payout requests
+    -- 5. Instructor payout requests (filter by role to avoid overlap with customer payouts)
     SELECT JSONB_AGG(j) INTO v_instructor_payouts FROM (
         SELECT pr.*, p.full_name as instructor_name, p.email as instructor_email, p.available_balance as instructor_balance
         FROM payout_requests pr
         JOIN profiles p ON pr.user_id = p.id
-        WHERE pr.status = 'pending' AND pr.user_id IS NOT NULL AND pr.studio_id IS NULL
+        WHERE pr.status = 'pending' AND pr.user_id IS NOT NULL AND pr.studio_id IS NULL AND p.role = 'instructor'
         ORDER BY pr.created_at DESC
     ) j;
 
@@ -89,12 +89,12 @@ BEGIN
         ORDER BY pr.created_at DESC
     ) j;
 
-    -- 7. Customer payout breakouts
+    -- 7. Customer payout breakouts (filter by role to avoid overlap with instructor payouts)
     SELECT JSONB_AGG(j) INTO v_customer_payouts FROM (
         SELECT pr.*, json_build_object('full_name', p.full_name, 'email', p.email, 'available_balance', p.available_balance) as profile
         FROM payout_requests pr
         JOIN profiles p ON pr.user_id = p.id
-        WHERE pr.status = 'pending' AND pr.user_id IS NOT NULL AND pr.instructor_id IS NULL AND pr.studio_id IS NULL
+        WHERE pr.status = 'pending' AND pr.user_id IS NOT NULL AND pr.studio_id IS NULL AND p.role = 'customer'
         ORDER BY pr.created_at DESC
     ) j;
 

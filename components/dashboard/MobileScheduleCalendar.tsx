@@ -151,7 +151,7 @@ export default function MobileScheduleCalendar({
                         <h2 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tightest leading-none">
                             {isMounted && format(selectedDate, 'MMMM yyyy')}
                         </h2>
-                        <p className="text-[9px] sm:text-[10px] font-black tracking-[0.3em] sm:tracking-[0.4em] text-charcoal/30 uppercase mt-1 sm:mt-2">Schedule View</p>
+                        <p className="text-[9px] sm:text-[10px] font-black tracking-[0.3em] sm:tracking-[0.4em] text-charcoal/60 uppercase mt-1 sm:mt-2">Schedule View</p>
                     </div>
                     <div className="flex bg-off-white/50 backdrop-blur-sm rounded-full p-0.5 border border-border-grey/60">
                         <button
@@ -256,7 +256,7 @@ export default function MobileScheduleCalendar({
                                 {currentTimeIndex === index && (
                                     <div className="flex items-center gap-3 py-1.5 animate-in fade-in slide-in-from-left duration-700">
                                         <div className="w-2.5 h-2.5 rounded-full bg-burgundy shadow-[0_0_12px_rgba(67,48,46,0.4)] flex-shrink-0" />
-                                        <div className="h-[2px] flex-1 bg-forest opacity-30" />
+                                        <div className="h-[2px] flex-1 bg-forest opacity-50" />
                                         <span className="text-[8px] font-black text-charcoal uppercase tracking-widest whitespace-nowrap">Now</span>
                                     </div>
                                 )}
@@ -267,7 +267,7 @@ export default function MobileScheduleCalendar({
                                         "w-full rounded-2xl p-4.5 shadow-tight active:scale-[0.98] transition-all duration-300 flex flex-col gap-4 relative overflow-hidden group cursor-pointer border",
                                         session.is_booked
                                             ? "bg-[#1e4438] text-white border-white/20 shadow-md"
-                                            : "bg-white border-border-grey/30 text-charcoal"
+                                            : "bg-[#FDF6E3]/30 border-border-grey text-charcoal"
                                     )}
                                 >
                                     {session.is_booked && (
@@ -276,7 +276,7 @@ export default function MobileScheduleCalendar({
                                     <div className="flex justify-between items-start gap-3">
                                         <div className="space-y-2 flex-1 min-w-0">
                                             <div className={clsx("flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]", session.is_booked ? "text-white" : "text-charcoal/30")}>
-                                                <div className={clsx("px-3 py-1.5 rounded-xl border flex items-center gap-2.5 w-full sm:w-auto", session.is_booked ? "bg-white/20 border-white/20 shadow-inner" : "bg-off-white/50 border-border-grey/40")}>
+                                                <div className={clsx("px-3 py-1.5 rounded-xl border flex items-center gap-2.5 w-full sm:w-auto", session.is_booked ? "bg-white/20 border-white/20 shadow-inner" : "bg-white/60 border-border-grey/60")}>
                                                     <Clock className="w-3.5 h-3.5 shrink-0" />
                                                     <span className="truncate">{formatTo12Hour(session.start_time)} — {formatTo12Hour(session.end_time)}</span>
                                                 </div>
@@ -300,7 +300,7 @@ export default function MobileScheduleCalendar({
                                         )}
                                     </div>
 
-                                    <div className={clsx("flex flex-wrap items-center gap-2 pt-2 border-t", session.is_booked ? "border-white/10" : "border-[#EADED7]")}>
+                                    <div className={clsx("flex flex-wrap items-center gap-2 pt-2 border-t", session.is_booked ? "border-white/10" : "border-border-grey/60")}>
                                         {session.locations ? (
                                             session.locations.map((loc: string, idx: number) => (
                                                 <a 
