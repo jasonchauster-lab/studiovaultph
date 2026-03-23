@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { updateStudio } from '@/app/(dashboard)/studio/actions'
+import { updateStudio } from '@/app/(dashboard)/studio/studio-actions'
 import { Loader2, Save, Camera, User, X, Upload, CheckCircle, AlertCircle } from 'lucide-react'
 import clsx from 'clsx'
 import { STUDIO_AMENITIES } from '@/types'

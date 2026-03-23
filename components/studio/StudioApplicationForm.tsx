@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { createStudio } from '@/app/(dashboard)/studio/actions'
+import { createStudio } from '@/app/(dashboard)/studio/studio-actions'
 import { Loader2, Upload, CheckCircle, X, ShieldCheck, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { normalizeImageFile, uploadContentType } from '@/lib/utils/image-utils'
