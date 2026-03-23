@@ -41,6 +41,12 @@ export default async function InstructorDashboardPage({ searchParams }: { search
         // Fallback or error state could be handled here
     }
 
+    // Fetch verified studios for the map selector
+    const { data: studios } = await supabase
+        .from('studios')
+        .select('*')
+        .eq('is_verified', true);
+
     // Check verification status
     if (!dashboardData?.is_verified) {
         redirect('/instructor/onboarding');
@@ -49,6 +55,7 @@ export default async function InstructorDashboardPage({ searchParams }: { search
     return (
         <InstructorDashboardClient
             userId={user.id}
+            studios={studios || []}
             initialCalendarBookings={dashboardData?.calendar_bookings || []}
             initialUpcomingBookings={dashboardData?.upcoming_bookings || []}
             availableBalance={dashboardData?.balance || 0}

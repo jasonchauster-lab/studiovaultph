@@ -16,6 +16,8 @@ import InstructorStatCards from './InstructorStatCards';
 import RevenueTrendChart from './RevenueTrendChart';
 import MobileScheduleCalendar from '@/components/dashboard/MobileScheduleCalendar';
 import { deleteAvailability } from '@/app/(dashboard)/instructor/schedule/actions';
+import StudioSelectionMap from '@/components/instructor/StudioSelectionMap';
+import { Navigation } from 'lucide-react';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/Toast';
@@ -26,6 +28,7 @@ import DashboardErrorBoundary from '@/components/shared/DashboardErrorBoundary';
 
 interface InstructorDashboardClientProps {
     userId: string;
+    studios: any[];
     initialCalendarBookings: any[];
     initialUpcomingBookings: any[];
     availableBalance: number;
@@ -49,6 +52,7 @@ interface InstructorDashboardClientProps {
 
 export default function InstructorDashboardClient({
     userId,
+    studios,
     initialCalendarBookings,
     initialUpcomingBookings,
     availableBalance,
@@ -103,6 +107,8 @@ export default function InstructorDashboardClient({
     const [editingSlot, setEditingSlot] = useState<any>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+    const [selectedMapStudio, setSelectedMapStudio] = useState<any>(null);
     const [currentSlotHistory, setCurrentSlotHistory] = useState<any[]>([]);
 
     // State for Add/Edit Form
@@ -219,11 +225,6 @@ export default function InstructorDashboardClient({
         if (e) e.preventDefault();
         if (isSubmitting) return;
 
-        if (!instructorProfile?.home_base_address) {
-            alert('Please set your Service Area in profile settings first.');
-            return;
-        }
-
         setIsSubmitting(true);
         const { generateRecurringAvailability } = await import('@/app/(dashboard)/instructor/schedule/actions');
 
@@ -233,7 +234,7 @@ export default function InstructorDashboardClient({
             days: [new Date(singleDate).getDay()],
             startTime: singleTime,
             endTime: singleEndTime,
-            locations: [instructorProfile?.home_base_address || ''],
+            locations: [selectedMapStudio ? `${selectedMapStudio.name} - ${selectedMapStudio.location}` : (instructorProfile?.home_base_address || '')],
             equipment: instructorProfile?.teaching_equipment || []
         });
 
@@ -864,17 +865,51 @@ export default function InstructorDashboardClient({
 
 
                                     <div className="pt-6 space-y-4">
-                                        {!instructorProfile?.home_base_address && (
+                                        <div className="p-5 bg-burgundy/5 rounded-2xl border border-burgundy/10 relative overflow-hidden group/loc">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin className="w-3.5 h-3.5 text-burgundy" />
+                                                    <span className="text-[10px] font-black text-burgundy uppercase tracking-widest">Service Area</span>
+                                                </div>
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => setIsMapModalOpen(true)}
+                                                    className="px-3 py-1.5 bg-burgundy/10 hover:bg-burgundy text-burgundy hover:text-white rounded-lg text-[8px] font-black uppercase tracking-widest transition-all border border-burgundy/10 flex items-center gap-2 active:scale-95"
+                                                >
+                                                    <Navigation className="w-3 h-3" /> Find Studio on Map
+                                                </button>
+                                            </div>
+                                            
+                                            <p className="text-[11px] font-bold text-burgundy">
+                                                {selectedMapStudio ? `${selectedMapStudio.name} - ${selectedMapStudio.location}` : (instructorProfile?.home_base_address || 'No service area set')}
+                                            </p>
+
+                                            {selectedMapStudio && (
+                                                <div className="mt-2 flex items-center gap-2">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-forest animate-pulse" />
+                                                    <span className="text-[9px] font-black text-forest uppercase tracking-widest">Selected via Map</span>
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => setSelectedMapStudio(null)}
+                                                        className="ml-auto text-[9px] font-black text-burgundy/40 hover:text-burgundy uppercase"
+                                                    >
+                                                        Reset
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {!instructorProfile?.home_base_address && !selectedMapStudio && (
                                             <div className="p-4 bg-burgundy/5 border border-burgundy/10 rounded-2xl flex items-start gap-3">
                                                 <AlertCircle className="w-5 h-5 text-burgundy shrink-0 mt-0.5" />
                                                 <p className="text-[11px] font-bold text-burgundy/80 leading-relaxed uppercase tracking-wider">
-                                                    Service Area missing. Please set your home base in profile settings to activate sessions.
+                                                    Service Area missing. Please select a studio on the map or set your home base in profile settings.
                                                 </p>
                                             </div>
                                         )}
                                         <button 
                                             type="submit"
-                                            disabled={isSubmitting || !instructorProfile?.home_base_address}
+                                            disabled={isSubmitting || (!instructorProfile?.home_base_address && !selectedMapStudio)}
                                             className="w-full py-5 bg-forest text-white rounded-2xl text-[10px] font-bold hover:brightness-110 transition-all uppercase tracking-[0.3em] shadow-tight disabled:opacity-50 active:scale-95"
                                         >
                                             {isSubmitting ? 'Creating Session...' : 'Activate Session'}
@@ -943,6 +978,37 @@ export default function InstructorDashboardClient({
                         </div>
 
                         <button onClick={() => setSelectedStudio(null)} className="w-full py-6 bg-forest text-white rounded-[12px] text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-[1.2] transition-all shadow-md active:scale-95">CLOSE</button>
+                    </div>
+                </div>
+            )}
+            {/* Studio Selection Map Modal */}
+            {isMapModalOpen && (
+                <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-burgundy/40 backdrop-blur-md animate-in fade-in duration-500" onClick={() => setIsMapModalOpen(false)}>
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-4xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500 relative flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+                        <div className="p-8 border-b border-burgundy/5 flex justify-between items-center bg-[#faf9f6]">
+                            <div>
+                                <h3 className="text-3xl font-serif text-burgundy tracking-tighter">Select a Studio</h3>
+                                <p className="text-[10px] text-burgundy/40 font-bold uppercase tracking-[0.4em] mt-2">PICK A FACILITY ON THE SPATIAL DISCOVERY MAP</p>
+                            </div>
+                            <button onClick={() => setIsMapModalOpen(false)} className="p-4 bg-white hover:bg-off-white rounded-2xl text-burgundy/40 hover:text-burgundy transition-all border border-burgundy/5 shadow-tight">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        
+                        <div className="flex-1 overflow-hidden">
+                            <StudioSelectionMap 
+                                studios={studios} 
+                                apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
+                                onSelect={(studio) => {
+                                    setSelectedMapStudio(studio);
+                                    setIsMapModalOpen(false);
+                                }}
+                            />
+                        </div>
+
+                        <div className="p-8 bg-[#faf9f6] border-t border-burgundy/5 text-center">
+                            <p className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em] italic">Click on a facility marker to view details and select.</p>
+                        </div>
                     </div>
                 </div>
             )}

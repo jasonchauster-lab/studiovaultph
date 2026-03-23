@@ -26,7 +26,7 @@ export default async function InstructorSchedulePage(props: {
     const windowEndStr = format(windowEnd, 'yyyy-MM-dd')
 
     // Fetch existing availability, profile, and bookings with windowed filtering
-    const [availabilityRes, profileRes, bookingsRes] = await Promise.all([
+    const [availabilityRes, profileRes, bookingsRes, studiosRes] = await Promise.all([
         supabase
             .from('instructor_availability')
             .select('*')
@@ -50,12 +50,17 @@ export default async function InstructorSchedulePage(props: {
             .gte('slots.date', windowStartStr)
             .lte('slots.date', windowEndStr)
             .in('status', ['approved', 'completed', 'pending', 'cancelled_refunded', 'cancelled_charged', 'rejected'])
-            .order('created_at', { ascending: false })
+            .order('created_at', { ascending: false }),
+        supabase
+            .from('studios')
+            .select('id, name, location, latitude, longitude, logo_url, banner_url, description')
+            .eq('verified', true)
     ])
 
     const availability = availabilityRes.data
     const profile = profileRes.data
     const bookings = bookingsRes.data || []
+    const studios = studiosRes.data || []
 
     return (
         <div className="min-h-screen p-8 lg:p-12 bg-cream-50/30">
@@ -79,6 +84,7 @@ export default async function InstructorSchedulePage(props: {
                         currentUserId={user.id}
                         currentDate={currentDate}
                         instructorProfile={profile}
+                        studios={studios}
                     />
                 </div>
             </div>

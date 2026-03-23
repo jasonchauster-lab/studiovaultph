@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay, getHours, parseISO, setHours, setMinutes, getDay, parse, differenceInMinutes, isPast, addDays, subDays, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle, ChevronDown, ChevronUp, CheckCircle, Check, Pencil, Copy } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Trash2, MapPin, X, User, Box, ArrowUpRight, MessageSquare, AlertTriangle, ChevronDown, ChevronUp, CheckCircle, Check, Pencil, Copy, Navigation } from 'lucide-react'
 import clsx from 'clsx'
 import { toManilaDateStr, getManilaTodayStr, toManilaDate, getSlotDateTime, formatTo12Hour } from '@/lib/timezone'
 import { deleteAvailability, addAvailability } from '@/app/(dashboard)/instructor/schedule/actions'
@@ -14,6 +14,7 @@ import Link from 'next/link'
 
 import { createClient } from '@/lib/supabase/client'
 import MobileScheduleCalendar from '@/components/dashboard/MobileScheduleCalendar'
+import StudioSelectionMap from './StudioSelectionMap'
 
 interface Availability {
     id: string
@@ -38,6 +39,7 @@ interface InstructorScheduleCalendarProps {
         rates?: Record<string, number>;
         home_base_address?: string | null;
     } | null;
+    studios?: any[];
 }
 
 export default function InstructorScheduleCalendar({ 
@@ -45,7 +47,8 @@ export default function InstructorScheduleCalendar({
     bookings: initialBookings = [], 
     currentUserId, 
     currentDate,
-    instructorProfile
+    instructorProfile,
+    studios = []
 }: InstructorScheduleCalendarProps) {
     const safeDate = currentDate || new Date();
     const router = useRouter()
@@ -73,6 +76,8 @@ export default function InstructorScheduleCalendar({
     const [activeChat, setActiveChat] = useState<{ id: string, recipientId: string, name: string } | null>(null)
     const [view, setView] = useState<'day' | 'week' | 'month'>('week')
     const [isMounted, setIsMounted] = useState(false)
+    const [isMapModalOpen, setIsMapModalOpen] = useState(false)
+    const [selectedMapStudio, setSelectedMapStudio] = useState<any>(null)
 
     useEffect(() => {
         setIsMounted(true)
@@ -324,7 +329,7 @@ export default function InstructorScheduleCalendar({
             days: [new Date(singleDate).getDay()],
             startTime: singleTime,
             endTime: singleEndTime,
-            locations: [instructorProfile?.home_base_address || ''],
+            locations: [selectedMapStudio ? `${selectedMapStudio.name} - ${selectedMapStudio.location}` : (instructorProfile?.home_base_address || '')],
             equipment: instructorProfile?.teaching_equipment || []
         })
 
@@ -1047,17 +1052,45 @@ export default function InstructorScheduleCalendar({
                                 </div>
 
                                 <div className="space-y-6">
-                                    <div className="earth-card p-6 bg-burgundy/5 border border-burgundy/10 rounded-2xl">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <MapPin className="w-4 h-4 text-burgundy" />
-                                            <span className="text-[10px] font-black text-burgundy uppercase tracking-widest">Service Area Address</span>
+                                    <div className="earth-card p-6 bg-burgundy/5 border border-burgundy/10 rounded-2xl relative overflow-hidden group/loc">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <MapPin className="w-4 h-4 text-burgundy" />
+                                                <span className="text-[10px] font-black text-burgundy uppercase tracking-widest">Service Area Address</span>
+                                            </div>
+                                            <button 
+                                                type="button"
+                                                onClick={() => setIsMapModalOpen(true)}
+                                                className="px-3 py-1.5 bg-burgundy/10 hover:bg-burgundy text-burgundy hover:text-white rounded-lg text-[8px] font-black uppercase tracking-widest transition-all border border-burgundy/10 flex items-center gap-2 active:scale-95"
+                                            >
+                                                <Navigation className="w-3 h-3" /> Find Studio on Map
+                                            </button>
                                         </div>
-                                        <p className="text-sm font-serif text-charcoal-700">
-                                            {instructorProfile?.home_base_address || 'Address not set'}
-                                        </p>
-                                        <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-2 italic">
-                                            Changing this requires updating your profile.
-                                        </p>
+                                        
+                                        <div className="bg-white/40 p-4 rounded-xl border border-burgundy/5">
+                                            <p className="text-sm font-serif text-charcoal-700">
+                                                {selectedMapStudio ? `${selectedMapStudio.name} - ${selectedMapStudio.location}` : (instructorProfile?.home_base_address || 'Address not set')}
+                                            </p>
+                                        </div>
+                                        
+                                        {!selectedMapStudio && (
+                                            <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-3 italic">
+                                                Changing this requires updating your profile or selecting a studio.
+                                            </p>
+                                        )}
+                                        {selectedMapStudio && (
+                                            <div className="mt-3 flex items-center gap-2">
+                                                <span className="w-2 h-2 rounded-full bg-forest animate-pulse" />
+                                                <span className="text-[10px] font-black text-forest uppercase tracking-widest">Selected via Discovery Map</span>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => setSelectedMapStudio(null)}
+                                                    className="ml-auto text-[10px] font-black text-burgundy/40 hover:text-burgundy uppercase"
+                                                >
+                                                    Reset
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -1628,6 +1661,38 @@ export default function InstructorScheduleCalendar({
                     isExpired={false}
                     isOpen={true}
                 />
+            )}
+
+            {/* Map Studio Selection Modal */}
+            {isMapModalOpen && (
+                <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-burgundy/40 backdrop-blur-md animate-in fade-in duration-500" onClick={() => setIsMapModalOpen(false)}>
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-4xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500 relative flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+                        <div className="p-8 border-b border-burgundy/5 flex justify-between items-center bg-[#faf9f6]">
+                            <div>
+                                <h3 className="text-3xl font-serif text-burgundy tracking-tighter">Select a Studio</h3>
+                                <p className="text-[10px] text-burgundy/40 font-bold uppercase tracking-[0.4em] mt-2">PICK A FACILITY ON THE SPATIAL DISCOVERY MAP</p>
+                            </div>
+                            <button onClick={() => setIsMapModalOpen(false)} className="p-4 bg-white hover:bg-off-white rounded-2xl text-burgundy/40 hover:text-burgundy transition-all border border-burgundy/5 shadow-tight">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        
+                        <div className="flex-1 overflow-hidden">
+                            <StudioSelectionMap 
+                                studios={studios} 
+                                apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
+                                onSelect={(studio) => {
+                                    setSelectedMapStudio(studio)
+                                    setIsMapModalOpen(false)
+                                }}
+                            />
+                        </div>
+
+                        <div className="p-8 bg-[#faf9f6] border-t border-burgundy/5 text-center">
+                            <p className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em] italic">Click on a facility marker to view details and select.</p>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     )

@@ -77,7 +77,7 @@ export default function SidebarDrawer({ isOpen, onClose, role, profile, studioDa
                     <div className="mb-4 flex flex-col gap-2">
                         {role === 'instructor' && !isCustomerMode && (
                             <Link 
-                                href="/customer" 
+                                href="/customer?mode=rent" 
                                 onClick={onClose}
                                 className="mx-2 p-4 bg-forest/5 border-2 border-forest/20 text-forest rounded-2xl flex items-center gap-3 hover:bg-forest/10 transition-all font-black text-[11px] uppercase tracking-wider"
                             >

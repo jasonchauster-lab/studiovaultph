@@ -14,6 +14,7 @@ import { headers } from 'next/headers'
 import SaveButton from '@/components/shared/SaveButton'
 import SavedDiscovery from '@/components/customer/SavedDiscovery'
 import DiscoveryEmptyState from '@/components/customer/DiscoveryEmptyState'
+import DiscoveryViewManager from '@/components/customer/DiscoveryViewManager'
 
 interface SearchParams {
     q?: string;
@@ -27,6 +28,7 @@ interface SearchParams {
     lat?: string;
     lng?: string;
     radius?: string;
+    mode?: string;
 }
 
 export default async function CustomerDashboard({
@@ -269,213 +271,205 @@ export default async function CustomerDashboard({
                         userRole={profile?.role} 
                     />
                 </div>
+                {/* ─── Discovery View Manager (List / Map) ─── */}
+                <DiscoveryViewManager
+                    studios={studios}
+                    instructors={instructors}
+                    slots={slots}
+                    apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
+                    isRentMode={params.mode === 'rent'}
+                    listView={
+                        <div className="flex flex-col gap-y-32">
+                            {/* Saved for You (Customer Retention) */}
+                            <SavedDiscovery allInstructors={instructors} allStudios={studios} />
 
-                {/* ─── Sections ─── */}
-                <div className="flex flex-col gap-y-32">
-
-                    {/* Saved for You (Customer Retention) */}
-                    <SavedDiscovery allInstructors={instructors} allStudios={studios} />
-
-
-                    {/* ══════════════════════════════════════
-                        INSTRUCTORS SECTION
-                    ══════════════════════════════════════ */}
-                    {(profile?.role !== 'instructor') && (!params.type || params.type === 'instructor') && (
-                        <section className="animate-in fade-in slide-in-from-bottom-6 duration-1000">
-                            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-8 mb-8 sm:mb-16 border-b border-burgundy/5 pb-6 sm:pb-10">
-                                <div className="space-y-2 sm:space-y-3">
-                                    <div className="flex items-center gap-3 sm:gap-5">
-                                        <h2 className="text-2xl sm:text-5xl font-serif font-bold text-burgundy tracking-tight">Verified Instructors</h2>
-                                        <div className="px-3 sm:px-4 py-1.5 rounded-full bg-forest text-[9px] sm:text-[10px] font-black text-white uppercase tracking-[0.2em] sm:tracking-[0.25em] shadow-lg shadow-forest/20">
-                                            {instructors.length} Available
+                            {/* ══════════════════════════════════════
+                                INSTRUCTORS SECTION
+                            ══════════════════════════════════════ */}
+                            {(profile?.role !== 'instructor') && (!params.type || params.type === 'instructor') && (
+                                <section className="animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-8 mb-8 sm:mb-16 border-b border-burgundy/5 pb-6 sm:pb-10">
+                                        <div className="space-y-2 sm:space-y-3">
+                                            <div className="flex items-center gap-3 sm:gap-5">
+                                                <h2 className="text-2xl sm:text-5xl font-serif font-bold text-burgundy tracking-tight">Verified Instructors</h2>
+                                                <div className="px-3 sm:px-4 py-1.5 rounded-full bg-forest text-[9px] sm:text-[10px] font-black text-white uppercase tracking-[0.2em] sm:tracking-[0.25em] shadow-lg shadow-forest/20">
+                                                    {instructors.length} Available
+                                                </div>
+                                            </div>
+                                            <p className="text-burgundy/40 text-sm sm:text-lg font-medium max-w-2xl">World-class talent, personally vetted for quality and expertise.</p>
                                         </div>
                                     </div>
-                                    <p className="text-burgundy/40 text-sm sm:text-lg font-medium max-w-2xl">World-class talent, personally vetted for quality and expertise.</p>
-                                </div>
-                            </div>
 
-                            {instructors.length === 0 ? (
-                                <DiscoveryEmptyState 
-                                    title="No instructors found"
-                                    description="We couldn't find any instructors matching your current filters. Try broadening your search or clearing all filters."
-                                    icon={User}
-                                />
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {instructors.map(inst => {
-                                        const hasVerifiedCert = inst.certifications?.some((c: any) => c.verified)
-                                        return (
-                                            <div key={inst.id} className="atelier-card group flex flex-col h-full relative overflow-hidden">
-                                                {/* ── Banner: gradient lifestyle area ── */}
-                                                <div className="relative h-32 sm:h-44 bg-[#F5F2EB] overflow-hidden">
-                                                    {(inst.banner_url || inst.avatar_url) ? (
-                                                        <Image
-                                                            src={inst.banner_url || inst.avatar_url}
-                                                            alt={inst.full_name}
-                                                            fill
-                                                            className="object-cover group-hover:scale-110 transition-transform duration-[3000ms] ease-out will-change-transform opacity-40"
-                                                        />
-                                                    ) : (
-                                                        <>
-                                                            <div className="absolute inset-0 bg-gradient-to-br from-walking-vinnie/20 via-buttermilk/10 to-transparent opacity-60" />
-                                                            <div className="absolute -top-10 sm:-top-20 -right-10 sm:-right-20 w-48 sm:w-64 h-48 sm:h-64 bg-forest/5 rounded-full blur-[60px] sm:blur-[80px]" />
-                                                            <div className="absolute -bottom-10 sm:-bottom-20 -left-10 sm:-left-20 w-48 sm:w-64 h-48 sm:h-64 bg-burgundy/5 rounded-full blur-[60px] sm:blur-[80px]" />
-                                                        </>
-                                                    )}
-                                                    
-                                                    <div className="absolute inset-x-0 bottom-0 h-16 sm:h-20 bg-gradient-to-t from-white to-transparent" />
-                                                    
-                                                    {/* Save Button */}
-                                                    <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-20">
-                                                        <SaveButton id={inst.id} type="instructor" className="w-10 h-10 sm:w-12 sm:h-12 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-white/50" />
-                                                    </div>
-
-                                                    {/* Verified badge — top right */}
-
-                                                    {hasVerifiedCert && (
-                                                        <div className="absolute top-4 sm:top-6 right-4 sm:right-6 bg-white/90 backdrop-blur-md text-burgundy px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl flex items-center gap-2 z-10 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em] border border-burgundy/5 shadow-xl transition-all duration-500 group-hover:bg-forest group-hover:text-white group-hover:border-forest/20">
-                                                            <Award className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
-                                                            Verified Master
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* ── Circular instructor avatar overlapping bottom edge ── */}
-                                                {/* MOVED OUTSIDE OF overflow-hidden TO PREVENT CLIPPING */}
-                                                <div className="absolute top-20 sm:top-28 left-6 sm:left-8 z-30 transition-transform duration-700 group-hover:scale-105">
-                                                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-[3px] sm:border-4 border-white shadow-2xl overflow-hidden bg-white ring-1 ring-burgundy/5">
-                                                        <AvatarWithFallback
-                                                            src={inst.avatar_url}
-                                                            alt={inst.full_name}
-                                                            isOnline={inst.is_online}
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                {/* ── Card Body ── */}
-                                                <div className="p-6 sm:p-10 pt-12 sm:pt-16 flex flex-col gap-y-6 sm:gap-y-8 flex-1 relative">
-                                                    {/* Name + handle */}
-                                                    <div className="space-y-1 sm:space-y-2">
-                                                        <h3 className="text-2xl sm:text-3xl font-serif font-bold text-burgundy tracking-tight leading-tight group-hover:text-forest transition-colors duration-500">{inst.full_name}</h3>
-                                                        {inst.instagram_handle && (
-                                                            <p className="text-[9px] sm:text-[10px] font-black text-burgundy/20 uppercase tracking-[0.2em] sm:tracking-[0.3em] group-hover:text-forest/30 transition-colors duration-500">
-                                                                @{inst.instagram_handle}
-                                                            </p>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Rating and Badges container */}
-                                                    <div className="flex flex-col gap-6">
-                                                        {/* Star rating */}
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="px-3 py-1.5 rounded-xl bg-[#F5F2EB] border border-burgundy/5 flex items-center gap-2 shadow-sm">
-                                                                <StarRating
-                                                                    rating={ratingsMap[inst.id]?.average || null}
-                                                                    count={ratingsMap[inst.id]?.count}
-                                                                    size="xs"
+                                    {instructors.length === 0 ? (
+                                        <DiscoveryEmptyState 
+                                            title="No instructors found"
+                                            description="We couldn't find any instructors matching your current filters. Try broadening your search or clearing all filters."
+                                            icon={User}
+                                        />
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {instructors.map(inst => {
+                                                const hasVerifiedCert = inst.certifications?.some((c: any) => c.verified)
+                                                return (
+                                                    <div key={inst.id} className="atelier-card group flex flex-col h-full relative overflow-hidden">
+                                                        {/* ── Banner: gradient lifestyle area ── */}
+                                                        <div className="relative h-32 sm:h-44 bg-[#F5F2EB] overflow-hidden">
+                                                            {(inst.banner_url || inst.avatar_url) ? (
+                                                                <Image
+                                                                    src={inst.banner_url || inst.avatar_url}
+                                                                    alt={inst.full_name}
+                                                                    fill
+                                                                    className="object-cover group-hover:scale-110 transition-transform duration-[3000ms] ease-out will-change-transform opacity-40"
                                                                 />
-                                                                {ratingsMap[inst.id]?.count > 0 && (
-                                                                    <span className="text-[10px] text-burgundy/30 font-black uppercase tracking-widest border-l border-burgundy/10 pl-2">
-                                                                        {ratingsMap[inst.id].count} Reviews
-                                                                    </span>
+                                                            ) : (
+                                                                <>
+                                                                    <div className="absolute inset-0 bg-gradient-to-br from-walking-vinnie/20 via-buttermilk/10 to-transparent opacity-60" />
+                                                                    <div className="absolute -top-10 sm:-top-20 -right-10 sm:-right-20 w-48 sm:w-64 h-48 sm:h-64 bg-forest/5 rounded-full blur-[60px] sm:blur-[80px]" />
+                                                                    <div className="absolute -bottom-10 sm:-bottom-20 -left-10 sm:-left-20 w-48 sm:w-64 h-48 sm:h-64 bg-burgundy/5 rounded-full blur-[60px] sm:blur-[80px]" />
+                                                                </>
+                                                            )}
+                                                            
+                                                            <div className="absolute inset-x-0 bottom-0 h-16 sm:h-20 bg-gradient-to-t from-white to-transparent" />
+                                                            
+                                                            {/* Save Button */}
+                                                            <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-20">
+                                                                <SaveButton id={inst.id} type="instructor" className="w-10 h-10 sm:w-12 sm:h-12 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-white/50" />
+                                                            </div>
+
+                                                            {/* Verified badge — top right */}
+                                                            {hasVerifiedCert && (
+                                                                <div className="absolute top-4 sm:top-6 right-4 sm:right-6 bg-white/90 backdrop-blur-md text-burgundy px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl flex items-center gap-2 z-10 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em] border border-burgundy/5 shadow-xl transition-all duration-500 group-hover:bg-forest group-hover:text-white group-hover:border-forest/20">
+                                                                    <Award className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
+                                                                    Verified Master
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* ── Circular instructor avatar overlapping bottom edge ── */}
+                                                        <div className="absolute top-20 sm:top-28 left-6 sm:left-8 z-30 transition-transform duration-700 group-hover:scale-105">
+                                                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-[3px] sm:border-4 border-white shadow-2xl overflow-hidden bg-white ring-1 ring-burgundy/5">
+                                                                <AvatarWithFallback
+                                                                    src={inst.avatar_url}
+                                                                    alt={inst.full_name}
+                                                                    isOnline={inst.is_online}
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* ── Card Body ── */}
+                                                        <div className="p-6 sm:p-10 pt-12 sm:pt-16 flex flex-col gap-y-6 sm:gap-y-8 flex-1 relative">
+                                                            <div className="space-y-1 sm:space-y-2">
+                                                                <h3 className="text-2xl sm:text-3xl font-serif font-bold text-burgundy tracking-tight leading-tight group-hover:text-forest transition-colors duration-500">{inst.full_name}</h3>
+                                                                {inst.instagram_handle && (
+                                                                    <p className="text-[9px] sm:text-[10px] font-black text-burgundy/20 uppercase tracking-[0.2em] sm:tracking-[0.3em] group-hover:text-forest/30 transition-colors duration-500">
+                                                                        @{inst.instagram_handle}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="flex flex-col gap-6">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="px-3 py-1.5 rounded-xl bg-[#F5F2EB] border border-burgundy/5 flex items-center gap-2 shadow-sm">
+                                                                        <StarRating
+                                                                            rating={ratingsMap[inst.id]?.average || null}
+                                                                            count={ratingsMap[inst.id]?.count}
+                                                                            size="xs"
+                                                                        />
+                                                                        {ratingsMap[inst.id]?.count > 0 && (
+                                                                            <span className="text-[10px] text-burgundy/30 font-black uppercase tracking-widest border-l border-burgundy/10 pl-2">
+                                                                                {ratingsMap[inst.id].count} Reviews
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+
+                                                                {(inst.certifications || []).filter((c: any) => c.verified).length > 0 && (
+                                                                    <div className="flex flex-wrap gap-2">
+                                                                        {(inst.certifications || []).filter((c: any) => c.verified).slice(0, 3).map((c: any) => (
+                                                                            <span
+                                                                                key={c.id}
+                                                                                className="text-[9px] font-black uppercase tracking-[0.2em] bg-walking-vinnie/10 text-burgundy/40 px-3.5 py-1.5 rounded-xl border border-walking-vinnie/20 transition-all duration-500 group-hover:bg-forest/5 group-hover:text-forest/50 group-hover:border-forest/10"
+                                                                            >
+                                                                                {c.certification_body}
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="flex flex-col gap-y-4 mt-auto pt-8 border-t border-burgundy/5">
+                                                                <Link
+                                                                    href={`/instructors/${inst.id}`}
+                                                                    className="flex items-center justify-center w-full py-4.5 rounded-[1.25rem] bg-[#F5F2EB]/50 text-burgundy text-[11px] font-black uppercase tracking-[0.3em] border border-burgundy/5 hover:bg-white hover:border-burgundy/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-500"
+                                                                >
+                                                                    View Full Profile
+                                                                </Link>
+
+                                                                {params.date && params.time && params.location && params.location !== 'all' && params.equipment && params.equipment !== 'all' && (
+                                                                    <BookSessionButton
+                                                                        instructorId={inst.id}
+                                                                        date={params.date}
+                                                                        time={params.time}
+                                                                        location={params.location}
+                                                                        equipment={params.equipment}
+                                                                    />
                                                                 )}
                                                             </div>
                                                         </div>
-
-                                                        {/* Certification badges */}
-                                                        {(inst.certifications || []).filter((c: any) => c.verified).length > 0 && (
-                                                            <div className="flex flex-wrap gap-2">
-                                                                {(inst.certifications || []).filter((c: any) => c.verified).slice(0, 3).map((c: any) => (
-                                                                    <span
-                                                                        key={c.id}
-                                                                        className="text-[9px] font-black uppercase tracking-[0.2em] bg-walking-vinnie/10 text-burgundy/40 px-3.5 py-1.5 rounded-xl border border-walking-vinnie/20 transition-all duration-500 group-hover:bg-forest/5 group-hover:text-forest/50 group-hover:border-forest/10"
-                                                                    >
-                                                                        {c.certification_body}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        )}
                                                     </div>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
+                                </section>
+                            )}
 
-                                                    {/* Actions */}
-                                                    <div className="flex flex-col gap-y-4 mt-auto pt-8 border-t border-burgundy/5">
-                                                        <Link
-                                                            href={`/instructors/${inst.id}`}
-                                                            className="flex items-center justify-center w-full py-4.5 rounded-[1.25rem] bg-[#F5F2EB]/50 text-burgundy text-[11px] font-black uppercase tracking-[0.3em] border border-burgundy/5 hover:bg-white hover:border-burgundy/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-500"
-                                                        >
-                                                            View Full Profile
-                                                        </Link>
-
-                                                        {/* Book Session — only when all required filters are active */}
-                                                        {params.date && params.time && params.location && params.location !== 'all' && params.equipment && params.equipment !== 'all' && (
-                                                            <BookSessionButton
-                                                                instructorId={inst.id}
-                                                                date={params.date}
-                                                                time={params.time}
-                                                                location={params.location}
-                                                                equipment={params.equipment}
-                                                            />
-                                                        )}
-                                                    </div>
+                            {/* ══════════════════════════════════════
+                                STUDIOS SECTION — Marketplace Cards
+                            ══════════════════════════════════════ */}
+                            {(!params.type || params.type === 'studio') && (
+                                <section className="animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-150">
+                                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-8 mb-8 sm:mb-16 border-b border-burgundy/5 pb-6 sm:pb-10">
+                                        <div className="space-y-2 sm:space-y-3">
+                                            <div className="flex items-center gap-3 sm:gap-5">
+                                                <h2 className="text-2xl sm:text-5xl font-serif font-bold text-burgundy tracking-tight">Partner Studios</h2>
+                                                <div className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-buttermilk/20 border border-buttermilk/40 text-[9px] sm:text-[10px] font-black text-burgundy/50 uppercase tracking-[0.2em] sm:tracking-[0.25em] shadow-sm">
+                                                    {studios?.length || 0} Registered
                                                 </div>
                                             </div>
-                                        )
-                                    })}
-                                </div>
-                            )}
-                        </section>
-                    )}
-
-                    {/* ══════════════════════════════════════
-                        STUDIOS SECTION — Marketplace Cards
-                    ══════════════════════════════════════ */}
-                    {(!params.type || params.type === 'studio') && (
-                        <section className="animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-150">
-                            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-8 mb-8 sm:mb-16 border-b border-burgundy/5 pb-6 sm:pb-10">
-                                <div className="space-y-2 sm:space-y-3">
-                                    <div className="flex items-center gap-3 sm:gap-5">
-                                        <h2 className="text-2xl sm:text-5xl font-serif font-bold text-burgundy tracking-tight">Partner Studios</h2>
-                                        <div className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-buttermilk/20 border border-buttermilk/40 text-[9px] sm:text-[10px] font-black text-burgundy/50 uppercase tracking-[0.2em] sm:tracking-[0.25em] shadow-sm">
-                                            {studios?.length || 0} Registered
+                                            <p className="text-burgundy/40 text-sm sm:text-lg font-medium max-w-2xl">Top-tier facilities curated for your practice and excellence.</p>
                                         </div>
                                     </div>
-                                    <p className="text-burgundy/40 text-sm sm:text-lg font-medium max-w-2xl">Top-tier facilities curated for your practice and excellence.</p>
-                                </div>
-                            </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
-                                {studios?.length === 0 ? (
-                                    <div className="col-span-full">
-                                        <DiscoveryEmptyState 
-                                            title="No partner studios found"
-                                            description="No studios match your criteria. Try adjusting your equipment filters or increasing the search radius."
-                                            icon={Home}
-                                        />
-                                    </div>
-                                ) : (
-                                    studios?.map(studio => (
-                                        <div key={studio.id} className="atelier-card group flex flex-col h-full ring-1 ring-burgundy/[0.02] overflow-hidden">
-                                            {/* ── Banner Image ── */}
-                                            <div className="relative aspect-[16/10] overflow-hidden bg-[#F5F2EB]">
-                                                {(studio.banner_url || studio.logo_url) ? (
-                                                    <Image
-                                                        src={studio.banner_url || studio.logo_url}
-                                                        alt={studio.name}
-                                                        fill
-                                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                                        className="object-cover group-hover:scale-110 transition-transform duration-[3000ms] ease-out will-change-transform"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-stone-50 to-walking-vinnie/20">
-                                                        <span className="text-burgundy/10 font-serif italic text-7xl sm:text-8xl select-none group-hover:scale-110 transition-transform duration-1000">
-                                                            {studio.name.slice(0, 1)}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                                
-                                                <div className="absolute inset-0 bg-burgundy/5 group-hover:bg-transparent transition-colors duration-1000" />
-
-                                                        {/* Location overlay — top left */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
+                                        {studios?.length === 0 ? (
+                                            <div className="col-span-full">
+                                                <DiscoveryEmptyState 
+                                                    title="No partner studios found"
+                                                    description="No studios match your criteria. Try adjusting your equipment filters or increasing the search radius."
+                                                    icon={Home}
+                                                />
+                                            </div>
+                                        ) : (
+                                            studios?.map(studio => (
+                                                <div key={studio.id} className="atelier-card group flex flex-col h-full ring-1 ring-burgundy/[0.02] overflow-hidden">
+                                                    <div className="relative aspect-[16/10] overflow-hidden bg-[#F5F2EB]">
+                                                        {(studio.banner_url || studio.logo_url) ? (
+                                                            <Image
+                                                                src={studio.banner_url || studio.logo_url}
+                                                                alt={studio.name}
+                                                                fill
+                                                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                                className="object-cover group-hover:scale-110 transition-transform duration-[3000ms] ease-out will-change-transform"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-stone-50 to-walking-vinnie/20">
+                                                                <span className="text-burgundy/10 font-serif italic text-7xl sm:text-8xl select-none group-hover:scale-110 transition-transform duration-1000">
+                                                                    {studio.name.slice(0, 1)}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        <div className="absolute inset-0 bg-burgundy/5 group-hover:bg-transparent transition-colors duration-1000" />
                                                         <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-10 flex items-center gap-3">
                                                             <SaveButton id={studio.id} type="studio" className="w-10 h-10 sm:w-12 sm:h-12 bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-white/50" />
                                                             <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-xl border border-white/50 transition-all duration-500 group-hover:bg-forest group-hover:text-white group-hover:border-forest/20">
@@ -483,111 +477,100 @@ export default async function CustomerDashboard({
                                                                 <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] sm:tracking-[0.15em]">{studio.location}</span>
                                                             </div>
                                                         </div>
-
-
-                                                {/* Studio small logo overlay — bottom left circular */}
-                                                <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 z-10 hidden sm:block transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
-                                                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[4px] sm:border-[6px] border-white shadow-2xl overflow-hidden bg-white ring-1 ring-burgundy/5">
-                                                        <AvatarWithFallback
-                                                            src={studio.logo_url}
-                                                            alt={studio.name}
-                                                            initials={studio.name.slice(0, 1)}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* ── Card Body ── */}
-                                            <div className="p-6 sm:p-10 flex flex-col flex-1 gap-y-6 sm:gap-y-8">
-
-                                                {/* Studio name + rating */}
-                                                <div className="flex items-start justify-between gap-4 sm:gap-6">
-                                                    <div className="space-y-1 sm:space-y-2">
-                                                        <h3 className="text-2xl sm:text-3xl font-serif font-bold text-burgundy tracking-tight leading-tight group-hover:text-forest transition-colors duration-500">{studio.name}</h3>
-                                                        <p className="text-[9px] sm:text-[10px] font-black text-burgundy/20 uppercase tracking-[0.2em] sm:tracking-[0.3em]">Partner Studio</p>
-                                                    </div>
-                                                    <div className="shrink-0 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-[#F5F2EB] border border-burgundy/5 flex flex-col items-center gap-0.5 sm:gap-1 shadow-sm transition-all duration-500 group-hover:bg-white group-hover:border-burgundy/10">
-                                                        <StarRating
-                                                            rating={ratingsMap[studio.owner_id]?.average || null}
-                                                            count={ratingsMap[studio.owner_id]?.count}
-                                                            size="xs"
-                                                        />
-                                                        {(!ratingsMap[studio.owner_id]?.count || ratingsMap[studio.owner_id].count === 0) && (
-                                                            <span className="text-[8px] font-black text-burgundy/25 uppercase tracking-[0.1em]">Vault Choice</span>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                {/* Description */}
-                                                <p className="text-[13px] sm:text-[14px] text-burgundy/40 leading-relaxed line-clamp-2 italic font-medium transition-colors duration-500 group-hover:text-burgundy/60">
-                                                    {studio.description || 'A premiere pilates studio dedicated to your well-being and excellence.'}
-                                                </p>
-
-                                                {/* Features/Equipment */}
-                                                {(studio.reformers_count || 0) > 0 && (
-                                                    <div className="flex flex-wrap gap-2">
-                                                        <div className="flex items-center gap-2.5 sm:gap-3 bg-walking-vinnie/5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-walking-vinnie/10 group-hover:border-forest/20 group-hover:bg-forest/5 transition-all duration-500">
-                                                            <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-forest animate-pulse" />
-                                                            <span className="text-[9px] sm:text-[10px] font-black text-burgundy/40 uppercase tracking-[0.15em] sm:tracking-[0.2em] group-hover:text-forest/70">
-                                                                {studio.reformers_count} Reformers
-                                                            </span>
+                                                        <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 z-10 hidden sm:block transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
+                                                            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[4px] sm:border-[6px] border-white shadow-2xl overflow-hidden bg-white ring-1 ring-burgundy/5">
+                                                                <AvatarWithFallback
+                                                                    src={studio.logo_url}
+                                                                    alt={studio.name}
+                                                                    initials={studio.name.slice(0, 1)}
+                                                                />
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                )}
 
-                                                {/* Book Now Button — Full width at bottom */}
-                                                <div className="pt-6 sm:pt-8 mt-auto border-t border-burgundy/5">
-                                                    <Link
-                                                        href={`/studios/${studio.id}`}
-                                                        className="flex items-center justify-center w-full py-4 sm:py-5 rounded-[1.25rem] sm:rounded-[1.5rem] bg-[#F5F2EB]/50 text-burgundy text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] border border-burgundy/5 hover:bg-forest hover:text-white hover:border-forest/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-500"
-                                                    >
-                                                        Book Studio
-                                                    </Link>
+                                                    <div className="p-6 sm:p-10 flex flex-col flex-1 gap-y-6 sm:gap-y-8">
+                                                        <div className="flex items-start justify-between gap-4 sm:gap-6">
+                                                            <div className="space-y-1 sm:space-y-2">
+                                                                <h3 className="text-2xl sm:text-3xl font-serif font-bold text-burgundy tracking-tight leading-tight group-hover:text-forest transition-colors duration-500">{studio.name}</h3>
+                                                                <p className="text-[9px] sm:text-[10px] font-black text-burgundy/20 uppercase tracking-[0.2em] sm:tracking-[0.3em]">Partner Studio</p>
+                                                            </div>
+                                                            <div className="shrink-0 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-[#F5F2EB] border border-burgundy/5 flex flex-col items-center gap-0.5 sm:gap-1 shadow-sm transition-all duration-500 group-hover:bg-white group-hover:border-burgundy/10">
+                                                                <StarRating
+                                                                    rating={ratingsMap[studio.owner_id]?.average || null}
+                                                                    count={ratingsMap[studio.owner_id]?.count}
+                                                                    size="xs"
+                                                                />
+                                                                {(!ratingsMap[studio.owner_id]?.count || ratingsMap[studio.owner_id].count === 0) && (
+                                                                    <span className="text-[8px] font-black text-burgundy/25 uppercase tracking-[0.1em]">Vault Choice</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-[13px] sm:text-[14px] text-burgundy/40 leading-relaxed line-clamp-2 italic font-medium transition-colors duration-500 group-hover:text-burgundy/60">
+                                                            {studio.description || 'A premiere pilates studio dedicated to your well-being and excellence.'}
+                                                        </p>
+                                                        {(studio.reformers_count || 0) > 0 && (
+                                                            <div className="flex flex-wrap gap-2">
+                                                                <div className="flex items-center gap-2.5 sm:gap-3 bg-walking-vinnie/5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-walking-vinnie/10 group-hover:border-forest/20 group-hover:bg-forest/5 transition-all duration-500">
+                                                                    <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-forest animate-pulse" />
+                                                                    <span className="text-[9px] sm:text-[10px] font-black text-burgundy/40 uppercase tracking-[0.15em] sm:tracking-[0.2em] group-hover:text-forest/70">
+                                                                        {studio.reformers_count} Reformers
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        <div className="pt-6 sm:pt-8 mt-auto border-t border-burgundy/5">
+                                                            <Link
+                                                                href={`/studios/${studio.id}`}
+                                                                className="flex items-center justify-center w-full py-4 sm:py-5 rounded-[1.25rem] sm:rounded-[1.5rem] bg-[#F5F2EB]/50 text-burgundy text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] border border-burgundy/5 hover:bg-forest hover:text-white hover:border-forest/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-500"
+                                                            >
+                                                                Book Studio
+                                                            </Link>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* ══════════════════════════════════════
+                                SLOTS SECTION
+                            ══════════════════════════════════════ */}
+                            {params.type === 'slot' && (
+                                <section>
+                                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-3">
+                                                <h2 className="text-3xl font-serif font-bold text-burgundy tracking-tight">Available Sessions</h2>
+                                                <div className="px-2 py-0.5 rounded-md bg-walking-vinnie/20 border border-walking-vinnie/30 text-[10px] font-black text-burgundy/60 uppercase tracking-widest">
+                                                    {slots.length} Ready
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </section>
-                    )}
-
-                    {/* ══════════════════════════════════════
-                        SLOTS SECTION
-                    ══════════════════════════════════════ */}
-                    {params.type === 'slot' && (
-                        <section>
-                            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-3">
-                                        <h2 className="text-3xl font-serif font-bold text-burgundy tracking-tight">Available Sessions</h2>
-                                        <div className="px-2 py-0.5 rounded-md bg-walking-vinnie/20 border border-walking-vinnie/30 text-[10px] font-black text-burgundy/60 uppercase tracking-widest">
-                                            {slots.length} Ready
+                                            <p className="text-muted-burgundy/60 text-sm font-medium">Instant booking for your preferred time slots.</p>
                                         </div>
                                     </div>
-                                    <p className="text-muted-burgundy/60 text-sm font-medium">Instant booking for your preferred time slots.</p>
-                                </div>
-                            </div>
 
-                            {slots.length === 0 ? (
-                                <DiscoveryEmptyState 
-                                    title="No sessions available"
-                                    description="There are no sessions available for the selected period. Please try a different date or time range."
-                                    icon={Clock}
-                                />
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                    {slots.map(slot => (
-                                        <div key={slot.id} className="h-full">
-                                            <SlotCard slot={slot} />
+                                    {slots.length === 0 ? (
+                                        <DiscoveryEmptyState 
+                                            title="No sessions available"
+                                            description="There are no sessions available for the selected period. Please try a different date or time range."
+                                            icon={Clock}
+                                        />
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                            {slots.map(slot => (
+                                                <div key={slot.id} className="h-full">
+                                                    <SlotCard slot={slot} />
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
+                                    )}
+                                </section>
                             )}
-                        </section>
-                    )}
-
-                </div>
+                        </div>
+                    }
+                />
             </div>
         </div>
     )
