@@ -128,7 +128,7 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
             
             if (lat && lng) {
                 map.panTo({ lat, lng })
-                map.setZoom(15)
+                map.setZoom(selectedType === 'studio' ? 17 : 15)
             }
         }
     }, [selectedId, selectedType, map, validStudios, validInstructors])
