@@ -134,11 +134,15 @@ export default function SidebarDrawer({ isOpen, onClose, role, profile, studioDa
                         </>
                     ) : (
                         <>
-                            {role === 'instructor' && (
+                             {role === 'instructor' && (
                                 <>
-                                    <Link href="/instructor/sessions" onClick={onClose} className={linkClass(pathname.startsWith('/instructor/sessions'))}>
+                                    <Link href="/instructor/schedule" onClick={onClose} className={linkClass(pathname.startsWith('/instructor/schedule'))}>
                                         <Calendar className="w-5 h-5" />
-                                        <span className="text-[11px] font-black uppercase tracking-widest">Sessions</span>
+                                        <span className="text-[11px] font-black uppercase tracking-widest">Schedule</span>
+                                    </Link>
+                                    <Link href="/instructor/sessions" onClick={onClose} className={linkClass(pathname.startsWith('/instructor/sessions'))}>
+                                        <History className="w-5 h-5" />
+                                        <span className="text-[11px] font-black uppercase tracking-widest">History</span>
                                     </Link>
                                     <Link href="/instructor/earnings" onClick={onClose} className={linkClass(pathname.startsWith('/instructor/earnings'))}>
                                         <DollarSign className="w-5 h-5" />
@@ -148,6 +152,10 @@ export default function SidebarDrawer({ isOpen, onClose, role, profile, studioDa
                             )}
                             {role === 'studio' && (
                                 <>
+                                    <Link href="/studio/schedule" onClick={onClose} className={linkClass(pathname.startsWith('/studio/schedule'))}>
+                                        <Calendar className="w-5 h-5" />
+                                        <span className="text-[11px] font-black uppercase tracking-widest">Schedule</span>
+                                    </Link>
                                     <Link href="/studio/earnings" onClick={onClose} className={linkClass(pathname.startsWith('/studio/earnings'))}>
                                         <DollarSign className="w-5 h-5" />
                                         <span className="text-[11px] font-black uppercase tracking-widest">Earnings</span>

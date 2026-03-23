@@ -58,21 +58,21 @@ export default async function InstructorSchedulePage(props: {
     const bookings = bookingsRes.data || []
 
     return (
-        <div className="min-h-screen p-8 lg:p-12">
+        <div className="min-h-screen p-8 lg:p-12 bg-cream-50/30">
             <div className="max-w-7xl mx-auto space-y-12">
                 <div>
                     <Link
                         href="/instructor"
-                        className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/50 hover:text-gold uppercase tracking-[0.3em] transition-all mb-8 group"
+                        className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/50 hover:text-forest uppercase tracking-[0.3em] transition-all mb-8 group"
                     >
                         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                         BACK TO DASHBOARD
                     </Link>
-                    <h1 className="text-2xl sm:text-5xl font-serif text-charcoal tracking-tighter mb-4">My Schedule</h1>
-                    <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Set your weekly availability so customers can book you.</p>
+                    <h1 className="text-2xl sm:text-5xl font-serif text-charcoal tracking-tighter mb-4">Instructor Schedule</h1>
+                    <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Manage your availability and upcoming student sessions.</p>
                 </div>
 
-                <div className="overflow-hidden rounded-[2.5rem] shadow-cloud border border-white/60">
+                <div className="overflow-hidden rounded-[2.5rem] shadow-cloud border border-white/60 bg-white">
                     <InstructorScheduleCalendar
                         availability={availability || []}
                         bookings={bookings}

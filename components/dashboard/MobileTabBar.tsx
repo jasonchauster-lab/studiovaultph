@@ -15,8 +15,8 @@ export default function MobileTabBar({ onOpenMenu }: MobileTabBarProps) {
 
     const navItems = [
         { label: 'Find', icon: Search, href: '/customer' },
-        { label: 'Sessions', icon: Calendar, href: '/customer/bookings' },
-        { label: 'Wallet', icon: Wallet, href: '/customer/wallet' },
+        { label: 'Schedule', icon: Calendar, href: pathname.includes('/instructor') ? '/instructor/schedule' : pathname.includes('/studio') ? '/studio/schedule' : '/customer/bookings' },
+        { label: 'Wallet', icon: Wallet, href: pathname.includes('/instructor') ? '/instructor/earnings' : pathname.includes('/studio') ? '/studio/earnings' : '/customer/wallet' },
     ]
 
     return (

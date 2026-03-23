@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2, Pencil, Copy, Trash2, AlertTriangle, CheckCircle, Plus, RefreshCcw, UserCheck } from 'lucide-react'
+import { Calendar, Clock, MessageSquare, X, ChevronRight, User, MapPin, ArrowUpRight, AlertCircle, Box, Loader2, Pencil, Copy, Trash2, AlertTriangle, CheckCircle, Plus, RefreshCcw, UserCheck, Wallet } from 'lucide-react'
 import Avatar from '@/components/shared/Avatar';
 
 import Link from 'next/link';
@@ -286,75 +286,105 @@ export default function InstructorDashboardClient({
 
             {/* Dashboard Grid Container */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10">
-                <div className="lg:col-span-8">
-                    {/* Desktop Calendar */}
-                    <div className="hidden lg:block border border-burgundy/5 rounded-xl overflow-hidden bg-white">
-                        <InstructorScheduleCalendar
-                            availability={availability}
-                            bookings={calendarBookings}
-                            currentUserId={userId || ''}
-                            currentDate={new Date(currentDateStr || getManilaTodayStr())}
-                            instructorProfile={instructorProfile}
-                        />
+                <div className="lg:col-span-8 space-y-8">
+                    {/* Today's Agenda / Quick Overview */}
+                    <div className="atelier-card p-8 sm:p-10 bg-white border border-burgundy/5 shadow-ambient relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                        
+                        <div className="flex items-center justify-between mb-10 relative z-10">
+                            <div>
+                                <h2 className="text-2xl sm:text-3xl font-serif text-burgundy tracking-tight">Today's Agenda</h2>
+                                <p className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.3em] mt-1">{format(new Date(), 'EEEE, MMMM do')}</p>
+                            </div>
+                            <Link 
+                                href="/instructor/schedule"
+                                className="px-5 py-2.5 bg-forest/5 text-forest border border-forest/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-forest hover:text-white transition-all shadow-tight"
+                            >
+                                Open Full Calendar
+                            </Link>
+                        </div>
+
+                        <div className="space-y-4 relative z-10">
+                            {calendarBookings.filter(b => {
+                                const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+                                return slot?.date === getManilaTodayStr();
+                            }).length > 0 ? (
+                                calendarBookings
+                                    .filter(b => {
+                                        const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+                                        return slot?.date === getManilaTodayStr();
+                                    })
+                                    .sort((a, b) => {
+                                        const slotA = Array.isArray(a.slots) ? a.slots[0] : a.slots;
+                                        const slotB = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+                                        return (slotA?.start_time || '').localeCompare(slotB?.start_time || '');
+                                    })
+                                    .map((booking) => {
+                                        const slot = Array.isArray(booking.slots) ? booking.slots[0] : booking.slots;
+                                        return (
+                                            <div key={booking.id} className="flex items-center gap-6 p-6 bg-off-white/40 border border-border-grey/30 rounded-2xl hover:bg-white hover:shadow-tight transition-all duration-500 group/item">
+                                                <div className="w-20 flex flex-col items-center justify-center py-3 bg-burgundy/5 rounded-xl border border-burgundy/10 group-hover/item:bg-burgundy group-hover/item:text-white transition-colors duration-500">
+                                                    <span className="text-xs font-black uppercase tracking-tighter leading-none">{formatTo12Hour(slot?.start_time || '00:00:00').split(' ')[0]}</span>
+                                                    <span className="text-[8px] font-black uppercase tracking-widest opacity-60">{formatTo12Hour(slot?.start_time || '00:00:00').split(' ')[1]}</span>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-3 mb-1">
+                                                        <span className="text-[10px] font-black text-forest uppercase tracking-widest">{slot?.session_type || 'Private Session'}</span>
+                                                        <span className="w-1 h-1 bg-border-grey rounded-full" />
+                                                        <span className="text-[10px] font-bold text-slate uppercase tracking-widest">{slot?.studios?.name || 'Home Base'}</span>
+                                                    </div>
+                                                    <h3 className="text-lg font-serif text-charcoal truncate tracking-tight">{booking.client?.full_name}</h3>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <button 
+                                                        onClick={() => setSelectedBooking(booking)}
+                                                        className="w-10 h-10 flex items-center justify-center bg-white border border-border-grey/40 text-charcoal/40 hover:text-forest hover:border-forest/20 rounded-full transition-all shadow-tight"
+                                                    >
+                                                        <ChevronRight className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                            ) : (
+                                <div className="py-20 flex flex-col items-center justify-center bg-off-white/20 rounded-[2.5rem] border border-dashed border-border-grey/60">
+                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-tight mb-6">
+                                        <Calendar className="w-6 h-6 text-charcoal/20" />
+                                    </div>
+                                    <p className="text-[10px] font-black text-charcoal/30 uppercase tracking-[0.4em] italic leading-relaxed">No sessions scheduled for today</p>
+                                    <button 
+                                        onClick={() => setIsAddModalOpen(true)}
+                                        className="mt-6 text-[9px] font-black text-forest hover:text-burgundy transition-colors uppercase tracking-[0.2em] underline underline-offset-4"
+                                    >
+                                        Add Availability
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Mobile Schedule View */}
-                    <div className="lg:hidden">
-                        <MobileScheduleCalendar
-                            currentDate={new Date(currentDateStr || getManilaTodayStr())}
-                            onAddSlot={(date) => {
-                                if (!isProfileComplete) {
-                                    alert('Please complete your profile and set your service area before adding sessions.');
-                                    router.push('/instructor/profile');
-                                    return;
-                                }
-                                setSingleDate(format(date, 'yyyy-MM-dd'));
-                                setAddMode('single');
-                                setIsAddModalOpen(true);
-                            }}
-                            onRecurringSchedule={() => {
-                                router.push('/instructor/schedule');
-                            }}
-                            onSlotClick={(session) => {
-                                if (session.is_booked) {
-                                    const booking = calendarBookings.find(b => b.id === session.id);
-                                    if (booking) setSelectedBooking(booking);
-                                } else {
-                                    const slot = availability.find(a => a.id === session.id);
-                                    if (slot) {
-                                        setEditingSlot(slot);
-                                        setSingleDate(slot.date || getManilaTodayStr());
-                                        setSingleTime(slot.start_time);
-                                        setSingleEndTime(slot.end_time);
-                                        setEquipment(slot.equipment || instructorProfile?.teaching_equipment || []);
-                                        setIsEditModalOpen(true);
-                                    }
-                                }
-                            }}
-                            initialSessions={[
-                                ...availability.map(a => ({
-                                    id: a.id,
-                                    start_time: a.start_time,
-                                    end_time: a.end_time,
-                                    date: a.date || getManilaTodayStr(),
-                                    type: `Home Session: ${instructorProfile?.home_base_address?.split(',')[0] || 'My Area'}`,
-                                    location: a.location_area || 'Studio',
-                                    is_booked: false
-                                })),
-                                ...calendarBookings.map(b => {
-                                    const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
-                                    return {
-                                        id: b.id,
-                                        start_time: slot?.start_time || '00:00:00',
-                                        end_time: slot?.end_time || '00:00:00',
-                                        date: slot?.date || getManilaTodayStr(),
-                                        type: `Booking: ${slot?.studios?.name || 'Partner'}`,
-                                        location: slot?.studios?.location || 'Studio',
-                                        is_booked: b.status === 'approved'
-                                    };
-                                })
-                            ]}
-                        />
+                    {/* Quick Access Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <Link 
+                            href="/instructor/schedule"
+                            className="atelier-card p-8 bg-white border border-burgundy/5 shadow-tight hover:shadow-ambient hover:-translate-y-1 transition-all duration-500 group/card"
+                        >
+                            <div className="w-12 h-12 bg-forest/5 rounded-2xl flex items-center justify-center mb-6 group-hover/card:bg-forest group-hover/card:text-white transition-colors">
+                                <Plus className="w-6 h-6 text-forest group-hover/card:text-white" />
+                            </div>
+                            <h3 className="text-xl font-serif text-burgundy tracking-tight mb-2">Manage Schedule</h3>
+                            <p className="text-[10px] font-bold text-slate uppercase tracking-widest leading-relaxed">Update your weekly slots and availability windows.</p>
+                        </Link>
+                        <Link 
+                            href="/instructor/earnings"
+                            className="atelier-card p-8 bg-white border border-burgundy/5 shadow-tight hover:shadow-ambient hover:-translate-y-1 transition-all duration-500 group/card"
+                        >
+                            <div className="w-12 h-12 bg-burgundy/5 rounded-2xl flex items-center justify-center mb-6 group-hover/card:bg-burgundy group-hover/card:text-white transition-colors">
+                                <Wallet className="w-6 h-6 text-burgundy group-hover/card:text-white" />
+                            </div>
+                            <h3 className="text-xl font-serif text-burgundy tracking-tight mb-2">Review Earnings</h3>
+                            <p className="text-[10px] font-bold text-slate uppercase tracking-widest leading-relaxed">Monitor your yield, payouts, and financial performance.</p>
+                        </Link>
                     </div>
                 </div>
 
