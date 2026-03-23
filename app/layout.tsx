@@ -34,6 +34,31 @@ export const metadata: Metadata = {
   title: "Studio Vault PH | Pilates Marketplace",
   description: "Connect with premium Pilates studios and certified instructors in the Philippines.",
   manifest: "/manifest.json",
+  metadataBase: new URL("https://studiovaultph.com"),
+  openGraph: {
+    title: "Studio Vault PH | Pilates Marketplace",
+    description:
+      "The professional marketplace connecting certified instructors with elite boutique studios in the Philippines.",
+    url: "https://studiovaultph.com",
+    siteName: "Studio Vault PH",
+    locale: "en_PH",
+    type: "website",
+    images: [
+      {
+        url: "/images/homepage/hero_pilates_lifestyle.png",
+        width: 1200,
+        height: 630,
+        alt: "Studio Vault PH – Pilates Studio Marketplace",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Studio Vault PH | Pilates Marketplace",
+    description:
+      "The professional marketplace connecting certified instructors with elite boutique studios.",
+    images: ["/images/homepage/hero_pilates_lifestyle.png"],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
