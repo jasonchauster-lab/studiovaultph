@@ -10,6 +10,7 @@ import {
     useAdvancedMarkerRef,
     useMap
 } from '@vis.gl/react-google-maps'
+import { useRouter } from 'next/navigation'
 import { MapPin, Navigation, Star, Award, Home, User } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -48,6 +49,7 @@ const MANILA_CENTER = { lat: 14.5995, lng: 120.9842 }
 
 export default function DiscoveryMap({ studios, instructors = [], apiKey, isRentMode = false }: DiscoveryMapProps) {
     const map = useMap()
+    const router = useRouter()
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [selectedType, setSelectedType] = useState<'studio' | 'instructor' | null>(null)
     const [isScrolling, setIsScrolling] = useState(false)
@@ -233,6 +235,9 @@ export default function DiscoveryMap({ studios, instructors = [], apiKey, isRent
                             setSelectedId(item.id)
                             setSelectedType(item.carouselType)
                         }}
+                        onMouseEnter={() => {
+                            router.prefetch(item.carouselType === 'studio' ? `/studios/${item.id}` : `/instructors/${item.id}`)
+                        }}
                         className={clsx(
                             "flex-shrink-0 w-[280px] snap-center transition-all duration-500",
                             selectedId === item.id ? "scale-105" : "scale-95 opacity-90"
@@ -320,6 +325,7 @@ const StudioMarker = memo(function StudioMarker({ studio, onClick, isActive, set
             position={{ lat: studio.lat!, lng: studio.lng! }}
             onClick={onClick}
             zIndex={isActive ? 100 : 1}
+            collisionBehavior={google.maps.CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL}
         >
             <div className={clsx(
                 "group relative flex flex-col items-center cursor-pointer transition-all duration-500 animate-in zoom-in duration-700",
@@ -368,6 +374,7 @@ const InstructorMarker = memo(function InstructorMarker({ instructor, onClick, i
             position={{ lat: instructor.home_base_lat!, lng: instructor.home_base_lng! }}
             onClick={onClick}
             zIndex={isActive ? 100 : 1}
+            collisionBehavior={google.maps.CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL}
         >
             <div className={clsx(
                 "group relative flex flex-col items-center cursor-pointer transition-all duration-500 animate-in zoom-in duration-700",

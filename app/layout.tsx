@@ -84,6 +84,9 @@ export default function RootLayout({
             and fonts.gstatic.com — manual duplicates removed to avoid double hints. */}
         <link rel="preconnect" href="https://wzacmyemiljzpdskyvie.supabase.co" />
         <link rel="dns-prefetch" href="https://wzacmyemiljzpdskyvie.supabase.co" />
+        <link rel="preconnect" href="https://maps.googleapis.com" />
+        <link rel="preconnect" href="https://maps.gstatic.com" />
+        <link rel="preload" href="https://www.transparenttextures.com/patterns/felt.png" as="image" />
       </head>
       <body
         className={`${playfairDisplay.variable} ${inter.variable} ${lexend.variable} antialiased`}

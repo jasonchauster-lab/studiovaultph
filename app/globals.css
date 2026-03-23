@@ -138,6 +138,7 @@ h1, h2, h3, h4 {
     border-radius: var(--radius-xl);
     padding: 2.5rem;
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    contain: content;
   }
   
   .atelier-card:hover {

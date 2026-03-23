@@ -315,6 +315,7 @@ export default async function CustomerDashboard({
                                                                     src={inst.banner_url || inst.avatar_url}
                                                                     alt={inst.full_name}
                                                                     fill
+                                                                    priority={instructors.indexOf(inst) < 3}
                                                                     className="object-cover group-hover:scale-110 transition-transform duration-[3000ms] ease-out will-change-transform opacity-40"
                                                                 />
                                                             ) : (
@@ -455,6 +456,7 @@ export default async function CustomerDashboard({
                                                                 src={studio.banner_url || studio.logo_url}
                                                                 alt={studio.name}
                                                                 fill
+                                                                priority={studios.indexOf(studio) < 3}
                                                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                                                 className="object-cover group-hover:scale-110 transition-transform duration-[3000ms] ease-out will-change-transform"
                                                             />
