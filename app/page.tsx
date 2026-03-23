@@ -21,9 +21,9 @@ export default function LandingPage() {
             <Image
               src="/logo4.png"
               alt="Studio Vault"
-              width={240}
-              height={60}
-              className="h-10 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+              width={260}
+              height={70}
+              className="h-12 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
               priority
             />
           </Link>
@@ -50,7 +50,7 @@ export default function LandingPage() {
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="btn-primary-atelier !py-3 !px-6"
+              className="btn-outline-atelier"
             >
               Sign Up
             </button>
@@ -83,25 +83,34 @@ export default function LandingPage() {
             </p>
 
             {/* CTA Group */}
-            <div className="flex flex-col sm:flex-row gap-8 items-center animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+            <div className="flex flex-col sm:flex-row gap-6 items-center animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="btn-primary-atelier w-full sm:w-auto px-12 py-6 text-xs"
+                className="btn-primary-atelier w-full sm:w-auto px-12 py-6 text-[11px]"
               >
                 Get Started Now
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
 
-              <div className="flex items-center gap-4 py-2">
-                <div className="flex -space-x-4">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="w-12 h-12 rounded-full border-4 border-surface bg-primary/10 flex items-center justify-center overflow-hidden shadow-ambient">
-                      <User className="w-6 h-6 text-primary/30" />
+              <div className="flex items-center gap-5 py-2">
+                <div className="flex -space-x-3">
+                  {[
+                    { src: "/images/avatars/instructor_1.png", alt: "Instructor" },
+                    { src: "/images/avatars/client_1.png", alt: "Client" },
+                    { src: "/images/avatars/instructor_2.png", alt: "Instructor" }
+                  ].map((avatar, i) => (
+                    <div key={i} className="w-12 h-12 rounded-full border-4 border-surface bg-primary/10 flex items-center justify-center overflow-hidden shadow-ambient relative">
+                      <Image
+                        src={avatar.src}
+                        alt={avatar.alt}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                   ))}
                 </div>
-                <p className="label-atelier leading-tight">
+                <p className="label-atelier leading-tight !tracking-[0.3em] text-[8px]">
                   Validated by<br />Certified Professionals
                 </p>
               </div>
@@ -120,12 +129,12 @@ export default function LandingPage() {
                 priority
               />
               {/* Overlay card — Ambient Tonal Layering */}
-              <div className="absolute bottom-10 left-10 right-10 p-8 bg-white/90 backdrop-blur-md rounded-xl flex items-center gap-6 shadow-ambient animate-in slide-in-from-bottom-8 duration-1000 delay-700">
-                <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center shadow-lg">
+              <div className="absolute -bottom-6 -left-6 p-8 bg-white rounded-2xl flex items-center gap-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-in slide-in-from-bottom-8 duration-1000 delay-700 max-w-sm border border-surface-container-highest">
+                <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center shadow-lg shrink-0">
                   <Sparkles className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <p className="label-atelier text-primary mb-1">Validated Excellence</p>
+                  <p className="label-atelier text-primary mb-1 !tracking-[0.3em]">Validated Excellence</p>
                   <p className="text-sm text-muted-surface font-medium leading-relaxed">Certified Equipment and Verified Partners.</p>
                 </div>
               </div>
