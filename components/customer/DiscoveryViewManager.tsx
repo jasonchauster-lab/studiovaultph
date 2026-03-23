@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DiscoveryMap from './DiscoveryMap'
 import MapToggle from './MapToggle'
+import DiscoveryMapSkeleton from './DiscoveryMapSkeleton'
 import { clsx } from 'clsx'
 
 interface DiscoveryViewManagerProps {
@@ -23,6 +24,16 @@ export default function DiscoveryViewManager({
     isRentMode = false
 }: DiscoveryViewManagerProps) {
     const [view, setView] = useState<'list' | 'map'>('list')
+    const [isMapLoading, setIsMapLoading] = useState(true)
+
+    useEffect(() => {
+        if (view === 'map') {
+            const timer = setTimeout(() => setIsMapLoading(false), 800)
+            return () => clearTimeout(timer)
+        } else {
+            setIsMapLoading(true)
+        }
+    }, [view])
 
     return (
         <div className="relative">
@@ -46,12 +57,18 @@ export default function DiscoveryViewManager({
                         : "opacity-0 translate-y-12 pointer-events-none absolute inset-0"
                 )}>
                     {view === 'map' && (
-                        <DiscoveryMap 
-                            studios={studios} 
-                            instructors={instructors}
-                            apiKey={apiKey} 
-                            isRentMode={isRentMode}
-                        />
+                        <>
+                            {isMapLoading ? (
+                                <DiscoveryMapSkeleton />
+                            ) : (
+                                <DiscoveryMap 
+                                    studios={studios} 
+                                    instructors={instructors}
+                                    apiKey={apiKey} 
+                                    isRentMode={isRentMode}
+                                />
+                            )}
+                        </>
                     )}
                 </div>
             </div>

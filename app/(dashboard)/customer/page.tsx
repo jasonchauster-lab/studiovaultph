@@ -50,9 +50,10 @@ export default async function CustomerDashboard({
     )
 
     // 1. Fetch main datasets in parallel
-    const [{ data: profile }, { data: allLocationsRaw }] = await Promise.all([
+    const [{ data: profile }, { data: allLocationsRaw }, { data: ratingsRows }] = await Promise.all([
         supabase.from('profiles').select('role, date_of_birth, contact_number').eq('id', user.id).maybeSingle(),
-        supabase.from('studios').select('location').eq('verified', true)
+        supabase.from('studios').select('location').eq('verified', true),
+        supabase.from('reviewer_ratings').select('reviewee_id, average, count')
     ])
 
     if (!profile?.date_of_birth || !profile?.contact_number) {
@@ -227,11 +228,6 @@ export default async function CustomerDashboard({
         const { data } = await slotQuery
         if (data) slots = data as unknown as Slot[]
     }
-
-    // 3. Fetch aggregated ratings + ratings rows in parallel
-    const [{ data: ratingsRows }] = await Promise.all([
-        supabase.from('reviewer_ratings').select('reviewee_id, average, count'),
-    ])
 
     const ratingsMap: Record<string, { total: number, count: number, average: number }> = {}
     ratingsRows?.forEach((r: any) => {
