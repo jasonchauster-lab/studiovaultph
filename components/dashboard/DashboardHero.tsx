@@ -4,6 +4,7 @@ import React from 'react'
 import { MapPin } from 'lucide-react'
 import Image from 'next/image'
 import clsx from 'clsx'
+import Avatar from '@/components/shared/Avatar'
 
 interface DashboardHeroProps {
     title: string
@@ -35,15 +36,12 @@ export const DashboardHero = ({ title, subtitle, profile, actions, className }: 
                 <div className="flex items-center gap-6 animate-in fade-in slide-in-from-right-4 duration-700 delay-200">
                     {profile && (
                         <div className="flex items-center gap-4 bg-white/40 backdrop-blur-md p-3 pr-6 rounded-[2rem] border border-burgundy/5 shadow-tight ring-1 ring-white/20">
-                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-tight shrink-0">
-                                <Image
-                                    src={profile.image || "/logo2.jpg"}
-                                    alt={profile.name}
-                                    width={48}
-                                    height={48}
-                                    className="object-cover w-full h-full"
-                                />
-                            </div>
+                            <Avatar 
+                                src={profile.image} 
+                                fallbackName={profile.name} 
+                                size={48} 
+                                className="!border-2 !border-white !shadow-tight"
+                            />
                             <div className="min-w-0">
                                 <p className="text-sm font-black text-burgundy tracking-tight truncate">{profile.name}</p>
                                 {profile.location && (

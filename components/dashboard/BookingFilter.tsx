@@ -64,12 +64,12 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
             <div className="grid grid-cols-2 gap-3 sm:gap-2 flex-1 w-full sm:items-center sm:max-w-xl">
                 {/* Status Dropdown */}
                 <div className="w-full relative group min-w-0">
-                    <span className="absolute -top-2 left-3 px-1.5 bg-white text-[7px] font-black text-forest/60 uppercase tracking-[0.1em] z-10 sm:hidden whitespace-nowrap">STATUS FILTER</span>
+                    <span className="absolute -top-2 left-3 px-1.5 bg-white text-[9px] font-black text-forest/60 uppercase tracking-[0.1em] z-10 sm:hidden whitespace-nowrap">STATUS FILTER</span>
                     <div className="relative h-11 sm:h-10">
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value as FilterStatus)}
-                            className="w-full h-full pl-3 pr-8 bg-white sm:bg-charcoal/5 border border-border-grey/20 sm:border-charcoal/5 text-charcoal text-[10px] sm:text-[11px] font-black uppercase tracking-[0.05em] sm:tracking-[0.2em] rounded-xl focus:ring-forest focus:border-forest block py-2 sm:py-1 outline-none transition-all shadow-sm sm:shadow-none appearance-none hover:bg-forest/5"
+                            className="w-full h-full pl-3 pr-8 bg-white sm:bg-charcoal/5 border border-border-grey/20 sm:border-charcoal/5 text-charcoal text-[11px] sm:text-[11px] font-black uppercase tracking-[0.05em] sm:tracking-[0.2em] rounded-xl focus:ring-forest focus:border-forest block py-2 sm:py-1 outline-none transition-all shadow-sm sm:shadow-none appearance-none hover:bg-forest/5"
                         >
                             <option value="all">ALL STATUS</option>
                             <option value="approved">Approved</option>
@@ -81,7 +81,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                 </div>
 
                 <div className="w-full relative group min-w-0">
-                    <span className="absolute -top-2 left-3 px-1.5 bg-white text-[7px] font-black text-forest/60 uppercase tracking-[0.1em] z-10 sm:hidden whitespace-nowrap">DATE RANGE</span>
+                    <span className="absolute -top-2 left-3 px-1.5 bg-white text-[9px] font-black text-forest/60 uppercase tracking-[0.1em] z-10 sm:hidden whitespace-nowrap">DATE RANGE</span>
                     <div className={clsx(
                         "flex items-center justify-between gap-1 sm:gap-4 border rounded-xl px-2 sm:px-4 py-0 shrink-0 sm:shrink transition-all duration-300 overflow-hidden sm:min-w-0 w-full h-11 sm:h-10",
                         (fromDate || toDate) ? "bg-forest/5 border-forest/20 ring-1 ring-forest/10" : "bg-white sm:bg-charcoal/5 border-border-grey/20 sm:border-charcoal/5"
@@ -94,7 +94,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                                     type="date"
                                     value={fromDate}
                                     onChange={(e) => setFromDate(e.target.value)}
-                                    className="bg-transparent text-charcoal text-[10px] sm:text-[11px] font-black uppercase tracking-[0.05em] sm:tracking-[0.15em] focus:outline-none w-full pr-0.5 cursor-pointer"
+                                    className="bg-transparent text-charcoal text-[11px] sm:text-[11px] font-black uppercase tracking-[0.05em] sm:tracking-[0.15em] focus:outline-none w-full pr-0.5 cursor-pointer"
                                     aria-label="From Date"
                                 />
                                 {fromDate && (
@@ -113,7 +113,7 @@ export default function BookingFilter({ onFilterChange, className }: BookingFilt
                                     type="date"
                                     value={toDate}
                                     onChange={(e) => setToDate(e.target.value)}
-                                    className="bg-transparent text-charcoal text-[10px] sm:text-[11px] font-black uppercase tracking-[0.05em] sm:tracking-[0.15em] focus:outline-none w-full text-right sm:text-left pr-0.5 cursor-pointer appearance-none min-w-0"
+                                    className="bg-transparent text-charcoal text-[11px] sm:text-[11px] font-black uppercase tracking-[0.05em] sm:tracking-[0.15em] focus:outline-none w-full text-right sm:text-left pr-0.5 cursor-pointer appearance-none min-w-0"
                                     aria-label="To Date"
                                 />
                                 {toDate && (

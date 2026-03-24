@@ -155,7 +155,7 @@ export default function InstructorEarningsClient({
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setShowTopUpModal(true)}
-                            className="h-11 px-6 bg-white text-charcoal rounded-xl flex items-center justify-center gap-2 border border-border-grey shadow-tight hover:bg-off-white active:scale-95 transition-all text-[10px] font-black uppercase tracking-widest"
+                            className="h-11 px-8 bg-white text-charcoal rounded-xl flex items-center justify-center gap-2 border border-border-grey shadow-tight hover:bg-off-white active:scale-95 transition-all text-[11px] font-black uppercase tracking-widest"
                         >
                             <Plus className="w-3.5 h-3.5 text-forest" />
                             TOP UP
@@ -184,7 +184,7 @@ export default function InstructorEarningsClient({
                             </div>
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">AVAILABLE FUNDS</span>
+                                    <span className="text-[11px] font-black text-white/40 uppercase tracking-[0.2em]">AVAILABLE FUNDS</span>
                                     <button
                                         onClick={() => setShowInfoModal(true)}
                                         className="text-white/20 hover:text-white transition-colors"
@@ -198,20 +198,20 @@ export default function InstructorEarningsClient({
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => setShowTopUpModal(true)}
-                                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all"
+                                className="hidden sm:flex items-center gap-2 px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-[11px] font-black uppercase tracking-widest border border-white/10 transition-all"
                             >
                                 <Plus className="w-3.5 h-3.5 text-gold" />
                                 TOP UP
                             </button>
                             {availableBalance < 0 ? (
-                                <div className="px-6 py-2.5 bg-white/5 text-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/10 flex items-center gap-2">
+                                <div className="px-6 py-3 bg-white/5 text-white/20 rounded-xl text-[11px] font-black uppercase tracking-widest border border-white/10 flex items-center gap-2">
                                     <ShieldCheck className="w-3 h-3" />
                                     RESTRICTED
                                 </div>
                             ) : (
                                 <Link
                                     href="/instructor/payout"
-                                    className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                                    className={`px-8 py-3 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all ${
                                         availableBalance > 0 
                                         ? 'bg-gold hover:bg-gold-600 text-charcoal shadow-lg shadow-gold/20 active:scale-95' 
                                         : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/20'
@@ -228,7 +228,7 @@ export default function InstructorEarningsClient({
                             <span className="text-4xl sm:text-6xl font-serif text-gold tracking-tighter">₱{(availableBalance || 0).toLocaleString()}</span>
                             <span className="text-xs font-black text-gold/40 tracking-widest uppercase mb-2">PHP</span>
                         </div>
-                        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">LIQUID BALANCE READY FOR PAYOUT</p>
+                        <p className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em]">LIQUID BALANCE READY FOR PAYOUT</p>
                     </div>
                 </div>
 
@@ -238,7 +238,7 @@ export default function InstructorEarningsClient({
                             <div className="w-10 h-10 rounded-2xl bg-forest/10 flex items-center justify-center shrink-0">
                                 <TrendingUp className="w-5 h-5 text-forest" />
                             </div>
-                            <span className="text-[10px] font-black text-forest/40 uppercase tracking-[0.2em]">NET YIELD</span>
+                            <span className="text-[11px] font-black text-forest/40 uppercase tracking-[0.2em]">NET YIELD</span>
                         </div>
                         <div className="opacity-40 group-hover:opacity-100 transition-opacity">
                             <Sparkline data={trendData} color="#5C8A42" width={80} height={30} />
@@ -248,7 +248,7 @@ export default function InstructorEarningsClient({
                         <h3 className="text-3xl font-serif text-charcoal tracking-tighter">₱{(netEarnings || 0).toLocaleString()}</h3>
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-forest animate-pulse" />
-                            <p className="text-[10px] font-black text-charcoal-400 uppercase tracking-widest">REALIZED INCOME</p>
+                            <p className="text-[11px] font-black text-charcoal-400 uppercase tracking-widest">REALIZED INCOME</p>
                         </div>
                     </div>
                 </div>
@@ -259,13 +259,13 @@ export default function InstructorEarningsClient({
                         <div className="w-10 h-10 rounded-2xl bg-burgundy/10 flex items-center justify-center shrink-0">
                             <Clock className="w-5 h-5 text-burgundy/60" />
                         </div>
-                        <span className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.2em]">VAULT HOLD</span>
+                        <span className="text-[11px] font-black text-burgundy/40 uppercase tracking-[0.2em]">VAULT HOLD</span>
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-3xl font-serif text-burgundy/80 tracking-tighter">₱{(pendingBalance || 0).toLocaleString()}</h3>
                         <div className="flex items-center gap-2">
                             <ShieldCheck className="w-3 h-3 text-burgundy/30" />
-                            <p className="text-[10px] font-black text-burgundy/30 uppercase tracking-widest leading-tight">24H SAFETY PERIOD</p>
+                            <p className="text-[11px] font-black text-burgundy/30 uppercase tracking-widest leading-tight">24H SAFETY PERIOD</p>
                         </div>
                     </div>
                 </div>
@@ -276,7 +276,7 @@ export default function InstructorEarningsClient({
                         <div className="w-10 h-10 rounded-2xl bg-charcoal/5 flex items-center justify-center shrink-0">
                             <TrendingUp className="w-5 h-5 text-charcoal" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">GROSS</span>
+                        <span className="text-[11px] font-black text-charcoal/40 uppercase tracking-[0.2em]">GROSS</span>
                     </div>
                     <div className="space-y-1">
                         <h3 className="text-2xl font-serif text-charcoal">₱{(totalEarned || 0).toLocaleString()}</h3>
@@ -300,7 +300,7 @@ export default function InstructorEarningsClient({
                         <div className="w-10 h-10 rounded-2xl bg-charcoal/5 flex items-center justify-center shrink-0">
                             <ArrowUpRight className="w-5 h-5 text-charcoal" />
                         </div>
-                        <span className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.2em]">CASHOUTS</span>
+                        <span className="text-[11px] font-black text-charcoal/40 uppercase tracking-[0.2em]">CASHOUTS</span>
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-2xl font-serif text-charcoal">₱{(totalWithdrawn || 0).toLocaleString()}</h3>

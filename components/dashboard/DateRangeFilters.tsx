@@ -36,7 +36,7 @@ export default function DateRangeFilters() {
                     <button
                         key={r.value}
                         onClick={() => handleRangeChange(r.value)}
-                        className={`snap-start px-3.5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.1em] transition-all whitespace-nowrap shadow-sm border ${currentRange === r.value
+                        className={`snap-start px-4.5 py-2.5 rounded-full text-[11px] font-black uppercase tracking-[0.1em] transition-all whitespace-nowrap shadow-sm border ${currentRange === r.value
                                 ? 'bg-forest text-white border-forest shadow-tight'
                                 : 'bg-white text-charcoal/60 border-border-grey hover:border-charcoal/40 hover:bg-off-white'
                             }`}

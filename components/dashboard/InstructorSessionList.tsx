@@ -391,12 +391,12 @@ const SessionCard = memo(({ booking, currentUserId, onStudioClick, onClientClick
                     <div className="flex items-center gap-1.5">
                         {['completed', 'approved'].includes(booking.status) && (
                             <div className="flex items-baseline gap-1 bg-forest/5 px-2 py-0.5 rounded-full border border-forest/10">
-                                <span className="text-[6px] font-black text-forest/40 uppercase tracking-widest">EARNED</span>
+                                <span className="text-[8px] font-black text-forest/40 uppercase tracking-widest">EARNED</span>
                                 <span className="text-[10px] font-black text-forest">₱{Number(instructorFee).toLocaleString()}</span>
                             </div>
                         )}
                         <span className={clsx(
-                            'px-2 py-0.5 text-[7px] font-bold uppercase rounded-full tracking-widest border inline-flex items-center gap-1 shrink-0',
+                            'px-2 py-0.5 text-[9px] font-bold uppercase rounded-full tracking-widest border inline-flex items-center gap-1 shrink-0',
                             booking.status === 'completed' ? 'border-[#b8d49a] text-forest bg-sage/20' :
                             booking.status === 'approved' ? 'bg-blue-100/70 text-blue-700 border-blue-200' :
                             'bg-red-100/70 text-red-600 border-red-200'
@@ -420,7 +420,7 @@ const SessionCard = memo(({ booking, currentUserId, onStudioClick, onClientClick
                         </div>
                         <span className="text-sm font-bold text-charcoal-900 truncate group-hover/client:text-forest transition-colors">{client.full_name}</span>
                         {client?.medical_conditions && (
-                            <span className="ml-1 px-1.5 py-0.5 bg-red-50 text-red-500 text-[6px] font-black uppercase rounded border border-red-100 flex items-center gap-0.5 tracking-widest shrink-0">
+                            <span className="ml-1 px-1.5 py-0.5 bg-red-50 text-red-500 text-[8px] font-black uppercase rounded border border-red-100 flex items-center gap-0.5 tracking-widest shrink-0">
                                 <AlertCircle className="w-2 h-2" /> MEDICAL
                             </span>
                         )}
@@ -434,7 +434,7 @@ const SessionCard = memo(({ booking, currentUserId, onStudioClick, onClientClick
                         <span className="font-bold text-charcoal/70 group-hover/studio:text-forest">{studio?.name || "Studio Node"}</span>
                     </button>
                     <span className="text-charcoal/20 text-[10px]">·</span>
-                    <span className="text-[9px] font-bold text-charcoal/50 uppercase tracking-wider bg-off-white px-1.5 py-0.5 rounded border border-border-grey/30">
+                    <span className="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider bg-off-white px-1.5 py-0.5 rounded border border-border-grey/30">
                         {Array.isArray(slot?.equipment) && slot.equipment.length > 0
                             ? slot.equipment[0]
                             : (booking.price_breakdown?.equipment || booking.equipment || 'Session')}
@@ -452,13 +452,13 @@ const SessionCard = memo(({ booking, currentUserId, onStudioClick, onClientClick
                                     await checkInClient(booking.id)
                                 }
                             }}
-                            className="h-8 px-3 bg-forest text-white border border-forest rounded-lg hover:brightness-110 transition-all text-[9px] font-black uppercase tracking-widest shadow-sm active:scale-95"
+                            className="h-8 px-3 bg-forest text-white border border-forest rounded-lg hover:brightness-110 transition-all text-[10px] font-black uppercase tracking-widest shadow-sm active:scale-95"
                         >
                             CHECK IN
                         </button>
                     )}
                     {booking.client_checked_in_at && (
-                        <div className="h-8 px-3 flex items-center bg-forest/10 text-forest border border-forest/20 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                        <div className="h-8 px-3 flex items-center bg-forest/10 text-forest border border-forest/20 rounded-lg text-[10px] font-black uppercase tracking-widest">
                             <UserCheck className="w-3 h-3 mr-1.5" />
                             CHECKED IN
                         </div>
@@ -474,7 +474,7 @@ const SessionCard = memo(({ booking, currentUserId, onStudioClick, onClientClick
                             label="CHAT" 
                             variant="antigravity" 
                             iconType="client"
-                            className="!h-8 !px-3 !bg-white !border-border-grey !text-[9px] !font-bold"
+                            className="!h-8 !px-3 !bg-white !border-border-grey !text-[10px] !font-bold"
                         />
                     )}
 
@@ -486,7 +486,7 @@ const SessionCard = memo(({ booking, currentUserId, onStudioClick, onClientClick
                                 revieweeId: studio?.owner_id || '',
                                 revieweeName: studio?.name || 'Studio'
                             })}
-                            className="h-8 px-3 bg-white text-forest border border-forest/20 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-forest/5 transition-all shadow-sm active:scale-95"
+                            className="h-8 px-3 bg-white text-forest border border-forest/20 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-forest/5 transition-all shadow-sm active:scale-95"
                         >
                             FEEDBACK
                         </button>
@@ -496,7 +496,7 @@ const SessionCard = memo(({ booking, currentUserId, onStudioClick, onClientClick
                     {booking.status === 'approved' && start > now && (
                         <button
                             onClick={() => onCancelClick(booking)}
-                            className="h-8 px-3 bg-off-white text-red-500 border border-red-100 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-red-50 transition-all"
+                            className="h-8 px-3 bg-off-white text-red-500 border border-red-100 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition-all"
                             title="Cancel Session"
                         >
                             Cancel

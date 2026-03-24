@@ -86,7 +86,7 @@ export default function ExportCsvButton({ data, filename = 'transactions', class
         <button
             onClick={handleExport}
             className={clsx(
-                "h-10 sm:h-12 w-full sm:w-auto bg-white text-charcoal px-3 sm:px-8 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.3em] flex items-center justify-center gap-2 sm:gap-3 border border-border-grey hover:bg-off-white transition-all shadow-tight active:scale-95 whitespace-nowrap",
+                "h-11 sm:h-12 w-full sm:w-auto bg-white text-charcoal px-5 sm:px-8 rounded-xl text-[10px] sm:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.3em] flex items-center justify-center gap-2 sm:gap-3 border border-border-grey hover:bg-off-white transition-all shadow-tight active:scale-95 whitespace-nowrap",
                 className
             )}
         >
