@@ -43,7 +43,7 @@ export const PWAInstallPrompt = () => {
 
     return (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] w-[calc(100%-2rem)] max-w-md animate-in slide-in-from-bottom-8 fade-in duration-700">
-            <div className="atelier-card !p-6 bg-burgundy text-white flex items-center gap-4 shadow-2xl relative overflow-hidden">
+            <div className="atelier-card !p-6 !bg-burgundy text-white flex items-center gap-4 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none" />
                 
                 <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shrink-0">
@@ -60,7 +60,7 @@ export const PWAInstallPrompt = () => {
                         variant="primary" 
                         size="sm" 
                         onClick={handleInstall}
-                        className="!bg-white !text-burgundy !py-2 !px-4 !text-[9px]"
+                        className="!bg-none !bg-white !text-burgundy !py-2 !px-4 !text-[9px]"
                     >
                         Install
                     </Button>

@@ -69,7 +69,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
         const file = e.target.files?.[0]
         if (file) {
             try {
-                const processedFile = await normalizeImageFile(file)
+                const processedFile = await normalizeImageFile(file, { maxWidth: 512, quality: 0.8 })
                 const url = URL.createObjectURL(processedFile)
                 
                 setCropperConfig({
@@ -93,7 +93,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
         const file = e.target.files?.[0]
         if (file) {
             try {
-                const processedFile = await normalizeImageFile(file)
+                const processedFile = await normalizeImageFile(file, { maxWidth: 1600, quality: 0.8 })
                 const url = URL.createObjectURL(processedFile)
 
                 setCropperConfig({

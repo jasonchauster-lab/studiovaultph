@@ -103,7 +103,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
         const file = e.target.files?.[0]
         if (file) {
             try {
-                const normalized = await normalizeImageFile(file)
+                const normalized = await normalizeImageFile(file, { maxWidth: 512, quality: 0.8 })
                 const url = URL.createObjectURL(normalized)
                 setCropperConfig({
                     isOpen: true,
@@ -126,7 +126,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
         const file = e.target.files?.[0]
         if (file) {
             try {
-                const normalized = await normalizeImageFile(file)
+                const normalized = await normalizeImageFile(file, { maxWidth: 1600, quality: 0.8 })
                 const url = URL.createObjectURL(normalized)
                 setCropperConfig({
                     isOpen: true,
@@ -169,7 +169,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
 
         for (const file of files) {
             try {
-                const normalized = await normalizeImageFile(file)
+                const normalized = await normalizeImageFile(file, { maxWidth: 1200, quality: 0.8 })
                 validFiles.push(normalized)
             } catch (err) {
                 console.error('Image processing error:', err)

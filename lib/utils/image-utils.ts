@@ -25,15 +25,17 @@ export const isHeicFile = (file: File | string | null | undefined): boolean => {
  * Canvas-based image conversion and resizing.
  * Works natively on iOS and Android to decode HEIC/HEIF and normalize formats.
  */
-const convertViaCanvas = (file: File): Promise<File> => {
+const convertViaCanvas = (file: File, options: { maxWidth?: number; quality?: number } = {}): Promise<File> => {
     return new Promise((resolve, reject) => {
         const img = new Image();
         const url = URL.createObjectURL(file);
         img.onload = () => {
             URL.revokeObjectURL(url);
             
-            // Maximum dimension constraint (e.g., 2560px for 2K-ish quality)
-            const MAX_SIZE = 1920;
+            // Default to 1600px for general usage, unless specific maxWidth provided
+            const MAX_SIZE = options.maxWidth || 1600;
+            const QUALITY = options.quality ?? 0.8; // default to 0.8 for good balance
+
             let width = img.naturalWidth;
             let height = img.naturalHeight;
 
@@ -64,7 +66,7 @@ const convertViaCanvas = (file: File): Promise<File> => {
                     type: 'image/jpeg', 
                     lastModified: Date.now() 
                 }));
-            }, 'image/jpeg', 0.92);
+            }, 'image/jpeg', QUALITY);
         };
         img.onerror = () => {
             URL.revokeObjectURL(url);
@@ -81,13 +83,17 @@ const isMobile = (): boolean =>
  * Normalizes any image file for upload across all platforms (iPhone, Android, desktop).
  * Multi-stage Fallback: Canvas (Fast/Native) -> heic2any (Chrome Desktop) -> Original with faked type
  */
-export const normalizeImageFile = async (file: File): Promise<File> => {
+export const normalizeImageFile = async (
+    file: File, 
+    options: { maxWidth?: number; quality?: number } = {}
+): Promise<File> => {
     const logPrefix = `[ImageNormalization:${file.name}]`;
     console.log(`${logPrefix} Starting... Type: ${file.type || 'unknown'}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
 
     try {
         const isHeic = isHeicFile(file);
-        const needsNormalization = isHeic || !file.type || file.size > 1 * 1024 * 1024;
+        // Force normalization if file is HEIC, missing type, or larger than 0.5MB (aggressive)
+        const needsNormalization = isHeic || !file.type || file.size > 0.5 * 1024 * 1024 || options.maxWidth || options.quality;
 
         if (!needsNormalization) {
             console.log(`${logPrefix} Normalization skipped (small/standard file)`);
@@ -97,8 +103,8 @@ export const normalizeImageFile = async (file: File): Promise<File> => {
         // --- STAGE 1: CANVAS (Fast, handles Native HEIC on iOS/Safari and Resizing) ---
         if (typeof document !== 'undefined') {
             try {
-                const result = await convertViaCanvas(file);
-                console.log(`${logPrefix} Success via Canvas`);
+                const result = await convertViaCanvas(file, options);
+                console.log(`${logPrefix} Success via Canvas. New size: ${(result.size / 1024 / 1024).toFixed(2)}MB`);
                 return result;
             } catch (err) {
                 console.warn(`${logPrefix} Canvas failed, trying fallback...`, err);
