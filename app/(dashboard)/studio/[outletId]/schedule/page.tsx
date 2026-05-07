@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { startOfWeek, endOfWeek, addWeeks, format } from 'date-fns'
 import { getCachedStudio } from '@/lib/studio/data'
+import { ScheduleService } from '@/lib/services/schedule'
 
 type Params = Promise<{ outletId: string }>
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
