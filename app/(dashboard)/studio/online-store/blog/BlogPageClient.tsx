@@ -109,9 +109,9 @@ export default function BlogPageClient({ studio }: BlogPageClientProps) {
         formData.append('type', 'blog')
         
         const res = await uploadStudioAsset(formData)
-        if (res.success && res.url) {
+        if (res.success && res.data?.url) {
             if (editingPost) {
-                setEditingPost({ ...editingPost, image_url: res.url })
+                setEditingPost({ ...editingPost, image_url: res.data.url })
             }
         }
         setIsUploading(false)
