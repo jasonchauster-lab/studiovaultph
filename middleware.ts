@@ -6,8 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 const MAIN_DOMAINS = [
     'studiovaultph.com',
     'studiovaultph.local',
-    'localhost:3000',
-    'localhost:3001',
+    'localhost',
 ].filter(Boolean)
 
 const STUDIO_DOMAINS = [
@@ -50,7 +49,7 @@ export async function middleware(request: NextRequest) {
         const isReserved = RESERVED_PATHS.some(reserved => path.startsWith(`/${reserved}`))
 
         // If it's just the root domain (studiovault.co/), show the CMS landing page
-        if (!slug) {
+        if (path === '/' || path === '') {
             return NextResponse.rewrite(new URL(`/cms-home${url.search}`, request.url), {
                 request: { headers: requestHeaders },
             })
