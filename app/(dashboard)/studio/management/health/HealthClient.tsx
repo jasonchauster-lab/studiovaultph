@@ -55,7 +55,7 @@ export default function HealthClient({ studioId, initialLogs }: { studioId: stri
                 schema: 'public',
                 table: 'payment_webhook_logs',
                 filter: `studio_id=eq.${studioId}`
-            }, (payload) => {
+            }, (payload: any) => {
                 setLogs(prev => [payload.new as WebhookLog, ...prev].slice(0, 50))
                 toast('New webhook signal received', 'info')
             })
