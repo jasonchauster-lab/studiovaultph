@@ -25,7 +25,7 @@ const RESERVED_PATHS = [
 const domainCache = new Map<string, { slug: string, tier: string, expiry: number }>()
 const CACHE_TTL = 1000 * 60 * 5 // 5 minutes
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const url = request.nextUrl
     const hostname = request.headers.get('host') || ''
     const path = url.pathname
