@@ -42,18 +42,19 @@ export async function middleware(request: NextRequest) {
     const isMainDomain = MAIN_DOMAINS.some(domain => hostname.includes(domain))
     const isStudioDomain = STUDIO_DOMAINS.some(domain => hostname.includes(domain))
 
-    // 1. Handle Studio Domain (studiovault.co)
+    // 1. Force Studio Landing Page (Highest Priority)
+    // Using a more explicit check for the root path
+    if (isStudioDomain && (path === '/' || path === '' || path === '/index.html')) {
+        return NextResponse.rewrite(new URL(`/cms-home${url.search}`, request.url), {
+            request: { headers: requestHeaders },
+        })
+    }
+
+    // 2. Handle Studio Domain Routing (Slugs & Reserved)
     if (isStudioDomain) {
         const pathSegments = path.split('/').filter(Boolean)
         const slug = pathSegments[0]
         const isReserved = RESERVED_PATHS.some(reserved => path.startsWith(`/${reserved}`))
-
-        // If it's just the root domain (studiovault.co/), show the CMS landing page
-        if (path === '/' || path === '') {
-            return NextResponse.rewrite(new URL(`/cms-home${url.search}`, request.url), {
-                request: { headers: requestHeaders },
-            })
-        }
 
         // If it's an official system route, it NEEDS session management
         if (isReserved) {
