@@ -3,19 +3,31 @@
 import { createClient } from '@/lib/supabase/server'
 import { getManilaTodayStr } from '@/lib/timezone'
 import { revalidatePath } from 'next/cache'
+import { verifyStudioAccess } from '@/lib/studio/auth'
+import { logAuditAction } from '@/lib/studio/audit'
+import { PayoutRequestSchema } from '@/lib/studio/schemas'
+import { checkRateLimit } from '@/lib/studio/rate-limit'
+import { v4 as uuidv4 } from 'uuid'
+import { ErrorService } from '@/lib/services/error-service'
 
-export async function getEarningsData(studioId: string, startDate?: string, endDate?: string) {
+export async function getEarningsData(studioId: string, startDate?: string, endDate?: string, outletId?: string) {
     const supabase = await createClient()
 
     try {
-        const { data, error } = await supabase.rpc('get_studio_earnings_v2', {
+        const { user, isOwner, permissions } = await verifyStudioAccess(studioId)
+        
+        if (!isOwner && !permissions.view_sales) {
+            return { error: 'Permission denied: You do not have access to sales data.' }
+        }
+        const { data, error } = await supabase.rpc('get_studio_earnings_v4', {
             p_studio_id: studioId,
             p_start_date: startDate || null,
-            p_end_date: endDate || null
+            p_end_date: endDate || null,
+            p_outlet_id: outletId || null
         })
 
         if (error) {
-            console.error('[getEarningsData] RPC error:', error)
+            await ErrorService.logServiceError('EarningsActions', 'getEarningsData', error, { studioId })
             return { error: `Earnings data error: ${error.message}` }
         }
 
@@ -44,6 +56,9 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             status: tx.status,
             session_date: tx.session_date,
             session_time: tx.session_time,
+            origin: tx.origin,
+            payment_method: tx.payment_method || tx.method || 'Xendit',
+            reference_id: tx.reference_id,
         }))
 
         return {
@@ -53,7 +68,7 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
             summary: summary
         }
     } catch (err: any) {
-        console.error('[getEarningsData] Global Crash:', err)
+        await ErrorService.logServiceError('EarningsActions', 'getEarningsData (Critical)', err, { studioId })
         return { error: `Critical system error: ${err.message || 'Unknown error'}` }
     }
 }
@@ -61,25 +76,26 @@ export async function getEarningsData(studioId: string, startDate?: string, endD
 export async function requestPayout(prevState: any, formData: FormData) {
     const supabase = await createClient()
 
-    const studioId = formData.get('studioId') as string
-    const amount = parseFloat(formData.get('amount') as string)
-    const paymentMethod = formData.get('paymentMethod') as string
-    const accountName = formData.get('accountName') as string
-    const accountNumber = formData.get('accountNumber') as string
-    const bankName = formData.get('bankName') as string
-
-    if (!studioId || !amount || !paymentMethod || !accountName || !accountNumber) {
-        return { error: 'All fields are required' }
+    const payload = {
+        studioId: formData.get('studioId') as string,
+        amount: parseFloat(formData.get('amount') as string),
+        paymentMethod: formData.get('paymentMethod') as string,
+        accountName: formData.get('accountName') as string,
+        accountNumber: formData.get('accountNumber') as string,
+        bankName: formData.get('bankName') as string || undefined
     }
 
-    if (amount <= 0) {
-        return { error: 'Invalid amount' }
+    const validated = PayoutRequestSchema.safeParse(payload)
+    if (!validated.success) {
+        return { error: validated.error.issues[0].message }
     }
+    const { studioId, amount, paymentMethod, accountName, accountNumber, bankName } = validated.data
+
 
     // Check approval status and document expiry
     const { data: studio } = await supabase
         .from('studios')
-        .select('payout_approval_status, bir_certificate_expiry, mayors_permit_expiry, payout_lock, owner_id')
+        .select('payout_approval_status, bir_certificate_expiry, mayors_permit_expiry, payout_lock')
         .eq('id', studioId).single()
 
     if (studio?.payout_approval_status !== 'approved') {
@@ -96,23 +112,50 @@ export async function requestPayout(prevState: any, formData: FormData) {
         return { error: 'One or more of your mandatory documents have expired.' }
     }
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const { user, isOwner, permissions } = await verifyStudioAccess(studioId)
     if (!user) return { error: 'Not authenticated' }
 
-    // PERFORM ATOMIC DEDUCTION AND RECORD CREATION
-    const { data: result, error: rpcError } = await supabase.rpc('request_payout_atomic_v2', {
-        p_user_id: user.id,
+    if (!isOwner) {
+        return { error: 'Permission denied: Only the studio owner can request payouts.' }
+    }
+
+    // 1. Rate Limiting (5 requests per hour per studio)
+    const isAllowed = await checkRateLimit(`payout:${studioId}`, 5, 3600)
+    if (!isAllowed) {
+        return { error: 'Too many payout requests. Please try again later.' }
+    }
+
+    // 2. Generate Idempotency Key (usually from client, but we can use a hash of stable fields if needed)
+    // For server actions, the client should ideally pass a key. 
+    // Here we'll generate one but typically we'd want to persist it on the client during retry.
+    const idempotencyKey = formData.get('idempotencyKey') as string || uuidv4()
+
+    // PERFORM ATOMIC DEDUCTION AND RECORD CREATION (v4 with auth.uid)
+    const { data: result, error: rpcError } = await supabase.rpc('request_payout_atomic_v4', {
         p_amount: amount,
         p_method: paymentMethod,
         p_account_name: accountName,
         p_account_number: accountNumber,
         p_bank_name: paymentMethod === 'bank_transfer' ? bankName : undefined,
-        p_studio_id: studioId
+        p_studio_id: studioId,
+        p_idempotency_key: idempotencyKey
     })
+
+    if (rpcError?.message?.includes('idempotency_key')) {
+        return { success: true, message: 'Payout request already processed.' }
+    }
 
     if (rpcError || !result?.success) {
         return { error: rpcError?.message || result?.error || 'Failed to process payout request.' }
     }
+
+    await logAuditAction({
+        studioId,
+        actorId: user.id,
+        action: 'REQUEST_PAYOUT',
+        entityType: 'payout',
+        metadata: { amount, bankName, accountNumber }
+    })
 
     revalidatePath('/studio/earnings')
     return { success: true, message: 'Payout request submitted successfully!' }
@@ -142,7 +185,7 @@ export async function submitPayoutApplication(prevState: any, formData: FormData
         permitPath = `studios/${user.id}/mayors_permit_${timestamp}.${ext}`
         const { error: uploadError } = await supabase.storage.from('certifications').upload(permitPath, mayorsPermit)
         if (uploadError) {
-            console.error('Mayors permit upload error:', uploadError)
+            await ErrorService.logServiceError('EarningsActions', 'submitPayoutApplication (Permit)', uploadError, { studioId })
             return { error: 'Failed to upload Mayor\'s Permit.' }
         }
     }
@@ -153,7 +196,7 @@ export async function submitPayoutApplication(prevState: any, formData: FormData
         certPath = `studios/${user.id}/secretary_cert_${timestamp}.${ext}`
         const { error: uploadError } = await supabase.storage.from('certifications').upload(certPath, secretaryCertificate)
         if (uploadError) {
-            console.error('Secretary certificate upload error:', uploadError)
+            await ErrorService.logServiceError('EarningsActions', 'submitPayoutApplication (Cert)', uploadError, { studioId })
             return { error: 'Failed to upload Secretary\'s Certificate.' }
         }
     }
@@ -169,7 +212,7 @@ export async function submitPayoutApplication(prevState: any, formData: FormData
         .eq('id', studioId)
 
     if (updateError) {
-        console.error('Failed to update studio status:', updateError)
+        await ErrorService.logServiceError('EarningsActions', 'submitPayoutApplication (Update)', updateError, { studioId })
         return { error: 'Failed to submit application. Please try again later.' }
     }
 

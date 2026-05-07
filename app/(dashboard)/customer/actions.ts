@@ -4,8 +4,53 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { uploadContentType } from '@/lib/utils/image-utils'
 import { sendEmail } from '@/lib/email'
+import { createXenditInvoice } from '@/lib/xendit'
+import { WAIVER_VERSIONS, TIMEZONE_OFFSET, SUBSCRIPTION_STATUS } from '@/lib/constants'
+import { headers } from 'next/headers'
 import BookingNotificationEmail from '@/components/emails/BookingNotificationEmail'
 import { formatManilaDate, formatManilaTime, roundToISOString, formatManilaDateStr, formatTo12Hour, toManilaDateStr, getManilaTodayStr, normalizeTimeTo24h, toManilaTimeString } from '@/lib/timezone'
+import { getStudioBranding } from '@/lib/studio/branding'
+ 
+function calculateBookingPrice({
+    studio,
+    instructor,
+    equipment,
+    quantity,
+    isStorefront
+}: {
+    studio: any,
+    instructor: any,
+    equipment?: string,
+    quantity: number,
+    isStorefront: boolean
+}) {
+    const studioPricing = studio?.pricing as Record<string, number> | null;
+    const sKey = Object.keys(studioPricing || {}).find(k => k.toLowerCase() === (equipment || '').toLowerCase());
+    const studioFee = sKey ? (studioPricing?.[sKey] || 0) : (Number(studio?.hourly_rate) || 0);
+
+    const instructorRates = instructor?.rates as Record<string, number> | null;
+    const instructorKey = Object.keys(instructorRates || {}).find(k => k.toUpperCase() === 'REFORMER');
+    const instructorFee = instructorKey ? (instructorRates?.[instructorKey] || 0) : 0;
+
+    const baseFee = studioFee + instructorFee;
+    let feePercentage = 20;
+
+    const isSubscriptionActive = studio?.subscription_status === 'active';
+    
+    if (isStorefront && isSubscriptionActive) {
+        feePercentage = 0;
+    } else if (studio?.custom_fee_percentage !== undefined) {
+        feePercentage = studio.custom_fee_percentage;
+    } else if (instructor?.custom_fee_percentage !== undefined) {
+        feePercentage = instructor.custom_fee_percentage;
+    }
+
+    const calculatedServiceFee = baseFee * (feePercentage / 100);
+    const serviceFee = (isStorefront && isSubscriptionActive) ? 0 : Math.max(100, calculatedServiceFee);
+    const totalPrice = (baseFee + serviceFee) * quantity;
+
+    return { studioFee, instructorFee, baseFee, serviceFee, totalPrice };
+}
 
 export async function requestBooking(
     slotId: string | null,
@@ -17,7 +62,10 @@ export async function requestBooking(
     bookingType: 'studio' | 'home' = 'studio',
     clientAddress?: string,
     clientLat?: number | null,
-    clientLng?: number | null
+    clientLng?: number | null,
+    isStorefront: boolean = false,
+    paymentMethod: 'xendit' | 'manual' | 'credit' = 'xendit',
+    planId?: string
 ) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -25,80 +73,155 @@ export async function requestBooking(
 
     let actualBookingId: string | null = null;
     let studioOwnerProfile: any = null;
+    let studioSlug: string | null = null;
+    let updatePayload: any = {};
+
+    // 1. Fetch all initial data in parallel
+    const [
+        { data: { user: verifiedUser } },
+        slotResult,
+        instructorResult
+    ] = await Promise.all([
+        supabase.auth.getUser(),
+        bookingType === 'studio' && slotId 
+            ? supabase.from('slots').select('*, outlet_id, studios!inner(slug, pricing, hourly_rate, id, is_founding_partner, custom_fee_percentage, subscription_status, location, profiles!owner_id(available_balance, is_suspended, full_name, email))').eq('id', slotId).eq('is_available', true).single()
+            : Promise.resolve({ data: null, error: null }),
+        supabase.from('profiles').select('full_name, rates, is_founding_partner, custom_fee_percentage, available_balance, offers_home_sessions, home_base_lat, home_base_lng, max_travel_km').eq('id', instructorId).single()
+    ]);
+
+    if (!user) return { error: 'Unauthorized' }
+
+    const slot = slotResult.data;
+    const instructor = instructorResult.data;
 
     // --- CASE A: STUDIO BOOKING ---
     if (bookingType === 'studio') {
         if (!slotId) return { error: 'Slot ID is required for studio bookings.' };
-
-        // 1. Fetch available slot
-        const { data: slot, error: slotError } = await supabase
-            .from('slots')
-            .select('*, studios!inner(pricing, hourly_rate, id, is_founding_partner, custom_fee_percentage, location, profiles!owner_id(available_balance, is_suspended, full_name, email))')
-            .eq('id', slotId)
-            .eq('is_available', true)
-            .single()
-
-        if (slotError || !slot) return { error: `Slot no longer available.` }
+        if (slotResult.error || !slot) return { error: `Slot no longer available.` }
 
         const studio = (slot as any)?.studios;
+        studioSlug = studio?.slug;
         studioOwnerProfile = Array.isArray(studio.profiles) ? studio.profiles[0] : studio.profiles;
+
         if (studioOwnerProfile?.is_suspended || (studioOwnerProfile?.available_balance ?? 0) < 0) {
             return { error: `Studio is not accepting new bookings.` }
         }
-
-        // Fetch Instructor
-        const { data: instructor } = await supabase.from('profiles').select('full_name, rates, is_founding_partner, custom_fee_percentage, available_balance').eq('id', instructorId).single()
         if (instructor && (instructor.available_balance ?? 0) < 0) return { error: `Instructor is not accepting bookings.` }
 
-        // --- DOUBLE BOOKING CHECK ---
+        // 2. Perform overlapping check and balance check in parallel
         const timeStr = normalizeTimeTo24h(slot.start_time);
-        const { data: overlapping } = await supabase.from('bookings').select('id').eq('instructor_id', instructorId).in('status', ['pending', 'approved']).eq('booking_date', slot.date).eq('booking_start_time', timeStr);
-        if (overlapping && overlapping.length > 0) return { error: 'Instructor already booked for this time.' }
+        const [overlappingResult, balanceResult] = await Promise.all([
+            supabase.from('bookings').select('id').eq('instructor_id', instructorId).in('status', ['pending', 'approved']).eq('booking_date', slot.date).eq('booking_start_time', timeStr),
+            isStorefront 
+                ? supabase.from('customer_memberships').select('available_balance').eq('user_id', user.id).eq('studio_id', studio.id).maybeSingle()
+                : Promise.resolve({ data: { available_balance: instructor?.available_balance ?? 0 } }) // fallback for now
+        ]);
+
+        if (overlappingResult.data && overlappingResult.data.length > 0) return { error: 'Instructor already booked for this time.' }
 
         // --- PRICE CALCULATION ---
-        const studioPricing = studio.pricing as Record<string, number> | null;
-        const sKey = Object.keys(studioPricing || {}).find(k => k.toLowerCase() === (equipment || '').toLowerCase());
-        const studioFee = sKey ? (studioPricing?.[sKey] || 0) : (Number(studio.hourly_rate) || 0);
-
-        const instructorRates = instructor?.rates as Record<string, number> | null;
-        const instructorKey = Object.keys(instructorRates || {}).find(k => k.toUpperCase() === 'REFORMER');
-        const instructorFee = instructorKey ? (instructorRates?.[instructorKey] || 0) : 0;
-
-        const baseFee = studioFee + instructorFee;
-        let feePercentage = 20;
-        if (studio?.custom_fee_percentage !== undefined) feePercentage = studio.custom_fee_percentage;
-        else if (instructor?.custom_fee_percentage !== undefined) feePercentage = instructor.custom_fee_percentage;
-
-        const calculatedServiceFee = baseFee * (feePercentage / 100);
-        const serviceFee = Math.max(100, calculatedServiceFee);
-        const totalPrice = (baseFee + serviceFee) * quantity;
-
-        // --- WALLET DEDUCTION ---
-        const { data: profile } = await supabase.from('profiles').select('available_balance').eq('id', user.id).single();
-        const deduction = Math.min(profile?.available_balance ?? 0, totalPrice);
-        const finalPrice = totalPrice - deduction;
-
-        // --- ATOMIC RPC ---
-        const { data: rpcResult, error: rpcError } = await supabase.rpc('book_slot_atomic', {
-            p_slot_id: slotId, p_instructor_id: instructorId, p_client_id: user.id, p_equipment_key: equipment?.toUpperCase() || 'MAT',
-            p_quantity: quantity, p_db_price: finalPrice, p_price_breakdown: { studio_fee: studioFee, instructor_fee: instructorFee, service_fee: serviceFee },
-            p_wallet_deduction: deduction
+        const { studioFee, instructorFee, serviceFee, totalPrice } = calculateBookingPrice({
+            studio,
+            instructor,
+            equipment,
+            quantity,
+            isStorefront
         });
 
-        if (rpcError || !rpcResult?.success) return { error: 'Booking failed.' };
-        actualBookingId = rpcResult.booking_id;
+        // --- PAYMENT LOGIC ---
+        let deduction = 0;
+        if (paymentMethod === 'credit') {
+            if (!planId) return { error: 'Plan ID required for credit booking.' };
 
-        // Update home-specific columns for unified search
-        await supabase.from('bookings').update({ 
+            const { data: rpcResult, error: rpcError } = await supabase.rpc('book_slot_with_package_credit', {
+                p_slot_id: slotId,
+                p_instructor_id: instructorId,
+                p_client_id: user.id,
+                p_plan_id: planId,
+                p_equipment_key: equipment?.toUpperCase() || 'MAT',
+                p_quantity: quantity,
+                p_price_breakdown: { studio_fee: studioFee, instructor_fee: instructorFee, service_fee: serviceFee },
+                p_origin: isStorefront ? 'studio' : 'marketplace',
+                p_outlet_id: slot.outlet_id
+            });
+
+            if (rpcError || !rpcResult?.success) return { error: rpcError?.message || 'Booking failed.' };
+            actualBookingId = rpcResult.booking_id;
+        } else {
+            const availableBalance = (balanceResult.data as any)?.available_balance ?? 0;
+            deduction = Math.min(availableBalance, totalPrice);
+            const finalPrice = totalPrice - deduction;
+
+            // --- ATOMIC RPC ---
+            const { data: rpcResult, error: rpcError } = await supabase.rpc('book_slot_atomic', {
+                p_slot_id: slotId, 
+                p_instructor_id: instructorId, 
+                p_client_id: user.id, 
+                p_equipment_key: equipment?.toUpperCase() || 'MAT',
+                p_quantity: quantity, 
+                p_db_price: finalPrice, 
+                p_price_breakdown: { 
+                    studio_fee: studioFee, 
+                    instructor_fee: instructorFee, 
+                    service_fee: serviceFee,
+                    wallet_deduction: deduction,
+                    wallet_source: isStorefront ? 'studio' : 'marketplace'
+                },
+                p_wallet_deduction: deduction,
+                p_origin: isStorefront ? 'studio' : 'marketplace',
+                p_outlet_id: slot.outlet_id,
+                p_use_studio_wallet: isStorefront
+            });
+
+            if (rpcError || !rpcResult?.success) return { error: 'Booking failed.' };
+            actualBookingId = rpcResult.booking_id;
+        }
+
+        // Update booking metadata
+        updatePayload = { 
             booking_date: slot.date, 
             booking_start_time: slot.start_time, 
-            booking_end_time: slot.end_time 
-        }).eq('id', actualBookingId);
+            booking_end_time: slot.end_time,
+            payment_method: paymentMethod,
+            status: paymentMethod === 'manual' ? 'pending' : (paymentMethod === 'credit' ? 'approved' : 'pending')
+        };
+
+        let checkoutUrl = null;
+
+        if (paymentMethod === 'xendit' && actualBookingId) {
+            try {
+                const headerList = await headers();
+                const host = headerList.get('host') || 'studiovaultph.com';
+                const protocol = host.includes('localhost') ? 'http' : 'https';
+                const baseUrl = `${protocol}://${host}`;
+
+                const invoice = await createXenditInvoice({
+                    studioId: studio.id,
+                    externalId: `book_${actualBookingId}`,
+                    amount: totalPrice - (deduction || 0),
+                    description: `Booking at ${studio.name} - ${slot.date} ${slot.start_time}`,
+                    payerEmail: user.email,
+                    successUrl: `${baseUrl}/customer/payment/${actualBookingId}/success`,
+                    failureUrl: `${baseUrl}/customer/payment/${actualBookingId}/failure`
+                });
+
+                updatePayload.xendit_invoice_id = invoice.id;
+                updatePayload.xendit_checkout_url = invoice.invoice_url;
+                updatePayload.expires_at = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // Extend to 1 hour
+                checkoutUrl = invoice.invoice_url;
+            } catch (err: any) {
+                console.error('[requestBooking] Xendit Invoice Creation Failed:', err);
+                // Return a clear error if invoice creation fails so the user knows why they can't pay
+                return { error: `Payment gateway error: ${err.message || 'Please try again later.'}` };
+            }
+        }
+
+        await supabase.from('bookings').update(updatePayload).eq('id', actualBookingId);
     }
     // --- CASE B: HOME BOOKING ---
     else {
         // Fetch Instructor
-        const { data: instructor } = await supabase.from('profiles').select('*').eq('id', instructorId).single();
+        const { data: instructor } = await supabase.from('profiles').select('id, full_name, avatar_url, bio, role, offers_home_sessions, available_balance, rates, is_founding_partner, custom_fee_percentage, home_base_lat, home_base_lng, max_travel_km').eq('id', instructorId).single();
         if (!instructor?.offers_home_sessions) return { error: 'Instructor does not offer home sessions.' };
         if (instructor.available_balance < 0) return { error: 'Instructor not accepting bookings.' };
 
@@ -141,7 +264,8 @@ export async function requestBooking(
             p_wallet_deduction: deduction,
             p_home_address: clientAddress,
             p_home_lat: clientLat,
-            p_home_lng: clientLng
+            p_home_lng: clientLng,
+            p_origin: isStorefront ? 'studio' : 'marketplace'
         });
 
         if (rpcError || !rpcResult?.success) return { error: rpcError?.message || 'Booking failed.' };
@@ -183,10 +307,18 @@ export async function requestBooking(
         const date = formatManilaDateStr(booking.booking_date || (booking.slots as any)?.date);
         const time = formatTo12Hour(booking.booking_start_time || (booking.slots as any)?.start_time);
 
+        const branding = (booking.slots as any)?.studios?.owner_id 
+            ? await getStudioBranding((booking.slots as any).studios.id)
+            : null;
+
+        const isConfirmed = booking.status === 'approved';
+        const emailPromises = [];
+
         if (clientEmail) {
-            await sendEmail({
+            emailPromises.push(sendEmail({
                 to: clientEmail,
-                subject: `Booking Requested: ${studioName}`,
+                subject: `${isConfirmed ? 'Booking Confirmed' : 'Booking Requested'}: ${studioName}`,
+                fromName: branding?.fromName,
                 react: BookingNotificationEmail({
                     recipientName: 'Valued Client',
                     bookingType: 'New Booking',
@@ -196,15 +328,18 @@ export async function requestBooking(
                     date,
                     time,
                     equipment: (booking.price_breakdown as any)?.equipment || 'MAT',
-                    quantity: (booking.price_breakdown as any)?.quantity || 1
+                    quantity: (booking.price_breakdown as any)?.quantity || 1,
+                    studioLogo: branding?.logoUrl,
+                    primaryColor: branding?.primaryColor
                 })
-            });
+            }));
         }
 
         if (instructorEmail) {
-            await sendEmail({
+            emailPromises.push(sendEmail({
                 to: instructorEmail,
                 subject: `New Client Booking Request`,
+                fromName: branding?.fromName,
                 react: BookingNotificationEmail({
                     recipientName: instructorName,
                     bookingType: 'New Booking',
@@ -213,15 +348,18 @@ export async function requestBooking(
                     date,
                     time,
                     equipment: (booking.price_breakdown as any)?.equipment || 'MAT',
-                    quantity: (booking.price_breakdown as any)?.quantity || 1
+                    quantity: (booking.price_breakdown as any)?.quantity || 1,
+                    studioLogo: branding?.logoUrl,
+                    primaryColor: branding?.primaryColor
                 })
-            });
+            }));
         }
 
         if (studioOwnerProfile?.email) {
-            await sendEmail({
+            emailPromises.push(sendEmail({
                 to: studioOwnerProfile.email,
                 subject: `New Session Booked at your Studio`,
+                fromName: branding?.fromName,
                 react: BookingNotificationEmail({
                     recipientName: 'Studio Owner',
                     bookingType: 'New Booking',
@@ -230,15 +368,22 @@ export async function requestBooking(
                     date,
                     time,
                     equipment: (booking.price_breakdown as any)?.equipment,
-                    quantity: (booking.price_breakdown as any)?.quantity
+                    quantity: (booking.price_breakdown as any)?.quantity,
+                    studioLogo: branding?.logoUrl,
+                    primaryColor: branding?.primaryColor
                 })
-            });
+            }));
         }
+
+        await Promise.allSettled(emailPromises);
     }
 
     revalidatePath('/customer')
+    if (studioSlug) {
+        revalidatePath(`/s/${studioSlug}/dashboard`)
+    }
     revalidatePath(`/instructors/${instructorId}`)
-    return { success: true, bookingId: actualBookingId }
+    return { success: true, bookingId: actualBookingId, checkoutUrl: (updatePayload as any)?.xendit_checkout_url }
 }
 
 export async function submitPaymentProof(
@@ -267,7 +412,7 @@ export async function submitPaymentProof(
         p_parq_answers: parqAnswers,
         p_has_risk_flags: hasRiskFlags,
         p_medical_clearance_acknowledged: medicalClearanceAcknowledged,
-        p_waiver_version: '2026-03-22' // Updated version for the new atomic flow
+        p_waiver_version: WAIVER_VERSIONS.CURRENT
     });
 
     if (rpcError || !rpcResult?.success) {
@@ -366,12 +511,38 @@ export async function submitTopUpPaymentProof(
     return { success: true }
 }
 
+export async function joinWaitlist(
+    slotId: string,
+    equipment: string,
+    quantity: number = 1
+) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    // atomic RPC call
+    const { data: result, error } = await supabase.rpc('join_waitlist_atomic', {
+        p_slot_id: slotId,
+        p_client_id: user.id,
+        p_equipment_key: equipment.toUpperCase(),
+        p_quantity: quantity
+    })
+
+    if (error || !result?.success) {
+        return { error: error?.message || result?.error || 'Failed to join waitlist' }
+    }
+
+    revalidatePath('/customer')
+    return { success: true, position: result.position }
+}
+
 export async function bookInstructorSession(
     instructorId: string,
     date: string,
     time: string,
     location: string,
-    equipment: string
+    equipment: string,
+    isStorefront: boolean = false
 ) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -383,7 +554,7 @@ export async function bookInstructorSession(
     }
 
     const normalizedTime = time.length === 5 ? time + ':00' : time;
-    const startDateTime = new Date(`${date}T${normalizedTime}+08:00`)
+    const startDateTime = new Date(`${date}T${normalizedTime}${TIMEZONE_OFFSET}`)
     // We no longer rely on startISO for slot matching, but keep it for legacy if needed elsewhere
     // However, it's safer to just use strings now.
 
@@ -572,14 +743,19 @@ export async function bookInstructorSession(
     const baseFee = studioFee + instructorFee;
     let feePercentage = 20;
 
-    if (selectedSlot.studios?.custom_fee_percentage !== undefined) {
+    // WAIVE FEE FOR STOREFRONT BOOKINGS IF SUBSCRIPTION IS ACTIVE
+    const isSubscriptionActive = selectedSlot.studios?.subscription_status === SUBSCRIPTION_STATUS.ACTIVE;
+
+    if (isStorefront && isSubscriptionActive) {
+        feePercentage = 0;
+    } else if (selectedSlot.studios?.custom_fee_percentage !== undefined) {
         feePercentage = selectedSlot.studios.custom_fee_percentage;
     } else if (instructorProfile?.custom_fee_percentage !== undefined) {
         feePercentage = instructorProfile.custom_fee_percentage;
     }
 
     const calculatedServiceFee = baseFee * (feePercentage / 100);
-    const serviceFee = Math.max(100, calculatedServiceFee);
+    const serviceFee = (isStorefront && isSubscriptionActive) ? 0 : Math.max(100, calculatedServiceFee);
     const totalPrice = baseFee + serviceFee;
 
     const breakdown = {
@@ -607,7 +783,9 @@ export async function bookInstructorSession(
         p_price_breakdown: breakdown,
         p_wallet_deduction: 0, // Assume no direct wallet hit here unless later processed
         p_req_start_time: reqStartTime,
-        p_req_end_time: reqEndTime
+        p_req_end_time: reqEndTime,
+        p_origin: isStorefront ? 'studio' : 'marketplace',
+        p_use_studio_wallet: isStorefront // NEW FLAG
     });
 
     if (rpcError) {
@@ -664,6 +842,10 @@ export async function bookInstructorSession(
         const studioName = studios?.name;
         const studioAddress = studios?.address;
 
+        const branding = (slots as any)?.studios?.id 
+            ? await getStudioBranding((slots as any).studios.id)
+            : null;
+
         if (clientEmail && slots?.start_time) {
             const dateStr = formatManilaDateStr(slots?.date);
             const timeStr = formatTo12Hour(slots?.start_time);
@@ -672,6 +854,7 @@ export async function bookInstructorSession(
             await sendEmail({
                 to: clientEmail,
                 subject: `Booking Confirmed: ${studioName}`,
+                fromName: branding?.fromName,
                 react: BookingNotificationEmail({
                     recipientName: clientName,
                     bookingType: 'Booking Confirmed',
@@ -681,7 +864,9 @@ export async function bookInstructorSession(
                     date: dateStr,
                     time: timeStr,
                     equipment: (enrichedBooking.price_breakdown as any)?.equipment,
-                    quantity: (enrichedBooking.price_breakdown as any)?.quantity
+                    quantity: (enrichedBooking.price_breakdown as any)?.quantity,
+                    studioLogo: branding?.logoUrl,
+                    primaryColor: branding?.primaryColor
                 })
             });
 
@@ -690,6 +875,7 @@ export async function bookInstructorSession(
                 await sendEmail({
                     to: instructorEmail,
                     subject: `New Session Confirmed with ${clientName}`,
+                    fromName: branding?.fromName,
                     react: BookingNotificationEmail({
                         recipientName: instructorName,
                         bookingType: 'Booking Confirmed',
@@ -698,19 +884,22 @@ export async function bookInstructorSession(
                         date: dateStr,
                         time: timeStr,
                         equipment: (enrichedBooking.price_breakdown as any)?.equipment,
-                        quantity: (enrichedBooking.price_breakdown as any)?.quantity
+                        quantity: (enrichedBooking.price_breakdown as any)?.quantity,
+                        studioLogo: branding?.logoUrl,
+                        primaryColor: branding?.primaryColor
                     })
                 });
             }
 
             // Notify Studio Owner
-            const studioOwnerId = studios?.owner_id;
-            if (studioOwnerId) {
-                const { data: owner } = await supabase.from('profiles').select('email').eq('id', studioOwnerId).single();
+            const ownerId = (slots as any)?.studios?.owner_id;
+            if (ownerId) {
+                const { data: owner } = await supabase.from('profiles').select('email').eq('id', ownerId).single();
                 if (owner?.email) {
                     await sendEmail({
                         to: owner.email,
                         subject: `New Session Confirmed at ${studioName}`,
+                        fromName: branding?.fromName,
                         react: BookingNotificationEmail({
                             recipientName: 'Studio Owner',
                             bookingType: 'Booking Confirmed',
@@ -720,7 +909,9 @@ export async function bookInstructorSession(
                             date: dateStr,
                             time: timeStr,
                             equipment: (enrichedBooking.price_breakdown as any)?.equipment,
-                            quantity: (enrichedBooking.price_breakdown as any)?.quantity
+                            quantity: (enrichedBooking.price_breakdown as any)?.quantity,
+                            studioLogo: branding?.logoUrl,
+                            primaryColor: branding?.primaryColor
                         })
                     });
                 }
@@ -928,50 +1119,53 @@ export async function getCustomerWalletDetails() {
 
     if (!user) return { error: 'Unauthorized' }
 
+    // 1. Fetch all data in parallel
+    const [profileResult, walletActionsResult, walletBookingsResult] = await Promise.all([
+        supabase.from('profiles')
+            .select('available_balance, wallet_balance, pending_balance')
+            .eq('id', user.id)
+            .single(),
+        supabase.from('wallet_top_ups')
+            .select('id, amount, type, status, created_at, updated_at, admin_notes')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(100), // Scalability: Limit to recent history
+        supabase.from('bookings')
+            .select(`
+                id,
+                created_at,
+                status,
+                price_breakdown,
+                slots:slot_id (
+                    date,
+                    start_time
+                ),
+                studios:studio_id (
+                    name
+                )
+            `)
+            .eq('client_id', user.id)
+            .not('price_breakdown', 'is', null)
+            // SQL-Level Filtering: Avoid fetching studio-wallet transactions here if possible
+            // Note: price_breakdown is JSONB, so we can filter by top-level keys if needed, 
+            // but for now we filter in JS. We at least limit the fetch.
+            .order('created_at', { ascending: false })
+            .limit(100)
+    ]);
 
-    const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-    if (profileError) {
-        console.error('Wallet profile fetch error:', profileError)
+    if (profileResult.error) {
+        console.error('Wallet profile fetch error:', profileResult.error)
         return { error: 'Failed to fetch wallet balance.' }
     }
+
+    const profile = profileResult.data
+    const walletActions = walletActionsResult.data
+    const walletBookings = walletBookingsResult.data
 
     const available = profile.available_balance ?? profile.wallet_balance ?? 0
     const pending = profile.pending_balance ?? 0
 
-    // Fetch top-ups and adjustments from wallet_top_ups table
-    const { data: walletActions } = await supabase
-        .from('wallet_top_ups')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-    // Fetch bookings with wallet deductions
-    const { data: walletBookings } = await supabase
-        .from('bookings')
-        .select(`
-            id,
-            created_at,
-            status,
-            price_breakdown,
-            slots (
-                date,
-                start_time
-            ),
-            studios:studio_id (
-                name
-            )
-        `)
-        .eq('client_id', user.id)
-        .not('price_breakdown', 'is', null);
-
     const transactions: any[] = [];
-
-    const getFirst = (item: any) => Array.isArray(item) ? item[0] : item;
 
     // 1. Process Wallet Top-ups/Adjustments
     walletActions?.forEach(wa => {
@@ -980,10 +1174,12 @@ export async function getCustomerWalletDetails() {
                 : wa.type === 'refund' ? 'Booking Refund'
                 : wa.type === 'referral_bonus' ? 'Referral Bonus'
                 : 'Wallet Top-Up'
+            
             const detailsFallback = wa.type === 'admin_adjustment' ? 'Manual balance adjustment'
                 : wa.type === 'refund' ? 'Refund for cancelled/declined booking'
                 : wa.type === 'referral_bonus' ? 'Your friend completed their first booking'
                 : 'Gcash/Bank Top-up'
+
             transactions.push({
                 id: wa.id,
                 date: wa.updated_at || wa.created_at,
@@ -999,16 +1195,17 @@ export async function getCustomerWalletDetails() {
     walletBookings?.forEach(b => {
         const breakdown = b.price_breakdown as any;
         const deduction = Number(breakdown?.wallet_deduction || 0);
+        const walletSource = breakdown?.wallet_source || 'marketplace';
 
-        if (deduction > 0) {
-            const slot = getFirst(b.slots);
-            const studio = getFirst(b.studios);
-            const studioName = studio?.name || slot?.studios?.name || 'Studio';
+        // Filter out studio-specific wallet transactions
+        if (deduction > 0 && walletSource !== 'studio') {
+            const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
+            const studio = Array.isArray(b.studios) ? b.studios[0] : b.studios;
+            const studioName = studio?.name || 'Studio';
 
-            // Correct mapping for cancellation/rejection
             let displayStatus = b.status === 'pending' || b.status === 'submitted' ? 'pending'
                 : b.status === 'approved' || b.status === 'completed' ? 'completed'
-                    : b.status; // expired, rejected, cancelled, cancelled_refunded, cancelled_charged
+                : b.status; 
 
             transactions.push({
                 id: b.id,
@@ -1016,13 +1213,14 @@ export async function getCustomerWalletDetails() {
                 session_date: slot?.date,
                 session_time: slot?.start_time,
                 type: 'Booking Payment',
-                amount: -deduction, // Negative for spending
+                amount: deduction, 
                 status: displayStatus,
                 details: `Payment for booking at ${studioName}${b.status === 'cancelled_refunded' ? ' (Refunded)' : b.status === 'cancelled_charged' ? ' (No Refund)' : ''}`
             });
         }
     });
 
+    // Final sort for the merged list
     transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return {

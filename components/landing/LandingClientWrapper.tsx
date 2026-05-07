@@ -11,6 +11,8 @@ interface LandingClientWrapperProps {
   philosophy: React.ReactNode
   audience: React.ReactNode
   footer: React.ReactNode
+  profile?: any
+  avatarUrl?: string
 }
 
 export default function LandingClientWrapper({
@@ -18,7 +20,9 @@ export default function LandingClientWrapper({
   methodology,
   philosophy,
   audience,
-  footer
+  footer,
+  profile,
+  avatarUrl
 }: LandingClientWrapperProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -29,7 +33,11 @@ export default function LandingClientWrapper({
     <div className="min-h-screen bg-surface selection:bg-primary/10 selection:text-primary relative font-sans">
       <RoleSelectionModal isOpen={isModalOpen} onClose={closeModal} />
       
-      <Header onSignUpClick={openModal} />
+      <Header 
+        onSignUpClick={openModal} 
+        profile={profile} 
+        avatarUrl={avatarUrl} 
+      />
       
       <main>
         <Hero onSignUpClick={openModal} />

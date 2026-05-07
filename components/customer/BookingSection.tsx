@@ -1,13 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { requestBooking } from '@/app/(dashboard)/customer/actions'
-import { Loader2, CheckCircle, Calendar, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react'
+import { requestBooking, joinWaitlist } from '@/app/(dashboard)/customer/actions'
+import { Loader2, CheckCircle, Calendar, ChevronLeft, ChevronRight, AlertCircle, Sparkles, Smartphone, Ticket } from 'lucide-react'
+import { getActivePlans } from '@/app/(dashboard)/customer/pricing-actions'
+import LegalAgreementCheckbox from '@/components/storefront/LegalAgreementCheckbox'
 import InstructorProfileCard from '@/components/instructor/InstructorProfileCard'
 import clsx from 'clsx'
 import { formatTo12Hour, toManilaTimeString, normalizeTimeTo24h } from '@/lib/timezone'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isBefore, startOfDay, addDays, isPast } from 'date-fns'
+import Image from 'next/image'
+import { getSupabaseAssetUrl } from '@/lib/supabase/utils'
 
 interface Slot {
     id: string;
@@ -17,6 +21,9 @@ interface Slot {
     equipment?: Record<string, number>;
     equipment_type?: string;
     quantity?: number;
+    is_available?: boolean;
+    service_id?: string;
+    instructor_id?: string | null;
 }
 
 interface Instructor {
@@ -51,9 +58,17 @@ export default function BookingSection({
     studioPricing,
     studioHourlyRate,
     studioLocation,
-    pendingBookings = []
+    pendingBookings = [],
+    isStorefront = false,
+    manualPaymentInstructions = null,
+    enableManualPayments = false,
+    enableXendit = false,
+    manualPaymentMethods = [],
+    outletId = null,
+    legalConfig = null
 }: {
     studioId: string
+    outletId?: string | null
     slots: Slot[]
     instructors: Instructor[]
     availabilityBlocks: AvailabilityBlock[]
@@ -61,6 +76,16 @@ export default function BookingSection({
     studioHourlyRate?: number
     studioLocation?: string
     pendingBookings?: any[]
+    isStorefront?: boolean
+    manualPaymentInstructions?: string | null
+    enableManualPayments?: boolean
+    enableXendit?: boolean
+    manualPaymentMethods?: any[]
+    legalConfig?: {
+        terms?: string
+        privacy?: string
+        refund?: string
+    } | null
 }) {
     const [selectedSlotTime, setSelectedSlotTime] = useState<string | null>(null) // Key: start-end
     const [selectedInstructor, setSelectedInstructor] = useState<string>('')
@@ -68,6 +93,11 @@ export default function BookingSection({
     const [quantity, setQuantity] = useState<number>(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [successMessage, setSuccessMessage] = useState<string | null>(null)
+    const [waitlistPosition, setWaitlistPosition] = useState<number | null>(null)
+    const [paymentMethod, setPaymentMethod] = useState<'xendit' | 'manual' | 'credit'>(enableXendit ? 'xendit' : 'manual')
+    const [userPlans, setUserPlans] = useState<any[]>([])
+    const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
+    const [agreedToLegal, setAgreedToLegal] = useState(false)
 
     // 2. State for active date & month
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -113,7 +143,18 @@ export default function BookingSection({
         const firstEq = Object.keys(inventory)[0] || '';
         setSelectedEquipment(firstEq);
         setQuantity(1);
+
+        // Auto-select instructor if pre-assigned to the slot
+        const firstSlot = slotsInGroup[0] as any;
+        if (firstSlot?.instructor_id) {
+            setSelectedInstructor(firstSlot.instructor_id);
+        }
     }, [selectedSlotTime, selectedDate, slots]);
+
+    // Fetch user credits for this studio
+    useEffect(() => {
+        getActivePlans(studioId).then(setUserPlans)
+    }, [studioId])
 
     // Determine available instructors for the selected time
     const availableInstructors = instructors.filter((instructor) => {
@@ -122,10 +163,15 @@ export default function BookingSection({
 
         // 1. Case-Insensitive Equipment Check
         const instructorRates = instructor.rates || {};
+        
+        // NEW: If instructor is pre-assigned to THIS slot, they are ALWAYS available
+        const slotsInGroup = slots.filter(s => s.date === selectedDate && `${s.start_time}|${s.end_time}` === selectedSlotTime);
+        const isAssigned = slotsInGroup.some((s: any) => s.instructor_id === instructor.id);
+        if (isAssigned) return true;
         const hasEquipment = Object.keys(instructorRates).some(
             (key) => key.toUpperCase() === selectedEquipment.toUpperCase()
         );
-        if (!hasEquipment) return false;
+        if (!hasEquipment && selectedEquipment.toUpperCase() !== 'MAT') return false;
 
         // 2. Isolate blocks for THIS specific instructor
         const instBlocks = availabilityBlocks.filter(b => b.instructor_id === instructor.id);
@@ -173,6 +219,19 @@ export default function BookingSection({
         }
     }, [availableDates, selectedDate]);
 
+    // Auto-select date/time from URL if present
+    useEffect(() => {
+        const urlDate = searchParams.get('date');
+        const urlTime = searchParams.get('time');
+        
+        if (urlDate) {
+            setSelectedDate(urlDate);
+        }
+        if (urlTime) {
+            setSelectedSlotTime(urlTime);
+        }
+    }, [searchParams]);
+
     // Calendar logic
     const nextMonth = () => handleMonthChange(1)
     const prevMonth = () => handleMonthChange(-1)
@@ -214,13 +273,13 @@ export default function BookingSection({
                         !isSameMonth(day, monthStart) ? "text-cream-300 pointer-events-none" : "",
                         isSameMonth(day, monthStart) && !hasSlots && !isPast && !isSelected ? "text-charcoal-500 opacity-60" : "",
                         isPast ? "text-cream-400 pointer-events-none opacity-40" : "",
-                        hasSlots && !isSelected ? "bg-white text-burgundy font-medium hover:bg-off-white cursor-pointer border border-border-grey" : "",
-                        isSelected ? "bg-forest text-white font-bold shadow-md transform scale-105 border border-forest" : ""
+                        hasSlots && !isSelected ? "bg-white text-[var(--primary-brand,theme(colors.burgundy))] font-medium hover:bg-off-white cursor-pointer border border-border-grey" : "",
+                        isSelected ? "bg-[var(--primary-brand,theme(colors.forest))] text-white font-bold shadow-md transform scale-105 border border-[var(--primary-brand,theme(colors.forest))]" : ""
                     )}
                     disabled={!hasSlots || isPast}
                 >
                     <span className="leading-none">{formattedDate}</span>
-                    {hasSlots && !isSelected && <span className="w-1 h-1 bg-forest/40 rounded-full mt-1"></span>}
+                    {hasSlots && !isSelected && <span className="w-1 h-1 bg-[var(--primary-brand,theme(colors.forest))]/40 rounded-full mt-1"></span>}
                 </button>
             )
             day = addDays(day, 1)
@@ -306,6 +365,7 @@ export default function BookingSection({
                 && ((equipmentData[k] ?? 0) > 0)
         );
     });
+    const primarySlot = slotsForSelectedEquipment[0];
 
     // Helper to calculate price
     const calculateTotal = () => {
@@ -327,13 +387,16 @@ export default function BookingSection({
         const sessionFee = sRate + iRate;
 
         // Platform Service Fee: 20% of session fee or ₱100 minimum, per slot
-        const serviceFee = Math.max(100, sessionFee * 0.20);
+        // WAIVE IF STOREFRONT
+        const rawServiceFee = Math.max(100, sessionFee * 0.20);
+        const serviceFee = isStorefront ? 0 : rawServiceFee;
 
         return {
             studioRate: sRate,
             instructorRate: iRate,
             sessionFee,
             serviceFee,
+            rawServiceFee, // Include raw for UI strike-through
             total: (sessionFee + serviceFee) * quantity,
         };
     }
@@ -343,8 +406,7 @@ export default function BookingSection({
     const handleBook = async () => {
         if (!selectedSlotTime || !selectedInstructor || !selectedEquipment) return
 
-        // We use the first slot ID FROM THE FILTERED LIST as the primary ID
-        const primarySlot = slotsForSelectedEquipment[0];
+        // Primary slot for booking is already defined in the component body
         if (!primarySlot) return;
 
         setIsSubmitting(true)
@@ -359,14 +421,66 @@ export default function BookingSection({
                 quantity, // Pass quantity
                 selectedEquipment,
                 start || undefined,
-                end || undefined
+                end || undefined,
+                'studio',
+                undefined,
+                undefined,
+                undefined,
+                isStorefront,
+                paymentMethod,
+                selectedPlanId || undefined
             );
 
             if (result.success && result.bookingId) {
-                setSuccessMessage('Booking requested! Redirecting to payment...')
-                router.push(`/customer/payment/${result.bookingId}`)
+                if (paymentMethod === 'manual') {
+                    setSuccessMessage('Booking requested! Please follow the manual payment instructions and notify the studio owner.')
+                } else if (paymentMethod === 'credit') {
+                    setSuccessMessage('Booking confirmed using your package credits!')
+                } else {
+                    setSuccessMessage('Booking requested! Redirecting to payment...')
+                    // Prioritize checkoutUrl if provided (for immediately opening Xendit)
+                    if (result.checkoutUrl) {
+                        window.location.href = result.checkoutUrl;
+                    } else {
+                        router.push(`/customer/payment/${result.bookingId}`)
+                    }
+                }
             } else {
                 alert(result.error || 'Failed to book.')
+            }
+        } catch (error) {
+            console.error(error)
+            alert('Something went wrong')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleJoinWaitlist = async () => {
+        if (!selectedSlotTime || !selectedEquipment) return
+
+        const primarySlot = slotsForSelectedEquipment[0];
+        if (!primarySlot) {
+            // If No slots for this equipment, we can't waitlist
+            alert('No slots available for this equipment.')
+            return
+        }
+
+        setIsSubmitting(true)
+        setWaitlistPosition(null)
+
+        try {
+            const result = await joinWaitlist(
+                primarySlot.id,
+                selectedEquipment,
+                quantity
+            )
+
+            if (result.success) {
+                setSuccessMessage(`You have been added to the waitlist!`)
+                setWaitlistPosition(result.position || null)
+            } else {
+                alert(result.error || 'Failed to join waitlist.')
             }
         } catch (error) {
             console.error(error)
@@ -485,8 +599,8 @@ export default function BookingSection({
                             className={clsx(
                                 "p-5 rounded-2xl border text-left transition-all relative overflow-hidden",
                                 isSelected
-                                    ? "bg-forest border-forest text-white shadow-md transform scale-[1.02]"
-                                    : "bg-white border-border-grey hover:shadow-md text-burgundy hover:border-forest/40"
+                                    ? "bg-[var(--primary-brand,theme(colors.forest))] border-[var(--primary-brand,theme(colors.forest))] text-white shadow-md transform scale-[1.02]"
+                                    : "bg-white border-border-grey hover:shadow-md text-[var(--primary-brand,theme(colors.burgundy))] hover:border-[var(--primary-brand,theme(colors.forest))]/40"
                             )}
                         >
                             <div className="font-serif text-xl mb-2">
@@ -501,7 +615,7 @@ export default function BookingSection({
                                             "text-xs px-2.5 py-1 rounded-lg inline-block font-medium border",
                                             isSelected
                                                 ? "bg-white/20 text-white border-white/30"
-                                                : "bg-off-white text-burgundy border-border-grey"
+                                                : "bg-off-white text-[var(--primary-brand,theme(colors.burgundy))] border-border-grey"
                                         )}>
                                             {qty} {eq}{qty !== 1 ? 's' : ''} available
                                         </span>
@@ -515,6 +629,15 @@ export default function BookingSection({
                                     </span>
                                 )}
                             </div>
+                            
+                            {!firstSlot.is_available && (
+                                <div className={clsx(
+                                    "absolute top-2 right-2 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest",
+                                    isSelected ? "bg-white text-forest" : "bg-charcoal-900 text-white"
+                                )}>
+                                    Full
+                                </div>
+                            )}
                         </button>
                     );
                 })}
@@ -574,8 +697,8 @@ export default function BookingSection({
                                                     className={clsx(
                                                         "p-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-between text-left",
                                                         selectedEquipment.toLowerCase() === eq.toLowerCase()
-                                                            ? "bg-forest border-forest text-white"
-                                                            : "bg-white border-border-grey text-burgundy hover:border-forest/50"
+                                                            ? "bg-[var(--primary-brand,theme(colors.forest))] border-[var(--primary-brand,theme(colors.forest))] text-white"
+                                                            : "bg-white border-border-grey text-[var(--primary-brand,theme(colors.burgundy))] hover:border-[var(--primary-brand,theme(colors.forest))]/50"
                                                     )}
                                                 >
                                                     <div>
@@ -646,40 +769,246 @@ export default function BookingSection({
 
                                 {/* Price Display */}
                                 {totalPrice !== null && (
-                                    <div className="bg-white p-4 rounded-lg border border-cream-200 space-y-2 text-sm">
+                                    <div className="bg-white p-4 rounded-lg border border-cream-200 space-y-4 text-sm">
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-charcoal-600">
+                                                <span>Session Fee (1x)</span>
+                                                <span>₱{totalPrice.sessionFee.toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex justify-between text-charcoal-500 text-xs pl-2">
+                                                <span>↳ Instructor Base <span className="text-charcoal-400">({selectedEquipment})</span></span>
+                                                <span>₱{totalPrice.instructorRate.toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex justify-between text-charcoal-500 text-xs pl-2">
+                                                <span>↳ Studio Fee <span className="text-charcoal-400">({selectedEquipment})</span></span>
+                                                <span>₱{totalPrice.studioRate.toLocaleString()}</span>
+                                            </div>
+                                        </div>
+                                        
                                         <div className="flex justify-between text-charcoal-600">
-                                            <span>Session Fee (1x)</span>
-                                            <span>₱{totalPrice.sessionFee.toLocaleString()}</span>
+                                            <span>
+                                                Platform Service Fee 
+                                                {isStorefront && <span className="ml-2 text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded-full uppercase font-bold tracking-wider">Waived</span>}
+                                            </span>
+                                            <span className={isStorefront ? "line-through text-charcoal-400" : ""}>
+                                                ₱{isStorefront ? totalPrice.rawServiceFee?.toLocaleString() : totalPrice.serviceFee.toLocaleString()}
+                                            </span>
                                         </div>
-                                        <div className="flex justify-between text-charcoal-500 text-xs pl-2">
-                                            <span>↳ Instructor Base <span className="text-charcoal-400">({selectedEquipment})</span></span>
-                                            <span>₱{totalPrice.instructorRate.toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex justify-between text-charcoal-500 text-xs pl-2">
-                                            <span>↳ Studio Fee <span className="text-charcoal-400">({selectedEquipment})</span></span>
-                                            <span>₱{totalPrice.studioRate.toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex justify-between text-charcoal-600 mt-2">
-                                            <span>Platform Service Fee <span className="text-xs text-charcoal-400 italic">(20% min. ₱100)</span></span>
-                                            <span>₱{totalPrice.serviceFee.toLocaleString()}</span>
-                                        </div>
+
                                         {quantity > 1 && (
-                                            <div className="flex justify-between text-charcoal-500 text-xs mt-1">
+                                            <div className="flex justify-between text-charcoal-500 text-xs">
                                                 <span>Quantity:</span>
                                                 <span>× {quantity} {selectedEquipment}s</span>
                                             </div>
                                         )}
-                                        <div className="border-t border-cream-200 pt-3 mt-2 flex justify-between items-center">
+
+                                        <div className="border-t border-cream-200 pt-3 flex justify-between items-center">
                                             <p className="font-bold text-charcoal-900">Grand Total</p>
                                             <span className="text-xl font-serif text-charcoal-900">₱{totalPrice.total.toLocaleString()}</span>
                                         </div>
+
+                                        {waitlistPosition && (
+                                            <div className="p-3 bg-forest/10 border border-forest/20 rounded-xl text-center">
+                                                <p className="text-xs font-bold text-forest uppercase tracking-widest">
+                                                    Current Position: #{waitlistPosition}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Legal Agreement */}
+                                        <div className="py-4 border-t border-cream-100">
+                                            <LegalAgreementCheckbox 
+                                                checked={agreedToLegal}
+                                                onChange={setAgreedToLegal}
+                                                legalConfig={legalConfig || undefined}
+                                            />
+                                        </div>
+
+                                        {!slotsForSelectedEquipment[0]?.is_available ? (
+                                            <button
+                                                onClick={handleJoinWaitlist}
+                                                disabled={isSubmitting || !agreedToLegal}
+                                                className="w-full py-4 bg-charcoal-900 text-white rounded-xl font-bold uppercase tracking-[0.2em] shadow-lg hover:shadow-xl transform active:scale-95 transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-3"
+                                            >
+                                                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Calendar className="w-5 h-5" />}
+                                                Join Waitlist
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={handleBook}
+                                                disabled={isSubmitting || !selectedInstructor || !agreedToLegal}
+                                                className="w-full py-4 bg-charcoal-900 text-white rounded-xl font-bold uppercase tracking-[0.2em] shadow-lg hover:shadow-xl transform active:scale-95 transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-3"
+                                            >
+                                                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Calendar className="w-5 h-5" />}
+                                                Confirm Booking
+                                            </button>
+                                        )}
+
+                                        {/* Payment Method Selection (Storefront Only) */}
+                                        {isStorefront && (enableManualPayments || enableXendit) && (
+                                            <div className="space-y-4 pt-4 border-t border-cream-100">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-slate/40 block">Payment Method</label>
+                                                <div className="grid grid-cols-1 gap-2">
+                                                    {/* Package Credits Option */}
+                                                    {userPlans.map(plan => {
+                                                        const planServiceIds = plan.plan_type === 'package' 
+                                                            ? plan.packages?.applicable_service_ids 
+                                                            : plan.memberships?.applicable_service_ids;
+                                                        
+                                                        const planOutletIds = plan.plan_type === 'package'
+                                                            ? plan.packages?.applicable_outlet_ids
+                                                            : plan.memberships?.applicable_outlet_ids;
+
+                                                        const slotServiceId = primarySlot?.service_id;
+                                                        
+                                                        // Service validation
+                                                        const isServiceValid = !planServiceIds || planServiceIds.length === 0 || (slotServiceId && planServiceIds.includes(slotServiceId));
+                                                        
+                                                        // Location validation (Transparency check)
+                                                        const isLocationValid = !outletId || !planOutletIds || planOutletIds.length === 0 || planOutletIds.includes(outletId);
+
+                                                        const isPlanSelectable = isServiceValid && isLocationValid;
+
+                                                        return (
+                                                            <button
+                                                                key={plan.id}
+                                                                onClick={() => {
+                                                                    setPaymentMethod('credit')
+                                                                    setSelectedPlanId(plan.id)
+                                                                }}
+                                                                disabled={!isPlanSelectable}
+                                                                type="button"
+                                                                className={clsx(
+                                                                    "p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-between",
+                                                                    (paymentMethod === 'credit' && selectedPlanId === plan.id) ? "bg-indigo-600 border-indigo-600 text-white" : "bg-white border-cream-100 text-charcoal hover:border-indigo-500/30",
+                                                                    !isPlanSelectable && "opacity-60 grayscale cursor-not-allowed"
+                                                                )}
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <Ticket className={clsx("w-4 h-4", (paymentMethod === 'credit' && selectedPlanId === plan.id) ? "text-white" : "text-indigo-500")} />
+                                                                    <div className="text-left">
+                                                                        <div className="uppercase tracking-widest text-[9px]">Pay with {plan.plan_type}</div>
+                                                                        <div className={clsx("font-black flex items-center gap-2", (paymentMethod === 'credit' && selectedPlanId === plan.id) ? "text-indigo-100" : "text-zinc-600")}>
+                                                                            {plan.plan_type === 'package' ? plan.packages?.name : plan.memberships?.name}
+                                                                            <span className="ml-2 opacity-60">({plan.remaining_credits ?? '∞'} left)</span>
+                                                                            
+                                                                            {!isLocationValid && (
+                                                                                <span className="bg-red-500 text-white px-2 py-0.5 rounded text-[8px] font-black uppercase flex items-center gap-1 shadow-sm">
+                                                                                    <AlertCircle className="w-2.5 h-2.5" />
+                                                                                    Not valid here
+                                                                                </span>
+                                                                            )}
+                                                                            {isLocationValid && !isServiceValid && (
+                                                                                <span className="bg-orange-500 text-white px-2 py-0.5 rounded text-[8px] font-black uppercase flex items-center gap-1 shadow-sm">
+                                                                                    <AlertCircle className="w-2.5 h-2.5" />
+                                                                                    Service Mismatch
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                {(paymentMethod === 'credit' && selectedPlanId === plan.id) && <CheckCircle className="w-4 h-4" />}
+                                                            </button>
+                                                        )
+                                                    })}
+
+
+                                                    {enableXendit && (
+                                                        <button
+                                                            onClick={() => setPaymentMethod('xendit')}
+                                                            type="button"
+                                                            className={clsx(
+                                                                "p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-between",
+                                                                paymentMethod === 'xendit' ? "bg-forest border-forest text-white" : "bg-white border-cream-100 text-charcoal hover:border-forest/30"
+                                                            )}
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <Sparkles className={clsx("w-4 h-4", paymentMethod === 'xendit' ? "text-white" : "text-emerald-500")} />
+                                                                <span>Automatic Checkout</span>
+                                                            </div>
+                                                            {paymentMethod === 'xendit' && <CheckCircle className="w-4 h-4" />}
+                                                        </button>
+                                                    )}
+                                                    {enableManualPayments && (
+                                                        <button
+                                                            onClick={() => setPaymentMethod('manual')}
+                                                            type="button"
+                                                            className={clsx(
+                                                                "p-4 rounded-xl border text-xs font-bold transition-all flex items-center justify-between",
+                                                                paymentMethod === 'manual' ? "bg-forest border-forest text-white" : "bg-white border-cream-100 text-charcoal hover:border-forest/30"
+                                                            )}
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <Smartphone className={clsx("w-4 h-4", paymentMethod === 'manual' ? "text-white" : "text-blue-500")} />
+                                                                <span>Manual Payout</span>
+                                                            </div>
+                                                            {paymentMethod === 'manual' && <CheckCircle className="w-4 h-4" />}
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                {paymentMethod === 'manual' && (
+                                                    <div className="space-y-4 animate-in fade-in zoom-in-95 duration-500 mt-2">
+                                                        {(manualPaymentMethods && manualPaymentMethods.length > 0) ? (
+                                                            <div className="space-y-3">
+                                                                {manualPaymentMethods.map((method: any) => (
+                                                                    <div key={method.id} className="p-5 bg-white border border-cream-200 rounded-2xl shadow-tight space-y-4">
+                                                                        <div className="flex items-center justify-between">
+                                                                            <span className="text-[10px] font-black uppercase tracking-widest text-forest bg-forest/5 px-2 py-1 rounded border border-forest/10">
+                                                                                {method.type}
+                                                                            </span>
+                                                                        </div>
+                                                                        
+                                                                        <div className="flex gap-6">
+                                                                            {method.qr_code_url && (
+                                                                                <div className="shrink-0 w-24 h-24 relative bg-cream-50 rounded-xl border border-cream-100 overflow-hidden group/qr cursor-zoom-in">
+                                                                                    <Image 
+                                                                                        src={getSupabaseAssetUrl(method.qr_code_url, 'studios') || '/default-qr.svg'} 
+                                                                                        alt="QR Code" 
+                                                                                        fill 
+                                                                                        className="object-contain p-1"
+                                                                                        unoptimized
+                                                                                    />
+                                                                                </div>
+                                                                            )}
+                                                                            <div className="flex-1 space-y-3">
+                                                                                <div className="space-y-1">
+                                                                                    <p className="text-[9px] font-black uppercase tracking-widest text-charcoal-400">Account Number</p>
+                                                                                    <p className="text-sm font-bold text-charcoal-900 font-mono">{method.account_number}</p>
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <p className="text-[9px] font-black uppercase tracking-widest text-charcoal-400">Recipient Name</p>
+                                                                                    <p className="text-xs font-bold text-charcoal-700">{method.recipient_name}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                                <div className="p-4 bg-cream-50 rounded-xl border border-cream-100">
+                                                                    <p className="text-[10px] text-charcoal-500 italic leading-relaxed">
+                                                                        Please send the payment using any of the methods above and notify the studio owner to confirm your booking.
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            manualPaymentInstructions && (
+                                                                <div className="p-4 bg-cream-50 border border-cream-100 rounded-xl space-y-2">
+                                                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate/40">Instructions</p>
+                                                                    <p className="text-xs text-charcoal whitespace-pre-wrap leading-relaxed">{manualPaymentInstructions}</p>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
                                 <button
                                     onClick={handleBook}
                                     disabled={!selectedInstructor || isSubmitting || !selectedEquipment}
-                                    className="w-full bg-forest text-white py-3 rounded-lg font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                                    className="w-full bg-[var(--primary-brand,theme(colors.forest))] text-white py-3 rounded-lg font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                                 >
                                     {isSubmitting ? (
                                         <>

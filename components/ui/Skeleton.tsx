@@ -1,23 +1,31 @@
-import React from 'react'
-import clsx from 'clsx'
+'use client'
 
-interface SkeletonProps {
-  className?: string
+import React from 'react'
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'rect' | 'circle' | 'text'
 }
 
-export const Skeleton = ({ className, variant = 'rect' }: SkeletonProps) => {
+export const Skeleton: React.FC<SkeletonProps> = ({ className, variant = 'rect', ...props }) => {
   return (
     <div
-      className={clsx(
-        "relative overflow-hidden bg-surface-container-highest/50",
-        variant === 'circle' && "rounded-full",
-        variant === 'rect' && "rounded-xl",
-        variant === 'text' && "rounded-md h-4 w-full",
+      className={cn(
+        "relative overflow-hidden bg-zinc-100",
+        variant === 'circle' ? "rounded-full" : "rounded-md",
+        "after:absolute after:inset-0 after:animate-shimmer after:bg-linear-to-r after:from-transparent after:via-white/20 after:to-transparent",
         className
       )}
-    >
-      <div className="absolute inset-0 animate-shimmer" />
-    </div>
+      {...props}
+    />
   )
+}
+
+export const SkeletonCircle: React.FC<SkeletonProps> = ({ className, ...props }) => {
+  return <Skeleton className={cn("rounded-full", className)} {...props} />
 }

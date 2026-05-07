@@ -17,6 +17,10 @@ interface Stats {
     totalPayouts: number
     bookingCount: number
     dailyData: (DailyData & { platformFees: number })[]
+    origins?: {
+        marketplace: { revenue: number, count: number }
+        studio: { revenue: number, count: number }
+    }
 }
 
 export default function AdminAnalytics({ stats }: { stats: any }) {
@@ -51,9 +55,23 @@ export default function AdminAnalytics({ stats }: { stats: any }) {
                             <div className="p-5 bg-forest/10 text-forest rounded-[20px] group-hover:bg-forest group-hover:text-white transition-all duration-700 shadow-sm">
                                 <DollarSign className="w-6 h-6" />
                             </div>
-                            <div>
+                            <div className="flex-1 text-left">
                                 <p className="text-[10px] font-black text-burgundy/50 uppercase tracking-[0.3em] mb-1">Total Revenue</p>
                                 <p className="text-4xl font-serif text-burgundy group-hover:translate-x-1 transition-transform duration-700">₱{stats.totalRevenue.toLocaleString()}</p>
+                                
+                                {stats.origins && (
+                                    <div className="flex gap-4 mt-3 pt-3 border-t border-burgundy/5">
+                                        <div className="flex flex-col">
+                                            <span className="text-[8px] font-black text-forest uppercase tracking-widest">Marketplace</span>
+                                            <span className="text-[10px] font-bold text-burgundy/70">₱{stats.origins.marketplace.revenue.toLocaleString()}</span>
+                                        </div>
+                                        <div className="w-px h-6 bg-burgundy/5 self-center" />
+                                        <div className="flex flex-col">
+                                            <span className="text-[8px] font-black text-amber-600 uppercase tracking-widest">Studio Vault</span>
+                                            <span className="text-[10px] font-bold text-burgundy/70">₱{stats.origins.studio.revenue.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="absolute top-0 right-0 w-40 h-40 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-forest/10 transition-colors duration-700" />
@@ -136,14 +154,28 @@ export default function AdminAnalytics({ stats }: { stats: any }) {
                     onClick={() => window.location.href = '/admin?tab=reports&subtab=transactions&filter=Booking'}
                     className="group atelier-card p-0 relative overflow-hidden transition-all duration-700 hover:shadow-xl"
                 >
-                    <div className="p-10 relative z-10">
+                    <div className="p-10 relative z-10 text-left">
                         <div className="flex items-center gap-6 mb-6">
                             <div className="p-5 bg-stone-100 text-burgundy/50 rounded-[20px] group-hover:bg-burgundy group-hover:text-white transition-all duration-700 shadow-sm border border-burgundy/5">
                                 <Users className="w-6 h-6" />
                             </div>
-                            <div>
+                            <div className="flex-1">
                                 <p className="text-[10px] font-black text-burgundy/50 uppercase tracking-[0.3em] mb-1">Total Bookings</p>
                                 <p className="text-4xl font-serif text-burgundy group-hover:translate-x-1 transition-transform duration-700">{stats.bookingCount}</p>
+                                
+                                {stats.origins && (
+                                    <div className="flex gap-4 mt-3 pt-3 border-t border-burgundy/5">
+                                        <div className="flex flex-col">
+                                            <span className="text-[8px] font-black text-forest uppercase tracking-widest">Marketplace</span>
+                                            <span className="text-[10px] font-bold text-burgundy/70">{stats.origins.marketplace.count}</span>
+                                        </div>
+                                        <div className="w-px h-6 bg-burgundy/5 self-center" />
+                                        <div className="flex flex-col">
+                                            <span className="text-[8px] font-black text-amber-600 uppercase tracking-widest">Studio Vault</span>
+                                            <span className="text-[10px] font-bold text-burgundy/70">{stats.origins.studio.count}</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="absolute top-0 right-0 w-40 h-40 bg-stone-100/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-burgundy/5 transition-colors duration-700" />

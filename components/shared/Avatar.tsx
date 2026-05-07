@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { User } from 'lucide-react'
@@ -9,10 +11,21 @@ import { isHeicFile } from '@/lib/utils/image-utils'
 interface AvatarProps {
     src?: string | null
     alt?: string
-    size?: number
+    size?: number | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl'
     className?: string
     fallbackName?: string
     isOnline?: boolean
+}
+
+const SIZE_MAP = {
+    xs: 24,
+    sm: 32,
+    md: 40,
+    lg: 48,
+    xl: 56,
+    '2xl': 64,
+    '3xl': 80,
+    '4xl': 96,
 }
 
 export default function Avatar({ 
@@ -23,6 +36,7 @@ export default function Avatar({
     fallbackName,
     isOnline = false
 }: AvatarProps) {
+    const numericSize = (typeof size === 'string' ? SIZE_MAP[size] : size) || 40
     const [error, setError] = useState(false)
     const [isMounted, setIsMounted] = useState(false)
 
@@ -50,17 +64,17 @@ export default function Avatar({
     // Use the centralized Supabase Render Engine transformation for all Supabase assets
     // This handles HEIC to WebP/JPG conversion and resizing automatically
     const finalSrc = (src && src.includes('supabase.co')) 
-        ? getSupabaseAssetUrl(src, 'avatars', { width: size * 2, quality: 80, format: 'webp' })
+        ? getSupabaseAssetUrl(src, 'avatars', { width: numericSize * 2, quality: 80, format: 'webp' })
         : (src && !src.startsWith('http') && !src.startsWith('blob:'))
-            ? getSupabaseAssetUrl(src, 'avatars', { width: size * 2, quality: 80 })
+            ? getSupabaseAssetUrl(src, 'avatars', { width: numericSize * 2, quality: 80 })
             : src;
 
     if (!isMounted) {
-        return <div style={{ width: size, height: size }} className={clsx("rounded-full bg-cream-100 animate-pulse", className)} />
+        return <div style={{ width: numericSize, height: numericSize }} className={clsx("rounded-full bg-cream-100 animate-pulse", className)} />
     }
 
     return (
-        <div className="relative inline-block shrink-0" style={{ width: size, height: size }}>
+        <div className="relative inline-block shrink-0" style={{ width: numericSize, height: numericSize }}>
             <div 
                 className={clsx(
                     "relative rounded-full overflow-hidden flex items-center justify-center w-full h-full",
@@ -70,18 +84,18 @@ export default function Avatar({
             >
                 {showFallback ? (
                     fallbackName ? (
-                        <span style={{ fontSize: size * 0.4 }}>
+                        <span style={{ fontSize: numericSize * 0.4 }}>
                             {getInitials(fallbackName)}
                         </span>
                     ) : (
-                        <User style={{ width: size * 0.6, height: size * 0.6 }} className="text-burgundy/40" />
+                        <User style={{ width: numericSize * 0.6, height: numericSize * 0.6 }} className="text-burgundy/40" />
                     )
                 ) : (
                     <Image
                         src={finalSrc || ''}
                         alt={alt}
-                        width={size}
-                        height={size}
+                        width={numericSize}
+                        height={numericSize}
                         className="object-cover w-full h-full"
                         onError={(e) => {
                             console.warn(`[Avatar] Failed to load image: ${finalSrc}. Falling back to initials.`, e)

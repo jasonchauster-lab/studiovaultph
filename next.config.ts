@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'wzacmyemiljzpdskyvie.supabase.co',
         port: '',
+        pathname: '/storage/v1/object/sign/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'wzacmyemiljzpdskyvie.supabase.co',
+        port: '',
         pathname: '/storage/v1/object/public/**',
       },
       {
@@ -37,6 +43,12 @@ const nextConfig: NextConfig = {
         hostname: 'ui-avatars.com',
         port: '',
         pathname: '/api/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+        pathname: '/**',
       },
     ],
   },

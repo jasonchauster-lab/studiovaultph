@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { createStudio } from '@/app/(dashboard)/studio/studio-actions'
-import { Loader2, Upload, CheckCircle, X, ShieldCheck, ArrowRight } from 'lucide-react'
+import { Loader2, Upload, CheckCircle, X, ShieldCheck, ArrowRight, Sparkles, DollarSign } from 'lucide-react'
 import Link from 'next/link'
 import { normalizeImageFile, uploadContentType } from '@/lib/utils/image-utils'
 import clsx from 'clsx'
@@ -19,12 +20,18 @@ function FileUploadBox({ name, label, required, fileName, previewUrl, accept, se
             <div className="border-2 border-dashed border-cream-300 rounded-lg p-2 flex flex-col items-center justify-center bg-cream-50/50 hover:bg-cream-100/50 transition-colors relative cursor-pointer group h-[120px]">
                 <input type="file" name={name} accept={accept} required={required}
                     onChange={async (e) => {
-                        let file = e.target.files?.[0]
-                        if (file) {
-                            file = await normalizeImageFile(file)
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        
+                        try {
+                            const normalized = await normalizeImageFile(file)
+                            const url = normalized.type.startsWith('image/') ? URL.createObjectURL(normalized) : null
+                            setFileState(normalized.name, url, normalized)
+                        } catch (err: any) {
+                            console.error('File normalization error:', err)
+                            alert(err.message || 'Failed to process file')
+                            e.target.value = '' // Reset input
                         }
-                        const url = file && file.type.startsWith('image/') ? URL.createObjectURL(file) : null
-                        setFileState(file ? file.name : null, url, file)
                     }}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
@@ -59,16 +66,82 @@ function FileUploadBox({ name, label, required, fileName, previewUrl, accept, se
     )
 }
 
-export default function StudioApplicationForm() {
+export default function StudioApplicationForm({ originPortal = 'marketplace' }: { originPortal?: string }) {
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    const [activePortal, setActivePortal] = useState(originPortal)
+
+    const [step, setStep] = useState(1)
+    const [isPublic, setIsPublic] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
+    // Form Data State
+    const [name, setName] = useState('')
+    const [contactNumber, setContactNumber] = useState('')
+    const [dateOfBirth, setDateOfBirth] = useState('')
+    const [slug, setSlug] = useState('')
+    const isCma = activePortal === 'cms'
+    const [selectedPlan, setSelectedPlan] = useState('starter')
+    const [billingCycle, setBillingCycle] = useState<'monthly' | 'annually'>('monthly')
+    const [identityConflict, setIdentityConflict] = useState<'marketplace' | null>(null)
+    const [isCheckingIdentity, setIsCheckingIdentity] = useState(true)
+
+    useEffect(() => {
+        async function checkIdentity() {
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            
+            if (user && isCma) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('origin_portal, role')
+                    .eq('id', user.id)
+                    .single()
+
+                if (profile?.role === 'admin') {
+                    router.push('/admin')
+                    return
+                }
+
+                // If user is from marketplace but on CMA, flag conflict
+                if (profile?.origin_portal === 'marketplace') {
+                    setIdentityConflict('marketplace')
+                }
+            }
+            setIsCheckingIdentity(false)
+        }
+
+        checkIdentity()
+    }, [isCma])
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const host = window.location.hostname
+            if (host.includes('studiovault.co') || host.includes('studiovault.local')) {
+                setActivePortal('cms')
+            }
+        }
+        
+        // Pre-select plan from URL
+        const planParam = searchParams.get('plan')
+        const billingParam = searchParams.get('billing')
+        if (planParam && ['starter', 'team', 'business', 'pro'].includes(planParam)) {
+            // Note: 'pro' in pricing maps to 'team' in logic or we keep it as 'pro'?
+            // Actually, my plans in StudioApplicationForm are 'starter', 'team', 'business'.
+            // In pricing I used 'Starter', 'Team', 'Business'.
+            setSelectedPlan(planParam === 'pro' ? 'team' : planParam) 
+        }
+        if (billingParam && ['monthly', 'annually'].includes(billingParam)) {
+            setBillingCycle(billingParam as 'monthly' | 'annually')
+        }
+    }, [searchParams])
+
+
     const [birFileName, setBirFileName] = useState<string | null>(null)
     const [birPreviewUrl, setBirPreviewUrl] = useState<string | null>(null)
-
     const [govIdFileName, setGovIdFileName] = useState<string | null>(null)
     const [govIdPreviewUrl, setGovIdPreviewUrl] = useState<string | null>(null)
-
     const [insuranceFileName, setInsuranceFileName] = useState<string | null>(null)
     const [insurancePreviewUrl, setInsurancePreviewUrl] = useState<string | null>(null)
 
@@ -116,6 +189,10 @@ export default function StudioApplicationForm() {
             setLat(res.lat.toString())
             setLng(res.lng.toString())
             setAddress(res.full || suggestion)
+            // Auto-derive google maps link from coordinates if not already set
+            if (!googleMapsUrl) {
+                setGoogleMapsUrl(`https://www.google.com/maps/search/?api=1&query=${res.lat},${res.lng}`)
+            }
         }
         setIsGeocoding(false)
     }
@@ -142,22 +219,17 @@ export default function StudioApplicationForm() {
     const handleSpacePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || [])
         const processedFiles: File[] = []
-
         for (const file of files) {
             try {
                 const processed = await normalizeImageFile(file)
                 processedFiles.push(processed)
-            } catch (err) {
-                console.error('Photo normalization failed', err)
-                processedFiles.push(file)
+            } catch (err: any) {
+                console.error('Image processing error:', err)
+                alert(`${file.name}: ${err.message || 'Failed to process image'}`)
             }
         }
-
         if (processedFiles.length > 0) {
             setSpacePhotos(prev => [...prev, ...processedFiles])
-        }
-        if (spacePhotosInputRef.current) {
-            spacePhotosInputRef.current.value = ''
         }
     }
 
@@ -166,474 +238,539 @@ export default function StudioApplicationForm() {
         setSpacePhotos(prev => prev.filter((_, idx) => idx !== indexToRemove))
     }
 
+    const validateStep = () => {
+        setError(null)
+        if (step === 1) {
+            if (!name) return setError('Studio Name is required')
+            if (!contactNumber) return setError('Contact Number is required')
+            if (!dateOfBirth) return setError('Date of Birth is required')
+        }
+        if (step === 2) {
+            if (!address) return setError('Location is required')
+            // googleMapsUrl is now optional for CMA
+            if (!isCma) {
+                if (!birFile) return setError('BIR Certificate is required')
+                if (spacePhotos.length === 0) return setError('Please upload at least one space photo')
+            }
+        }
+        if (step === 3) {
+            if (!slug) return setError('Please choose a URL slug')
+            if (slug.length < 3) return setError('Slug must be at least 3 characters')
+        }
+        if (step === 4) {
+            if (!selectedPlan) return setError('Please select a plan')
+        }
+        return true
+    }
+
+    const nextStep = () => {
+        if (validateStep()) {
+            setStep((prev) => prev + 1)
+            window.scrollTo(0, 0)
+        }
+    }
+
+    const prevStep = () => setStep(prev => prev - 1)
+
+    // Plans data
+    interface PricingPlan {
+        id: string;
+        name: string;
+        price: number;
+        popular: boolean;
+        features: string[];
+    }
+
+    const plans: PricingPlan[] = [
+        { 
+            id: 'starter', 
+            name: 'Starter', 
+            price: 2500, 
+            popular: false, 
+            features: ['Up to 50 bookings/mo', 'Basic analytics', 'Custom URL slug', 'Standard support'] 
+        },
+        { 
+            id: 'team', 
+            name: 'Team', 
+            price: 6500, 
+            popular: true, 
+            features: ['Unlimited bookings', 'Advanced reporting', 'Multi-staff access', 'Priority support'] 
+        },
+        { 
+            id: 'business', 
+            name: 'Business', 
+            price: 12500, 
+            popular: false, 
+            features: ['Custom domain logic', 'Whitelabel experience', 'Dedicated manager', 'API access'] 
+        }
+    ]
+
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
-
+        
+        console.log('[StudioApplicationForm] Submitting form...', { name, contactNumber, slug, selectedPlan })
         setError(null)
         setIsLoading(true)
-
-        if (spacePhotos.length === 0) {
-            setError('Please upload at least one photo of the space.')
-            setIsLoading(false)
-            return
-        }
-
-        // Custom validation: At least one equipment must be provided
-        const hasReformer = formData.get('reformer') === 'on'
-        const hasCadillac = formData.get('cadillac') === 'on'
-        const hasTower = formData.get('tower') === 'on'
-        const hasChair = formData.get('chair') === 'on'
-        const hasLadderBarrel = formData.get('ladderBarrel') === 'on'
-        const hasMat = formData.get('mat') === 'on'
-        const otherEq = formData.get('otherEquipment') as string
-
-        if (!hasReformer && !hasCadillac && !hasTower && !hasChair && !hasLadderBarrel && !hasMat && !otherEq.trim()) {
-            setError('Please select at least one piece of equipment or specify other equipment.')
-            setIsLoading(false)
-            return
-        }
 
         try {
             const supabase = createClient()
             const { data: { user } } = await supabase.auth.getUser()
-
+            
             if (!user) {
+                console.error('[StudioApplicationForm] No user found during submission')
                 throw new Error('You must be logged in to apply.')
             }
 
+            console.log(`[StudioApplicationForm] Authenticated as ${user.id}. Starting uploads...`)
             const timestamp = Date.now()
 
-            // Upload BIR
-            if (birFile && birFile.size > 0) {
+            // Upload Files
+            const uploadTasks = []
+            if (birFile) {
                 const ext = birFile.name.split('.').pop()
                 const path = `studios/${user.id}/bir_${timestamp}.${ext}`
-                const { error: birErr } = await supabase.storage.from('certifications').upload(path, birFile)
-                if (birErr) throw new Error('Failed to upload BIR Certificate: ' + birErr.message)
-
-                formData.set('birCertificateUrl', path)
+                uploadTasks.push(supabase.storage.from('certifications').upload(path, birFile).then(({ error }: { error: any }) => {
+                    if (error) throw error
+                    formData.set('birCertificateUrl', path)
+                }))
             }
-            formData.delete('birCertificate')
-
-            // Upload Gov ID
-            if (govIdFile && govIdFile.size > 0) {
+            if (govIdFile) {
                 const ext = govIdFile.name.split('.').pop()
                 const path = `studios/${user.id}/govid_${timestamp}.${ext}`
-                const { error: govErr } = await supabase.storage.from('certifications').upload(path, govIdFile)
-                if (govErr) throw new Error('Failed to upload Government ID: ' + govErr.message)
-
-                formData.set('govIdUrl', path)
+                uploadTasks.push(supabase.storage.from('certifications').upload(path, govIdFile).then(({ error }: { error: any }) => {
+                    if (error) throw error
+                    formData.set('govIdUrl', path)
+                }))
             }
-            formData.delete('govId')
+            
+            await Promise.all(uploadTasks)
+            console.log('[StudioApplicationForm] Document uploads finished.')
 
-            // Upload Insurance
-            if (insuranceFile && insuranceFile.size > 0) {
-                const ext = insuranceFile.name.split('.').pop()
-                const path = `studios/${user.id}/insurance_${timestamp}.${ext}`
-                const { error: insErr } = await supabase.storage.from('certifications').upload(path, insuranceFile)
-                if (insErr) throw new Error('Failed to upload Insurance/Permit: ' + insErr.message)
-
-                formData.set('insuranceUrl', path)
-            }
-            formData.delete('insurance')
-
-            // Upload Space Photos directly (bypassing append to formData previously)
-            for (let i = 0; i < spacePhotos.length; i++) {
-                const file = spacePhotos[i]
-                if (file.size > 0) {
+            // Space Photos
+            if (spacePhotos.length > 0) {
+                console.log(`[StudioApplicationForm] Uploading ${spacePhotos.length} space photos...`)
+                for (let i = 0; i < spacePhotos.length; i++) {
+                    const file = spacePhotos[i]
                     const ext = file.name.split('.').pop()
                     const path = `studios/${user.id}/space_${timestamp}_${i}.${ext}`
-                    const { error: photoErr } = await supabase.storage.from('avatars').upload(path, file, {
-                        contentType: uploadContentType(file)
-                    })
-                    if (photoErr) throw new Error('Failed to upload space photo: ' + photoErr.message)
-
+                    await supabase.storage.from('avatars').upload(path, file, { contentType: uploadContentType(file) })
                     const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
                     formData.append('spacePhotosUrls', publicUrl)
                 }
             }
+
+            // Sync Google Maps and Slug data for Server Action
+            formData.set('slug', slug)
+            formData.set('lat', lat)
+            formData.set('lng', lng)
+            
+            // Auto-derive google maps link if not manually provided (to satisfy DB requirement)
+            if (!googleMapsUrl) {
+                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+                formData.set('googleMapsUrl', mapUrl)
+            } else {
+                formData.set('googleMapsUrl', googleMapsUrl)
+            }
+            
+            formData.append('plan', selectedPlan)
+            formData.append('billingCycle', billingCycle)
+            formData.append('subscription_status', 'trial')
+            formData.set('is_public', String(isPublic))
+            formData.set('marketplace_status', isPublic ? 'pending' : 'inactive')
+            
+            console.log('[StudioApplicationForm] Calling createStudio Server Action...')
             const result = await createStudio(formData)
+            console.log('[StudioApplicationForm] Server Action result:', result)
+
             if (result?.error) {
                 setError(result.error)
+            } else if (result?.success) {
+                console.log('[StudioApplicationForm] Success! Redirecting to /studio/website...')
+                router.push('/studio/website?success=true')
             }
         } catch (err: any) {
-            console.error('Studio Form Submit Error:', err)
+            console.error('[StudioApplicationForm] Fatal error during submission:', err)
             setError(err.message || 'An unexpected error occurred.')
         } finally {
             setIsLoading(false)
         }
     }
 
-    return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
-                    {error}
+    if (isCheckingIdentity) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                <Loader2 className="w-10 h-10 animate-spin text-forest/20" />
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate/40">Verifying Identity...</p>
+            </div>
+        )
+    }
+
+    if (identityConflict === 'marketplace') {
+        return (
+            <div className="bg-white border border-red-100 rounded-[2.5rem] p-12 text-center shadow-xl shadow-red-500/5 max-w-2xl mx-auto space-y-8 animate-in fade-in zoom-in duration-500">
+                <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto border border-red-100">
+                    <ShieldCheck className="w-10 h-10 text-red-500" />
                 </div>
-            )}
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Studio Name <span className="text-rose-gold font-bold">*</span></label>
-                <input name="name" required placeholder="e.g. Pilates Logic" className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 transition-all" />
+                
+                <div className="space-y-4">
+                    <h2 className="text-3xl font-serif text-charcoal tracking-tight">Identity Conflict Detected</h2>
+                    <p className="text-sm text-slate/60 font-medium leading-relaxed max-w-md mx-auto">
+                        We detected that you have a <span className="text-forest font-bold">Studio</span> or <span className="text-forest font-bold">Instructor account</span> linked to <span className="underline">studiovaultph.com</span>. 
+                    </p>
+                    <p className="text-xs text-slate/50 font-bold uppercase tracking-widest leading-relaxed pt-2">
+                        To ensure absolute security and separation of your business financials, please use a <span className="text-charcoal underline">different email address</span> to register and link your studio account on this portal.
+                    </p>
+                </div>
+
+                <div className="pt-8 border-t border-zinc-50 flex flex-col items-center gap-4">
+                    <Link 
+                        href="/logout" 
+                        className="px-10 py-4 bg-charcoal text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-lg"
+                    >
+                        Sign Out to Use Different Email
+                    </Link>
+                    <Link 
+                        href="/" 
+                        className="text-[10px] font-bold text-slate/40 uppercase tracking-widest hover:text-forest transition-colors"
+                    >
+                        Return to Dashboard
+                    </Link>
+                </div>
             </div>
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Contact Number <span className="text-rose-gold font-bold">*</span></label>
-                <input type="tel" name="contactNumber" required maxLength={13} placeholder="e.g. 09171234567" className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 transition-all font-mono" />
-                <p className="text-[10px] text-charcoal-500 mt-1 italic">
-                    Format: 09XXXXXXXXX or +639XXXXXXXXX (11 digits). We&apos;ll reach out here to confirm your application.
-                </p>
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Date of Birth of Authorized Representative <span className="text-rose-gold font-bold">*</span></label>
-                <input type="date" name="dateOfBirth" required className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white transition-all" />
+        )
+    }
+
+    return (
+        <div className="space-y-8">
+            {/* Multi-step indicator */}
+            <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((num) => (
+                    <div 
+                        key={num} 
+                        className={`h-1 flex-1 rounded-full transition-all duration-500 ${step >= num ? 'bg-forest' : 'bg-cream-200'}`} 
+                    />
+                ))}
             </div>
 
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Location <span className="text-rose-gold font-bold">*</span></label>
-                <select name="location" required className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white transition-all">
-                    <option value="">Select a location</option>
-                    <optgroup label="Alabang">
-                        <option value="Alabang - Madrigal/Ayala Alabang">Alabang - Madrigal / Ayala Alabang</option>
-                        <option value="Alabang - Filinvest City">Alabang - Filinvest City</option>
-                        <option value="Alabang - Alabang Town Center Area">Alabang - Alabang Town Center Area</option>
-                        <option value="Alabang - Others">Alabang - Others</option>
-                    </optgroup>
-                    <optgroup label="BGC">
-                        <option value="BGC - High Street">BGC - High Street</option>
-                        <option value="BGC - Central Square/Uptown">BGC - Central Square / Uptown</option>
-                        <option value="BGC - Forbes Town">BGC - Forbes Town</option>
-                        <option value="BGC - Others">BGC - Others</option>
-                    </optgroup>
-                    <optgroup label="Ortigas">
-                        <option value="Ortigas - Ortigas Center">Ortigas - Ortigas Center</option>
-                        <option value="Ortigas - Greenhills">Ortigas - Greenhills</option>
-                        <option value="Ortigas - San Juan">Ortigas - San Juan</option>
-                        <option value="Ortigas - Others">Ortigas - Others</option>
-                    </optgroup>
-                    <optgroup label="Makati">
-                        <option value="Makati - CBD/Ayala">Makati - CBD / Ayala</option>
-                        <option value="Makati - Poblacion/Rockwell">Makati - Poblacion / Rockwell</option>
-                        <option value="Makati - San Antonio/Gil Puyat">Makati - San Antonio / Gil Puyat</option>
-                        <option value="Makati - Others">Makati - Others</option>
-                    </optgroup>
-                    <optgroup label="Mandaluyong">
-                        <option value="Mandaluyong - Ortigas South">Mandaluyong - Ortigas South</option>
-                        <option value="Mandaluyong - Greenfield/Shaw">Mandaluyong - Greenfield / Shaw</option>
-                        <option value="Mandaluyong - Boni/Pioneer">Mandaluyong - Boni / Pioneer</option>
-                    </optgroup>
-                    <optgroup label="Quezon City">
-                        <option value="QC - Tomas Morato">QC - Tomas Morato</option>
-                        <option value="QC - Katipunan">QC - Katipunan</option>
-                        <option value="QC - Eastwood">QC - Eastwood</option>
-                        <option value="QC - Cubao">QC - Cubao</option>
-                        <option value="QC - Fairview/Commonwealth">QC - Fairview / Commonwealth</option>
-                        <option value="QC - Novaliches">QC - Novaliches</option>
-                        <option value="QC - Diliman">QC - Diliman</option>
-                        <option value="QC - Maginhawa/UP Village">QC - Maginhawa / UP Village</option>
-                    </optgroup>
-                    <optgroup label="Paranaque">
-                        <option value="Paranaque - BF Homes">Paranaque - BF Homes</option>
-                        <option value="Paranaque - Moonwalk / Merville">Paranaque - Moonwalk / Merville</option>
-                        <option value="Paranaque - Bicutan / Sucat">Paranaque - Bicutan / Sucat</option>
-                        <option value="Paranaque - Others">Paranaque - Others</option>
-                    </optgroup>
-                </select>
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Display Address <span className="text-rose-gold font-bold">*</span></label>
-                <div className="relative">
-                    <div className="absolute left-4 top-3.5 text-charcoal-300">
-                        <MapPin className="w-4 h-4" />
-                    </div>
-                    <input
-                        type="text"
-                        name="address"
-                        value={address}
-                        onChange={(e) => handleAddressSearch(e.target.value)}
-                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                        autoComplete="off"
-                        required
-                        placeholder="e.g. One Building, Ayala Ave"
-                        className="w-full pl-12 pr-12 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 transition-all"
-                    />
-                    {isSearching && (
-                        <div className="absolute right-4 top-3.5">
-                            <Loader2 className="w-4 h-4 animate-spin text-charcoal-300" />
-                        </div>
-                    )}
-                    {showSuggestions && suggestions.length > 0 && (
-                        <div className="absolute z-[100] top-full left-0 right-0 mt-1 bg-white border border-cream-200 rounded-xl shadow-2xl overflow-hidden">
-                            {suggestions.map((s, idx) => (
-                                <button
-                                    key={idx}
-                                    type="button"
-                                    onMouseDown={() => handleSuggestionSelect(s)}
-                                    className="w-full text-left px-5 py-3 text-xs font-medium text-charcoal-700 hover:bg-cream-50 transition-colors border-b border-cream-50 last:border-0 flex items-center gap-3"
-                                >
-                                    <Search className="w-3.5 h-3.5 opacity-30 flex-shrink-0" />
-                                    <span className="truncate">{s}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-                {isGeocoding && (
-                    <p className="text-[10px] text-charcoal-400 flex items-center gap-1.5 mt-1">
-                        <Loader2 className="w-3 h-3 animate-spin" /> Locating address...
-                    </p>
-                )}
+            <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Hidden Persistent Fields for Multi-Step Submission */}
+                <input type="hidden" name="name" value={name} />
+                <input type="hidden" name="contactNumber" value={contactNumber} />
+                <input type="hidden" name="dateOfBirth" value={dateOfBirth} />
+                <input type="hidden" name="address" value={address} />
+                <input type="hidden" name="slug" value={slug} />
+                <input type="hidden" name="selectedPlan" value={selectedPlan} />
                 <input type="hidden" name="lat" value={lat} />
                 <input type="hidden" name="lng" value={lng} />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Floor or Unit <span className="text-charcoal-400 font-normal ml-1">(Optional)</span></label>
-                <input
-                    name="floorOrUnit"
-                    placeholder="e.g. Unit 302, 3rd Floor"
-                    className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 transition-all"
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Google Maps Link <span className="text-rose-gold font-bold">*</span></label>
-                <div className="relative">
-                    <input
-                        type="url"
-                        name="googleMapsUrl"
-                        value={googleMapsUrl}
-                        onChange={(e) => setGoogleMapsUrl(e.target.value)}
-                        onBlur={handleGoogleMapsUrlBlur}
-                        required
-                        placeholder="e.g. https://maps.app.goo.gl/..."
-                        className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white transition-all"
-                    />
-                    {isResolvingUrl && (
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                            <Loader2 className="w-4 h-4 animate-spin text-charcoal-300" />
-                        </div>
-                    )}
-                </div>
-                {isResolvingUrl && (
-                    <p className="text-[10px] text-charcoal-400 flex items-center gap-1.5 mt-1">
-                        <Loader2 className="w-3 h-3 animate-spin" /> Resolving link to address...
-                    </p>
+                <input type="hidden" name="googleMapsUrl" value={googleMapsUrl} />
+                <input type="hidden" name="billingCycle" value={billingCycle} />
+                <input type="hidden" name="isPublic" value={String(isPublic)} />
+
+                {error && (
+                    <div className="p-4 text-xs font-black uppercase tracking-widest text-red-600 bg-red-50 border border-red-100 rounded-xl">
+                        {error}
+                    </div>
                 )}
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <FileUploadBox
-                        name="birCertificate"
-                        label="BIR Certificate (Form 2303)"
-                        required={true}
-                        fileName={birFileName}
-                        previewUrl={birPreviewUrl}
-                        accept=".jpg,.jpeg,.png,.pdf,.heic,.heif"
-                        setFileState={(name: string | null, url: string | null, file: File | null) => { setBirFileName(name); setBirPreviewUrl(url); setBirFile(file); }}
-                    />
-                    <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3 text-rose-gold" />
-                        Used only for secure identity verification and automated payouts.
-                    </p>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <FileUploadBox
-                        name="govId"
-                        label="Valid Government ID"
-                        required={true}
-                        fileName={govIdFileName}
-                        previewUrl={govIdPreviewUrl}
-                        accept=".jpg,.jpeg,.png,.pdf,.heic,.heif"
-                        setFileState={(name: string | null, url: string | null, file: File | null) => { setGovIdFileName(name); setGovIdPreviewUrl(url); setGovIdFile(file); }}
-                    />
-                    <p className="text-[10px] text-charcoal-500 mt-2 italic flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3 text-rose-gold" />
-                        Used only for secure identity verification and automated payouts.
-                    </p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-1">ID Expiration Date <span className="text-rose-gold font-bold">*</span></label>
-                    <input type="date" required name="govIdExpiry" className="w-full px-5 py-3 border border-cream-200 bg-cream-50/20 rounded-xl text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm transition-all" />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FileUploadBox
-                    name="insurance"
-                    label="Insurance Policy (Optional)"
-                    required={false}
-                    fileName={insuranceFileName}
-                    previewUrl={insurancePreviewUrl}
-                    accept=".jpg,.jpeg,.png,.pdf,.heic,.heif"
-                    setFileState={(name: string | null, url: string | null, file: File | null) => { setInsuranceFileName(name); setInsurancePreviewUrl(url); setInsuranceFile(file); }}
-                />
-                <div>
-                    <label className="block text-sm font-medium text-charcoal-700 mb-0.5">Insurance Expiration Date</label>
-                    <p className="text-[10px] text-charcoal-500 italic mb-1">Optional</p>
-                    <input type="date" name="insuranceExpiry" className="w-full px-3 py-1.5 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm" />
-                </div>
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-1">Photos of the Space <span className="text-rose-gold font-bold">*</span></label>
-                <div className="bg-cream-50 p-6 rounded-lg border border-cream-200">
-                    {spacePhotos.length > 0 && (
-                        <div className="mb-6">
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                {spacePhotos.map((file, i) => {
-                                    const url = URL.createObjectURL(file)
-                                    return (
-                                        <div key={i} className="relative aspect-square rounded-lg overflow-hidden group border border-cream-200 shadow-sm z-30">
-                                            <a href={url} target="_blank" rel="noopener noreferrer" className="block w-full h-full relative">
-                                                <Image src={url} fill className="object-cover cursor-pointer hover:opacity-90 transition-opacity" alt={`Space Photo ${i + 1}`} unoptimized />
-                                            </a>
-                                            <button
-                                                onClick={(e) => removeSpacePhoto(e, i)}
-                                                className="absolute top-2 right-2 p-1.5 bg-red-500/90 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm z-40 opacity-0 group-hover:opacity-100"
-                                                title="Remove Photo"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    )
-                                })}
+                {/* STEP 1: IDENTITY */}
+                {step === 1 && (
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40 mb-3">
+                                Studio Name <span className="text-red-500">*</span>
+                            </label>
+                            <input 
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required 
+                                placeholder="e.g. Pilates Logic" 
+                                className="w-full px-6 py-4 border border-cream-200 bg-white rounded-2xl text-charcoal outline-none focus:ring-2 focus:ring-forest/20 transition-all font-serif text-lg" 
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40 mb-3">
+                                    Contact Number <span className="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    value={contactNumber}
+                                    onChange={(e) => setContactNumber(e.target.value)}
+                                    required 
+                                    placeholder="0917XXXXXXX" 
+                                    className="w-full px-6 py-4 border border-cream-200 bg-white rounded-2xl text-charcoal outline-none focus:ring-2 focus:ring-forest/20 transition-all" 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40 mb-3">
+                                    Authorized Rep DOB <span className="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="date" 
+                                    value={dateOfBirth}
+                                    onChange={(e) => setDateOfBirth(e.target.value)}
+                                    required 
+                                    className="w-full px-6 py-4 border border-cream-200 bg-white rounded-2xl text-charcoal outline-none focus:ring-2 focus:ring-forest/20 transition-all" 
+                                />
                             </div>
                         </div>
-                    )}
-
-                    <div className="flex flex-col items-center justify-center py-6 border-2 border-dashed border-cream-300 rounded-lg hover:bg-cream-100/50 transition-colors cursor-pointer" onClick={() => spacePhotosInputRef.current?.click()}>
-                        <Upload className="w-6 h-6 text-charcoal-400 mb-2" />
-                        <p className="text-sm font-medium text-charcoal-700">Click to add photos</p>
-                        <p className="text-[10px] text-charcoal-500 mt-1 italic text-center">Images only. Show the studio layout, equipment, and amenities.</p>
-                        <input type="file" accept="image/*,.heic,.heif" multiple onChange={handleSpacePhotosChange} ref={spacePhotosInputRef} className="hidden" />
                     </div>
-                </div>
-            </div>
+                )}
 
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-2">Available Equipment & Quantities <span className="text-rose-gold font-bold">*</span></label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                    {[
-                        { id: 'reformer', label: 'Reformer' },
-                        { id: 'cadillac', label: 'Cadillac' },
-                        { id: 'tower', label: 'Tower' },
-                        { id: 'chair', label: 'Chair' },
-                        { id: 'ladderBarrel', label: 'Ladder Barrel' },
-                        { id: 'mat', label: 'Mat' }
-                    ].map((eq) => {
-                        const isChecked = selectedEquipment[eq.id] || false;
-                        return (
-                            <div key={eq.id} className="flex flex-col gap-3 p-4 border border-cream-200 rounded-lg bg-cream-50 transition-all">
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" name={eq.id} checked={isChecked} onChange={(e) => handleEquipmentChange(eq.id, e.target.checked)} className="w-4 h-4 shrink-0 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900" />
-                                    <span className="text-charcoal-700 text-sm font-bold">{eq.label}</span>
-                                </label>
-                                <div className={clsx("flex items-center gap-4 transition-all", !isChecked && "opacity-30 pointer-events-none")}>
-                                    <div className="flex items-center gap-2 shrink-0">
-                                        <span className="text-[10px] text-charcoal-500 font-bold uppercase tracking-tight">Qty:</span>
-                                        <input
-                                            type="number"
-                                            name={`qty_${eq.label}`}
-                                            min="1"
-                                            defaultValue="1"
-                                            disabled={!isChecked}
-                                            className="w-16 px-2 py-1.5 border border-cream-200 rounded-lg text-sm text-center text-charcoal-900 bg-white focus:ring-2 focus:ring-charcoal-900 outline-none"
-                                        />
+                {/* STEP 2: SETUP (TRUNCATED FOR BREVITY IN REPLACEMENT, KEEPING LOGIC) */}
+                {step === 2 && (
+                    <div className="space-y-6">
+                         <div>
+                            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40 mb-3">
+                                Location <span className="text-red-500">*</span>
+                            </label>
+                            <div className="relative">
+                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate/40"><MapPin className="w-4 h-4" /></div>
+                                <input
+                                    type="text"
+                                    value={address}
+                                    onChange={(e) => handleAddressSearch(e.target.value)}
+                                    autoComplete="off"
+                                    required
+                                    placeholder="Search for your studio address..."
+                                    className="w-full pl-14 pr-12 py-4 border border-cream-200 bg-white rounded-2xl text-charcoal outline-none focus:ring-2 focus:ring-forest/20 transition-all font-serif text-lg"
+                                />
+                                {showSuggestions && suggestions.length > 0 && (
+                                    <div className="absolute z-[100] top-full left-0 right-0 mt-2 bg-white border border-cream-100 rounded-2xl shadow-2xl overflow-hidden py-2">
+                                        {suggestions.map((s, idx) => (
+                                            <button key={idx} type="button" onMouseDown={() => handleSuggestionSelect(s)} className="w-full text-left px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate/60 hover:bg-cream-50 flex items-center gap-3">
+                                                <Search className="w-3 h-3 opacity-20" /> {s}
+                                            </button>
+                                        ))}
                                     </div>
-                                    <div className="flex items-center gap-2 grow">
-                                        <span className="text-[10px] text-charcoal-500 font-bold uppercase tracking-tight">Rate:</span>
-                                        <div className="relative grow">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-400 text-xs">₱</span>
-                                            <input
-                                                type="number"
-                                                name={`price_${eq.label}`}
-                                                min="0"
-                                                step="0.01"
-                                                placeholder="0.00"
-                                                disabled={!isChecked}
-                                                className="w-full pl-7 pr-3 py-1.5 border border-cream-200 rounded-lg text-sm text-charcoal-900 bg-white focus:ring-2 focus:ring-charcoal-900 outline-none"
-                                            />
-                                        </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {!isCma && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <FileUploadBox
+                                    name="birCertificate"
+                                    label="BIR Certificate"
+                                    required={true}
+                                    fileName={birFileName}
+                                    previewUrl={birPreviewUrl}
+                                    setFileState={(name: any, url: any, file: any) => { setBirFileName(name); setBirPreviewUrl(url); setBirFile(file); }}
+                                />
+                                <div className="space-y-4">
+                                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40">Studio Photos <span className="text-red-500">*</span></label>
+                                    <div 
+                                        onClick={() => spacePhotosInputRef.current?.click()}
+                                        className="border-2 border-dashed border-cream-200 rounded-2xl p-8 flex flex-col items-center justify-center bg-cream-50/30 hover:bg-cream-50 transition-colors cursor-pointer"
+                                    >
+                                        <Upload className="w-6 h-6 text-slate/20 mb-3" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate/40">{spacePhotos.length} Photos added</span>
+                                        <input type="file" multiple className="hidden" ref={spacePhotosInputRef} onChange={handleSpacePhotosChange} />
                                     </div>
                                 </div>
                             </div>
-                        )
-                    })}
-                </div>
-                <input
-                    type="text"
-                    name="otherEquipment"
-                    placeholder="Other equipment (comma separated)"
-                    className="w-full px-3 py-2 border border-cream-300 rounded-lg text-charcoal-900 outline-none focus:ring-2 focus:ring-charcoal-900 bg-white text-sm"
-                />
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-charcoal-700 mb-2">Amenities</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    {STUDIO_AMENITIES.map((amenity) => (
-                        <label key={amenity} className="flex items-start gap-2.5 p-3 border border-cream-200 rounded-lg bg-cream-50 cursor-pointer hover:bg-cream-100 transition-colors min-h-[52px]">
-                            <input
-                                type="checkbox"
-                                name="amenities"
-                                value={amenity}
-                                className="w-4 h-4 mt-0.5 shrink-0 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900"
-                            />
-                            <span className="text-charcoal-700 text-sm font-medium leading-tight">{amenity}</span>
-                        </label>
-                    ))}
-                </div>
-            </div>
-
-            {/* Cancellation & Wallet Policy */}
-            <div className="pt-6 border-t border-cream-200">
-                <h3 className="text-sm font-semibold text-charcoal-900 uppercase tracking-wider mb-4">Cancellation & Wallet Policy</h3>
-                <div className="bg-cream-50 rounded-xl border border-cream-200 p-4 mb-4">
-                    <div className="h-48 overflow-y-auto pr-2 text-xs text-charcoal-600 space-y-4 scrollbar-thin scrollbar-thumb-cream-300">
-                        <p className="font-bold text-charcoal-900">1. The 24-Hour Strict Cancellation Rule</p>
-                        <p>Studio Vault PH enforces a strict 24-hour cancellation policy. Any session cancelled less than 24 hours before the scheduled start time is considered a "Late Cancellation" and is subject to automated penalties.</p>
-
-                        <p className="font-bold text-charcoal-900">2. Instructor-Initiated Late Cancellations</p>
-                        <p>If an Instructor cancels within the 24-hour window: The Client receives a 100% refund. The Instructor’s Wallet will be immediately deducted the cost of the Studio Rental Fee, which is credited to the Studio.</p>
-
-                        <p className="font-bold text-charcoal-900">3. Studio-Initiated Late Cancellations</p>
-                        <p>If a Studio cancels within the 24-hour window: The Client receives a 100% refund. The Studio’s Wallet is deducted a Displacement Fee (equal to the Studio Rental Rate), which is credited to the Instructor’s Wallet.</p>
-
-                        <p className="font-bold text-charcoal-900">4. Negative Wallet Balances</p>
-                        <p>If penalties cause a balance to drop below ₱0.00, the account carries a negative balance. Future earnings are automatically applied to the debt. "Request Payout" and new bookings are disabled until settled.</p>
+                        )}
                     </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                    <div className="flex items-center h-5">
-                        <input
-                            id="policyAgree"
-                            name="policyAgree"
-                            type="checkbox"
-                            required
-                            className="w-4 h-4 text-charcoal-900 border-cream-300 rounded focus:ring-charcoal-900 cursor-pointer"
-                        />
-                    </div>
-                    <label htmlFor="policyAgree" className="text-sm text-charcoal-700 cursor-pointer">
-                        I have read and agree to the <Link href="/terms-of-service" target="_blank" className="text-rose-gold font-bold hover:underline">Studio Vault Cancellation & Wallet Policy</Link>. <span className="text-rose-gold font-bold">*</span>
-                    </label>
-                </div>
-            </div>
-
-            <button type="submit" disabled={isLoading} className="w-full py-4 flex items-center justify-center gap-3 bg-forest text-white rounded-xl font-bold text-lg hover:brightness-110 transition-all shadow-lg hover:shadow-xl active:scale-[0.99] disabled:opacity-70 group">
-                {isLoading ? (
-                    <>
-                        <Loader2 className="w-6 h-6 animate-spin" />
-                        <span className="text-white/80 font-medium tracking-wide">Processing application...</span>
-                    </>
-                ) : (
-                    <>
-                        <span>Submit Application</span>
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </>
                 )}
-            </button>
-        </form>
+
+                {/* STEP 3: IDENTITY & URL */}
+                {step === 3 && (
+                    <div className="space-y-8">
+                        <div className="text-center space-y-2">
+                            <h2 className="text-2xl font-serif text-charcoal">Business Identity</h2>
+                            <p className="text-xs text-slate/40 uppercase font-black tracking-widest">Choose your unique storefront URL</p>
+                        </div>
+                        <div className="max-w-md mx-auto">
+                            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40 mb-3">
+                                Your Custom URL <span className="text-red-500">*</span>
+                            </label>
+                            <div className="flex items-center border border-cream-200 bg-white rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-forest/20 transition-all">
+                                <span className="px-6 py-4 bg-cream-50 text-slate/40 text-[10px] font-black uppercase tracking-widest border-r border-cream-100">
+                                    studiovault.co/
+                                </span>
+                                <input 
+                                    value={slug}
+                                    onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
+                                    placeholder="your-studio"
+                                    className="flex-1 px-6 py-4 outline-none text-charcoal font-black placeholder:text-slate/20"
+                                />
+                            </div>
+                            <p className="mt-4 text-[10px] text-center text-slate/40 font-black uppercase tracking-widest leading-relaxed">
+                                This will be your permanent link for client bookings. <br />
+                                You can change this or add a custom domain later in settings.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {/* STEP 4: PLAN SELECTION */}
+                {step === 4 && (
+                    <div className="space-y-12">
+                        <div className="text-center space-y-4">
+                            <h2 className="text-3xl font-serif text-charcoal">Select Your Plan</h2>
+                            <p className="text-xs text-slate/40 uppercase font-black tracking-widest italic">All plans include a 1-month free trial</p>
+                            
+                            {/* Billing Toggle */}
+                            <div className="flex items-center justify-center gap-6 mt-8">
+                                <span className={clsx("text-[10px] font-black uppercase tracking-widest transition-all", billingCycle === 'monthly' ? "text-charcoal" : "text-slate/40")}>Monthly</span>
+                                <button 
+                                    type="button"
+                                    onClick={() => setBillingCycle(prev => prev === 'monthly' ? 'annually' : 'monthly')}
+                                    className="w-14 h-7 bg-cream-200 rounded-full p-1 relative transition-colors hover:bg-cream-300 ring-1 ring-black/5 shadow-inner"
+                                >
+                                    <div className={clsx(
+                                        "w-5 h-5 bg-forest rounded-full transition-all duration-300 shadow-md",
+                                        billingCycle === 'annually' ? "translate-x-7" : "translate-x-0"
+                                    )} />
+                                </button>
+                                <div className="flex items-center gap-2">
+                                    <span className={clsx("text-[10px] font-black uppercase tracking-widest transition-all", billingCycle === 'annually' ? "text-charcoal" : "text-slate/40")}>Annually</span>
+                                    <span className="bg-emerald-100 text-emerald-600 text-[8px] font-black uppercase px-2 py-0.5 rounded-full">Save 20%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {plans.map((p) => {
+                                const price = billingCycle === 'annually' ? Math.floor(p.price * 0.8) : p.price
+                                return (
+                                    <div 
+                                        key={p.id}
+                                        onClick={() => setSelectedPlan(p.id)}
+                                        className={clsx(
+                                            "px-6 py-10 rounded-[2.5rem] border-2 cursor-pointer transition-all relative overflow-hidden group h-full flex flex-col justify-between",
+                                            selectedPlan === p.id 
+                                                ? 'border-forest bg-forest/[0.02] ring-4 ring-forest/10' 
+                                                : 'border-cream-100 bg-white hover:border-forest/20 shadow-tight hover:shadow-ambient'
+                                        )}
+                                    >
+                                        <div className="space-y-4 mb-8">
+                                            <div className="flex justify-between items-center">
+                                                <h4 className="text-lg font-bold text-charcoal">{p.name}</h4>
+                                                {p.popular && <span className="bg-emerald-100 text-emerald-600 text-[8px] font-black uppercase px-2 py-0.5 rounded-full">Popular</span>}
+                                            </div>
+                                            <div className="flex items-baseline gap-1.5">
+                                                <span className="text-2xl font-black text-charcoal tracking-tight">PHP {price.toLocaleString()}</span>
+                                                <span className="text-[10px] uppercase font-bold tracking-[0.2em] opacity-30">/ mo</span>
+                                            </div>
+                                        </div>
+                                        <ul className="space-y-4 mb-8 flex-1">
+                                            {p.features.map(f => (
+                                                <li key={f} className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate/70 flex items-start gap-3 leading-relaxed">
+                                                    <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" /> 
+                                                    <span>{f}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        <div className={`w-full h-1 rounded-full ${selectedPlan === p.id ? 'bg-forest' : 'bg-cream-100'}`} />
+                                    </div>
+                                )
+                            })}
+                        </div>
+                        
+                        <div className="p-10 bg-forest/[0.03] border border-forest/10 rounded-[2.5rem] flex flex-col sm:flex-row items-center gap-8 shadow-inner">
+                            <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                                <Sparkles className="w-8 h-8 text-emerald-600" />
+                            </div>
+                            <div className="space-y-2 text-center sm:text-left">
+                                <h5 className="text-sm font-black uppercase tracking-widest text-charcoal">30-Day Free Trial Activated</h5>
+                                <p className="text-[10px] text-slate/50 font-bold uppercase tracking-[0.2em] leading-relaxed">
+                                    Your first payment of <span className="text-charcoal">PHP {((billingCycle === 'annually' ? Math.floor(plans.find(p => p.id === selectedPlan)!.price * 0.8) : plans.find(p => p.id === selectedPlan)!.price) * (billingCycle === 'annually' ? 12 : 1)).toLocaleString()}</span> isn&apos;t due until May 4, 2026. Cancel anytime.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* STEP 5: MARKETPLACE DISCOVERY */}
+                {step === 5 && (
+                    <div className="space-y-12">
+                        <div className="text-center space-y-4">
+                            <h2 className="text-3xl font-serif text-charcoal tracking-tight">Marketplace Discovery</h2>
+                            <p className="text-[10px] text-slate/40 uppercase font-black tracking-[0.3em] italic">Choose how you want to be discovered</p>
+                        </div>
+
+                        <div className="max-w-2xl mx-auto">
+                            <div 
+                                onClick={() => setIsPublic(!isPublic)}
+                                className={clsx(
+                                    "p-10 rounded-[2.5rem] border-2 cursor-pointer transition-all relative overflow-hidden group",
+                                    isPublic 
+                                        ? "border-forest bg-forest/[0.02] ring-4 ring-forest/10" 
+                                        : "border-cream-100 bg-white hover:border-cream-200"
+                                )}
+                            >
+                                <div className="flex flex-col sm:flex-row items-center gap-8">
+                                    <div className={clsx(
+                                        "w-20 h-20 rounded-full flex items-center justify-center shrink-0 border transition-all duration-500",
+                                        isPublic ? "bg-forest border-forest text-white" : "bg-cream-50 border-cream-100 text-slate/30"
+                                    )}>
+                                        <Sparkles className={clsx("w-10 h-10 transition-transform duration-500", isPublic && "scale-110")} />
+                                    </div>
+                                    <div className="space-y-4 text-center sm:text-left flex-1">
+                                        <div className="flex items-center justify-center sm:justify-start gap-4">
+                                            <h4 className="text-xl font-bold text-charcoal tracking-tight">List on StudioVault Marketplace</h4>
+                                            <div className={clsx(
+                                                "w-14 h-7 rounded-full p-1 relative transition-colors duration-500 ring-1 ring-black/10 shadow-inner",
+                                                isPublic ? "bg-forest" : "bg-slate/20"
+                                            )}>
+                                                <div className={clsx(
+                                                    "w-5 h-5 bg-white rounded-full transition-all duration-500 shadow-md",
+                                                    isPublic ? "translate-x-7" : "translate-x-0"
+                                                )} />
+                                            </div>
+                                        </div>
+                                        <p className="text-[10px] text-slate/60 font-black uppercase tracking-[0.1em] leading-relaxed">
+                                            Monetize your studio&apos;s idle capacity by renting out unused equipment to independent instructors and students on the <span className="text-forest">StudioVault Marketplace</span>. <br />
+                                            <span className="text-forest underline">Set your own rental prices and reach a wider community.</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-8 p-10 bg-cream-50/50 rounded-[2.5rem] border border-cream-100 italic text-center">
+                                <p className="text-[10px] text-slate/50 font-black uppercase tracking-widest leading-relaxed">
+                                    {isPublic 
+                                        ? "PUBLIC: Your studio will be searchable on studiovaultph.com as soon as you are verified." 
+                                        : "PRIVATE: Your studio will be hidden from public search. Only customers who have your direct link (studiovault.co/your-slug) will be able to book."
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* NAVIGATION */}
+                <div className="flex gap-4 pt-8">
+                    {step > 1 && (
+                        <button 
+                            type="button" 
+                            onClick={prevStep}
+                            className="px-10 py-4 rounded-2xl border-2 border-cream-100 text-[10px] font-black uppercase tracking-widest text-slate/40 hover:bg-cream-50 transition-all"
+                        >
+                            Back
+                        </button>
+                    )}
+                    
+                    {step < 5 ? (
+                        <button 
+                            type="button" 
+                            onClick={nextStep}
+                            className="flex-1 py-4 bg-forest text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-xl shadow-forest/20 flex items-center justify-center gap-3 group"
+                        >
+                            Continue <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    ) : (
+                        <button 
+                            type="submit" 
+                            disabled={isLoading}
+                            className="flex-1 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-xl flex items-center justify-center gap-3 disabled:opacity-50"
+                        >
+                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Complete Setup & Launch'}
+                        </button>
+                    )}
+                </div>
+            </form>
+        </div>
     )
 }

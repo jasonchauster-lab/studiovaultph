@@ -3,6 +3,7 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { uploadContentType } from '@/lib/utils/image-utils'
+import { linkReferral } from '@/lib/actions/referral'
 
 export async function updateProfile(formData: FormData) {
     const supabase = await createClient()
@@ -18,6 +19,10 @@ export async function updateProfile(formData: FormData) {
     const bio = formData.get('bio') as string
     const birthday = formData.get('birthday') as string
     const email = formData.get('email') as string
+    const firstName = formData.get('firstName') as string
+    const lastName = formData.get('lastName') as string
+    const gender = formData.get('gender') as string
+    const marketingConsent = formData.get('marketingConsent') === 'on'
     const avatarFile = formData.get('avatar') as File
     const bannerFile = formData.get('banner') as File
     const otherMedicalCondition = formData.get('otherMedicalCondition') as string
@@ -26,6 +31,8 @@ export async function updateProfile(formData: FormData) {
     const homeBaseLat = parseFloat(formData.get('homeBaseLat') as string)
     const homeBaseLng = parseFloat(formData.get('homeBaseLng') as string)
     const maxTravelKm = parseInt(formData.get('maxTravelKm') as string)
+    const referralCode = formData.get('referralCode') as string
+    const studioId = formData.get('studioId') as string
 
     // Extract all values for teaching_equipment (checkboxes)
     const teachingEquipment = formData.getAll('teaching_equipment') as string[]
@@ -33,7 +40,11 @@ export async function updateProfile(formData: FormData) {
     const medicalConditions = formData.getAll('medical_conditions') as string[]
 
     const updates: any = {
-        full_name: fullName,
+        full_name: fullName || `${firstName} ${lastName}`.trim(),
+        first_name: firstName,
+        last_name: lastName,
+        gender: gender,
+        marketing_consent: marketingConsent,
         instagram_handle: instagram,
         contact_number: contactNumber,
         emergency_contact_name: emergencyContactName,
@@ -132,6 +143,11 @@ export async function updateProfile(formData: FormData) {
         revalidatePath('/customer/profile')
         revalidatePath('/instructor/profile')
         return { success: true, emailChangePending: true }
+    }
+
+    // New: Link referral if provided (usually during onboarding)
+    if (referralCode && studioId) {
+        await linkReferral(studioId, user.id, referralCode)
     }
 
     revalidatePath('/customer/profile')

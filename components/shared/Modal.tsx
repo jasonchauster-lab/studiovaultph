@@ -34,7 +34,7 @@ export default function Modal({ isOpen, onClose, title, children, className }: M
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md bg-charcoal-900/40 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-charcoal-900/60 animate-in fade-in duration-300">
             <div 
                 ref={modalRef}
                 className={clsx(

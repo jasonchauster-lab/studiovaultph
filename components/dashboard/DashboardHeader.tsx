@@ -3,23 +3,27 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LogOut } from 'lucide-react'
 import Navigation from './Navigation'
-import { signOut } from '@/app/auth/actions'
+import { signOut } from '@/app/(marketplace)/auth/actions'
 import clsx from 'clsx'
 import Avatar from '@/components/shared/Avatar'
 import { Menu, Search } from 'lucide-react'
 import HeaderSearchPill from './HeaderSearchPill'
 import NotificationCenter from '@/components/shared/NotificationCenter'
+import QuickActionMenu from './QuickActionMenu'
+import StorefrontNav from './StorefrontNav'
+import ProfileDropdown from './ProfileDropdown'
 
 interface DashboardHeaderProps {
     profile: any
     studioData: any
     avatarUrl: string
     onOpenSidebar: () => void
+    isStudioPortal?: boolean
+    outlets?: any[]
 }
 
-export default function DashboardHeader({ profile, studioData, avatarUrl, onOpenSidebar }: DashboardHeaderProps) {
+export default function DashboardHeader({ profile, studioData, avatarUrl, onOpenSidebar, isStudioPortal, outlets }: DashboardHeaderProps) {
     const [isScrolled, setIsScrolled] = useState(false)
 
     useEffect(() => {
@@ -34,80 +38,80 @@ export default function DashboardHeader({ profile, studioData, avatarUrl, onOpen
 
     return (
         <header className={clsx(
-            "fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border-b border-burgundy/5 bg-white/95 backdrop-blur-md px-4 md:px-12",
-            isScrolled ? "h-16 md:h-20 shadow-tight" : "h-[60px] md:h-28 lg:h-32"
+            "relative z-[50] border-b border-outline-variant bg-surface px-4 md:px-8 lg:px-12 h-16 lg:h-20 transition-colors duration-300"
         )}>
-            <div className="max-w-7xl mx-auto h-full flex items-center justify-between gap-4">
-                {/* Desktop and Mobile Shared Left: Hamburger + Logo */}
-                <div className="flex items-center gap-2 sm:gap-6">
+            <div className="h-full flex items-center justify-between gap-4">
+                {/* Mobile Only Logo/Hamburger */}
+                <div className="flex lg:hidden items-center gap-4">
                     <button 
                         onClick={onOpenSidebar}
-                        className="p-3 rounded-xl hover:bg-stone-50 text-burgundy/40 hover:text-burgundy transition-all active:scale-95"
+                        className="p-2 rounded-lg hover:bg-zinc-50 text-zinc-400 hover:text-zinc-900 transition-all"
                         aria-label="Open Menu"
                     >
-                        <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <Menu className="w-6 h-6" />
                     </button>
-                    <Link href="/welcome" aria-label="Go to Welcome Dashboard" className="group">
-                        <Image
-                            src="/logo4.png"
-                            alt="Studio Vault"
-                            width={140}
-                            height={60}
-                            priority
-                            className={clsx(
-                                "w-auto object-contain transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-105",
-                                isScrolled ? "h-8 sm:h-10" : "h-10 sm:h-14"
-                            )}
+                    <Link href={isStudioPortal ? `/s/${studioData?.slug}` : "/welcome"} className="block lg:hidden">
+                        <Image 
+                            src={isStudioPortal && studioData?.logo_url ? studioData.logo_url : "/logo4.png"} 
+                            alt="Logo" 
+                            width={100} 
+                            height={30} 
+                            className="h-6 w-auto object-contain" 
                         />
                     </Link>
                 </div>
 
-                {/* Center: Search Pill (Desktop Search Only) */}
-                {(profile?.role === 'customer' || profile?.role === 'instructor') && (
-                    <div className="flex-1 max-w-2xl px-4 hidden md:block">
-                        <HeaderSearchPill />
-                    </div>
-                )}
-
-                {/* Right: Profile / Notifications */}
-                <div className="flex items-center gap-3 sm:gap-6">
-                    <div className="flex items-center gap-3 pl-4 border-l border-burgundy/5 shrink-0">
-                        <div className="hidden sm:flex flex-col items-end text-right">
-                            <p className="text-xs font-bold text-burgundy leading-tight mb-0.5 whitespace-nowrap">
-                                {profile?.role === 'studio' ? (studioData?.name || profile?.full_name || 'Studio') : (profile?.full_name || 'Partner')}
-                            </p>
-                            <p className="text-[10px] text-burgundy/40 font-bold uppercase tracking-widest leading-none">
-                                {profile?.role === 'instructor' ? 'INSTRUCTOR' :
-                                    profile?.role === 'studio' ? 'STUDIO' :
-                                        profile?.role || 'USER'}
-                            </p>
-                        </div>
-                        {profile?.id && (
-                            <div className="hidden xs:block">
-                                <NotificationCenter userId={profile.id} />
-                            </div>
-                        )}
-                        <Link
-                            href={
-                                profile?.role === 'customer' ? '/customer/profile' :
-                                    profile?.role === 'instructor' ? '/instructor/profile' :
-                                        profile?.role === 'studio' ? '/studio/settings' :
-                                            profile?.role === 'admin' ? '/admin' :
-                                                '#'
-                            }
-                            aria-label="View and Edit Profile"
-                            className="transition-all hover:scale-110 block"
-                        >
-                            <Avatar
-                                src={avatarUrl}
-                                fallbackName={profile?.full_name || (profile?.role === 'studio' ? studioData?.name : null)}
-                                size={40}
-                                className="border-2 border-burgundy/20 shadow-tight hover:border-burgundy/40"
+                {/* Desktop Logo (Shown only on Studio Portals for Customers because sidebar is hidden) */}
+                {isStudioPortal && isCustomer && (
+                    <div className="hidden lg:flex items-center gap-4">
+                        <Link href={`/s/${studioData?.slug}`}>
+                            <Image 
+                                src={studioData?.logo_url || "/logo4.png"} 
+                                alt="Logo" 
+                                width={120} 
+                                height={40} 
+                                className="h-8 w-auto object-contain" 
                             />
                         </Link>
                     </div>
+                )}
+
+                {/* Left Side: Contextual Info (Optional Search) */}
+                <div className="hidden lg:flex items-center justify-center gap-4 flex-1">
+                     {isStudioPortal ? (
+                         !isCustomer ? (
+                             <QuickActionMenu />
+                         ) : (
+                             <StorefrontNav 
+                                 links={studioData?.website_config?.navigation?.header} 
+                                 slug={studioData?.slug} 
+                             />
+                         )
+                     ) : (
+                         profile?.role !== 'studio' && <HeaderSearchPill />
+                     )}
+                </div>
+
+                {/* Right Side: Account Actions */}
+                <div className="flex items-center gap-4 lg:gap-8">
+                    <div className="flex items-center gap-3 pr-4 border-r border-zinc-100 hidden sm:flex">
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-50 rounded-lg">
+                            <Image src="https://flagcdn.com/ph.svg" alt="PH" width={16} height={12} className="rounded-sm" style={{ height: 'auto' }} />
+                            <span className="text-[11px] font-bold text-zinc-600">Philippines</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <NotificationCenter userId={profile?.id} />
+                    </div>
+
+                    <ProfileDropdown 
+                        profile={profile}
+                        avatarUrl={avatarUrl}
+                    />
                 </div>
             </div>
         </header>
     )
 }
+

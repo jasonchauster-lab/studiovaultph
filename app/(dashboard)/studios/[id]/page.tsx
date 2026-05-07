@@ -198,7 +198,7 @@ export default async function StudioDetailsPage(props: {
             {studio.banner_url && (
                 <div className="relative w-full h-[200px] sm:h-[400px] bg-cream-100 overflow-hidden">
                     <NextImage
-                        src={getSupabaseAssetUrl(studio.banner_url, 'avatars') || '/default-banner.svg'}
+                        src={getSupabaseAssetUrl(studio.banner_url, 'studios') || '/default-banner.svg'}
                         alt={`${studio.name} Banner`}
                         fill
                         className="object-cover"
@@ -215,7 +215,7 @@ export default async function StudioDetailsPage(props: {
                         {studio.logo_url ? (
                             <div className="relative w-full h-full">
                                 <NextImage
-                                    src={getSupabaseAssetUrl(studio.logo_url, 'avatars') || '/default-studio.svg'}
+                                    src={getSupabaseAssetUrl(studio.logo_url, 'studios') || '/default-studio.svg'}
                                     alt={studio.name}
                                     fill
                                     className="object-cover"
@@ -312,6 +312,9 @@ export default async function StudioDetailsPage(props: {
                                 studioHourlyRate={studio.hourly_rate}
                                 studioLocation={studio.location}
                                 pendingBookings={pendingBookings || []}
+                                enableXendit={studio.enable_xendit}
+                                enableManualPayments={studio.enable_manual_payments}
+                                manualPaymentMethods={studio.manual_payment_methods}
                             />
                         );
                     })()}

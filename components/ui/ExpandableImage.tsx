@@ -10,9 +10,10 @@ interface ExpandableImageProps {
     src: string
     alt: string
     className?: string
+    bucket?: 'avatars' | 'studios' | 'certifications' | 'payment-proofs' | 'waivers'
 }
 
-export default function ExpandableImage({ src, alt, className }: ExpandableImageProps) {
+export default function ExpandableImage({ src, alt, className, bucket = 'avatars' }: ExpandableImageProps) {
     const [isOpen, setIsOpen] = useState(false)
 
     return (
@@ -23,11 +24,10 @@ export default function ExpandableImage({ src, alt, className }: ExpandableImage
                 onClick={() => setIsOpen(true)}
                 title="Click to expand"
             >
-                <Image
-                    src={getSupabaseAssetUrl(src, 'avatars') || '/default-image.svg'}
+                <img
+                    src={getSupabaseAssetUrl(src, bucket) || '/default-image.svg'}
                     alt={alt}
-                    fill
-                    className="object-cover rounded-lg"
+                    className="w-full h-full object-cover rounded-lg"
                 />
 
                 {/* Hover Overlay */}
@@ -54,12 +54,10 @@ export default function ExpandableImage({ src, alt, className }: ExpandableImage
                         </button>
 
                         <div className="relative w-full h-full min-w-[300px] min-h-[300px]">
-                            <Image
-                                src={getSupabaseAssetUrl(src, 'avatars') || '/default-image.svg'}
+                            <img 
+                                src={getSupabaseAssetUrl(src, bucket) || '/default-image.svg'}
                                 alt={alt}
-                                width={1200}
-                                height={800}
-                                className="max-w-full max-h-[85vh] object-contain"
+                                className="max-w-full max-h-[85vh] object-contain mx-auto"
                             />
                         </div>
                         <p className="text-center text-charcoal-600 mt-2 font-medium">{alt}</p>

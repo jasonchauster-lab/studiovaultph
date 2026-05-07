@@ -1,15 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, Calendar, Clock, Repeat, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, Calendar, Clock, Repeat, CheckCircle, AlertCircle, Box, ArrowRight } from 'lucide-react';
 import { generateRecurringSlots } from '@/app/(dashboard)/studio/slot-actions';
 
 interface ScheduleManagerProps {
     studioId: string;
     availableEquipment: string[];
+    inventory?: Record<string, any>;
+    services: Array<{ id: string; name: string; type: string; difficulty: string }>;
 }
 
-export default function ScheduleManager({ studioId, availableEquipment }: ScheduleManagerProps) {
+export default function ScheduleManager({ studioId, availableEquipment, inventory, services }: ScheduleManagerProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -20,6 +22,7 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
     const [endTime, setEndTime] = useState('17:00');
     const [quantity, setQuantity] = useState(1);
     const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
+    const [selectedServiceId, setSelectedServiceId] = useState('');
 
     const daysOfWeek = [
         { id: 1, label: 'Mon' },
@@ -48,8 +51,8 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
     };
 
     const handleGenerate = async () => {
-        if (!startDate || !endDate || selectedDays.length === 0) {
-            setMessage({ type: 'error', text: 'Please fill in all fields (Start/End Date and Days).' });
+        if (!startDate || !endDate || selectedDays.length === 0 || !selectedServiceId) {
+            setMessage({ type: 'error', text: 'Please fill in all fields (Start/End Date, Days, and Service).' });
             return;
         }
 
@@ -70,7 +73,8 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
                 startTime,
                 endTime,
                 equipment: selectedEquipment,
-                quantity: quantity
+                quantity: quantity,
+                serviceId: selectedServiceId
             });
 
             if (result.success) {
@@ -179,12 +183,31 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
                     </div>
                 </div>
 
+                {/* Service Selection */}
+                <div>
+                     <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-3 ml-2">Class Type / Service</label>
+                     <select 
+                        value={selectedServiceId}
+                        onChange={(e) => setSelectedServiceId(e.target.value)}
+                        className="w-full px-5 py-4 border border-border-grey rounded-lg text-charcoal font-bold text-[10px] outline-none bg-white focus:ring-1 focus:ring-forest cursor-pointer uppercase tracking-widest"
+                     >
+                        <option value="">Select a service</option>
+                        {services.map(s => (
+                            <option key={s.id} value={s.id}>{s.name} ({s.difficulty})</option>
+                        ))}
+                     </select>
+                </div>
+
                 {/* Equipment Selection */}
                 {availableEquipment.length > 0 && (
                     <div>
                         <label className="block text-[10px] font-bold text-slate uppercase tracking-[0.2em] mb-4 ml-2">Equipment Selection</label>
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                            {availableEquipment.map(eq => (
+                            {availableEquipment.filter(eq => {
+                                const invItem = inventory?.[eq] || Object.values(inventory || {}).find((item: any) => item.name === eq);
+                                if (invItem) return (invItem.total || 0) > 0;
+                                return true;
+                            }).map(eq => (
                                 <button
                                     key={eq}
                                     onClick={() => toggleEquipment(eq)}
@@ -223,6 +246,29 @@ export default function ScheduleManager({ studioId, availableEquipment }: Schedu
                     </p>
                 </div>
             </div>
+
+            {(!inventory || Object.keys(inventory).length === 0) && (
+                <div className="absolute inset-0 z-50 bg-white/60 backdrop-blur-[2px] flex items-center justify-center p-8 rounded-lg">
+                    <div className="bg-white border border-border-grey rounded-3xl p-12 shadow-2xl max-w-sm text-center space-y-8 animate-in zoom-in-95 duration-500">
+                        <div className="w-20 h-20 bg-amber-50 rounded-[2rem] flex items-center justify-center mx-auto text-amber-500">
+                            <Box className="w-10 h-10" />
+                        </div>
+                        <div className="space-y-3">
+                            <h3 className="text-2xl font-black text-zinc-900 tracking-tight leading-tight">Setup Required</h3>
+                            <p className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.3em] leading-relaxed">
+                                Please define your studio equipment in management before bulk generating slots.
+                            </p>
+                        </div>
+                        <a 
+                            href="/studio/management/equipments"
+                            className="flex items-center justify-center gap-3 w-full py-5 bg-forest text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-forest/20 hover:brightness-110 active:scale-95 transition-all"
+                        >
+                            Configure Inventory
+                            <ArrowRight className="w-4 h-4" />
+                        </a>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

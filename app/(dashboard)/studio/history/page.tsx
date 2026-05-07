@@ -1,11 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { PlusCircle } from 'lucide-react'
+import { Plus, ArrowLeft, Clock } from 'lucide-react'
 import Link from 'next/link'
 import StudioRentalList from '@/components/dashboard/StudioRentalList'
+import StudioDashboardShell from '@/components/dashboard/StudioDashboardShell'
 
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns'
 import DateRangeFilters from '@/components/dashboard/DateRangeFilters'
+import { getCachedStudio, getCachedUser } from '@/lib/studio/data'
 
 export default async function StudioHistoryPage(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -13,16 +15,12 @@ export default async function StudioHistoryPage(props: {
     const searchParams = await props.searchParams
     const range = searchParams.range as string | undefined
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
+    const user = await getCachedUser()
     if (!user) redirect('/login')
 
-    // 1. Get Studio ID
-    const { data: studio } = await supabase
-        .from('studios')
-        .select('id')
-        .eq('owner_id', user.id)
-        .single()
+    // 1. Get Studio ID (supports both owner and staff)
+    const studio = await getCachedStudio()
 
     if (!studio) {
         return <div className="p-8">Studio not found.</div>
@@ -95,34 +93,45 @@ export default async function StudioHistoryPage(props: {
         }
     }))
 
+    const actions = (
+        <div className="flex items-center gap-3">
+            <Link
+                href="/studio/schedule"
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#2D3282] rounded-lg text-[11px] font-bold uppercase tracking-widest text-white hover:bg-indigo-900 transition-all shadow-md active:scale-95"
+            >
+                <Plus className="w-4 h-4" />
+                Add Session
+            </Link>
+        </div>
+    )
+
     return (
-        <div className="min-h-screen bg-cream-50 px-4 py-6 sm:p-10">
-            <div className="max-w-6xl mx-auto space-y-6">
-
+        <div className="min-h-screen p-8 lg:p-12 bg-[#F9F9F9]">
+            <div className="max-w-7xl mx-auto space-y-10">
                 {/* Header */}
-                <div className="flex items-center justify-between gap-4 px-0 sm:px-0">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
-                        <h1 className="text-xl sm:text-4xl font-serif font-bold text-charcoal-900 mb-0.5">Rental History</h1>
-                        <p className="text-charcoal-500 text-[10px] sm:text-sm">Past sessions and earnings for your studio.</p>
+                        <div className="inline-flex items-center gap-3 px-3 py-1 bg-white rounded-full border border-zinc-100 shadow-sm mb-4">
+                            <Clock className="w-3.5 h-3.5 text-[#2D3282]" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Operations</span>
+                        </div>
+                        <h1 className="text-4xl md:text-6xl font-black text-zinc-900 tracking-tightest leading-tight">
+                            Booking <span className="text-zinc-300">History</span>
+                        </h1>
                     </div>
-                    <Link
-                        href="/studio"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-forest text-white text-[10px] sm:text-sm font-bold rounded-lg shadow-sm hover:bg-forest/90 active:scale-95 transition-all shrink-0"
-                    >
-                        <PlusCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline">Add Slot</span>
-                        <span className="sm:hidden">Slot</span>
-                    </Link>
+                    
+                    <div className="flex items-center gap-3">
+                        <DateRangeFilters />
+                    </div>
                 </div>
 
-                {/* Date Filter */}
-                <div className="flex justify-end">
-                    <DateRangeFilters />
+                {/* Main Content */}
+                <div className="bg-white rounded-[2.5rem] shadow-cloud border border-zinc-100 overflow-hidden">
+                    <div className="p-8 lg:p-10">
+                        <StudioRentalList bookings={formattedBookings || []} currentUserId={user.id} />
+                    </div>
                 </div>
-
-                {/* Card List */}
-                <StudioRentalList bookings={formattedBookings || []} currentUserId={user.id} />
-            </div >
-        </div >
+            </div>
+        </div>
     )
 }

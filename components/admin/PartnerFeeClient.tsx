@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updatePartnerFeeSettings } from '@/app/(dashboard)/admin/actions'
+import { updatePartnerFeeSettings, updateStudioAICredits } from '@/app/(dashboard)/admin/actions'
 import { Star, Mail, Phone, Calendar, Percent, ChevronDown, ExternalLink } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -13,6 +13,8 @@ type PartnerProps = {
     location?: string
     is_founding_partner: boolean
     custom_fee_percentage: number
+    ai_chat_limit?: number
+    ai_chat_usage?: number
     email?: string
     phone?: string
     documents?: {
@@ -61,6 +63,8 @@ export default function PartnerFeeClient({
                 location: s.location,
                 is_founding_partner: s.is_founding_partner || false,
                 custom_fee_percentage: s.custom_fee_percentage || 20,
+                ai_chat_limit: s.ai_chat_limit ?? 50,
+                ai_chat_usage: s.ai_chat_usage ?? 0,
                 email: ownerObj?.email,
                 phone: s.contact_number,
                 documents: s.documents
@@ -77,6 +81,15 @@ export default function PartnerFeeClient({
         newPartners[index] = { ...newPartners[index], custom_fee_percentage: newFee, is_founding_partner: true }
         setPartners(newPartners)
         await updatePartnerFeeSettings(p.id, p.type, true, newFee)
+    }
+
+    const handleSaveAICredits = async (index: number, val: string) => {
+        const p = partners[index]
+        const newLimit = parseInt(val) || 50
+        const newPartners = [...partners]
+        newPartners[index] = { ...newPartners[index], ai_chat_limit: newLimit }
+        setPartners(newPartners)
+        await updateStudioAICredits(p.id, newLimit)
     }
 
     const iList = partners.filter(p => p.type === 'profile')
@@ -141,8 +154,8 @@ export default function PartnerFeeClient({
                     </div>
                 </div>
 
-                {/* Fee selector block */}
-                <div className="bg-stone-50 p-6 rounded-[24px] border border-stone-100 relative z-10 shadow-inner group/fee">
+                {/* Fee + AI Credits selector block */}
+                <div className="bg-stone-50 p-6 rounded-[24px] border border-stone-100 relative z-10 shadow-inner group/fee flex flex-col gap-6">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.3em] mb-1.5 ml-1">Commission Protocol</p>
@@ -163,6 +176,33 @@ export default function PartnerFeeClient({
                             </div>
                         </div>
                     </div>
+
+                    {p.type === 'studio' && (
+                        <div className="flex items-center justify-between pt-4 border-t border-stone-200/50">
+                            <div>
+                                <p className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.3em] mb-1.5 ml-1">AI Chat Credits</p>
+                                <p className="text-[9px] text-forest/60 font-bold uppercase tracking-widest ml-1">Usage: {p.ai_chat_usage ?? 0} / {p.ai_chat_limit ?? 50}</p>
+                            </div>
+                            <div className="relative">
+                                <select
+                                    value={p.ai_chat_limit}
+                                    onChange={e => handleSaveAICredits(trueIdx, e.target.value)}
+                                    className="px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest outline-none transition-all duration-300 border appearance-none pr-12 min-w-[100px] text-center bg-white border-stone-200 text-burgundy shadow-sm focus:ring-8 focus:ring-forest/5 focus:border-forest/20 group-hover/fee:border-forest/30"
+                                >
+                                    <option value="0">Disabled</option>
+                                    <option value="10">10 msgs</option>
+                                    <option value="50">50 msgs</option>
+                                    <option value="100">100 msgs</option>
+                                    <option value="250">250 msgs</option>
+                                    <option value="500">500 msgs</option>
+                                    <option value="1000">1000 msgs</option>
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-forest/40">
+                                    <ChevronDown className="w-4 h-4" />
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Documents section */}

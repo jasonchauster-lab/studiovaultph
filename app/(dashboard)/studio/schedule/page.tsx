@@ -1,10 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getManilaTodayStr, toManilaDateStr } from '@/lib/timezone'
+import { getManilaTodayStr } from '@/lib/timezone'
 import StudioScheduleCalendar from '@/components/dashboard/StudioScheduleCalendar'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
-import { startOfWeek, endOfWeek, addWeeks, format } from 'date-fns'
+import { ArrowLeft, Calendar as CalendarIcon } from 'lucide-react'
+import { startOfWeek, format, addWeeks } from 'date-fns'
+import BranchPageSelector from '@/components/dashboard/BranchPageSelector'
+import { getCachedStudio, getCachedUser } from '@/lib/studio/data'
+import { ScheduleService } from '@/lib/services/schedule'
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
 
@@ -12,52 +15,43 @@ export default async function StudioSchedulePage(props: {
     searchParams: SearchParams
 }) {
     const searchParams = await props.searchParams
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
+    const outletId = typeof searchParams.outletId === 'string' ? searchParams.outletId : undefined
+    
+    const user = await getCachedUser()
     if (!user) redirect('/login')
+    const supabase = await createClient()
 
-    // Fetch user's studio
-    const { data: studios } = await supabase
-        .from('studios')
-        .select('*')
-        .eq('owner_id', user.id)
-
-    const myStudio = studios?.[0]
-    if (!myStudio) redirect('/studio')
+    // 1. Fetch User's Studio (Handles both owner and staff)
+    const studio = await getCachedStudio()
+    if (!studio) redirect('/studio')
 
     const dateParam = typeof searchParams.date === 'string' ? searchParams.date : getManilaTodayStr()
     const [year, month, day] = dateParam.split('-').map(Number)
     const currentDate = new Date(year, month - 1, day)
 
-    const windowStart = addWeeks(currentDate, -4)
-    const windowEnd = addWeeks(currentDate, 12)
+    const windowStart = addWeeks(currentDate, -1)
+    const windowEnd = addWeeks(currentDate, 4)
     const windowStartStr = format(windowStart, 'yyyy-MM-dd')
     const windowEndStr = format(windowEnd, 'yyyy-MM-dd')
 
-    // Fetch slots within window
-    const { data: slots } = await supabase
-        .from('slots')
-        .select(`
-            *,
-            bookings(
-                id, 
-                status, 
-                created_at, 
-                updated_at, 
-                equipment, 
-                quantity, 
-                price_breakdown,
-                client:profiles!client_id(full_name, avatar_url),
-                instructor:profiles!instructor_id(full_name, avatar_url)
-            )
-        `)
-        .eq('studio_id', myStudio.id)
-        .gte('date', windowStartStr)
-        .lte('date', windowEndStr)
+    // 2. Fetch Centralized Schedule Context
+    const {
+        slots,
+        outlets,
+        services,
+        staffMembers,
+        packagesCount,
+        membershipsCount
+    } = await ScheduleService.getScheduleContext(studio.id, {
+        outletId,
+        windowStart: windowStartStr,
+        windowEnd: windowEndStr
+    })
 
-    // Calculate dayStrings for the current week (StudioScheduleCalendar might use it)
+    const activeOutlet = outletId ? outlets?.find((o: any) => o.id === outletId) : null
+    const instructors = ScheduleService.getInstructorsList(studio, staffMembers)
     const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
+
     const dayStrings: string[] = []
     for (let i = 0; i < 7; i++) {
         const d = new Date(weekStart)
@@ -66,31 +60,53 @@ export default async function StudioSchedulePage(props: {
     }
 
     return (
-        <div className="min-h-screen p-8 lg:p-12 bg-cream-50/30">
-            <div className="max-w-7xl mx-auto space-y-12">
+        <div className="min-h-screen p-8 lg:p-12 bg-zinc-50/50">
+            <div className="max-w-7xl mx-auto space-y-8">
                 <div>
                     <Link
-                        href="/studio"
-                        className="inline-flex items-center gap-3 text-[10px] font-black text-charcoal/50 hover:text-forest uppercase tracking-[0.3em] transition-all mb-8 group"
+                        href={outletId ? `/studio?outletId=${outletId}` : '/studio'}
+                        className="inline-flex items-center gap-3 text-[10px] font-black text-zinc-400 hover:text-indigo-600 uppercase tracking-[0.3em] transition-all mb-8 group"
                     >
                         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                         BACK TO DASHBOARD
                     </Link>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl sm:text-5xl font-serif text-charcoal tracking-tighter mb-4">Studio Schedule</h1>
-                            <p className="text-[10px] font-black text-charcoal/50 uppercase tracking-[0.4em]">Manage slots, instructors, and equipment availability.</p>
+                    
+                    <div className="text-center mb-12">
+                        <div className="inline-flex items-center gap-3 px-4 py-2 bg-white rounded-2xl border border-zinc-100 shadow-sm mb-6">
+                            <CalendarIcon className="w-4 h-4 text-indigo-600" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Schedule Management</span>
+                        </div>
+                        <h1 className="text-4xl md:text-6xl font-black text-zinc-900 tracking-tightest leading-tight">
+                            Studio <span className="text-zinc-300">Calendar</span>
+                        </h1>
+                        
+                        <div className="mt-8 flex justify-center">
+                            <BranchPageSelector 
+                                outlets={outlets || []} 
+                                currentOutletId={outletId}
+                                isGlobalAllowed={true}
+                            />
                         </div>
                     </div>
                 </div>
 
-                <div className="overflow-hidden rounded-[2.5rem] shadow-cloud border border-white/60 bg-white">
+                <div className="overflow-hidden rounded-[2.5rem] shadow-xl shadow-zinc-200/50 border border-zinc-100 bg-white">
                     <StudioScheduleCalendar
-                        studioId={myStudio.id}
+                        studioId={studio.id}
+                        outletId={outletId}
+                        outlets={outlets || []}
                         slots={slots || []}
                         currentDate={currentDate}
                         dayStrings={dayStrings}
-                        availableEquipment={myStudio.equipment || []}
+                        availableEquipment={studio.equipment || []}
+                        inventory={(studio.inventory as any) || {}}
+                        services={services || []}
+                        instructors={instructors}
+                        packagesCount={packagesCount || 0}
+                        membershipsCount={membershipsCount || 0}
+                        openingTime={activeOutlet?.opening_time || studio.opening_time || '06:00:00'}
+                        closingTime={activeOutlet?.closing_time || studio.closing_time || '22:00:00'}
+                        marketplaceStatus={studio.marketplace_status}
                     />
                 </div>
             </div>

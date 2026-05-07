@@ -1,7 +1,18 @@
-import { createAdminClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { getAdminAnalytics } from '../actions'
 
 export default async function AdminDebugPage() {
+    const publicSupabase = await createClient()
+    const { data: { user } } = await publicSupabase.auth.getUser()
+    
+    if (!user) redirect('/login')
+
+    const { data: profile } = await publicSupabase.from('profiles').select('role').eq('id', user.id).single()
+    if (profile?.role !== 'admin') {
+        redirect('/studio')
+    }
+
     const supabase = createAdminClient()
     const diagnostics: any = {}
 

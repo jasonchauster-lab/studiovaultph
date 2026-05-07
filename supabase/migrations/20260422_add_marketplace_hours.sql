@@ -1,0 +1,1 @@
+ALTER TABLE public.outlets ADD COLUMN IF NOT EXISTS marketplace_available_from TIME DEFAULT NULL; ALTER TABLE public.outlets ADD COLUMN IF NOT EXISTS marketplace_available_to TIME DEFAULT NULL;

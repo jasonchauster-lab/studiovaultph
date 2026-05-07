@@ -6,11 +6,13 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function sendEmail({
     to,
     subject,
-    react
+    react,
+    fromName
 }: {
     to: string | string[];
     subject: string;
     react: React.ReactElement;
+    fromName?: string;
 }) {
     if (!process.env.RESEND_API_KEY) {
         console.warn('RESEND_API_KEY is missing. Email not sent.');
@@ -20,7 +22,8 @@ export async function sendEmail({
     try {
         const emailHtml = await render(react);
 
-        const fromAddress = 'Studio Vault PH <bookings@studiovaultph.com>';
+        const name = fromName || 'Studio Vault PH';
+        const fromAddress = `${name} <bookings@studiovaultph.com>`;
         console.log(`Attempting to send email FROM: ${fromAddress} TO: ${to} with subject: ${subject}`);
         const data = await resend.emails.send({
             from: fromAddress, // Validated domain

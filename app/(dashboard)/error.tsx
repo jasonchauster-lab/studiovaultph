@@ -21,6 +21,16 @@ export default function DashboardError({
             </div>
 
             <h2 className="text-2xl font-bold font-lexend text-charcoal mb-3">Unable to load dashboard data</h2>
+            <div className="bg-red-50 p-4 rounded-lg mb-6 max-w-lg w-full overflow-auto">
+                <p className="text-red-700 font-mono text-sm break-all">
+                    {error.message || 'Unknown error'}
+                </p>
+                {error.digest && (
+                    <p className="text-red-500 font-mono text-xs mt-2">
+                        Digest: {error.digest}
+                    </p>
+                )}
+            </div>
             <p className="text-slate text-center max-w-sm mb-8 leading-relaxed">
                 We're having trouble retrieving the information for this page.
                 Your connection might be unstable.

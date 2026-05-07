@@ -40,6 +40,7 @@ type Transaction = {
     platform_fee: number
     studio_fee: number
     instructor_fee: number
+    origin: string
 }
 
 const ACTION_CATEGORIES: Record<string, string> = {
@@ -113,6 +114,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
     const [dateTo, setDateTo] = useState('')
     const [page, setPage] = useState(1)
     const [expandedId, setExpandedId] = useState<string | null>(null)
+    const [originFilter, setOriginFilter] = useState('all')
 
     // ── Stats (computed from all logs, before filters) ──────────────────────
     const now = new Date()
@@ -180,6 +182,8 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                 if (new Date(t.date) > to) return false
             }
 
+            if (originFilter !== 'all' && t.origin !== originFilter) return false
+
             if (search) {
                 const q = search.toLowerCase()
                 return (
@@ -187,13 +191,14 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                     t.client_email.toLowerCase().includes(q) ||
                     t.studio.toLowerCase().includes(q) ||
                     t.instructor.toLowerCase().includes(q) ||
-                    t.type.toLowerCase().includes(q)
+                    t.type.toLowerCase().includes(q) ||
+                    t.origin.toLowerCase().includes(q)
                 )
             }
 
             return true
         })
-    }, [transactions, search, txTypeFilter, dateFrom, dateTo])
+    }, [transactions, search, txTypeFilter, originFilter, dateFrom, dateTo])
 
     const currentDisplayData = activeSubtab === 'activity' ? filteredLogs : filteredTransactions
     const totalPages = Math.max(1, Math.ceil(currentDisplayData.length / PAGE_SIZE))
@@ -370,19 +375,31 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                             </select>
                         </>
                     ) : (
-                        <select
-                            value={txTypeFilter}
-                            onChange={e => { setTxTypeFilter(e.target.value); resetPage() }}
-                            className="text-[10px] font-black border border-cream-100 rounded-xl px-4 py-3 bg-white/60 text-charcoal focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer lg:col-span-2"
-                        >
-                            <option value="all">ALL TRANSACTION TYPES</option>
-                            <option value="Booking">SESSIONS & RENTALS</option>
-                            <option value="Top-up">WALLET TOP-UPS</option>
-                            <option value="Payout">PARTNER PAYOUTS</option>
-                            <option value="Platform Fees">PLATFORM REVENUE ONLY</option>
-                            <option value="Studio Share">STUDIO DISBURSEMENTS</option>
-                            <option value="Instructor Share">INSTRUCTOR DISBURSEMENTS</option>
-                        </select>
+                        <>
+                            <select
+                                value={txTypeFilter}
+                                onChange={e => { setTxTypeFilter(e.target.value); resetPage() }}
+                                className="text-[10px] font-black border border-cream-100 rounded-xl px-4 py-3 bg-white/60 text-charcoal focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer lg:col-span-2"
+                            >
+                                <option value="all">ALL TRANSACTION TYPES</option>
+                                <option value="Booking">SESSIONS & RENTALS</option>
+                                <option value="Top-up">WALLET TOP-UPS</option>
+                                <option value="Payout">PARTNER PAYOUTS</option>
+                                <option value="Platform Fees">PLATFORM REVENUE ONLY</option>
+                                <option value="Studio Share">STUDIO DISBURSEMENTS</option>
+                                <option value="Instructor Share">INSTRUCTOR DISBURSEMENTS</option>
+                            </select>
+                            
+                            <select
+                                value={originFilter}
+                                onChange={e => { setOriginFilter(e.target.value); resetPage() }}
+                                className="text-[10px] font-black border border-cream-100 rounded-xl px-4 py-3 bg-white/60 text-charcoal focus:bg-white focus:outline-none tracking-widest uppercase cursor-pointer"
+                            >
+                                <option value="all">ALL ORIGINS</option>
+                                <option value="marketplace">MARKETPLACE ONLY</option>
+                                <option value="studio">STUDIO VAULT ONLY</option>
+                            </select>
+                        </>
                     )}
 
                     {/* Date range */}
@@ -440,6 +457,7 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                 ) : (
                                     <tr className="bg-stone-50/50 border-b border-stone-100 italic">
                                         <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">TIMESTAMP</th>
+                                        <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">ORIGIN</th>
                                         <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">TYPE</th>
                                         <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">PARTICIPANTS</th>
                                         <th className="px-8 py-5 text-[9px] font-black text-burgundy/40 uppercase tracking-[0.2em]">TOTAL</th>
@@ -519,6 +537,14 @@ export default function ReportsTab({ logs, transactions = [] }: { logs: Log[], t
                                         <tr key={tx.id} className="hover:bg-sage/5 transition-colors group">
                                             <td className="px-8 py-6 text-[10px] font-bold text-charcoal/60 whitespace-nowrap">
                                                 {safeFormatDate(tx.date)}
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <span className={clsx(
+                                                    "inline-flex px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border",
+                                                    tx.origin === 'studio' ? "bg-amber-50 text-amber-700 border-amber-100" : "bg-green-50 text-green-700 border-green-100"
+                                                )}>
+                                                    {tx.origin === 'studio' ? 'STUDIO VAULT' : 'MARKETPLACE'}
+                                                </span>
                                             </td>
                                             <td className="px-8 py-6">
                                                 <span className={clsx(

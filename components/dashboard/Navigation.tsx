@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Home, Search, Calendar, DollarSign, Box, History, ShieldCheck, User, LogOut, LayoutDashboard, Wallet, ArrowUpRight, Menu, X, Users, Gift, Building2 } from 'lucide-react'
 import clsx from 'clsx'
 import SupportNotificationBadge from '@/components/admin/SupportNotificationBadge'
-import { signOut } from '@/app/auth/actions'
+import { signOut } from '@/app/(marketplace)/auth/actions'
 
 interface NavigationProps {
     role?: string;
@@ -169,6 +169,16 @@ export default function Navigation({ role }: NavigationProps) {
                             </Link>
                         </>
                     )}
+                    <div className="h-px w-full md:h-4 md:w-px bg-border-grey my-1 md:my-0 md:mx-2 hidden md:block" />
+                    <form action={signOut} className="hidden md:block">
+                        <button 
+                            type="submit"
+                            className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-red-600 hover:text-red-700 transition-colors py-2"
+                        >
+                            <LogOut className="w-3.5 h-3.5" />
+                            Log Out
+                        </button>
+                    </form>
                 </>
             )}
 
@@ -213,3 +223,4 @@ export default function Navigation({ role }: NavigationProps) {
         </>
     )
 }
+

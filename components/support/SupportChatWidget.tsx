@@ -7,8 +7,26 @@ import { SupportMessage, SupportTicket } from '@/types'
 import { createTicket, sendMessage } from '@/app/(dashboard)/support/actions'
 import clsx from 'clsx'
 
-export default function SupportChatWidget({ userId }: { userId: string }) {
-    const [isOpen, setIsOpen] = useState(false)
+export default function SupportChatWidget({ 
+    userId, 
+    hideFloatingButton = false, 
+    hideHeader = false,
+    externalOpen, 
+    onToggle 
+}: { 
+    userId: string, 
+    hideFloatingButton?: boolean, 
+    hideHeader?: boolean,
+    externalOpen?: boolean, 
+    onToggle?: (open: boolean) => void 
+}) {
+    const [internalOpen, setInternalOpen] = useState(false)
+    const isOpen = externalOpen !== undefined ? externalOpen : internalOpen
+
+    const toggleOpen = (val: boolean) => {
+        if (onToggle) onToggle(val)
+        else setInternalOpen(val)
+    }
     const [ticket, setTicket] = useState<SupportTicket | null>(null)
     const [messages, setMessages] = useState<SupportMessage[]>([])
     const [inputValue, setInputValue] = useState('')
@@ -33,9 +51,24 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
     useEffect(() => {
         const fetchUnreadCount = async () => {
             if (!userId) return;
+            
+            // Get user's tickets first to ensure we only count messages belonging to them
+            const { data: userTickets } = await supabase
+                .from('support_tickets')
+                .select('id')
+                .eq('user_id', userId);
+            
+            if (!userTickets || userTickets.length === 0) {
+                setUnreadCount(0);
+                return;
+            }
+
+            const ticketIds = userTickets.map(t => t.id);
+
             const { count } = await supabase
                 .from('support_messages')
                 .select('*', { count: 'exact', head: true })
+                .in('ticket_id', ticketIds)
                 .eq('is_read', false)
                 .neq('sender_id', userId)
 
@@ -47,7 +80,12 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
 
     // 1. Fetch/Find active ticket when opening
     useEffect(() => {
-        if (!isOpen || ticket) return
+        if (!isOpen) return
+        if (ticket) {
+            // If we already have a ticket and just re-opened, reset unread count
+            setUnreadCount(0)
+            return
+        }
 
         async function findTicket() {
             setIsLoading(true)
@@ -69,7 +107,7 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
 
     // 2. Sync messages and setup realtime when ticket exists
     useEffect(() => {
-        if (!ticket?.id) return
+        if (!ticket?.id || !isOpen) return
         const ticketId = ticket.id
 
         async function syncMessages() {
@@ -112,6 +150,7 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
 
                     if (newMsg.sender_id !== userId) {
                         import('@/app/(dashboard)/support/actions').then(m => m.markMessagesAsRead(ticketId))
+                        setUnreadCount(0)
                     }
                 }
             )
@@ -120,7 +159,7 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [ticket?.id, userId, supabase])
+    }, [ticket?.id, userId, supabase, isOpen])
 
     const handleSend = async () => {
         if (!inputValue.trim()) return
@@ -183,12 +222,19 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
     }
 
     return (
-        <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end pointer-events-none">
+        <div className={clsx(
+            hideFloatingButton ? "relative w-full h-full" : "fixed bottom-8 right-8 z-[100] items-end",
+            "flex flex-col pointer-events-none"
+        )}>
             {/* Chat Window */}
             {isOpen && (
-                <div className="mb-6 w-80 sm:w-96 h-[500px] bg-white rounded-xl shadow-2xl border border-border-grey flex flex-col pointer-events-auto overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-300">
+                <div className={clsx(
+                    hideFloatingButton ? "flex-1 w-full h-full" : "mb-6 w-80 sm:w-96 h-[500px] rounded-xl shadow-2xl border border-border-grey",
+                    "bg-white flex flex-col pointer-events-auto overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-300"
+                )}>
                     {/* Header */}
-                    <div className="bg-charcoal p-6 flex justify-between items-center border-b border-white/10">
+                    {!hideHeader && (
+                        <div className="bg-charcoal p-6 flex justify-between items-center border-b border-white/10">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-forest rounded-lg flex items-center justify-center shadow-tight">
                                 <MessageCircle className="w-5 h-5 text-white" />
@@ -202,13 +248,14 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
                             </div>
                         </div>
                         <button
-                            onClick={() => setIsOpen(false)}
+                            onClick={() => toggleOpen(false)}
                             className="p-2 text-white/80 hover:text-white transition-colors rounded-lg hover:bg-white/5"
                             aria-label="Close Support Portal"
                         >
                             <X className="w-5 h-5" />
                         </button>
                     </div>
+                    )}
 
                     {/* Messages Area */}
                     <div className="flex-1 overflow-y-auto p-6 bg-off-white space-y-6">
@@ -272,21 +319,23 @@ export default function SupportChatWidget({ userId }: { userId: string }) {
             )}
 
             {/* Floating Button */}
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                aria-label={isOpen ? "Close Support Chat" : "Open Support Chat"}
-                aria-expanded={isOpen}
-                aria-haspopup="true"
-                className="w-16 h-16 bg-forest text-white rounded-lg shadow-card hover:brightness-110 transition-all active:scale-95 flex items-center justify-center pointer-events-auto relative border border-white/10"
-            >
-                {isOpen ? <X className="w-7 h-7" /> : <MessageCircle className="w-7 h-7" />}
-                {!isOpen && unreadCount > 0 && (
-                    <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-lg bg-forest border-2 border-white text-[10px] font-bold text-white shadow-tight">
-                        <span className="sr-only">New messages: </span>
-                        {unreadCount > 99 ? '99+' : unreadCount}
-                    </span>
-                )}
-            </button>
+            {!hideFloatingButton && (
+                <button
+                    onClick={() => toggleOpen(!isOpen)}
+                    aria-label={isOpen ? "Close Support Chat" : "Open Support Chat"}
+                    aria-expanded={isOpen}
+                    aria-haspopup="true"
+                    className="w-16 h-16 bg-forest text-white rounded-lg shadow-card hover:brightness-110 transition-all active:scale-95 flex items-center justify-center pointer-events-auto relative border border-white/10"
+                >
+                    {isOpen ? <X className="w-7 h-7" /> : <MessageCircle className="w-7 h-7" />}
+                    {!isOpen && unreadCount > 0 && (
+                        <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-lg bg-forest border-2 border-white text-[10px] font-bold text-white shadow-tight">
+                            <span className="sr-only">New messages: </span>
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                    )}
+                </button>
+            )}
         </div>
     )
 }

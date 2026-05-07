@@ -1,4 +1,5 @@
 import { createClient } from './supabase/server'
+import { fulfillStudioReferral } from './actions/referral'
 
 /**
  * Moves calculated earnings from a completed booking into the pending_balance 
@@ -18,6 +19,18 @@ export async function processBookingCompletion(bookingId: string) {
 
     if (!success) {
         return { error: 'Booking not eligible for completion.' }
+    }
+
+    // 1. Get booking details for referral processing
+    const { data: booking } = await supabase
+        .from('bookings')
+        .select('client_id, studio_id')
+        .eq('id', bookingId)
+        .single()
+
+    if (booking) {
+        // 2. Process any pending studio-specific referral reward
+        await fulfillStudioReferral(booking.client_id, booking.studio_id)
     }
 
     return { success: true }
@@ -42,13 +55,17 @@ export async function unlockMaturedFunds() {
 
     if (error || !maturedBookings) return { count: 0 }
 
-    // Parallelize RPC calls — no ordering dependency between individual unlocks.
-    const results = await Promise.all(
-        maturedBookings.map(b =>
-            supabase.rpc('unlock_booking_funds_atomic', { target_booking_id: b.id })
+    // Parallelize RPC calls in chunks to avoid connection exhaustion
+    const CHUNK_SIZE = 25
+    let count = 0
+    
+    for (let i = 0; i < maturedBookings.length; i += CHUNK_SIZE) {
+        const chunk = maturedBookings.slice(i, i + CHUNK_SIZE)
+        const results = await Promise.all(
+            chunk.map(b => supabase.rpc('unlock_booking_funds_atomic', { target_booking_id: b.id }))
         )
-    )
-    const count = results.filter(r => r.data === true).length
+        count += results.filter(r => r.data === true).length
+    }
 
     return { count }
 }
@@ -116,19 +133,21 @@ export async function autoCompleteBookings() {
         return slotDate <= cutoffTime;
     });
 
-    if (toComplete.length === 0) {
-        return { count: 0 }
+    const CHUNK_SIZE = 25
+    let completedCount = 0
+
+    for (let i = 0; i < toComplete.length; i += CHUNK_SIZE) {
+        const chunk = toComplete.slice(i, i + CHUNK_SIZE)
+        const results = await Promise.all(chunk.map(async b => {
+            if (b.status === 'cancelled_charged') {
+                return processInstantPayout(b.id)
+            } else {
+                return processBookingCompletion(b.id)
+            }
+        }))
+        completedCount += results.filter(r => r.success).length
     }
 
-    const results = await Promise.all(toComplete.map(async b => {
-        if (b.status === 'cancelled_charged') {
-            return processInstantPayout(b.id)
-        } else {
-            return processBookingCompletion(b.id)
-        }
-    }))
-
-    const completedCount = results.filter(r => r.success).length
     return { count: completedCount }
 }
 

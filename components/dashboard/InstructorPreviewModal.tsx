@@ -20,7 +20,7 @@ const InstructorPreviewModal = ({ instructor, details, loading, onClose }: Instr
 
     return (
         <div 
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-charcoal/40 backdrop-blur-[2px] animate-in fade-in duration-300" 
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-charcoal/60 animate-in fade-in duration-300" 
             onClick={onClose}
         >
             <div 
@@ -164,7 +164,7 @@ const InstructorPreviewModal = ({ instructor, details, loading, onClose }: Instr
                     )}
                 </div>
 
-                <div className="p-5 border-t border-charcoal/5 flex bg-off-white/50 backdrop-blur-md">
+                <div className="p-5 border-t border-charcoal/5 flex bg-off-white">
                     <button
                         onClick={onClose}
                         className="w-full py-4 bg-forest text-white rounded-xl text-[10px] font-black uppercase tracking-[0.4em] hover:brightness-110 transition-all shadow-md active:scale-95"

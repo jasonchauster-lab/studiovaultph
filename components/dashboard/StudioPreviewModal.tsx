@@ -29,7 +29,7 @@ const StudioPreviewModal = ({ studio, details, loading, onClose }: StudioPreview
 
     return (
         <div 
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-charcoal/40 backdrop-blur-[2px] animate-in fade-in duration-300" 
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-charcoal/60 animate-in fade-in duration-300" 
             onClick={onClose}
         >
             <div 
@@ -179,7 +179,7 @@ const StudioPreviewModal = ({ studio, details, loading, onClose }: StudioPreview
                     )}
                 </div>
 
-                <div className="p-5 border-t border-charcoal/5 flex gap-3 bg-off-white/50 backdrop-blur-md">
+                <div className="p-5 border-t border-charcoal/5 flex gap-3 bg-off-white">
                     <Link
                         href={`/studios/${studio.id}`}
                         target="_blank"

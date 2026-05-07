@@ -482,8 +482,8 @@ export default function InstructorBookingWizard({
                         </div>
 
                         <div className="grid grid-cols-7 gap-2 mb-4">
-                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
-                                <div key={d} className="text-center text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em]">
+                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, idx) => (
+                                <div key={`${d}-${idx}`} className="text-center text-[10px] font-bold text-charcoal/50 uppercase tracking-[0.2em]">
                                     {d}
                                 </div>
                             ))}

@@ -1,10 +1,11 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { ROLES, canAccessStudioPortal, isCustomer, isInstructor, isStudio, isAdmin } from '@/lib/auth/roles'
 
-export async function updateSession(request: NextRequest) {
+export async function updateSession(request: NextRequest, customHeaders?: Headers) {
     let response = NextResponse.next({
         request: {
-            headers: request.headers,
+            headers: customHeaders || request.headers,
         },
     })
 
@@ -20,15 +21,16 @@ export async function updateSession(request: NextRequest) {
                 },
                 setAll(cookiesToSet) {
                     cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-                    response = NextResponse.next({
+                    const newResponse = NextResponse.next({
                         request: {
-                            headers: request.headers,
+                            headers: customHeaders || request.headers,
                         },
                     })
+                    // Copy existing cookies from old response
+                    response.cookies.getAll().forEach(c => newResponse.cookies.set(c.name, c.value, c))
+                    response = newResponse
 
                     // We need to decide whether to extend the session lifetime.
-                    // If we have a userId, we check for a user-specific cookie.
-                    // If we don't have it yet (e.g. initial login), we fall back to a generic one.
                     const genericRememberMe = request.cookies.get('remember_me')?.value === '1'
                     
                     cookiesToSet.forEach(({ name, value, options }) => {
@@ -52,33 +54,46 @@ export async function updateSession(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     userId = user?.id
 
-    // ── Diagnostic Logging (Server-side) ──────────────────────────────
+    // ── Role & Identity Fetching ──────────────────────────────────
+    let role = user?.user_metadata?.role;
+    let originPortal = user?.user_metadata?.origin_portal;
+
+    if (user && (!role || !originPortal)) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role, origin_portal')
+            .eq('id', user.id)
+            .single()
+        
+        if (profile) {
+            role = profile.role;
+            originPortal = profile.origin_portal;
+        }
+    }
+
     const path = request.nextUrl.pathname
     const otpCookie = userId ? request.cookies.get(`otp_rem_${userId.toLowerCase()}`)?.value : null
-    
-    // Robust OAuth check: check singular provider OR plural providers list
     const isOAuth = (user?.app_metadata?.provider && user.app_metadata.provider !== 'email') ||
                     (user?.app_metadata?.providers?.some((p: string) => p !== 'email'))
     
-    const isVerified = user && (isOAuth || otpCookie === '1' || otpCookie?.toLowerCase() === userId?.toLowerCase())
+    const isVerified = user && (isOAuth || otpCookie === '1')
 
     if (user && !path.startsWith('/_next') && !path.startsWith('/favicon.ico')) {
-        console.log(`[Middleware] Path: ${path} | User: ${userId} | OTP Cookie: ${otpCookie || 'MISSING'} | Verified: ${isVerified}`)
+        const hostname = request.headers.get('host') || ''
+        console.log(`[Middleware] Path: ${path} | Host: ${hostname} | User: ${userId} | Verified: ${isVerified} | Role: ${role} | Origin: ${originPortal}`)
     }
 
     // Protected Routes Logic
     if (
-        !request.nextUrl.pathname.startsWith('/auth') &&
-        !request.nextUrl.pathname.startsWith('/register') &&
-        !request.nextUrl.pathname.startsWith('/verified') && // Allow verification success page
-        !request.nextUrl.pathname.startsWith('/_next') && // Next.js internals
-        !request.nextUrl.pathname.startsWith('/favicon.ico') && // Static asset
-        request.nextUrl.pathname !== '/' // Landing page
+        !path.startsWith('/auth') &&
+        !path.startsWith('/register') &&
+        !path.startsWith('/verified') &&
+        !path.startsWith('/_next') &&
+        !path.startsWith('/favicon.ico') &&
+        path !== '/'
     ) {
         // ── 2FA Enforcement ──────────────────────────────────────────────
-        // If they have a session but aren't remembered on this device/browser,
-        // force them to /login (where they will land on the OTP step).
-        if (user && !request.nextUrl.pathname.startsWith('/login')) {
+        if (user && !path.startsWith('/login')) {
             if (!isVerified) {
                 const url = request.nextUrl.clone()
                 url.pathname = '/login'
@@ -87,72 +102,146 @@ export async function updateSession(request: NextRequest) {
         }
 
         // 1. If user IS logged in but hitting /login, redirect to dashboard
-        if (user && request.nextUrl.pathname.startsWith('/login')) {
-            // Skip redirect if they still need 2FA
+        if (user && path.startsWith('/login')) {
             if (isVerified) {
-                let role = user.user_metadata?.role;
-                if (!role) {
-                    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-                    role = profile?.role;
+                const hostname = request.headers.get('host') || ''
+                const isStudioDomain = ['studiovault.co', 'studiovault.local'].some(d => hostname.includes(d))
+                const targetPath = getDashboard(role, isStudioDomain);
+                if (path !== targetPath) {
+                    const url = request.nextUrl.clone()
+                    url.pathname = targetPath;
+                    return mergeResponseCookies(response, NextResponse.redirect(url))
                 }
-                const url = request.nextUrl.clone()
-                url.pathname = getDashboard(role);
-                return mergeResponseCookies(response, NextResponse.redirect(url))
             }
         }
 
         // 2. Enforce Login for protected areas
         if (!user) {
             const protectedPrefixes = ['/instructor', '/studio', '/admin', '/customer', '/welcome', '/instructors', '/studios'];
-            if (protectedPrefixes.some(prefix => request.nextUrl.pathname.startsWith(prefix))) {
+            if (protectedPrefixes.some(prefix => path.startsWith(prefix))) {
                 const url = request.nextUrl.clone()
                 url.pathname = '/login'
                 return mergeResponseCookies(response, NextResponse.redirect(url))
             }
         } else {
-            // 2. Enforce Role Locking (User is logged in)
+            const hostname = request.headers.get('host') || ''
+            const isStudioDomain = ['studiovault.co', 'studiovault.local'].some(d => hostname.includes(d))
 
-            let role = user.user_metadata?.role;
-            if (!role) {
-                const { data: profile } = await supabase
+            // ── IDENTITY FIREWALL ──
+            const isStorefrontPath = path.startsWith('/s/')
+            if (isStudioDomain && !isStorefrontPath && originPortal === 'marketplace' && (isCustomer(role) || isInstructor(role))) {
+                const { data: fullProfile } = await supabase
                     .from('profiles')
-                    .select('role')
+                    .select('first_name, contact_number, waiver_signed_at')
                     .eq('id', user.id)
-                    .single()
-                role = profile?.role;
+                    .maybeSingle()
+
+                const isIncomplete = !fullProfile?.first_name || !fullProfile?.contact_number
+                const hasNoWaiver = !fullProfile?.waiver_signed_at
+                const isOnboardingPath = path.includes('/onboarding') || path === '/identity-conflict'
+
+                if ((isIncomplete || hasNoWaiver) && !isOnboardingPath) {
+                    const lastStudioSlug = request.cookies.get('last_studio_slug')?.value || 'clubpilatesph'
+                    const target = isIncomplete 
+                        ? `/customer/onboarding?slug=${lastStudioSlug}`
+                        : `/s/${lastStudioSlug}/onboarding/waiver`
+
+                    const url = request.nextUrl.clone()
+                    url.pathname = target.split('?')[0]
+                    if (target.includes('?')) {
+                        const params = new URLSearchParams(target.split('?')[1])
+                        params.forEach((v, k) => url.searchParams.set(k, v))
+                    }
+                    return mergeResponseCookies(response, NextResponse.redirect(url))
+                }
+
+                if (originPortal === 'marketplace' && !path.startsWith('/customer')) {
+                    if (path !== '/identity-conflict') {
+                        const url = request.nextUrl.clone()
+                        url.pathname = '/identity-conflict'
+                        return mergeResponseCookies(response, NextResponse.redirect(url))
+                    }
+                }
             }
 
-            // A. No Role -> Force Welcome/Onboarding
-            if (!role) {
-                if (!path.startsWith('/welcome') && !path.startsWith('/api')) {
+            if (!role || (isStudioDomain && isStudio(role))) {
+                let hasStudio = false;
+                if (isStudio(role) && isStudioDomain) {
+                    const { data: studio } = await supabase
+                        .from('studios')
+                        .select('id')
+                        .eq('owner_id', user.id)
+                        .maybeSingle()
+                    hasStudio = !!studio;
+                }
+
+                if (!role || (isStudioDomain && isStudio(role) && !hasStudio)) {
+                    const systemPrefixes = ['/welcome', '/studio', '/admin', '/customer', '/instructor', '/api', '/auth', '/login']
+                    if (!systemPrefixes.some(prefix => path.startsWith(prefix))) {
+                        const url = request.nextUrl.clone()
+                        url.pathname = '/welcome'
+                        return mergeResponseCookies(response, NextResponse.redirect(url))
+                    }
+                }
+            }
+
+            if (path.startsWith('/welcome')) {
+                if (isStudioDomain && role && !isAdmin(role)) {
+                    const { data: studio } = await supabase.from('studios').select('id').eq('owner_id', user.id).maybeSingle()
+                    if (!studio) return response
+                }
+
+                const targetDashboard = getDashboard(role, isStudioDomain)
+                if (path !== targetDashboard) {
                     const url = request.nextUrl.clone()
-                    url.pathname = '/welcome'
+                    url.pathname = targetDashboard
                     return mergeResponseCookies(response, NextResponse.redirect(url))
                 }
             }
-            // B. Check Restrictions based on Role
-            else {
-                if (path.startsWith('/welcome')) {
+
+            if (isStudioDomain) {
+                const isPublicStorefrontPath = path.startsWith('/s/')
+                const isStudioLandingPath = path === '/cms-home'
+                const isAuthPath = path.startsWith('/auth') || path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/identity-conflict')
+
+                if (isStudio(role) && !path.startsWith('/studio') && !isPublicStorefrontPath && !isStudioLandingPath) {
                     const url = request.nextUrl.clone()
-                    url.pathname = getDashboard(role);
+                    url.pathname = '/studio/website'
                     return mergeResponseCookies(response, NextResponse.redirect(url))
                 }
 
-                if (role === 'customer') {
-                    if (path.startsWith('/instructor/') || path === '/instructor' || path.startsWith('/studio/') || path === '/studio' || path.startsWith('/admin')) {
+                // Strictly block Instructors and Customers from CMS management area
+                if (!isPublicStorefrontPath && !isStudioLandingPath && !isAuthPath && !canAccessStudioPortal(role)) {
+                    const url = request.nextUrl.clone()
+                    url.pathname = '/identity-conflict'
+                    return mergeResponseCookies(response, NextResponse.redirect(url))
+                }
+            } else {
+                if (isCustomer(role)) {
+                    if (path.startsWith('/studio/') || path === '/studio' || path.startsWith('/admin')) {
+                        // Only block marketplace-originated customers
+                        if (originPortal === 'marketplace') {
+                            const url = request.nextUrl.clone()
+                            url.pathname = '/identity-conflict'
+                            return mergeResponseCookies(response, NextResponse.redirect(url))
+                        }
+                        // Otherwise allow (they might be a staff member with customer role? unlikely but safer)
+                    }
+                    if (path.startsWith('/instructor/') || path === '/instructor') {
                         const url = request.nextUrl.clone()
                         url.pathname = '/customer'
                         return mergeResponseCookies(response, NextResponse.redirect(url))
                     }
-                }
-                else if (role === 'instructor') {
+                } else if (isInstructor(role)) {
                     if (path.startsWith('/studio/') || path === '/studio' || path.startsWith('/admin')) {
-                        const url = request.nextUrl.clone()
-                        url.pathname = '/instructor'
-                        return mergeResponseCookies(response, NextResponse.redirect(url))
+                        // Only block marketplace-originated instructors
+                        if (originPortal === 'marketplace') {
+                            const url = request.nextUrl.clone()
+                            url.pathname = '/identity-conflict'
+                            return mergeResponseCookies(response, NextResponse.redirect(url))
+                        }
                     }
-                }
-                else if (role === 'studio') {
+                } else if (isStudio(role)) {
                     if (path.startsWith('/instructor/') || path === '/instructor' || path.startsWith('/admin')) {
                         const url = request.nextUrl.clone()
                         url.pathname = '/studio'
@@ -166,20 +255,29 @@ export async function updateSession(request: NextRequest) {
     return response
 }
 
-/**
- * Merges cookies from a source response into a destination response (e.g. a redirect).
- * This ensures that Supabase session refreshes are not lost during redirects.
- */
 function mergeResponseCookies(source: NextResponse, dest: NextResponse) {
     source.cookies.getAll().forEach(cookie => {
         const { name, value, ...options } = cookie
-        // @ts-ignore - options matches the expected shape but TS is strict about the exact interface
+        // @ts-ignore
         dest.cookies.set(name, value, options)
     })
     return dest
 }
 
-function getDashboard(role: string | undefined | null): string {
-    const map: Record<string, string> = { admin: '/admin', instructor: '/instructor', studio: '/studio', customer: '/customer' }
-    return map[role ?? ''] ?? '/welcome'
+function getDashboard(role: string | undefined | null, isStudioDomain: boolean = false): string {
+    if (isStudioDomain) {
+        // If they are a studio owner or admin, they can go to their dashboard.
+        // Otherwise, they are likely a customer/instructor from the marketplace and should see the identity conflict page.
+        if (canAccessStudioPortal(role)) {
+            return isAdmin(role) ? '/admin' : '/studio'
+        }
+        return '/identity-conflict'
+    }
+
+    if (isStudio(role)) return '/studio'
+    if (isInstructor(role)) return '/instructor'
+    if (isCustomer(role)) return '/customer'
+    if (isAdmin(role)) return '/admin'
+    
+    return '/welcome'
 }

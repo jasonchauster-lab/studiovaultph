@@ -16,6 +16,7 @@ interface Session {
     displayRatio?: string;
     displayTitle?: string;
     equipment?: string;
+    calendar_color?: string;
 }
 
 interface MobileScheduleCalendarProps {
@@ -51,9 +52,20 @@ export default function MobileScheduleCalendar({
         }), [weekStart]
     );
 
+    // OPTIMIZATION: Index sessions by date string for O(1) lookups
+    const sessionsByDate = useMemo(() => {
+        const map: Record<string, Session[]> = {};
+        initialSessions.forEach(s => {
+            if (!map[s.date]) map[s.date] = []
+            map[s.date].push(s)
+        })
+        return map
+    }, [initialSessions])
+
     // Filter and consolidate sessions for selected date
     const agendaSessions = useMemo(() => {
-        const filtered = initialSessions.filter(s => isSameDay(new Date(s.date), selectedDate));
+        const dateKey = format(selectedDate, 'yyyy-MM-dd')
+        const filtered = sessionsByDate[dateKey] || []
 
         // Group availability-only slots by time
         const consolidated: any[] = [];
@@ -89,7 +101,8 @@ export default function MobileScheduleCalendar({
 
     // Helper to check for dots
     const getDateStatus = (date: Date) => {
-        const dateSessions = initialSessions.filter(s => isSameDay(new Date(s.date), date));
+        const dateKey = format(date, 'yyyy-MM-dd')
+        const dateSessions = sessionsByDate[dateKey] || []
         if (dateSessions.length === 0) return null;
         const hasBooked = dateSessions.some(s => s.is_booked);
         const hasAvailable = dateSessions.some(s => !s.is_booked);
@@ -145,7 +158,7 @@ export default function MobileScheduleCalendar({
     return (
         <div className="flex flex-col h-full bg-off-white/50 font-sans antialiased text-charcoal">
             {/* Sticky Top Section: Weekly Strip */}
-            <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-border-grey/60 px-4 pt-5 pb-3 shadow-tight">
+            <div className="sticky top-0 z-50 bg-white border-b border-border-grey/60 px-4 pt-5 pb-3 shadow-tight">
                 <div className="flex items-center justify-between mb-4 sm:mb-5">
                     <div className="flex flex-col">
                         <h2 className="text-xl sm:text-2xl font-serif text-charcoal tracking-tightest leading-none">
@@ -153,7 +166,7 @@ export default function MobileScheduleCalendar({
                         </h2>
                         <p className="text-[9px] sm:text-[10px] font-black tracking-[0.3em] sm:tracking-[0.4em] text-charcoal/60 uppercase mt-1 sm:mt-2">Schedule View</p>
                     </div>
-                    <div className="flex bg-off-white/50 backdrop-blur-sm rounded-full p-0.5 border border-border-grey/60">
+                    <div className="flex bg-off-white rounded-full p-0.5 border border-border-grey/60">
                         <button
                             onClick={() => setSelectedDate(addDays(selectedDate, -7))}
                             className="p-1 sm:p-1.5 hover:bg-white rounded-full transition-all text-charcoal/40 hover:text-charcoal border border-transparent hover:border-border-grey hover:shadow-tight"
@@ -269,6 +282,9 @@ export default function MobileScheduleCalendar({
                                             ? "bg-[#1e4438] text-white border-white/20 shadow-md"
                                             : "bg-[#FDF6E3]/30 border-border-grey text-charcoal"
                                     )}
+                                    style={{ 
+                                        borderLeft: !session.is_booked && session.calendar_color ? `4px solid ${session.calendar_color}` : undefined 
+                                    }}
                                 >
                                     {session.is_booked && (
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none" />

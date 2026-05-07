@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { updateStudio } from '@/app/(dashboard)/studio/studio-actions'
-import { Loader2, Save, Camera, User, X, Upload, CheckCircle, AlertCircle } from 'lucide-react'
+import { Loader2, Save, Camera, User, X, Upload, CheckCircle, AlertCircle, Sparkles } from 'lucide-react'
 import clsx from 'clsx'
 import { STUDIO_AMENITIES } from '@/types'
 import { isValidPhone, phoneErrorMessage } from '@/lib/validation'
@@ -12,6 +12,8 @@ import { normalizeImageFile, uploadContentType } from '@/lib/utils/image-utils'
 import ImageCropper from '@/components/shared/ImageCropper'
 import { geocodeAddress, getAutocompleteSuggestions, resolveGoogleMapsUrl } from '@/lib/utils/location'
 import { MapPin, Search } from 'lucide-react'
+import { Field } from '@/components/ui/Field'
+import AIInputAssistant from '@/components/ai/AIInputAssistant'
 
 export default function StudioSettingsForm({ studio }: { studio: any }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -38,6 +40,10 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
     const [address, setAddress] = useState(studio.address || '')
     const [googleMapsUrl, setGoogleMapsUrl] = useState(studio.google_maps_url || '')
     const [isResolvingUrl, setIsResolvingUrl] = useState(false)
+    const [isPublic, setIsPublic] = useState(studio.is_public || false)
+
+    const [name, setName] = useState(studio.name || '')
+    const [bio, setBio] = useState(studio.bio || studio.description || '')
 
     // Autocomplete State
     const [suggestions, setSuggestions] = useState<string[]>([])
@@ -338,17 +344,29 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Studio Name</label>
+                    <Field 
+                        label="Studio Name"
+                        actions={
+                            <AIInputAssistant 
+                                fieldName="Studio Name"
+                                onApply={(val) => setName(val)}
+                                getContext={() => ({
+                                    title: name,
+                                    description: bio
+                                })}
+                            />
+                        }
+                    >
                         <input
                             type="text"
                             name="name"
-                            defaultValue={studio.name}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             required
                             placeholder="Enter studio name"
                             className="w-full px-5 py-3.5 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all placeholder:text-charcoal-300"
                         />
-                    </div>
+                    </Field>
                     <div className="space-y-1.5">
                         <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Location Area</label>
                         <div className="relative">
@@ -492,17 +510,29 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                             </p>
                         )}
                     </div>
-                    <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-charcoal-500 uppercase tracking-wider ml-1">Studio Bio / Description</label>
+                    <Field 
+                        label="Studio Bio / Description"
+                        actions={
+                            <AIInputAssistant 
+                                fieldName="Studio Bio"
+                                onApply={(val) => setBio(val)}
+                                getContext={() => ({
+                                    title: name,
+                                    description: bio
+                                })}
+                            />
+                        }
+                    >
                         <textarea
                             name="bio"
-                            defaultValue={studio.bio || studio.description || ''}
+                            value={bio}
+                            onChange={(e) => setBio(e.target.value)}
                             rows={4}
                             placeholder="Describe your vibe and nearby BGC/Makati landmarks..."
                             className="w-full px-5 py-3.5 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all resize-none placeholder:text-charcoal-300"
                         />
                         <p className="text-[10px] text-charcoal-400 mt-1 italic leading-relaxed">Help clients find you — mention landmarks, parking, and what makes your studio unique.</p>
-                    </div>
+                    </Field>
                 </div>
 
                 <div className="space-y-1.5">
@@ -518,6 +548,49 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                     />
                     <p className="text-[11px] text-charcoal-400 mt-1">Format: 09XXXXXXXXX or +639XXXXXXXXX (11 digits)</p>
                 </div>
+            </div>
+
+            {/* Marketplace Visibility */}
+            <div className="space-y-6 pt-4 border-t border-cream-200/60 transition-all duration-500">
+                <div className="flex flex-col gap-1 border-b border-cream-200/60 pb-3">
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-xl font-serif font-bold text-charcoal-900">Marketplace Visibility</h2>
+                        <div className="h-px flex-1 bg-cream-100/50" />
+                    </div>
+                    <p className="text-[10px] text-charcoal-400 font-medium uppercase tracking-wider">Control how your studio appears on the public directory.</p>
+                </div>
+
+                <div className={clsx(
+                    "p-6 rounded-2xl border transition-all duration-500",
+                    isPublic 
+                        ? "bg-forest/5 border-forest/20 shadow-sm" 
+                        : "bg-zinc-50 border-zinc-200 opacity-80"
+                )}>
+                    <div className="flex items-center justify-between gap-6">
+                        <div className="space-y-1.5">
+                            <h3 className="text-sm font-bold text-charcoal-900 flex items-center gap-2">
+                                {isPublic ? <Sparkles className="w-4 h-4 text-forest" /> : <X className="w-4 h-4 text-zinc-400" />}
+                                {isPublic ? 'Listed on Marketplace' : 'Hidden from Marketplace'}
+                            </h3>
+                            <p className="text-[11px] text-charcoal-500 max-w-lg leading-relaxed font-medium">
+                                {isPublic 
+                                    ? "Your studio is visible to the public. You must maintain valid compliance documents to remain listed."
+                                    : "Your studio is private. It won't appear in search results, and marketplace-specific document requirements are skipped."
+                                }
+                            </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                            <input 
+                                type="checkbox" 
+                                checked={isPublic} 
+                                onChange={(e) => setIsPublic(e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-14 h-7 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-[20px] after:w-[24px] after:transition-all peer-checked:bg-forest transition-all duration-300"></div>
+                        </label>
+                    </div>
+                </div>
+                <input type="hidden" name="is_public" value={isPublic.toString()} />
             </div>
 
             {/* Space Photos */}
@@ -641,9 +714,12 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
 
             {/* Equipment & Inventory */}
             <div className="space-y-6">
-                <div className="flex items-center gap-3 border-b border-cream-200/60 pb-3">
-                    <h2 className="text-xl font-serif font-bold text-charcoal-900">Equipment & Pricing</h2>
-                    <div className="h-px flex-1 bg-cream-100/50" />
+                <div className="flex flex-col gap-1 border-b border-cream-200/60 pb-3">
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-xl font-serif font-bold text-charcoal-900">Marketplace Rental Rates</h2>
+                        <div className="h-px flex-1 bg-cream-100/50" />
+                    </div>
+                    <p className="text-[10px] text-charcoal-400 font-medium uppercase tracking-wider">Set the hourly rates for independent instructors or customers renting your space via StudioVault.</p>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -679,7 +755,7 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                                         />
                                     </div>
                                     <div className="space-y-1.5">
-                                        <span className="text-[10px] font-black text-charcoal-400 uppercase tracking-widest ml-1">Hourly Rate</span>
+                                        <span className="text-[10px] font-black text-charcoal-400 uppercase tracking-widest ml-1">Marketplace Rate</span>
                                         <div className="relative">
                                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-400 text-sm font-bold">₱</span>
                                             <input
@@ -697,6 +773,32 @@ export default function StudioSettingsForm({ studio }: { studio: any }) {
                             </div>
                         )
                     })}
+                </div>
+            </div>
+            
+            {/* Waitlist Settings */}
+            <div className="space-y-6 pt-6 border-t border-cream-200/60">
+                <div className="flex flex-col gap-1 border-b border-cream-200/60 pb-3">
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-xl font-serif font-bold text-charcoal-900">Waitlist Management</h2>
+                        <div className="h-px flex-1 bg-cream-100/50" />
+                    </div>
+                    <p className="text-[10px] text-charcoal-400 font-medium uppercase tracking-wider">Configure how your studio handles full classes.</p>
+                </div>
+                
+                <div className="max-w-xs">
+                    <div className="space-y-1.5 p-5 border border-cream-200 rounded-[1.5rem] bg-white hover:border-charcoal-900/10 transition-all">
+                        <label className="block text-[10px] font-black text-charcoal-500 uppercase tracking-widest ml-1">Waitlist Capacity (per class)</label>
+                        <input
+                            type="number"
+                            name="waitlistLimit"
+                            defaultValue={studio.waitlist_limit || 5}
+                            min="0"
+                            placeholder="e.g. 5"
+                            className="w-full px-4 py-2.5 bg-cream-50/50 border border-cream-200 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-charcoal-900/5 focus:border-charcoal-900 transition-all text-sm font-bold"
+                        />
+                        <p className="text-[9px] text-charcoal-300 italic px-1 pt-1 leading-tight">Max clients allowed to wait. Set to 0 for unlimited.</p>
+                    </div>
                 </div>
             </div>
 

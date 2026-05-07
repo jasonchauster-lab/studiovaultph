@@ -21,7 +21,14 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined)
 export const useToast = () => {
   const context = useContext(ToastContext)
   if (!context) {
-    throw new Error('useToast must be used within a ToastProvider')
+    // If we're outside a ToastProvider, return a no-op to prevent crashing
+    // This can happen during SSR or in development when context isn't ready
+    console.warn('useToast must be used within a ToastProvider')
+    return {
+      toast: (message: string, type?: ToastType) => {
+        console.warn(`Toast requested but no provider found: [${type}] ${message}`)
+      }
+    }
   }
   return context
 }

@@ -18,6 +18,9 @@ interface WalletNotificationEmailProps {
     amount: number;
     date: string;
     rejectionReason?: string;
+    studioName?: string;
+    studioLogo?: string;
+    primaryColor?: string;
 }
 
 export default function WalletNotificationEmail({
@@ -26,9 +29,16 @@ export default function WalletNotificationEmail({
     amount,
     date,
     rejectionReason,
+    studioName,
+    studioLogo,
+    primaryColor,
 }: WalletNotificationEmailProps) {
     const isCredit = type === 'top_up_approved' || type === 'adjustment_credit';
     const isTopUp = type === 'top_up_approved' || type === 'top_up_rejected';
+    
+    const brandColor = primaryColor || '#1a1f2c';
+    const logoUrl = studioLogo || "https://studiovaultph.com/logo4.png";
+    const brandName = studioName || "StudioVaultPH";
 
     const getTitle = () => {
         switch (type) {
@@ -51,14 +61,14 @@ export default function WalletNotificationEmail({
     return (
         <Html>
             <Head />
-            <Preview>{getTitle()} - StudioVaultPH</Preview>
+            <Preview>{getTitle()} - {brandName}</Preview>
             <Body style={main}>
                 <Container style={container}>
                     <Section style={header}>
-                        <Img src="https://studiovaultph.com/logo4.png" width="48" height="48" alt="StudioVaultPH Logo" style={logoImage} />
-                        <Text style={logoText}>StudioVaultPH</Text>
+                        <Img src={logoUrl} width="48" height="48" alt={`${brandName} Logo`} style={logoImage} />
+                        <Text style={{ ...logoText, color: brandColor }}>{brandName}</Text>
                     </Section>
-                    <Heading style={h1}>{getTitle()}</Heading>
+                    <Heading style={{ ...h1, color: brandColor }}>{getTitle()}</Heading>
                     <Text style={text}>Hi {recipientName},</Text>
                     <Text style={text}>{getHeadline()}</Text>
 
@@ -99,7 +109,7 @@ export default function WalletNotificationEmail({
                     </Text>
 
                     <Hr style={hr} />
-                    <Text style={footer}>StudioVaultPH Notification</Text>
+                    <Text style={footer}>{brandName} Notification</Text>
                 </Container>
             </Body>
         </Html>

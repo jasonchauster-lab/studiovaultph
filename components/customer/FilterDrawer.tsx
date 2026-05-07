@@ -28,7 +28,7 @@ export default function FilterDrawer({
 
     return (
         <div className="fixed inset-0 z-[100] lg:hidden">
-            <div className="absolute inset-0 bg-burgundy/20 backdrop-blur-sm" onClick={onClose} />
+            <div className="absolute inset-0 bg-burgundy/60" onClick={onClose} />
             <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
                 <div className="flex items-center justify-between p-6 border-b border-burgundy/5">
                     <h2 className="text-xl font-serif font-bold text-burgundy">Search Filters</h2>

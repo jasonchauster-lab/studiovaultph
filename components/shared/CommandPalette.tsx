@@ -1,23 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { 
-    Search, 
-    Calendar, 
-    User, 
-    Settings, 
-    MessageSquare, 
-    CreditCard, 
-    ArrowRight, 
-    X,
-    Command as CommandIcon,
-    Sparkles,
-    Shield,
-    History,
-    Plus
-} from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { Search, Calendar, Settings, CreditCard, ArrowRight, Command as CommandIcon, Sparkles, History, Plus, BarChart3, Package, Users, Loader2 } from 'lucide-react'
+import { useRouter, usePathname } from 'next/navigation'
 import clsx from 'clsx'
+import { Kbd } from '@/components/ui/Kbd'
+import { Separator } from '@/components/ui/Separator'
+import { ScrollArea } from '@/components/ui/ScrollArea'
+import { performGlobalSearch } from '@/app/(dashboard)/studio/search-actions'
+import { SearchResult } from '@/lib/services/search'
 
 interface CommandAction {
     id: string
@@ -34,11 +25,14 @@ export default function CommandPalette({ userRole }: { userRole?: string }) {
     const [isOpen, setIsOpen] = useState(false)
     const [query, setQuery] = useState('')
     const [activeIndex, setActiveIndex] = useState(0)
+    const [dataResults, setDataResults] = useState<SearchResult[]>([])
+    const [isSearching, setIsSearching] = useState(false)
     const router = useRouter()
+    const pathname = usePathname()
     const inputRef = useRef<HTMLInputElement>(null)
 
-    const actions: CommandAction[] = [
-        // Global Actions
+    const staticActions = useMemo<CommandAction[]>(() => [
+        // Global Navigation
         {
             id: 'home',
             title: 'Overview',
@@ -47,70 +41,135 @@ export default function CommandPalette({ userRole }: { userRole?: string }) {
             category: 'Navigation',
             perform: () => router.push('/welcome')
         },
+        // Studio Operations
+        {
+            id: 'schedule',
+            title: 'Schedule Manager',
+            description: 'Manage availability and bookings',
+            icon: Calendar,
+            category: 'Studio Ops',
+            roles: ['studio', 'instructor'],
+            perform: () => router.push(`/${userRole}/schedule`)
+        },
+        {
+            id: 'analytics',
+            title: 'Studio Intelligence',
+            description: 'View growth and booking analytics',
+            icon: BarChart3,
+            category: 'Studio Ops',
+            roles: ['studio'],
+            perform: () => router.push('/studio/analytics')
+        },
+        {
+            id: 'memberships',
+            title: 'Pricing & Passes',
+            description: 'Manage memberships and packages',
+            icon: Package,
+            category: 'Studio Ops',
+            roles: ['studio'],
+            perform: () => router.push('/studio/pricing')
+        },
+        {
+            id: 'clients',
+            title: 'Client CRM',
+            description: 'Manage your studio customer list',
+            icon: Users,
+            category: 'Studio Ops',
+            roles: ['studio'],
+            perform: () => router.push('/studio/customers')
+        },
+        // Quick Actions (Contextual)
+        {
+            id: 'add-customer',
+            title: 'Quick Add Customer',
+            description: 'Onboard a new client',
+            icon: Plus,
+            category: 'Quick Actions',
+            roles: ['studio'],
+            perform: () => router.push('/studio/customers/new')
+        },
+        {
+            id: 'add-product',
+            title: 'Quick Add Product',
+            description: 'Add item to inventory',
+            icon: Package,
+            category: 'Quick Actions',
+            roles: ['studio'],
+            perform: () => router.push('/studio/inventory?action=add')
+        },
+        // System
         {
             id: 'settings',
             title: 'Settings',
-            description: 'Manage your profile and account',
+            description: 'Manage profile and studio config',
             icon: Settings,
             category: 'System',
             perform: () => router.push(userRole === 'studio' ? '/studio/settings' : `/${userRole}/profile`)
         },
-        // Instructor Specific
-        {
-            id: 'schedule',
-            title: 'My Schedule',
-            description: 'Manage your availability and classes',
-            icon: Calendar,
-            category: 'Management',
-            roles: ['instructor'],
-            perform: () => router.push('/instructor/schedule')
-        },
-        {
-            id: 'earnings',
-            title: 'Earnings',
-            description: 'View revenue and payout status',
-            icon: CreditCard,
-            category: 'Management',
-            roles: ['instructor', 'studio'],
-            perform: () => router.push(`/${userRole}/earnings`)
-        },
-        // Studio Specific
-        {
-            id: 'bulk-slots',
-            title: 'Generate Slots',
-            description: 'Bulk create studio availability',
-            icon: Plus,
-            category: 'Studio Ops',
-            roles: ['studio'],
-            perform: () => router.push('/studio/schedule')
-        },
-        // Customer Specific
-        {
-            id: 'discovery',
-            title: 'Find Instructors',
-            description: 'Search for trainers and studios',
-            icon: Search,
-            category: 'Discovery',
-            roles: ['customer'],
-            perform: () => router.push('/customer')
-        },
         {
             id: 'history',
-            title: 'Booking History',
-            description: 'View your past and upcoming sessions',
+            title: 'Interaction History',
+            description: 'View past activity logs',
             icon: History,
-            category: 'History',
+            category: 'System',
             roles: ['customer', 'instructor', 'studio'],
             perform: () => router.push(`/${userRole}/history`)
         }
-    ].filter(a => !a.roles || (userRole && a.roles.includes(userRole)))
+    ].filter(a => !a.roles || (userRole && a.roles.includes(userRole))), [userRole, router])
 
-    const filteredActions = query === '' 
-        ? actions 
-        : actions.filter(a => 
-            a.title.toLowerCase().includes(query.toLowerCase()) || 
-            a.category.toLowerCase().includes(query.toLowerCase())
-          )
+    // HIGH-INTEGRITY: Search logic with debouncing
+    useEffect(() => {
+        if (query.length < 2) {
+            setDataResults([])
+            return
+        }
+
+        const handler = setTimeout(async () => {
+            setIsSearching(true)
+            const res = await performGlobalSearch(query)
+            if (res.success && res.results) {
+                setDataResults(res.results)
+            }
+            setIsSearching(false)
+        }, 250)
+
+        return () => clearTimeout(handler)
+    }, [query])
+
+    const filteredStaticActions = useMemo(() => {
+        if (!query.trim()) return staticActions
+        const lowQuery = query.toLowerCase()
+        return staticActions.filter(a => 
+            a.title.toLowerCase().includes(lowQuery) || 
+            a.category.toLowerCase().includes(lowQuery) ||
+            a.description.toLowerCase().includes(lowQuery)
+        )
+    }, [staticActions, query])
+
+    // Combine Static Actions and Dynamic Data Results
+    const combinedResults = useMemo(() => {
+        const dataActions = dataResults.map(res => ({
+            id: res.id,
+            title: res.title,
+            description: res.description,
+            icon: res.category === 'Customers' ? Users : res.category === 'Products' ? Package : Calendar,
+            category: res.category,
+            perform: () => router.push(res.link)
+        }))
+
+        return [...filteredStaticActions, ...dataActions]
+    }, [filteredStaticActions, dataResults, router])
+
+    const groupedActions = useMemo(() => {
+        const groups: Record<string, any[]> = {}
+        combinedResults.forEach(action => {
+            if (!groups[action.category]) groups[action.category] = []
+            groups[action.category].push(action)
+        })
+        return groups
+    }, [combinedResults])
+
+    const categories = useMemo(() => Object.keys(groupedActions), [groupedActions])
 
     const toggle = useCallback(() => setIsOpen(prev => !prev), [])
 
@@ -120,9 +179,7 @@ export default function CommandPalette({ userRole }: { userRole?: string }) {
                 e.preventDefault()
                 toggle()
             }
-            if (e.key === 'Escape') {
-                setIsOpen(false)
-            }
+            if (e.key === 'Escape') setIsOpen(false)
         }
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
@@ -136,21 +193,18 @@ export default function CommandPalette({ userRole }: { userRole?: string }) {
         }
     }, [isOpen])
 
-    const handleAction = (action: CommandAction) => {
-        action.perform()
-        setIsOpen(false)
-    }
-
     const onKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'ArrowDown') {
             e.preventDefault()
-            setActiveIndex(prev => (prev + 1) % filteredActions.length)
+            setActiveIndex(prev => (prev + 1) % combinedResults.length)
         } else if (e.key === 'ArrowUp') {
             e.preventDefault()
-            setActiveIndex(prev => (prev - 1 + filteredActions.length) % filteredActions.length)
+            setActiveIndex(prev => (prev - 1 + combinedResults.length) % combinedResults.length)
         } else if (e.key === 'Enter') {
-            if (filteredActions[activeIndex]) {
-                handleAction(filteredActions[activeIndex])
+            const action = combinedResults[activeIndex]
+            if (action) {
+                action.perform()
+                setIsOpen(false)
             }
         }
     }
@@ -159,97 +213,106 @@ export default function CommandPalette({ userRole }: { userRole?: string }) {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-charcoal/40 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setIsOpen(false)} />
+            <div className="absolute inset-0 bg-charcoal/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setIsOpen(false)} />
             
-            <div className="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl border border-charcoal/5 overflow-hidden animate-in slide-in-from-bottom-4 duration-500 fill-mode-both">
-                <div className="p-6 border-b border-border-grey/30 bg-off-white/30 flex items-center gap-4">
-                    <Search className="w-5 h-5 text-forest" />
+            <div className="relative w-full max-w-2xl bg-white rounded-3xl md:rounded-[3rem] shadow-2xl border border-zinc-100 overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
+                <div className="p-5 md:p-8 bg-zinc-50/50 flex items-center gap-4 md:gap-6">
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl md:rounded-2xl flex items-center justify-center shadow-tight border border-zinc-100 shrink-0">
+                        {isSearching ? <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-primary animate-spin" /> : <Search className="w-4 h-4 md:w-5 md:h-5 text-zinc-400" />}
+                    </div>
                     <input 
                         ref={inputRef}
                         type="text"
-                        placeholder="Search actions, pages, or search terms..."
-                        className="flex-1 bg-transparent border-none outline-none text-charcoal font-bold text-base placeholder:text-charcoal/20"
+                        placeholder="Search clients, inventory, sessions or actions..."
+                        className="flex-1 bg-transparent border-none outline-none text-zinc-900 font-black text-sm md:text-lg placeholder:text-zinc-200"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onKeyDown={onKeyDown}
+                        autoFocus
                     />
-                    <div className="flex items-center gap-1.5 px-2 py-1 bg-charcoal/5 rounded-lg border border-charcoal/10">
-                        <CommandIcon className="w-3 h-3 text-charcoal/40" />
-                        <span className="text-[10px] font-black text-charcoal/40 tracking-widest">K</span>
+                    <div className="hidden md:flex items-center gap-2 px-3.5 py-2 bg-white rounded-xl border border-zinc-100 shadow-sm shrink-0">
+                        <CommandIcon className="w-3.5 h-3.5 text-zinc-400" />
+                        <Kbd className="bg-transparent border-none shadow-none text-[10px] font-black">K</Kbd>
                     </div>
                 </div>
 
-                <div className="max-h-[60vh] overflow-y-auto py-4 scrollbar-hide">
-                    {filteredActions.length === 0 ? (
-                        <div className="p-12 text-center">
-                            <p className="text-sm font-bold text-slate uppercase tracking-widest opacity-40">No matching actions found.</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            {Array.from(new Set(filteredActions.map(a => a.category))).map(category => (
-                                <div key={category} className="px-6">
-                                    <h4 className="text-[10px] font-black text-forest uppercase tracking-[0.2em] mb-3 ml-2">{category}</h4>
-                                    <div className="space-y-1">
-                                        {filteredActions.filter(a => a.category === category).map((action, idx) => {
-                                            const globalIdx = filteredActions.indexOf(action)
-                                            const isActive = activeIndex === globalIdx
-                                            return (
-                                                <button 
-                                                    key={action.id}
-                                                    onClick={() => handleAction(action)}
-                                                    onMouseMove={() => setActiveIndex(globalIdx)}
-                                                    className={clsx(
-                                                        "w-full flex items-center justify-between p-4 rounded-xl transition-all text-left group",
-                                                        isActive ? "bg-forest text-white shadow-tight -translate-y-0.5" : "hover:bg-off-white/50 text-charcoal"
-                                                    )}
-                                                >
-                                                    <div className="flex items-center gap-4">
-                                                        <div className={clsx(
-                                                            "w-10 h-10 rounded-lg flex items-center justify-center transition-colors",
-                                                            isActive ? "bg-white/20" : "bg-off-white group-hover:bg-white"
-                                                        )}>
-                                                            <action.icon className={clsx("w-5 h-5", isActive ? "text-white" : "text-charcoal/40")} />
-                                                        </div>
-                                                        <div>
-                                                            <p className={clsx("text-sm font-bold tracking-tight", isActive ? "text-white" : "text-charcoal-900")}>
-                                                                {action.title}
-                                                            </p>
-                                                            <p className={clsx("text-[11px] font-medium leading-none opacity-60", isActive ? "text-white/70" : "text-slate")}>
-                                                                {action.description}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    {isActive && (
-                                                        <ArrowRight className="w-4 h-4 text-white/50 animate-pulse" />
-                                                    )}
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
+                <Separator className="opacity-50" />
+
+                <ScrollArea className="max-h-[60vh]">
+                    <div className="py-6">
+                        {combinedResults.length === 0 ? (
+                            <div className="p-20 text-center space-y-4">
+                                <div className="w-16 h-16 bg-zinc-50 rounded-2xl flex items-center justify-center mx-auto border border-zinc-100 shadow-tight">
+                                    <Search className="w-8 h-8 text-zinc-200" />
                                 </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                                <p className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.3em]">No matching intelligence found.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-10">
+                                {categories.map(category => (
+                                    <div key={category} className="px-6">
+                                        <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-5 ml-6 flex items-center gap-3">
+                                            <span className="w-6 h-[1px] bg-primary/20" />
+                                            {category}
+                                        </h4>
+                                        <div className="space-y-1.5">
+                                            {groupedActions[category].map((action) => {
+                                                const globalIdx = combinedResults.indexOf(action)
+                                                const isActive = activeIndex === globalIdx
+                                                return (
+                                                    <button 
+                                                        key={action.id + action.title}
+                                                        onClick={() => { action.perform(); setIsOpen(false); }}
+                                                        onMouseMove={() => setActiveIndex(globalIdx)}
+                                                        className={clsx(
+                                                            "w-full flex items-center justify-between p-4 rounded-[2rem] transition-all text-left group",
+                                                            isActive ? "bg-zinc-900 text-white shadow-2xl -translate-y-1" : "hover:bg-zinc-50 text-zinc-600"
+                                                        )}
+                                                    >
+                                                        <div className="flex items-center gap-5">
+                                                            <div className={clsx(
+                                                                "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300",
+                                                                isActive ? "bg-white/10 rotate-3" : "bg-white border border-zinc-100 shadow-tight"
+                                                            )}>
+                                                                <action.icon className={clsx("w-5 h-5", isActive ? "text-white" : "text-zinc-400")} />
+                                                            </div>
+                                                            <div>
+                                                                <p className={clsx("text-[13px] font-black tracking-tight", isActive ? "text-white" : "text-zinc-900")}>
+                                                                    {action.title}
+                                                                </p>
+                                                                <p className={clsx("text-[10px] font-bold opacity-40 uppercase tracking-widest mt-0.5", isActive ? "text-white/60" : "text-zinc-400")}>
+                                                                    {action.description}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        {isActive && (
+                                                            <ArrowRight className="w-4 h-4 text-white/40 animate-pulse mr-4" />
+                                                        )}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </ScrollArea>
 
-                <div className="p-6 bg-off-white/50 border-t border-border-grey/30 flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2">
-                            <kbd className="px-2 py-1 bg-white border border-border-grey/60 rounded text-[9px] font-bold text-charcoal/40 shadow-sm">↑↓</kbd>
-                            <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-widest">Navigate</span>
+                <div className="p-5 md:p-8 bg-zinc-50/50 flex items-center justify-between border-t border-zinc-100">
+                    <div className="hidden md:flex items-center gap-8">
+                        <div className="flex items-center gap-2.5">
+                            <Kbd className="bg-white">↑↓</Kbd>
+                            <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Navigate</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <kbd className="px-2 py-1 bg-white border border-border-grey/60 rounded text-[9px] font-bold text-charcoal/40 shadow-sm">Enter</kbd>
-                            <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-widest">Select</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <kbd className="px-2 py-1 bg-white border border-border-grey/60 rounded text-[9px] font-bold text-charcoal/40 shadow-sm">Esc</kbd>
-                            <span className="text-[9px] font-black text-charcoal/30 uppercase tracking-widest">Close</span>
+                        <div className="flex items-center gap-2.5">
+                            <Kbd className="bg-white">Enter</Kbd>
+                            <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Select</span>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 text-forest/40">
-                        <Shield className="w-3 h-3" />
-                        <span className="text-[9px] font-black uppercase tracking-widest leading-none">Safe Path Verified</span>
+                    <div className="flex items-center gap-2.5 text-primary/40 mx-auto md:mx-0">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">Intel Engine Active</span>
                     </div>
                 </div>
             </div>

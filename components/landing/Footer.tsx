@@ -9,9 +9,9 @@ export default function Footer() {
           <Image
             src="/logo4.png"
             alt="Studio Vault"
-            width={180}
-            height={50}
-            className="h-10 w-auto object-contain opacity-80"
+            width={600}
+            height={180}
+            className="h-32 w-auto object-contain opacity-80"
           />
           <p className="label-atelier text-xs">
             &copy; 2026 STUDIO VAULT. ALL RIGHTS RESERVED.

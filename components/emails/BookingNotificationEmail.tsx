@@ -26,6 +26,8 @@ interface BookingNotificationEmailProps {
     rejectionReason?: string;
     cancellationReason?: string;
     hasRefund?: boolean;
+    studioLogo?: string;
+    primaryColor?: string;
 }
 
 export default function BookingNotificationEmail({
@@ -42,18 +44,24 @@ export default function BookingNotificationEmail({
     rejectionReason,
     cancellationReason,
     hasRefund,
+    studioLogo,
+    primaryColor,
 }: BookingNotificationEmailProps) {
+    const brandColor = primaryColor || '#1a1f2c';
+    const logoUrl = studioLogo || "https://studiovaultph.com/logo4.png";
+    const brandName = studioName || "StudioVaultPH";
+
     return (
         <Html>
             <Head />
-            <Preview>{bookingType} - StudioVaultPH</Preview>
+            <Preview>{bookingType} - {brandName}</Preview>
             <Body style={main}>
                 <Container style={container}>
                     <Section style={header}>
-                        <Img src="https://studiovaultph.com/logo4.png" width="48" height="48" alt="StudioVaultPH Logo" style={logoImage} />
-                        <Text style={logoText}>StudioVaultPH</Text>
+                        <Img src={logoUrl} width="48" height="48" alt={`${brandName} Logo`} style={logoImage} />
+                        <Text style={{ ...logoText, color: brandColor }}>{brandName}</Text>
                     </Section>
-                    <Heading style={h1}>{bookingType}</Heading>
+                    <Heading style={{ ...h1, color: brandColor }}>{bookingType}</Heading>
                     <Text style={text}>Hi {recipientName},</Text>
                     <Text style={text}>
                         {bookingType === 'New Booking'
@@ -140,7 +148,7 @@ export default function BookingNotificationEmail({
                     )}
 
                     <Hr style={hr} />
-                    <Text style={footer}>StudioVaultPH Notification</Text>
+                    <Text style={footer}>{brandName} Notification</Text>
                 </Container>
             </Body>
         </Html>

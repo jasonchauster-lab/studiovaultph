@@ -10,6 +10,7 @@ import ApplicationRejectionEmail from '@/components/emails/ApplicationRejectionE
 import { formatManilaDate, formatManilaTime, formatManilaDateStr, formatTo12Hour } from '@/lib/timezone'
 import WalletNotificationEmail from '@/components/emails/WalletNotificationEmail'
 import AccountReactivatedEmail from '@/components/emails/AccountReactivatedEmail'
+import { getStudioBranding } from '@/lib/studio/branding'
 
 async function verifyAdmin(supabase: any) {
     const { data: { user } } = await supabase.auth.getUser()
@@ -209,6 +210,154 @@ export async function rejectCertification(certificationId: string, customReason?
     return { success: true }
 }
 
+export async function approveStudioGlobalDocs(studioId: string) {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
+    const { data: studio, error } = await supabase
+        .from('studios')
+        .update({ marketplace_eligibility: 'active' })
+        .eq('id', studioId)
+        .select('name, profiles!owner_id(email, full_name)')
+        .single()
+
+    if (error) return { error: error.message }
+
+    await logAdminAction(supabase, 'APPROVE_STUDIO_GLOBAL_DOCS', 'studios', studioId, `Approved global marketplace documents for Studio: ${studio.name}`)
+
+    return { success: true }
+}
+
+export async function rejectStudioGlobalDocs(studioId: string, reason: string) {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
+    const { data: studio, error } = await supabase
+        .from('studios')
+        .update({ 
+            marketplace_eligibility: 'rejected',
+            verification_notes: reason
+        })
+        .eq('id', studioId)
+        .select('name')
+        .single()
+
+    if (error) return { error: error.message }
+
+    await logAdminAction(supabase, 'REJECT_STUDIO_GLOBAL_DOCS', 'studios', studioId, `Rejected global marketplace documents for ${studio.name}. Reason: ${reason}`)
+
+    return { success: true }
+}
+
+export async function updateStudioAICredits(studioId: string, limit: number) {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
+    const { data: studio, error } = await supabase
+        .from('studios')
+        .update({ ai_chat_limit: limit })
+        .eq('id', studioId)
+        .select('name')
+        .single()
+
+    if (error) return { error: error.message }
+
+    await logAdminAction(supabase, 'UPDATE_STUDIO_AI_LIMIT', 'studios', studioId, `Updated AI chat limit for ${studio.name} to ${limit} messages.`)
+
+    revalidatePath('/admin/partners')
+    return { success: true }
+}
+
+export async function approveBranchMarketplace(outletId: string) {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
+    const { data: outlet, error } = await supabase
+        .from('outlets')
+        .update({ marketplace_status: 'active' })
+        .eq('id', outletId)
+        .select('name, studio:studios(name)')
+        .single()
+
+    if (error) return { error: error.message }
+
+    await logAdminAction(supabase, 'APPROVE_BRANCH_MARKETPLACE', 'outlets', outletId, `Approved marketplace listing for Branch: ${outlet.name} (Studio: ${(outlet.studio as any)?.name})`)
+
+    return { success: true }
+}
+
+export async function rejectBranchMarketplace(outletId: string, reason: string) {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
+    const { data: outlet, error } = await supabase
+        .from('outlets')
+        .update({ 
+            marketplace_status: 'rejected',
+            manual_verification_notes: reason
+        })
+        .eq('id', outletId)
+        .select('name, studio:studios(name)')
+        .single()
+
+    if (error) return { error: error.message }
+
+    await logAdminAction(supabase, 'REJECT_BRANCH_MARKETPLACE', 'outlets', outletId, `Rejected marketplace listing for Branch: ${outlet.name} (Studio: ${(outlet.studio as any)?.name}). Reason: ${reason}`)
+
+    return { success: true }
+}
+
+export async function getPendingVerifications() {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
+    const { data: globalPending } = await supabase
+        .from('studios')
+        .select(`
+            id,
+            name,
+            bir_url,
+            bir_expiry,
+            gov_id_url,
+            gov_id_expiry,
+            sec_cert_url,
+            marketplace_eligibility,
+            owner:profiles!owner_id(full_name, email)
+        `)
+        .eq('marketplace_eligibility', 'pending')
+
+    const { data: branchPending } = await supabase
+        .from('outlets')
+        .select(`
+            id,
+            name,
+            studio:studios(name),
+            mayors_permit_url,
+            mayors_permit_expiry,
+            insurance_url,
+            insurance_expiry,
+            marketplace_status
+        `)
+        .eq('marketplace_status', 'pending')
+
+    return { 
+        globalDocs: globalPending || [], 
+        branches: branchPending || [] 
+    }
+}
+
 export async function verifyStudio(studioId: string) {
     const supabase = await createClient()
 
@@ -219,7 +368,7 @@ export async function verifyStudio(studioId: string) {
     const { data: studio, error: fetchError } = await supabase.from('studios')
         .update({ verified: true })
         .eq('id', studioId)
-        .select('*, profiles(full_name, email)')
+        .select('*, profiles!owner_id(full_name, email)')
         .single()
 
     if (fetchError || !studio) {
@@ -227,7 +376,7 @@ export async function verifyStudio(studioId: string) {
         return { error: 'Failed to verify studio' }
     }
 
-    await logAdminAction(supabase, 'VERIFY_STUDIO', 'studios', studioId, `Studio "${studio.name}" approved — Owner: ${studio.profiles?.full_name || 'Unknown'} (${(studio.profiles as any)?.email || 'no email'})`)
+    await logAdminAction(supabase, 'APPROVE_STUDIO', 'studios', studioId, `Studio "${studio.name}" verified — Owner: ${studio.profiles?.full_name || 'Unknown'} (${(studio.profiles as any)?.email || 'no email'})`)
 
     // Send notification email
     if (studio.profiles?.email) {
@@ -237,7 +386,7 @@ export async function verifyStudio(studioId: string) {
 
         const emailResult = await sendEmail({
             to: studio.profiles.email,
-            subject: 'Exciting news! Your studio has been approved',
+            subject: 'Congratulations! Your studio has been verified',
             react: ApplicationApprovalEmail({
                 recipientName: (studio.profiles as any).full_name || 'Studio Owner',
                 applicationType: 'Studio',
@@ -246,7 +395,7 @@ export async function verifyStudio(studioId: string) {
             })
         })
         if (!emailResult.success) {
-            console.error('Failed to send studio approval email to', studio.profiles.email, emailResult.error);
+            console.error('Failed to send studio approval email:', emailResult.error)
         }
     }
 
@@ -487,6 +636,8 @@ export async function confirmBooking(bookingId: string) {
     // 4. Send Emails based on Booking Type
     const isRental = booking.client_id === booking.instructor_id;
 
+    const branding = studios?.id ? await getStudioBranding(studios.id) : null;
+
     if (isRental) {
         // --- STUDIO RENTAL FLOW ---
         // Just one email to the instructor (who is also the client)
@@ -494,6 +645,7 @@ export async function confirmBooking(bookingId: string) {
             await sendEmail({
                 to: instructorEmail,
                 subject: `Studio Rental Approved: ${studioName}`,
+                fromName: branding?.fromName,
                 react: BookingNotificationEmail({
                     recipientName: instructorName,
                     bookingType: 'Booking Confirmed',
@@ -502,7 +654,9 @@ export async function confirmBooking(bookingId: string) {
                     date,
                     time,
                     equipment: (booking.price_breakdown as any)?.equipment,
-                    quantity: (booking.price_breakdown as any)?.quantity
+                    quantity: (booking.price_breakdown as any)?.quantity,
+                    studioLogo: branding?.logoUrl,
+                    primaryColor: branding?.primaryColor
                 })
             });
         }
@@ -513,6 +667,7 @@ export async function confirmBooking(bookingId: string) {
             await sendEmail({
                 to: clientEmail,
                 subject: `Booking Confirmed: ${studioName}`,
+                fromName: branding?.fromName,
                 react: BookingNotificationEmail({
                     recipientName: clientName,
                     bookingType: 'Booking Confirmed',
@@ -522,7 +677,9 @@ export async function confirmBooking(bookingId: string) {
                     date,
                     time,
                     equipment: (booking.price_breakdown as any)?.equipment,
-                    quantity: (booking.price_breakdown as any)?.quantity
+                    quantity: (booking.price_breakdown as any)?.quantity,
+                    studioLogo: branding?.logoUrl,
+                    primaryColor: branding?.primaryColor
                 })
             });
         }
@@ -532,6 +689,7 @@ export async function confirmBooking(bookingId: string) {
             await sendEmail({
                 to: instructorEmail,
                 subject: `Session Confirmed with ${clientName}`,
+                fromName: branding?.fromName,
                 react: BookingNotificationEmail({
                     recipientName: instructorName,
                     bookingType: 'Booking Confirmed',
@@ -540,7 +698,9 @@ export async function confirmBooking(bookingId: string) {
                     date,
                     time,
                     equipment: (booking.price_breakdown as any)?.equipment,
-                    quantity: (booking.price_breakdown as any)?.quantity
+                    quantity: (booking.price_breakdown as any)?.quantity,
+                    studioLogo: branding?.logoUrl,
+                    primaryColor: branding?.primaryColor
                 })
             });
         }
@@ -554,6 +714,7 @@ export async function confirmBooking(bookingId: string) {
             await sendEmail({
                 to: owner.email,
                 subject: `New Session Confirmed at ${studioName}`,
+                fromName: branding?.fromName,
                 react: BookingNotificationEmail({
                     recipientName: 'Studio Owner',
                     bookingType: 'Booking Confirmed',
@@ -563,7 +724,9 @@ export async function confirmBooking(bookingId: string) {
                     date,
                     time,
                     equipment: (booking.price_breakdown as any)?.equipment,
-                    quantity: (booking.price_breakdown as any)?.quantity
+                    quantity: (booking.price_breakdown as any)?.quantity,
+                    studioLogo: branding?.logoUrl,
+                    primaryColor: branding?.primaryColor
                 })
             });
         }
@@ -630,10 +793,13 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
     const time = formatTo12Hour(slots?.start_time);
     const studioName = studios?.name || 'Pilates Studio';
 
+    const branding = studios?.id ? await getStudioBranding(studios.id) : null;
+
     if (client?.email) {
         await sendEmail({
             to: client.email,
             subject: `Update on your booking at ${studioName}`,
+            fromName: branding?.fromName,
             react: BookingNotificationEmail({
                 recipientName: client.full_name || 'Valued Client',
                 bookingType: 'Booking Rejected',
@@ -643,7 +809,9 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
                 rejectionReason: reason,
                 hasRefund: withRefund,
                 equipment: (booking.price_breakdown as any)?.equipment,
-                quantity: (booking.price_breakdown as any)?.quantity
+                quantity: (booking.price_breakdown as any)?.quantity,
+                studioLogo: branding?.logoUrl,
+                primaryColor: branding?.primaryColor
             })
         });
     }
@@ -656,6 +824,11 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
 
 
 export async function getAdminAnalytics(startDate?: string, endDate?: string) {
+    const publicSupabase = await createClient()
+    if (!(await verifyAdmin(publicSupabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
     try {
         const supabase = createAdminClient()
         
@@ -674,7 +847,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
         const [bookingsRes, payoutsRes, topUpsRes] = await Promise.all([
             supabase.from('bookings')
                 .select(`
-                    id, total_price, created_at, price_breakdown, status,
+                    id, total_price, created_at, price_breakdown, status, origin,
                     client:profiles!client_id(full_name, email),
                     slots!inner(date, start_time, studios(name, owner:profiles!owner_id(email))),
                     instructor:profiles!instructor_id(full_name, email)
@@ -685,7 +858,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
                 .order('created_at', { ascending: false })
                 .limit(100),
             supabase.from('payout_requests')
-                .select('id, amount, created_at, instructor:profiles!instructor_id(full_name, email), user:profiles!user_id(full_name, email), studios(name, profiles!owner_id(full_name, email))')
+                .select('id, amount, created_at, studio_id, instructor:profiles!instructor_id(full_name, email), user:profiles!user_id(full_name, email), studios(name, profiles!owner_id(full_name, email))')
                 .eq('status', 'paid')
                 .gte('created_at', startDate || '1970-01-01')
                 .lte('created_at', endDate || new Date().toISOString())
@@ -717,6 +890,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
                 date: slots ? `${slots.date} ${slots.start_time}` : b.created_at,
                 type: 'Booking',
                 status: b.status,
+                origin: b.origin || 'marketplace', // Added origin
                 client: client?.full_name || '-',
                 client_email: client?.email || '-',
                 studio: studio?.name || '-',
@@ -739,6 +913,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
                 id: `payout-${p.id}`,
                 date: p.created_at,
                 type: 'Payout',
+                origin: p.studio_id ? 'studio' : 'marketplace', // Payouts from studio are 'studio'
                 client: user?.full_name || '-',
                 client_email: user?.email || '-',
                 studio: studio?.name || '-',
@@ -759,6 +934,7 @@ export async function getAdminAnalytics(startDate?: string, endDate?: string) {
                 id: `topup-${t.id}`,
                 date: t.created_at,
                 type: 'Top-up',
+                origin: 'marketplace', // Top-ups are platform-level
                 client: profile?.full_name || '-',
                 client_email: profile?.email || '-',
                 studio: '-',
@@ -1551,4 +1727,111 @@ export async function settleInstructorDebt(profileId: string) {
     revalidatePath('/admin')
     revalidatePath('/instructor/earnings')
     return { success: true }
+}
+
+
+export async function getBuilderOverview() {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: "Unauthorized: Admin access required." }
+    }
+
+    const { data: studios, error } = await supabase
+        .from("studios")
+        .select(`
+            id, 
+            name, 
+            slug, 
+            subscription_tier, 
+            subscription_status, 
+            verified,
+            owner:profiles!owner_id(full_name, email)
+        `)
+        .eq("is_cma_enabled", true)
+        .order("name", { ascending: true })
+
+    if (error) return { error: error.message }
+    return { data: studios }
+}
+
+export async function updateStudioTier(studioId: string, tier: string) {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: "Unauthorized: Admin access required." }
+    }
+
+    const { data: studio, error } = await supabase
+        .from("studios")
+        .update({ subscription_tier: tier })
+        .eq("id", studioId)
+        .select("name")
+        .single()
+
+    if (error) return { error: error.message }
+
+    await logAdminAction(supabase, "UPDATE_STUDIO_TIER", "studios", studioId, `Updated subscription tier for "${studio.name}" to ${tier}`)
+    
+    revalidatePath("/admin")
+    return { success: true }
+}
+
+export async function getCmaAnalytics(startDate?: string, endDate?: string) {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: "Unauthorized: Admin access required." }
+    }
+
+    const { data: bookings, error } = await supabase
+        .from("bookings")
+        .select("id, origin, total_price, status, created_at")
+        .gte("created_at", startDate || "1970-01-01")
+        .lte("created_at", endDate || new Date().toISOString())
+
+    if (error) return { error: error.message }
+
+    const stats = bookings.reduce((acc, b) => {
+        const origin = b.origin || "marketplace"
+        if (!acc[origin]) acc[origin] = { count: 0, revenue: 0 }
+        acc[origin].count++
+        if (b.status === "approved" || b.status === "completed") {
+            acc[origin].revenue += Number(b.total_price || 0)
+        }
+        return acc
+    }, {} as Record<string, any>)
+
+    return { data: stats }
+}
+
+export async function getStudioStaff(studioId: string) {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: "Unauthorized: Admin access required." }
+    }
+
+    const { data: members, error } = await supabase
+        .from("studio_members")
+        .select(`
+            id,
+            role,
+            profile:profiles!profile_id(full_name, email, role)
+        `)
+        .eq("studio_id", studioId)
+
+    if (error) return { error: error.message }
+    return { data: members || [] }
+}
+export async function getStudioBillingHistory(studioId: string) {
+    const supabase = await createClient()
+    if (!(await verifyAdmin(supabase))) {
+        return { error: 'Unauthorized: Admin access required.' }
+    }
+
+    const { data: transactions, error } = await supabase
+        .from('wallet_top_ups')
+        .select('*')
+        .eq('studio_id', studioId)
+        .order('created_at', { ascending: false })
+
+    if (error) return { error: error.message }
+    return { data: transactions || [] }
 }

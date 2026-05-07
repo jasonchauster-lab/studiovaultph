@@ -2,8 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import PaymentForm from '@/components/customer/PaymentForm'
 import ExpandableImage from '@/components/ui/ExpandableImage'
-import { ArrowLeft, CreditCard, AlertTriangle, CheckCircle } from 'lucide-react'
+import { ArrowLeft, CreditCard, AlertTriangle, CheckCircle, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
+import XenditStatusPolling from '@/components/customer/XenditStatusPolling'
 
 export default async function PaymentPage({
     params
@@ -108,9 +109,23 @@ export default async function PaymentPage({
     // Fetch user role for specialized terms/flow
     const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, waiver_signed_at')
         .eq('id', user.id)
         .single()
+
+    const isXendit = booking.payment_method === 'xendit' && booking.xendit_checkout_url
+    const studioId = (booking.slots as any)?.studios?.id
+
+    // Fetch manual payment instructions if needed
+    let manualMethods = []
+    if (!isXendit) {
+        const { data: studioData } = await supabase
+            .from('studios')
+            .select('manual_payment_methods')
+            .eq('id', studioId)
+            .single()
+        manualMethods = studioData?.manual_payment_methods || []
+    }
 
     return (
         <div className="min-h-screen bg-cream-50 p-4 sm:p-8">
@@ -127,7 +142,7 @@ export default async function PaymentPage({
                         </div>
                         <h1 className="text-3xl font-serif text-charcoal-900 mb-2">Complete Payment</h1>
                         <p className="text-charcoal-600">
-                            Please scan the QR code to pay via GCash or BPI.
+                            {isXendit ? 'Follow the Xendit checkout to secure your spot.' : 'Please scan the QR code to pay via GCash or BPI.'}
                         </p>
                     </div>
 
@@ -154,33 +169,58 @@ export default async function PaymentPage({
                         </div>
                     </div>
 
-                    {/* QR Codes - Only show if price > 0 */}
-                    {(booking.total_price ?? 0) > 0 ? (
+                    {/* Payment Interface */}
+                    {/* Manual Payment QR Codes (only if NOT Xendit and NOT Zero Price) */}
+                    {!isXendit && (booking.total_price ?? 0) > 0 && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            <div className="text-center">
-                                <p className="font-medium text-charcoal-900 mb-2">GCash</p>
-                                <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-md hover:shadow-lg transition-shadow inline-block">
-                                    <ExpandableImage
-                                        src="/gcash-qr.jpg"
-                                        alt="GCash QR Code"
-                                        className="w-32 h-32 sm:w-48 sm:h-48"
-                                    />
-                                    <p className="text-xs text-charcoal-500 mt-2">Scan to pay</p>
+                            {manualMethods.length > 0 ? manualMethods.map((method: any, idx: number) => (
+                                <div key={idx} className="text-center">
+                                    <p className="font-bold text-charcoal-900 mb-2 uppercase tracking-widest text-[10px]">{method.type}</p>
+                                    <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-md hover:shadow-lg transition-shadow inline-block">
+                                        <ExpandableImage
+                                            src={method.qr_code_url}
+                                            bucket="studios"
+                                            alt={`${method.type} QR`}
+                                            className="w-32 h-32 sm:w-48 sm:h-48"
+                                        />
+                                        <div className="mt-3 space-y-1">
+                                            <p className="text-[11px] text-charcoal-700 font-bold">{method.recipient_name}</p>
+                                            <p className="text-[11px] text-charcoal-500 font-mono tracking-tight">{method.account_number}</p>
+                                        </div>
+                                        <p className="text-[10px] text-zinc-400 mt-2 uppercase tracking-tighter">Scan to pay</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="text-center mt-4 md:mt-0">
-                                <p className="font-medium text-charcoal-900 mb-2">BPI</p>
-                                <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-md hover:shadow-lg transition-shadow inline-block">
-                                    <ExpandableImage
-                                        src="/bpi-qr.jpg"
-                                        alt="BPI QR Code"
-                                        className="w-32 h-32 sm:w-48 sm:h-48"
-                                    />
-                                    <p className="text-xs text-charcoal-500 mt-2">Scan to pay</p>
-                                </div>
-                            </div>
+                            )) : (
+                                // Fallback to legacy hardcoded if no methods set
+                                <>
+                                    <div className="text-center">
+                                        <p className="font-medium text-charcoal-900 mb-2">GCash</p>
+                                        <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-md hover:shadow-lg transition-shadow inline-block">
+                                            <ExpandableImage
+                                                src="/gcash-qr.jpg"
+                                                alt="GCash QR Code"
+                                                className="w-32 h-32 sm:w-48 sm:h-48"
+                                            />
+                                            <p className="text-xs text-charcoal-500 mt-2">Scan to pay</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="font-medium text-charcoal-900 mb-2">BPI</p>
+                                        <div className="bg-white p-2 rounded-lg border border-cream-200 shadow-md hover:shadow-lg transition-shadow inline-block">
+                                            <ExpandableImage
+                                                src="/bpi-qr.jpg"
+                                                alt="BPI QR Code"
+                                                className="w-32 h-32 sm:w-48 sm:h-48"
+                                            />
+                                            <p className="text-xs text-charcoal-500 mt-2">Scan to pay</p>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
-                    ) : (
+                    )}
+
+                    {(booking.total_price ?? 0) === 0 && (
                         <div className="bg-green-50/50 border border-green-200 rounded-xl p-6 mb-8 text-center animate-in fade-in slide-in-from-bottom-2">
                             <CheckCircle className="w-10 h-10 text-green-600 mx-auto mb-3" />
                             <p className="text-green-900 font-medium">Session Fully Covered</p>
@@ -195,6 +235,8 @@ export default async function PaymentPage({
                         existingParq={existingParq ?? null}
                         userRole={profile?.role || 'customer'}
                         expiresAt={booking.expires_at || null}
+                        isXendit={isXendit}
+                        xenditCheckoutUrl={booking.xendit_checkout_url}
                     />
                 </div>
             </div>

@@ -1,67 +1,61 @@
-import { Loader2 } from 'lucide-react'
+import React from 'react'
 
-export default function Loading() {
+export default function DashboardLoading() {
     return (
-        <div className="space-y-12 pb-20 p-4 sm:p-8">
-            <div className="max-w-[1600px] mx-auto space-y-12 animate-pulse">
-
-                {/* Header Skeleton */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                    <div>
-                        <div className="h-12 w-80 bg-cream-200 rounded-lg mb-6"></div>
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-cream-200 shrink-0"></div>
-                            <div className="space-y-2 text-left">
-                                <div className="h-5 w-48 bg-cream-200 rounded-md"></div>
-                                <div className="h-3 w-32 bg-cream-100 rounded-md"></div>
-                            </div>
-                        </div>
+        <div className="pt-8 pb-20 px-4 md:px-10 max-w-[1600px] mx-auto space-y-12 bg-zinc-50/30 min-h-screen">
+            {/* Header Skeleton */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 animate-in fade-in duration-700">
+                <div className="space-y-6 flex-1">
+                    <div className="h-14 bg-white border border-zinc-100 rounded-2xl w-1/3 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-50/50 to-transparent animate-shimmer" />
                     </div>
-                    <div className="h-10 w-36 bg-cream-200 rounded-full"></div>
-                </div>
-
-                {/* Studio Metrics Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="bg-white p-6 rounded-2xl border border-cream-200 shadow-sm h-32 flex flex-col justify-between">
-                            <div className="flex justify-between items-start">
-                                <div className="h-4 w-24 bg-cream-100 rounded-md"></div>
-                                <div className="h-8 w-8 bg-cream-100 rounded-full"></div>
-                            </div>
-                            <div className="h-8 w-32 bg-cream-200 rounded-lg"></div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Main Content Area */}
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
-                    <div className="xl:col-span-2 space-y-6">
-                        <div className="bg-white p-6 rounded-2xl border border-cream-200 shadow-sm h-[40rem]">
-                            <div className="h-8 w-48 bg-cream-200 rounded-lg mb-8"></div>
-                            <div className="grid grid-cols-7 gap-4">
-                                {[1, 2, 3, 4, 5, 6, 7].map(i => (
-                                    <div key={i} className="h-96 bg-cream-50 rounded-xl border border-cream-100"></div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-8">
-                        <div className="bg-white rounded-2xl border border-cream-200 shadow-sm overflow-hidden h-[30rem]">
-                            <div className="h-14 w-full bg-cream-200"></div>
-                            <div className="p-6 space-y-4">
-                                {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className="h-20 w-full bg-cream-50 rounded-xl border border-cream-100"></div>
-                                ))}
-                            </div>
-                        </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+                        <div className="h-6 bg-zinc-200/50 rounded-xl w-48" />
+                        <div className="h-10 bg-zinc-200/50 rounded-2xl w-40" />
                     </div>
                 </div>
-
+                <div className="h-24 bg-white border border-zinc-100 rounded-[2rem] w-72 relative overflow-hidden shadow-sm">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-50/50 to-transparent animate-shimmer" />
+                </div>
             </div>
 
-            <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-50">
-                <Loader2 className="w-8 h-8 text-charcoal-300 animate-spin" />
+            {/* Stat Cards Skeleton */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-44 bg-white border border-zinc-100 rounded-[2.5rem] shadow-sm relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-50/50 to-transparent animate-shimmer" />
+                    </div>
+                ))}
+            </div>
+
+            {/* Main Content Skeleton */}
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+                <div className="xl:col-span-8 space-y-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="h-[380px] bg-white border border-zinc-100 rounded-[2.5rem] shadow-sm relative overflow-hidden">
+                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-50/50 to-transparent animate-shimmer" />
+                        </div>
+                        <div className="h-[380px] bg-white border border-zinc-100 rounded-[2.5rem] shadow-sm relative overflow-hidden">
+                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-50/50 to-transparent animate-shimmer" />
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="h-8 bg-zinc-200/50 rounded-xl w-48" />
+                        <div className="bg-white border border-zinc-100 rounded-[3rem] overflow-hidden shadow-sm h-[600px] relative">
+                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-50/50 to-transparent animate-shimmer" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="xl:col-span-4 space-y-8">
+                    <div className="h-72 bg-charcoal rounded-[2.5rem] shadow-xl relative overflow-hidden">
+                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
+                    </div>
+                    <div className="h-[500px] bg-white border border-zinc-100 rounded-[2.5rem] shadow-sm relative overflow-hidden">
+                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-50/50 to-transparent animate-shimmer" />
+                    </div>
+                </div>
             </div>
         </div>
     )

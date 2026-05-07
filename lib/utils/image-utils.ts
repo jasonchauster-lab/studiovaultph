@@ -22,6 +22,18 @@ export const isHeicFile = (file: File | string | null | undefined): boolean => {
 };
 
 /**
+ * Sanitize filename to prevent issues with multipart/form-data parsing
+ */
+export const sanitizeFileName = (name: string): string => {
+    // Remove special characters, keep extension
+    const parts = name.split('.');
+    const ext = parts.pop();
+    const base = parts.join('.');
+    const cleanBase = base.replace(/[^a-z0-9]/gi, '_').replace(/_{2,}/g, '_');
+    return `${cleanBase}.${ext}`;
+};
+
+/**
  * Canvas-based image conversion and resizing.
  * Works natively on iOS and Android to decode HEIC/HEIF and normalize formats.
  */
@@ -62,7 +74,7 @@ const convertViaCanvas = (file: File, options: { maxWidth?: number; quality?: nu
             canvas.toBlob((blob) => {
                 if (!blob) { reject(new Error('Canvas toBlob failed')); return; }
                 const newName = file.name.replace(/\.(heic|heif|png|webp|avif)$/i, '.jpg');
-                resolve(new File([blob], newName, { 
+                resolve(new File([blob], sanitizeFileName(newName), { 
                     type: 'image/jpeg', 
                     lastModified: Date.now() 
                 }));
@@ -79,21 +91,28 @@ const convertViaCanvas = (file: File, options: { maxWidth?: number; quality?: nu
 const isMobile = (): boolean =>
     typeof navigator !== 'undefined' && /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
 
+const MAX_UPLOAD_SIZE = 15 * 1024 * 1024; // 15MB limit
+
 /**
  * Normalizes any image file for upload across all platforms (iPhone, Android, desktop).
- * Multi-stage Fallback: Canvas (Fast/Native) -> heic2any (Chrome Desktop) -> Original with faked type
+ * Multi-stage Fallback: Canvas (Fast/Native) -> heic2any (Chrome Desktop) -> Error
  */
 export const normalizeImageFile = async (
     file: File, 
     options: { maxWidth?: number; quality?: number } = {}
 ): Promise<File> => {
     const logPrefix = `[ImageNormalization:${file.name}]`;
-    console.log(`${logPrefix} Starting... Type: ${file.type || 'unknown'}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+    console.log(`${logPrefix} Starting... Type: ${file.type || 'unknown'}, Size: ${fileSizeMB}MB`);
+
+    if (file.size > MAX_UPLOAD_SIZE) {
+        throw new Error(`File is too large (${fileSizeMB}MB). Maximum size is 15MB.`);
+    }
 
     try {
         const isHeic = isHeicFile(file);
-        // Force normalization if file is HEIC, missing type, or larger than 0.5MB (aggressive)
-        const needsNormalization = isHeic || !file.type || file.size > 0.5 * 1024 * 1024 || options.maxWidth || options.quality;
+        // Relaxed normalization: only if HEIC, missing type, or larger than 2MB
+        const needsNormalization = isHeic || !file.type || file.size > 2 * 1024 * 1024 || options.maxWidth || options.quality;
 
         if (!needsNormalization) {
             console.log(`${logPrefix} Normalization skipped (small/standard file)`);
@@ -120,35 +139,30 @@ export const normalizeImageFile = async (
                     blob: file,
                     toType: 'image/jpeg',
                     quality: 0.8,
+                    multiple: false // Ensure we only get one result
                 });
                 const blob = Array.isArray(result) ? result[0] : result;
                 const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
                 console.log(`${logPrefix} Success via heic2any`);
-                return new File([blob], newName, { type: 'image/jpeg', lastModified: Date.now() });
+                return new File([blob], sanitizeFileName(newName), { type: 'image/jpeg', lastModified: Date.now() });
             } catch (err) {
                 console.error(`${logPrefix} heic2any failed`, err);
+                throw new Error('This image format (HEIC) is not supported on your current browser. Please try uploading a JPEG or PNG, or use a mobile device.');
             }
         }
 
         // --- STAGE 3: LAST RESORT (Faked Content Type) ---
-        // CAUTION: Only do this if it's NOT a HEIC file. 
-        // If it's HEIC and we reached here, both Canvas and heic2any failed.
-        // Returning it as a .jpg will likely result in a broken image on the web.
-        if (isHeic) {
-            console.error(`${logPrefix} All HEIC conversion stages failed. Returning original file.`);
-            return file;
-        }
-
+        // If we reached here and it's NOT HEIC, we just try to treat it as a JPEG.
         console.log(`${logPrefix} Returning original with JPEG type fallback`);
         const finalName = file.name.match(/\.(jpg|jpeg|png)$/i) ? file.name : `${file.name.split('.')[0]}.jpg`;
-        return new File([file], finalName, { 
+        return new File([file], sanitizeFileName(finalName), { 
             type: 'image/jpeg', 
             lastModified: file.lastModified 
         });
 
-    } catch (err) {
-        console.error(`${logPrefix} Critical catch-all error`, err);
-        return file;
+    } catch (err: any) {
+        console.error(`${logPrefix} Normalization failed`, err);
+        throw err; // Re-throw to be handled by caller
     }
 };
 

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function getInstructorEarnings(startDate?: string, endDate?: string) {
     const supabase = await createClient()
@@ -68,14 +69,15 @@ export async function requestPayout(amount: number, method: string, details: any
         return { error: `Insufficient funds. Available: ₱${availableBalance}` }
     }
 
-    const { data: result, error: rpcError } = await supabase.rpc('request_payout_atomic_v2', {
-        p_user_id: user.id,
+    const idempotencyKey = uuidv4()
+
+    const { data: result, error: rpcError } = await supabase.rpc('request_payout_instructor_v1', {
         p_amount: amount,
         p_method: method,
         p_account_name: details.accountName,
         p_account_number: details.accountNumber,
         p_bank_name: method === 'bank' ? details.bankName : undefined,
-        p_studio_id: null
+        p_idempotency_key: idempotencyKey
     });
 
     if (rpcError || !result?.success) {

@@ -13,17 +13,13 @@ export default async function InstructorSessionsPage() {
         redirect('/login')
     }
 
-    // Trigger financial jobs in background
-    await supabase.rpc('process_all_overdue_locks')
-    await supabase.rpc('process_all_pending_payouts')
-
     const { data: bookings } = await supabase
         .from('bookings')
         .select(`
             *,
-            slots!inner (*, studios (*)),
-            client:profiles!client_id (*),
-            instructor:profiles!instructor_id (*)
+            slots!inner (*, studios (id, name, logo_url)),
+            client:profiles!client_id (id, full_name, email, avatar_url),
+            instructor:profiles!instructor_id (id, full_name, avatar_url)
         `)
         .eq('instructor_id', user.id)
         .order('created_at', { ascending: false })

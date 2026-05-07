@@ -59,5 +59,5 @@ export async function selectRole(role: 'customer' | 'instructor' | 'studio') {
 
     if (role === 'customer') redirect('/customer/onboarding')
     if (role === 'instructor') redirect('/instructor/onboarding')
-    if (role === 'studio') redirect('/studio')
+    if (role === 'studio') redirect('/studio/register')
 }

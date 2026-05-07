@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Upload, CheckCircle, Loader2, AlertCircle, X, FileText, ShieldAlert, HeartPulse, RefreshCw, Eye, Clock, CreditCard } from 'lucide-react'
+import { Upload, CheckCircle, Loader2, AlertCircle, X, FileText, ShieldAlert, HeartPulse, RefreshCw, Eye, Clock, CreditCard, ArrowLeft, AlertTriangle, ExternalLink, Globe } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { submitPaymentProof } from '@/app/(dashboard)/customer/actions'
 import { normalizeImageFile } from '@/lib/utils/image-utils'
 import Image from 'next/image'
+import XenditStatusPolling from './XenditStatusPolling'
 
 // ─── Health Waiver Text ───────────────────────────────────────────────────────
 const HEALTH_WAIVER_TEXT = `HEALTH AND FITNESS PARTICIPATION WAIVER AND RELEASE OF LIABILITY
@@ -171,7 +172,7 @@ type ParqAnswers = Partial<Record<ParqKey, boolean>>
 function AgreementModal({ title, content, onClose }: { title: string; content: string; onClose: () => void }) {
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
             onClick={onClose}
         >
             <div
@@ -205,7 +206,7 @@ function AgreementModal({ title, content, onClose }: { title: string; content: s
 // ─── Medical Clearance Modal ──────────────────────────────────────────────────
 function MedicalClearanceModal({ onAcknowledge }: { onAcknowledge: () => void }) {
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
             <div className="atelier-card max-w-lg w-full overflow-hidden shadow-2xl border-burgundy/20">
                 <div className="p-6 border-b border-burgundy/10 flex items-center gap-4 bg-burgundy/5">
                     <div className="w-12 h-12 bg-burgundy text-white rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-burgundy/20">
@@ -268,6 +269,8 @@ export default function PaymentForm({
     existingParq: ExistingParq;
     userRole?: string;
     expiresAt?: string | null;
+    xenditCheckoutUrl?: string | null;
+    isXendit?: boolean;
 }) {
     const [file, setFile] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -739,9 +742,18 @@ export default function PaymentForm({
                     </div>
                 )}
 
-                {/* ── File Upload Section ── */}
-                {/* ── File Upload Section ── */}
-                {!isZeroPrice ? (
+                {/* ── Payment Section ── */}
+                {isXendit ? (
+                    <div className="space-y-4">
+                        <h4 className="font-medium text-charcoal-900 mb-1 text-sm">Secure Online Payment</h4>
+                        <XenditStatusPolling 
+                            bookingId={booking.id} 
+                            checkoutUrl={xenditCheckoutUrl!} 
+                            disabled={!waiverAgreed || !termsAgreed || (isLateBooking && !lateBookingAgreed)}
+                            disabledMessage="Required: Please agree to the waiver and terms below to enable the payment link."
+                        />
+                    </div>
+                ) : !isZeroPrice ? (
                     <div>
                         <h4 className="font-medium text-charcoal-900 mb-3 text-sm">Upload Payment Proof</h4>
 
@@ -877,23 +889,25 @@ export default function PaymentForm({
                             24-Hour Cancellation Policy
                         </button>.
                     </p>
-                    <button
-                        type="submit"
-                        disabled={!canSubmit}
-                        className={`w-full py-4 btn-rose-gold flex items-center justify-center gap-3 text-lg ${!canSubmit ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
-                    >
-                        {isUploading ? (
-                            <>
-                                <Loader2 className="w-6 h-6 animate-spin" />
-                                <span>Uploading...</span>
-                            </>
-                        ) : (
-                            <>
-                                <CreditCard className="w-6 h-6" />
-                                <span>Confirm Booking</span>
-                            </>
-                        )}
-                    </button>
+                    {!isXendit && (
+                        <button
+                            type="submit"
+                            disabled={!canSubmit}
+                            className={`w-full py-4 btn-rose-gold flex items-center justify-center gap-3 text-lg ${!canSubmit ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
+                        >
+                            {isUploading ? (
+                                <>
+                                    <Loader2 className="w-6 h-6 animate-spin" />
+                                    <span>Uploading...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <CreditCard className="w-6 h-6" />
+                                    <span>Confirm Booking</span>
+                                </>
+                            )}
+                        </button>
+                    )}
                 </div>
                 {!canSubmit && !isUploading && (
                     <p className="text-xs text-center text-charcoal-400 mt-4">

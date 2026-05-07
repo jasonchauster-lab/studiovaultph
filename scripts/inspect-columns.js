@@ -11,17 +11,16 @@ envFile.split('\n').forEach(line => {
 });
 
 async function run() {
-    console.log('--- Inspecting Bookings Table Schema ---');
+    console.log('--- Inspecting Profiles Table Schema ---');
     // Querying one row to see columns
-    const res = await fetch(`${supabaseUrl}/rest/v1/bookings?limit=1`, {
+    const res = await fetch(`${supabaseUrl}/rest/v1/profiles?limit=1`, {
         headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
     });
     const data = await res.json();
     if (data && data.length > 0) {
         console.log('Columns found:', Object.keys(data[0]));
     } else {
-        console.log('No rows found to inspect columns. Trying a different method.');
-        // Try to fetch column names via postgres rpc if available, or just guess.
+        console.log('No rows found in profiles. Error:', JSON.stringify(data));
     }
 }
 

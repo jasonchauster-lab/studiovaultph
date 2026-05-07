@@ -18,13 +18,13 @@ interface RevenueTrendChartProps {
 }
 
 export default function RevenueTrendChart({ 
-    data, 
+    data = [], 
     title = "Revenue Trends", 
     height = 200,
     type = 'revenue'
 }: RevenueTrendChartProps) {
     const maxVal = useMemo(() => {
-        const values = data.map(d => type === 'revenue' ? d.amount : d.count)
+        const values = (data || []).map(d => type === 'revenue' ? d.amount : d.count)
         return Math.max(...values, 1) // Avoid division by zero
     }, [data, type])
 
@@ -41,15 +41,15 @@ export default function RevenueTrendChart({
     if (!data || data.length === 0) return null
 
     return (
-        <div className="atelier-card !p-8 group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-forest/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+        <div className="bg-white border border-zinc-100 rounded-[3rem] p-8 group relative overflow-hidden shadow-sm">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
             
             <div className="flex items-center justify-between mb-8 relative z-10">
                 <div className="space-y-1">
-                    <h3 className="text-[10px] font-black text-burgundy/40 uppercase tracking-[0.4em]">{title}</h3>
-                    <p className="text-[9px] font-bold text-slate uppercase tracking-widest">Last 14 Days</p>
+                    <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.4em]">{title}</h3>
+                    <p className="text-[9px] font-bold text-zinc-900 uppercase tracking-widest">Last 14 Days</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-forest/5 text-forest border border-forest/10 shadow-tight">
+                <div className="p-2.5 rounded-xl bg-primary/5 text-primary border border-primary/10 shadow-tight">
                     <TrendingUp className="w-4 h-4" />
                 </div>
             </div>
@@ -68,17 +68,17 @@ export default function RevenueTrendChart({
                             <div className="relative w-full flex flex-col items-center justify-end h-full">
                                 {/* Tooltip */}
                                 <div className="absolute -top-12 opacity-0 group-hover/bar:opacity-100 transition-all duration-300 pointer-events-none z-20 whitespace-nowrap">
-                                    <div className="bg-burgundy text-white text-[9px] font-black px-3 py-1.5 rounded-lg shadow-xl border border-burgundy/20 uppercase tracking-widest translate-y-2 group-hover/bar:translate-y-0">
+                                    <div className="bg-zinc-900 text-white text-[9px] font-black px-3 py-1.5 rounded-lg shadow-xl border border-zinc-100 uppercase tracking-widest translate-y-2 group-hover/bar:translate-y-0">
                                         {formatValue(value)}
                                     </div>
-                                    <div className="w-2 h-2 bg-burgundy rotate-45 mx-auto -mt-1 shadow-xl" />
+                                    <div className="w-2 h-2 bg-zinc-900 rotate-45 mx-auto -mt-1 shadow-xl" />
                                 </div>
 
                                 {/* The Bar */}
                                 <div 
                                     className={clsx(
                                         "w-full rounded-t-lg transition-all duration-1000 ease-out relative overflow-hidden",
-                                        value > 0 ? "bg-forest shadow-lg" : "bg-stone-100 h-1"
+                                        value > 0 ? "bg-primary shadow-lg" : "bg-zinc-100 h-1"
                                     )}
                                     style={{ 
                                         height: value > 0 ? `${percentage}%` : '4px',
@@ -92,7 +92,7 @@ export default function RevenueTrendChart({
 
                             {/* Date Label (Only show every 2-3 days on small screens) */}
                             <div className="mt-4 hidden sm:block">
-                                <p className="text-[8px] font-black text-burgundy/30 uppercase tracking-tighter text-center scale-90">
+                                <p className="text-[8px] font-black text-zinc-400 uppercase tracking-tighter text-center scale-90">
                                     {idx % 2 === 0 ? formatDate(item.date).split(',')[0] : ''}
                                 </p>
                             </div>
@@ -102,15 +102,15 @@ export default function RevenueTrendChart({
             </div>
 
             {/* Legend / Info */}
-            <div className="mt-8 pt-6 border-t border-burgundy/5 flex items-center justify-between">
+            <div className="mt-8 pt-6 border-t border-zinc-100 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-forest" />
-                        <span className="text-[9px] font-black text-burgundy/40 uppercase tracking-widest">{type === 'revenue' ? 'Earnings' : 'Sessions'}</span>
+                        <div className="w-2 h-2 rounded-full bg-primary" />
+                        <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">{type === 'revenue' ? 'Earnings' : 'Sessions'}</span>
                     </div>
                 </div>
-                <div className="px-3 py-1 bg-stone-50 rounded-lg border border-burgundy/5">
-                    <span className="text-[9px] font-black text-forest uppercase tracking-widest">Active Trends</span>
+                <div className="px-3 py-1 bg-zinc-50 rounded-lg border border-zinc-100">
+                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">Active Trends</span>
                 </div>
             </div>
         </div>

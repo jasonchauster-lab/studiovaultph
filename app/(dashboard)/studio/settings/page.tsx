@@ -1,38 +1,24 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
-import StudioSettingsForm from '@/components/studio/StudioSettingsForm'
-import ReferralCard from '@/components/customer/ReferralCard'
+import SettingsGrid from '@/components/studio/settings/SettingsGrid'
+import { getCachedUser } from '@/lib/studio/data'
 
 export default async function StudioSettingsPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        redirect('/login')
-    }
-
-    const headersList = await headers()
-    const origin = `${headersList.get('x-forwarded-proto') ?? 'http'}://${headersList.get('host') ?? 'localhost:3000'}`
-
-    const [{ data: studio, error }, { data: profile }] = await Promise.all([
-        supabase.from('studios').select('*').eq('owner_id', user.id).single(),
-        supabase.from('profiles').select('referral_code').eq('id', user.id).single(),
-    ])
-
-    if (error || !studio) {
-        return <div className="p-8 text-charcoal-500">Studio not found. Please contact support.</div>
-    }
+    const user = await getCachedUser()
+    if (!user) redirect('/login')
 
     return (
-        <div className="space-y-6 max-w-3xl mx-auto py-6 sm:py-10">
-            <div>
-                <h1 className="text-2xl sm:text-3xl font-serif text-charcoal-900 mb-1">Studio Settings</h1>
-                <p className="text-charcoal-600 text-sm">Manage your studio details, equipment, and inventory.</p>
+        <div className="space-y-12 py-10 px-6 max-w-7xl mx-auto min-h-screen">
+            <div className="space-y-2">
+                <h1 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tightest leading-tight">
+                    Studio <span className="text-zinc-300">Settings</span>
+                </h1>
+                <p className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.3em] max-w-2xl">
+                    Configure your studio management preferences, billing, and marketplace presence.
+                </p>
             </div>
 
-            <StudioSettingsForm studio={studio} />
-
+            <SettingsGrid />
         </div>
     )
 }

@@ -45,20 +45,21 @@ export default async function CustomerDashboard({
 
     if (!user) redirect('/login')
 
-    // Fire-and-forget: expire abandoned bookings to release slots.
-    import('@/lib/wallet').then(({ expireAbandonedBookings }) =>
-        expireAbandonedBookings().catch(() => {})
-    )
+
 
     // 1. Fetch main datasets in parallel
     const [{ data: profile }, { data: allLocationsRaw }, { data: ratingsRows }] = await Promise.all([
-        supabase.from('profiles').select('role, date_of_birth, contact_number').eq('id', user.id).maybeSingle(),
+        supabase.from('profiles').select('role, date_of_birth, contact_number, waiver_signed_at').eq('id', user.id).maybeSingle(),
         supabase.from('studios').select('location').eq('verified', true),
         supabase.from('reviewer_ratings').select('reviewee_id, average, count')
     ])
 
     if (!profile?.date_of_birth || !profile?.contact_number) {
         redirect('/customer/onboarding')
+    }
+
+    if (!profile?.waiver_signed_at) {
+        redirect('/customer/onboarding/waiver')
     }
 
     const availableLocations: string[] = [...new Set((allLocationsRaw || []).map((s: any) => s.location).filter(Boolean))]
@@ -81,8 +82,9 @@ export default async function CustomerDashboard({
     } else {
         const { data } = await supabase
             .from('studios')
-            .select('*, profiles!owner_id!inner(available_balance, is_suspended)')
+            .select('id, name, location, logo_url, banner_url, description, equipment, amenities, owner_id, reformers_count, profiles!owner_id!inner(available_balance, is_suspended)')
             .eq('verified', true)
+            .eq('marketplace_eligibility', 'active')
             .eq('profiles.is_suspended', false)
             .gte('profiles.available_balance', 0)
         rawStudiosData = data || []
@@ -121,7 +123,7 @@ export default async function CustomerDashboard({
     } else {
         const { data } = await supabase
             .from('profiles')
-            .select('*')
+            .select('id, full_name, avatar_url, bio, rates, teaching_equipment, instagram_handle, banner_url, offers_home_sessions, is_online, home_base_lat, home_base_lng, max_travel_km, role')
             .eq('role', 'instructor')
             .is('is_suspended', false)
         
@@ -195,9 +197,11 @@ export default async function CustomerDashboard({
 
         let slotQuery = supabase
             .from('slots')
-            .select(`*, studios!inner(*)`)
+            .select(`id, date, start_time, end_time, equipment, is_available, capacity, pax_capacity, session_type, studios!inner(id, name, location, logo_url, hourly_rate, verified, marketplace_eligibility), outlets!inner(id, name, is_marketplace_sync_enabled)`)
             .eq('is_available', true)
             .eq('studios.verified', true)
+            .eq('studios.marketplace_eligibility', 'active')
+            .eq('outlets.is_marketplace_sync_enabled', true)
             .or(`date.gt.${nowManilaDate},and(date.eq.${nowManilaDate},start_time.gte.${nowManilaTime})`)
             .order('date', { ascending: true })
             .order('start_time', { ascending: true })
@@ -240,15 +244,22 @@ export default async function CustomerDashboard({
     })
 
     // To ensure the UI has certifications, join them back if they aren't there
-    const instructorsWithCerts = await Promise.all(filteredInstructors.map(async (inst) => {
-        if (inst.certifications) return inst;
-        const { data: certs } = await supabase
+    const instructorIds = filteredInstructors.filter(i => !i.certifications).map(i => i.id)
+    let certsMap: Record<string, any[]> = {}
+    if (instructorIds.length > 0) {
+        const { data: allCerts } = await supabase
             .from('certifications')
             .select('*')
-            .eq('instructor_id', inst.id)
-            .eq('verified', true);
-        return { ...inst, certifications: certs || [] };
-    }));
+            .in('instructor_id', instructorIds)
+            .eq('verified', true)
+        allCerts?.forEach(c => {
+            if (!certsMap[c.instructor_id]) certsMap[c.instructor_id] = []
+            certsMap[c.instructor_id].push(c)
+        })
+    }
+    const instructorsWithCerts = filteredInstructors.map(inst =>
+        inst.certifications ? inst : { ...inst, certifications: certsMap[inst.id] || [] }
+    )
 
     const instructors = instructorsWithCerts;
 

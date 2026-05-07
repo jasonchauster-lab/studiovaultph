@@ -122,34 +122,27 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
     }, [baseFilteredBookings])
 
     return (
-        <div className="space-y-8 pb-48">
-            <BookingFilter key={resetKey} onFilterChange={setFilters} />
+        <div className="space-y-12">
+            <div className="flex items-center justify-between gap-4">
+                <BookingFilter key={resetKey} onFilterChange={setFilters} />
+                {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
+                    <button 
+                        onClick={() => setResetKey(prev => prev + 1)}
+                        className="px-4 py-2 bg-zinc-100 text-zinc-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-zinc-200 transition-all border border-zinc-200"
+                    >
+                        Reset
+                    </button>
+                )}
+            </div>
 
-            <div className="space-y-10">
+            <div className="space-y-12">
                 {sortedDates.length === 0 ? (
-                    <div className="min-h-[220px] py-12 flex flex-col items-center justify-center text-center bg-white/40 backdrop-blur-sm rounded-[2rem] border-2 border-dashed border-charcoal/10 mx-4 sm:mx-0 px-6">
-                        <div className="w-14 h-14 bg-forest/5 rounded-full flex items-center justify-center mb-5 ring-1 ring-forest/10">
-                            <CalendarX2 className="w-7 h-7 text-forest/40" />
+                    <div className="py-20 flex flex-col items-center justify-center text-center">
+                        <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center mb-6 border border-zinc-100">
+                            <CalendarX2 className="w-8 h-8 text-zinc-300" />
                         </div>
-                        <h3 className="text-base font-serif font-bold text-charcoal-900 mb-2">No sessions found</h3>
-                        <p className="text-[11px] text-charcoal/50 max-w-[240px] mb-8 leading-relaxed">Try adjusting your filters or adding a new availability slot to your studio.</p>
-                        
-                        <div className="flex flex-col sm:flex-row items-center gap-4">
-                            {(filters.status !== 'all' || filters.dateRange.from || filters.dateRange.to) && (
-                                <button 
-                                    onClick={() => setResetKey(prev => prev + 1)}
-                                    className="px-5 py-2.5 bg-off-white text-charcoal/60 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-forest/5 transition-all border border-border-grey shadow-sm"
-                                >
-                                    Clear Filters
-                                </button>
-                            )}
-                            <Link
-                                href="/studio"
-                                className="px-5 py-2.5 bg-forest text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-tight"
-                            >
-                                Add Slot
-                            </Link>
-                        </div>
+                        <h3 className="text-xl font-black text-zinc-900 mb-2">No sessions found</h3>
+                        <p className="text-[11px] text-zinc-400 max-w-[260px] leading-relaxed uppercase tracking-widest font-bold">Try adjusting your filters or checking a different date range.</p>
                     </div>
                 ) : (
                     sortedDates.map((dateKey) => {
@@ -157,33 +150,31 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                         const dateObj = new Date(`${dateKey}T00:00:00+08:00`)
                         
                         return (
-                            <div key={dateKey} className="space-y-4">
-                                {/* Sticky Date Header */}
-                                <div className="sticky top-0 z-20 py-3 bg-cream-50/95 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0">
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex flex-col items-center justify-center bg-forest text-white rounded-2xl w-12 h-12 shrink-0 shadow-lg shadow-forest/20 group-hover:scale-105 transition-transform">
-                                            <span className="text-[8px] font-black uppercase tracking-[0.2em] leading-none opacity-70">
-                                                {dateObj.toLocaleDateString('en-PH', { month: 'short' })}
+                            <div key={dateKey} className="space-y-6">
+                                {/* Modern Date Header */}
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col items-center justify-center bg-zinc-900 text-white rounded-2xl w-14 h-14 shrink-0 shadow-lg shadow-zinc-200">
+                                        <span className="text-[9px] font-black uppercase tracking-widest opacity-60">
+                                            {dateObj.toLocaleDateString('en-PH', { month: 'short' })}
+                                        </span>
+                                        <span className="text-xl font-black leading-none mt-0.5">
+                                            {dateObj.toLocaleDateString('en-PH', { day: 'numeric' })}
+                                        </span>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-3">
+                                            <h2 className="text-sm font-black text-zinc-900 uppercase tracking-widest">
+                                                {dateObj.toLocaleDateString('en-PH', { weekday: 'long' })}
+                                            </h2>
+                                            <div className="h-px flex-1 bg-zinc-100" />
+                                            <span className="text-[9px] text-zinc-400 font-black uppercase tracking-[0.2em] bg-zinc-50 px-3 py-1 rounded-full border border-zinc-100">
+                                                {dayBookings.length} {dayBookings.length === 1 ? 'SESSION' : 'SESSIONS'}
                                             </span>
-                                            <span className="text-lg font-serif font-bold leading-none mt-1">
-                                                {dateObj.toLocaleDateString('en-PH', { day: 'numeric' })}
-                                            </span>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2">
-                                                <h2 className="text-[10px] font-black text-charcoal uppercase tracking-[0.2em]">
-                                                    {dateObj.toLocaleDateString('en-PH', { weekday: 'long' })}
-                                                </h2>
-                                                <div className="h-px flex-1 bg-gradient-to-r from-charcoal/10 via-charcoal/5 to-transparent" />
-                                                <span className="text-[8px] text-charcoal/30 font-bold uppercase tracking-widest bg-charcoal/5 px-2 py-0.5 rounded-full shrink-0">
-                                                    {dayBookings.length} {dayBookings.length === 1 ? 'SESSION' : 'SESSIONS'}
-                                                </span>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {dayBookings.map((booking: any) => (
                                         <SessionCard
                                             key={booking.id}
@@ -207,7 +198,7 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                 onClose={() => setCancellingBooking(null)}
                 onConfirm={handleCancelConfirm}
                 title="Cancel Session"
-                description="Are you sure you want to cancel this session? A 100% refund will be issued to the client immediately. The instructor will also be notified."
+                description="Are you sure you want to cancel this session? A 100% refund will be issued to the client immediately."
                 penaltyNotice={
                     (() => {
                         if (!cancellingBooking) return null
@@ -219,14 +210,13 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
 
                         if (isLate) {
                             const studioFee = cancellingBooking.price_breakdown?.studio_fee || 0
-                            return `Late Cancellation Displacement Fee: ₱${studioFee.toLocaleString()} will be deducted from your wallet and credited to the instructor.`
+                            return `Late Cancellation Fee: ₱${studioFee.toLocaleString()} will be charged.`
                         }
                         return null
                     })() || undefined
                 }
             />
 
-            {/* Instructor Profile Modal */}
             <InstructorPreviewModal 
                 instructor={selectedInstructor}
                 details={instructorDetails}
@@ -234,66 +224,60 @@ export default function StudioRentalList({ bookings, currentUserId }: StudioRent
                 onClose={() => { setSelectedInstructor(null); setInstructorDetails(null) }}
             />
 
-            {/* Client Medical Modal */}
             {selectedClient && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-burgundy/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
-                    <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden p-6 relative" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setSelectedClient(null)} className="absolute top-4 right-4 text-burgundy/40 hover:text-burgundy transition-colors"><X className="w-5 h-5" /></button>
-                        <div className="flex flex-col items-center mt-2 mb-6 text-center">
-                            <div className="relative w-20 h-20 rounded-full overflow-hidden mb-3 border border-cream-200 bg-cream-50">
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-zinc-900/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setSelectedClient(null)}>
+                    <div className="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl overflow-hidden p-8 relative" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedClient(null)} className="absolute top-6 right-6 text-zinc-400 hover:text-zinc-900 transition-colors"><X className="w-5 h-5" /></button>
+                        <div className="flex flex-col items-center mb-8 text-center">
+                            <div className="relative w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-zinc-100 shadow-sm">
                                 <Avatar 
                                     src={selectedClient.avatar_url} 
                                     fallbackName={selectedClient.full_name} 
-                                    size={80} 
+                                    size={96} 
                                 />
                             </div>
-                            <h3 className="text-xl font-serif text-burgundy">{selectedClient.full_name}</h3>
+                            <h3 className="text-2xl font-black text-zinc-900 tracking-tight">{selectedClient.full_name}</h3>
                             <div className="flex items-center gap-2 mt-1">
-                                <p className="text-sm text-slate">{selectedClient.email}</p>
-                                {selectedClient.date_of_birth && (
-                                    <>
-                                        <span className="text-border-grey">•</span>
-                                        <p className="text-sm font-bold text-gold">{calculateAge(selectedClient.date_of_birth)} years old</p>
-                                    </>
-                                )}
+                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{selectedClient.email}</p>
                             </div>
                         </div>
-                        <div className="bg-pastel-blue p-4 rounded-xl border border-border-grey mb-3">
-                            <h4 className="text-sm font-bold text-burgundy/70 mb-1">About</h4>
-                            {selectedClient.bio
-                                ? <p className="text-sm text-slate leading-relaxed italic">"{selectedClient.bio}"</p>
-                                : <p className="text-sm text-slate italic">No bio provided.</p>
-                            }
+                        
+                        <div className="space-y-4">
+                            <div className="bg-zinc-50 p-5 rounded-2xl border border-zinc-100">
+                                <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">About Client</h4>
+                                <p className="text-sm text-zinc-600 leading-relaxed italic">{selectedClient.bio || 'No bio provided.'}</p>
+                            </div>
+                            
+                            {(() => {
+                                const conditions = typeof selectedClient.medical_conditions === 'string'
+                                    ? selectedClient.medical_conditions.split(',').map((c: string) => c.trim())
+                                    : Array.isArray(selectedClient.medical_conditions)
+                                        ? selectedClient.medical_conditions
+                                        : [];
+
+                                const displayConditions = conditions
+                                    .map((c: string) => c === 'Others' ? selectedClient.other_medical_condition : c)
+                                    .filter(Boolean)
+                                    .join(', ');
+
+                                return (
+                                    <div className={clsx("p-5 rounded-2xl border", displayConditions ? "bg-red-50 border-red-100" : "bg-zinc-50 border-zinc-100")}>
+                                        <h4 className={clsx("text-[10px] font-black uppercase tracking-widest mb-2 flex items-center gap-2", displayConditions ? "text-red-800" : "text-zinc-400")}>
+                                            <AlertCircle className="w-3.5 h-3.5" /> Medical Conditions
+                                        </h4>
+                                        <p className={clsx("text-sm leading-relaxed", displayConditions ? "text-red-700" : "text-zinc-500 italic")}>
+                                            {displayConditions || 'None reported.'}
+                                        </p>
+                                    </div>
+                                )
+                            })()}
                         </div>
-                        {(() => {
-                            const conditions = typeof selectedClient.medical_conditions === 'string'
-                                ? selectedClient.medical_conditions.split(',').map((c: string) => c.trim())
-                                : Array.isArray(selectedClient.medical_conditions)
-                                    ? selectedClient.medical_conditions
-                                    : [];
 
-                            const displayConditions = conditions
-                                .map((c: string) => c === 'Others' ? selectedClient.other_medical_condition : c)
-                                .filter(Boolean)
-                                .join(', ');
-
-                            return displayConditions ? (
-                                <div className="bg-red-50 p-4 rounded-xl border border-red-100 mb-2">
-                                    <h4 className="text-sm font-bold text-red-800 mb-1 flex items-center gap-1.5"><AlertCircle className="w-4 h-4" /> Medical Conditions</h4>
-                                    <p className="text-sm text-red-700 whitespace-pre-wrap leading-relaxed">{displayConditions}</p>
-                                </div>
-                            ) : (
-                                <div className="bg-pastel-blue p-4 rounded-xl border border-border-grey mb-2">
-                                    <h4 className="text-sm font-bold text-burgundy/70 mb-1">Medical Conditions</h4>
-                                    <p className="text-sm text-slate italic">None reported.</p>
-                                </div>
-                            );
-                        })()}
                         <button
                             onClick={() => setSelectedClient(null)}
-                            className="w-full mt-4 py-3 bg-forest text-white rounded-xl font-bold hover:brightness-110 transition-colors"
+                            className="w-full mt-8 py-4 bg-zinc-900 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-zinc-800 transition-colors shadow-lg shadow-zinc-200"
                         >
-                            Close
+                            Close Details
                         </button>
                     </div>
                 </div>
@@ -315,110 +299,97 @@ const SessionCard = memo(({ booking, currentUserId, onInstructorClick, onClientC
     return (
         <div
             className={clsx(
-                "atelier-card overflow-hidden group relative mx-4 sm:mx-0",
+                "bg-white rounded-3xl border border-zinc-100 p-5 hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-50/20 transition-all duration-300 group relative",
                 isCancelled && "opacity-60 grayscale-[0.3]"
             )}
         >
-            {/* Top accent for status */}
+            {/* Status Ribbon */}
             <div className={clsx(
-                'h-0.5 w-full',
-                booking.status === 'completed' && booking.funds_unlocked ? 'bg-[#5C8A42]' :
+                'absolute top-0 right-8 h-1 w-12 rounded-b-full',
+                booking.status === 'completed' && booking.funds_unlocked ? 'bg-indigo-500' :
                 booking.status === 'completed' ? 'bg-amber-400' :
-                booking.status === 'approved' ? 'bg-blue-400' :
-                'bg-red-300'
+                booking.status === 'approved' ? 'bg-emerald-400' :
+                'bg-red-400'
             )} />
 
-            <div className="p-3.5">
-                {/* Row 1: Time + Status Badge */}
-                <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-1 h-1 rounded-full bg-forest/40" />
-                        <span className="text-[10px] font-black text-charcoal/60 uppercase tracking-widest">
+            <div className="space-y-5">
+                {/* Time & Earnings */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5 text-zinc-300" />
+                        <span className="text-xs font-black text-zinc-900 uppercase tracking-widest">
                             {start.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true })}
                         </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                        {['completed', 'approved'].includes(booking.status) && (
-                            <div className="flex items-baseline gap-1 bg-forest/5 px-2 py-0.5 rounded-full border border-forest/10">
-                                <span className="text-[6px] font-black text-forest/40 uppercase tracking-widest">EARNED</span>
-                                <span className="text-[10px] font-black text-forest">₱{Number(studioFee || booking.total_price || 0).toLocaleString()}</span>
-                            </div>
-                        )}
-                        <span className={clsx(
-                            'px-2 py-0.5 text-[7px] font-bold uppercase rounded-full tracking-widest border inline-flex items-center gap-1 shrink-0',
-                            booking.status === 'completed'
-                                ? (booking.funds_unlocked
-                                    ? 'border-[#b8d49a] text-forest bg-sage/20'
-                                    : 'bg-amber-100/70 text-amber-700 border-amber-200')
-                                : booking.status === 'approved' ? 'bg-blue-100/70 text-blue-700 border-blue-200' :
-                                    'bg-red-100/70 text-red-600 border-red-200'
-                        )}>
-                            {booking.status === 'completed' && (
-                                booking.funds_unlocked ? <Award className="w-2 h-2" /> : <Clock className="w-2 h-2" />
-                            )}
-                            {['completed', 'approved'].includes(booking.status)
-                                ? (booking.status === 'completed'
-                                    ? (booking.funds_unlocked ? 'Unlocked' : 'Funds Held')
-                                    : 'Upcoming')
-                                : 'Cancelled'}
-                        </span>
-                    </div>
+                    {['completed', 'approved'].includes(booking.status) && (
+                        <div className="text-right">
+                            <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Earnings</p>
+                            <p className="text-sm font-black text-zinc-900">₱{Number(studioFee || 0).toLocaleString()}</p>
+                        </div>
+                    )}
                 </div>
 
-                {/* Row 2: Client Name */}
+                {/* Client Info */}
                 {client && (
-                    <button onClick={() => onClientClick(client)} className="flex items-center gap-2 hover:opacity-75 transition-opacity mb-2.5 min-w-0 group/client">
-                        <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0 ring-1 ring-charcoal/5">
+                    <button onClick={() => onClientClick(client)} className="flex items-center gap-3 w-full text-left group/client">
+                        <div className="relative w-10 h-10 rounded-2xl overflow-hidden shrink-0 border border-zinc-100">
                             <Avatar 
                                 src={client.avatar_url} 
                                 fallbackName={client.full_name} 
-                                size={24} 
+                                size={40} 
                             />
                         </div>
-                        <span className="text-sm font-bold text-charcoal-900 truncate group-hover/client:text-forest transition-colors">{client.full_name}</span>
+                        <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-black text-zinc-900 truncate group-hover/client:text-indigo-600 transition-colors tracking-tight">{client.full_name}</h4>
+                            <div className="flex items-center gap-2">
+                                <span className={clsx(
+                                    "text-[8px] font-black uppercase tracking-widest",
+                                    booking.status === 'completed' ? "text-indigo-500" :
+                                    booking.status === 'approved' ? "text-emerald-500" : "text-red-500"
+                                )}>
+                                    {booking.status === 'completed' ? (booking.funds_unlocked ? 'Payout Ready' : 'Funds Held') : booking.status.replace('_', ' ')}
+                                </span>
+                            </div>
+                        </div>
                         {client?.medical_conditions && (
-                            <span className="ml-1 px-1.5 py-0.5 bg-red-50 text-red-500 text-[6px] font-black uppercase rounded border border-red-100 flex items-center gap-0.5 tracking-widest shrink-0">
-                                <AlertCircle className="w-2 h-2" /> MEDICAL
-                            </span>
+                            <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" title="Medical Alert" />
                         )}
                     </button>
                 )}
 
-                {/* Row 3: Instructor + Equipment */}
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-4">
-                    <button onClick={() => onInstructorClick(instructor)} className="text-[10px] font-semibold text-charcoal/50 hover:text-forest transition-colors flex items-center gap-1 group/inst">
-                        <span className="opacity-60">instructor:</span>
-                        <span className="font-bold text-charcoal/70 group-hover/inst:text-forest">{instructor?.full_name || 'Instructor'}</span>
-                    </button>
-                    <span className="text-charcoal/20 text-[10px]">·</span>
-                    <span className="text-[9px] font-bold text-charcoal/50 uppercase tracking-wider bg-off-white px-1.5 py-0.5 rounded border border-border-grey/30">
-                        {Array.isArray(slot?.equipment) && slot.equipment.length > 0
-                            ? slot.equipment[0]
-                            : (booking.price_breakdown?.equipment || booking.equipment || 'Session')}
-                        <span className="font-medium opacity-50 ml-0.5">({booking.quantity || 1}x)</span>
-                    </span>
+                {/* Meta Info */}
+                <div className="flex flex-col gap-2 pt-2 border-t border-zinc-50">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Instructor</span>
+                        <button onClick={() => onInstructorClick(instructor)} className="text-[10px] font-black text-zinc-900 hover:text-indigo-600 transition-colors">
+                            {instructor?.full_name || 'Unassigned'}
+                        </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Session</span>
+                        <span className="text-[10px] font-black text-zinc-900 uppercase tracking-widest">
+                            {Array.isArray(slot?.equipment) && slot.equipment.length > 0 ? slot.equipment[0] : 'Standard'} ({booking.quantity}x)
+                        </span>
+                    </div>
                 </div>
 
-                {/* Row 4: Actions */}
-                <div className="flex items-center gap-2">
-
+                {/* Actions */}
+                <div className="flex items-center gap-2 pt-2">
                     {instructor && instructor.id !== currentUserId && (
                         <StudioChatButton
                             bookingId={booking.id}
                             currentUserId={currentUserId}
                             partnerId={instructor.id}
                             partnerName={instructor.full_name || 'Instructor'}
-                            label="Message"
+                            label="Message Staff"
                             variant="antigravity"
-                            iconType="instructor"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-forest hover:text-white border border-border-grey hover:border-forest transition-all rounded-lg font-bold text-[9px] uppercase tracking-wider text-charcoal-500 shadow-sm active:scale-95"
+                            className="flex-1 px-4 py-2 bg-zinc-900 text-white rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-zinc-800 transition-all text-center"
                         />
                     )}
                     {booking.status === 'approved' && start > now && (
                         <button
                             onClick={() => onCancelClick(booking)}
-                            className="px-3 py-1.5 bg-off-white text-red-500 border border-red-100 rounded-lg text-[9px] font-semibold uppercase tracking-wide hover:bg-red-50 transition-all"
-                            title="Cancel Session"
+                            className="px-4 py-2 bg-white text-red-500 border border-red-100 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-red-50 transition-all shadow-sm"
                         >
                             Cancel
                         </button>

@@ -2,9 +2,11 @@
 import { TrendingUp, CreditCard, Wallet, Clock, Info, X, ShieldCheck, AlertCircle, ArrowUpRight } from 'lucide-react'
 import PayoutRequestModal from './PayoutRequestModal'
 import TopUpModal from './TopUpModal'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { topUpWallet } from '@/app/(dashboard)/customer/actions'
+import { createClient } from '@/lib/supabase/client'
+import { useToast } from '@/components/ui/Toast'
 
 interface EarningsOverviewProps {
     studioId: string
@@ -26,6 +28,10 @@ interface EarningsOverviewProps {
 import Sparkline from './Sparkline'
 
 export default function EarningsOverview({ studioId, summary, userEmail, transactions = [] }: EarningsOverviewProps) {
+    const supabase = createClient()
+    const { toast } = useToast()
+    const router = useRouter()
+    
     // Process transactions for sparkline
     const getTrendData = () => {
         if (!transactions || transactions.length === 0) return [0, 0, 0, 0, 0, 0, 0]
@@ -51,7 +57,31 @@ export default function EarningsOverview({ studioId, summary, userEmail, transac
     const [showInfoModal, setShowInfoModal] = useState(false)
     const [showTopUpModal, setShowTopUpModal] = useState(false)
     const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false)
-    const router = useRouter()
+
+    // Reactive Revenue Updates
+    useEffect(() => {
+        const channel = supabase
+            .channel(`studio_revenue_${studioId}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'customer_plans',
+                filter: `studio_id=eq.${studioId}`
+            }, () => {
+                router.refresh()
+            })
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'bookings',
+                filter: `studio_id=eq.${studioId}`
+            }, () => {
+                router.refresh()
+            })
+            .subscribe()
+
+        return () => { channel.unsubscribe() }
+    }, [studioId, router, supabase])
 
     const handleTopUp = () => {
         setShowTopUpModal(true)
@@ -115,7 +145,7 @@ export default function EarningsOverview({ studioId, summary, userEmail, transac
                             </div>
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">AVAILABLE FUNDS</span>
+                                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">MARKETPLACE WALLET</span>
                                     <button
                                         onClick={() => setShowInfoModal(true)}
                                         className="text-white/20 hover:text-white transition-colors"
@@ -123,7 +153,7 @@ export default function EarningsOverview({ studioId, summary, userEmail, transac
                                         <Info className="w-3.5 h-3.5" />
                                     </button>
                                 </div>
-                                <div className="h-px w-full bg-gold/20 mt-1" />
+                                <p className="text-[9px] font-bold text-gold/60 uppercase tracking-widest mt-1">Held by StudioVault for Payout</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">

@@ -51,7 +51,7 @@ export const createAdminClient = cache(() => {
     }
 
     if (!key) {
-        throw new Error('MISSING_ENV: DASHBOARD_MASTER_KEY is not defined.')
+        throw new Error('MISSING_ENV: DASHBOARD_MASTER_KEY or SUPABASE_SERVICE_ROLE_KEY is not defined.')
     }
 
     return createSupabaseClient(url, key)
