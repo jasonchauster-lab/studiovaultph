@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { CheckCircle, AlertCircle, Info, X } from 'lucide-react'
 import clsx from 'clsx'
 
-type ToastType = 'success' | 'error' | 'info'
+type ToastType = 'success' | 'error' | 'info' | 'warning'
 
 interface Toast {
   id: string
@@ -57,12 +57,14 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
               "pointer-events-auto flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl border bg-white/90 backdrop-blur-md animate-in slide-in-from-right-8 fade-in duration-300 min-w-[300px]",
               t.type === 'success' && "border-forest/20 text-forest",
               t.type === 'error' && "border-red-200 text-red-600",
+              t.type === 'warning' && "border-amber-200 text-amber-600",
               t.type === 'info' && "border-primary/20 text-primary"
             )}
           >
             <div className="shrink-0">
               {t.type === 'success' && <CheckCircle className="w-5 h-5" />}
               {t.type === 'error' && <AlertCircle className="w-5 h-5" />}
+              {t.type === 'warning' && <AlertCircle className="w-5 h-5" />}
               {t.type === 'info' && <Info className="w-5 h-5" />}
             </div>
             <p className="text-[11px] font-black uppercase tracking-[0.15em] flex-1">{t.message}</p>
