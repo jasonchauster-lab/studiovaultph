@@ -213,6 +213,8 @@ export async function generateRecurringSlots(params: {
     outletId: string
     instructorId?: string
     paxCapacity: number
+    equipment?: string[]
+    quantity?: number
 }) {
     const supabase = await createClient()
     const { isOwner, permissions } = await verifyStudioAccess(params.studioId)
@@ -220,7 +222,7 @@ export async function generateRecurringSlots(params: {
         return { error: 'Permission denied.' }
     }
 
-    const { studioId, startDate, endDate, days, startTime, serviceId, outletId, instructorId, paxCapacity } = params
+    const { studioId, startDate, endDate, days, startTime, serviceId, outletId, instructorId, paxCapacity, equipment, quantity } = params
 
     // 1. Fetch Service Details for Duration
     const { data: service } = await supabase
@@ -261,7 +263,7 @@ export async function generateRecurringSlots(params: {
                     p_date: dateStr,
                     p_start_time: startTime.padStart(5, '0'),
                     p_end_time: endTimeStr,
-                    p_equipment: {}, // Assume empty or handle via another param if needed
+                    p_equipment: equipment ? Object.fromEntries(equipment.map(eq => [eq.toUpperCase(), quantity || 1])) : {},
                     p_pax_capacity: paxCapacity,
                     p_waitlist_pax_capacity: 0,
                     p_calendar_color: null,

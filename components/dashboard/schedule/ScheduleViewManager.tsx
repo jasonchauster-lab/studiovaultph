@@ -266,6 +266,7 @@ export const ScheduleViewManager = (props: ScheduleViewManagerProps) => {
                                 studioId={props.studioId} 
                                 availableEquipment={props.availableEquipment}
                                 services={props.services}
+                                outletId={props.outletId || ''}
                             />
                         </div>
                     </div>

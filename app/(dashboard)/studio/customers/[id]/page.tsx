@@ -17,6 +17,25 @@ export default async function CustomerDetailPage({ params }: CustomerPageProps) 
     // Use Admin Client to bypass RLS for CRM data
     const supabaseAdmin = await createAdminClient()
 
+    // Fetch the studio context (handle both Owner and Staff)
+    let { data: studio } = await supabaseAdmin
+        .from('studios')
+        .select('id, name')
+        .eq('owner_id', user.id)
+        .maybeSingle()
+
+    if (!studio) {
+        const { data: membership } = await supabaseAdmin
+            .from('studio_members')
+            .select('studio_id, studios(id, name)')
+            .eq('user_id', user.id)
+            .maybeSingle()
+        
+        if (membership?.studios) {
+            studio = membership.studios as any
+        }
+    }
+
     // Fetch profile
     const { data: profile } = await supabaseAdmin
         .from('profiles')
@@ -39,27 +58,6 @@ export default async function CustomerDetailPage({ params }: CustomerPageProps) 
         .eq('client_id', id)
         .eq('studio_id', studio?.id)
         .order('created_at', { ascending: false })
-
-    // Fetch the owner's studio context
-    // Fetch the studio context (handle both Owner and Staff)
-    let { data: studio } = await supabaseAdmin
-        .from('studios')
-        .select('id, name')
-        .eq('owner_id', user.id)
-        .maybeSingle()
-
-    if (!studio) {
-        // Check if user is a staff member
-        const { data: membership } = await supabaseAdmin
-            .from('studio_members')
-            .select('studio_id, studios(id, name)')
-            .eq('user_id', user.id)
-            .maybeSingle()
-        
-        if (membership?.studios) {
-            studio = membership.studios as any
-        }
-    }
 
     // Fetch transactions from bookings
     const { data: bookingTransactions } = await supabaseAdmin

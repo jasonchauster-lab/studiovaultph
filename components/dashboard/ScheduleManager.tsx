@@ -9,9 +9,10 @@ interface ScheduleManagerProps {
     availableEquipment: string[];
     inventory?: Record<string, any>;
     services: Array<{ id: string; name: string; type: string; difficulty: string }>;
+    outletId: string;
 }
 
-export default function ScheduleManager({ studioId, availableEquipment, inventory, services }: ScheduleManagerProps) {
+export default function ScheduleManager({ studioId, availableEquipment, inventory, services, outletId }: ScheduleManagerProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -71,10 +72,10 @@ export default function ScheduleManager({ studioId, availableEquipment, inventor
                 endDate,
                 days: selectedDays,
                 startTime,
-                endTime,
-                equipment: selectedEquipment,
                 quantity: quantity,
-                serviceId: selectedServiceId
+                serviceId: selectedServiceId,
+                outletId: outletId,
+                paxCapacity: 1 // Default pax capacity for bulk generation
             });
 
             if (result.success) {
