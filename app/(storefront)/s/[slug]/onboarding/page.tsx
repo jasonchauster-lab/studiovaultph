@@ -11,7 +11,8 @@ export default async function StorefrontOnboardingPage(props: {
 }) {
     const { slug } = await props.params
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) {
         redirect(`/s/${slug}/login`)

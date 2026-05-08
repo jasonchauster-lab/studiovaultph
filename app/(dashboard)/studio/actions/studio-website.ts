@@ -11,7 +11,8 @@ import { ServerActionResponse } from './types'
 
 export async function updateStudioWebsite(formData: FormData): Promise<ServerActionResponse> {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const studioId = formData.get('studioId') as string

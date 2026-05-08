@@ -8,7 +8,8 @@ export default async function ServicesPage() {
     if (!studio) notFound()
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) redirect('/login')
 
     // Fetch existing services from the new services table

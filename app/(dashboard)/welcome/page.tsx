@@ -6,7 +6,8 @@ import { headers } from 'next/headers'
 
 export default async function WelcomePage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (user) {
         const { data: profile } = await supabase

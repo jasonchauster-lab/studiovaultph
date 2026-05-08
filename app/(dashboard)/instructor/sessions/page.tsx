@@ -7,7 +7,8 @@ import InstructorSessionList from '@/components/dashboard/InstructorSessionList'
 export default async function InstructorSessionsPage() {
     const supabase = await createClient()
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) {
         redirect('/login')

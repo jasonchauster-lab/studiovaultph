@@ -44,7 +44,7 @@ export default async function StudiosTab({ searchQuery = '' }: StudiosTabProps) 
     const studios = rawStudios || []
 
     // Handle signed URLs for documents
-    let signedUrls: Record<string, string> = {}
+    const signedUrls: Record<string, string> = {}
     const paths = studios.flatMap((s: any) => [
         s.bir_certificate_url,
         s.gov_id_url,

@@ -30,7 +30,8 @@ export async function addClientNote(formData: {
     isPrivate?: boolean
 }) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) throw new Error('Not authenticated')
 
     const { data, error } = await supabase
@@ -89,7 +90,8 @@ export async function addClientProgressPhoto(formData: {
     notes?: string
 }) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) throw new Error('Not authenticated')
 
     const { data, error } = await supabase

@@ -7,7 +7,8 @@ import { calculateDistance } from '@/lib/utils/location'
 
 export async function getInstructorProfile(instructorId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     const [profileRes, certsRes] = await Promise.all([
         supabase
@@ -35,7 +36,8 @@ export async function getInstructorProfile(instructorId: string) {
 
 export async function getStudioProfile(studioId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     const { data: studio } = await supabase
         .from('studios')
@@ -56,7 +58,8 @@ export async function findMatchingStudios(
     endTimeStr: string    // any time format
 ) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { studios: [] }
 
     // 1. Get Instructor Profile for Radius Logic

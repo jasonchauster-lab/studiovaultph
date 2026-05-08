@@ -8,7 +8,8 @@ import { formatManilaDateStr, toManilaDateStr, toManilaTimeString, formatTo12Hou
 
 export async function bookSlot(slotId: string, equipment: string, quantity: number = 1) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -305,7 +306,8 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
 
 export async function cancelBookingByInstructor(bookingId: string, reason: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     if (!reason?.trim()) return { error: 'Cancellation reason is required.' }
@@ -396,7 +398,8 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
 
 export async function checkInClient(bookingId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     const { data: booking, error: fetchError } = await supabase

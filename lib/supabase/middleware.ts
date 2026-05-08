@@ -51,7 +51,8 @@ export async function updateSession(request: NextRequest, customHeaders?: Header
         }
     )
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     userId = user?.id
 
     // ── Role & Identity Fetching ──────────────────────────────────

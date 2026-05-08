@@ -19,7 +19,8 @@ const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB Hard Limit
  */
 export async function updateStudioPaymentSettings(formData: FormData): Promise<ServerActionResponse> {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const studioId = formData.get('studioId') as string
@@ -106,7 +107,8 @@ export async function updateStudioPaymentSettings(formData: FormData): Promise<S
 
 export async function updateStudioPlan(studioId: string, newTier: string): Promise<ServerActionResponse> {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const { isOwner } = await verifyStudioAccess(studioId)

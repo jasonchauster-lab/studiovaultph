@@ -193,7 +193,7 @@ export const getTransformedImageUrl = (url: string, options: { width?: number; f
     const { width, format = 'jpg' } = options;
     
     // Convert object/public to render/image/public
-    let transformedUrl = url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
+    const transformedUrl = url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
     
     const params = new URLSearchParams();
     if (width) params.append('width', width.toString());

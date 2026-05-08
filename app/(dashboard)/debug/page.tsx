@@ -4,7 +4,8 @@ import { getCachedStudio } from '@/lib/studio/data'
 
 export default async function DebugPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     const studio = await getCachedStudio()
     
     const { data: allStudios } = await supabase

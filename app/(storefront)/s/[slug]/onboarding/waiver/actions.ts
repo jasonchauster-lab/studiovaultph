@@ -28,7 +28,8 @@ export async function signWaiverAction({
     parqAnswers
 }: SignWaiverParams) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) {
         return { error: 'You must be logged in to sign the waiver.' }

@@ -27,7 +27,8 @@ export default async function BranchSchedulePage(props: {
     if (!outlet) notFound()
 
     // 2. Resolve Profile
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     let profile = null
     let avatarUrl = ''
     if (user) {

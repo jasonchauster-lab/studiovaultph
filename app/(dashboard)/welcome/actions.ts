@@ -5,7 +5,8 @@ import { redirect } from 'next/navigation'
 
 export async function selectRole(role: 'customer' | 'instructor' | 'studio') {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) redirect('/login')
 

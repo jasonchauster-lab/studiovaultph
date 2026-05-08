@@ -70,7 +70,8 @@ export default async function InstructorProfilePage(props: {
         .lte('slots.date', endDateStr)
 
     // 2.6 Fetch this user's own pending bookings for resume-booking support
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     const { data: pendingBookings } = user ? await supabase
         .from('bookings')
         .select('id, slot_id, status, booked_slot_ids')

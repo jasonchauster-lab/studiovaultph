@@ -41,7 +41,8 @@ export default async function CustomerDashboard({
     const headersList = await headers()
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) redirect('/login')
 
@@ -90,7 +91,7 @@ export default async function CustomerDashboard({
         rawStudiosData = data || []
     }
 
-    let studios = rawStudiosData.filter(s => {
+    const studios = rawStudiosData.filter(s => {
         // A. Location Tags (Fallback)
         if (params.location && params.location !== 'all') {
             const matchesTag = params.location.includes(' - ') 
@@ -245,7 +246,7 @@ export default async function CustomerDashboard({
 
     // To ensure the UI has certifications, join them back if they aren't there
     const instructorIds = filteredInstructors.filter(i => !i.certifications).map(i => i.id)
-    let certsMap: Record<string, any[]> = {}
+    const certsMap: Record<string, any[]> = {}
     if (instructorIds.length > 0) {
         const { data: allCerts } = await supabase
             .from('certifications')

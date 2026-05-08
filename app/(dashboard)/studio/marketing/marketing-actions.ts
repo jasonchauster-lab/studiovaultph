@@ -19,7 +19,8 @@ export async function sendMarketingCampaignAction(payload: {
 }) {
     const { studioId, title, subject, content, segment } = payload
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Not authenticated' }
 
     // 1. Security Check

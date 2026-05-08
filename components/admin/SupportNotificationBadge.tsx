@@ -16,7 +16,8 @@ export default function SupportNotificationBadge({ showIcon = false, className }
 
     useEffect(() => {
         const fetchUnreadCount = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
+            const { data } = await supabase.auth.getUser();
+    const user = data?.user
             if (!user) return
 
             const { count, error } = await supabase

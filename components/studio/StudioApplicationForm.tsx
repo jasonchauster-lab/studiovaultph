@@ -90,7 +90,8 @@ export default function StudioApplicationForm({ originPortal = 'marketplace' }: 
     useEffect(() => {
         async function checkIdentity() {
             const supabase = createClient()
-            const { data: { user } } = await supabase.auth.getUser()
+            const { data } = await supabase.auth.getUser();
+    const user = data?.user
             
             if (user && isCma) {
                 const { data: profile } = await supabase
@@ -315,7 +316,8 @@ export default function StudioApplicationForm({ originPortal = 'marketplace' }: 
 
         try {
             const supabase = createClient()
-            const { data: { user } } = await supabase.auth.getUser()
+            const { data } = await supabase.auth.getUser();
+    const user = data?.user
             
             if (!user) {
                 console.error('[StudioApplicationForm] No user found during submission')

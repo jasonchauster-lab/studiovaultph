@@ -17,7 +17,8 @@ export async function createStudio(formData: FormData): Promise<ServerActionResp
     try {
         const supabase = await createClient()
 
-        const { data: { user } } = await supabase.auth.getUser()
+        const { data } = await supabase.auth.getUser();
+    const user = data?.user
         if (!user) {
             console.error('[createStudio] Authentication failed: No user found')
             return { success: false, error: 'Not authenticated' }
@@ -201,7 +202,8 @@ import { ErrorService } from '@/lib/services/error-service'
 
 export async function updateStudio(formData: FormData): Promise<ServerActionResponse> {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const studioId = formData.get('studioId') as string

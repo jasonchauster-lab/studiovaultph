@@ -4,7 +4,8 @@ import MarketplaceSyncManager from '@/components/studio/settings/MarketplaceSync
 
 export default async function MarketplaceBrandingPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) {
         redirect('/login')

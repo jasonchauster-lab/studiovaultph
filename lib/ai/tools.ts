@@ -25,7 +25,8 @@ export const aiTools = {
       console.log(`[AI Tool] Creating ticket with summary: ${summary}`)
       
       const supabase = await createClient()
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
       if (!user) {
         return { error: 'User must be authenticated to create a ticket.' }

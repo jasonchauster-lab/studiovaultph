@@ -27,7 +27,8 @@ export async function submitReview({
     tags: string[]
 }) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -91,7 +92,8 @@ export async function submitReview({
  */
 export async function getPendingReviews() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized', bookings: [] }
 

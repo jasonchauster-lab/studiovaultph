@@ -42,7 +42,7 @@ export async function createSlot(formData: FormData) {
     }
     
     const instructorId = formData.get('instructorId') as string || null
-    let paxCapacity = parseInt(formData.get('paxCapacity') as string) || 1
+    const paxCapacity = parseInt(formData.get('paxCapacity') as string) || 1
     const waitlistPaxCapacity = parseInt(formData.get('waitlistPaxCapacity') as string) || 0
     const color = formData.get('color') as string || null
     const displayName = formData.get('displayName') as string || null
@@ -241,7 +241,7 @@ export async function generateRecurringSlots(params: {
     const effectiveEnd = end > maxDate ? maxDate : end
 
     let count = 0
-    let currentDate = new Date(start)
+    const currentDate = new Date(start)
 
     while (currentDate <= effectiveEnd) {
         if (days.includes(currentDate.getDay())) {

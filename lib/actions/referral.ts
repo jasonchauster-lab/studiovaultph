@@ -27,7 +27,8 @@ export async function getStudioReferralConfig(studioId: string) {
  */
 export async function updateStudioReferralConfig(studioId: string, payload: any) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Not authenticated' }
 
     // Verify ownership
@@ -64,7 +65,8 @@ export async function updateStudioReferralConfig(studioId: string, payload: any)
  */
 export async function trackReferralVisit(studioId: string, referralCode: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     
     // We only track attribution for logged-out / signing up users
     // If they already signed up, we link them later.

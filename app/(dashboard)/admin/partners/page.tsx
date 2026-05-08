@@ -4,7 +4,8 @@ import PartnersManagementContent from './PartnersManagementContent';
 
 export default async function AdminPartnersPage() {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
 
     // Re-verify Admin role
     if (!user) redirect('/login');

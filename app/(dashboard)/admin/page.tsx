@@ -34,7 +34,8 @@ export default async function AdminDashboard({
         // Use the cookie-aware client for auth (createAdminClient has NO cookies = always null user)
         const { createClient } = await import('@/lib/supabase/server')
         const authClient = await createClient()
-        const { data: { user } } = await authClient.auth.getUser()
+        const { data } = await authClient.auth.getUser()
+        const user = data?.user
         if (!user) redirect('/login')
 
         // Use service-role client for admin data queries (bypasses RLS)

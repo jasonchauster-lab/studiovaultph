@@ -68,7 +68,8 @@ export async function requestBooking(
     planId?: string
 ) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     let actualBookingId: string | null = null;
@@ -395,7 +396,8 @@ export async function submitPaymentProof(
     medicalClearanceAcknowledged: boolean = false
 ) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -426,7 +428,8 @@ export async function submitPaymentProof(
 
 export async function uploadTopUpProof(formData: FormData) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     const topUpId = formData.get('topUpId') as string
@@ -458,7 +461,8 @@ export async function submitTopUpPaymentProof(
     proofPath: string
 ) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -517,7 +521,8 @@ export async function joinWaitlist(
     quantity: number = 1
 ) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     // atomic RPC call
@@ -545,7 +550,8 @@ export async function bookInstructorSession(
     isStorefront: boolean = false
 ) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -703,7 +709,7 @@ export async function bookInstructorSession(
         .neq('status', 'rejected');
 
     const bookedSlotIds = new Set(activeBookings?.map(b => b.slot_id) || []);
-    let selectedSlot = filteredSlots.find(s => !bookedSlotIds.has(s.id)) || null;
+    const selectedSlot = filteredSlots.find(s => !bookedSlotIds.has(s.id)) || null;
 
     if (!selectedSlot) {
         return { error: 'All matching slots are currently booked.' }
@@ -928,7 +934,8 @@ export async function bookInstructorSession(
 
 export async function cancelBooking(bookingId: string, reason: string = 'Cancelled by client') {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -1083,7 +1090,8 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
 
 export async function topUpWallet(amount: number) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -1115,7 +1123,8 @@ export async function topUpWallet(amount: number) {
 
 export async function getCustomerWalletDetails() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -1203,7 +1212,7 @@ export async function getCustomerWalletDetails() {
             const studio = Array.isArray(b.studios) ? b.studios[0] : b.studios;
             const studioName = studio?.name || 'Studio';
 
-            let displayStatus = b.status === 'pending' || b.status === 'submitted' ? 'pending'
+            const displayStatus = b.status === 'pending' || b.status === 'submitted' ? 'pending'
                 : b.status === 'approved' || b.status === 'completed' ? 'completed'
                 : b.status; 
 
@@ -1232,7 +1241,8 @@ export async function getCustomerWalletDetails() {
 
 export async function requestCustomerPayout(amount: number, method: string, details: any) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 

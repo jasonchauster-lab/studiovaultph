@@ -6,7 +6,8 @@ import { getManilaTodayStr, toManilaDateStr, toManilaTimeString } from '@/lib/ti
 
 export async function addAvailability(formData: FormData) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -44,7 +45,8 @@ export async function addAvailability(formData: FormData) {
 
 export async function deleteAvailability(id: string, groupId?: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -72,7 +74,8 @@ export async function deleteAvailability(id: string, groupId?: string) {
 
 export async function updateAvailability(id: string, formData: FormData) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -130,7 +133,8 @@ interface GenerateAvailabilityParams {
 
 export async function generateRecurringAvailability(params: GenerateAvailabilityParams) {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
 
     if (!user) return { error: 'Unauthorized' };
 

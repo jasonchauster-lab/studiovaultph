@@ -6,7 +6,8 @@ import EmailMarketingPageClient from './EmailMarketingPageClient'
 
 export default async function EmailMarketingPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) redirect('/login')
 
     const studio = await getCachedStudio()

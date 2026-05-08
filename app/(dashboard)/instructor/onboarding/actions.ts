@@ -8,7 +8,8 @@ export async function submitInstructorOnboarding(formData: FormData) {
     const supabase = await createClient()
 
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) {
         return { error: 'User not authenticated' }
     }

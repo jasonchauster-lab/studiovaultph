@@ -4,7 +4,8 @@ import BlogPageClient from './BlogPageClient'
 
 export default async function BlogPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) {
         redirect('/login')

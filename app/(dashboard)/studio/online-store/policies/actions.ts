@@ -12,7 +12,8 @@ export async function upsertPolicyAction(formData: {
     status?: string
 }) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     try {
@@ -62,7 +63,8 @@ export async function upsertPolicyAction(formData: {
 
 export async function deletePolicyAction(id: string, studioId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     try {
@@ -90,7 +92,8 @@ export async function updateCancellationRulesAction(
     noShowPenalty: boolean
 ) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     const { error } = await supabase

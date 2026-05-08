@@ -6,7 +6,8 @@ export default async function AdminSupportPage() {
     const supabase = await createClient()
 
     // 1. Auth & Admin Check
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) redirect('/login')
 
     const { data: profile } = await supabase

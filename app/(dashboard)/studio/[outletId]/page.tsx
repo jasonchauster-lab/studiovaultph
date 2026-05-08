@@ -22,7 +22,8 @@ export default async function OutletDashboard(props: {
     const supabase = await createClient()
 
     // 1. Get Current User
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) {
         return null // Should be handled by layout redirect
     }

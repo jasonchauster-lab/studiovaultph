@@ -5,7 +5,8 @@ import { getCachedStudio, getCachedOutlets } from '@/lib/studio/data'
 
 export default async function AddStaffPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) {
         redirect('/login')

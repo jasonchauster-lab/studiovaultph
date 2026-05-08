@@ -35,7 +35,8 @@ export default async function BlogPostPage(props: {
     if (!post || post.status !== 'published') notFound()
 
     // 3. Header Profile Data
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     let profile = null
     let avatarUrl = ''
     if (user) {

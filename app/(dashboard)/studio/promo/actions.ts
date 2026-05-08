@@ -99,7 +99,7 @@ export async function getPromoUsageHistory(promoId: string) {
 
     // Fetch profiles separately for the user_ids found
     const userIds = data.map((u: any) => u.user_id).filter(Boolean)
-    let profilesMap: Record<string, any> = {}
+    const profilesMap: Record<string, any> = {}
     
     if (userIds.length > 0) {
         const { data: profiles } = await adminSupabase

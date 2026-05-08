@@ -5,7 +5,8 @@ import { revalidatePath } from 'next/cache'
 
 export async function createTicket(message: string, messageId?: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Not authenticated' }
 
@@ -45,7 +46,8 @@ export async function createTicket(message: string, messageId?: string) {
 
 export async function sendMessage(ticketId: string, message: string, messageId?: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Not authenticated' }
 
@@ -96,7 +98,8 @@ export async function resolveTicket(ticketId: string) {
 
 export async function markMessagesAsRead(ticketId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Not authenticated' }
 

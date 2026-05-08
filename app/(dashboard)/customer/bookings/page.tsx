@@ -6,7 +6,8 @@ import BookingList from '@/components/customer/BookingList'
 
 export default async function CustomerBookingsPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) redirect('/login')
 
@@ -54,7 +55,7 @@ export default async function CustomerBookingsPage() {
     const isStoragePath = (url: string) => url && !url.startsWith('http');
     const storagePaths = ((bookings || []).map(b => b.payment_proof_url).filter(isStoragePath)) as string[]
 
-    let signedUrlMap: Record<string, string> = {}
+    const signedUrlMap: Record<string, string> = {}
     if (storagePaths.length > 0) {
         const { data } = await supabase.storage
             .from('payment-proofs')

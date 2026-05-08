@@ -14,7 +14,8 @@ export async function recordManualSale(formData: {
     notes?: string;
 }) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     // 1. Verify studio ownership
@@ -116,7 +117,8 @@ export async function refundTransaction(transaction: {
     if (result && result.success) {
         // Log Audit Trail
         const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
+        const { data } = await supabase.auth.getUser();
+    const user = data?.user
         const { data: studio } = await supabase.from('studios').select('id').eq('owner_id', user?.id).single()
         
         if (studio && user) {

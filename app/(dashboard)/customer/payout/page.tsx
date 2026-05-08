@@ -6,7 +6,8 @@ import { createClient } from '@/lib/supabase/server'
 
 export default async function CustomerPayoutPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     const { available, error } = await getCustomerWalletDetails()
 
     if (error) {

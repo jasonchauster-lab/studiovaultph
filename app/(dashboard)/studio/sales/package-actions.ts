@@ -10,7 +10,8 @@ import { format } from 'date-fns'
 
 export async function approveCustomerPlan(planId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     // 1. Fetch Plan to verify ownership of the studio
@@ -73,7 +74,8 @@ export async function approveCustomerPlan(planId: string) {
 
 export async function cancelCustomerPlan(planId: string, reason?: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     // 1. Fetch Plan to verify ownership and check for Xendit payment

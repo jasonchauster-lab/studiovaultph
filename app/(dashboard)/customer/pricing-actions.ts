@@ -56,7 +56,8 @@ export async function purchasePlan(formData: {
     referralRewardId?: string;
 }) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     // 1. Fetch all necessary data in parallel
@@ -77,7 +78,7 @@ export async function purchasePlan(formData: {
     }
 
     // 2. Apply Domain Logic
-    let discounts: number[] = [];
+    const discounts: number[] = [];
     
     if (promoResult.success && promoResult.promo) {
         discounts.push(calculateDiscount(plan.price, promoResult.promo));
@@ -166,7 +167,8 @@ export async function purchasePlan(formData: {
 
 export async function uploadPlanPaymentProof(planId: string, proofUrl: string, promoCodeId?: string, totalAmount?: number) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     const updateData: any = {
@@ -213,7 +215,8 @@ export async function uploadPlanPaymentProof(planId: string, proofUrl: string, p
 
 export async function getActivePlans(studioId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return []
 
     const { data } = await supabase

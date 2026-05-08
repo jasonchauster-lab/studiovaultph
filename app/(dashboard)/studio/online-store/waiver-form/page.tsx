@@ -9,7 +9,8 @@ import OnlineStorePageIntro from '@/components/studio/OnlineStorePageIntro'
 
 export default async function OnlineStoreWaiverFormPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) redirect('/login')
 

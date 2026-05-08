@@ -29,7 +29,8 @@ export default async function BranchFaqPage(props: {
     
     if (!outlet) notFound()
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     
     let profile = null
     let avatarUrl = ''

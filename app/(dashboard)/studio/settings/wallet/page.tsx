@@ -5,7 +5,8 @@ import WalletSettingsClient from './WalletSettingsClient'
 
 export default async function StudioWalletSettingsPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) {
         redirect('/login')

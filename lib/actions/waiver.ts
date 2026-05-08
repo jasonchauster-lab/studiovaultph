@@ -6,7 +6,8 @@ import { getCachedStudio } from '@/lib/studio/data'
 
 export async function getWaiversAction() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) throw new Error('Unauthorized')
 
@@ -48,7 +49,8 @@ export async function upsertWaiverAction(formData: {
     status?: string
 }) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) throw new Error('Unauthorized')
 
@@ -96,7 +98,8 @@ export async function upsertWaiverAction(formData: {
 
 export async function deleteWaiverAction(id: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) throw new Error('Unauthorized')
 

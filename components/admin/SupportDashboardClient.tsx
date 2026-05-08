@@ -119,7 +119,8 @@ export default function SupportDashboardClient() {
                     })
 
                     // If it's from the user, mark it as read immediately if this ticket is open
-                    const { data: { user } } = await supabase.auth.getUser()
+                    const { data } = await supabase.auth.getUser();
+    const user = data?.user
                     if (user && newMsg.sender_id !== user.id) {
                         await markMessagesAsRead(selectedTicket.id)
                     }
@@ -138,7 +139,8 @@ export default function SupportDashboardClient() {
 
     useEffect(() => {
         const checkUnread = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
+            const { data } = await supabase.auth.getUser();
+    const user = data?.user
             if (!user) return
 
             const { data } = await supabase

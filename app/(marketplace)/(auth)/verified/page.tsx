@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 
 export default async function VerifiedPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     let nextRoute = '/login'
     let buttonText = 'Log In Now'

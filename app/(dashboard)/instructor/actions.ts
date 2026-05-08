@@ -10,7 +10,8 @@ import { formatManilaDate, formatManilaTime, toManilaDateStr, toManilaTimeString
 
 export async function getInstructorEarnings(startDate?: string, endDate?: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -53,7 +54,8 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
 
 export async function requestPayout(amount: number, method: string, details: any) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -99,7 +101,8 @@ export async function requestPayout(amount: number, method: string, details: any
 
 export async function getPayoutHistory() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -119,7 +122,8 @@ export async function getPayoutHistory() {
 
 export async function bookSlot(slotId: string, equipment: string, quantity: number = 1) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -452,7 +456,8 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
 
 export async function cancelBookingByInstructor(bookingId: string, reason: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     if (!reason?.trim()) return { error: 'Cancellation reason is required.' }
@@ -549,7 +554,8 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
 
 export async function checkInClient(bookingId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     // 1. Fetch booking and verify instructor identity

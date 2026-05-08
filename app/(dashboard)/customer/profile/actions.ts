@@ -7,7 +7,8 @@ import { linkReferral } from '@/lib/actions/referral'
 
 export async function updateProfile(formData: FormData) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -157,7 +158,8 @@ export async function updateProfile(formData: FormData) {
 
 export async function uploadWaiver(formData: FormData) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -203,7 +205,8 @@ export async function uploadWaiver(formData: FormData) {
 
 export async function uploadGalleryImage(formData: FormData) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -260,7 +263,8 @@ export async function uploadGalleryImage(formData: FormData) {
 
 export async function deleteGalleryImage(imageUrl: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 

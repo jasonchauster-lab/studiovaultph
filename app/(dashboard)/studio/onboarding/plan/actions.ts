@@ -5,7 +5,8 @@ import { revalidatePath } from 'next/cache'
 
 export async function selectCmsPlanAction(planId: string, billingCycle: 'monthly' | 'annually') {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Not authenticated' }
 

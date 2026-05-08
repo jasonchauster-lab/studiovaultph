@@ -234,11 +234,11 @@ export function useScheduleState(
 
     // Navigation
     const handlePrev = () => {
-        let newDate = view === 'day' ? subDays(initialDate, 1) : view === 'week' ? subWeeks(initialDate, 1) : subMonths(initialDate, 1)
+        const newDate = view === 'day' ? subDays(initialDate, 1) : view === 'week' ? subWeeks(initialDate, 1) : subMonths(initialDate, 1)
         router.push(`?date=${toManilaDateStr(newDate)}`)
     }
     const handleNext = () => {
-        let newDate = view === 'day' ? addDays(initialDate, 1) : view === 'week' ? addWeeks(initialDate, 1) : addMonths(initialDate, 1)
+        const newDate = view === 'day' ? addDays(initialDate, 1) : view === 'week' ? addWeeks(initialDate, 1) : addMonths(initialDate, 1)
         router.push(`?date=${toManilaDateStr(newDate)}`)
     }
     const handleToday = () => router.push('?date=' + getManilaTodayStr())

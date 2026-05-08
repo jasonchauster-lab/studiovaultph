@@ -6,7 +6,8 @@ import { v4 as uuidv4 } from 'uuid'
 
 export async function getInstructorEarnings(startDate?: string, endDate?: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -47,7 +48,8 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
 
 export async function requestPayout(amount: number, method: string, details: any) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -92,7 +94,8 @@ export async function requestPayout(amount: number, method: string, details: any
 
 export async function getPayoutHistory() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) return { error: 'Unauthorized' }
 

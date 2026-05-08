@@ -7,7 +7,8 @@ import { createClient } from '@/lib/supabase/server'
 
 export default async function PayoutPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     // Parallelize data fetching for performance
     const [earningsRes, historyRes] = await Promise.all([
         getInstructorEarnings(),

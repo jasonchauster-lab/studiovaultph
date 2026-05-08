@@ -14,7 +14,8 @@ export default function UserPresenceTracker() {
         // Only run for authenticated users
         const initPresence = async () => {
             const supabase = supabaseRef.current
-            const { data: { user } } = await supabase.auth.getUser()
+            const { data } = await supabase.auth.getUser();
+    const user = data?.user
             if (!user) return
 
             // Function to ping the server

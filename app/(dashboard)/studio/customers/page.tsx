@@ -16,7 +16,8 @@ import { LeadStatus, ClientProfile } from '@/types/agency'
  */
 export default async function CustomersPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
 
     if (!user) redirect('/login')
 

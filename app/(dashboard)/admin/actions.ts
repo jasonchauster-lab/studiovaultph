@@ -13,7 +13,8 @@ import AccountReactivatedEmail from '@/components/emails/AccountReactivatedEmail
 import { getStudioBranding } from '@/lib/studio/branding'
 
 async function verifyAdmin(supabase: any) {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return false
 
     // Optimization: Check metadata first (non-recursive)
@@ -25,7 +26,8 @@ async function verifyAdmin(supabase: any) {
 }
 
 async function logAdminAction(supabase: any, actionType: string, entityType: string, entityId: string | null, details: string) {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return
     const { error } = await supabase.from('admin_activity_logs').insert({
         admin_id: user.id,
@@ -88,7 +90,8 @@ export async function rejectPayout(payoutId: string) {
     }
 
     // --- ATOMIC RPC ---
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
     const { data: rpcResult, error: rpcError } = await supabase.rpc('reject_payout_atomic', {
         p_payout_id: payoutId,
         p_admin_id: user?.id,
@@ -772,7 +775,8 @@ export async function rejectBooking(bookingId: string, reason: string, withRefun
     }
 
     // --- ATOMIC RPC ---
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
     const { data: rpcResult, error: rpcError } = await supabase.rpc('reject_booking_atomic', {
         p_booking_id: bookingId,
         p_admin_id: user?.id,
@@ -1230,7 +1234,7 @@ export async function searchAllUsers(query: string) {
         });
     }
 
-    let profileSignedUrlsMap: Record<string, string> = {};
+    const profileSignedUrlsMap: Record<string, string> = {};
     if (profilePathsToSign.length > 0) {
         const { data: signedData } = await supabase.storage.from('certifications').createSignedUrls(profilePathsToSign, 3600);
         if (signedData) {
@@ -1288,7 +1292,7 @@ export async function searchAllUsers(query: string) {
             if (s.insurance_url) pathsToSign.push(s.insurance_url);
         });
 
-        let signedUrlsMap: Record<string, string> = {};
+        const signedUrlsMap: Record<string, string> = {};
         if (pathsToSign.length > 0) {
             const { data: signedData } = await supabase.storage.from('certifications').createSignedUrls(pathsToSign, 3600);
             if (signedData) {

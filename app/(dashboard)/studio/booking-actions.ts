@@ -23,7 +23,8 @@ import { PriceBreakdownSchema, STUDIO_TAGS } from '@/lib/studio/schemas'
 
 export async function cancelBookingByStudio(bookingId: string, reason: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     if (!reason?.trim()) return { error: 'Cancellation reason is required.' }
@@ -131,7 +132,8 @@ export async function cancelBookingByStudio(bookingId: string, reason: string) {
 
 export async function approveManualBooking(bookingId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     const { data: booking, error: fetchError } = await supabase
@@ -179,7 +181,8 @@ export async function approveManualBooking(bookingId: string) {
 
 export async function checkInInstructor(bookingId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) return { error: 'Unauthorized' }
 
     const { data: booking, error: fetchError } = await supabase

@@ -4,7 +4,8 @@ import { getAdminAnalytics } from '../actions'
 
 export default async function AdminDebugPage() {
     const publicSupabase = await createClient()
-    const { data: { user } } = await publicSupabase.auth.getUser()
+    const { data } = await publicSupabase.auth.getUser();
+    const user = data?.user
     
     if (!user) redirect('/login')
 

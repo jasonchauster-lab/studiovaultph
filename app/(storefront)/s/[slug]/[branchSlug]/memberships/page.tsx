@@ -28,7 +28,8 @@ export default async function BranchMembershipsPage(props: {
     if (!outlet) notFound()
 
     // 2. Fetch user and profile
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     let profile = null
     let avatarUrl = ''
     if (user) {

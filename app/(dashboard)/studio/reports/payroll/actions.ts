@@ -8,7 +8,8 @@ export async function getPayrollData(studioId: string, startDate?: string, endDa
     const supabase = await createClient()
     
     // Permission Check: Owner or staff with view_payroll permission
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) throw new Error('Unauthorized')
 
     const { isOwner, permissions } = await verifyStudioAccess(studioId)

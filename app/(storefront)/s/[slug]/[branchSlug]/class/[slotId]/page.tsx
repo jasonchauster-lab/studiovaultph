@@ -30,7 +30,8 @@ export default async function ClassPage({
         .maybeSingle()
 
     // 3. Fetch User and Plans
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     
     let userPlans: any[] = []
     if (user) {

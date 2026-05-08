@@ -14,7 +14,8 @@ export default async function OutletReportsPage(props: {
     const supabase = await createClient()
 
     // 1. Get Current User & Studio context
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user
     if (!user) redirect('/login')
 
     // 2. Fetch the specific Outlet

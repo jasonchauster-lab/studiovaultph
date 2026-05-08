@@ -26,7 +26,8 @@ export default async function LandingPage({
   }
 
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data } = await supabase.auth.getUser()
+  const user = data?.user
   
   let profile = null
   let avatarUrl = ''
