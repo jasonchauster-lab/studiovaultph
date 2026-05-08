@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -171,7 +171,7 @@ export default function ClassPageClient({
                                     <div className="space-y-4">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-charcoal-400 block ml-1">Use a package credit</label>
                                         <div className="grid grid-cols-1 gap-3">
-                                            {userPlans.map((plan) => (
+                                            {userPlans.map((plan: any) => (
                                                 <button
                                                     key={plan.id}
                                                     onClick={() => setSelectedPlanId(plan.id)}

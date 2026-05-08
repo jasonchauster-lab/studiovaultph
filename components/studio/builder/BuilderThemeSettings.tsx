@@ -522,7 +522,7 @@ export default function BuilderThemeSettings({ subView, config, studioId, setCon
                                             formData.append('studioId', studioId)
                                             formData.append('type', 'favicon')
                                             const res = await uploadStudioAsset(formData)
-                                            if (res.success && res.url) updateTheme({ favicon: res.url })
+                                            if (res.success && res.data?.url) updateTheme({ favicon: res.data.url })
                                             setIsUploading(false)
                                         }}
                                     />

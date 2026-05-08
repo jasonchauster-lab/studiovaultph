@@ -62,6 +62,8 @@ export async function deleteMembership(id: string, studioId?: string, name?: str
             finalName = membership.name
         }
 
+        if (!finalStudioId) return { success: false, error: 'Studio ID is required' }
+
         const { user, isOwner, permissions } = await verifyStudioAccess(finalStudioId)
         if (!isOwner && !permissions.manage_store) {
             return { success: false, error: 'Permission denied.' }
@@ -154,6 +156,8 @@ export async function deletePackage(id: string, studioId?: string, name?: string
             finalStudioId = pkg.studio_id
             finalName = pkg.name
         }
+
+        if (!finalStudioId) return { success: false, error: 'Studio ID is required' }
 
         const { user, isOwner, permissions } = await verifyStudioAccess(finalStudioId)
         if (!isOwner && !permissions.manage_store) {

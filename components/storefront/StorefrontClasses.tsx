@@ -41,7 +41,7 @@ function StorefrontClasses({ config, theme, isMobile = false }: StorefrontClasse
                     "grid gap-8",
                     isMobile ? "grid-cols-1" : "md:grid-cols-3"
                 )}>
-                    {classes.map((cls, i) => (
+                    {classes.map((cls: any, i: number) => (
                         <div key={i} className="group relative bg-white rounded-[2.5rem] overflow-hidden border border-zinc-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
                             <div className="aspect-[4/5] relative overflow-hidden">
                                 <img src={cls.image} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={cls.name} />

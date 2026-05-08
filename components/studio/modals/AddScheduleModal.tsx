@@ -21,6 +21,7 @@ interface Outlet {
     id: string
     name: string
     address?: string
+    inventory?: any
 }
 
 interface AddScheduleModalProps {

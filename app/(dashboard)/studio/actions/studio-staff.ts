@@ -5,11 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { verifyStudioAccess } from '@/lib/studio/auth'
 import { ErrorService } from '@/lib/services/error-service'
 
-export interface ServerActionResponse<T = any> {
-    success: boolean
-    error?: string
-    data?: T
-}
+import { ServerActionResponse } from './types'
 
 /**
  * Hardened Staff Management

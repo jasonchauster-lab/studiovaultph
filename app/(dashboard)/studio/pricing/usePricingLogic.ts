@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Membership, Package, ServiceCategory } from '@/types/agency'
+import { Membership, Package, ServiceCategory, PricingItem } from '@/types/agency'
 import { createCategory, deleteCategory, deleteMembership, deletePackage, updateCategory } from '@/app/(dashboard)/studio/pricing/actions'
 import { useToast } from '@/components/ui/Toast'
 import { SYSTEM_CATEGORIES } from '@/lib/constants'

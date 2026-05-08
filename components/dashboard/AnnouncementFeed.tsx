@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { cache } from 'react'
-import { Plus, Video, Tag, MessageCircle, ChevronRight, Store, Megaphone, Star, Zap, Bell, Info } from 'lucide-react'
+import { Plus, Video, Tag, MessageCircle, ChevronRight, Store, Megaphone, Star, Zap, Bell, Info, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 

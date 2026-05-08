@@ -378,35 +378,6 @@ function EquipmentEditModal({
 
     const handleBranchChange = (branchId: string) => {
         setTargetBranch(branchId)
-        
-        if (mode === 'MARKETPLACE' && isGlobalMode) {
-            // Find existing data for this branch in breakdown
-            const branchData = initialData.breakdown?.find(b => b.outletId === branchId)
-            
-            if (branchData) {
-                setFormData(prev => ({
-                    ...prev,
-                    rental_cap: branchData.rental_cap,
-                    rental_price: branchData.rental_price,
-                    total: branchData.total,
-                    available_from: branchData.available_from,
-                    available_to: branchData.available_to
-                }))
-                setCapRaw(branchData.rental_cap.toString())
-                setPriceRaw(branchData.rental_price.toString())
-            } else {
-                setFormData(prev => ({
-                    ...prev,
-                    rental_cap: 0,
-                    rental_price: 0,
-                    total: 0,
-                    available_from: undefined,
-                    available_to: undefined
-                }))
-                setCapRaw('0')
-                setPriceRaw('0')
-            }
-        }
     }
 
     const activeOutletId = isGlobalMode ? targetBranch : currentOutletId;
@@ -418,10 +389,10 @@ function EquipmentEditModal({
                 <div className="p-10 border-b border-zinc-50 flex items-center justify-between">
                     <div>
                         <h2 className="text-3xl font-black text-zinc-900 tracking-tight leading-none">
-                            {mode === 'CORE' ? (isEditing ? 'Update Inventory' : 'Register Equipment') : 'Marketplace Listing'}
+                            {isEditing ? 'Update Inventory' : 'Register Equipment'}
                         </h2>
                         <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest mt-2 leading-none">
-                            {mode === 'CORE' ? 'Physical Asset Configuration' : `Listing Settings for ${formData.name}`}
+                            Physical Asset Configuration
                         </p>
                     </div>
                     <button onClick={onClose} className="p-4 hover:bg-zinc-50 rounded-2xl transition-all">
@@ -430,11 +401,11 @@ function EquipmentEditModal({
                 </div>
                 
                 <div className="p-10 space-y-8 overflow-y-auto max-h-[70vh]">
-                    {/* Branch Selector (Visible in Marketplace Global Mode or NEW Core Global Mode) */}
-                    {( (mode === 'MARKETPLACE' && isGlobalMode) || (mode === 'CORE' && isGlobalMode && !isEditing) ) && outlets.length > 0 && (
+                    {/* Branch Selector (Visible in Core Global Mode) */}
+                    {( isGlobalMode && !isEditing ) && outlets.length > 0 && (
                         <div className="space-y-4">
                             <label className="text-[11px] font-black text-zinc-400 uppercase tracking-widest leading-none block ml-2">
-                                {mode === 'MARKETPLACE' ? 'Select Location to Configure' : 'Assign to Location'}
+                                {'Assign to Location'}
                             </label>
                             <select 
                                 value={targetBranch}
@@ -446,16 +417,12 @@ function EquipmentEditModal({
                                 ))}
                             </select>
                             <p className="text-[10px] text-zinc-400/60 px-2 leading-tight">
-                                {mode === 'MARKETPLACE' 
-                                    ? 'Marketplace pricing and availability are managed independently for each location.' 
-                                    : 'Select which branch this equipment belongs to. You can also assign it to the studio-wide pool.'
-                                }
+                                {'Select which branch this equipment belongs to. You can also assign it to the studio-wide pool.'}
                             </p>
                         </div>
                     )}
 
-                    {mode === 'CORE' && (
-                        <>
+                    <>
                             {/* Name */}
                             <div className="space-y-4">
                                 <label className="text-[11px] font-black text-zinc-400 uppercase tracking-widest leading-none block ml-2">Equipment Category Name</label>
@@ -486,7 +453,6 @@ function EquipmentEditModal({
                                 </p>
                             </div>
                         </>
-                    )}
 
                     {/* No longer used: Marketplace configuration is handled in the Marketplace tab */}
                 </div>

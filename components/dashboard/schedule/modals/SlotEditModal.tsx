@@ -186,7 +186,7 @@ export const SlotEditModal = ({
                                             <div className="flex items-center gap-6">
                                                 <Avatar 
                                                     src={b.client?.avatar_url} 
-                                                    fallback={b.client?.full_name?.slice(0, 2) || 'CL'} 
+                                                    fallbackName={b.client?.full_name || 'CL'} 
                                                     className="w-12 h-12 rounded-2xl shadow-tight"
                                                 />
                                                 <div>

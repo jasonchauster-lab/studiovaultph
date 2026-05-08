@@ -98,7 +98,7 @@ export async function createSlot(formData: FormData) {
     }
 
     // Granular Revalidation
-    revalidateTag(STUDIO_TAGS.SCHEDULE(studioId))
+    ;(revalidateTag as any)(STUDIO_TAGS.SCHEDULE(studioId))
     
     return { success: true, slotId: rpcResult.slot_id }
 }
@@ -172,7 +172,7 @@ export async function updateSlot(slotId: string, formData: FormData) {
 
     if (updateError) return { error: `Update failed: ${updateError.message}` }
 
-    revalidateTag(STUDIO_TAGS.SCHEDULE(slot.studio_id))
+    ;(revalidateTag as any)(STUDIO_TAGS.SCHEDULE(slot.studio_id))
     return { success: true }
 }
 

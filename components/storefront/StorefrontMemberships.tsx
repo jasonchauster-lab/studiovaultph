@@ -179,7 +179,7 @@ function MembershipCard({ id, name, price, credits, validity_days, features, bes
                 )}
 
                 <ul className="space-y-5">
-                    {features.map((feature, idx) => (
+                    {features.map((feature: any, idx: number) => (
                         <li key={idx} className="flex items-start gap-3">
                             <div className={`p-1 rounded-full mt-0.5 shrink-0 ${bestValue ? 'bg-[var(--primary-brand)]/20 text-[var(--primary-brand)]' : 'bg-emerald-50 text-emerald-600'}`}>
                                 <Check className="w-3 h-3" />
@@ -364,7 +364,7 @@ function StorefrontMemberships({ config, studioName, memberships = [], studioId,
                     "grid items-stretch gap-10 lg:gap-14 max-w-7xl mx-auto",
                     isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                 )}>
-                        {displayMemberships.map((membership, idx) => (
+                        {displayMemberships.map((membership: any, idx: number) => (
                             <MembershipCard 
                                 key={idx}
                                 {...membership}

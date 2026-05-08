@@ -6,7 +6,7 @@ import { clsx } from 'clsx'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import supabaseLoader from '@/lib/utils/image-loader'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 interface InventoryGridProps {
     items: any[]
@@ -76,27 +76,21 @@ export const InventoryItemGrid = React.memo(({ items, onEdit, onDelete }: Invent
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <button 
-                                            onClick={() => onEdit(item)}
-                                            className="p-3 bg-zinc-50 text-zinc-300 rounded-2xl hover:bg-zinc-900 hover:text-white transition-all shadow-sm active:scale-90"
-                                        >
-                                            <Edit2 className="w-4 h-4" />
-                                        </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>Edit Product</TooltipContent>
+                                <Tooltip content="Edit Product">
+                                    <button 
+                                        onClick={() => onEdit(item)}
+                                        className="p-3 bg-zinc-50 text-zinc-300 rounded-2xl hover:bg-zinc-900 hover:text-white transition-all shadow-sm active:scale-90"
+                                    >
+                                        <Edit2 className="w-4 h-4" />
+                                    </button>
                                 </Tooltip>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <button 
-                                            onClick={() => onDelete(item.id)}
-                                            className="p-3 bg-rose-50 text-rose-300 rounded-2xl hover:bg-rose-500 hover:text-white transition-all shadow-sm active:scale-90"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>Delete Product</TooltipContent>
+                                <Tooltip content="Delete Product">
+                                    <button 
+                                        onClick={() => onDelete(item.id)}
+                                        className="p-3 bg-rose-50 text-rose-300 rounded-2xl hover:bg-rose-500 hover:text-white transition-all shadow-sm active:scale-90"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
                                 </Tooltip>
                             </div>
                         </div>

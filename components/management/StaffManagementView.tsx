@@ -32,11 +32,12 @@ interface StaffManagementViewProps {
     studio: any
     initialMembers: StaffMember[]
     outlets: any[]
+    roles: any[]
 }
 
 const TABS = ['Staff', 'Guest', 'Invited', 'Locked', 'Deactivated', 'Draft']
 
-export default function StaffManagementView({ studio, initialMembers, outlets }: StaffManagementViewProps) {
+export default function StaffManagementView({ studio, initialMembers, outlets, roles }: StaffManagementViewProps) {
     const [members, setMembers] = useState(initialMembers)
     const [searchQuery, setSearchQuery] = useState('')
     const [activeTab, setActiveTab] = useState('Staff')

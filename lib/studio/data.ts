@@ -31,6 +31,7 @@ export const getCachedStudio = cache(async () => {
         whatsapp_number, show_whatsapp_button,
         business_contact_email, business_contact_number,
         address, floor_or_unit, business_country,
+        late_cancel_hours, no_show_penalty,
         enable_xendit, enable_manual_payments, manual_payment_methods,
         owner:profiles!owner_id(id, full_name, avatar_url, email)
     `

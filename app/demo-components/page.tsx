@@ -50,7 +50,14 @@ export default function DemoComponentsPage() {
           <section className="space-y-8">
             <h2 className="text-2xl font-serif text-zinc-900 px-2">Foundation: Layout & Wayfinding</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card title="Card Component" description="Standardized elevation and container.">
+              <Card 
+                header={
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-serif text-zinc-900">Card Component</h3>
+                    <p className="text-xs text-zinc-500">Standardized elevation and container.</p>
+                  </div>
+                }
+              >
                 <div className="space-y-4">
                   <p className="text-sm text-zinc-600">Cards support headers, descriptions, and flexible children.</p>
                   <Separator />
@@ -155,61 +162,70 @@ export default function DemoComponentsPage() {
           <section className="space-y-8">
             <h2 className="text-2xl font-serif text-zinc-900 px-2">Data Display (Table)</h2>
             <Table 
-              headers={['Product', 'Status', 'Price', 'Actions']}
-              className="bg-white border-zinc-100"
-            >
-              {[1, 2, 3].map((i) => (
-                <tr key={i} className="hover:bg-zinc-50 transition-colors group">
-                  <td className="px-6 py-4">
+              data={[
+                { id: '1', product: 'Standard Package 1', status: 'Live', price: '₱2,500' },
+                { id: '2', product: 'Standard Package 2', status: 'Draft', price: '₱2,500' },
+                { id: '3', product: 'Standard Package 3', status: 'Live', price: '₱2,500' },
+              ]}
+              keyExtractor={(item) => item.id}
+              columns={[
+                {
+                  header: 'Product',
+                  accessor: (item) => (
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-zinc-100 rounded-lg flex items-center justify-center">
                         <Package size={20} className="text-zinc-400" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-zinc-900">Standard Package {i}</span>
-                        <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-black">Ref: #00{i}</span>
+                        <span className="text-sm font-bold text-zinc-900">{item.product}</span>
+                        <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-black">Ref: #00{item.id}</span>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge variant={i % 2 === 0 ? 'success' : 'outline'} showDot>
-                      {i % 2 === 0 ? 'Live' : 'Draft'}
+                  )
+                },
+                {
+                  header: 'Status',
+                  accessor: (item) => (
+                    <Badge variant={item.status === 'Live' ? 'success' : 'outline'} showDot>
+                      {item.status}
                     </Badge>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm font-black text-zinc-900">₱2,500</span>
-                  </td>
-                  <td className="px-6 py-4">
+                  )
+                },
+                {
+                  header: 'Price',
+                  accessor: (item) => (
+                    <span className="text-sm font-black text-zinc-900">{item.price}</span>
+                  )
+                },
+                {
+                  header: 'Actions',
+                  accessor: () => (
                     <div className="flex items-center gap-2">
                       <Tooltip content="Quick Edit">
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                           <CheckCircle2 size={16} />
                         </Button>
                       </Tooltip>
-                      <Popover 
-                        trigger={
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <Info size={16} />
-                          </Button>
-                        }
-                      >
-                        <div className="space-y-2">
-                          <p className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Contextual Info</p>
-                          <p className="text-sm text-zinc-600">This item was last modified 2 days ago by admin.</p>
-                        </div>
-                      </Popover>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </Table>
+                  )
+                }
+              ]}
+              className="bg-white"
+            />
           </section>
 
           {/* Overlays & Utilities */}
           <section className="space-y-8">
             <h2 className="text-2xl font-serif text-zinc-900 px-2">Overlays & Utilities</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Card title="Skeleton Loading" description="Perceived performance primitives.">
+              <Card 
+                header={
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-serif text-zinc-900">Skeleton Loading</h3>
+                    <p className="text-xs text-zinc-500">Perceived performance primitives.</p>
+                  </div>
+                }
+              >
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
                     <SkeletonCircle className="w-12 h-12" />
@@ -222,7 +238,14 @@ export default function DemoComponentsPage() {
                 </div>
               </Card>
 
-              <Card title="ScrollArea & Shortcuts" description="Custom scrollbars and Kbd tooltips.">
+              <Card 
+                header={
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-serif text-zinc-900">ScrollArea & Shortcuts</h3>
+                    <p className="text-xs text-zinc-500">Custom scrollbars and Kbd tooltips.</p>
+                  </div>
+                }
+              >
                 <div className="space-y-4">
                   <ScrollArea className="h-32 rounded-xl border border-zinc-100 p-4 bg-zinc-50">
                     <div className="space-y-2">
@@ -240,7 +263,14 @@ export default function DemoComponentsPage() {
                 </div>
               </Card>
 
-              <Card title="Modals" description="Focus-trapped accessible overlays.">
+              <Card 
+                header={
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-serif text-zinc-900">Modals</h3>
+                    <p className="text-xs text-zinc-500">Focus-trapped accessible overlays.</p>
+                  </div>
+                }
+              >
                 <Button onClick={() => setIsModalOpen(true)} className="w-full">Open Modal Demo</Button>
                 <Modal 
                   isOpen={isModalOpen} 

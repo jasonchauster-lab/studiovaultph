@@ -17,7 +17,7 @@ export default function ChatWidget({ userEmail, userId }: { userEmail?: string, 
         body: {
             userEmail
         }
-    })
+    } as any)
     const isLoading = status === 'streaming' || status === 'submitted'
     const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -34,7 +34,7 @@ export default function ChatWidget({ userEmail, userId }: { userEmail?: string, 
                 setShowHumanOption(true)
             }
         } else if (lastMessage?.role === 'user') {
-            const text = lastMessage.content?.toLowerCase() || ''
+            const text = getMessageText(lastMessage).toLowerCase()
             if (text.includes('human') || text.includes('person') || text.includes('agent')) {
                 // If user asks for a human, we can show it too
                 setShowHumanOption(true)
@@ -55,8 +55,8 @@ export default function ChatWidget({ userEmail, userId }: { userEmail?: string, 
     }
 
     const getMessageText = (m: any) => {
-        if (m.content) return m.content
-        return m.parts?.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('') || ''
+        if ((m as any).content) return (m as any).content
+        return (m as any).parts?.filter((p: any) => p.type === 'text').map((p: any) => (p as any).text).join('') || ''
     }
 
     return (

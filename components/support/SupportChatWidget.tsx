@@ -63,7 +63,7 @@ export default function SupportChatWidget({
                 return;
             }
 
-            const ticketIds = userTickets.map(t => t.id);
+            const ticketIds = userTickets.map((t: any) => t.id);
 
             const { count } = await supabase
                 .from('support_messages')

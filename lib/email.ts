@@ -7,11 +7,15 @@ export async function sendEmail({
     to,
     subject,
     react,
+    html,
+    text,
     fromName
 }: {
     to: string | string[];
     subject: string;
-    react: React.ReactElement;
+    react?: React.ReactElement;
+    html?: string;
+    text?: string;
     fromName?: string;
 }) {
     if (!process.env.RESEND_API_KEY) {
@@ -20,17 +24,26 @@ export async function sendEmail({
     }
 
     try {
-        const emailHtml = await render(react);
+        let emailHtml = html;
+        if (react) {
+            emailHtml = await render(react);
+        }
 
         const name = fromName || 'Studio Vault PH';
         const fromAddress = `${name} <bookings@studiovaultph.com>`;
         console.log(`Attempting to send email FROM: ${fromAddress} TO: ${to} with subject: ${subject}`);
-        const data = await resend.emails.send({
-            from: fromAddress, // Validated domain
+        
+        const emailOptions: any = {
+            from: fromAddress,
             to,
             subject,
-            html: emailHtml, // Send as HTML
-        });
+        };
+
+        if (emailHtml) emailOptions.html = emailHtml;
+        if (text) emailOptions.text = text;
+        
+        const data = await resend.emails.send(emailOptions);
+        
         console.log('Resend Response Data:', JSON.stringify(data, null, 2));
         return { success: true, data };
     } catch (error: unknown) {

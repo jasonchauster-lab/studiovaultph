@@ -35,7 +35,7 @@ export default function XenditStatusPolling({ bookingId, planId, checkoutUrl, di
                     table: table,
                     filter: `id=eq.${id}`
                 },
-                (payload) => {
+                (payload: any) => {
                     const newStatus = payload.new.status
                     if (newStatus === 'approved' || newStatus === 'active' || (payload.new.payment_status === 'paid')) {
                         setStatus('paid')

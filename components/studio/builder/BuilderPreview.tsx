@@ -35,6 +35,7 @@ interface BuilderPreviewProps {
     activePage?: string
     publicUrl: string
     packages?: any[]
+    memberships?: any[]
     outlets?: any[]
     outlet?: any
     hoveredSectionId?: string | null
@@ -81,6 +82,8 @@ export default function BuilderPreview({
     
     // Live Focus: Scroll to section when selected in sidebar
     useEffect(() => {
+            if (!navPath?.id) return;
+
             // Auto-switch to active page if section is found there
             const isSectionInCurrentPage = sections.some((s: any) => s.id === navPath.id);
             if (!isSectionInCurrentPage) {
@@ -95,6 +98,7 @@ export default function BuilderPreview({
 
             // Wait for render/switch
             setTimeout(() => {
+                if (!navPath?.id) return;
                 const el = scrollRef.current?.querySelector(`[data-section-id="${navPath.id}"]`);
                 el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100);

@@ -4,7 +4,7 @@ import { useToast } from '@/components/ui/Toast'
 export interface PricingFormOptions<T> {
     isOpen: boolean
     onClose: () => void
-    initialData?: T
+    initialData?: any
     defaultForm: T
     onSave: (data: T) => Promise<{ success: boolean; error?: string }>
     validation?: (data: T) => string | null

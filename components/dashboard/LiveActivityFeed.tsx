@@ -36,7 +36,7 @@ export default function LiveActivityFeed({ studioId, userId }: { studioId: strin
             .limit(10)
 
         if (rows) {
-            setActivities(rows.map(r => ({
+            setActivities(rows.map((r: any) => ({
                 id: r.id,
                 type: r.type,
                 title: r.title,

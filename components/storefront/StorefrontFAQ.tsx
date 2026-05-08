@@ -11,18 +11,7 @@ interface FAQItem {
 }
 
 interface StorefrontFAQProps {
-    config: {
-        content: {
-            title?: string
-            subtitle?: string
-            faqs?: FAQItem[]
-            layout?: 'simple' | 'split'
-            supportTitle?: string
-            supportSubtitle?: string
-            supportBtnText?: string
-            supportBtnLink?: string
-        }
-    }
+    config: any
     theme?: any
     isMobile?: boolean
 }
@@ -95,7 +84,7 @@ function StorefrontFAQ({ config, theme, isMobile }: StorefrontFAQProps) {
 
                 <div className="space-y-4">
                     {faqs.length > 0 ? (
-                        faqs.map((faq, index) => (
+                        faqs.map((faq: any, index: number) => (
                             <motion.div 
                                 key={index}
                                 initial={{ opacity: 0, x: -20 }}

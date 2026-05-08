@@ -243,7 +243,7 @@ function SidebarContent({ role, studioData, outlets, isStudioPortal, pathname, o
                                 setLocalIsPublic(!prevStatus)
                                 const result = await toggleStudioVisibilityAction(studioData.id, prevStatus)
                                 if (result.success) {
-                                    toast(`Studio now ${result.newStatus ? 'Live' : 'Private'}`, 'success')
+                                    toast(`Studio now ${result.data?.newStatus ? 'Live' : 'Private'}`, 'success')
                                 } else {
                                     setLocalIsPublic(prevStatus)
                                     toast('Failed to update status', 'error')

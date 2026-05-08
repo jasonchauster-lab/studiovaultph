@@ -77,7 +77,7 @@ function StorefrontReviews({ reviews: dbReviews, config, theme, isMobile = false
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {displayReviews.slice(0, 9).map((review, index) => (
+                    {displayReviews.slice(0, 9).map((review: any, index: number) => (
                         <motion.div 
                             key={review.id}
                             initial={{ opacity: 0, y: 20 }}

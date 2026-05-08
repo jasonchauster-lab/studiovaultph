@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/Switch'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { Card } from '@/components/ui/Card'
 import AIInputAssistant from '@/components/ai/AIInputAssistant'
+import clsx from 'clsx'
 
 import { Membership, Service, ServiceCategory, Outlet } from '@/types/agency'
 
@@ -218,7 +219,7 @@ const MembershipFormContent = memo(({ form, updateField, categories, services, o
                                                 </div>
                                                 <div className="flex flex-col gap-0.5">
                                                     <span className="text-[13px] font-bold text-zinc-900 line-clamp-1">{service.name}</span>
-                                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{service.duration_minutes}m · {service.category}</span>
+                                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{service.duration_minutes}m</span>
                                                 </div>
                                             </div>
                                             <Checkbox 

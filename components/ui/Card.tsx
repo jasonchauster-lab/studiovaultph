@@ -47,7 +47,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <Component
       {...(isHoverable || onClick ? {
-        whileHover: { y: -6, scale: 1.005, shadow: '0 30px 60px rgba(0,0,0,0.12)' },
+        whileHover: { y: -6, scale: 1.005, boxShadow: '0 30px 60px rgba(0,0,0,0.12)' },
         whileTap: { scale: 0.99 },
         transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] }
       } : {})}

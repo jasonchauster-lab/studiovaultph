@@ -11,11 +11,7 @@ import { verifyStudioAccess } from '@/lib/studio/auth'
 import { sanitizeHtml } from '@/lib/utils/security'
 import { uploadContentType } from '@/lib/utils/image-utils'
 
-export interface ServerActionResponse<T = any> {
-    success: boolean
-    error?: string
-    data?: T
-}
+import { ServerActionResponse } from './types'
 
 export async function createStudio(formData: FormData): Promise<ServerActionResponse> {
     try {

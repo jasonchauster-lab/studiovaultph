@@ -120,8 +120,8 @@ export default function BuilderSectionForm({
             formData.append('studioId', studioId)
             formData.append('type', type)
             const res = await uploadStudioAsset(formData)
-            if (res.success && res.url) {
-                updateSectionContent(sectionId, { [fieldName]: res.url })
+            if (res.success && res.data?.url) {
+                updateSectionContent(sectionId, { [fieldName]: res.data.url })
             } else {
                 alert(res.error || 'Upload failed')
             }
@@ -222,9 +222,9 @@ export default function BuilderSectionForm({
                                                             formData.append('studioId', studioId)
                                                             formData.append('type', 'hero')
                                                             const res = await uploadStudioAsset(formData)
-                                                            if (res.success && res.url) {
+                                                            if (res.success && res.data?.url) {
                                                                 const currentImages = section.content.images || []
-                                                                updateSectionContent(sectionId, { images: [...currentImages, res.url] })
+                                                                updateSectionContent(sectionId, { images: [...currentImages, res.data.url] })
                                                             } else {
                                                                 alert(res.error || 'Upload failed')
                                                             }
@@ -795,8 +795,8 @@ export default function BuilderSectionForm({
                                                     formData.append('studioId', studioId)
                                                     formData.append('type', 'banners')
                                                     const res = await uploadStudioAsset(formData)
-                                                    if (res.success && res.url) {
-                                                        updateSectionContent(sectionId, { imageUrl: res.url })
+                                                    if (res.success && res.data?.url) {
+                                                        updateSectionContent(sectionId, { imageUrl: res.data.url })
                                                     } else {
                                                         alert(res.error || 'Upload failed')
                                                     }
@@ -1050,9 +1050,9 @@ export default function BuilderSectionForm({
                                                                                         const formData = new FormData()
                                                                                         formData.append('file', sanitizedFile); formData.append('studioId', studioId); formData.append('type', section.type)
                                                                                         const res = await uploadStudioAsset(formData)
-                                                                                        if (res.success && res.url) {
+                                                                                        if (res.success && res.data?.url) {
                                                                                             const newItems = [...section.content.items]
-                                                                                            newItems[selectedItemIndex] = { ...newItems[selectedItemIndex], image: res.url }
+                                                                                            newItems[selectedItemIndex] = { ...newItems[selectedItemIndex], image: res.data.url }
                                                                                             updateSectionContent(sectionId, { items: newItems })
                                                                                         } else {
                                                                                             alert(res.error || 'Upload failed')
@@ -1083,9 +1083,9 @@ export default function BuilderSectionForm({
                                                                                 const formData = new FormData()
                                                                                 formData.append('file', sanitizedFile); formData.append('studioId', studioId); formData.append('type', section.type)
                                                                                 const res = await uploadStudioAsset(formData)
-                                                                                if (res.success && res.url) {
+                                                                                if (res.success && res.data?.url) {
                                                                                     const newItems = [...section.content.items]
-                                                                                    newItems[selectedItemIndex] = { ...newItems[selectedItemIndex], image: res.url }
+                                                                                    newItems[selectedItemIndex] = { ...newItems[selectedItemIndex], image: res.data.url }
                                                                                     updateSectionContent(sectionId, { items: newItems })
                                                                                 } else {
                                                                                     alert(res.error || 'Upload failed')
@@ -1411,9 +1411,9 @@ export default function BuilderSectionForm({
                                                     formData.append('studioId', studioId)
                                                     formData.append('type', 'gallery')
                                                     const res = await uploadStudioAsset(formData)
-                                                    if (res.success && res.url) {
+                                                    if (res.success && res.data?.url) {
                                                         const current = section.content.images || []
-                                                        updateSectionContent(sectionId, { images: [...current, res.url] })
+                                                        updateSectionContent(sectionId, { images: [...current, res.data.url] })
                                                     } else {
                                                         alert(res.error || 'Upload failed')
                                                     }
@@ -1498,9 +1498,9 @@ export default function BuilderSectionForm({
                                                             formData.append('studioId', studioId)
                                                             formData.append('type', 'avatars')
                                                             const res = await uploadStudioAsset(formData)
-                                                            if (res.success && res.url) {
+                                                            if (res.success && res.data?.url) {
                                                                 const newReviews = [...section.content.reviews]
-                                                                newReviews[idx].avatar = res.url
+                                                                newReviews[idx].avatar = res.data.url
                                                                 updateSectionContent(sectionId, { reviews: newReviews })
                                                             } else {
                                                                 alert(res.error || 'Avatar upload failed')
@@ -1742,9 +1742,9 @@ export default function BuilderSectionForm({
                                                             const formData = new FormData()
                                                             formData.append('file', normalized); formData.append('studioId', studioId); formData.append('type', 'instructors')
                                                             const res = await uploadStudioAsset(formData)
-                                                            if (res.success && res.url) {
+                                                            if (res.success && res.data?.url) {
                                                                 const newItems = [...section.content.items]
-                                                                newItems[idx].image = res.url
+                                                                newItems[idx].image = res.data.url
                                                                 updateSectionContent(sectionId, { items: newItems })
                                                             }
                                                         } finally { setIsUploading(false) }

@@ -129,7 +129,7 @@ export async function POST(req: Request) {
                             category: 'earnings',
                             event: 'payment_received',
                             title: 'Late Payment Alert',
-                            description: `Received payment for an EXPIRED booking (${finalStatus.profiles?.full_name || 'Client'}). Manual intervention required.`,
+                            description: `Received payment for an EXPIRED booking (${(finalStatus.profiles as any)?.full_name || (finalStatus.profiles as any)?.[0]?.full_name || 'Client'}). Manual intervention required.`,
                             link: `/studio/history`,
                             metadata: { bookingId: entityId, status: 'late_payment' }
                         })
@@ -185,7 +185,8 @@ export async function POST(req: Request) {
                         .eq('id', entityId)
                         .single()
 
-                    if (activatedPlan?.profiles?.email && studioId) {
+                    const profile = Array.isArray(activatedPlan?.profiles) ? activatedPlan.profiles[0] : activatedPlan?.profiles;
+                    if (profile?.email && studioId) {
                         const branding = await getStudioBranding(studioId);
                         const planName = activatedPlan.packages?.name || activatedPlan.memberships?.name || 'Package';
                         
@@ -194,7 +195,7 @@ export async function POST(req: Request) {
                             subject: `Purchase Confirmed: ${planName}`,
                             fromName: branding?.fromName,
                             react: PurchaseConfirmationEmail({
-                                recipientName: activatedPlan.profiles.full_name || 'Valued Client',
+                                recipientName: profile.full_name || 'Valued Client',
                                 studioName: studio?.name || 'Studio',
                                 planName,
                                 amount: activatedPlan.total_amount,

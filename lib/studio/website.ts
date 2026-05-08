@@ -39,6 +39,8 @@ export const getStudioBySlug = cache(async (slug: string) => {
             enable_xendit,
             service_rates,
             hourly_rate,
+            ai_chat_limit,
+            ai_chat_usage,
             profiles!owner_id(
                 full_name,
                 avatar_url,
@@ -62,7 +64,43 @@ export const getStudioBySlug = cache(async (slug: string) => {
         // Fallback to normalized slug if direct match fails
         const secondTry = await admin
             .from('studios')
-            .select('id, name, slug, owner_id, logo_url, banner_url, bio, website_config, subscription_tier, subscription_status, address, outlets(*)')
+            .select(`
+                id,
+                name,
+                slug,
+                owner_id,
+                logo_url,
+                banner_url,
+                bio,
+                whatsapp_number,
+                show_whatsapp_button,
+                enable_manual_payments,
+                manual_payment_instructions,
+                website_config,
+                subscription_tier,
+                subscription_status,
+                address,
+                enable_xendit,
+                service_rates,
+                hourly_rate,
+                ai_chat_limit,
+                ai_chat_usage,
+                profiles!owner_id(
+                    full_name,
+                    avatar_url,
+                    origin_portal
+                ),
+                outlets(
+                    id,
+                    name,
+                    slug,
+                    address,
+                    status,
+                    is_active,
+                    hero_image_url,
+                    website_config
+                )
+            `)
             .eq('slug', normalizedSlug)
             .maybeSingle()
         

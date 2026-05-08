@@ -52,7 +52,7 @@ function StorefrontEvents({ config, theme, isMobile = false }: StorefrontEventsP
                 </div>
 
                 <div className="grid gap-6">
-                    {events.map((event, i) => (
+                    {events.map((event: any, i: number) => (
                         <div key={i} className="group relative bg-white rounded-[2.5rem] overflow-hidden border border-zinc-100 shadow-sm flex flex-col md:flex-row min-h-[300px] transition-all hover:shadow-xl">
                             <div className="md:w-2/5 relative overflow-hidden h-[250px] md:h-auto">
                                 <img src={event.image} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={event.title} />

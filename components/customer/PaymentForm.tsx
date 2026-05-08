@@ -263,7 +263,9 @@ export default function PaymentForm({
     booking,
     existingParq,
     userRole = 'customer',
-    expiresAt = null
+    expiresAt = null,
+    xenditCheckoutUrl = null,
+    isXendit = false
 }: {
     booking: any;
     existingParq: ExistingParq;

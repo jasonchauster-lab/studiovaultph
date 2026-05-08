@@ -83,7 +83,7 @@ function AuthForm({
 
     useEffect(() => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
+            async (event: any, session: any) => {
                 if (isRedirecting) return
                 const isVerificationEvent = event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED'
                 
@@ -447,7 +447,7 @@ function AuthForm({
                 <div className="space-y-1.5">
                     <div className="flex items-center justify-between px-1">
                         <label className="block text-[9px] font-bold text-slate-600 uppercase tracking-widest">Password</label>
-                        {!isSignUp && <Link href="/forgot-password" size="sm" className="text-[9px] text-slate-500 hover:text-burgundy font-bold uppercase tracking-widest">Forgot?</Link>}
+                        {!isSignUp && <Link href="/forgot-password" className="text-[9px] text-slate-500 hover:text-burgundy font-bold uppercase tracking-widest">Forgot?</Link>}
                     </div>
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" className="w-full px-5 h-12 border border-border-grey bg-white rounded-lg text-sm font-medium outline-none focus:ring-1 focus:ring-burgundy transition-all" />
                 </div>

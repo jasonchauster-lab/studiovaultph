@@ -78,11 +78,11 @@ function StorefrontBlogs({ config, theme, isMobile = false, posts = [], studioSl
                             ? `/s/${studioSlug}/${branchSlug}/blog/${blog.slug}`
                             : '#'
                         
-                        const CardWrapper = isPreview ? 'div' : Link
+                        const CardWrapper = isPreview ? ('div' as any) : Link
                         
                         return (
                             <CardWrapper 
-                                href={isPreview ? undefined : postUrl} 
+                                {...(!isPreview ? { href: postUrl } : {})} 
                                 key={i} 
                                 onClick={() => {
                                     if (isPreview) {

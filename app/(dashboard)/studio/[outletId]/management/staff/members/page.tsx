@@ -70,6 +70,7 @@ export default async function StaffMembersPage(props: {
                 studio={studio}
                 initialMembers={members as any || []}
                 outlets={outlets || []}
+                roles={rolesRes.data || []}
             />
         </div>
     )

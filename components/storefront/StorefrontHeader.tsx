@@ -21,7 +21,7 @@ interface StorefrontHeaderProps {
     hasMultipleBranches?: boolean
     // New props for Builder synchronization
     onNavigate?: (id: string) => void
-    activePage?: 'home' | 'memberships' | 'packages' | 'schedule' | 'pricing'
+    activePage?: string
     scrollRef?: React.RefObject<HTMLDivElement | null>
     isPreview?: boolean
     forceMobile?: boolean
@@ -223,7 +223,7 @@ function StorefrontHeader({
             ...(hasLocations ? [{ id: 'locations', label: 'Locations', href: '#locations' }] : []),
             ...(hasContact ? [{ id: 'contact', label: 'Contact', href: '#contact' }] : [])
         ]
-    ).filter((item): item is Exclude<typeof item, boolean | null | undefined> => !!item && !item.hidden) as { label: string, id: string, href?: string, hidden?: boolean, children?: any[] }[]
+    ).filter((item: any): item is any => !!item && !item.hidden) as { label: string, id: string, href?: string, hidden?: boolean, children?: any[] }[]
 
     return (
       <>
@@ -335,7 +335,7 @@ function StorefrontHeader({
                  "items-center gap-8 md:gap-10",
                  (forceMobile) ? "hidden" : "hidden md:flex"
              )}>
-                  {navItems.map((item) => (
+                  {navItems.map((item: any) => (
                     <div key={item.label} className="relative group/nav-item">
                         <button 
                             onClick={() => {
@@ -714,7 +714,7 @@ function StorefrontHeader({
 
                             <div className="space-y-6">
                                 <div className="flex flex-col gap-6">
-                                    {navItems.map((item) => (
+                                    {navItems.map((item: any) => (
                                         <div key={item.label} className="space-y-4">
                                             <button 
                                                 onClick={() => {

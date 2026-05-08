@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Image as ImageIcon, Plus, Trash2, Loader2, Maximize2, X, Clock, User, Camera } from 'lucide-react'
+import { Image as ImageIcon, Plus, Trash2, Loader2, Maximize2, X, Clock, User, Camera, Calendar } from 'lucide-react'
 import { getClientProgressPhotos, addClientProgressPhoto, deleteClientProgressPhoto } from '@/app/(dashboard)/studio/customers/[id]/actions'
 import { uploadStudioAsset } from '@/app/(dashboard)/studio/studio-actions'
 import { format } from 'date-fns'
@@ -52,7 +52,7 @@ export default function GalleryTab({ clientId, studioId }: GalleryTabProps) {
             formData.append('type', 'progress_photos')
             
             const uploadRes = await uploadStudioAsset(formData)
-            if (!uploadRes.success || !uploadRes.url) {
+            if (!uploadRes.success || !uploadRes.data?.url) {
                 throw new Error(uploadRes.error || 'Upload failed')
             }
 
@@ -60,7 +60,7 @@ export default function GalleryTab({ clientId, studioId }: GalleryTabProps) {
             await addClientProgressPhoto({
                 clientId,
                 studioId,
-                photoUrl: uploadRes.url
+                photoUrl: uploadRes.data.url
             })
 
             fetchPhotos()

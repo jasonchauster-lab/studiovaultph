@@ -36,7 +36,7 @@ export default function NotificationCenter({ userId }: { userId: string }) {
             .limit(20)
 
         if (rows) {
-            const mapped: Notification[] = rows.map(r => ({
+            const mapped: Notification[] = rows.map((r: any) => ({
                 id: r.id,
                 type: r.type,
                 title: r.title,

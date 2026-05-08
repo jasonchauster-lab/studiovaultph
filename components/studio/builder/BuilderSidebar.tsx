@@ -282,7 +282,7 @@ export default function BuilderSidebar({
         }
 
         // Deduplicate by key
-        return filtered.filter((v, i, a) => a.findIndex(t => t.key === v.key) || i === 0).filter((v, i, a) => a.findIndex(t => t.key === v.key) === i)
+        return filtered.filter((v: any, i: number, a: any[]) => a.findIndex(t => t.key === v.key) === i)
     }, [config.navigation?.header, config.pages?.home?.sections])
 
 
@@ -409,7 +409,7 @@ export default function BuilderSidebar({
                             onChange={(e) => setActivePage?.(e.target.value)}
                             className="w-full flex items-center justify-between px-6 py-4 bg-zinc-50 rounded-[2rem] border border-zinc-100 hover:bg-white hover:border-indigo-500/30 hover:shadow-xl transition-all text-zinc-900 text-[13px] font-black uppercase tracking-[0.1em] outline-none cursor-pointer appearance-none text-center"
                         >
-                            {navPages.map((page) => (
+                            {navPages.map((page: any) => (
                                 <option key={page.key} value={page.key}>
                                     {page.label}
                                 </option>

@@ -140,7 +140,7 @@ export const normalizeImageFile = async (
                     toType: 'image/jpeg',
                     quality: 0.8,
                     multiple: false // Ensure we only get one result
-                });
+                } as any);
                 const blob = Array.isArray(result) ? result[0] : result;
                 const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
                 console.log(`${logPrefix} Success via heic2any`);

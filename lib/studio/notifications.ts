@@ -66,11 +66,12 @@ export async function dispatchNotification({
         }
 
         // B. Email Notification
-        if (prefs.includes('email') && recipient.profile?.email) {
+        const profile: any = Array.isArray(recipient.profile) ? recipient.profile[0] : recipient.profile
+        if (prefs.includes('email') && profile?.email) {
             emailPromises.push(
                 sendNotificationEmail(
-                    recipient.profile.email, 
-                    recipient.profile.full_name || 'Staff Member',
+                    profile.email, 
+                    profile.full_name || 'Staff Member',
                     title, 
                     description, 
                     link,

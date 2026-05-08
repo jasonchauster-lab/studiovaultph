@@ -37,7 +37,7 @@ interface StorefrontTimetableProps {
     studioName: string
     initialSlots: Slot[]
     slug: string
-    branchSlug: string
+    branchSlug?: string
     theme?: any
     isMobile?: boolean
 }
@@ -91,7 +91,7 @@ function StorefrontTimetable({ studioName, initialSlots, slug, branchSlug, theme
         )}>
             {/* Horizontal Date Scroller */}
             <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar -mx-6 px-6">
-                {dateTabs.map(date => (
+                {dateTabs.map((date: Date) => (
                     <button
                         key={date.toISOString()}
                         onClick={() => setSelectedDate(date)}
@@ -174,7 +174,7 @@ function StorefrontTimetable({ studioName, initialSlots, slug, branchSlug, theme
             {/* Timetable List */}
             <div className="space-y-4">
                 {filteredSlots.length > 0 ? (
-                    filteredSlots.map(slot => {
+                    filteredSlots.map((slot: any) => {
                         const spotsLeft = slot.pax_capacity - slot.bookings_count
                         const isFull = spotsLeft <= 0
 

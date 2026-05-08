@@ -158,7 +158,7 @@ function PackageCard({ id, name, price, credits, validity_days, features, studio
                 </div>
 
                 <ul className="space-y-4 pt-4">
-                    {features.map((feature, idx) => (
+                    {features.map((feature: any, idx: number) => (
                         <li key={idx} className="flex items-start gap-4">
                             <Check className={`w-4 h-4 mt-0.5 shrink-0 ${isPremium ? 'text-zinc-900' : 'text-forest'}`} />
                             <span 
@@ -335,7 +335,7 @@ function StorefrontPackages({ config, studioName, packages = [], studioId, theme
                         "grid grid-cols-1 items-stretch gap-10",
                         !isMobile && "md:grid-cols-2 lg:grid-cols-3 lg:gap-14"
                     )}>
-                        {displayPackages.map((pkg, idx) => (
+                        {displayPackages.map((pkg: any, idx: number) => (
                             <PackageCard 
                                 key={idx}
                                 {...pkg}

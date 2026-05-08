@@ -12,6 +12,7 @@ import MobileScheduleCalendar from '../MobileScheduleCalendar'
 import { createSlot, deleteSlot, updateSlot } from '@/app/(dashboard)/studio/slot-actions'
 import { cancelBookingByStudio, approveManualBooking } from '@/app/(dashboard)/studio/booking-actions'
 import { format, parseISO } from 'date-fns'
+import { Plus } from 'lucide-react'
 
 interface ScheduleViewManagerProps {
     studioId: string
@@ -238,17 +239,14 @@ export const ScheduleViewManager = (props: ScheduleViewManagerProps) => {
                 onSubmit={handleCreateSingle}
                 initialDate={singleDate}
                 initialTime={singleTime}
-                initialEndTime={singleEndTime}
                 instructors={props.instructors}
                 services={props.services}
-                availableEquipment={props.availableEquipment}
                 inventory={props.inventory}
                 packagesCount={props.packagesCount}
                 membershipsCount={props.membershipsCount}
                 marketplaceStatus={props.marketplaceStatus}
                 outletId={props.outletId}
                 outlets={props.outlets}
-                isSubmitting={isSubmitting}
             />
 
             {state.isAddModalOpen && state.addMode === 'bulk' && (
@@ -266,12 +264,8 @@ export const ScheduleViewManager = (props: ScheduleViewManagerProps) => {
                         <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
                             <ScheduleManager 
                                 studioId={props.studioId} 
-                                outletId={props.outletId}
-                                onSuccess={() => state.setIsAddModalOpen(false)}
                                 availableEquipment={props.availableEquipment}
                                 services={props.services}
-                                instructors={props.instructors}
-                                marketplaceStatus={props.marketplaceStatus}
                             />
                         </div>
                     </div>

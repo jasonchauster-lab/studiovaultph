@@ -41,6 +41,8 @@ interface Branch {
     marketplace_available_to: string | null
     opening_time: string | null
     closing_time: string | null
+    insurance_url: string | null
+    insurance_expiry: string | null
 }
 
 interface MarketplaceSyncManagerProps {

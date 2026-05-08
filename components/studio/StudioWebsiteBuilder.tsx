@@ -299,7 +299,8 @@ export default function StudioWebsiteBuilder({
             initialData.current = {
                 slug,
                 customDomain,
-                config: JSON.stringify(config)
+                config: JSON.stringify(config),
+                isPublished: (config as any).is_published || false
             }
         } else {
             toast(result.error || 'Failed to update website', 'error')

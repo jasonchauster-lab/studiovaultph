@@ -35,6 +35,9 @@ export default function RolesView({ studioId, initialRoles }: RolesViewProps) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
     const [roles, setRoles] = useState(initialRoles)
+    const [newName, setNewName] = useState('')
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [editingPermissionsRole, setEditingPermissionsRole] = useState<Role | null>(null)
 
     // Sync state when props change (after router.refresh())
     useEffect(() => {

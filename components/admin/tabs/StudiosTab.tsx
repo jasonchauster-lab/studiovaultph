@@ -40,7 +40,8 @@ export default async function StudiosTab({ searchQuery = '' }: StudiosTabProps) 
         query = query.or(`name.ilike.%${searchQuery}%,slug.ilike.%${searchQuery}%`)
     }
 
-    const { data: studios = [] } = await query
+    const { data: rawStudios } = await query
+    const studios = rawStudios || []
 
     // Handle signed URLs for documents
     let signedUrls: Record<string, string> = {}

@@ -142,6 +142,8 @@ export interface ScheduleSlot {
     equipment?: Record<string, number>
     is_deleted: boolean
     bookings?: Booking[]
+    color?: string
+    calendar_color?: string
 }
 
 export type LeadStatus = 'new' | 'contacted' | 'trial' | 'active' | 'lost'

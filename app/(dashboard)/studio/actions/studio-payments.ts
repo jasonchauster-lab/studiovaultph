@@ -5,11 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { verifyStudioAccess } from '@/lib/studio/auth'
 import { uploadContentType } from '@/lib/utils/image-utils'
 
-export interface ServerActionResponse<T = any> {
-    success: boolean
-    error?: string
-    data?: T
-}
+import { ServerActionResponse } from './types'
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB Hard Limit
 

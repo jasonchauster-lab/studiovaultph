@@ -55,7 +55,7 @@ import { useEffect, useRef } from 'react'
 
 export default function BuilderHeaderForm({ config, studioId, setConfig, goBack }: BuilderHeaderFormProps) {
     const [isUploading, setIsUploading] = useState(false)
-    const [activeAccordion, setActiveAccordion] = useState<'logo' | 'color' | null>('color')
+    const [activeAccordion, setActiveAccordion] = useState<'logo' | 'color' | 'navigation' | null>('color')
 
     const updateHeader = (updates: any) => {
         setConfig((prev: any) => ({
@@ -152,8 +152,8 @@ export default function BuilderHeaderForm({ config, studioId, setConfig, goBack 
                                                 formData.append('studioId', studioId)
                                                 formData.append('type', 'logo')
                                                 const res = await uploadStudioAsset(formData)
-                                                if (res.success && res.url) {
-                                                    updateHeader({ logoUrl: res.url })
+                                                if (res.success && res.data?.url) {
+                                                    updateHeader({ logoUrl: res.data.url })
                                                 }
                                                 setIsUploading(false)
                                             }}

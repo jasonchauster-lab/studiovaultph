@@ -25,11 +25,11 @@ export default function supabaseLoader({ src, width, quality }: { src: string; w
                 const bucket = pathParts[publicIdx + 1] as any;
                 const path = pathParts.slice(publicIdx + 2).join('/');
                 
-                return getSupabaseAssetUrl(path, bucket, {
+                return (getSupabaseAssetUrl(path, bucket, {
                     width,
                     quality: quality || 80,
                     format: 'webp' // Force WebP for better performance
-                });
+                }) || src) as string;
             }
         } catch (e) {
             console.warn('[SupabaseLoader] Failed to parse URL:', src);
@@ -39,9 +39,9 @@ export default function supabaseLoader({ src, width, quality }: { src: string; w
 
     // 3. If it's a relative path, we assume it's from the 'studios' bucket by default (common in config)
     // or the caller should provide a full path if using this loader.
-    return getSupabaseAssetUrl(src, 'studios', {
+    return (getSupabaseAssetUrl(src, 'studios', {
         width,
         quality: quality || 80,
         format: 'webp'
-    }) || src;
+    }) || src) as string;
 }

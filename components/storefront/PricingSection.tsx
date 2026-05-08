@@ -30,7 +30,7 @@ export default function PricingSection({ title, description, items, studioId, st
                 {/* Right side: Cards Grid */}
                 <div className="md:col-span-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {items.map((item) => (
+                        {items.map((item: any) => (
                             <PricingCard 
                                 key={item.id}
                                 {...item}

@@ -188,7 +188,7 @@ export default function PricingPageClient({
                 services={services}
                 categories={categories}
                 outlets={outlets}
-                initialData={editingItem}
+                initialData={activeTab === 'memberships' ? (editingItem as Membership) : null}
                 studioId={studioId}
             />
             <PackageForm 
@@ -197,7 +197,7 @@ export default function PricingPageClient({
                 services={services}
                 categories={categories}
                 outlets={outlets}
-                initialData={editingItem}
+                initialData={activeTab === 'packages' ? (editingItem as Package) : null}
                 studioId={studioId}
             />
         </TooltipProvider>

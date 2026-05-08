@@ -3,13 +3,13 @@ import { LucideIcon, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { motion } from 'framer-motion'
+import { motion, HTMLMotionProps } from 'framer-motion'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {
   variant?: 'primary' | 'secondary' | 'outline' | 'forest' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   icon?: LucideIcon

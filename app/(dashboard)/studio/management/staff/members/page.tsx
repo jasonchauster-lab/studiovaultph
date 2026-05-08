@@ -67,6 +67,7 @@ export default async function StaffMembersPage() {
                 studio={studio}
                 initialMembers={members}
                 outlets={outlets}
+                roles={roles}
             />
         </div>
     )
