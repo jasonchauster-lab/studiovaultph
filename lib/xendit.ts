@@ -107,7 +107,7 @@ export async function createXenditRefund(params: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            invoice_id: params.paymentId,
+            payment_id: params.paymentId,
             amount: params.amount,
             reason: params.reason
         })

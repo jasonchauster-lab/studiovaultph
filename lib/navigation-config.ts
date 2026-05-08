@@ -23,6 +23,14 @@ export interface SecondaryMenu {
     groups: NavGroup[]
 }
 
+export const RESERVED_STUDIO_SLUGS = [
+    'schedule', 'services', 'pricing', 'customers', 'sales', 
+    'reports', 'loyalty-insights', 'marketing', 'referrals', 'promo', 
+    'online-store', 'management', 'scan', 'settings', 'website', 
+    'earnings', 'history', 'staff', 'inventory', 'analytics', 
+    'automation', 'marketplace'
+]
+
 /**
  * List of pages that require branch-specific context via ?outletId=...
  */
@@ -220,8 +228,7 @@ export function getActivePrimaryId(pathname: string): string | null {
     if (parts.length === 1) return 'home'
     
     // Pattern 2: /studio/[navId]
-    const navIds = ['schedule', 'services', 'pricing', 'customers', 'sales', 'reports', 'loyalty-insights', 'marketing', 'referrals', 'promo', 'online-store', 'management', 'website', 'earnings', 'history', 'staff', 'settings', 'marketplace']
-    if (navIds.includes(parts[1])) {
+    if (RESERVED_STUDIO_SLUGS.includes(parts[1])) {
         if (parts[1] === 'services') return 'services'
         if (parts[1] === 'pricing') return 'pricing'
         if (parts[1] === 'settings' && parts[2] === 'marketplace') return 'marketplace'
@@ -235,14 +242,7 @@ export function getOutletIdFromPath(pathname: string): string | undefined {
     // We no longer store outletId in the path for global routing.
     // This is Kept for backward compatibility during migration.
     const parts = pathname.split('/').filter(Boolean)
-    const reserved = [
-        'schedule', 'services', 'pricing', 'customers', 'sales', 
-        'reports', 'loyalty-insights', 'marketing', 'referrals', 'promo', 'online-store', 
-        'management', 'scan', 'settings', 'website', 'earnings', 
-        'history', 'staff', 'inventory', 'analytics', 'automation'
-    ]
-    
-    if (parts[0] === 'studio' && parts[1] && !reserved.includes(parts[1])) {
+    if (parts[0] === 'studio' && parts[1] && !RESERVED_STUDIO_SLUGS.includes(parts[1])) {
         return parts[1]
     }
     

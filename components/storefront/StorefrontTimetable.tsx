@@ -174,7 +174,7 @@ function StorefrontTimetable({ studioName, initialSlots, slug, branchSlug, theme
             {/* Timetable List */}
             <div className="space-y-4">
                 {filteredSlots.length > 0 ? (
-                    filteredSlots.map((slot: any) => {
+                    filteredSlots.map((slot: Slot) => {
                         const spotsLeft = slot.pax_capacity - slot.bookings_count
                         const isFull = spotsLeft <= 0
 

@@ -175,6 +175,11 @@ export async function submitPayoutApplication(prevState: any, formData: FormData
         return { error: 'All documents are required.' }
     }
 
+    const { isOwner, permissions } = await verifyStudioAccess(studioId)
+    if (!isOwner && !permissions.manage_settings) {
+        return { error: 'Permission denied: You do not have access to submit payout applications.' }
+    }
+
     const timestamp = Date.now()
     let permitPath = null
     let certPath = null

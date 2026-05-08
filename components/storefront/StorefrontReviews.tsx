@@ -27,7 +27,7 @@ function StorefrontReviews({ reviews: dbReviews, config, theme, isMobile = false
     const source = content.source || 'database' // 'database', 'manual', 'hybrid'
     
     // Resolve reviews based on source
-    const manualReviews = (content.reviews || []).map((r: any, idx: number) => ({
+    const manualReviews = (content.reviews || []).map((r: { rating?: number; text: string; name: string; avatar?: string }, idx: number): Review => ({
         id: `manual-${idx}`,
         rating: r.rating || 5,
         comment: r.text,
@@ -77,7 +77,7 @@ function StorefrontReviews({ reviews: dbReviews, config, theme, isMobile = false
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {displayReviews.slice(0, 9).map((review: any, index: number) => (
+                    {displayReviews.slice(0, 9).map((review: Review, index: number) => (
                         <motion.div 
                             key={review.id}
                             initial={{ opacity: 0, y: 20 }}

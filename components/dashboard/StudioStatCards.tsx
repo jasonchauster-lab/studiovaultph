@@ -58,30 +58,38 @@ export default function StudioStatCards({ stats }: StudioStatCardsProps) {
                         key={index}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
+                        whileHover={{ y: -5, scale: 1.02 }}
                         transition={{ 
                             type: "spring", 
                             damping: 25, 
                             stiffness: 200, 
                             delay: index * 0.08 
                         }}
-                        className="bg-white p-5 sm:p-6 rounded-[2.5rem] border border-zinc-100 shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all group"
+                        className="relative overflow-hidden bg-white/70 backdrop-blur-xl p-6 rounded-[2.5rem] border border-white/40 shadow-tight hover:shadow-2xl hover:shadow-primary/10 transition-all group"
                     >
-                        <div className="flex justify-between items-start mb-6">
+                        {/* Subtle Background Glow */}
+                        <div className={clsx(
+                            "absolute -right-4 -bottom-4 w-24 h-24 blur-[40px] opacity-20 transition-opacity group-hover:opacity-40",
+                            card.color.replace('text-', 'bg-')
+                        )} />
+
+                        <div className="flex justify-between items-start mb-8 relative z-10">
                             <div className={clsx(
-                                "w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center transition-all border shadow-sm group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-current/5",
-                                card.bgColor
+                                "w-12 h-12 rounded-2xl flex items-center justify-center transition-all border border-white/50 shadow-sm group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-current/10 bg-gradient-to-br",
+                                card.bgColor,
+                                index % 2 === 0 ? "from-white to-zinc-50" : "from-white to-primary/5"
                             )}>
-                                <card.icon className={clsx("w-5 h-5", card.color)} />
+                                <card.icon className={clsx("w-6 h-6", card.color)} />
                             </div>
-                            <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest bg-zinc-50 px-2.5 py-1 rounded-full border border-zinc-100">
+                            <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest bg-white/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/40 shadow-sm">
                                 {card.trend}
                             </span>
                         </div>
-                        <div className="space-y-1.5">
-                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] leading-none">
+                        <div className="space-y-1 relative z-10">
+                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.25em] leading-none mb-1">
                                 {card.label}
                             </p>
-                            <h3 className="text-2xl font-black text-zinc-900 tracking-tight truncate leading-none">
+                            <h3 className="text-3xl font-black text-zinc-900 tracking-tightest truncate leading-tight bg-gradient-to-br from-zinc-900 to-zinc-500 bg-clip-text text-transparent">
                                 {card.value}
                             </h3>
                         </div>

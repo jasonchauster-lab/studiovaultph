@@ -37,6 +37,7 @@ export default async function CustomerDetailPage({ params }: CustomerPageProps) 
             )
         `)
         .eq('client_id', id)
+        .eq('studio_id', studio?.id)
         .order('created_at', { ascending: false })
 
     // Fetch the owner's studio context

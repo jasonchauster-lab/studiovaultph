@@ -21,9 +21,28 @@ export default function WaiverSignForm({ studio, template, profile }: WaiverSign
     const [isLoading, setIsLoading] = useState(false)
     const [isSigned, setIsSigned] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [parqAnswers, setParqAnswers] = useState({
+        dizziness: false,
+        bone_joint: false,
+        medical_advice: false,
+        chest_pain_rest: false,
+        heart_condition: false,
+        chest_pain_activity: false,
+        pregnant_postpartum: false
+    })
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const [isDrawing, setIsDrawing] = useState(false)
     const router = useRouter()
+
+    const parqQuestions = [
+        { id: 'heart_condition', label: 'Has your doctor ever said that you have a heart condition and that you should only do physical activity recommended by a doctor?' },
+        { id: 'chest_pain_activity', label: 'Do you feel pain in your chest when you do physical activity?' },
+        { id: 'chest_pain_rest', label: 'In the past month, have you had chest pain when you were not doing physical activity?' },
+        { id: 'dizziness', label: 'Do you lose your balance because of dizziness or do you ever lose consciousness?' },
+        { id: 'bone_joint', label: 'Do you have a bone or joint problem (for example, back, knee or hip) that could be made worse by a change in your physical activity?' },
+        { id: 'medical_advice', label: 'Is your doctor currently prescribing drugs (for example, water pills) for your blood pressure or heart condition?' },
+        { id: 'pregnant_postpartum', label: 'Are you currently pregnant or have you given birth in the last 6 months?' }
+    ]
 
     const waiverTitle = template?.title || 'Waiver and Indemnification Form'
     const waiverContent = template?.content || `
@@ -136,7 +155,8 @@ export default function WaiverSignForm({ studio, template, profile }: WaiverSign
                 studioId: studio.id,
                 signatureData: signatureData || '',
                 waiverTitle: waiverTitle,
-                waiverContent: waiverContent
+                waiverContent: waiverContent,
+                parqAnswers: parqAnswers
             })
 
             if (result.success) {
@@ -188,6 +208,44 @@ export default function WaiverSignForm({ studio, template, profile }: WaiverSign
                             className="prose prose-sm prose-zinc max-w-none text-zinc-600 leading-relaxed font-medium space-y-6"
                             dangerouslySetInnerHTML={{ __html: waiverContent }}
                         />
+                    </div>
+
+                    {/* PAR-Q Section */}
+                    <div className="space-y-8 pt-12 border-t border-zinc-100">
+                        <div className="space-y-2">
+                            <h3 className="text-xl font-serif font-bold text-charcoal-900">Health Questionnaire (PAR-Q)</h3>
+                            <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Please answer the following questions truthfully</p>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            {parqQuestions.map((q) => (
+                                <div 
+                                    key={q.id}
+                                    className={clsx(
+                                        "flex items-start gap-4 p-4 rounded-2xl border transition-all cursor-pointer",
+                                        parqAnswers[q.id as keyof typeof parqAnswers] 
+                                            ? "bg-burgundy/5 border-burgundy/20" 
+                                            : "bg-off-white border-zinc-100 hover:border-zinc-200"
+                                    )}
+                                    onClick={() => setParqAnswers(prev => ({ ...prev, [q.id]: !prev[q.id as keyof typeof parqAnswers] }))}
+                                >
+                                    <div className={clsx(
+                                        "mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition-all",
+                                        parqAnswers[q.id as keyof typeof parqAnswers]
+                                            ? "bg-burgundy border-burgundy text-white"
+                                            : "bg-white border-zinc-200"
+                                    )}>
+                                        {parqAnswers[q.id as keyof typeof parqAnswers] && <Check className="w-3.5 h-3.5" />}
+                                    </div>
+                                    <span className={clsx(
+                                        "text-sm font-medium leading-relaxed",
+                                        parqAnswers[q.id as keyof typeof parqAnswers] ? "text-burgundy" : "text-zinc-600"
+                                    )}>
+                                        {q.label}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Signature Area */}

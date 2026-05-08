@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Check, X, ChevronRight, User, Users, Sparkles, Building2, HelpCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Button } from '@/components/ui/Button'
 
 const tiers = [
     {
@@ -266,14 +267,14 @@ const ComparisonTable = memo(({ billingCycle }: { billingCycle: 'monthly' | 'ann
                                             <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Billed {billingCycle}</p>
                                         )}
                                     </div>
-                                    <Link 
+                                    <Button 
                                         href={t.name === 'Enterprise' ? '/contact' : `/login?mode=signup&role=studio&plan=${t.name.toLowerCase()}&billing=${billingCycle}`}
-                                        className={`mt-4 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest w-full inline-block transition-all ${
-                                            t.name === 'Team' ? 'bg-forest text-white shadow-lg shadow-forest/20' : 'bg-white/10 border border-white/30 hover:bg-white/20 text-white'
-                                        }`}
+                                        variant={t.name === 'Team' ? 'forest' : 'outline'}
+                                        className="mt-4 w-full"
+                                        size="sm"
                                     >
                                         {t.cta}
-                                    </Link>
+                                    </Button>
                                 </div>
                             </th>
                         ))}
@@ -364,12 +365,13 @@ export default function PricingPage() {
                     <div className="hidden md:flex items-center gap-10">
                         <Link href="/pricing" className="text-[10px] font-black uppercase tracking-[0.2em] text-forest transition-colors">Pricing</Link>
                         <Link href="/login" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate hover:text-forest transition-colors">Partner Login</Link>
-                        <Link 
+                        <Button 
                             href="/login?mode=signup&role=studio" 
-                            className="bg-forest text-white px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:bg-primary-container transition-all active:scale-95"
+                            variant="forest"
+                            className="px-8 py-3.5"
                         >
                             FREE TRIAL
-                        </Link>
+                        </Button>
                     </div>
                 </div>
             </nav>
@@ -487,14 +489,13 @@ export default function PricingPage() {
                                     </div>
                                 </ul>
 
-                                <Link 
+                                <Button 
                                     href={tier.name === 'Enterprise' ? '/contact' : `/login?mode=signup&role=studio&plan=${tier.name.toLowerCase()}&billing=${billingCycle}`}
-                                    className={`w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all text-center ${
-                                        tier.name === 'Team' ? 'bg-forest text-white shadow-lg shadow-forest/20' : 'border border-forest text-forest hover:bg-forest/5'
-                                    }`}
+                                    variant={tier.name === 'Team' ? 'forest' : 'outline'}
+                                    className="w-full py-4"
                                 >
                                     {tier.cta}
-                                </Link>
+                                </Button>
                             </div>
                         ))}
                     </div>

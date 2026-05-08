@@ -9,13 +9,23 @@ interface SignWaiverParams {
     signatureData: string // This will be the base64 PNG data from the canvas
     waiverTitle: string
     waiverContent: string
+    parqAnswers: {
+        dizziness: boolean
+        bone_joint: boolean
+        medical_advice: boolean
+        chest_pain_rest: boolean
+        heart_condition: boolean
+        chest_pain_activity: boolean
+        pregnant_postpartum: boolean
+    }
 }
 
 export async function signWaiverAction({
     studioId,
     signatureData,
     waiverTitle,
-    waiverContent
+    waiverContent,
+    parqAnswers
 }: SignWaiverParams) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -40,15 +50,7 @@ export async function signWaiverAction({
                 waiver_content_snapshot: sanitizedContent,
                 waiver_version: new Date().toISOString().split('T')[0],
                 agreed_at: new Date().toISOString(),
-                parq_answers: {
-                    dizziness: false,
-                    bone_joint: false,
-                    medical_advice: false,
-                    chest_pain_rest: false,
-                    heart_condition: false,
-                    chest_pain_activity: false,
-                    pregnant_postpartum: false
-                }
+                parq_answers: parqAnswers
             })
 
         if (consentError) {

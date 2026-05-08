@@ -19,8 +19,8 @@ export default function StudioDashboardShell({
     children
 }: StudioDashboardShellProps) {
     return (
-        <div className="min-h-full bg-white lg:pt-6 pt-24 pb-20 animate-in fade-in duration-500">
-            <div className="max-w-[1600px] mx-auto space-y-6">
+        <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-zinc-50 via-white to-zinc-100 lg:pt-12 pt-24 pb-20 animate-in fade-in duration-700">
+            <div className="max-w-[1600px] mx-auto px-4 md:px-10 space-y-10">
                 {/* Studio Style Breadcrumbs & Title Bar */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div className="space-y-1">

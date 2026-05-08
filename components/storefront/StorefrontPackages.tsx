@@ -15,13 +15,16 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/Button"
 
-interface PackageCardProps {
+interface Package {
     id: string
     name: string
     price: number
     credits: number
     validity_days: number | null
     features: string[]
+}
+
+interface PackageCardProps extends Package {
     studioId: string
     theme?: any
     isMobile?: boolean
@@ -282,7 +285,7 @@ function PackageCard({ id, name, price, credits, validity_days, features, studio
     )
 }
 
-function StorefrontPackages({ config, studioName, packages = [], studioId, theme, isMobile = false, referralRewards, enableXendit, enableManualPayments, isPreview = false, onNavigate }: { config: any, studioName: string, packages?: any[], studioId: string, theme?: any, isMobile?: boolean, referralRewards?: any[], enableXendit?: boolean, enableManualPayments?: boolean, isPreview?: boolean, onNavigate?: (id: string) => void }) {
+function StorefrontPackages({ config, studioName, packages = [], studioId, theme, isMobile = false, referralRewards, enableXendit, enableManualPayments, isPreview = false, onNavigate }: { config: any, studioName: string, packages?: Package[], studioId: string, theme?: any, isMobile?: boolean, referralRewards?: any[], enableXendit?: boolean, enableManualPayments?: boolean, isPreview?: boolean, onNavigate?: (id: string) => void }) {
     const isPremium = theme?.layoutStyle === 'premium'
     
     // Fallback data for preview if no packages exist
@@ -335,7 +338,7 @@ function StorefrontPackages({ config, studioName, packages = [], studioId, theme
                         "grid grid-cols-1 items-stretch gap-10",
                         !isMobile && "md:grid-cols-2 lg:grid-cols-3 lg:gap-14"
                     )}>
-                        {displayPackages.map((pkg: any, idx: number) => (
+                        {displayPackages.map((pkg: Package, idx: number) => (
                             <PackageCard 
                                 key={idx}
                                 {...pkg}

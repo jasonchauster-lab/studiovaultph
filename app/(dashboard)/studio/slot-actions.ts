@@ -207,12 +207,12 @@ export async function generateRecurringSlots(params: {
     studioId: string
     startDate: string
     endDate: string
-    days: number[]
-    startTime: string
-    endTime: string
-    equipment: string[]
-    quantity: number
+    days: number[] // 0 for Sunday, 1 for Monday, etc.
+    startTime: string // "HH:mm"
     serviceId: string
+    outletId: string
+    instructorId?: string
+    paxCapacity: number
 }) {
     const supabase = await createClient()
     const { isOwner, permissions } = await verifyStudioAccess(params.studioId)
@@ -220,64 +220,66 @@ export async function generateRecurringSlots(params: {
         return { error: 'Permission denied.' }
     }
 
-    const { studioId, startDate, endDate, days, startTime, endTime, equipment, quantity, serviceId } = params
+    const { studioId, startDate, endDate, days, startTime, serviceId, outletId, instructorId, paxCapacity } = params
 
-    // Basic loop to generate dates
+    // 1. Fetch Service Details for Duration
+    const { data: service } = await supabase
+        .from('services')
+        .select('duration_minutes, name')
+        .eq('id', serviceId)
+        .single()
+
+    if (!service) return { error: 'Service not found.' }
+    const duration = service.duration_minutes || 60
+
+    // 2. Setup Loop Limits (Cap at 90 days for safety)
     const start = new Date(startDate)
     const end = new Date(endDate)
-    
-    // Fetch outlets for the studio to pick the first one as default if not specified
-    const { data: outlets } = await supabase.from('outlets').select('id').eq('studio_id', studioId).limit(1)
-    if (!outlets || outlets.length === 0) return { error: 'No outlet found for this studio.' }
-    const outletId = outlets[0].id
-
-    // Convert equipment array to record
-    const equipmentRecord: Record<string, number> = {}
-    equipment.forEach(eq => {
-        equipmentRecord[eq.toUpperCase()] = quantity
-    })
+    const maxDate = new Date(start.getTime() + 90 * 24 * 60 * 60 * 1000)
+    const effectiveEnd = end > maxDate ? maxDate : end
 
     let count = 0
     let currentDate = new Date(start)
 
-    while (currentDate <= end) {
+    while (currentDate <= effectiveEnd) {
         if (days.includes(currentDate.getDay())) {
             const dateStr = currentDate.toISOString().split('T')[0]
             
-            // For now, we just create 1-hour slots from startTime to endTime
-            let currentHour = parseInt(startTime.split(':')[0])
-            const endHour = parseInt(endTime.split(':')[0])
-
-            while (currentHour < endHour) {
-                const sTime = `${currentHour.toString().padStart(2, '0')}:00`
-                const eTime = `${(currentHour + 1).toString().padStart(2, '0')}:00`
+            // Calculate start and end times
+            const [startH, startM] = startTime.split(':').map(Number)
+            const slotStart = new Date(`${dateStr}T${startTime.padStart(5, '0')}:00+08:00`)
+            
+            if (!isNaN(slotStart.getTime())) {
+                const slotEnd = new Date(slotStart.getTime() + duration * 60000)
+                const endTimeStr = toManilaTimeString(slotEnd)
 
                 const { data: rpcResult, error: rpcError } = await supabase.rpc('create_slots_atomic_v1', {
                     p_studio_id: studioId,
                     p_outlet_id: outletId,
                     p_service_id: serviceId,
-                    p_instructor_id: null,
+                    p_instructor_id: instructorId || null,
                     p_date: dateStr,
-                    p_start_time: sTime,
-                    p_end_time: eTime,
-                    p_equipment: equipmentRecord,
-                    p_pax_capacity: quantity,
+                    p_start_time: startTime.padStart(5, '0'),
+                    p_end_time: endTimeStr,
+                    p_equipment: {}, // Assume empty or handle via another param if needed
+                    p_pax_capacity: paxCapacity,
                     p_waitlist_pax_capacity: 0,
                     p_calendar_color: null,
-                    p_display_name: null,
+                    p_display_name: service.name,
                     p_location_name: null,
                     p_is_published: true
                 })
 
                 if (!rpcError && rpcResult?.success) {
                     count++
+                } else if (rpcError) {
+                    console.error(`Failed to create recurring slot for ${dateStr}:`, rpcError.message)
                 }
-                currentHour++
             }
         }
         currentDate.setDate(currentDate.getDate() + 1)
     }
 
     ;(revalidateTag as any)(STUDIO_TAGS.SCHEDULE(studioId))
-    return { success: true, count }
+    return { success: true, count, limitApplied: end > maxDate }
 }

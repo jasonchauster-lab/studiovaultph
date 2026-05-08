@@ -29,6 +29,21 @@ interface StorefrontHeaderProps {
     studioMembership?: any
 }
 
+interface NavChild {
+    label: string
+    id: string
+    href: string
+}
+
+interface NavItem {
+    label: string
+    id: string
+    href?: string
+    itemType?: 'link' | 'group'
+    hidden?: boolean
+    children?: NavChild[]
+}
+
 const LEGACY_HREF_MAP: Record<string, string> = {
     '/locations': '#locations',
     '/contact-us': '#contact',
@@ -202,13 +217,13 @@ function StorefrontHeader({
     }
 
     const navItems = (navigationLinks.length > 0 
-        ? navigationLinks.map((item: any) => ({
+        ? navigationLinks.map((item: any): NavItem => ({
             label: item.label,
             id: getNavId(item.href || item.children?.[0]?.href || item.label || ''),
             href: sanitizeHref(item.href),
             itemType: item.itemType || (item.children?.length ? 'group' : 'link'),
             hidden: item.hidden,
-            children: item.children?.filter((c: any) => !c.hidden).map((c: any) => ({
+            children: item.children?.filter((c: any) => !c.hidden).map((c: any): NavChild => ({
                 label: c.label,
                 id: getNavId(c.href),
                 href: sanitizeHref(c.href)
@@ -223,7 +238,7 @@ function StorefrontHeader({
             ...(hasLocations ? [{ id: 'locations', label: 'Locations', href: '#locations' }] : []),
             ...(hasContact ? [{ id: 'contact', label: 'Contact', href: '#contact' }] : [])
         ]
-    ).filter((item: any): item is any => !!item && !item.hidden) as { label: string, id: string, href?: string, hidden?: boolean, children?: any[] }[]
+    ).filter((item: any): item is NavItem => !!item && !item.hidden)
 
     return (
       <>
@@ -335,7 +350,7 @@ function StorefrontHeader({
                  "items-center gap-8 md:gap-10",
                  (forceMobile) ? "hidden" : "hidden md:flex"
              )}>
-                  {navItems.map((item: any) => (
+                  {navItems.map((item: NavItem) => (
                     <div key={item.label} className="relative group/nav-item">
                         <button 
                             onClick={() => {
@@ -429,7 +444,7 @@ function StorefrontHeader({
                         {item.children && item.children.length > 0 && (
                             <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover/nav-item:opacity-100 group-hover/nav-item:translate-y-0 group-hover/nav-item:pointer-events-auto transition-all duration-300 z-[100]">
                                 <div className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-black/5 overflow-hidden min-w-[200px] p-2">
-                                    {item.children.map((child: any) => (
+                                    {item.children.map((child: NavChild) => (
                                         <button
                                             key={child.label}
                                             onClick={() => {
@@ -714,7 +729,7 @@ function StorefrontHeader({
 
                             <div className="space-y-6">
                                 <div className="flex flex-col gap-6">
-                                    {navItems.map((item: any) => (
+                                    {navItems.map((item: NavItem) => (
                                         <div key={item.label} className="space-y-4">
                                             <button 
                                                 onClick={() => {

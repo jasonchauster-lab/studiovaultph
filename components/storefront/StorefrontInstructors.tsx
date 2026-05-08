@@ -48,7 +48,7 @@ export default function StorefrontInstructors({ config, theme, isMobile }: Store
 
                 {items.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {items.map((inst: any, index: number) => (
+                        {items.map((inst: Instructor, index: number) => (
                             <div key={index} className="group relative">
                                 <div className="aspect-[4/5] rounded-[3rem] overflow-hidden bg-zinc-100 mb-8 relative">
                                     {inst.image ? (

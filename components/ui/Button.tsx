@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import { LucideIcon, Loader2 } from 'lucide-react'
 import Link from 'next/link'
@@ -22,8 +24,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const variantClasses = {
       primary: 'btn-primary-atelier',
       secondary: 'btn-secondary-atelier',
-      outline: 'btn-outline-atelier',
-      forest: 'btn-forest px-8 py-4 rounded-md font-bold text-[10px] tracking-[0.2em] uppercase',
+      outline: 'border border-forest text-forest hover:bg-forest/5 rounded-xl',
+      forest: 'bg-forest text-white shadow-lg shadow-forest/20 rounded-xl',
       ghost: 'bg-transparent text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg p-2'
     }
 
@@ -57,6 +59,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       return (
         <Link href={href}>
           <motion.div 
+            role="button"
+            tabIndex={0}
             whileTap={{ scale: 0.97 }}
             className={classes}
           >

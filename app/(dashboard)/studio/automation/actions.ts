@@ -9,25 +9,35 @@ import { getStudioBranding } from '@/lib/studio/branding'
 
 export async function processPackageExpiries() {
     const supabase = await createClient()
-    
-    // Days to check for (e.g. 7 days out, 3 days out)
     const intervals = [7, 3, 1]
     
     for (const days of intervals) {
         const { data: expiring, error } = await supabase.rpc('get_expiring_plans', { p_days: days })
-        
-        if (error) {
-            console.error(`Error fetching expiring plans for ${days} days:`, error)
-            continue
-        }
+        if (error || !expiring?.length) continue
+
+        // Bulk fetch profiles and studios
+        const userIds = [...new Set(expiring.map((p: any) => p.user_id))]
+        const studioIds = [...new Set(expiring.map((p: any) => p.studio_id))]
+
+        const [{ data: profiles }, { data: studios }] = await Promise.all([
+            supabase.from('profiles').select('id, full_name, email').in('id', userIds),
+            supabase.from('studios').select('id, name, slug').in('id', studioIds)
+        ])
+
+        const profileMap = new Map(profiles?.map(p => [p.id, p]))
+        const studioMap = new Map(studios?.map(s => [s.id, s]))
+        const brandingCache = new Map()
 
         for (const plan of expiring) {
-            // Fetch user profile and studio info
-            const { data: userProfile } = await supabase.from('profiles').select('full_name, email').eq('id', plan.user_id).single()
-            const { data: studio } = await supabase.from('studios').select('id, name, slug').eq('id', plan.studio_id).single()
+            const userProfile = profileMap.get(plan.user_id)
+            const studio = studioMap.get(plan.studio_id)
 
             if (userProfile?.email && studio) {
-                const branding = await getStudioBranding(studio.id);
+                if (!brandingCache.has(studio.id)) {
+                    brandingCache.set(studio.id, await getStudioBranding(studio.id))
+                }
+                const branding = brandingCache.get(studio.id)
+
                 await sendEmail({
                     to: userProfile.email,
                     subject: `Reminder: Your package at ${studio.name} is expiring soon!`,
@@ -50,21 +60,32 @@ export async function processPackageExpiries() {
 
 export async function processAbandonedBookings() {
     const supabase = await createClient()
-    
     const { data: abandoned, error } = await supabase.rpc('get_abandoned_bookings')
-    
-    if (error) {
-        console.error('Error fetching abandoned bookings:', error)
-        return
-    }
+    if (error || !abandoned?.length) return
+
+    // Bulk fetch profiles and studios
+    const userIds = [...new Set(abandoned.map((b: any) => b.user_id))]
+    const studioIds = [...new Set(abandoned.map((b: any) => b.studio_id))]
+
+    const [{ data: profiles }, { data: studios }] = await Promise.all([
+        supabase.from('profiles').select('id, full_name, email').in('id', userIds),
+        supabase.from('studios').select('id, name, slug').in('id', studioIds)
+    ])
+
+    const profileMap = new Map(profiles?.map(p => [p.id, p]))
+    const studioMap = new Map(studios?.map(s => [s.id, s]))
+    const brandingCache = new Map()
 
     for (const booking of abandoned) {
-        // Fetch user profile and studio info
-        const { data: userProfile } = await supabase.from('profiles').select('full_name, email').eq('id', booking.user_id).single()
-        const { data: studio } = await supabase.from('studios').select('id, name').eq('id', booking.studio_id).single()
+        const userProfile = profileMap.get(booking.user_id)
+        const studio = studioMap.get(booking.studio_id)
 
         if (userProfile?.email && studio) {
-            const branding = await getStudioBranding(studio.id);
+            if (!brandingCache.has(studio.id)) {
+                brandingCache.set(studio.id, await getStudioBranding(studio.id))
+            }
+            const branding = brandingCache.get(studio.id)
+
             await sendEmail({
                 to: userProfile.email,
                 subject: `Complete your booking at ${studio.name}`,
@@ -78,7 +99,6 @@ export async function processAbandonedBookings() {
                 })
             })
 
-            // Mark as recovery notified
             await supabase.from('bookings').update({ 
                 recovery_notified_at: new Date().toISOString() 
             }).eq('id', booking.booking_id)

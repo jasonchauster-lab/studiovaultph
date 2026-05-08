@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/Button"
 
-interface MembershipCardProps {
+interface Membership {
     id: string
     name: string
     price: number
@@ -23,6 +23,9 @@ interface MembershipCardProps {
     validity_days: number | null
     features: string[]
     bestValue?: boolean
+}
+
+interface MembershipCardProps extends Membership {
     studioId: string
     referralRewards?: any[]
     theme?: any
@@ -311,7 +314,7 @@ function MembershipCard({ id, name, price, credits, validity_days, features, bes
     )
 }
 
-function StorefrontMemberships({ config, studioName, memberships = [], studioId, theme, isMobile = false, referralRewards, enableXendit, enableManualPayments, isPreview = false, onNavigate }: { config: any, studioName: string, memberships?: any[], studioId: string, theme?: any, isMobile?: boolean, referralRewards?: any[], enableXendit?: boolean, enableManualPayments?: boolean, isPreview?: boolean, onNavigate?: (id: string) => void }) {
+function StorefrontMemberships({ config, studioName, memberships = [], studioId, theme, isMobile = false, referralRewards, enableXendit, enableManualPayments, isPreview = false, onNavigate }: { config: any, studioName: string, memberships?: Membership[], studioId: string, theme?: any, isMobile?: boolean, referralRewards?: any[], enableXendit?: boolean, enableManualPayments?: boolean, isPreview?: boolean, onNavigate?: (id: string) => void }) {
     const isPremium = theme?.layoutStyle === 'premium'
     
     // Fallback data for preview if no memberships exist
@@ -364,7 +367,7 @@ function StorefrontMemberships({ config, studioName, memberships = [], studioId,
                     "grid items-stretch gap-10 lg:gap-14 max-w-7xl mx-auto",
                     isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                 )}>
-                        {displayMemberships.map((membership: any, idx: number) => (
+                        {displayMemberships.map((membership: Membership, idx: number) => (
                             <MembershipCard 
                                 key={idx}
                                 {...membership}

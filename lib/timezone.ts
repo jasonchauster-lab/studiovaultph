@@ -160,5 +160,5 @@ export function normalizeTimeTo24h(timeStr: string): string {
  * Combines a YYYY-MM-DD date and HH:mm or HH:mm:ss time into a Date object.
  */
 export function getSlotDateTime(date: string, time: string): Date {
-    return new Date(`${date}T${time}`);
+    return new Date(`${date}T${time}+08:00`);
 }

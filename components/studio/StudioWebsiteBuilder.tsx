@@ -271,7 +271,7 @@ export default function StudioWebsiteBuilder({
             bio: studio.bio,
             address: studio.address
         })),
-        isPublished: (studio.website_config as any)?.is_published || false
+        isPublished: (studio.website_config as WebsiteConfig)?.is_published || false
     })
 
     const hasChanges = useMemo(() => {
@@ -279,7 +279,7 @@ export default function StudioWebsiteBuilder({
             slug !== initialData.current.slug ||
             customDomain !== initialData.current.customDomain ||
             JSON.stringify(config) !== initialData.current.config ||
-            (config as any).is_published !== initialData.current.isPublished
+            config.is_published !== initialData.current.isPublished
         )
     }, [slug, customDomain, config])
 
@@ -300,7 +300,7 @@ export default function StudioWebsiteBuilder({
                 slug,
                 customDomain,
                 config: JSON.stringify(config),
-                isPublished: (config as any).is_published || false
+                isPublished: config.is_published || false
             }
         } else {
             toast(result.error || 'Failed to update website', 'error')

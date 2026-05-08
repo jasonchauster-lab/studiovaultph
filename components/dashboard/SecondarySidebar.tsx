@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { clsx } from 'clsx'
-import { getSecondaryMenus, getActivePrimaryId } from '@/lib/navigation-config'
+import { getSecondaryMenus, getActivePrimaryId, RESERVED_STUDIO_SLUGS } from '@/lib/navigation-config'
 
 interface SecondarySidebarProps {
     isVisible: boolean
@@ -15,7 +15,7 @@ interface SecondarySidebarProps {
 export default function SecondarySidebar({ isVisible, isStudioPortal }: SecondarySidebarProps) {
     const pathname = usePathname()
     const parts = pathname.split('/').filter(Boolean)
-    const outletId = parts[0] === 'studio' && parts[1] && !['schedule', 'services', 'pricing', 'customers', 'sales', 'reports', 'loyalty-insights', 'marketing', 'promo', 'online-store', 'management', 'scan', 'settings', 'website', 'earnings', 'history', 'staff'].includes(parts[1]) ? parts[1] : undefined
+    const outletId = parts[0] === 'studio' && parts[1] && !RESERVED_STUDIO_SLUGS.includes(parts[1]) ? parts[1] : undefined
     
     const menu = React.useMemo(() => {
         const activePrimaryId = getActivePrimaryId(pathname)

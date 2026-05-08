@@ -161,7 +161,7 @@ export default async function StorefrontLayout(props: {
       {/* Floating WhatsApp Button */}
       {studio.show_whatsapp_button && studio.whatsapp_number && (
           <a 
-            href={`https://wa.me/${studio.whatsapp_number.replace(/\D/g, '')}`}
+            href={`https://wa.me/${(studio.whatsapp_number || '').replace(/\D/g, '')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="fixed bottom-8 right-8 z-[999] bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all group"
