@@ -178,19 +178,19 @@ export default function DashboardLayoutClient({
                                                 
                                                 {/* Specific Reasons */}
                                                 <div className="mt-4 flex flex-wrap gap-3">
-                                                    {profile.gov_id_expiry && new Date(profile.gov_id_expiry) < new Date() && (
+                                                    {profile?.gov_id_expiry && new Date(profile.gov_id_expiry) < new Date() && (
                                                         <div className="flex items-center gap-2 bg-rose-50 text-rose-700 px-3 py-1.5 rounded-full text-xs font-bold border border-rose-100">
                                                             <FileWarning className="w-3.5 h-3.5" />
                                                             Government ID Expired
                                                         </div>
                                                     )}
-                                                    {profile.available_balance < 0 && (
+                                                    {profile?.available_balance !== undefined && profile.available_balance < 0 && (
                                                         <div className="flex items-center gap-2 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full text-xs font-bold border border-amber-100">
                                                             <Wallet className="w-3.5 h-3.5" />
                                                             Outstanding Balance (₱{Math.abs(profile.available_balance)})
                                                         </div>
                                                     )}
-                                                    {(!profile.gov_id_expiry || new Date(profile.gov_id_expiry) >= new Date()) && profile.available_balance >= 0 && (
+                                                    {(!profile?.gov_id_expiry || new Date(profile.gov_id_expiry) >= new Date()) && (profile?.available_balance === undefined || profile.available_balance >= 0) && (
                                                         <div className="flex items-center gap-2 bg-zinc-50 text-zinc-700 px-3 py-1.5 rounded-full text-xs font-bold border border-zinc-200">
                                                             <XCircle className="w-3.5 h-3.5" />
                                                             Administrative Hold

@@ -17,6 +17,7 @@ import {
     LocationSwitcher,
     OnboardingChecklist
 } from '@/components/dashboard/DashboardClientComponents'
+import { StatsErrorBoundary } from '@/components/dashboard/StatsErrorBoundary'
 
 interface StudioPageProps {
     searchParams: Promise<{ outletId?: string }>
@@ -173,15 +174,28 @@ export default async function StudioRoot({ searchParams }: StudioPageProps) {
 
             {/* 2. Stats Grid */}
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-                <StudioStatCards stats={statsData} />
+                <StatsErrorBoundary fallback={
+                    <div className="bg-zinc-50 border border-zinc-100 rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center gap-4">
+                        <Loader2 className="w-6 h-6 text-zinc-300 animate-spin" />
+                        <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+                            Stats temporarily unavailable
+                        </p>
+                    </div>
+                }>
+                    <StudioStatCards stats={statsData} />
+                </StatsErrorBoundary>
             </div>
 
             {/* 3. Main Content */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
                 <div className="xl:col-span-8 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <RevenueTrendChart data={statsData.revenueTrends} title="Revenue Growth" type="revenue" />
-                        <RevenueTrendChart data={statsData.revenueTrends} title="Booking Volume" type="bookings" />
+                        <StatsErrorBoundary>
+                            <RevenueTrendChart data={statsData.revenueTrends} title="Revenue Growth" type="revenue" />
+                        </StatsErrorBoundary>
+                        <StatsErrorBoundary>
+                            <RevenueTrendChart data={statsData.revenueTrends} title="Booking Volume" type="bookings" />
+                        </StatsErrorBoundary>
                     </div>
 
                     <AnnouncementFeed role="studio" position="main" />

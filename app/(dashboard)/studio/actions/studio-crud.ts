@@ -339,22 +339,39 @@ export async function toggleStudioVisibilityAction(studioId: string, currentStat
 }
 
 export async function getStudioDashboardStatsAction(studioId: string, outletId?: string): Promise<ServerActionResponse> {
-    await verifyStudioAccess(studioId)
+    try {
+        await verifyStudioAccess(studioId)
 
-    const now = new Date()
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    const weekEnd = now.toISOString().split('T')[0]
+        const now = new Date()
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        const weekEnd = now.toISOString().split('T')[0]
 
-    const supabase = await createClient()
-    const { data: stats, error } = await supabase.rpc('get_studio_dashboard_stats_v6', {
-        p_studio_id: studioId,
-        p_last_30_days_date: thirtyDaysAgo,
-        p_week_start: weekStart,
-        p_week_end: weekEnd,
-        p_outlet_id: outletId || null
-    })
+        const supabase = await createClient()
+        const { data: stats, error } = await supabase.rpc('get_studio_dashboard_stats_v6', {
+            p_studio_id: studioId,
+            p_last_30_days_date: thirtyDaysAgo,
+            p_week_start: weekStart,
+            p_week_end: weekEnd,
+            p_outlet_id: outletId || null
+        })
 
-    if (error) return { success: false, error: `Failed to fetch dashboard stats: ${error.message}` }
-    return { success: true, data: stats }
+        if (error) {
+            console.error('[getStudioDashboardStatsAction] RPC Error:', {
+                message: error.message,
+                code: error.code,
+                studioId,
+                outletId
+            })
+            return { success: false, error: `Failed to fetch dashboard stats: ${error.message}` }
+        }
+        return { success: true, data: stats }
+    } catch (err) {
+        console.error('[getStudioDashboardStatsAction] Unexpected crash:', {
+            error: err,
+            studioId,
+            outletId
+        })
+        return { success: false, error: 'Internal Server Error during stats aggregation' }
+    }
 }

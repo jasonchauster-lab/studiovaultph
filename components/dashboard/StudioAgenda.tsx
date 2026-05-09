@@ -59,10 +59,10 @@ export default function StudioAgenda({ slots, outletId, activeOutletName }: Stud
                                         {/* Time Section */}
                                         <div className="min-w-[80px] pt-1 space-y-1">
                                             <p className="text-lg font-black text-zinc-900 tracking-tightest leading-none">
-                                                {slot.start_time.slice(0, 5)}
+                                                {slot.start_time?.slice(0, 5) ?? '--:--'}
                                             </p>
                                             <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">
-                                                {slot.end_time.slice(0, 5)}
+                                                {slot.end_time?.slice(0, 5) ?? '--:--'}
                                             </p>
                                         </div>
                                         
