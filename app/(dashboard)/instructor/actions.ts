@@ -10,12 +10,12 @@ import { formatManilaDate, formatManilaTime, toManilaDateStr, toManilaTimeString
 
 export async function getInstructorEarnings(startDate?: string, endDate?: string) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
-    const { data, error } = await supabase.rpc('get_instructor_earnings_v3', {
+    const { data: earnings, error } = await supabase.rpc('get_instructor_earnings_v3', {
         p_instructor_id: user.id,
         p_start_date: startDate || null,
         p_end_date: endDate || null
@@ -27,18 +27,18 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
     }
 
     return {
-        ...data,
+        ...earnings,
         // Ensure numbers are numbers and handle potentially missing fields
-        totalEarned: Number(data.totalEarned || 0),
-        totalWithdrawn: Number(data.totalWithdrawn || 0),
-        pendingPayouts: Number(data.pendingPayouts || 0),
-        availableBalance: Number(data.availableBalance || 0),
-        pendingBalance: Number(data.pendingBalance || 0),
-        totalCompensation: Number(data.totalCompensation || 0),
-        totalPenalty: Number(data.totalPenalty || 0),
-        netEarnings: Number(data.netEarnings || 0),
+        totalEarned: Number(earnings.totalEarned || 0),
+        totalWithdrawn: Number(earnings.totalWithdrawn || 0),
+        pendingPayouts: Number(earnings.pendingPayouts || 0),
+        availableBalance: Number(earnings.availableBalance || 0),
+        pendingBalance: Number(earnings.pendingBalance || 0),
+        totalCompensation: Number(earnings.totalCompensation || 0),
+        totalPenalty: Number(earnings.totalPenalty || 0),
+        netEarnings: Number(earnings.netEarnings || 0),
         // Map RPC field names to what the InstructorEarningsClient expects
-        recentTransactions: (data.recentTransactions || []).map((tx: any) => ({
+        recentTransactions: (earnings.recentTransactions || []).map((tx: any) => ({
             date: tx.tx_date || tx.date,
             type: tx.type,
             client: tx.client,
@@ -48,14 +48,14 @@ export async function getInstructorEarnings(startDate?: string, endDate?: string
             session_date: tx.session_date,
             session_time: tx.session_time,
         })),
-        payouts: data.payouts || []
+        payouts: earnings.payouts || []
     };
 }
 
 export async function requestPayout(amount: number, method: string, details: any) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -101,8 +101,8 @@ export async function requestPayout(amount: number, method: string, details: any
 
 export async function getPayoutHistory() {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -122,8 +122,8 @@ export async function getPayoutHistory() {
 
 export async function bookSlot(slotId: string, equipment: string, quantity: number = 1) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -456,8 +456,8 @@ export async function bookSlot(slotId: string, equipment: string, quantity: numb
 
 export async function cancelBookingByInstructor(bookingId: string, reason: string) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Unauthorized' }
 
     if (!reason?.trim()) return { error: 'Cancellation reason is required.' }
@@ -554,8 +554,8 @@ export async function cancelBookingByInstructor(bookingId: string, reason: strin
 
 export async function checkInClient(bookingId: string) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Unauthorized' }
 
     // 1. Fetch booking and verify instructor identity
@@ -593,5 +593,3 @@ export async function checkInClient(bookingId: string) {
     revalidatePath('/instructor')
     return { success: true }
 }
-
-

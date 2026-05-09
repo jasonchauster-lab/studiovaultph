@@ -7,8 +7,8 @@ import { logAuditAction } from '@/lib/studio/audit'
 
 export async function updateBusinessInfo(formData: FormData) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     const studioId = formData.get('studioId') as string
@@ -122,8 +122,8 @@ export async function updateBusinessInfo(formData: FormData) {
 
 export async function updateStaffMember(formData: FormData) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     const memberId = formData.get('memberId') as string
@@ -162,8 +162,8 @@ export async function updateStaffMember(formData: FormData) {
 
 export async function createOutlet(formData: FormData) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     const studioId = formData.get('studioId') as string
@@ -188,7 +188,7 @@ export async function createOutlet(formData: FormData) {
         .limit(1)
         .maybeSingle()
 
-    const { data, error } = await supabase
+    const { data: newOutlet, error } = await supabase
         .from('outlets')
         .insert({
             studio_id: studioId,
@@ -213,13 +213,13 @@ export async function createOutlet(formData: FormData) {
     }
 
     revalidatePath('/studio/management/outlets')
-    return { success: true, data }
+    return { success: true, data: newOutlet }
 }
 
 export async function updateOutlet(formData: FormData) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     const outletId = formData.get('outletId') as string
@@ -264,8 +264,8 @@ export async function updateOutlet(formData: FormData) {
 
 export async function deleteOutlet(outletId: string) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     const { data: outlet } = await supabase.from('outlets').select('studio_id').eq('id', outletId).single()
@@ -301,8 +301,8 @@ export async function deleteOutlet(outletId: string) {
 
 export async function updateMemberOutlets(memberId: string, outletIds: string[]) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     const { data: member } = await supabase.from('studio_members').select('studio_id').eq('id', memberId).single()
@@ -343,8 +343,8 @@ export async function updateMemberOutlets(memberId: string, outletIds: string[])
 
 export async function updateEquipmentInventory(studioId: string, inventory: any, outletId?: string) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     // Security Lockdown
@@ -404,8 +404,8 @@ export async function updateEquipmentInventory(studioId: string, inventory: any,
 
 export async function updateTaxSettings(studioId: string, taxInclusive: boolean) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     // Security Lockdown
@@ -427,8 +427,8 @@ export async function updateTaxSettings(studioId: string, taxInclusive: boolean)
 
 export async function addStudioTax(formData: FormData) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     const studioId = formData.get('studioId') as string
@@ -460,8 +460,8 @@ export async function addStudioTax(formData: FormData) {
 
 export async function deleteStudioTax(taxId: string) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     const { data: tax } = await supabase.from('studio_taxes').select('studio_id').eq('id', taxId).single()
@@ -493,8 +493,8 @@ export async function upsertNotificationRecipient(
     preferences: any
 ) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     // Security Lockdown
@@ -534,8 +534,8 @@ export async function upsertNotificationRecipient(
 
 export async function deleteNotificationRecipient(id: string) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     const { data: recipient } = await supabase.from('staff_notification_recipients').select('studio_id').eq('id', id).single()
@@ -558,8 +558,8 @@ export async function deleteNotificationRecipient(id: string) {
 
 export async function markNotificationRead(notificationId: string) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     const { error } = await supabase
@@ -576,8 +576,8 @@ export async function markNotificationRead(notificationId: string) {
 
 export async function clearAllNotifications() {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Not authenticated' }
 
     const { error } = await supabase
@@ -591,4 +591,3 @@ export async function clearAllNotifications() {
     revalidatePath('/studio')
     return { success: true }
 }
-

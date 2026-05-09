@@ -30,11 +30,11 @@ export async function addClientNote(formData: {
     isPrivate?: boolean
 }) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) throw new Error('Not authenticated')
 
-    const { data, error } = await supabase
+    const { data: note, error } = await supabase
         .from('client_notes')
         .insert({
             client_id: formData.clientId,
@@ -48,7 +48,7 @@ export async function addClientNote(formData: {
 
     if (error) throw error
     revalidatePath(`/studio/customers/${formData.clientId}`)
-    return { success: true, data }
+    return { success: true, data: note }
 }
 
 export async function deleteClientNote(noteId: string, clientId: string) {
@@ -90,11 +90,11 @@ export async function addClientProgressPhoto(formData: {
     notes?: string
 }) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) throw new Error('Not authenticated')
 
-    const { data, error } = await supabase
+    const { data: photo, error } = await supabase
         .from('client_progress_photos')
         .insert({
             client_id: formData.clientId,
@@ -108,7 +108,7 @@ export async function addClientProgressPhoto(formData: {
 
     if (error) throw error
     revalidatePath(`/studio/customers/${formData.clientId}`)
-    return { success: true, data }
+    return { success: true, data: photo }
 }
 
 export async function deleteClientProgressPhoto(photoId: string, clientId: string) {

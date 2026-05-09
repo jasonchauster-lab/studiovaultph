@@ -11,6 +11,11 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { messages = [], studioSlug } = body
 
+    // 0. Input Validation
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return new Response(JSON.stringify({ error: 'Messages are required' }), { status: 400 })
+    }
+
     if (!studioSlug) {
       return new Response(JSON.stringify({ error: 'Studio slug is required' }), { status: 400 })
     }
@@ -39,12 +44,12 @@ export async function POST(req: Request) {
       getStorefrontData(studio.id, studio.owner_id)
     ])
 
-    // Limit slots to next 72 hours for token efficiency
+    // Limit slots to next 7 days for better schedule coverage
     const now = new Date()
-    const threeDaysLater = new Date(now.getTime() + 72 * 60 * 60 * 1000)
+    const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
     const upcomingSlots = storefront.slots.filter((s: any) => {
         const slotDate = new Date(s.date)
-        return slotDate <= threeDaysLater
+        return slotDate <= sevenDaysLater
     })
 
     const contextText = `
@@ -54,13 +59,13 @@ Bio: ${studio.bio || 'N/A'}
 Address: ${studio.address || 'N/A'}
 
 PRICING & PACKAGES:
-${pricing.packages.map(p => `- ${p.name}: ₱${p.price} (${p.credits} credits, ${p.validity_value} ${p.validity_unit})`).join('\n')}
-${pricing.memberships.map(m => `- ${m.name}: ₱${m.price} (${m.credits} credits/month)`).join('\n')}
+${pricing.packages.map(p => `- ${p.name}: ₱${p.price} (${p.credits} credits, ${p.validity_value} ${p.validity_unit})${p.description ? `. Description: ${p.description}` : ''}`).join('\n')}
+${pricing.memberships.map(m => `- ${m.name}: ₱${m.price} (${m.credits} credits/month)${m.description ? `. Description: ${m.description}` : ''}`).join('\n')}
 
 INSTRUCTORS:
 ${storefront.instructors.map(i => `- ${i.full_name}: ${i.expertise || 'General Pilates'}`).join('\n')}
 
-UPCOMING CLASSES (Next 72h):
+UPCOMING CLASSES (Next 7 Days):
 ${upcomingSlots.map((s: any) => `- ${s.display_name || s.service?.name} on ${s.date} at ${s.start_time} with ${s.instructor?.full_name}`).join('\n')}
 `.trim()
 
@@ -72,10 +77,12 @@ ${upcomingSlots.map((s: any) => `- ${s.display_name || s.service?.name} on ${s.d
       model: openai('gpt-4o-mini'),
       system: `You are the helpful AI Concierge for ${studio.name}.
 
-# RULES
-- Help visitors with questions about classes, pricing, instructors, and studio details.
-- ALWAYS use the CONTEXT provided below to answer questions.
-- If information is not in the context, politely say you don't have that information and suggest they contact the studio via WhatsApp or their contact page.
+# SCOPE & RULES
+- Your ONLY goal is to help visitors with questions about this specific studio: classes, pricing, instructors, and studio details.
+- STRICTLY ONLY answer questions based on the CONTEXT provided below.
+- If a user asks something NOT related to the studio or its website (e.g., general knowledge, cooking, other businesses), politely decline and redirect them to ask about ${studio.name}.
+- Help customers understand what each package offers using their descriptions.
+- Clearly explain when packages expire based on their validity.
 - Be professional, warm, and encouraging.
 - Keep responses concise and focused on helping the user book or buy.
 - Use the studio's name in your welcome message if it's the start of the chat.

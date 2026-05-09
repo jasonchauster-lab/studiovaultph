@@ -11,8 +11,8 @@ export default async function EarningsPage(props: {
     const range = searchParams.range as string | undefined
 
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) redirect('/login')
 
@@ -49,20 +49,20 @@ export default async function EarningsPage(props: {
         }
     }
 
-    const data = await getInstructorEarnings(startDate, endDate)
+    const earnings = await getInstructorEarnings(startDate, endDate)
 
-    if (data.error) {
+    if (earnings.error) {
         return (
             <div className="p-12 text-center">
                 <div className="bg-red-50/20 p-8 rounded-[2rem] border border-red-100 inline-block">
                     <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">Failed to synchronise earnings data</p>
-                    <p className="text-[10px] mt-2">{data.error}</p>
+                    <p className="text-[10px] mt-2">{earnings.error}</p>
                 </div>
             </div>
         )
     }
 
     return (
-        <InstructorEarningsClient data={data} />
+        <InstructorEarningsClient data={earnings} />
     )
 }

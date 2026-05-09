@@ -17,8 +17,8 @@ export async function createStudio(formData: FormData): Promise<ServerActionResp
     try {
         const supabase = await createClient()
 
-        const { data } = await supabase.auth.getUser();
-    const user = data?.user
+        const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
         if (!user) {
             console.error('[createStudio] Authentication failed: No user found')
             return { success: false, error: 'Not authenticated' }
@@ -202,8 +202,8 @@ import { ErrorService } from '@/lib/services/error-service'
 
 export async function updateStudio(formData: FormData): Promise<ServerActionResponse> {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { success: false, error: 'Not authenticated' }
 
     const studioId = formData.get('studioId') as string
@@ -229,15 +229,15 @@ export async function updateStudio(formData: FormData): Promise<ServerActionResp
         return { success: false, error: 'Validation failed: ' + validation.error.issues[0].message }
     }
 
-    const data = validation.data
+    const validatedData = validation.data
 
     let lat = parseFloat(formData.get('lat') as string)
     let lng = parseFloat(formData.get('lng') as string)
 
     // Selective Geocoding
     const { data: currentStudio } = await supabase.from('studios').select('address, location').eq('id', studioId).single()
-    if (currentStudio && (currentStudio.address !== data.address || currentStudio.location !== data.location)) {
-        const geoResult = await getGeocodeAction(`${data.address}, ${data.location}`);
+    if (currentStudio && (currentStudio.address !== validatedData.address || currentStudio.location !== validatedData.location)) {
+        const geoResult = await getGeocodeAction(`${validatedData.address}, ${validatedData.location}`);
         if (geoResult?.data?.location) {
             lat = geoResult.data.location.lat;
             lng = geoResult.data.location.lng;
@@ -288,16 +288,16 @@ export async function updateStudio(formData: FormData): Promise<ServerActionResp
     }
 
     const updateData: any = {
-        ...data,
-        description: sanitizeHtml(data.description || ''),
-        bio: sanitizeHtml(data.bio || ''),
+        ...validatedData,
+        description: sanitizeHtml(validatedData.description || ''),
+        bio: sanitizeHtml(validatedData.bio || ''),
         equipment,
         inventory,
         pricing,
         reformers_count: reformersCount,
         lat: isNaN(lat) ? null : lat,
         lng: isNaN(lng) ? null : lng,
-        marketplace_status: data.is_public ? 'active' : 'inactive',
+        marketplace_status: validatedData.is_public ? 'active' : 'inactive',
         updated_at: new Date().toISOString()
     }
 
@@ -347,7 +347,7 @@ export async function getStudioDashboardStatsAction(studioId: string, outletId?:
     const weekEnd = now.toISOString().split('T')[0]
 
     const supabase = await createClient()
-    const { data, error } = await supabase.rpc('get_studio_dashboard_stats_v6', {
+    const { data: stats, error } = await supabase.rpc('get_studio_dashboard_stats_v6', {
         p_studio_id: studioId,
         p_last_30_days_date: thirtyDaysAgo,
         p_week_start: weekStart,
@@ -356,5 +356,5 @@ export async function getStudioDashboardStatsAction(studioId: string, outletId?:
     })
 
     if (error) return { success: false, error: `Failed to fetch dashboard stats: ${error.message}` }
-    return { success: true, data }
+    return { success: true, data: stats }
 }

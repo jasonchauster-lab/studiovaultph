@@ -6,8 +6,8 @@ import { getManilaTodayStr, toManilaDateStr, toManilaTimeString } from '@/lib/ti
 
 export async function addAvailability(formData: FormData) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -45,8 +45,8 @@ export async function addAvailability(formData: FormData) {
 
 export async function deleteAvailability(id: string, groupId?: string) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -74,8 +74,8 @@ export async function deleteAvailability(id: string, groupId?: string) {
 
 export async function updateAvailability(id: string, formData: FormData) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -133,8 +133,8 @@ interface GenerateAvailabilityParams {
 
 export async function generateRecurringAvailability(params: GenerateAvailabilityParams) {
     const supabase = await createClient();
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user;
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user;
 
     if (!user) return { error: 'Unauthorized' };
 
@@ -187,7 +187,7 @@ export async function generateRecurringAvailability(params: GenerateAvailability
         return { error: 'No dates matched your criteria.' };
     }
 
-    const { data, error } = await supabase
+    const { data: inserted, error } = await supabase
         .from('instructor_availability')
         .insert(availabilitiesToInsert)
         .select();
@@ -198,5 +198,5 @@ export async function generateRecurringAvailability(params: GenerateAvailability
     }
 
     revalidatePath('/instructor/schedule');
-    return { success: true, count: data.length };
+    return { success: true, count: inserted?.length || 0 };
 }

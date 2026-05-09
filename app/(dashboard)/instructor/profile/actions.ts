@@ -5,8 +5,8 @@ import { revalidatePath } from 'next/cache'
 
 export async function addCertification(formData: FormData) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -52,8 +52,8 @@ export async function addCertification(formData: FormData) {
 
 export async function deleteCertification(certId: string) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -95,8 +95,8 @@ export async function updateServiceArea(data: {
     max_travel_km: number;
 }) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 

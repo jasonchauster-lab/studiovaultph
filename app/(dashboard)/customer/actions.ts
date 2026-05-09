@@ -68,8 +68,8 @@ export async function requestBooking(
     planId?: string
 ) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Unauthorized' }
 
     let actualBookingId: string | null = null;
@@ -89,8 +89,6 @@ export async function requestBooking(
             : Promise.resolve({ data: null, error: null }),
         supabase.from('profiles').select('full_name, rates, is_founding_partner, custom_fee_percentage, available_balance, offers_home_sessions, home_base_lat, home_base_lng, max_travel_km').eq('id', instructorId).single()
     ]);
-
-    if (!user) return { error: 'Unauthorized' }
 
     const slot = slotResult.data;
     const instructor = instructorResult.data;
@@ -396,8 +394,8 @@ export async function submitPaymentProof(
     medicalClearanceAcknowledged: boolean = false
 ) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -428,8 +426,8 @@ export async function submitPaymentProof(
 
 export async function uploadTopUpProof(formData: FormData) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Unauthorized' }
 
     const topUpId = formData.get('topUpId') as string
@@ -461,8 +459,8 @@ export async function submitTopUpPaymentProof(
     proofPath: string
 ) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -521,8 +519,8 @@ export async function joinWaitlist(
     quantity: number = 1
 ) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Unauthorized' }
 
     // atomic RPC call
@@ -550,8 +548,8 @@ export async function bookInstructorSession(
     isStorefront: boolean = false
 ) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
@@ -561,8 +559,6 @@ export async function bookInstructorSession(
 
     const normalizedTime = time.length === 5 ? time + ':00' : time;
     const startDateTime = new Date(`${date}T${normalizedTime}${TIMEZONE_OFFSET}`)
-    // We no longer rely on startISO for slot matching, but keep it for legacy if needed elsewhere
-    // However, it's safer to just use strings now.
 
     // 0. Check Instructor Suspension & Balance
     const { data: instructorProfile } = await supabase
@@ -588,7 +584,7 @@ export async function bookInstructorSession(
     // Query A: date-specific availability
     const { data: availByDate } = await supabase
         .from('instructor_availability')
-        .select('id, group_id, location_area, equipment') // Changed select to fetch location and equipment
+        .select('id, group_id, location_area, equipment')
         .eq('instructor_id', instructorId)
         .eq('date', manilaDateStr)
         .lte('start_time', timeStr)
@@ -597,7 +593,7 @@ export async function bookInstructorSession(
     // Query B: weekly recurring availability
     const { data: availByDay } = await supabase
         .from('instructor_availability')
-        .select('id, group_id, location_area, equipment') // Changed select to fetch location and equipment
+        .select('id, group_id, location_area, equipment')
         .eq('instructor_id', instructorId)
         .eq('day_of_week', manilaDayOfWeek)
         .is('date', null)
@@ -656,7 +652,6 @@ export async function bookInstructorSession(
     // --- DOUBLE BOOKING VALIDATION END ---
 
     // 2. Find Available Studio Slot
-    // Criteria: Verified Studio, Location Match, Equipment Match, Time Match, IS AVAILABLE
     const { data: availableSlots, error: slotError } = await supabase
         .from('slots')
         .select(`
@@ -665,10 +660,8 @@ export async function bookInstructorSession(
         `)
         .eq('is_available', true)
         .eq('date', date)
-        .eq('start_time', timeStr) // Exact match for slot start
-        //.eq('end_time', endDateTime.toISOString()) // Optional, if slots are strict 1 hour
+        .eq('start_time', timeStr)
         .eq('studios.verified', true)
-    // We will filter location and equipment availability in JS for better case-insensitivity support
 
     if (slotError) {
         console.error('Slot search error:', slotError)
@@ -737,7 +730,6 @@ export async function bookInstructorSession(
         return { error: 'Failed to extract equipment for booking.' };
     }
 
-    // Determine the base fee & service fee dynamically for the RPC
     const studioPricing = selectedSlot.studios?.pricing as Record<string, number> | null;
     const sKey = Object.keys(studioPricing || {}).find(k => k.toLowerCase() === equipment.toLowerCase());
     const studioFee = sKey ? (studioPricing?.[sKey] || 0) : (Number(selectedSlot.studios?.hourly_rate) || 0);
@@ -749,7 +741,6 @@ export async function bookInstructorSession(
     const baseFee = studioFee + instructorFee;
     let feePercentage = 20;
 
-    // WAIVE FEE FOR STOREFRONT BOOKINGS IF SUBSCRIPTION IS ACTIVE
     const isSubscriptionActive = selectedSlot.studios?.subscription_status === SUBSCRIPTION_STATUS.ACTIVE;
 
     if (isStorefront && isSubscriptionActive) {
@@ -776,9 +767,6 @@ export async function bookInstructorSession(
     const reqStartTime = toManilaTimeString(startDateTime);
     const reqEndTime = toManilaTimeString(endDateTime);
 
-    // Note: bookInstructorSession seems to create "approved" bookings for immediate sessions or direct matches
-    // But we use the atomic RPC to ensure structure. We will default to RPC pending and immediately update to approved here,
-    // or rely on the RPC logic. For full atomic safety, the booking is created pending.
     const { data: rpcResult, error: rpcError } = await supabase.rpc('book_slot_atomic', {
         p_slot_id: selectedSlot.id,
         p_instructor_id: instructorId,
@@ -787,11 +775,11 @@ export async function bookInstructorSession(
         p_quantity: 1,
         p_db_price: totalPrice,
         p_price_breakdown: breakdown,
-        p_wallet_deduction: 0, // Assume no direct wallet hit here unless later processed
+        p_wallet_deduction: 0,
         p_req_start_time: reqStartTime,
         p_req_end_time: reqEndTime,
         p_origin: isStorefront ? 'studio' : 'marketplace',
-        p_use_studio_wallet: isStorefront // NEW FLAG
+        p_use_studio_wallet: isStorefront
     });
 
     if (rpcError) {
@@ -805,17 +793,12 @@ export async function bookInstructorSession(
 
     const { booking_id: actualBookingId } = rpcResult;
 
-    // Immediately mark as approved since this is a direct instructor session matching
     await supabase.from('bookings').update({ status: 'approved' }).eq('id', actualBookingId);
 
     const booking = { id: actualBookingId };
-    // --- ATOMIC BOOKING VIA RPC END ---
 
-    // 6. Notifications
-    // Helper to extract first item if array
     const first = (val: any) => Array.isArray(val) ? val[0] : val;
 
-    // Fetch enriched booking details for email
     const { data: enrichedBooking } = await supabase
         .from('bookings')
         .select(`
@@ -856,7 +839,6 @@ export async function bookInstructorSession(
             const dateStr = formatManilaDateStr(slots?.date);
             const timeStr = formatTo12Hour(slots?.start_time);
 
-            // Notify Client
             await sendEmail({
                 to: clientEmail,
                 subject: `Booking Confirmed: ${studioName}`,
@@ -876,7 +858,6 @@ export async function bookInstructorSession(
                 })
             });
 
-            // Notify Instructor
             if (instructorEmail) {
                 await sendEmail({
                     to: instructorEmail,
@@ -897,7 +878,6 @@ export async function bookInstructorSession(
                 });
             }
 
-            // Notify Studio Owner
             const ownerId = (slots as any)?.studios?.owner_id;
             if (ownerId) {
                 const { data: owner } = await supabase.from('profiles').select('email').eq('id', ownerId).single();
@@ -922,8 +902,6 @@ export async function bookInstructorSession(
                     });
                 }
             }
-        } else {
-            console.warn('Missing data for direct booking confirmation emails:', { client, slots, studios });
         }
     }
 
@@ -934,12 +912,11 @@ export async function bookInstructorSession(
 
 export async function cancelBooking(bookingId: string, reason: string = 'Cancelled by client') {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
-    // 1. Fetch booking with slot details
     const { data: booking, error: fetchError } = await supabase
         .from('bookings')
         .select(`
@@ -964,7 +941,6 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
         return { error: 'Booking is already cancelled.' }
     }
 
-    // Helper to safely extract from potential arrays
     const getFirst = (item: any) => Array.isArray(item) ? item[0] : item;
     const slotData = getFirst(booking.slots);
 
@@ -976,11 +952,9 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
     const now = new Date().getTime()
     const hoursUntilStart = (startTime - now) / (1000 * 60 * 60)
 
-    // Check user role for strict cancellation enforcement
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
     const isInstructor = profile?.role === 'instructor'
 
-    // 2. Cancellation restriction and Refund logic
     if (hoursUntilStart < 24) {
         if (isInstructor) {
             return { error: 'As an instructor, you cannot cancel a booking less than 24 hours in advance.' }
@@ -993,8 +967,6 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
     const totalPrice = Number(booking.total_price || 0);
 
     if (hoursUntilStart >= 24) {
-        // Only if the booking was approved (cash portion confirmed) do we refund total_price + wallet_deduction.
-        // If it's pending/submitted/confirmed, we only return the amount actually deducted from their wallet.
         if (booking.status === 'approved') {
             refundAmount = totalPrice + walletDeduction;
         } else {
@@ -1002,7 +974,6 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
         }
     }
 
-    // 3. Mark as cancelled atomically to prevent double refunds
     const newStatus = hoursUntilStart >= 24 ? 'cancelled_refunded' : 'cancelled_charged';
     const currentBreakdown = typeof booking.price_breakdown === 'object' && booking.price_breakdown !== null
         ? booking.price_breakdown
@@ -1031,7 +1002,6 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
         return { error: 'Booking already cancelled or not eligible for cancellation.' }
     }
 
-    // 4. Process Refund only if the atomic update was successful
     if (refundAmount > 0) {
         const { error: refundError } = await supabase.rpc('increment_available_balance', {
             user_id: user.id,
@@ -1042,7 +1012,6 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
             return { error: `Cancellation processed, but refund failed: ${refundError.message}` }
         }
 
-        // Log the refund transaction
         await supabase.from('wallet_top_ups').insert({
             user_id: user.id,
             amount: refundAmount,
@@ -1052,15 +1021,12 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
         })
     }
 
-    // Release all associated slots
     const slotsToRelease = Array.isArray(booking.booked_slot_ids) && booking.booked_slot_ids.length > 0
         ? booking.booked_slot_ids
         : [booking.slot_id];
 
     await supabase.from('slots').update({ is_available: true }).in('id', slotsToRelease);
 
-    // --- AUTO-REMOVAL OF AVAILABILITY START ---
-    // If an instructor is cancelling their own studio rental, remove the auto-created availability
     if (booking.client_id === booking.instructor_id) {
         try {
             const startDateTime = new Date(`${slotData.date}T${slotData.start_time}+08:00`);
@@ -1079,7 +1045,6 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
             console.error('Failed to remove auto-availability:', availError);
         }
     }
-    // --- AUTO-REMOVAL OF AVAILABILITY END ---
 
     revalidatePath('/customer')
     revalidatePath('/customer/bookings')
@@ -1090,15 +1055,14 @@ export async function cancelBooking(bookingId: string, reason: string = 'Cancell
 
 export async function topUpWallet(amount: number) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
     if (amount <= 0) return { error: 'Invalid amount' }
 
-    // Create a pending top-up record
-    const { data, error } = await supabase
+    const { data: topUpData, error } = await supabase
         .from('wallet_top_ups')
         .insert({
             user_id: user.id,
@@ -1114,21 +1078,18 @@ export async function topUpWallet(amount: number) {
         return { error: 'Failed to create top-up request.' }
     }
 
-    console.log('[TopUpWallet] Created record successfully:', data.id)
-
     revalidatePath('/customer/wallet')
     revalidatePath('/instructor/earnings')
-    return { success: true, topUpId: data.id }
+    return { success: true, topUpId: topUpData.id }
 }
 
 export async function getCustomerWalletDetails() {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
-    // 1. Fetch all data in parallel
     const [profileResult, walletActionsResult, walletBookingsResult] = await Promise.all([
         supabase.from('profiles')
             .select('available_balance, wallet_balance, pending_balance')
@@ -1138,7 +1099,7 @@ export async function getCustomerWalletDetails() {
             .select('id, amount, type, status, created_at, updated_at, admin_notes')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
-            .limit(100), // Scalability: Limit to recent history
+            .limit(100),
         supabase.from('bookings')
             .select(`
                 id,
@@ -1155,9 +1116,6 @@ export async function getCustomerWalletDetails() {
             `)
             .eq('client_id', user.id)
             .not('price_breakdown', 'is', null)
-            // SQL-Level Filtering: Avoid fetching studio-wallet transactions here if possible
-            // Note: price_breakdown is JSONB, so we can filter by top-level keys if needed, 
-            // but for now we filter in JS. We at least limit the fetch.
             .order('created_at', { ascending: false })
             .limit(100)
     ]);
@@ -1176,7 +1134,6 @@ export async function getCustomerWalletDetails() {
 
     const transactions: any[] = [];
 
-    // 1. Process Wallet Top-ups/Adjustments
     walletActions?.forEach(wa => {
         if (wa.status === 'approved' || wa.type === 'admin_adjustment' || wa.type === 'refund' || wa.type === 'referral_bonus') {
             const typeLabel = wa.type === 'admin_adjustment' ? 'Direct Adjustment'
@@ -1200,13 +1157,11 @@ export async function getCustomerWalletDetails() {
         }
     });
 
-    // 2. Process Booking Deductions
     walletBookings?.forEach(b => {
         const breakdown = b.price_breakdown as any;
         const deduction = Number(breakdown?.wallet_deduction || 0);
         const walletSource = breakdown?.wallet_source || 'marketplace';
 
-        // Filter out studio-specific wallet transactions
         if (deduction > 0 && walletSource !== 'studio') {
             const slot = Array.isArray(b.slots) ? b.slots[0] : b.slots;
             const studio = Array.isArray(b.studios) ? b.studios[0] : b.studios;
@@ -1229,7 +1184,6 @@ export async function getCustomerWalletDetails() {
         }
     });
 
-    // Final sort for the merged list
     transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return {
@@ -1241,12 +1195,11 @@ export async function getCustomerWalletDetails() {
 
 export async function requestCustomerPayout(amount: number, method: string, details: any) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
 
     if (!user) return { error: 'Unauthorized' }
 
-    // 1. Verify Balance
     const { available, error: balanceError } = await getCustomerWalletDetails();
 
     if (balanceError || available === undefined) {
@@ -1259,7 +1212,6 @@ export async function requestCustomerPayout(amount: number, method: string, deta
         return { error: `Insufficient funds. Available: ₱${available}` }
     }
 
-    // 2. Deduct from profile right away
     const { error: deductError } = await supabase.rpc('deduct_available_balance', {
         user_id: user.id,
         amount
@@ -1269,7 +1221,6 @@ export async function requestCustomerPayout(amount: number, method: string, deta
         return { error: 'Failed to process balance deduction.' };
     }
 
-    // 3. Create Payout Request
     const { error: insertError } = await supabase
         .from('payout_requests')
         .insert({
@@ -1283,7 +1234,6 @@ export async function requestCustomerPayout(amount: number, method: string, deta
         })
 
     if (insertError) {
-        // Rollback balance deduction
         await supabase.rpc('increment_available_balance', {
             user_id: user.id,
             amount

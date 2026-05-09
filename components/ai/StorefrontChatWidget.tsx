@@ -15,12 +15,12 @@ interface StorefrontChatWidgetProps {
 export default function StorefrontChatWidget({ studioSlug, studioName, primaryColor = '#2D3282' }: StorefrontChatWidgetProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [input, setInput] = useState('')
-    const { messages, sendMessage, status, error } = useChat({
+    const { messages, append, status, error } = useChat({
         api: '/api/chat/storefront',
         body: {
             studioSlug
         }
-    } as any)
+    } as any) as any
     const isLoading = status === 'streaming' || status === 'submitted'
     const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -34,17 +34,18 @@ export default function StorefrontChatWidget({ studioSlug, studioName, primaryCo
         setInput(e.target.value)
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!input.trim() || isLoading) return
         
-        sendMessage({ text: input })
+        const content = input
         setInput('')
+        await append({ role: 'user', content })
     }
 
     const getMessageText = (m: any) => {
-        if ((m as any).content) return (m as any).content
-        return (m as any).parts?.filter((p: any) => p.type === 'text').map((p: any) => (p as any).text).join('') || ''
+        if (m.content) return m.content
+        return m.parts?.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('') || ''
     }
 
     return (
@@ -132,7 +133,7 @@ export default function StorefrontChatWidget({ studioSlug, studioName, primaryCo
                                 </div>
                             )}
                             
-                            {messages.map((m) => (
+                            {messages.map((m: any) => (
                                 <div key={m.id} className={clsx("flex flex-col", m.role === 'user' ? "items-end" : "items-start")}>
                                     <div className={clsx(
                                         "max-w-[85%] p-4 rounded-3xl text-sm font-medium leading-relaxed shadow-sm transition-all whitespace-pre-wrap",

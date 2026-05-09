@@ -56,8 +56,8 @@ export async function purchasePlan(formData: {
     referralRewardId?: string;
 }) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Unauthorized' }
 
     // 1. Fetch all necessary data in parallel
@@ -167,8 +167,8 @@ export async function purchasePlan(formData: {
 
 export async function uploadPlanPaymentProof(planId: string, proofUrl: string, promoCodeId?: string, totalAmount?: number) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return { error: 'Unauthorized' }
 
     const updateData: any = {
@@ -215,11 +215,11 @@ export async function uploadPlanPaymentProof(planId: string, proofUrl: string, p
 
 export async function getActivePlans(studioId: string) {
     const supabase = await createClient()
-    const { data } = await supabase.auth.getUser();
-    const user = data?.user
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user
     if (!user) return []
 
-    const { data } = await supabase
+    const { data: plans } = await supabase
         .from('customer_plans')
         .select(`
             *,
@@ -231,5 +231,5 @@ export async function getActivePlans(studioId: string) {
         .eq('status', 'active')
         .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
 
-    return data || [];
+    return plans || [];
 }

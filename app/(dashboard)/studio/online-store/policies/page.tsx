@@ -21,7 +21,7 @@ export default async function PoliciesSettingsPage() {
 
     if (!user) redirect('/login')
 
-    const studio = await getCachedStudio()
+    const studio = await getCachedStudio() as any
     if (!studio) notFound()
 
     // Fetch existing policies
