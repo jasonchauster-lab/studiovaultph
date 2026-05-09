@@ -20,6 +20,7 @@ import SuspensionsTab from '@/components/admin/tabs/SuspensionsTab'
 import AccountsTab from '@/components/admin/tabs/AccountsTab'
 import CrmTab from '@/components/admin/tabs/CrmTab'
 import StudiosTab from '@/components/admin/tabs/StudiosTab'
+import PartnersManagementContent from './partners/PartnersManagementContent'
 
 export default async function AdminDashboard({
     searchParams
@@ -87,6 +88,7 @@ export default async function AdminDashboard({
 
         const cmsTabs = [
             { id: 'studios', label: 'STUDIOS', icon: Building2 },
+            { id: 'partners', label: 'PARTNERS', icon: Users },
             { id: 'branches', label: 'BRANCHES', icon: Globe },
             { id: 'builder', label: 'BUILDER', icon: Layout },
             { id: 'crm', label: 'CRM DIRECTORY', icon: History },
@@ -156,6 +158,7 @@ export default async function AdminDashboard({
                         {activeTab === 'suspensions' && <SuspensionsTab />}
                         {activeTab === 'builder' && <BuilderManager />}
                         {activeTab === 'studios' && <StudiosTab searchQuery={searchQuery} />}
+                        {activeTab === 'partners' && <PartnersTabWrapper />}
                         {activeTab === 'branches' && <BranchVerificationManager />}
                         {activeTab === 'accounts' && <AccountsTab searchQuery={searchQuery} />}
                         {activeTab === 'crm' && <CrmTab />}
@@ -248,4 +251,91 @@ async function ReportsTabWrapper() {
         .limit(500)
 
     return <ReportsTab logs={logs ?? []} transactions={transactions ?? []} />
+}
+
+async function PartnersTabWrapper() {
+    const supabase = createAdminClient()
+    
+    // Fetch Instructors
+    const { data: instructorsRaw } = await supabase
+        .from('profiles')
+        .select(`
+            id, 
+            full_name, 
+            role, 
+            is_founding_partner, 
+            custom_fee_percentage, 
+            email, 
+            contact_number,
+            gov_id_url,
+            gov_id_expiry,
+            bir_url,
+            bir_expiry,
+            certifications(proof_url, expiry_date)
+        `)
+        .eq('role', 'instructor')
+        .order('full_name', { ascending: true });
+
+    // Fetch Studios
+    const { data: studiosRaw } = await supabase
+        .from('studios')
+        .select('id, name, location, is_founding_partner, custom_fee_percentage, contact_number, ai_chat_limit, ai_chat_usage, owner:profiles!owner_id(email), bir_certificate_url, bir_certificate_expiry, gov_id_url, mayors_permit_url, mayors_permit_expiry, secretary_certificate_url, space_photos_urls, insurance_url, insurance_expiry')
+        .eq('verified', true)
+        .order('name', { ascending: true });
+
+    // Sign Documents
+    const allPathsToSign: string[] = [];
+    studiosRaw?.forEach(s => {
+        if (s.bir_certificate_url) allPathsToSign.push(s.bir_certificate_url);
+        if (s.gov_id_url) allPathsToSign.push(s.gov_id_url);
+        if (s.mayors_permit_url) allPathsToSign.push(s.mayors_permit_url);
+        if (s.secretary_certificate_url) allPathsToSign.push(s.secretary_certificate_url);
+        if (s.insurance_url) allPathsToSign.push(s.insurance_url);
+    });
+    instructorsRaw?.forEach(i => {
+        if (i.gov_id_url) allPathsToSign.push(i.gov_id_url);
+        if (i.bir_url) allPathsToSign.push(i.bir_url);
+        const cert = Array.isArray(i.certifications) ? i.certifications[0] : i.certifications;
+        if (cert?.proof_url) allPathsToSign.push(cert.proof_url);
+    });
+
+    const globalSignedUrlsMap: Record<string, string> = {};
+    if (allPathsToSign.length > 0) {
+        const { data: signedData } = await supabase.storage.from('certifications').createSignedUrls(allPathsToSign, 3600);
+        signedData?.forEach(item => {
+            if (item.signedUrl && item.path) globalSignedUrlsMap[item.path] = item.signedUrl;
+        });
+    }
+
+    const instructors = (instructorsRaw || []).map((i: any) => {
+        const cert = Array.isArray(i.certifications) ? i.certifications[0] : i.certifications;
+        return {
+            ...i,
+            documents: {
+                bir: i.bir_url ? globalSignedUrlsMap[i.bir_url] : null,
+                birExpiry: i.bir_expiry,
+                govId: i.gov_id_url ? globalSignedUrlsMap[i.gov_id_url] : null,
+                govIdExpiry: i.gov_id_expiry,
+                cert: cert?.proof_url ? globalSignedUrlsMap[cert.proof_url] : null,
+                certExpiry: cert?.expiry_date
+            }
+        };
+    });
+
+    const studios = (studiosRaw || []).map((s: any) => ({
+        ...s,
+        documents: {
+            bir: s.bir_certificate_url ? globalSignedUrlsMap[s.bir_certificate_url] : null,
+            birExpiry: s.bir_certificate_expiry,
+            govId: s.gov_id_url ? globalSignedUrlsMap[s.gov_id_url] : null,
+            mayorsPermit: s.mayors_permit_url ? globalSignedUrlsMap[s.mayors_permit_url] : null,
+            mayorsPermitExpiry: s.mayors_permit_expiry,
+            secretaryCert: s.secretary_certificate_url ? globalSignedUrlsMap[s.secretary_certificate_url] : null,
+            insurance: s.insurance_url ? globalSignedUrlsMap[s.insurance_url] : null,
+            insuranceExpiry: s.insurance_expiry,
+            spacePhotos: s.space_photos_urls || []
+        }
+    }));
+
+    return <PartnersManagementContent instructors={instructors} studios={studios} />
 }

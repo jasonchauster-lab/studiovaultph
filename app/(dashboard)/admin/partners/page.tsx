@@ -35,7 +35,7 @@ export default async function AdminPartnersPage() {
     // Fetch Studios
     const { data: studiosRaw } = await supabase
         .from('studios')
-        .select('id, name, location, is_founding_partner, custom_fee_percentage, contact_number, owner:profiles!owner_id(email), bir_certificate_url, bir_certificate_expiry, gov_id_url, mayors_permit_url, mayors_permit_expiry, secretary_certificate_url, space_photos_urls, insurance_url, insurance_expiry')
+        .select('id, name, location, is_founding_partner, custom_fee_percentage, contact_number, ai_chat_limit, ai_chat_usage, owner:profiles!owner_id(email), bir_certificate_url, bir_certificate_expiry, gov_id_url, mayors_permit_url, mayors_permit_expiry, secretary_certificate_url, space_photos_urls, insurance_url, insurance_expiry')
         .eq('verified', true)
         .order('name', { ascending: true });
 
