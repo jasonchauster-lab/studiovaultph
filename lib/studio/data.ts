@@ -27,7 +27,19 @@ export const getCachedStudio = cache(async () => {
         const user = await getCachedUser()
         if (!user) return null
 
-        const studioFields = 'id, name, slug, logo_url, banner_url, website_config, is_public, owner_id, equipment, inventory, subscription_tier'
+        const studioFields = `
+            id, name, slug, owner_id, business_industry, 
+            company_registered_name, company_registration_no,
+            opening_time, closing_time, is_cma_enabled,
+            website_config, marketplace_status, subscription_tier,
+            verified, is_public, inventory, equipment, tax_inclusive,
+            monthly_marketing_sent, marketing_limit_reset_at,
+            whatsapp_number, show_whatsapp_button,
+            business_contact_email, business_contact_number,
+            address, floor_or_unit, business_country,
+            enable_xendit, enable_manual_payments, manual_payment_methods,
+            logo_url, banner_url
+        `
 
         // FIX PERF: Parallelize Owner and Member lookups
         const [ownerRes, memberRes] = await Promise.all([
@@ -48,19 +60,13 @@ export const getCachedStudio = cache(async () => {
         const studioData = ownerRes.data || memberRes.data
         if (!studioData) return null
 
+        // Return a clean, spread object ensuring all fields are present for TypeScript
         return {
             ...studioData,
             id: studioData.id,
             name: studioData.name,
             slug: studioData.slug,
-            logo_url: studioData.logo_url,
-            banner_url: studioData.banner_url,
-            website_config: studioData.website_config,
-            is_public: studioData.is_public,
-            owner_id: studioData.owner_id,
-            equipment: studioData.equipment,
-            inventory: studioData.inventory,
-            subscription_tier: studioData.subscription_tier
+            owner_id: studioData.owner_id
         }
     } catch (err) {
         console.error('[getCachedStudio] Unexpected error:', err)
@@ -117,7 +123,7 @@ export const getCachedProfile = cache(async () => {
 
         const { data: profile } = await supabase
             .from('profiles')
-            .select('role, avatar_url, full_name, id, is_suspended, wallet_balance, available_balance, gov_id_expiry, bir_expiry')
+            .select('*')
             .eq('id', user.id)
             .maybeSingle()
 
