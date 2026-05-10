@@ -27,7 +27,7 @@ export const getCachedStudio = cache(async () => {
         const user = await getCachedUser()
         if (!user) return null
 
-        const studioFields = 'id, name, slug, logo_url, banner_url, website_config, is_public, owner_id'
+        const studioFields = 'id, name, slug, logo_url, banner_url, website_config, is_public, owner_id, equipment, inventory, subscription_tier'
 
         // FIX PERF: Parallelize Owner and Member lookups
         const [ownerRes, memberRes] = await Promise.all([
@@ -57,7 +57,10 @@ export const getCachedStudio = cache(async () => {
             banner_url: studioData.banner_url,
             website_config: studioData.website_config,
             is_public: studioData.is_public,
-            owner_id: studioData.owner_id
+            owner_id: studioData.owner_id,
+            equipment: studioData.equipment,
+            inventory: studioData.inventory,
+            subscription_tier: studioData.subscription_tier
         }
     } catch (err) {
         console.error('[getCachedStudio] Unexpected error:', err)
