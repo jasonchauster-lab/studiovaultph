@@ -22,15 +22,25 @@ type Announcement = {
 }
 
 const getCachedAnnouncements = cache(async (role: string, position: string) => {
-    const supabase = await createClient()
-    const { data } = await supabase
-        .from('platform_announcements')
-        .select('*')
-        .eq('is_active', true)
-        .in('target_role', [role, 'all'])
-        .eq('type', position === 'main' ? 'banner' : 'sidebar_card')
-        .order('created_at', { ascending: false })
-    return data
+    try {
+        const supabase = await createClient()
+        const { data, error } = await supabase
+            .from('platform_announcements')
+            .select('*')
+            .eq('is_active', true)
+            .in('target_role', [role, 'all'])
+            .eq('type', position === 'main' ? 'banner' : 'sidebar_card')
+            .order('created_at', { ascending: false })
+            
+        if (error) {
+            console.error('[AnnouncementFeed] Error fetching announcements:', error)
+            return []
+        }
+        return data || []
+    } catch (err) {
+        console.error('[AnnouncementFeed] Unexpected crash fetching announcements:', err)
+        return []
+    }
 })
 
 export default async function AnnouncementFeed({ role, position }: { role: 'studio' | 'instructor', position: 'main' | 'sidebar' }) {

@@ -7,19 +7,24 @@ import { revalidatePath } from 'next/cache'
  * Fetches the referral configuration for a specific studio.
  */
 export async function getStudioReferralConfig(studioId: string) {
-    const supabase = createAdminClient()
-    const { data, error } = await supabase
-        .from('studio_referral_configs')
-        .select('*')
-        .eq('studio_id', studioId)
-        .maybeSingle()
+    try {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('studio_referral_configs')
+            .select('*')
+            .eq('studio_id', studioId)
+            .maybeSingle()
 
-    if (error) {
-        console.error('[getStudioReferralConfig] Error:', error)
+        if (error) {
+            console.error('[getStudioReferralConfig] Error:', error)
+            return null
+        }
+
+        return data
+    } catch (err) {
+        console.error('[getStudioReferralConfig] Unexpected crash:', err)
         return null
     }
-
-    return data
 }
 
 /**

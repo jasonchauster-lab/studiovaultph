@@ -46,11 +46,22 @@ export default async function StudioRoot({ searchParams }: StudioPageProps) {
         redirect('/studio/register')
     }
 
-    const { data: outlets = [] } = await supabase
-        .from('outlets')
-        .select('id, name, studio_id, inventory, status, is_active')
-        .eq('studio_id', studio.id)
-        .order('created_at', { ascending: true })
+    let outlets: any[] = []
+    try {
+        const { data: outletsRes, error: outletsError } = await supabase
+            .from('outlets')
+            .select('id, name, studio_id, inventory, status, is_active')
+            .eq('studio_id', studio.id)
+            .order('created_at', { ascending: true })
+        
+        if (outletsError) {
+            console.error('[StudioRoot] Outlets fetch error:', outletsError)
+        } else {
+            outlets = outletsRes || []
+        }
+    } catch (err) {
+        console.error('[StudioRoot] Unexpected error fetching outlets:', err)
+    }
 
     const activeOutlet = outletId ? outlets?.find(o => o.id === outletId) : null
     const todayStr = getManilaTodayStr()

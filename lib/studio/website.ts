@@ -9,60 +9,17 @@ import { getManilaTodayStr } from '@/lib/timezone'
  * Uses admin client to bypass RLS for public access.
  */
 export const getStudioBySlug = cache(async (slug: string) => {
-    const admin = createAdminClient()
-    const requestedSlug = (slug || '').trim()
-    const normalizedSlug = normalizeStudioSlug(slug)
+    try {
+        const admin = createAdminClient()
+        const requestedSlug = (slug || '').trim()
+        const normalizedSlug = normalizeStudioSlug(slug)
 
-    if (!requestedSlug && !normalizedSlug) {
-        return null
-    }
+        if (!requestedSlug && !normalizedSlug) {
+            return null
+        }
 
-    // Try multiple matching strategies for robustness
-    let { data: studio, error } = await admin
-        .from('studios')
-        .select(`
-            id,
-            name,
-            slug,
-            owner_id,
-            logo_url,
-            banner_url,
-            bio,
-            whatsapp_number,
-            show_whatsapp_button,
-            enable_manual_payments,
-            manual_payment_instructions,
-            website_config,
-            subscription_tier,
-            subscription_status,
-            address,
-            enable_xendit,
-            service_rates,
-            hourly_rate,
-            ai_chat_limit,
-            ai_chat_usage,
-            profiles!owner_id(
-                full_name,
-                avatar_url,
-                origin_portal
-            ),
-            outlets(
-                id,
-                name,
-                slug,
-                address,
-                status,
-                is_active,
-                hero_image_url,
-                website_config
-            )
-        `)
-        .eq('slug', requestedSlug)
-        .maybeSingle()
-
-    if (error || !studio) {
-        // Fallback to normalized slug if direct match fails
-        const secondTry = await admin
+        // Try multiple matching strategies for robustness
+        let { data: studio, error } = await admin
             .from('studios')
             .select(`
                 id,
@@ -101,26 +58,74 @@ export const getStudioBySlug = cache(async (slug: string) => {
                     website_config
                 )
             `)
-            .eq('slug', normalizedSlug)
+            .eq('slug', requestedSlug)
             .maybeSingle()
-        
-        if (secondTry.data) {
-            studio = secondTry.data
-        } else {
-            // Only log if there's an actual database error, not just a missing studio
-            if (error || secondTry.error) {
-                console.error('[Storefront] Error fetching studio by slug:', {
-                    requestedSlug,
-                    normalizedSlug,
-                    error: error ? JSON.stringify(error, null, 2) : null,
-                    secondTryError: secondTry.error ? JSON.stringify(secondTry.error, null, 2) : null
-                })
-            }
-            return null
-        }
-    }
 
-    return studio
+        if (error || !studio) {
+            // Fallback to normalized slug if direct match fails
+            const secondTry = await admin
+                .from('studios')
+                .select(`
+                    id,
+                    name,
+                    slug,
+                    owner_id,
+                    logo_url,
+                    banner_url,
+                    bio,
+                    whatsapp_number,
+                    show_whatsapp_button,
+                    enable_manual_payments,
+                    manual_payment_instructions,
+                    website_config,
+                    subscription_tier,
+                    subscription_status,
+                    address,
+                    enable_xendit,
+                    service_rates,
+                    hourly_rate,
+                    ai_chat_limit,
+                    ai_chat_usage,
+                    profiles!owner_id(
+                        full_name,
+                        avatar_url,
+                        origin_portal
+                    ),
+                    outlets(
+                        id,
+                        name,
+                        slug,
+                        address,
+                        status,
+                        is_active,
+                        hero_image_url,
+                        website_config
+                    )
+                `)
+                .eq('slug', normalizedSlug)
+                .maybeSingle()
+            
+            if (secondTry.data) {
+                studio = secondTry.data
+            } else {
+                // Only log if there's an actual database error, not just a missing studio
+                if (error || secondTry.error) {
+                    console.error('[Storefront] Error fetching studio by slug:', {
+                        requestedSlug,
+                        normalizedSlug,
+                        error: error ? JSON.stringify(error, null, 2) : null,
+                        secondTryError: secondTry.error ? JSON.stringify(secondTry.error, null, 2) : null
+                    })
+                }
+                return null
+            }
+        }
+
+        return studio
+    } catch (err) {
+        console.error('[Storefront] Unexpected crash in getStudioBySlug:', err)
+        return null
+    }
 })
 
 /**
