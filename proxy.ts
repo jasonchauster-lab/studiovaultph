@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
  
 // --- CONSTANTS ---
 const MAIN_DOMAINS = [
@@ -26,7 +26,8 @@ const domainCache = new Map<string, { slug: string, tier: string, expiry: number
 const CACHE_TTL = 1000 * 60 * 5 // 5 minutes
 
 export async function proxy(request: NextRequest) {
-    const url = request.nextUrl
+    try {
+        const url = request.nextUrl
     const hostname = request.headers.get('host') || ''
     const path = url.pathname
     
@@ -98,7 +99,7 @@ export async function proxy(request: NextRequest) {
         }
 
         try {
-            const supabase = await createClient()
+            const supabase = createAdminClient()
             const { data: studio, error } = await supabase
                 .from('studios')
                 .select('slug, subscription_tier')
@@ -142,9 +143,10 @@ export async function proxy(request: NextRequest) {
         return await updateSession(request, requestHeaders)
     }
 
-    return NextResponse.next({
-        request: { headers: requestHeaders }
-    })
+    } catch (err) {
+        console.error('[Proxy] Global Middleware Error:', err)
+        return NextResponse.next()
+    }
 }
 
 export const config = {

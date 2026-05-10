@@ -61,23 +61,43 @@ export async function getStudioOnboardingStatusAction(studioId: string): Promise
     }
 
     // 2. Fetch Multi-table Dependencies
-    const [
-        { data: outletsData },
-        { count: pricingItemsCount },
-        { count: staffCount },
-        { count: slotsCount },
-        { count: packagesCount },
-        { count: taxesCount },
-        { count: waiverTemplatesCount }
-    ] = await Promise.all([
-        supabase.from('outlets').select('address').eq('studio_id', studioId),
-        supabase.from('memberships').select('id', { count: 'exact', head: true }).eq('studio_id', studioId),
-        supabase.from('studio_members').select('id', { count: 'exact', head: true }).eq('studio_id', studioId),
-        supabase.from('slots').select('id', { count: 'exact', head: true }).eq('studio_id', studioId),
-        supabase.from('packages').select('id', { count: 'exact', head: true }).eq('studio_id', studioId),
-        supabase.from('studio_taxes').select('id', { count: 'exact', head: true }).eq('studio_id', studioId),
-        supabase.from('waiver_templates').select('id', { count: 'exact', head: true }).eq('studio_id', studioId)
-    ])
+    let outletsData: any[] = []
+    let pricingItemsCount = 0
+    let staffCount = 0
+    let slotsCount = 0
+    let packagesCount = 0
+    let taxesCount = 0
+    let waiverTemplatesCount = 0
+
+    try {
+        const [
+            outletsRes,
+            pricingRes,
+            staffRes,
+            slotsRes,
+            packagesRes,
+            taxesRes,
+            waiverRes
+        ] = await Promise.all([
+            supabase.from('outlets').select('address').eq('studio_id', studioId),
+            supabase.from('memberships').select('id', { count: 'exact', head: true }).eq('studio_id', studioId),
+            supabase.from('studio_members').select('id', { count: 'exact', head: true }).eq('studio_id', studioId),
+            supabase.from('slots').select('id', { count: 'exact', head: true }).eq('studio_id', studioId),
+            supabase.from('packages').select('id', { count: 'exact', head: true }).eq('studio_id', studioId),
+            supabase.from('studio_taxes').select('id', { count: 'exact', head: true }).eq('studio_id', studioId),
+            supabase.from('waiver_templates').select('id', { count: 'exact', head: true }).eq('studio_id', studioId)
+        ])
+
+        outletsData = outletsRes.data || []
+        pricingItemsCount = pricingRes.count || 0
+        staffCount = staffRes.count || 0
+        slotsCount = slotsRes.count || 0
+        packagesCount = packagesRes.count || 0
+        taxesCount = taxesRes.count || 0
+        waiverTemplatesCount = waiverRes.count || 0
+    } catch (err) {
+        console.error('[getStudioOnboardingStatusAction] Parallel fetch failed:', err)
+    }
 
     const hasAddress = outletsData?.some(o => o.address && o.address.length > 5)
 

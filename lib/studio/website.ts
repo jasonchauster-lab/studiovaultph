@@ -181,7 +181,7 @@ export async function getStorefrontData(studioId: string, ownerId: string, outle
             return {
                 slots: (slots || []).map((s: any) => ({
                     ...s,
-                    bookings_count: s.bookings_count?.[0]?.count || 0
+                    bookings_count: s.bookings_count?.[0]?.count ?? 0
                 })),
                 instructors: instructors || [],
                 reviews: reviews || []

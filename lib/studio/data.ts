@@ -128,12 +128,21 @@ export const getCachedProfile = cache(async () => {
  * Fetches all tax settings for the studio.
  */
 export const getCachedStudioTaxes = cache(async (studioId: string) => {
-    const supabase = await createClient()
-    const { data: taxes } = await supabase
-        .from('studio_taxes')
-        .select('*')
-        .eq('studio_id', studioId)
-        .order('created_at', { ascending: true })
+    try {
+        const supabase = await createClient()
+        const { data: taxes, error } = await supabase
+            .from('studio_taxes')
+            .select('*')
+            .eq('studio_id', studioId)
+            .order('created_at', { ascending: true })
         
-    return taxes || []
+        if (error) {
+            console.error('[getCachedStudioTaxes] Error:', error)
+            return []
+        }
+        return taxes || []
+    } catch (err) {
+        console.error('[getCachedStudioTaxes] Unexpected crash:', err)
+        return []
+    }
 })

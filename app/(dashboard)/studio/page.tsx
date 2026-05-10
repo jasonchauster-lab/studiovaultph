@@ -57,23 +57,30 @@ export default async function StudioRoot({ searchParams }: StudioPageProps) {
     const currentTime = toManilaTimeString(new Date())
 
     const fetchSlotsTask = async () => {
-        let slotsQuery = supabase
-            .from('slots')
-            .select(`
-                id, date, start_time, end_time, session_type, pax_capacity,
-                instructor:profiles!instructor_id(full_name),
-                outlet:outlets(name),
-                bookings(id, status, quantity)
-            `)
-            .eq('studio_id', studio.id)
-            .eq('date', todayStr)
-            .eq('is_deleted', false)
-            .order('start_time', { ascending: true })
+        try {
+            let slotsQuery = supabase
+                .from('slots')
+                .select(`
+                    id, date, start_time, end_time, session_type, pax_capacity,
+                    instructor:profiles!instructor_id(full_name),
+                    outlet:outlets(name),
+                    bookings(id, status, quantity)
+                `)
+                .eq('studio_id', studio.id)
+                .eq('date', todayStr)
+                .eq('is_deleted', false)
+                .order('start_time', { ascending: true })
 
-        if (outletId) slotsQuery = slotsQuery.eq('outlet_id', outletId)
+            if (outletId) slotsQuery = slotsQuery.eq('outlet_id', outletId)
 
-        const { data: slotsRes } = await slotsQuery
-        return (slotsRes || []).filter(slot => slot.end_time > currentTime)
+            const { data: slotsRes, error } = await slotsQuery
+            if (error) throw error
+            
+            return (slotsRes || []).filter(slot => slot.end_time > currentTime)
+        } catch (err) {
+            console.error('[StudioRoot] fetchSlotsTask error:', err)
+            return []
+        }
     }
 
     const [upcomingSlotsToday, statsRes, onboardingStatusRes] = await Promise.all([

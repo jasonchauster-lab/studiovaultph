@@ -77,17 +77,28 @@ export default async function DashboardLayout({
     let studioMembership = null
 
     if (studioData) {
-        const supabase = await createClient()
-        const { getStudioReferralConfig } = await import('@/lib/actions/referral')
-        const [outletsData, refData, memData] = await Promise.all([
-            getCachedOutlets(studioData.id, studioData.owner_id === user.id),
-            getStudioReferralConfig(studioData.id),
-            supabase.from('customer_memberships').select('*').eq('user_id', user.id).eq('studio_id', studioData.id).maybeSingle()
-        ])
-        
-        outlets = outletsData
-        referralConfig = refData
-        studioMembership = memData.data
+        try {
+            const supabase = await createClient()
+            const { getStudioReferralConfig } = await import('@/lib/actions/referral')
+            const [outletsData, refData, memData] = await Promise.all([
+                getCachedOutlets(studioData.id, studioData.owner_id === user.id),
+                getStudioReferralConfig(studioData.id).catch(e => {
+                    console.error('[Layout] Referral config error:', e)
+                    return null
+                }),
+                supabase.from('customer_memberships').select('*').eq('user_id', user.id).eq('studio_id', studioData.id).maybeSingle()
+            ])
+            
+            outlets = outletsData
+            referralConfig = refData
+            studioMembership = memData?.data || null
+        } catch (err) {
+            console.error('[Layout] Error in secondary data fetch:', err)
+            // Fallback to minimal data
+            outlets = []
+            referralConfig = null
+            studioMembership = null
+        }
     }
 
     const avatarUrl = studioData?.logo_url 
