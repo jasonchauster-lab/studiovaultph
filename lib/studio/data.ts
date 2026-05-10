@@ -8,8 +8,8 @@ import { createClient } from '@/lib/supabase/server'
 export const getCachedUser = cache(async () => {
     try {
         const supabase = await createClient()
-        const { data } = await supabase.auth.getUser()
-        return data?.user ?? null
+        const { data: { user } } = await supabase.auth.getUser()
+        return user
     } catch (err) {
         console.error('[getCachedUser] Unexpected crash:', err)
         return null
@@ -27,19 +27,7 @@ export const getCachedStudio = cache(async () => {
         const user = await getCachedUser()
         if (!user) return null
 
-        const studioFields = `
-            id, name, slug, owner_id, business_industry, 
-            company_registered_name, company_registration_no,
-            opening_time, closing_time, is_cma_enabled,
-            website_config, marketplace_status, subscription_tier,
-            verified, is_public, inventory, equipment, tax_inclusive,
-            monthly_marketing_sent, marketing_limit_reset_at,
-            whatsapp_number, show_whatsapp_button,
-            business_contact_email, business_contact_number,
-            address, floor_or_unit, business_country,
-            enable_xendit, enable_manual_payments, manual_payment_methods,
-            owner:profiles!owner_id(id, full_name, avatar_url, email)
-        `
+        const studioFields = 'id, name, slug, logo_url, banner_url, website_config, is_public, owner_id'
 
         // FIX PERF: Parallelize Owner and Member lookups
         const [ownerRes, memberRes] = await Promise.all([
@@ -50,21 +38,29 @@ export const getCachedStudio = cache(async () => {
                 .maybeSingle()
         ])
 
-        if (ownerRes.error) {
-            console.error('[getCachedStudio] Owner fetch error:', ownerRes.error.message || ownerRes.error)
+        if (ownerRes.error && ownerRes.error.code !== 'PGRST116') {
+            console.error('[getCachedStudio] Owner lookup error:', ownerRes.error)
         }
-        if (memberRes.error) {
-            console.error('[getCachedStudio] Member fetch error:', memberRes.error.message || memberRes.error)
-        }
-
-        const studio = ownerRes.data || memberRes.data
-        if (!studio) {
-            console.warn('[getCachedStudio] No studio found for user:', user.id)
+        if (memberRes.error && memberRes.error.code !== 'PGRST116') {
+            console.error('[getCachedStudio] Member lookup error:', memberRes.error)
         }
 
-        return studio
+        const studioData = ownerRes.data || memberRes.data
+        if (!studioData) return null
+
+        return {
+            ...studioData,
+            id: studioData.id,
+            name: studioData.name,
+            slug: studioData.slug,
+            logo_url: studioData.logo_url,
+            banner_url: studioData.banner_url,
+            website_config: studioData.website_config,
+            is_public: studioData.is_public,
+            owner_id: studioData.owner_id
+        }
     } catch (err) {
-        console.error('[getCachedStudio] Unexpected crash:', err)
+        console.error('[getCachedStudio] Unexpected error:', err)
         return null
     }
 })

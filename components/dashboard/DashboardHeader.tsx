@@ -96,7 +96,15 @@ export default function DashboardHeader({ profile, studioData, avatarUrl, onOpen
                 <div className="flex items-center gap-4 lg:gap-8">
                     <div className="flex items-center gap-3 pr-4 border-r border-zinc-100 hidden sm:flex">
                         <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-50 rounded-lg">
-                            <Image src="https://flagcdn.com/ph.svg" alt="PH" width={16} height={12} className="rounded-sm" style={{ height: 'auto' }} />
+                            <Image 
+                                src="https://flagcdn.com/ph.svg" 
+                                alt="PH" 
+                                width={16} 
+                                height={12} 
+                                className="rounded-sm" 
+                                style={{ height: 'auto' }} 
+                                unoptimized={true}
+                            />
                             <span className="text-[11px] font-bold text-zinc-600">Philippines</span>
                         </div>
                     </div>

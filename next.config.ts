@@ -42,11 +42,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'ui-avatars.com',
         port: '',
-        pathname: '/api/**',
+        pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
+        hostname: '*.googleusercontent.com',
         port: '',
         pathname: '/**',
       },
@@ -57,6 +57,9 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   turbopack: {},
   experimental: {

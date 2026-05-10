@@ -126,7 +126,7 @@ export default async function LoyaltyInsightsPage(props: {
                                                 <div className="flex items-center gap-3">
                                                     <span className="text-sm font-black text-zinc-900">{fb.name}</span>
                                                     <div className="flex gap-0.5">
-                                                        {[...Array(fb.score)].map((_, j) => <Star key={j} className="w-3 h-3 fill-amber-400 text-amber-400" />)}
+                                                        {[...Array(Math.max(0, Math.floor(fb.score || 0)))].map((_, j) => <Star key={j} className="w-3 h-3 fill-amber-400 text-amber-400" />)}
                                                     </div>
                                                 </div>
                                                 <p className="text-xs text-zinc-500 leading-relaxed italic line-clamp-2">"{fb.msg}"</p>
