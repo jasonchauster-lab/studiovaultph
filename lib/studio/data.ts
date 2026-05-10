@@ -6,9 +6,14 @@ import { createClient } from '@/lib/supabase/server'
  * Wrapped in React cache to memoize across a single request.
  */
 export const getCachedUser = cache(async () => {
-    const supabase = await createClient()
-    const { data } = await supabase.auth.getUser()
-    return data?.user ?? null
+    try {
+        const supabase = await createClient()
+        const { data } = await supabase.auth.getUser()
+        return data?.user ?? null
+    } catch (err) {
+        console.error('[getCachedUser] Unexpected crash:', err)
+        return null
+    }
 })
 
 /**
