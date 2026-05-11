@@ -1,5 +1,6 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getCachedUser, getCachedProfile } from '@/lib/studio/data'
+import { unstable_rethrow } from 'next/navigation'
 
 export async function verifyStudioAccess(studioId: string) {
     try {
@@ -15,7 +16,8 @@ export async function verifyStudioAccess(studioId: string) {
         let adminSupabase;
         try {
             adminSupabase = createAdminClient()
-        } catch (err) {
+        } catch (err: any) {
+            unstable_rethrow(err)
             console.error('[verifyStudioAccess] Admin client failed, falling back to public client:', err)
             adminSupabase = supabase // Fallback to public client (might fail if RLS is strict)
         }
@@ -67,6 +69,7 @@ export async function verifyStudioAccess(studioId: string) {
             metadata: (member as any).metadata || {}
         }
     } catch (err: any) {
+        unstable_rethrow(err)
         console.error('[verifyStudioAccess] Fatal access error:', err.message || err)
         throw err // Re-throw to be caught by component try/catch
     }

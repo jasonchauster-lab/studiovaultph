@@ -2,6 +2,7 @@
 
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { verifyStudioAccess } from '@/lib/studio/auth'
+import { unstable_rethrow } from 'next/navigation'
 
 export interface OnboardingStatus {
     identity: boolean        // Business Profile (Name + Industry)
@@ -28,7 +29,8 @@ export async function getStudioOnboardingStatusAction(studioId: string): Promise
     let adminSupabase;
     try {
         adminSupabase = createAdminClient()
-    } catch (err) {
+    } catch (err: any) {
+        unstable_rethrow(err)
         console.error('[getStudioOnboardingStatusAction] Failed to create admin client:', err)
         return {
             identity: false, infrastructure: false, equipment: false, team: false, pricing: false,
@@ -58,7 +60,8 @@ export async function getStudioOnboardingStatusAction(studioId: string): Promise
             .eq('studio_id', studioId)
             .maybeSingle()
         paymentConfig = payRes
-    } catch (err) {
+    } catch (err: any) {
+        unstable_rethrow(err)
         console.error('[getStudioOnboardingStatusAction] Critical fetch failure:', err)
     }
 
@@ -106,7 +109,8 @@ export async function getStudioOnboardingStatusAction(studioId: string): Promise
         packagesCount = packagesRes.count || 0
         taxesCount = taxesRes.count || 0
         waiverTemplatesCount = waiverRes.count || 0
-    } catch (err) {
+    } catch (err: any) {
+        unstable_rethrow(err)
         console.error('[getStudioOnboardingStatusAction] Parallel fetch failed:', err)
     }
 

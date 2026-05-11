@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { unstable_rethrow } from 'next/navigation'
 import { cache } from 'react'
 import { Plus, Video, Tag, MessageCircle, ChevronRight, Store, Megaphone, Star, Zap, Bell, Info, Sparkles } from 'lucide-react'
 import Image from 'next/image'
@@ -37,7 +38,8 @@ const getCachedAnnouncements = cache(async (role: string, position: string) => {
             return []
         }
         return data || []
-    } catch (err) {
+    } catch (err: any) {
+        unstable_rethrow(err)
         console.error('[AnnouncementFeed] Unexpected crash fetching announcements:', err)
         return []
     }

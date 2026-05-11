@@ -9,6 +9,8 @@ import { getStudioDashboardStatsAction } from './studio-actions'
 import { getStudioOnboardingStatusAction } from './onboarding-actions'
 import { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+
 import { 
     StudioStatCards, 
     RevenueTrendChart, 
@@ -30,7 +32,8 @@ export async function generateMetadata(): Promise<Metadata> {
             title: studio ? `Dashboard | ${studio.name}` : 'Studio Dashboard',
             description: 'Manage your studio operations, bookings, and website.'
         }
-    } catch (err) {
+    } catch (err: any) {
+        unstable_rethrow(err)
         console.error('[StudioRoot] Metadata generation failed:', err)
         return {
             title: 'Studio Dashboard',
@@ -68,7 +71,8 @@ export default async function StudioRoot({ searchParams }: StudioPageProps) {
             } else {
                 outlets = outletsRes || []
             }
-        } catch (err) {
+        } catch (err: any) {
+            unstable_rethrow(err)
             console.error('[StudioRoot] Unexpected error fetching outlets:', err)
         }
 
@@ -97,7 +101,8 @@ export default async function StudioRoot({ searchParams }: StudioPageProps) {
                 if (error) throw error
                 
                 return (slotsRes || []).filter(slot => slot.end_time > currentTime)
-            } catch (err) {
+            } catch (err: any) {
+                unstable_rethrow(err)
                 console.error('[StudioRoot] fetchSlotsTask error:', err)
                 return []
             }
@@ -106,10 +111,12 @@ export default async function StudioRoot({ searchParams }: StudioPageProps) {
         const [upcomingSlotsToday, statsRes, onboardingStatusRes] = await Promise.all([
             fetchSlotsTask(),
             getStudioDashboardStatsAction(studio.id, outletId).catch(err => {
+                unstable_rethrow(err)
                 console.error('[StudioRoot] Stats error:', err)
                 return { data: null }
             }),
             getStudioOnboardingStatusAction(studio.id).catch(err => {
+                unstable_rethrow(err)
                 console.error('[StudioRoot] Onboarding status error:', err)
                 return { progress: 100, isPublic: true } as any
             })
@@ -259,6 +266,7 @@ export default async function StudioRoot({ searchParams }: StudioPageProps) {
             </div>
         )
     } catch (err: any) {
+        unstable_rethrow(err)
         console.error('[StudioRoot] FATAL ERROR:', err)
         return (
             <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">

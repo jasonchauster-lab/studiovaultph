@@ -1,5 +1,6 @@
 import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { unstable_rethrow } from 'next/navigation'
 
 /**
  * Fetches the current authenticated user.
@@ -15,7 +16,8 @@ export const getCachedUser = cache(async () => {
             return null
         }
         return data?.user || null
-    } catch (err) {
+    } catch (err: any) {
+        unstable_rethrow(err)
         console.error('[getCachedUser] Unexpected crash:', err)
         return null
     }
@@ -83,7 +85,8 @@ export const getCachedStudio = cache(async () => {
         }
 
         return null
-    } catch (err) {
+    } catch (err: any) {
+        unstable_rethrow(err)
         console.error('[getCachedStudio] Unexpected error:', err)
         return null
     }

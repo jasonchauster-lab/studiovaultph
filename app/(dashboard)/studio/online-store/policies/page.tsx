@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect, notFound } from 'next/navigation'
+import { redirect, notFound, unstable_rethrow } from 'next/navigation'
 import StudioDashboardShell from '@/components/dashboard/StudioDashboardShell'
 import PoliciesSettingsClient from './PoliciesSettingsClient'
 import { getCachedStudio } from '@/lib/studio/data'
@@ -36,7 +36,8 @@ export default async function PoliciesSettingsPage() {
         if (!error && data) {
             policies = data
         }
-    } catch (err) {
+    } catch (err: any) {
+        unstable_rethrow(err)
         // Table may not exist yet
         console.warn('studio_policies query failed:', err)
     }

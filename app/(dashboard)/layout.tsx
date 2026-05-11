@@ -7,6 +7,8 @@ import { getCachedUser, getCachedProfile, getCachedStudio, getCachedOutlets } fr
 import clsx from "clsx";
 import { SUBSCRIPTION_STATUS } from '@/lib/constants'
 
+export const dynamic = 'force-dynamic'
+
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
@@ -139,18 +141,10 @@ export default async function DashboardLayout({
             </DashboardLayoutClient>
         )
     } catch (err: any) {
-        // Handle Next.js Redirects & 404s (should not be caught as errors)
+        unstable_rethrow(err)
+        
         const digest = String(err?.digest || '')
         const message = String(err?.message || '')
-        
-        if (
-            digest.includes('NEXT_REDIRECT') || 
-            digest.includes('NEXT_NOT_FOUND') ||
-            message.includes('NEXT_REDIRECT') ||
-            message.includes('NEXT_NOT_FOUND')
-        ) {
-            throw err
-        }
 
         console.error('[DashboardLayout] CRITICAL layout crash:', message || err)
         
