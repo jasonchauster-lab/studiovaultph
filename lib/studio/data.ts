@@ -38,7 +38,8 @@ export const getCachedStudio = cache(async () => {
             business_contact_email, business_contact_number,
             address, floor_or_unit, business_country,
             enable_xendit, enable_manual_payments, manual_payment_methods,
-            logo_url, banner_url
+            logo_url, banner_url,
+            owner:profiles!owner_id(*)
         `
 
         // 1. Try Owner lookup first (Most common case)

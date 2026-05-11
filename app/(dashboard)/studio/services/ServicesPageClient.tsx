@@ -559,6 +559,7 @@ export default function ServicesPageClient({
                     setEditingService(null)
                     setInitialStep(1)
                 }} 
+                studioId={studioId}
                 memberships={memberships}
                 packages={packages}
                 categories={filteredCategories}

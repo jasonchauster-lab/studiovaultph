@@ -22,6 +22,7 @@ interface ImmersiveServiceFormProps {
     type?: 'class' | 'appointment'
     service?: any
     initialStep?: number
+    studioId: string
 }
 
 export default function ImmersiveServiceForm({ 
@@ -32,7 +33,8 @@ export default function ImmersiveServiceForm({
     categories = [],
     type = 'class',
     service,
-    initialStep = 1
+    initialStep = 1,
+    studioId
 }: ImmersiveServiceFormProps) {
     const [step, setStep] = useState(initialStep)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -135,8 +137,8 @@ export default function ImmersiveServiceForm({
         setIsSubmitting(true)
         try {
             const res = service?.id 
-                ? await updateService(service.id, { ...formData, type })
-                : await createService({ ...formData, type })
+                ? await updateService(service.id, { ...formData, studioId, type })
+                : await createService({ ...formData, studioId, type })
 
             if (res.success) {
                 onClose()
@@ -367,8 +369,11 @@ export default function ImmersiveServiceForm({
                                         <div className="flex bg-white border border-zinc-200 rounded-xl overflow-hidden">
                                             <input 
                                                 type="number" 
-                                                value={formData.duration_minutes}
-                                                onChange={(e) => setFormData({...formData, duration_minutes: parseInt(e.target.value)})}
+                                                value={formData.duration_minutes || ''}
+                                                onChange={(e) => {
+                                                    const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                                                    setFormData({...formData, duration_minutes: isNaN(val) ? 0 : val});
+                                                }}
                                                 className="w-24 px-6 py-4 outline-none text-sm font-bold text-zinc-900 border-r border-zinc-100" 
                                             />
                                             <select className="flex-1 px-4 py-4 bg-zinc-50 text-xs font-bold text-zinc-500 outline-none">

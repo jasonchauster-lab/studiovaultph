@@ -285,15 +285,18 @@ export default function AddScheduleModal({
 
                         <div className="space-y-4">
                             <label className="text-[11px] font-black text-charcoal/40 uppercase tracking-widest block">Staff (Optional)</label>
-                            <select 
-                                name="instructorId"
-                                className="w-full px-6 py-4 bg-off-white border border-border-grey rounded-2xl text-sm font-bold text-charcoal outline-none focus:ring-2 focus:ring-forest/20 transition-all appearance-none"
-                            >
-                                <option value="">Select instructor</option>
-                                {instructors.map(i => (
-                                    <option key={i.id} value={i.id}>{i.full_name}</option>
-                                ))}
-                            </select>
+                            <div className="relative">
+                                <select 
+                                    name="instructorId"
+                                    className="w-full px-6 py-4 bg-off-white border border-border-grey rounded-2xl text-sm font-bold text-charcoal outline-none focus:ring-2 focus:ring-forest/20 transition-all appearance-none"
+                                >
+                                    <option value="">Select instructor</option>
+                                    {instructors.map(i => (
+                                        <option key={i.id} value={i.id}>{i.full_name}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30 pointer-events-none" />
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-6">

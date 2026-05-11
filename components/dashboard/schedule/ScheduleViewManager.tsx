@@ -64,28 +64,38 @@ export const ScheduleViewManager = (props: ScheduleViewManagerProps) => {
 
     const handleCreateSingle = async (formData: FormData) => {
         setIsSubmitting(true)
-        formData.append('studioId', props.studioId)
-        if (props.outletId) formData.append('outletId', props.outletId)
-        const result = await createSlot(formData)
-        setIsSubmitting(false)
-        if (result.success) {
-            state.setIsAddModalOpen(false)
-            router.refresh()
+        try {
+            formData.append('studioId', props.studioId)
+            if (props.outletId) formData.append('outletId', props.outletId)
+            const result = await createSlot(formData)
+            if (result.success) {
+                state.setIsAddModalOpen(false)
+                router.refresh()
+            }
+            else alert(result.error)
+        } catch (err: any) {
+            alert(err.message || 'An unexpected error occurred')
+        } finally {
+            setIsSubmitting(false)
         }
-        else alert(result.error)
     }
 
     const handleUpdate = async (formData: FormData) => {
         if (!state.editingSlot) return
         setIsSubmitting(true)
-        if (props.outletId) formData.append('outletId', props.outletId)
-        const result = await updateSlot(state.editingSlot.id, formData)
-        setIsSubmitting(false)
-        if (result.success) {
-            state.setIsEditModalOpen(false)
-            state.setEditingSlot(null)
-            router.refresh()
-        } else alert(result.error)
+        try {
+            if (props.outletId) formData.append('outletId', props.outletId)
+            const result = await updateSlot(state.editingSlot.id, formData)
+            if (result.success) {
+                state.setIsEditModalOpen(false)
+                state.setEditingSlot(null)
+                router.refresh()
+            } else alert(result.error)
+        } catch (err: any) {
+            alert(err.message || 'An unexpected error occurred')
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     const handleDelete = async () => {
