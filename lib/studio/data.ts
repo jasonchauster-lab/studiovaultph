@@ -8,8 +8,13 @@ import { createClient } from '@/lib/supabase/server'
 export const getCachedUser = cache(async () => {
     try {
         const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        return user
+        const { data, error } = await supabase.auth.getUser()
+        if (error) {
+            // Log warning but don't crash, just return null
+            console.warn('[getCachedUser] Auth check returned error:', error.message)
+            return null
+        }
+        return data?.user || null
     } catch (err) {
         console.error('[getCachedUser] Unexpected crash:', err)
         return null

@@ -25,7 +25,18 @@ export async function getStudioOnboardingStatusAction(studioId: string): Promise
 
     // 1. Fetch Studio Core Data (Using Admin to bypass RLS since we already verified access above)
     // We use a separate query for payment configs to avoid .single() failing if the config doesn't exist yet.
-    const adminSupabase = createAdminClient()
+    let adminSupabase;
+    try {
+        adminSupabase = createAdminClient()
+    } catch (err) {
+        console.error('[getStudioOnboardingStatusAction] Failed to create admin client:', err)
+        return {
+            identity: false, infrastructure: false, equipment: false, team: false, pricing: false,
+            website: false, waiver: false, finance: false, payouts: false, operations: false,
+            isPublic: false, progress: 0
+        }
+    }
+    
     let studio = null
     let paymentConfig = null
 

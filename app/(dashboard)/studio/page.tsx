@@ -24,10 +24,18 @@ interface StudioPageProps {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-    const studio = await getCachedStudio()
-    return {
-        title: studio ? `Dashboard | ${studio.name}` : 'Studio Dashboard',
-        description: 'Manage your studio operations, bookings, and website.'
+    try {
+        const studio = await getCachedStudio()
+        return {
+            title: studio ? `Dashboard | ${studio.name}` : 'Studio Dashboard',
+            description: 'Manage your studio operations, bookings, and website.'
+        }
+    } catch (err) {
+        console.error('[StudioRoot] Metadata generation failed:', err)
+        return {
+            title: 'Studio Dashboard',
+            description: 'Manage your studio operations.'
+        }
     }
 }
 
@@ -269,12 +277,12 @@ export default async function StudioRoot({ searchParams }: StudioPageProps) {
                             {err?.message || 'Unknown Runtime Error'}
                         </code>
                     </div>
-                    <button 
-                        onClick={() => window.location.reload()}
-                        className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-zinc-200 transition-colors"
+                    <a 
+                        href="/studio"
+                        className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center"
                     >
                         Try Refreshing
-                    </button>
+                    </a>
                 </div>
             </div>
         )

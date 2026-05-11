@@ -4,9 +4,21 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 
+import { revalidatePath } from 'next/cache'
+
 export async function signOut() {
-    const supabase = await createClient()
-    await supabase.auth.signOut()
+    try {
+        const supabase = await createClient()
+        await supabase.auth.signOut()
+        
+        // Clear all cached data across the platform
+        revalidatePath('/', 'layout')
+    } catch (err) {
+        console.error('[Auth] Logout error:', err)
+    }
+    
+    // Redirect must be called outside try/catch in some Next.js versions, 
+    // or properly re-thrown. Here we call it after the try/catch.
     redirect('/')
 }
 

@@ -37,7 +37,7 @@ export default async function LandingPage({
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
     
     profile = profileData
     avatarUrl = profileData?.avatar_url || ''

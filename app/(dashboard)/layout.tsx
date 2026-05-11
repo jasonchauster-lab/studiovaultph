@@ -139,22 +139,27 @@ export default async function DashboardLayout({
             </DashboardLayoutClient>
         )
     } catch (err: any) {
-        // CRITICAL: Next.js error.tsx CANNOT catch errors from layout.tsx.
-        // This is the last line of defense before a 500 page.
+        // Handle Next.js Redirects & 404s (should not be caught as errors)
+        const digest = String(err?.digest || '')
+        const message = String(err?.message || '')
         
-        // Next.js internally throws special errors for redirect() and notFound().
-        // These MUST be re-thrown or the navigation system breaks.
         if (
-            err?.digest?.includes('NEXT_REDIRECT') || 
-            err?.digest?.includes('NEXT_NOT_FOUND') ||
-            err?.message?.includes('NEXT_REDIRECT') ||
-            err?.message?.includes('NEXT_NOT_FOUND')
+            digest.includes('NEXT_REDIRECT') || 
+            digest.includes('NEXT_NOT_FOUND') ||
+            message.includes('NEXT_REDIRECT') ||
+            message.includes('NEXT_NOT_FOUND')
         ) {
             throw err
         }
+
+        console.error('[DashboardLayout] CRITICAL layout crash:', message || err)
         
-        console.error('[DashboardLayout] CRITICAL layout crash:', err?.message || err)
-        redirect('/login')
+        // Final fallback: attempt a safe redirect
+        try {
+            redirect('/login')
+        } catch (redirErr: any) {
+            // Re-throw the redirect error to let Next.js handle it
+            throw redirErr
+        }
     }
 }
-
