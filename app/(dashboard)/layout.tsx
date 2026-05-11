@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { redirect, unstable_rethrow } from 'next/navigation'
 import { headers, cookies } from 'next/headers'
 import { Playfair_Display, Inter, Lexend } from 'next/font/google'
 import DashboardLayoutClient from '@/components/dashboard/DashboardLayoutClient'

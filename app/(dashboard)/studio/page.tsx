@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCachedStudio, getCachedUser } from '@/lib/studio/data'
-import { redirect } from 'next/navigation'
+import { redirect, unstable_rethrow } from 'next/navigation'
 import { Globe, CheckCircle2, Sparkles, Loader2 } from 'lucide-react'
 import clsx from 'clsx'
 import { getManilaTodayStr, toManilaTimeString } from '@/lib/timezone'
